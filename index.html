@@ -9,175 +9,97 @@
 *{box-sizing:border-box}
 body{
  margin:0;background:#fbf3ed;color:#3d2b2b;
- font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Arial,sans-serif
+ font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Arial,sans-serif;
 }
 .wrap{max-width:480px;margin:auto;padding:28px 18px 70px}
-.logo{text-align:center;font-size:42px}
+.logo{text-align:center;font-size:42px;margin-top:8px}
 h1{text-align:center;color:#852f32;margin:5px 0;font-size:34px}
 .subtitle{text-align:center;color:#796963;line-height:1.7;margin-bottom:25px}
-
 .card{
  background:#fff;border-radius:24px;padding:24px 20px;
  box-shadow:0 8px 30px rgba(80,40,30,.08);margin-bottom:18px
 }
-
 label{display:block;font-weight:700;margin:18px 0 8px}
-
 input,select{
  width:100%;padding:15px;border:1px solid #e1d6d0;
  border-radius:12px;background:white;font-size:16px;color:#3d2b2b
 }
-
 .calendar{display:flex;gap:8px}
-
 .calendar button{
  flex:1;padding:13px;border:1px solid #dccbc4;background:white;
  color:#55413c;border-radius:12px;font-size:15px
 }
-
-.calendar button.active{
- background:#8b3033;color:white;border-color:#8b3033
-}
-
-.check{
- display:flex;align-items:center;gap:8px;
- margin-top:12px;font-size:14px
-}
+.calendar button.active{background:#8b3033;color:#fff;border-color:#8b3033}
+.check{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:14px}
 .check input{width:auto}
-
 .mainbtn{
- width:100%;border:0;border-radius:15px;background:#8b3033;
- color:white;padding:18px;font-size:18px;font-weight:800;margin-top:24px
+ width:100%;border:0;border-radius:15px;background:#8b3033;color:white;
+ padding:18px;font-size:18px;font-weight:800;margin-top:24px
 }
 .mainbtn:disabled{opacity:.45}
-
 #engine{
- background:#fff8f3;padding:12px;border-radius:12px;
- text-align:center;color:#705d56;font-size:14px;margin-bottom:16px
+ background:#fff8f3;padding:12px;border-radius:12px;text-align:center;
+ color:#705d56;font-size:14px;margin-bottom:16px
 }
-
 #result{display:none}
-
 .resultHead{text-align:center;margin-bottom:24px}
 .resultHead .flower{font-size:30px}
 .resultHead h2{color:#852f32;margin:6px 0;font-size:25px}
-.resultHead p{color:#88736c;line-height:1.7}
-
+.resultHead p{color:#88736c;margin:0}
 .section{
- border-top:1px solid #eee1db;
- padding-top:22px;margin-top:22px
+ border-top:1px solid #eee1db;padding-top:22px;margin-top:22px
 }
-
-.section h3{
- color:#7e3032;font-size:20px;margin:0 0 14px
-}
-
+.section h3{color:#7e3032;font-size:20px;margin:0 0 14px}
 .pillars{
- display:grid;grid-template-columns:repeat(4,1fr);
- gap:7px;text-align:center
+ display:grid;grid-template-columns:repeat(4,1fr);gap:7px;text-align:center
 }
-
-.pillar{
- background:#fff7f1;border-radius:13px;padding:14px 3px
-}
-
-.pillar small{
- display:block;color:#8d7770;margin-bottom:6px
-}
-
-.pillar strong{
- font-size:18px;color:#713032
-}
-
+.pillar{background:#fff7f1;border-radius:13px;padding:14px 3px}
+.pillar small{display:block;color:#8d7770;margin-bottom:6px}
+.pillar strong{font-size:18px;color:#713032}
 .highlight{
- background:#f9eee8;border-radius:16px;
- padding:18px;line-height:1.9
+ background:#f9eee8;border-radius:16px;padding:18px;line-height:1.8
 }
-
 .elementGrid{
- display:grid;grid-template-columns:repeat(5,1fr);
- gap:6px;text-align:center
+ display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center
 }
-
-.elementBox{
- background:#fff7f1;border-radius:12px;padding:11px 2px
-}
-
-.elementBox b{
- display:block;font-size:18px;color:#783335;margin-top:5px
-}
-
+.elementBox{background:#fff7f1;border-radius:12px;padding:11px 2px}
+.elementBox b{display:block;font-size:18px;color:#783335;margin-top:5px}
 .bar{
  height:6px;background:#eaded8;border-radius:10px;
  margin-top:8px;overflow:hidden
 }
-
-.bar span{
- display:block;height:100%;background:#9a4849;border-radius:10px
-}
-
-.story{
- line-height:1.95;color:#4d3b37
-}
-
+.bar span{display:block;height:100%;background:#9a4849;border-radius:10px}
+.story{line-height:1.9;color:#4d3b37}
 .story strong{color:#7d3032}
-
-.tags{
- display:flex;flex-wrap:wrap;gap:7px;margin-top:14px
-}
-
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
 .tag{
  background:#f7eae4;color:#7d3537;border-radius:20px;
  padding:8px 12px;font-size:13px
 }
-
-.advice{
- background:#fff7f1;
- border-left:4px solid #9a4849;
- padding:17px;border-radius:4px 14px 14px 4px;
- line-height:1.9
-}
-
 .lock{
  background:#312727;color:#f6ebe5;border-radius:20px;
  padding:23px 19px;margin-top:24px
 }
-
 .lock h3{color:#f4d4c5;margin-top:0}
-
-.lock p{
- line-height:1.85;color:#eadbd4
-}
-
-.lock ul{
- padding-left:20px;line-height:1.9;color:#f0e3dd
-}
-
+.lock p{line-height:1.8;color:#eadbd4}
+.lock ul{padding-left:20px;line-height:1.9;color:#f0e3dd}
 .price{
- text-align:center;font-size:25px;font-weight:900;
- color:#f4d4c5;margin:20px 0 5px
+ text-align:center;font-size:25px;font-weight:900;color:#f4d4c5;margin:20px 0 5px
 }
-
 .cta{
  display:block;text-decoration:none;text-align:center;
- background:#a74649;color:white;padding:17px;
- border-radius:14px;font-weight:800;font-size:17px;margin-top:18px
+ background:#a74649;color:white;padding:17px;border-radius:14px;
+ font-weight:800;font-size:17px;margin-top:18px
 }
-
-.notice{
- font-size:11px;color:#94807a;line-height:1.7;margin-top:20px
-}
+.notice{font-size:11px;color:#94807a;line-height:1.7;margin-top:20px}
 </style>
 </head>
 
 <body>
-
 <div class="wrap">
 
 <div class="logo">🌸</div>
-
 <h1>연화록</h1>
-
 <div class="subtitle">
 나를 읽는 사주 기록<br>
 당신의 첫 번째 연화록은 무료입니다.
@@ -197,7 +119,6 @@ input,select{
 </select>
 
 <label>생년월일 기준</label>
-
 <div class="calendar">
 <button type="button" id="solarBtn" class="active">양력</button>
 <button type="button" id="lunarBtn">음력</button>
@@ -205,8 +126,7 @@ input,select{
 
 <div id="leapArea" style="display:none">
 <label class="check">
-<input type="checkbox" id="leap">
-음력 윤달입니다
+<input type="checkbox" id="leap"> 음력 윤달입니다
 </label>
 </div>
 
@@ -217,12 +137,10 @@ input,select{
 <input id="time" type="time">
 
 <label class="check">
-<input type="checkbox" id="unknownTime">
-태어난 시간을 모릅니다
+<input type="checkbox" id="unknownTime"> 태어난 시간을 모릅니다
 </label>
 
 <label>지금 가장 궁금한 이야기</label>
-
 <select id="interest">
 <option value="overall">전체적인 나의 흐름</option>
 <option value="money">돈 · 재물</option>
@@ -242,181 +160,95 @@ input,select{
 <div class="resultHead">
 <div class="flower">🌸</div>
 <h2 id="resultTitle"></h2>
-
-<p>
-사주를 펼쳐보니,<br>
-가장 먼저 눈에 들어오는 기운이 있어요.
-</p>
+<p>당신의 사주에서 먼저 보이는 이야기를 펼쳐봤어요.</p>
 </div>
 
 <div class="section">
-
 <h3>🔮 나의 사주 명식</h3>
-
 <div class="pillars">
-
-<div class="pillar">
-<small>년주</small>
-<strong id="yearP"></strong>
-</div>
-
-<div class="pillar">
-<small>월주</small>
-<strong id="monthP"></strong>
-</div>
-
-<div class="pillar">
-<small>일주</small>
-<strong id="dayP"></strong>
-</div>
-
-<div class="pillar">
-<small>시주</small>
-<strong id="hourP"></strong>
-</div>
-
+<div class="pillar"><small>년주</small><strong id="yearP"></strong></div>
+<div class="pillar"><small>월주</small><strong id="monthP"></strong></div>
+<div class="pillar"><small>일주</small><strong id="dayP"></strong></div>
+<div class="pillar"><small>시주</small><strong id="hourP"></strong></div>
 </div>
 </div>
 
 <div class="section">
-
 <h3>🌿 나를 나타내는 기운</h3>
-
 <div class="highlight" id="dayMaster"></div>
-
 </div>
 
 <div class="section">
-
 <h3>🪷 내 사주에 드러난 오행</h3>
 
 <div class="elementGrid">
-
-<div class="elementBox">
-목
-<b id="woodN">0</b>
-<div class="bar"><span id="woodB"></span></div>
+<div class="elementBox">목<b id="woodN">0</b><div class="bar"><span id="woodB"></span></div></div>
+<div class="elementBox">화<b id="fireN">0</b><div class="bar"><span id="fireB"></span></div></div>
+<div class="elementBox">토<b id="earthN">0</b><div class="bar"><span id="earthB"></span></div></div>
+<div class="elementBox">금<b id="metalN">0</b><div class="bar"><span id="metalB"></span></div></div>
+<div class="elementBox">수<b id="waterN">0</b><div class="bar"><span id="waterB"></span></div></div>
 </div>
 
-<div class="elementBox">
-화
-<b id="fireN">0</b>
-<div class="bar"><span id="fireB"></span></div>
-</div>
-
-<div class="elementBox">
-토
-<b id="earthN">0</b>
-<div class="bar"><span id="earthB"></span></div>
-</div>
-
-<div class="elementBox">
-금
-<b id="metalN">0</b>
-<div class="bar"><span id="metalB"></span></div>
-</div>
-
-<div class="elementBox">
-수
-<b id="waterN">0</b>
-<div class="bar"><span id="waterB"></span></div>
-</div>
-
-</div>
-
-<div class="story" id="elementStory" style="margin-top:18px"></div>
-
+<div class="story" id="elementStory" style="margin-top:17px"></div>
 </div>
 
 <div class="section">
-
 <h3>💭 혹시 이런 모습 있지 않아요?</h3>
-
 <div class="story" id="personality"></div>
-
 <div class="tags" id="tags"></div>
-
 </div>
 
 <div class="section">
-
-<h3 id="interestTitle"></h3>
-
+<h3 id="interestTitle">🌸 지금 가장 궁금한 이야기</h3>
 <div class="story" id="interestStory"></div>
-
 </div>
 
 <div class="section">
-
-<h3>🧭 지금 기억하면 좋은 것</h3>
-
-<div class="advice" id="advice"></div>
-
-</div>
-
-<div class="section">
-
 <h3>🌙 연화가 한마디만 남길게요</h3>
-
 <div class="highlight" id="yeonhwaWord"></div>
-
 </div>
 
 <div class="lock">
-
-<h3>🔒 그런데, 아직 펼치지 않은 이야기가 있어요</h3>
-
-<p>
-무료 연화록에서는 사주에서 가장 먼저 보이는 부분까지만 펼쳐봤어요.
-</p>
+<h3>🔒 아직 펼치지 않은 이야기가 있어요</h3>
 
 <p>
-같은 일간이라도 나머지 글자들이 어떻게 만나고,
-어느 계절에 태어났는지에 따라 이야기는 훨씬 달라져요.
+무료 연화록에서는 당신의 사주에서 가장 먼저 보이는 부분까지만 펼쳐봤어요.
+그런데 사주는 같은 일간이라도 다른 글자들과 어떻게 만나느냐에 따라 이야기가 달라져요.
 </p>
 
 <ul>
 <li>내가 일에서 반복하는 패턴</li>
-<li>돈을 만들고 지키는 방식</li>
+<li>돈을 대하고 움직이는 방식</li>
 <li>관계에서 유독 마음이 쓰이는 지점</li>
-<li>내가 잘 모르고 지나치는 강점과 약점</li>
-<li>가까이하면 좋은 것과 조심하면 좋은 흐름</li>
+<li>내가 잘 모르고 지나치는 약점과 강점</li>
+<li>앞으로 가까이하면 좋은 것과 조심하면 좋은 것</li>
 <li>연화가 남기는 나만의 작은 처방</li>
 </ul>
 
 <p>
-<strong>정식 연화록에서는 당신의 명식 전체를 이어서 이야기해드려요.</strong>
+<strong>정식 연화록</strong>에서는 당신의 명식 전체를 이어서 풀어드려요.
 </p>
 
 <p>
 🌸 소장용 비주얼 연화록<br>
-📖 상세 사주 이야기<br>
+📖 7,000~8,000자 상세 이야기<br>
 📱 이름이 들어간 SNS 공유 사주카드
 </p>
 
 <div class="price">19,900원</div>
 
-<a class="cta"
-href="https://tally.so/r/44VWKB">
+<a class="cta" href="https://link.inpock.co.kr/yeonhwarok">
 🔮 내 사주 끝까지 보기
 </a>
 
 </div>
 
 <div class="notice">
-
-※ 오행 숫자는 사주 네 기둥의 천간과 지지에
-겉으로 드러난 오행을 기준으로 한 무료 기초 분석입니다.
-
-출생시간을 모르는 경우 시주는 분석에서 제외합니다.
-
-전통 명리의 전체적인 강약 판단에는 월령·절기·지장간·
-글자 간의 관계 등 추가 요소가 함께 고려될 수 있습니다.
-
+※ 오행 분포는 사주 네 기둥의 천간·지지에 겉으로 드러난 오행을 기준으로 보여주는 무료 기초 분석입니다.
+출생시간을 모르는 경우 시주를 제외해 표시합니다. 전통 명리 해석에는 월령·절기·지장간·기운의 세력 등 추가 요소가 함께 고려될 수 있습니다.
 </div>
 
 </div>
-
 </div>
 
 <script type="module">
@@ -428,34 +260,19 @@ let manseryeok=null;
 let lunar=false;
 
 async function loadEngine(){
-
  try{
+   manseryeok=await import("https://esm.sh/manseryeok@2.0.0?bundle");
 
-   manseryeok=
-   await import(
-     "https://esm.sh/manseryeok@2.0.0?bundle"
-   );
-
-   if(
-     !manseryeok ||
-     typeof manseryeok.calculateFourPillars!=="function"
-   ){
+   if(!manseryeok || typeof manseryeok.calculateFourPillars!=="function"){
      throw new Error("계산 함수를 찾지 못했습니다.");
    }
 
    engine.innerHTML="✅ 만세력 연결 완료";
-
    calculate.disabled=false;
 
- }catch(error){
-
-   engine.innerHTML=
-   "❌ 만세력 연결 실패<br><small>"+
-   error.message+
-   "</small>";
-
+ }catch(e){
+   engine.innerHTML="❌ 만세력 연결 실패<br><small>"+e.message+"</small>";
  }
-
 }
 
 loadEngine();
@@ -464,128 +281,295 @@ const solarBtn=document.getElementById("solarBtn");
 const lunarBtn=document.getElementById("lunarBtn");
 const leapArea=document.getElementById("leapArea");
 
-solarBtn.addEventListener("click",()=>{
-
+solarBtn.onclick=()=>{
  lunar=false;
-
  solarBtn.classList.add("active");
  lunarBtn.classList.remove("active");
-
  leapArea.style.display="none";
+};
 
-});
-
-lunarBtn.addEventListener("click",()=>{
-
+lunarBtn.onclick=()=>{
  lunar=true;
-
  lunarBtn.classList.add("active");
  solarBtn.classList.remove("active");
-
  leapArea.style.display="block";
-
-});
+};
 
 const unknown=document.getElementById("unknownTime");
 const timeInput=document.getElementById("time");
 
-unknown.addEventListener("change",()=>{
-
+unknown.onchange=()=>{
  timeInput.disabled=unknown.checked;
-
- if(unknown.checked){
-   timeInput.value="";
- }
-
-});
-
-const stemElements={
- 갑:"목",
- 을:"목",
- 병:"화",
- 정:"화",
- 무:"토",
- 기:"토",
- 경:"금",
- 신:"금",
- 임:"수",
- 계:"수"
+ if(unknown.checked)timeInput.value="";
 };
 
-const branchElements={
- 자:"수",
- 축:"토",
- 인:"목",
- 묘:"목",
- 진:"토",
- 사:"화",
- 오:"화",
- 미:"토",
- 신:"금",
- 유:"금",
- 술:"토",
- 해:"수"
+
+/* 오행 매핑 */
+
+const elementMap={
+ 갑:"목",을:"목",인:"목",묘:"목",
+ 병:"화",정:"화",사:"화",오:"화",
+ 무:"토",기:"토",진:"토",술:"토",축:"토",미:"토",
+ 경:"금",신:"금",신:"금",유:"금",
+ 임:"수",계:"수",해:"수",자:"수"
 };
 
-const personality={
+const stemElement={
+ 갑:"목",을:"목",
+ 병:"화",정:"화",
+ 무:"토",기:"토",
+ 경:"금",신:"금",
+ 임:"수",계:"수"
+};
+
+const elementEmoji={
+ 목:"🌿",화:"🔥",토:"⛰️",금:"⚔️",수:"💧"
+};
+
+
+/* 일간별 무료 성향 */
+
+const personalities={
 
 갑:{
  title:"큰 나무처럼 자기 기준을 세우는 사람",
- text:
- "겉으로는 담담하게 넘어가는 것 같아도 속에는 꽤 분명한 기준이 있어요. 누가 시켜서 움직이기보다 스스로 납득했을 때 힘이 제대로 나오는 편이에요. 한번 방향을 정하면 쉽게 포기하지 않지만, 그만큼 혼자 버티는 시간이 길어질 때도 있어요.",
+ text:"겉으로는 담담해 보여도 속에는 ‘내가 납득해야 움직인다’는 기준이 있어요. 한번 방향을 정하면 쉽게 바꾸지 않는 편이고, 누가 억지로 끌고 가려고 하면 오히려 마음이 닫힐 수 있어요. 대신 스스로 의미를 찾은 일에서는 생각보다 오래 버티는 힘이 있어요.",
  tags:["자기기준","성장","책임감","꾸준함"]
 },
 
 을:{
- title:"부드러워 보여도 쉽게 꺾이지 않는 사람",
- text:
- "사람이나 상황에 맞춰주는 모습 때문에 유순해 보일 수 있어요. 그런데 속을 들여다보면 생각보다 자기 기준이 분명해요. 정면으로 부딪히기보다 상황을 살피고 다른 길을 찾는 편이고, 한번 마음에 뿌리내린 생각은 쉽게 놓지 않아요. 세게 밀어붙이는 힘보다 오래 살아남는 힘이 당신 쪽에 더 가까워요.",
+ title:"부드럽지만 쉽게 꺾이지 않는 사람",
+ text:"사람이나 상황에 맞춰주는 모습 때문에 유순해 보일 수 있어요. 그런데 속에는 생각보다 분명한 기준이 있어요. 정면으로 부딪히기보다 상황을 읽고 다른 길을 찾는 편이고, 한번 마음속에 뿌리내린 생각은 쉽게 놓지 않아요. 그래서 당신의 강점은 세게 밀어붙이는 힘보다 오래 살아남는 힘에 가까워요.",
  tags:["유연함","끈기","관찰력","적응력"]
 },
 
 병:{
- title:"마음속 불빛이 자연스럽게 밖으로 드러나는 사람",
- text:
- "좋아하는 것과 싫어하는 것이 비교적 분명하고 마음이 움직이면 행동도 빨라지는 편이에요. 주변 분위기를 바꾸는 힘도 있지만, 반응이 없거나 답답한 상황이 오래 이어지면 갑자기 의욕이 떨어질 수 있어요.",
- tags:["열정","표현력","행동력","솔직함"]
+ title:"마음속 불빛이 밖으로 드러나는 사람",
+ text:"좋아하는 것과 싫어하는 것이 비교적 분명하고, 마음이 움직이면 행동도 빨라지는 편이에요. 주변 분위기를 밝게 만드는 힘이 있지만 반응이 없거나 답답한 상황이 오래 이어지면 금세 에너지가 떨어질 수도 있어요. 당신은 무엇을 하느냐만큼 마음이 어디에 향해 있는지가 중요해요.",
+ tags:["표현력","열정","행동력","솔직함"]
 },
 
 정:{
- title:"작은 불빛처럼 사람의 마음을 세심하게 보는 사람",
- text:
- "겉으로 크게 티를 내지 않아도 사람의 말과 분위기를 꽤 세심하게 읽어요. 중요한 사람이나 일에는 정성을 많이 쓰는 편이라, 기대했던 만큼 돌아오지 않으면 서운함도 오래 남을 수 있어요.",
+ title:"작은 불빛처럼 사람의 마음을 살피는 사람",
+ text:"겉으로 크게 드러내지 않아도 사람의 말과 분위기를 세심하게 읽는 편이에요. 내가 중요하게 생각하는 사람이나 일에는 정성을 많이 쓰지만, 그만큼 서운함도 마음에 오래 남을 수 있어요. 당신은 강하게 밀어붙이기보다 필요한 순간 정확하게 힘을 쓰는 쪽에 가까워요.",
  tags:["섬세함","집중력","감각","배려"]
 },
 
 무:{
  title:"쉽게 흔들리지 않는 중심을 가진 사람",
- text:
- "결정을 내리기 전에는 여러 가지를 생각하지만 한번 책임지기로 하면 쉽게 놓지 않아요. 주변에서는 든든한 사람으로 보일 가능성이 커요. 다만 '내가 할 수 있으니까'라는 이유로 너무 많은 걸 혼자 짊어질 때가 있어요.",
+ text:"결정을 내리기 전에는 여러 가지를 생각하지만 한번 책임지기로 하면 쉽게 놓지 않는 편이에요. 그래서 주변에서는 든든하다는 말을 들을 수 있어요. 다만 내가 감당할 수 있다는 이유로 너무 많은 것을 혼자 짊어지지는 않는 게 중요해요.",
  tags:["안정감","책임감","현실성","버팀"]
 },
 
 기:{
- title:"작은 가능성을 현실로 키워내는 사람",
- text:
- "눈에 확 띄는 방식보다 필요한 것을 하나씩 챙기면서 결과를 만드는 편이에요. 사람의 장단점을 잘 보고 현실 감각도 있지만, 다른 사람을 챙기느라 정작 내 마음을 뒤로 미룰 때가 있어요.",
+ title:"사람과 가능성을 현실로 키워내는 사람",
+ text:"눈에 확 띄는 방식보다는 필요한 것을 하나씩 챙기면서 결과를 만드는 편이에요. 사람의 장단점도 비교적 잘 보고 현실적인 감각도 있어요. 다만 다른 사람을 챙기느라 내 욕구를 뒤로 미루는 일이 반복되면 어느 순간 마음이 지칠 수 있어요.",
  tags:["현실감각","돌봄","실속","조율"]
 },
 
 경:{
- title:"필요할 때 확실하게 결정을 내리는 사람",
- text:
- "애매하게 상황을 오래 끌고 가는 걸 답답하게 느낄 수 있어요. 기준이 비교적 분명하고 필요할 때 결단을 내릴 힘도 있어요. 다만 결론을 너무 빨리 내리면 나중에 감정을 다시 돌아보게 되는 경우도 있어요.",
- tags:["결단력","원칙","실행력","직진"]
+ title:"결정할 때는 확실하게 선을 긋는 사람",
+ text:"애매하게 끌고 가는 상황을 답답해하는 편이에요. 옳고 그름이나 해야 할 일의 기준이 비교적 분명하고, 필요할 때 결단을 내릴 힘도 있어요. 다만 너무 빨리 결론을 내리면 상대의 사정이나 내 감정을 나중에 다시 생각하게 될 수도 있어요.",
+ tags:["결단력","원칙","실행력","직선적"]
 },
 
 신:{
  title:"작은 차이까지 알아보는 예민한 감각의 사람",
- text:
- "말 한마디나 분위기의 작은 변화도 비교적 빨리 알아차려요. 완성도를 중요하게 생각하고 스스로에게도 기준이 높은 편이에요. 이 섬세함은 큰 장점이지만 모든 것을 완벽하게 하려 하면 시작이 늦어질 수 있어요.",
+ text:"말 한마디나 분위기의 미묘한 변화도 비교적 잘 알아차리는 편이에요. 기준이 높고 완성도를 중요하게 생각해서 스스로에게도 엄격해질 수 있어요. 당신의 섬세함은 큰 장점이지만 모든 것을 완벽하게 만들려고 하면 시작 자체가 늦어질 수 있어요.",
  tags:["섬세함","완성도","분석력","감각"]
 },
 
 임:{
  title:"한곳에 머물기보다 흐름을 읽는 사람",
- text:
- "생각의 폭이 넓고 새로운 정보나 사람을 받아들이는 힘이 있어요. 하나의 답만 고집하기보다
+ text:"생각의 폭이 넓고 새로운 정보나 사람을 받아들이는 힘이 있어요. 상황을 여러 방향에서 보는 편이라 답이 하나뿐이라고 생각하지 않아요. 대신 생각이 너무 넓어지면 정작 무엇부터 해야 할지 결정하는 데 시간이 걸릴 수 있어요.",
+ tags:["확장성","통찰","정보력","유연함"]
+},
+
+계:{
+ title:"겉보다 속에서 생각이 더 많이 움직이는 사람",
+ text:"말로 다 표현하지 않아도 마음속에서는 많은 생각이 오가는 편이에요. 사람의 감정이나 분위기를 섬세하게 읽고, 작은 변화도 빨리 알아차릴 수 있어요. 다만 혼자 생각하는 시간이 길어지면 아직 일어나지 않은 일까지 걱정할 수 있어요.",
+ tags:["직관","감수성","관찰력","내면"]
+}
+
+};
+
+
+/* 관심 분야별 풀이 */
+
+const interestTexts={
+
+overall:(name,stem)=>{
+ `${name}님은 자신의 방식과 속도를 찾았을 때 힘이 더 잘 살아나는 편이에요. 지금 모든 답을 한 번에 정하려 하기보다, 반복해서 마음이 가는 것과 이상하게 계속 막히는 것을 함께 살펴보세요. 사주는 ‘무엇을 해야 한다’는 정답보다 내가 어떤 방식에서 힘을 얻고 소모되는지를 보는 데 더 도움이 될 수 있어요.`
+},
+
+money:(name,stem)=>{
+ `${name}님의 재물 이야기는 단순히 ‘돈복이 있다, 없다’로 보기보다 돈을 어떤 방식으로 만들고 지키는지를 함께 보는 게 중요해요. 특히 새로운 기회가 보일 때 금액부터 보기보다 ‘이걸 반복할 수 있는가’를 먼저 확인해보세요. 한 번의 큰 결과보다 내가 계속 만들어낼 수 있는 구조가 생길 때 돈에 대한 불안도 함께 줄어들 수 있어요.`
+},
+
+love:(name,stem)=>{
+ `${name}님은 관계에서 상대가 하는 말 자체보다 그 안의 태도와 분위기를 함께 보는 편일 수 있어요. 마음이 생기면 쉽게 무심해지지는 않지만, 서운한 일을 바로 꺼내기보다 한번 안으로 삼키는 순간도 생길 수 있어요. 관계에서 중요한 건 참는 횟수가 아니라 ‘나는 이럴 때 마음이 상한다’를 너무 늦기 전에 말하는 거예요.`
+},
+
+career:(name,stem)=>{
+ `${name}님에게 일은 단순히 월급만 받는 공간으로 끝나지 않을 가능성이 있어요. 내가 납득할 수 있는 방식, 성장하고 있다는 느낌, 그리고 어느 정도의 주도권이 중요하게 작용할 수 있어요. 답답함이 반복될 때 무조건 그만두기보다 ‘업무가 싫은지, 환경이 싫은지, 성장하지 않는 느낌이 싫은지’를 먼저 나눠보세요.`
+},
+
+relation:(name,stem)=>{
+ `${name}님은 모든 사람과 가까워지기보다 내 사람이라고 느끼는 관계에 더 마음을 쓰는 편일 수 있어요. 그래서 한번 신뢰가 생기면 오래 가지만 반대로 기대가 컸던 관계에서 실망하면 마음을 닫는 속도도 빨라질 수 있어요. 사람을 이해하는 것과 계속 참아주는 것은 다른 일이라는 걸 기억해두면 좋아요.`
+}
+
+};
+
+
+/* 연화 한마디 */
+
+const yeonhwaWords={
+ 목:"당장 크게 바꾸려고 하지 않아도 괜찮아요. 나무가 자라듯 작은 선택을 오래 이어가는 힘을 가볍게 보지 마세요.",
+ 화:"마음이 뜨거울 때 바로 달리는 것도 좋지만, 오래 가져가고 싶은 일이라면 속도를 조절하는 힘도 함께 필요해요.",
+ 토:"버틸 수 있다는 이유만으로 모든 것을 혼자 떠안지는 마세요. 내려놓는 것도 삶을 지키는 선택일 수 있어요.",
+ 금:"분명한 기준은 당신의 장점이에요. 다만 때로는 맞고 틀림보다 나와 상대가 무엇을 느끼는지를 먼저 보는 것도 필요해요.",
+ 수:"생각이 많다는 건 그만큼 여러 길을 볼 수 있다는 뜻이기도 해요. 답이 보이지 않을 때는 생각을 하나 더 하기보다 아주 작게 움직여보세요."
+};
+
+
+/* 계산 */
+
+calculate.addEventListener("click",()=>{
+
+try{
+
+ const name=document.getElementById("name").value.trim();
+ const birth=document.getElementById("birth").value;
+ const gender=document.getElementById("gender").value;
+ const interest=document.getElementById("interest").value;
+
+ if(!name){alert("이름 또는 닉네임을 입력해주세요.");return;}
+ if(!birth){alert("생년월일을 입력해주세요.");return;}
+
+ if(!unknown.checked && !timeInput.value){
+   alert("태어난 시간을 입력하거나 '모릅니다'를 선택해주세요.");
+   return;
+ }
+
+ const [year,month,day]=birth.split("-").map(Number);
+
+ let hour=12;
+ let minute=0;
+
+ if(!unknown.checked){
+   [hour,minute]=timeInput.value.split(":").map(Number);
+ }
+
+ const r=manseryeok.calculateFourPillars({
+   year,month,day,hour,minute,
+   isLunar:lunar,
+   isLeapMonth:lunar && document.getElementById("leap").checked,
+   gender
+ });
+
+ const p=r.toObject();
+
+ document.getElementById("resultTitle").innerText=
+ `${name}님의 무료 연화록`;
+
+ document.getElementById("yearP").innerText=p.year;
+ document.getElementById("monthP").innerText=p.month;
+ document.getElementById("dayP").innerText=p.day;
+ document.getElementById("hourP").innerText=unknown.checked?"미상":p.hour;
+
+ const stem=p.day.charAt(0);
+ const dayElement=stemElement[stem] || "";
+
+ const pers=personalities[stem];
+
+ document.getElementById("dayMaster").innerHTML=
+ `<strong>${name}님을 나타내는 일간은 ${stem} · ${dayElement}의 기운이에요.</strong><br><br>
+ ${pers ? pers.title : "당신만의 중심 기운을 가지고 있어요."}`;
+
+ const counts={목:0,화:0,토:0,금:0,수:0};
+
+ let pillarList=[p.year,p.month,p.day];
+
+ if(!unknown.checked){
+   pillarList.push(p.hour);
+ }
+
+ pillarList.forEach(x=>{
+   if(!x)return;
+
+   [...x].forEach(ch=>{
+     const el=elementMap[ch];
+     if(el)counts[el]++;
+   });
+ });
+
+ const total=Object.values(counts).reduce((a,b)=>a+b,0);
+
+ const ids={
+   목:["woodN","woodB"],
+   화:["fireN","fireB"],
+   토:["earthN","earthB"],
+   금:["metalN","metalB"],
+   수:["waterN","waterB"]
+ };
+
+ Object.keys(ids).forEach(el=>{
+   document.getElementById(ids[el][0]).innerText=counts[el];
+   const percent=total ? (counts[el]/total)*100 : 0;
+   document.getElementById(ids[el][1]).style.width=percent+"%";
+ });
+
+ const entries=Object.entries(counts);
+
+ const max=Math.max(...entries.map(x=>x[1]));
+ const min=Math.min(...entries.map(x=>x[1]));
+
+ const strong=entries.filter(x=>x[1]===max).map(x=>x[0]);
+ const weak=entries.filter(x=>x[1]===min).map(x=>x[0]);
+
+ document.getElementById("elementStory").innerHTML=
+ `겉으로 드러난 여덟 글자를 보면 <strong>${strong.join("·")}</strong> 기운이 비교적 많이 보이고,
+ <strong>${weak.join("·")}</strong> 기운은 상대적으로 적게 보여요.<br><br>
+ 다만 이것만으로 사주의 강약 전체를 단정하지는 않아요.
+ 계절과 월령, 글자들 사이의 관계까지 함께 봐야 더 깊은 이야기가 나오거든요.`;
+
+ if(pers){
+   document.getElementById("personality").innerHTML=
+   `<strong>${pers.title}</strong><br><br>${pers.text}`;
+
+   document.getElementById("tags").innerHTML=
+   pers.tags.map(t=>`<span class="tag">#${t}</span>`).join("");
+ }
+
+ const interestNames={
+   overall:"🌸 전체적인 나의 흐름",
+   money:"💰 돈 · 재물 이야기",
+   love:"❤️ 연애 · 인연 이야기",
+   career:"💼 직업 · 일 이야기",
+   relation:"🤝 인간관계 이야기"
+ };
+
+ document.getElementById("interestTitle").innerText=
+ interestNames[interest];
+
+ document.getElementById("interestStory").innerHTML=
+ interestTexts[interest](name,stem);
+
+ document.getElementById("yeonhwaWord").innerHTML=
+ `<strong>“${yeonhwaWords[dayElement] || "당신의 속도를 너무 쉽게 의심하지 마세요."}”</strong>`;
+
+ const result=document.getElementById("result");
+ result.style.display="block";
+
+ result.scrollIntoView({behavior:"smooth",block:"start"});
+
+}catch(e){
+ alert("사주 계산 중 오류가 발생했습니다.\n\n"+e.message);
+ console.error(e);
+}
+
+});
+
+</script>
+</body>
+</html>
