@@ -7,225 +7,286 @@
 
 <style>
 *{box-sizing:border-box}
+
 body{
- margin:0;
- background:#fbf3ed;
- color:#3d2b2b;
- font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Arial,sans-serif;
+  margin:0;
+  background:#fbf3ed;
+  color:#3d2b2b;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR",Arial,sans-serif;
 }
-.wrap{max-width:480px;margin:auto;padding:28px 18px 70px}
-.logo{text-align:center;font-size:40px;margin-top:10px}
-h1{text-align:center;color:#852f32;margin:8px 0;font-size:34px}
-.subtitle{text-align:center;color:#796963;line-height:1.7;margin-bottom:28px}
+
+.wrap{
+  max-width:480px;
+  margin:auto;
+  padding:28px 18px 70px;
+}
+
+.logo{
+  text-align:center;
+  font-size:40px;
+  margin-top:10px;
+}
+
+h1{
+  text-align:center;
+  color:#852f32;
+  margin:8px 0;
+  font-size:34px;
+}
+
+.subtitle{
+  text-align:center;
+  color:#796963;
+  line-height:1.7;
+  margin-bottom:28px;
+}
 
 .card{
- background:white;
- border-radius:24px;
- padding:24px 20px;
- box-shadow:0 8px 30px rgba(80,40,30,.08);
- margin-bottom:18px;
+  background:white;
+  border-radius:24px;
+  padding:24px 20px;
+  box-shadow:0 8px 30px rgba(80,40,30,.08);
+  margin-bottom:18px;
 }
-label{display:block;font-weight:700;margin:18px 0 8px}
+
+label{
+  display:block;
+  font-weight:700;
+  margin:18px 0 8px;
+}
+
 input,select{
- width:100%;
- padding:15px;
- border:1px solid #e1d6d0;
- border-radius:12px;
- background:white;
- font-size:16px;
+  width:100%;
+  padding:15px;
+  border:1px solid #e1d6d0;
+  border-radius:12px;
+  background:white;
+  font-size:16px;
+  color:#3d2b2b;
 }
-.row{display:flex;gap:10px}
-.row>*{flex:1}
 
 .calendar{
- display:flex;
- gap:8px;
+  display:flex;
+  gap:8px;
 }
+
 .calendar button{
- flex:1;
- padding:13px 5px;
- border:1px solid #dccbc4;
- background:white;
- color:#55413c;
- border-radius:12px;
- font-size:15px;
+  flex:1;
+  padding:13px 5px;
+  border:1px solid #dccbc4;
+  background:white;
+  color:#55413c;
+  border-radius:12px;
+  font-size:15px;
 }
+
 .calendar button.active{
- background:#8b3033;
- color:white;
- border-color:#8b3033;
+  background:#8b3033;
+  color:white;
+  border-color:#8b3033;
 }
 
 .check{
- display:flex;
- align-items:center;
- gap:8px;
- margin-top:12px;
- font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:12px;
+  font-size:14px;
 }
-.check input{width:auto}
+
+.check input{
+  width:auto;
+}
 
 .mainbtn{
- width:100%;
- border:0;
- border-radius:15px;
- background:#8b3033;
- color:white;
- padding:18px;
- font-size:18px;
- font-weight:800;
- margin-top:24px;
+  width:100%;
+  border:0;
+  border-radius:15px;
+  background:#8b3033;
+  color:white;
+  padding:18px;
+  font-size:18px;
+  font-weight:800;
+  margin-top:24px;
 }
 
-.mainbtn:disabled{opacity:.5}
+.mainbtn:disabled{
+  opacity:.45;
+}
 
 #engine{
- background:#fff8f3;
- padding:13px;
- border-radius:12px;
- text-align:center;
- color:#705d56;
- font-size:14px;
- margin-bottom:16px;
+  background:#fff8f3;
+  padding:13px;
+  border-radius:12px;
+  text-align:center;
+  color:#705d56;
+  font-size:14px;
+  margin-bottom:16px;
+  line-height:1.6;
 }
 
-#result{display:none}
+#result{
+  display:none;
+}
 
 .title{
- color:#852f32;
- font-size:23px;
- font-weight:800;
- margin-bottom:18px;
+  color:#852f32;
+  font-size:23px;
+  font-weight:800;
+  margin-bottom:18px;
 }
 
 .pillars{
- display:grid;
- grid-template-columns:repeat(4,1fr);
- gap:7px;
- text-align:center;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:7px;
+  text-align:center;
 }
+
 .pillar{
- background:#fff7f1;
- border-radius:13px;
- padding:14px 4px;
+  background:#fff7f1;
+  border-radius:13px;
+  padding:14px 4px;
 }
-.pillar small{display:block;color:#8d7770;margin-bottom:6px}
-.pillar strong{font-size:19px;color:#713032}
+
+.pillar small{
+  display:block;
+  color:#8d7770;
+  margin-bottom:6px;
+}
+
+.pillar strong{
+  font-size:19px;
+  color:#713032;
+}
 
 .element{
- margin-top:20px;
- padding:17px;
- border-radius:14px;
- background:#f9eee8;
- line-height:1.8;
+  margin-top:20px;
+  padding:17px;
+  border-radius:14px;
+  background:#f9eee8;
+  line-height:1.8;
 }
 
 .notice{
- color:#8b7770;
- font-size:12px;
- line-height:1.6;
- margin-top:18px;
+  color:#8b7770;
+  font-size:12px;
+  line-height:1.6;
+  margin-top:18px;
 }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
 
-<div class="logo">🌸</div>
-<h1>연화록</h1>
+  <div class="logo">🌸</div>
 
-<div class="subtitle">
-나를 읽는 사주 기록<br>
-당신의 첫 번째 연화록은 무료입니다.
-</div>
+  <h1>연화록</h1>
 
-<div class="card">
+  <div class="subtitle">
+    나를 읽는 사주 기록<br>
+    당신의 첫 번째 연화록은 무료입니다.
+  </div>
 
-<div id="engine">⏳ 만세력 엔진 연결 중...</div>
+  <div class="card">
 
-<label>이름 또는 닉네임</label>
-<input id="name" placeholder="예: 연화">
+    <div id="engine">
+      ⏳ 만세력 엔진 연결 중...
+    </div>
 
-<label>성별</label>
-<select id="gender">
-<option value="female">여성</option>
-<option value="male">남성</option>
-</select>
+    <label>이름 또는 닉네임</label>
+    <input id="name" placeholder="예: 연화">
 
-<label>생년월일 기준</label>
-<div class="calendar">
-<button type="button" id="solarBtn" class="active">양력</button>
-<button type="button" id="lunarBtn">음력</button>
-</div>
+    <label>성별</label>
+    <select id="gender">
+      <option value="female">여성</option>
+      <option value="male">남성</option>
+    </select>
 
-<div id="leapArea" style="display:none">
-<label class="check">
-<input type="checkbox" id="leap">
-음력 윤달입니다
-</label>
-</div>
+    <label>생년월일 기준</label>
 
-<label>생년월일</label>
-<input id="birth" type="date">
+    <div class="calendar">
+      <button type="button" id="solarBtn" class="active">
+        양력
+      </button>
 
-<label>태어난 시간</label>
-<input id="time" type="time">
+      <button type="button" id="lunarBtn">
+        음력
+      </button>
+    </div>
 
-<label class="check">
-<input type="checkbox" id="unknownTime">
-태어난 시간을 모릅니다
-</label>
+    <div id="leapArea" style="display:none">
+      <label class="check">
+        <input type="checkbox" id="leap">
+        음력 윤달입니다
+      </label>
+    </div>
 
-<label>지금 가장 궁금한 이야기</label>
-<select id="interest">
-<option value="overall">전체적인 나의 흐름</option>
-<option value="money">돈 · 재물</option>
-<option value="love">연애 · 인연</option>
-<option value="career">직업 · 일</option>
-<option value="relation">인간관계</option>
-</select>
+    <label>생년월일</label>
+    <input id="birth" type="date">
 
-<button class="mainbtn" id="calculate" disabled>
-🔮 내 무료 연화록 펼쳐보기
-</button>
+    <label>태어난 시간</label>
+    <input id="time" type="time">
 
-</div>
+    <label class="check">
+      <input type="checkbox" id="unknownTime">
+      태어난 시간을 모릅니다
+    </label>
 
-<div class="card" id="result">
+    <label>지금 가장 궁금한 이야기</label>
 
-<div class="title" id="resultTitle"></div>
+    <select id="interest">
+      <option value="overall">전체적인 나의 흐름</option>
+      <option value="money">돈 · 재물</option>
+      <option value="love">연애 · 인연</option>
+      <option value="career">직업 · 일</option>
+      <option value="relation">인간관계</option>
+    </select>
 
-<div class="pillars">
-<div class="pillar">
-<small>년주</small>
-<strong id="yearP"></strong>
-</div>
+    <button class="mainbtn" id="calculate" disabled>
+      🔮 내 무료 연화록 펼쳐보기
+    </button>
 
-<div class="pillar">
-<small>월주</small>
-<strong id="monthP"></strong>
-</div>
+  </div>
 
-<div class="pillar">
-<small>일주</small>
-<strong id="dayP"></strong>
-</div>
+  <div class="card" id="result">
 
-<div class="pillar">
-<small>시주</small>
-<strong id="hourP"></strong>
-</div>
-</div>
+    <div class="title" id="resultTitle"></div>
 
-<div class="element" id="element"></div>
+    <div class="pillars">
 
-<div class="notice">
-※ 본 결과는 한국 표준시 기준의 전통 명리 계산을 바탕으로 제공됩니다.
-출생시간을 모르는 경우 시주를 제외한 세 기둥을 중심으로 확인하세요.
-</div>
+      <div class="pillar">
+        <small>년주</small>
+        <strong id="yearP"></strong>
+      </div>
 
-</div>
+      <div class="pillar">
+        <small>월주</small>
+        <strong id="monthP"></strong>
+      </div>
+
+      <div class="pillar">
+        <small>일주</small>
+        <strong id="dayP"></strong>
+      </div>
+
+      <div class="pillar">
+        <small>시주</small>
+        <strong id="hourP"></strong>
+      </div>
+
+    </div>
+
+    <div class="element" id="element"></div>
+
+    <div class="notice">
+      ※ 본 결과는 한국 표준시 기준의 전통 명리 계산을 바탕으로 제공됩니다.<br>
+      출생시간을 모르는 경우 시주를 제외한 세 기둥을 중심으로 확인하세요.
+    </div>
+
+  </div>
 
 </div>
 
@@ -234,94 +295,311 @@ input,select{
 const engine = document.getElementById("engine");
 const calculate = document.getElementById("calculate");
 
+let manseryeok = null;
 let lunar = false;
-let manseryeok;
 
-try{
- manseryeok =
-   await import("https://esm.sh/manseryeok@2.0.0?bundle");
 
- engine.innerHTML="✅ 만세력 연결 완료";
- calculate.disabled=false;
+/* =========================
+   만세력 엔진 연결
+========================= */
 
-}catch(e){
- engine.innerHTML="❌ 만세력 연결에 실패했습니다.";
+async function loadManseryeok(){
+
+  try{
+
+    engine.innerHTML =
+      "⏳ 만세력 엔진 연결 중...";
+
+    manseryeok = await import(
+      "https://esm.sh/manseryeok@2.0.0?bundle"
+    );
+
+    if(
+      !manseryeok ||
+      typeof manseryeok.calculateFourPillars !== "function"
+    ){
+      throw new Error(
+        "사주 계산 함수를 불러오지 못했습니다."
+      );
+    }
+
+    engine.innerHTML =
+      "✅ 만세력 연결 완료";
+
+    calculate.disabled = false;
+
+  }catch(error){
+
+    engine.innerHTML =
+      "❌ 만세력 연결 실패<br><small>" +
+      error.message +
+      "</small>";
+
+    console.error(error);
+
+  }
+
 }
 
-const solarBtn=document.getElementById("solarBtn");
-const lunarBtn=document.getElementById("lunarBtn");
-const leapArea=document.getElementById("leapArea");
+loadManseryeok();
 
-solarBtn.onclick=()=>{
- lunar=false;
- solarBtn.classList.add("active");
- lunarBtn.classList.remove("active");
- leapArea.style.display="none";
-};
 
-lunarBtn.onclick=()=>{
- lunar=true;
- lunarBtn.classList.add("active");
- solarBtn.classList.remove("active");
- leapArea.style.display="block";
-};
+/* =========================
+   양력 / 음력
+========================= */
 
-const unknown=document.getElementById("unknownTime");
-const timeInput=document.getElementById("time");
+const solarBtn =
+  document.getElementById("solarBtn");
 
-unknown.onchange=()=>{
- timeInput.disabled=unknown.checked;
- if(unknown.checked) timeInput.value="";
-};
+const lunarBtn =
+  document.getElementById("lunarBtn");
 
-calculate.onclick=()=>{
+const leapArea =
+  document.getElementById("leapArea");
 
- try{
 
- const name=document.getElementById("name").value.trim();
- const birth=document.getElementById("birth").value;
- const gender=document.getElementById("gender").value;
+solarBtn.addEventListener("click",()=>{
 
- if(!name){
-   alert("이름 또는 닉네임을 입력해주세요.");
-   return;
- }
+  lunar = false;
 
- if(!birth){
-   alert("생년월일을 입력해주세요.");
-   return;
- }
+  solarBtn.classList.add("active");
+  lunarBtn.classList.remove("active");
 
- if(!unknown.checked && !timeInput.value){
-   alert("태어난 시간을 입력하거나 '모릅니다'를 선택해주세요.");
-   return;
- }
+  leapArea.style.display = "none";
 
- const [year,month,day]=birth.split("-").map(Number);
+});
 
- let hour=12;
- let minute=0;
 
- if(!unknown.checked){
-   [hour,minute]=timeInput.value.split(":").map(Number);
- }
+lunarBtn.addEventListener("click",()=>{
 
- const r=manseryeok.calculateFourPillars({
-   year,
-   month,
-   day,
-   hour,
-   minute,
-   isLunar:lunar,
-   isLeapMonth:lunar && document.getElementById("leap").checked,
-   gender
- });
+  lunar = true;
 
- const p=r.toObject();
+  lunarBtn.classList.add("active");
+  solarBtn.classList.remove("active");
 
- document.getElementById("resultTitle").innerText=
-   `🌸 ${name}님의 사주 명식`;
+  leapArea.style.display = "block";
 
- document.getElementById("yearP").innerText=p.year;
- document.getElementById("monthP").innerText=p.month;
- document
+});
+
+
+/* =========================
+   출생시간 모름
+========================= */
+
+const unknown =
+  document.getElementById("unknownTime");
+
+const timeInput =
+  document.getElementById("time");
+
+
+unknown.addEventListener("change",()=>{
+
+  timeInput.disabled = unknown.checked;
+
+  if(unknown.checked){
+    timeInput.value = "";
+  }
+
+});
+
+
+/* =========================
+   사주 계산
+========================= */
+
+calculate.addEventListener("click",()=>{
+
+  try{
+
+    if(!manseryeok){
+      alert("만세력 엔진이 아직 준비되지 않았습니다.");
+      return;
+    }
+
+    const name =
+      document.getElementById("name")
+      .value.trim();
+
+    const birth =
+      document.getElementById("birth")
+      .value;
+
+    const gender =
+      document.getElementById("gender")
+      .value;
+
+
+    if(!name){
+
+      alert(
+        "이름 또는 닉네임을 입력해주세요."
+      );
+
+      return;
+    }
+
+
+    if(!birth){
+
+      alert(
+        "생년월일을 입력해주세요."
+      );
+
+      return;
+    }
+
+
+    if(
+      !unknown.checked &&
+      !timeInput.value
+    ){
+
+      alert(
+        "태어난 시간을 입력하거나 '모릅니다'를 선택해주세요."
+      );
+
+      return;
+    }
+
+
+    const [year,month,day] =
+      birth.split("-").map(Number);
+
+
+    let hour = 12;
+    let minute = 0;
+
+
+    if(!unknown.checked){
+
+      [hour,minute] =
+        timeInput.value
+        .split(":")
+        .map(Number);
+
+    }
+
+
+    const result =
+      manseryeok.calculateFourPillars({
+
+        year:year,
+        month:month,
+        day:day,
+
+        hour:hour,
+        minute:minute,
+
+        isLunar:lunar,
+
+        isLeapMonth:
+          lunar &&
+          document
+          .getElementById("leap")
+          .checked,
+
+        gender:gender
+
+      });
+
+
+    const pillars =
+      result.toObject();
+
+
+    document
+      .getElementById("resultTitle")
+      .innerText =
+      "🌸 " + name + "님의 사주 명식";
+
+
+    document
+      .getElementById("yearP")
+      .innerText =
+      pillars.year;
+
+
+    document
+      .getElementById("monthP")
+      .innerText =
+      pillars.month;
+
+
+    document
+      .getElementById("dayP")
+      .innerText =
+      pillars.day;
+
+
+    document
+      .getElementById("hourP")
+      .innerText =
+      unknown.checked
+      ? "미상"
+      : pillars.hour;
+
+
+    const element =
+      result.dayElement &&
+      result.dayElement.stem
+      ? result.dayElement.stem
+      : "-";
+
+
+    const yinYang =
+      result.dayYinYang &&
+      result.dayYinYang.stem
+      ? result.dayYinYang.stem
+      : "";
+
+
+    document
+      .getElementById("element")
+      .innerHTML =
+
+      "<strong>" +
+      name +
+      "님의 일간은 " +
+      pillars.day.charAt(0) +
+      "(" +
+      element +
+      ")입니다.</strong><br><br>" +
+
+      yinYang +
+      "의 " +
+      element +
+      " 기운을 중심으로 타고난 성향과 삶의 흐름을 읽습니다.";
+
+
+    const resultBox =
+      document.getElementById("result");
+
+
+    resultBox.style.display =
+      "block";
+
+
+    resultBox.scrollIntoView({
+      behavior:"smooth",
+      block:"start"
+    });
+
+
+  }catch(error){
+
+    alert(
+      "사주 계산 중 오류가 발생했습니다.\n\n" +
+      error.message
+    );
+
+    console.error(error);
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
