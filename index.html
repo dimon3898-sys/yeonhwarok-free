@@ -1,62 +1,112 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>연화록 무료 사주</title>
-  <style>
-    body{
-      margin:0;
-      font-family:Arial,sans-serif;
-      background:#f8f0ea;
-      color:#3a2b2b;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-height:100vh;
-      text-align:center;
-      padding:24px;
-      box-sizing:border-box;
-    }
-    .card{
-      width:100%;
-      max-width:420px;
-      background:white;
-      border-radius:24px;
-      padding:32px 24px;
-      box-shadow:0 10px 30px rgba(0,0,0,.08);
-    }
-    h1{
-      margin:0 0 12px;
-      color:#7b2d2d;
-    }
-    p{
-      line-height:1.7;
-      margin:0;
-    }
-    .btn{
-      display:block;
-      margin-top:24px;
-      padding:16px;
-      border-radius:14px;
-      background:#7b2d2d;
-      color:white;
-      text-decoration:none;
-      font-weight:bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>🌸 연화록</h1>
-    <p>
-      무료 자동 사주 페이지<br>
-      연결 테스트 중입니다.
-    </p>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>연화록 만세력 테스트</title>
 
-    <a class="btn" href="#">
-      🔮 내 무료 연화록 펼쳐보기
-    </a>
-  </div>
-</body>
-</html>
+<style>
+body{
+  margin:0;
+  padding:25px;
+  background:#f8f0ea;
+  font-family:Arial,sans-serif;
+  color:#392929;
+}
+.wrap{
+  max-width:430px;
+  margin:auto;
+}
+.card{
+  background:#fff;
+  padding:25px;
+  border-radius:22px;
+  box-shadow:0 8px 25px rgba(0,0,0,.07);
+}
+h1{
+  color:#842f32;
+  text-align:center;
+}
+label{
+  display:block;
+  margin-top:18px;
+  font-weight:bold;
+}
+input{
+  width:100%;
+  padding:14px;
+  margin-top:7px;
+  box-sizing:border-box;
+  border:1px solid #ddd;
+  border-radius:12px;
+  font-size:16px;
+}
+button{
+  width:100%;
+  margin-top:22px;
+  padding:17px;
+  border:0;
+  border-radius:14px;
+  background:#842f32;
+  color:white;
+  font-size:17px;
+  font-weight:bold;
+}
+#result{
+  display:none;
+  margin-top:22px;
+  padding:20px;
+  background:#fff9f5;
+  border-radius:15px;
+  line-height:1.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+<div class="card">
+
+<h1>🌸 연화록</h1>
+<p style="text-align:center">
+만세력 계산 정확도 테스트
+</p>
+
+<label>생년월일</label>
+<input id="birth" type="date" value="1985-05-06">
+
+<label>태어난 시간</label>
+<input id="time" type="time" value="12:00">
+
+<button id="calculate">
+🔮 사주 계산하기
+</button>
+
+<div id="result"></div>
+
+</div>
+</div>
+
+<script type="module">
+
+import { calculateFourPillars }
+from "https://esm.sh/manseryeok@2";
+
+const btn = document.getElementById("calculate");
+const resultBox = document.getElementById("result");
+
+btn.addEventListener("click", () => {
+
+  try {
+
+    const birth = document.getElementById("birth").value;
+    const time = document.getElementById("time").value;
+
+    if (!birth || !time) {
+      alert("생년월일과 시간을 입력해주세요.");
+      return;
+    }
+
+    const [year, month, day] =
+      birth
