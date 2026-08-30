@@ -1,112 +1,148 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>연화록 만세력 테스트</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>연화록 만세력 테스트</title>
 
-<style>
-body{
-  margin:0;
-  padding:25px;
-  background:#f8f0ea;
-  font-family:Arial,sans-serif;
-  color:#392929;
-}
-.wrap{
-  max-width:430px;
-  margin:auto;
-}
-.card{
-  background:#fff;
-  padding:25px;
-  border-radius:22px;
-  box-shadow:0 8px 25px rgba(0,0,0,.07);
-}
-h1{
-  color:#842f32;
-  text-align:center;
-}
-label{
-  display:block;
-  margin-top:18px;
-  font-weight:bold;
-}
-input{
-  width:100%;
-  padding:14px;
-  margin-top:7px;
-  box-sizing:border-box;
-  border:1px solid #ddd;
-  border-radius:12px;
-  font-size:16px;
-}
-button{
-  width:100%;
-  margin-top:22px;
-  padding:17px;
-  border:0;
-  border-radius:14px;
-  background:#842f32;
-  color:white;
-  font-size:17px;
-  font-weight:bold;
-}
-#result{
-  display:none;
-  margin-top:22px;
-  padding:20px;
-  background:#fff9f5;
-  border-radius:15px;
-  line-height:1.8;
-}
-</style>
+  <style>
+    body{
+      margin:0;
+      padding:24px;
+      background:#f8f0ea;
+      font-family:Arial,sans-serif;
+      color:#392929;
+    }
+
+    .wrap{
+      max-width:430px;
+      margin:0 auto;
+    }
+
+    .card{
+      background:#fff;
+      padding:26px 22px;
+      border-radius:22px;
+      box-shadow:0 8px 25px rgba(0,0,0,.08);
+    }
+
+    h1{
+      text-align:center;
+      color:#842f32;
+      margin-bottom:8px;
+    }
+
+    .desc{
+      text-align:center;
+      line-height:1.6;
+      color:#665;
+    }
+
+    button{
+      width:100%;
+      padding:17px;
+      margin-top:22px;
+      border:0;
+      border-radius:14px;
+      background:#842f32;
+      color:#fff;
+      font-size:17px;
+      font-weight:bold;
+    }
+
+    #status,
+    #result{
+      margin-top:20px;
+      padding:18px;
+      border-radius:14px;
+      background:#fff8f4;
+      line-height:1.8;
+    }
+
+    #result{
+      display:none;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="wrap">
-<div class="card">
+  <div class="wrap">
+    <div class="card">
 
-<h1>🌸 연화록</h1>
-<p style="text-align:center">
-만세력 계산 정확도 테스트
-</p>
+      <h1>🌸 연화록</h1>
 
-<label>생년월일</label>
-<input id="birth" type="date" value="1985-05-06">
+      <p class="desc">
+        만세력 엔진 작동 테스트<br>
+        1985.05.06 · 12:00 기준
+      </p>
 
-<label>태어난 시간</label>
-<input id="time" type="time" value="12:00">
+      <div id="status">
+        ⏳ 만세력 엔진을 불러오는 중입니다...
+      </div>
 
-<button id="calculate">
-🔮 사주 계산하기
-</button>
+      <button id="calculate" disabled>
+        🔮 사주 계산하기
+      </button>
 
-<div id="result"></div>
+      <div id="result"></div>
 
-</div>
-</div>
+    </div>
+  </div>
 
-<script type="module">
+  <script type="module">
+    const statusBox = document.getElementById("status");
+    const resultBox = document.getElementById("result");
+    const button = document.getElementById("calculate");
 
-import { calculateFourPillars }
-from "https://esm.sh/manseryeok@2";
+    try {
+      const manseryeok =
+        await import("https://esm.sh/manseryeok@2.0.0?bundle");
 
-const btn = document.getElementById("calculate");
-const resultBox = document.getElementById("result");
+      statusBox.innerHTML = "✅ 만세력 엔진 연결 성공";
+      button.disabled = false;
 
-btn.addEventListener("click", () => {
+      button.addEventListener("click", () => {
+        try {
+          const result = manseryeok.calculateFourPillars({
+            year: 1985,
+            month: 5,
+            day: 6,
+            hour: 12,
+            minute: 0
+          });
 
-  try {
+          const pillars = result.toObject();
+          const hanja = result.toHanjaObject();
 
-    const birth = document.getElementById("birth").value;
-    const time = document.getElementById("time").value;
+          resultBox.style.display = "block";
 
-    if (!birth || !time) {
-      alert("생년월일과 시간을 입력해주세요.");
-      return;
+          resultBox.innerHTML = `
+            <strong>🌸 계산 성공</strong><br><br>
+
+            년주 : ${pillars.year} (${hanja.year})<br>
+            월주 : ${pillars.month} (${hanja.month})<br>
+            일주 : ${pillars.day} (${hanja.day})<br>
+            시주 : ${pillars.hour} (${hanja.hour})<br><br>
+
+            <strong>일간 오행</strong><br>
+            ${result.dayElement.stem}
+          `;
+
+        } catch(error) {
+          resultBox.style.display = "block";
+          resultBox.innerHTML =
+            "❌ 계산 오류<br>" + error.message;
+        }
+      });
+
+    } catch(error) {
+      statusBox.innerHTML =
+        "❌ 만세력 엔진 로딩 실패<br>" + error.message;
+
+      console.error(error);
     }
+  </script>
 
-    const [year, month, day] =
-      birth
+</body>
+</html>
