@@ -183,8 +183,6 @@ input,select{
 당신의 첫 번째 연화록은 무료입니다.
 </div>
 
-
-<!-- 입력 -->
 <div class="card">
 
 <div id="engine">⏳ 만세력 엔진 연결 중...</div>
@@ -239,8 +237,6 @@ input,select{
 
 </div>
 
-
-<!-- 결과 -->
 <div class="card" id="result">
 
 <div class="resultHead">
@@ -252,7 +248,6 @@ input,select{
 가장 먼저 눈에 들어오는 기운이 있어요.
 </p>
 </div>
-
 
 <div class="section">
 
@@ -281,9 +276,7 @@ input,select{
 </div>
 
 </div>
-
 </div>
-
 
 <div class="section">
 
@@ -292,7 +285,6 @@ input,select{
 <div class="highlight" id="dayMaster"></div>
 
 </div>
-
 
 <div class="section">
 
@@ -336,7 +328,6 @@ input,select{
 
 </div>
 
-
 <div class="section">
 
 <h3>💭 혹시 이런 모습 있지 않아요?</h3>
@@ -347,7 +338,6 @@ input,select{
 
 </div>
 
-
 <div class="section">
 
 <h3 id="interestTitle"></h3>
@@ -355,7 +345,6 @@ input,select{
 <div class="story" id="interestStory"></div>
 
 </div>
-
 
 <div class="section">
 
@@ -365,7 +354,6 @@ input,select{
 
 </div>
 
-
 <div class="section">
 
 <h3>🌙 연화가 한마디만 남길게요</h3>
@@ -373,7 +361,6 @@ input,select{
 <div class="highlight" id="yeonhwaWord"></div>
 
 </div>
-
 
 <div class="lock">
 
@@ -410,12 +397,11 @@ input,select{
 <div class="price">19,900원</div>
 
 <a class="cta"
-href="https://link.inpock.co.kr/yeonhwarok">
+href="https://tally.so/r/44VWKB">
 🔮 내 사주 끝까지 보기
 </a>
 
 </div>
-
 
 <div class="notice">
 
@@ -433,23 +419,13 @@ href="https://link.inpock.co.kr/yeonhwarok">
 
 </div>
 
-
 <script type="module">
-
-/* ==============================
-   기본 변수
-================================ */
 
 const engine=document.getElementById("engine");
 const calculate=document.getElementById("calculate");
 
 let manseryeok=null;
 let lunar=false;
-
-
-/* ==============================
-   만세력 엔진
-================================ */
 
 async function loadEngine(){
 
@@ -484,11 +460,6 @@ async function loadEngine(){
 
 loadEngine();
 
-
-/* ==============================
-   양력 / 음력
-================================ */
-
 const solarBtn=document.getElementById("solarBtn");
 const lunarBtn=document.getElementById("lunarBtn");
 const leapArea=document.getElementById("leapArea");
@@ -515,11 +486,6 @@ lunarBtn.addEventListener("click",()=>{
 
 });
 
-
-/* ==============================
-   시간 모름
-================================ */
-
 const unknown=document.getElementById("unknownTime");
 const timeInput=document.getElementById("time");
 
@@ -532,12 +498,6 @@ unknown.addEventListener("change",()=>{
  }
 
 });
-
-
-/* ==============================
-   천간 / 지지 오행
-   위치를 구분해서 계산
-================================ */
 
 const stemElements={
  갑:"목",
@@ -566,11 +526,6 @@ const branchElements={
  술:"토",
  해:"수"
 };
-
-
-/* ==============================
-   일간별 성향
-================================ */
 
 const personality={
 
@@ -633,428 +588,4 @@ const personality={
 임:{
  title:"한곳에 머물기보다 흐름을 읽는 사람",
  text:
- "생각의 폭이 넓고 새로운 정보나 사람을 받아들이는 힘이 있어요. 하나의 답만 고집하기보다 여러 가능성을 보는 편이에요. 대신 생각이 너무 넓어지면 무엇부터 시작해야 할지 결정이 늦어질 수 있어요.",
- tags:["확장성","통찰","정보력","유연함"]
-},
-
-계:{
- title:"겉보다 속에서 생각이 훨씬 많이 움직이는 사람",
- text:
- "말로 다 표현하지 않아도 마음속에서는 여러 생각이 오가는 편이에요. 사람의 감정이나 분위기도 세심하게 읽어요. 다만 혼자 생각하는 시간이 길어지면 아직 일어나지도 않은 일까지 걱정할 수 있어요.",
- tags:["직관","감수성","관찰력","내면"]
-}
-
-};
-
-
-/* ==============================
-   관심 분야
-================================ */
-
-function getInterestText(type,name){
-
- const texts={
-
- overall:
- `${name}님은 지금 당장 모든 답을 정하는 것보다,
- 이상하게 계속 마음이 가는 것과 반복해서 막히는 것을 함께 살펴보는 게 좋아요.<br><br>
- 잘되는 것만 보는 것보다 <strong>나는 어떤 상황에서 힘이 살아나고,
- 어떤 상황에서 유독 지치는지</strong>를 알아가는 게 더 중요해요.
- 그 패턴을 알게 되면 선택도 조금씩 쉬워질 수 있어요.`,
-
- money:
- `${name}님의 돈 이야기는 단순히 '재물운이 있다, 없다'로만 보기엔 아쉬워요.<br><br>
- 중요한 건 <strong>돈을 어떤 방식으로 만들고,
- 들어온 돈을 어떤 방식으로 지키는가</strong>예요.
- 새로운 기회가 보일 때 금액부터 보기보다
- '이 방식을 내가 반복할 수 있는가?'를 한번 같이 보세요.<br><br>
- 한 번의 큰 결과보다 내가 계속 만들어낼 수 있는 구조가 생겼을 때
- 돈에 대한 불안도 조금씩 줄어들 수 있어요.`,
-
- love:
- `${name}님은 관계에서 상대가 하는 말만 보는 게 아니라
- <strong>그 말에 담긴 태도와 분위기까지 함께 보는 편</strong>일 수 있어요.<br><br>
- 마음이 생긴 사람에게 쉽게 무심해지지는 않지만,
- 서운한 일이 생겼을 때 바로 말하기보다
- '이 정도는 그냥 넘어가자' 하고 한번 삼킬 때도 있어요.<br><br>
- 그런데 그게 몇 번 쌓이면 어느 순간 마음이 확 멀어질 수 있어요.
- 관계에서 중요한 건 얼마나 많이 참느냐보다
- <strong>'나는 이럴 때 마음이 상해'</strong>를 너무 늦기 전에 말하는 거예요.`,
-
- career:
- `${name}님에게 일은 단순히 월급만 받는 공간으로 끝나지 않을 가능성이 있어요.<br><br>
- 내가 납득할 수 있는 방식,
- 성장하고 있다는 느낌,
- 그리고 어느 정도의 주도권이 중요하게 작용할 수 있어요.<br><br>
- 일이 답답해질 때 바로 '이 일을 그만둬야 하나?'라고 생각하기보다
- <strong>업무 자체가 싫은 건지, 환경이 싫은 건지,
- 성장하지 않는 느낌이 싫은 건지</strong>부터 나눠보세요.`,
-
- relation:
- `${name}님은 모든 사람과 넓게 가까워지기보다
- <strong>내 사람이라고 느끼는 관계에 더 깊게 마음을 쓰는 편</strong>일 수 있어요.<br><br>
- 한번 신뢰가 생기면 오래 가지만,
- 기대했던 사람에게 실망했을 때는 마음을 닫는 속도도 빨라질 수 있어요.<br><br>
- 상대를 이해하는 것과 계속 참아주는 것은 다른 일이에요.
- 관계를 오래 가져가고 싶을수록 내 기준도 함께 지켜주세요.`
-
- };
-
- return texts[type] || texts.overall;
-
-}
-
-
-/* ==============================
-   오행별 한마디
-================================ */
-
-const adviceTexts={
-
-목:
-"지금은 결과를 빨리 만들려고 하기보다, 계속 키워갈 수 있는 걸 하나 정해보세요. 작아 보여도 오래 이어지는 선택이 결국 당신 편이 될 수 있어요.",
-
-화:
-"마음이 움직였을 때의 추진력은 좋은 힘이에요. 다만 오래 가져가고 싶은 일이라면 시작할 때의 열정만큼 속도를 조절하는 힘도 중요해요.",
-
-토:
-"버틸 수 있다는 이유만으로 모든 걸 혼자 떠안지는 마세요. 무엇을 더 해야 하는지보다 무엇을 내려놔도 되는지 보는 것도 필요해요.",
-
-금:
-"분명한 기준은 큰 장점이에요. 다만 모든 상황에 정답이 있는 건 아니에요. 때로는 맞고 틀림보다 나와 상대가 무엇을 느끼는지 먼저 보는 것도 좋아요.",
-
-수:
-"생각이 많다는 건 여러 길을 볼 수 있다는 뜻이기도 해요. 답이 안 보일 때 생각을 하나 더 보태기보다 아주 작은 행동 하나를 먼저 해보세요."
-
-};
-
-
-/* ==============================
-   계산
-================================ */
-
-calculate.addEventListener("click",()=>{
-
- try{
-
- const name=
- document.getElementById("name").value.trim();
-
- const birth=
- document.getElementById("birth").value;
-
- const gender=
- document.getElementById("gender").value;
-
- const interest=
- document.getElementById("interest").value;
-
-
- if(!name){
-   alert("이름 또는 닉네임을 입력해주세요.");
-   return;
- }
-
- if(!birth){
-   alert("생년월일을 입력해주세요.");
-   return;
- }
-
- if(!unknown.checked && !timeInput.value){
-   alert("태어난 시간을 입력하거나 '모릅니다'를 선택해주세요.");
-   return;
- }
-
-
- const [year,month,day]=
- birth.split("-").map(Number);
-
-
- let hour=12;
- let minute=0;
-
-
- if(!unknown.checked){
-
-   [hour,minute]=
-   timeInput.value
-   .split(":")
-   .map(Number);
-
- }
-
-
- const r=
- manseryeok.calculateFourPillars({
-
-   year,
-   month,
-   day,
-   hour,
-   minute,
-
-   isLunar:lunar,
-
-   isLeapMonth:
-   lunar &&
-   document.getElementById("leap").checked,
-
-   gender
-
- });
-
-
- const p=r.toObject();
-
-
- /* 명식 */
-
- document.getElementById("resultTitle").innerText=
- name+"님의 무료 연화록";
-
-
- document.getElementById("yearP").innerText=p.year;
- document.getElementById("monthP").innerText=p.month;
- document.getElementById("dayP").innerText=p.day;
-
- document.getElementById("hourP").innerText=
- unknown.checked ? "미상" : p.hour;
-
-
- /* 일간 */
-
- const dayStem=p.day.charAt(0);
-
- const dayElement=
- stemElements[dayStem] || "";
-
-
- const person=
- personality[dayStem];
-
-
- document.getElementById("dayMaster").innerHTML=
-
- `<strong>${name}님을 나타내는 일간은
- ${dayStem} · ${dayElement}의 기운이에요.</strong><br><br>
-
- ${person ? person.title : "당신만의 중심 기운을 가지고 있어요."}`;
-
-
- /* 오행 계산 */
-
- const counts={
- 목:0,
- 화:0,
- 토:0,
- 금:0,
- 수:0
- };
-
-
- let pillars=[
- p.year,
- p.month,
- p.day
- ];
-
-
- if(!unknown.checked){
-   pillars.push(p.hour);
- }
-
-
- pillars.forEach(pillar=>{
-
-   if(!pillar || pillar.length<2)return;
-
-   const stem=pillar.charAt(0);
-   const branch=pillar.charAt(1);
-
-   const stemEl=stemElements[stem];
-   const branchEl=branchElements[branch];
-
-   if(stemEl)counts[stemEl]++;
-   if(branchEl)counts[branchEl]++;
-
- });
-
-
- const total=
- Object.values(counts)
- .reduce((a,b)=>a+b,0);
-
-
- const ids={
- 목:["woodN","woodB"],
- 화:["fireN","fireB"],
- 토:["earthN","earthB"],
- 금:["metalN","metalB"],
- 수:["waterN","waterB"]
- };
-
-
- Object.keys(ids).forEach(el=>{
-
-   document
-   .getElementById(ids[el][0])
-   .innerText=counts[el];
-
-
-   const percent=
-   total ? counts[el]/total*100 : 0;
-
-
-   document
-   .getElementById(ids[el][1])
-   .style.width=percent+"%";
-
- });
-
-
- const entries=
- Object.entries(counts);
-
-
- const max=
- Math.max(...entries.map(x=>x[1]));
-
-
- const min=
- Math.min(...entries.map(x=>x[1]));
-
-
- const strong=
- entries
- .filter(x=>x[1]===max)
- .map(x=>x[0]);
-
-
- const weak=
- entries
- .filter(x=>x[1]===min)
- .map(x=>x[0]);
-
-
- document.getElementById("elementStory").innerHTML=
-
- `겉으로 드러난 글자들을 먼저 보면
- <strong>${strong.join("·")}</strong> 기운이 비교적 많이 보이고,
- <strong>${weak.join("·")}</strong> 기운은 상대적으로 적게 보여요.<br><br>
-
- 그런데 여기서 중요한 게 하나 있어요.
- 숫자가 많다고 무조건 강하고,
- 적다고 무조건 나쁜 건 아니에요.
- 태어난 계절과 다른 글자들이 서로 어떻게 만나는지까지 봐야
- 사주의 전체 균형이 보이거든요.`;
-
-
- /* 성향 */
-
- if(person){
-
- document.getElementById("personality").innerHTML=
-
- `<strong>${person.title}</strong><br><br>
- ${person.text}`;
-
-
- document.getElementById("tags").innerHTML=
-
- person.tags
- .map(tag=>`<span class="tag">#${tag}</span>`)
- .join("");
-
- }
-
-
- /* 관심 분야 */
-
- const titles={
-
- overall:"🌸 전체적인 나의 흐름",
- money:"💰 돈 · 재물 이야기",
- love:"❤️ 연애 · 인연 이야기",
- career:"💼 직업 · 일 이야기",
- relation:"🤝 인간관계 이야기"
-
- };
-
-
- document.getElementById("interestTitle").innerText=
- titles[interest];
-
-
- document.getElementById("interestStory").innerHTML=
- getInterestText(interest,name);
-
-
- /* 기억할 것 */
-
- document.getElementById("advice").innerHTML=
-
- `<strong>${name}님에게 지금 필요한 건
- '${dayElement}의 힘을 어떻게 쓰느냐'예요.</strong><br><br>
-
- ${adviceTexts[dayElement] || ""}`;
-
-
- /* 연화 한마디 */
-
- const finalWords={
-
- 목:
- "빨리 피는 것보다 오래 자라는 쪽이 당신에게 더 잘 맞을 수 있어요. 지금 조금 느려 보여도 뿌리를 내리는 시간을 가볍게 보지 마세요.",
-
- 화:
- "마음이 움직이는 순간은 소중해요. 다만 모든 불꽃을 끝까지 태울 필요는 없어요. 정말 남기고 싶은 것에 힘을 써보세요.",
-
- 토:
- "당신이 버텨온 시간이 있다는 걸 알아주세요. 이제는 무조건 견디는 것보다 무엇을 지킬지 선택하는 것도 필요해요.",
-
- 금:
- "기준이 있다는 건 좋은 일이에요. 다만 그 기준이 나까지 힘들게 하고 있지는 않은지 가끔은 돌아봐도 괜찮아요.",
-
- 수:
- "생각 속에서 답을 다 찾으려고 하지 않아도 괜찮아요. 작은 움직임 하나가 생각보다 많은 걸 알려줄 때가 있어요."
-
- };
-
-
- document.getElementById("yeonhwaWord").innerHTML=
-
- `<strong>“${finalWords[dayElement] || "당신의 속도를 너무 쉽게 의심하지 마세요."}”</strong>`;
-
-
- /* 결과 표시 */
-
- const result=
- document.getElementById("result");
-
-
- result.style.display="block";
-
-
- result.scrollIntoView({
-   behavior:"smooth",
-   block:"start"
- });
-
-
- }catch(error){
-
-   alert(
-   "사주 계산 중 오류가 발생했습니다.\n\n"+
-   error.message
-   );
-
-   console.error(error);
-
- }
-
-});
-
-</script>
-
-</body>
-</html>
+ "생각의 폭이 넓고 새로운 정보나 사람을 받아들이는 힘이 있어요. 하나의 답만 고집하기보다
