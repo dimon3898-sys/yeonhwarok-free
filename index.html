@@ -38,7 +38,8 @@ h1{
  text-align:center;
  color:#796963;
  line-height:1.7;
- margin-bottom:25px;
+ margin:0 auto 25px;
+ max-width:390px;
 }
 
 .card{
@@ -116,7 +117,7 @@ select{
  opacity:.45;
 }
 
-#engine{
+.engineStatus{
  background:#fff8f3;
  padding:12px;
  border-radius:12px;
@@ -124,6 +125,10 @@ select{
  color:#705d56;
  font-size:14px;
  margin-bottom:16px;
+}
+
+.engineStatus.ready{
+ display:none;
 }
 
 #result{
@@ -149,6 +154,22 @@ select{
  color:#88736c;
  margin:0;
  line-height:1.7;
+}
+
+.firstReading{
+ background:#fff8f3;
+ border:1px solid #f0ded5;
+ border-radius:18px;
+ padding:20px 18px;
+ line-height:1.9;
+ color:#4d3b37;
+}
+
+.firstReading .eyebrow{
+ display:block;
+ color:#8b3033;
+ font-weight:800;
+ margin-bottom:8px;
 }
 
 .section{
@@ -278,6 +299,18 @@ select{
  color:#f0e3dd;
 }
 
+.lockLead{
+ font-size:17px;
+ color:#fff7f2 !important;
+}
+
+.paidQuestion{
+ padding:15px 16px;
+ border-left:3px solid #d99b83;
+ background:rgba(255,255,255,.06);
+ border-radius:0 12px 12px 0;
+}
+
 .productBox{
  background:rgba(255,255,255,.07);
  border:1px solid rgba(255,255,255,.10);
@@ -310,10 +343,18 @@ select{
 }
 
 .notice{
- font-size:11px;
+ font-size:13px;
  color:#94807a;
  line-height:1.7;
  margin-top:20px;
+}
+
+@media (max-width:380px){
+ .wrap{padding:22px 14px 56px}
+ .card{padding:22px 17px}
+ h1{font-size:31px}
+ .pillars{gap:5px}
+ .pillar strong{font-size:16px}
 }
 </style>
 </head>
@@ -328,13 +369,19 @@ select{
 
 <div class="subtitle">
 나를 읽는 사주 기록<br>
-당신의 첫 번째 연화록은 무료입니다.
+<br>
+생년월일 속에 담긴<br>
+나의 기본 사주부터 펼쳐볼게요.<br><br>
+타고난 기운과 성향,<br>
+그리고 지금 궁금한 이야기의 실마리를<br>
+연화가 함께 살펴봐드릴게요.<br><br>
+첫 번째 연화록은 무료입니다.
 </div>
 
 
 <div class="card">
 
-<div id="engine">⏳ 만세력 엔진 연결 중...</div>
+<div id="engine" class="engineStatus" role="status">잠시만 기다려주세요. 사주를 펼칠 준비를 하고 있어요.</div>
 
 
 <label>이름 또는 닉네임</label>
@@ -380,14 +427,15 @@ select{
 </label>
 
 
-<label>지금 가장 궁금한 이야기</label>
+<label>지금 가장 궁금한 이야기는 무엇인가요?</label>
 
 <select id="interest">
-<option value="overall">전체적인 나의 흐름</option>
-<option value="money">돈 · 재물</option>
-<option value="love">연애 · 인연</option>
-<option value="career">직업 · 일</option>
-<option value="relation">인간관계</option>
+<option value="money">💰 재물·돈</option>
+<option value="love">💕 연애·인연</option>
+<option value="career">💼 직장·사업</option>
+<option value="family">🏠 가족·자녀</option>
+<option value="health">🌿 건강·생활 흐름</option>
+<option value="overall">🌸 전체적인 나의 흐름</option>
 </select>
 
 
@@ -408,10 +456,12 @@ select{
 <h2 id="resultTitle"></h2>
 
 <p>
-당신의 사주에서 먼저 보이는 이야기를 펼쳐봤어요.
+연화가 명식을 펼쳐보고 먼저 보이는 부분부터 말씀드릴게요.
 </p>
 
 </div>
+
+<div class="firstReading" id="firstReading"></div>
 
 
 <div class="section">
@@ -553,46 +603,48 @@ select{
 <h3>🔒 아직 펼치지 않은 이야기가 있어요</h3>
 
 <p>
-무료 연화록에서는 당신의 사주에서 가장 먼저 보이는 부분까지만 펼쳐봤어요.
-그런데 사주는 같은 일간이라도 다른 글자들과 어떻게 만나느냐에 따라 이야기가 달라져요.
+<span id="freeSummaryName"></span>님이 지금 본 것은 타고난 명식과 중심 기운,
+겉으로 드러난 오행, 그리고 기본적인 성향이에요.
 </p>
-
-<ul>
-<li>내가 일에서 반복하는 패턴</li>
-<li>돈을 대하고 움직이는 방식</li>
-<li>관계에서 유독 마음이 쓰이는 지점</li>
-<li>내가 잘 모르고 지나치는 약점과 강점</li>
-<li>앞으로 가까이하면 좋은 것과 조심하면 좋은 것</li>
-<li>연화가 남기는 나만의 작은 처방</li>
-</ul>
 
 <p>
-<strong>정식 연화록</strong>에서는
-당신의 명식 전체를 하나의 이야기처럼 이어서 풀어드려요.
+하지만 사주는 일간 하나나 오행 숫자만으로 한 사람 전체를 설명하지는 않아요.
+같은 일간을 가진 사람도 다른 글자들이 어떻게 만나느냐에 따라 실제 삶에서 나타나는 모습은 달라질 수 있어요.
 </p>
 
+<p class="lockLead">
+<strong>정식 연화록</strong>에서는 각각을 따로 보는 대신,
+<span id="paidName"></span>님의 명식 전체를 연결해 한 사람의 이야기처럼 풀어갑니다.
+</p>
 
-<div class="productBox">
+<p class="paidQuestion" id="paidQuestion"></p>
 
-📖 <strong>10,000자 상세 이야기 연화록</strong><br>
+<h3 style="margin-top:26px">🌸 나만의 정식 연화록</h3>
 
-📱 <strong>이름이 들어간 SNS 공유 사주카드</strong>
-
-</div>
-
+<p>
+무료 연화록에서 확인한 기본 명식을 바탕으로,
+각각의 기운이 <span id="productName"></span>님의 삶에서 어떻게 이어지는지 하나의 이야기처럼 자세히 풀어드립니다.
+</p>
 
 <div class="price">
 19,900원
 </div>
 
-
 <a
  class="cta"
  href="https://tally.so/r/44VWKB">
 
-🔮 내 사주 끝까지 보기
+🌸 나만의 정식 연화록 펼쳐보기
 
 </a>
+
+<div class="productBox">
+
+✓ <strong>약 10,000자 상세 이야기</strong><br>
+
+✓ <strong>이름이 들어간 SNS 공유 사주카드</strong>
+
+</div>
 
 </div>
 
@@ -648,8 +700,8 @@ async function loadEngine(){
   }
 
 
-  engine.innerHTML =
-  "✅ 만세력 연결 완료";
+  engine.innerHTML = "";
+  engine.classList.add("ready");
 
   calculate.disabled = false;
 
@@ -782,6 +834,19 @@ const stemElement = {
  임:"수",
  계:"수"
 
+};
+
+const stemNames = {
+ 갑:"갑목(甲木)",
+ 을:"을목(乙木)",
+ 병:"병화(丙火)",
+ 정:"정화(丁火)",
+ 무:"무토(戊土)",
+ 기:"기토(己土)",
+ 경:"경금(庚金)",
+ 신:"신금(辛金)",
+ 임:"임수(壬水)",
+ 계:"계수(癸水)"
 };
 
 
@@ -977,37 +1042,44 @@ const personalities = {
 
 const interestTexts = {
 
-overall:(name,stem)=>{
+overall:(name,pers)=>{
 
- return `${name}님은 자신의 방식과 속도를 찾았을 때 힘이 더 잘 살아나는 편이에요. 지금 모든 답을 한 번에 정하려 하기보다, 반복해서 마음이 가는 것과 이상하게 계속 막히는 것을 함께 살펴보세요. 사주는 ‘무엇을 해야 한다’는 정답보다 내가 어떤 방식에서 힘을 얻고 소모되는지를 보는 데 더 도움이 될 수 있어요.`;
-
-},
-
-
-money:(name,stem)=>{
-
- return `${name}님의 재물 이야기는 단순히 ‘돈복이 있다, 없다’로 보기보다 돈을 어떤 방식으로 만들고 지키는지를 함께 보는 게 중요해요. 특히 새로운 기회가 보일 때 금액부터 보기보다 ‘이걸 반복할 수 있는가’를 먼저 확인해보세요. 한 번의 큰 결과보다 내가 계속 만들어낼 수 있는 구조가 생길 때 돈에 대한 불안도 함께 줄어들 수 있어요.`;
+ return `무료 분석에서 먼저 확인되는 건 <strong>${pers.tags[0]}</strong>과 <strong>${pers.tags[1]}</strong>의 성향이에요. 지금 본 일간과 오행, 기본 성향은 ${name}님을 이해하는 출발점이에요. 다만 각각의 기운이 실제로 어떻게 연결되는지는 명식 전체를 함께 봐야 해요.`;
 
 },
 
 
-love:(name,stem)=>{
+money:(name,pers)=>{
 
- return `${name}님은 관계에서 상대가 하는 말 자체보다 그 안의 태도와 분위기를 함께 보는 편일 수 있어요. 마음이 생기면 쉽게 무심해지지는 않지만, 서운한 일을 바로 꺼내기보다 한번 안으로 삼키는 순간도 생길 수 있어요. 관계에서 중요한 건 참는 횟수가 아니라 ‘나는 이럴 때 마음이 상한다’를 너무 늦기 전에 말하는 거예요.`;
-
-},
-
-
-career:(name,stem)=>{
-
- return `${name}님에게 일은 단순히 월급만 받는 공간으로 끝나지 않을 가능성이 있어요. 내가 납득할 수 있는 방식, 성장하고 있다는 느낌, 그리고 어느 정도의 주도권이 중요하게 작용할 수 있어요. 답답함이 반복될 때 무조건 그만두기보다 ‘업무가 싫은지, 환경이 싫은지, 성장하지 않는 느낌이 싫은지’를 먼저 나눠보세요.`;
+ return `앞에서 확인한 <strong>${pers.tags[0]}</strong>과 <strong>${pers.tags[1]}</strong>의 성향은 돈을 판단하고 움직이는 방식에도 영향을 줄 수 있는 부분이에요. 다만 실제 재물의 흐름을 일간 하나나 오행 숫자만으로 단정하지는 않아요.`;
 
 },
 
 
-relation:(name,stem)=>{
+love:(name,pers)=>{
 
- return `${name}님은 모든 사람과 가까워지기보다 내 사람이라고 느끼는 관계에 더 마음을 쓰는 편일 수 있어요. 그래서 한번 신뢰가 생기면 오래 가지만 반대로 기대가 컸던 관계에서 실망하면 마음을 닫는 속도도 빨라질 수 있어요. 사람을 이해하는 것과 계속 참아주는 것은 다른 일이라는 걸 기억해두면 좋아요.`;
+ return `기본 성향에서 보이는 <strong>${pers.tags[0]}</strong>과 <strong>${pers.tags[1]}</strong>은 관계 안에서 마음을 쓰는 방식과도 이어질 수 있어요. 다만 실제 관계의 흐름은 일간만 떼어 보기보다 명식 전체를 함께 살펴야 해요.`;
+
+},
+
+
+career:(name,pers)=>{
+
+ return `앞에서 본 <strong>${pers.tags[0]}</strong>과 <strong>${pers.tags[1]}</strong>의 성향은 일을 대하고 결정하는 방식에서도 나타날 수 있어요. 이것은 직업의 성공 여부를 뜻하는 예측이 아니라, 현재 명식에서 확인한 기본 성향을 일의 관점에서 다시 본 설명이에요.`;
+
+},
+
+
+family:(name,pers)=>{
+
+ return `무료 분석에서 확인한 <strong>${pers.tags[0]}</strong>과 <strong>${pers.tags[1]}</strong>의 성향을 보면, 가까운 사람에게 어떤 방식으로 마음과 힘을 쓰는지 살펴볼 실마리가 돼요. 가족 안에서의 구체적인 모습은 다른 글자들과의 관계까지 함께 봐야 해요.`;
+
+},
+
+
+health:(name,pers)=>{
+
+ return `앞에서 확인한 <strong>${pers.tags[0]}</strong>과 <strong>${pers.tags[1]}</strong>은 일상에서 힘을 쓰는 방식을 돌아보는 실마리가 될 수 있어요. 여기서는 질병이나 의학적 상태를 예측하지 않고, 현재 확인된 기본 성향만 생활의 관점에서 연결해 말씀드려요.`;
 
 }
 
@@ -1034,6 +1106,15 @@ const yeonhwaWords = {
  수:
  "생각이 많다는 건 그만큼 여러 길을 볼 수 있다는 뜻이기도 해요. 답이 보이지 않을 때는 생각을 하나 더 하기보다 아주 작게 움직여보세요."
 
+};
+
+const paidQuestions = {
+ money:(name)=>`그렇다면 ${name}님의 기본 성향은 돈을 대하는 모습과는 어떻게 이어질까요?`,
+ love:(name)=>`그렇다면 ${name}님의 기본 성향은 관계 안에서는 어떻게 나타날까요?`,
+ career:(name)=>`그렇다면 ${name}님은 일할 때 어떤 방식으로 자신의 힘을 쓰는 편일까요?`,
+ family:(name)=>`그렇다면 ${name}님의 관계 성향은 가족 안에서는 어떻게 나타날까요?`,
+ health:(name)=>`그렇다면 ${name}님은 일상에서 어떤 방식으로 힘을 쓰고 균형을 잡는 편일까요?`,
+ overall:(name)=>`그렇다면 지금 본 각각의 기운은 ${name}님의 전체 사주에서 어떻게 하나의 이야기로 이어질까요?`
 };
 
 
@@ -1210,10 +1291,10 @@ try{
   "dayMaster"
  ).innerHTML =
 
- `<strong>${name}님을 나타내는 일간은 ${stem || "알 수 없음"} · ${dayElement || "기운"}이에요.</strong><br><br>
- ${pers
-  ? pers.title
-  : "당신만의 중심 기운을 가지고 있어요."
+ `<strong>${name}님을 나타내는 중심 기운은 ${stemNames[stem] || `${stem || "알 수 없음"} · ${dayElement || "기운"}`}예요.</strong><br><br>
+ 쉽게 말하면 ${pers
+  ? pers.title + "이라고 볼 수 있어요."
+  : "타고난 성향의 중심을 보여주는 기운이에요."
  }`;
 
 
@@ -1388,10 +1469,25 @@ try{
   "elementStory"
  ).innerHTML =
 
- `겉으로 드러난 여덟 글자를 보면 <strong>${strong.join("·")}</strong> 기운이 비교적 많이 보이고,
+ `겉으로 드러난 ${unknown.checked ? "세 기둥" : "네 기둥"}을 보면 <strong>${strong.join("·")}</strong> 기운이 비교적 많이 보이고,
  <strong>${weak.join("·")}</strong> 기운은 상대적으로 적게 보여요.<br><br>
- 다만 이것만으로 사주의 강약 전체를 단정하지는 않아요.
- 계절과 월령, 글자들 사이의 관계까지 함께 봐야 더 깊은 이야기가 나오거든요.`;
+ 다만 이 숫자만으로 사주 전체의 강약이나 좋고 나쁨을 단정할 수는 없어요.
+ 계절과 월령, 글자들 사이의 관계까지 함께 봐야 하기 때문이에요.`;
+
+
+ const firstSentence = pers
+ ? pers.text.split(".")[0] + "."
+ : "중심 기운을 기준으로 기본 성향을 살펴볼 수 있어요.";
+
+ document.getElementById(
+  "firstReading"
+ ).innerHTML =
+ `<span class="eyebrow">연화의 첫 해석</span>
+ ${name}님, 사주를 펼쳐보니 먼저 중심 기운이 눈에 들어와요.<br><br>
+ ${name}님을 나타내는 일간은 <strong>${stemNames[stem] || stem}</strong>예요.
+ 쉽게 말하면 ${firstSentence}<br><br>
+ 겉으로 드러난 오행에서는 <strong>${strong.join("·")}</strong> 기운이 비교적 많이 보여요.
+ 아래에서 하나씩 어렵지 않게 설명해드릴게요.`;
 
 
 
@@ -1434,19 +1530,22 @@ try{
  const interestNames = {
 
   overall:
-  "🌸 전체적인 나의 흐름",
+  "🌸 전체적인 흐름이 궁금하셨죠",
 
   money:
-  "💰 돈 · 재물 이야기",
+  "💰 돈 이야기가 가장 궁금하셨죠",
 
   love:
-  "❤️ 연애 · 인연 이야기",
+  "💕 인연 이야기가 가장 궁금하셨죠",
 
   career:
-  "💼 직업 · 일 이야기",
+  "💼 일 이야기가 가장 궁금하셨죠",
 
-  relation:
-  "🤝 인간관계 이야기"
+  family:
+  "🏠 가족 이야기가 가장 궁금하셨죠",
+
+  health:
+  "🌿 생활의 흐름이 가장 궁금하셨죠"
 
  };
 
@@ -1466,8 +1565,8 @@ try{
 
 
  const storyText =
- typeof storyFunction === "function"
- ? storyFunction(name,stem)
+ typeof storyFunction === "function" && pers
+ ? storyFunction(name,pers)
  : "선택하신 이야기를 불러오지 못했어요.";
 
 
@@ -1485,11 +1584,22 @@ try{
   "yeonhwaWord"
  ).innerHTML =
 
- `<strong>“${
+ `<strong>${name}님에게 먼저 보이는 건 ${pers ? `${pers.tags[0]}과 ${pers.tags[1]}` : "자신만의 중심"}이에요.</strong><br><br>${
   yeonhwaWords[dayElement]
   ||
-  "당신의 속도를 너무 쉽게 의심하지 마세요."
- }”</strong>`;
+  "앞에서 확인한 기본 성향을 자신의 생활과 천천히 연결해보세요."
+ }`;
+
+
+ ["freeSummaryName","paidName","productName"]
+ .forEach(id=>{
+  document.getElementById(id).innerText = name;
+ });
+
+ document.getElementById("paidQuestion").innerText =
+ paidQuestions[interest]
+ ? paidQuestions[interest](name)
+ : paidQuestions.overall(name);
 
 
 
