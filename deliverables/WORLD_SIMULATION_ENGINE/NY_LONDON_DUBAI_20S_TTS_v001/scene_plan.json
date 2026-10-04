@@ -1,0 +1,4787 @@
+{
+  "schema_version": "1.0",
+  "project_id": "project_21a865e0dc8d",
+  "version": "v001",
+  "duration": 20.0,
+  "request": {
+    "topic": "뉴욕에서 런던을 거쳐 두바이까지 이어지는 항공 여행",
+    "duration": 20.0,
+    "style": "긴장감 있는 세계 시뮬레이션",
+    "quality": "HIGH",
+    "tts": true,
+    "subtitles": true,
+    "bgm": true,
+    "style_profile": "tension"
+  },
+  "options": {
+    "tts": true,
+    "subtitles": true,
+    "bgm": true,
+    "quality": "HIGH"
+  },
+  "story": {
+    "hook": "뉴욕 → 런던 → 두바이 · 하나의 여정?",
+    "claims": [
+      {
+        "id": "F01",
+        "text": "New York의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F02",
+        "text": "London의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F03",
+        "text": "Dubai의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "FD01",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 5,570 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "FD02",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 5,473 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "A01",
+        "text": "입력한 도시 연결과 화면의 이동 시간은 시각화를 위한 가정입니다. 실제 항공편 일정이나 성능 예측이 아닙니다.",
+        "status": "ASSUMPTION",
+        "source_ids": [],
+        "scope": "scenario premise"
+      },
+      {
+        "id": "M01",
+        "text": "검증된 위치를 연결하는 구면 경로의 공간적 차이와 연결망을 시각화합니다.",
+        "status": "SIMULATION",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "assumption_ids": [
+          "A01"
+        ],
+        "scope": "visualization only"
+      }
+    ],
+    "beats": [
+      {
+        "scene_id": "S001",
+        "role": "hook",
+        "cause": null,
+        "summary": "hook: New York"
+      },
+      {
+        "scene_id": "S002",
+        "role": "progression",
+        "cause": "S001",
+        "summary": "progression: London"
+      },
+      {
+        "scene_id": "S003",
+        "role": "variable",
+        "cause": "S002",
+        "summary": "variable: Dubai"
+      },
+      {
+        "scene_id": "S004",
+        "role": "peak",
+        "cause": "S003",
+        "summary": "peak: Dubai"
+      },
+      {
+        "scene_id": "S005",
+        "role": "payoff",
+        "cause": "S004",
+        "summary": "payoff: Dubai"
+      }
+    ],
+    "domain": "aviation",
+    "planner": "offline-capability-bounded-v1",
+    "conclusion": "검증된 위치를 연결하는 구면 경로의 공간적 차이와 연결망을 시각화합니다.",
+    "limitations": [
+      "사실은 공개 GIS의 위치·형태·경로 자료에 한정합니다.",
+      "이동 속도·항로 선택·폐쇄의 결과는 가정 기반 시각화이며 예측이 아닙니다."
+    ],
+    "pattern": "journey-network-reveal"
+  },
+  "scenes": [
+    {
+      "hook": "뉴욕 → 런던 → 두바이 · 하나의 여정?",
+      "scene_id": "S001",
+      "start_time": 0.0,
+      "duration": 4.0,
+      "scene_type": "EARTH_ESTABLISH",
+      "narration": "뉴욕 → 런던 → 두바이 · 하나의 여정?",
+      "location": "New York",
+      "coordinates": {
+        "lon": -73.995718,
+        "lat": 40.721562,
+        "source_id": "natural_earth_places",
+        "location_id": "new_york"
+      },
+      "geographic_targets": [
+        "new_york"
+      ],
+      "camera_preset": "FAST_HOOK_DIVE",
+      "camera_start": {
+        "height": 1.8,
+        "tilt": 0.35,
+        "yaw": -0.26,
+        "bank": 0.015,
+        "fov": 43,
+        "lon": -73.995718,
+        "lat": 40.721562,
+        "target_lon": -73.995718,
+        "target_lat": 40.721562,
+        "location_id": "new_york"
+      },
+      "camera_end": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": -53.03845617111972,
+        "lat": 49.79057978143735,
+        "target_lon": -53.03845617111972,
+        "target_lat": 49.79057978143735
+      },
+      "camera_speed": 1.8,
+      "camera_easing": "quintic_out",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "new_york",
+          "action": "move",
+          "start_time": 1.5,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -73.995718,
+              "lat": 40.721562,
+              "source_id": "natural_earth_places",
+              "location_id": "new_york"
+            },
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5569.74,
+          "description": "New York → London",
+          "start_time": 1.3,
+          "end_time": 4.0,
+          "progress_start": 0.0,
+          "progress_end": 0.34394904,
+          "faint": false
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.6,
+          "duration": 0.7,
+          "target_id": "new_york",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "New York의 확인된 위치 공개",
+          "text": "NEW YORK",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "F01"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "cause",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "연결 경로 선택 공개",
+          "text": "New York → London",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E003",
+          "kind": "entity_departure",
+          "time": 1.5,
+          "duration": 0.7,
+          "target_id": "aircraft_R_01",
+          "role": "progression",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "DEPARTURE",
+          "text": "DEPARTURE",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E004",
+          "kind": "destination_preview",
+          "time": 2.4,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "hint",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "다음 연결점 London 공개",
+          "text": "LONDON",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "F02"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "new_york",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "NEW YORK",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_OPEN",
+          "kind": "cinematic_hit",
+          "time": 0.0,
+          "duration": 1.0,
+          "visual_event_id": null,
+          "gain_db": -12
+        },
+        {
+          "id": "A_E001",
+          "kind": "soft_pulse",
+          "time": 0.6,
+          "duration": 1.2,
+          "visual_event_id": "E001",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E002",
+          "kind": "digital_sweep",
+          "time": 1.3,
+          "duration": 1.2,
+          "visual_event_id": "E002",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E003",
+          "kind": "pass_by",
+          "time": 1.5,
+          "duration": 1.2,
+          "visual_event_id": "E003",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E004",
+          "kind": "soft_pulse",
+          "time": 2.4,
+          "duration": 1.2,
+          "visual_event_id": "E004",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 1.8,
+          "tilt": 0.35,
+          "yaw": -0.26,
+          "bank": 0.015,
+          "fov": 43,
+          "lon": -73.995718,
+          "lat": 40.721562,
+          "target_lon": -73.995718,
+          "target_lat": 40.721562,
+          "location_id": "new_york"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [],
+        "active_routes": [],
+        "entities": [],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.0
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": -53.03845617111972,
+          "lat": 49.79057978143735,
+          "target_lon": -53.03845617111972,
+          "target_lat": 49.79057978143735
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.34394904
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.2
+        }
+      },
+      "directing_presets": [
+        "HOOK_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.0,
+      "motion_start": 0.0,
+      "description": "hook: New York",
+      "role": "hook",
+      "narration_event_ids": [
+        "E001",
+        "E002",
+        "E003",
+        "E004"
+      ],
+      "render_time_offset": 0.0
+    },
+    {
+      "hook": "",
+      "scene_id": "S002",
+      "start_time": 4.0,
+      "duration": 4.0,
+      "scene_type": "ROUTE_CHASE",
+      "narration": "곡선을 따라 다음 연결점으로 향합니다.",
+      "location": "London",
+      "coordinates": {
+        "lon": -0.118668,
+        "lat": 51.501941,
+        "source_id": "natural_earth_places",
+        "location_id": "london"
+      },
+      "geographic_targets": [
+        "london"
+      ],
+      "camera_preset": "ROUTE_CHASE",
+      "camera_start": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": -53.03845617111972,
+        "lat": 49.79057978143735,
+        "target_lon": -53.03845617111972,
+        "target_lat": 49.79057978143735
+      },
+      "camera_end": {
+        "height": 0.42,
+        "tilt": 0.7,
+        "yaw": -0.26,
+        "bank": 0.025,
+        "fov": 43,
+        "lon": -11.808557914009382,
+        "lat": 53.24860786205799,
+        "target_lon": -11.808557914009382,
+        "target_lat": 53.24860786205799
+      },
+      "camera_speed": 1.15,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "london",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -73.995718,
+              "lat": 40.721562,
+              "source_id": "natural_earth_places",
+              "location_id": "new_york"
+            },
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5569.74,
+          "description": "New York → London",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 0.34394904,
+          "progress_end": 0.85350318,
+          "faint": false
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E005",
+          "kind": "milestone_reveal",
+          "time": 0.5,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "progression",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "3,532 km REMAINING",
+          "value": 3532,
+          "unit": "km",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E006",
+          "kind": "milestone_reveal",
+          "time": 2.65,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "progression",
+          "caused_by": "E005",
+          "meaningful": true,
+          "description": "현재 실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "1,568 km REMAINING",
+          "value": 1568,
+          "unit": "km",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "london",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "LONDON",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E005",
+          "kind": "soft_pulse",
+          "time": 0.5,
+          "duration": 1.2,
+          "visual_event_id": "E005",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E006",
+          "kind": "soft_pulse",
+          "time": 2.65,
+          "duration": 1.2,
+          "visual_event_id": "E006",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": -53.03845617111972,
+          "lat": 49.79057978143735,
+          "target_lon": -53.03845617111972,
+          "target_lat": 49.79057978143735
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.34394904
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.2
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.42,
+          "tilt": 0.7,
+          "yaw": -0.26,
+          "bank": 0.025,
+          "fov": 43,
+          "lon": -11.808557914009382,
+          "lat": 53.24860786205799,
+          "target_lon": -11.808557914009382,
+          "target_lat": 53.24860786205799
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.85350318
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.4
+        }
+      },
+      "directing_presets": [
+        "ROUTE_CHASE"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.2,
+      "motion_start": 0.0,
+      "description": "progression: London",
+      "role": "progression",
+      "narration_event_ids": [
+        "E005",
+        "E006"
+      ],
+      "render_time_offset": 4.0
+    },
+    {
+      "hook": "",
+      "scene_id": "S003",
+      "start_time": 8.0,
+      "duration": 4.0,
+      "scene_type": "COMPARISON",
+      "narration": "다음 연결은 어떻게 달라질까요?",
+      "location": "Dubai",
+      "coordinates": {
+        "lon": 55.286946,
+        "lat": 25.214912,
+        "source_id": "natural_earth_places",
+        "location_id": "dubai"
+      },
+      "geographic_targets": [
+        "dubai"
+      ],
+      "camera_preset": "NETWORK_EXPANSION",
+      "camera_start": {
+        "height": 0.42,
+        "tilt": 0.7,
+        "yaw": -0.26,
+        "bank": 0.025,
+        "fov": 43,
+        "lon": -11.808557914009382,
+        "lat": 53.24860786205799,
+        "target_lon": -11.808557914009382,
+        "target_lat": 53.24860786205799
+      },
+      "camera_end": {
+        "height": 1.45,
+        "tilt": 0.4,
+        "yaw": 0.185,
+        "bank": 0.018,
+        "fov": 44,
+        "lon": 25.847269783502682,
+        "lat": 45.032325804226815,
+        "target_lon": 25.847269783502682,
+        "target_lat": 45.032325804226815
+      },
+      "camera_speed": 1.2,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "dubai",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 1.15
+        },
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "dubai",
+          "action": "move",
+          "start_time": 1.35,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        },
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -73.995718,
+              "lat": 40.721562,
+              "source_id": "natural_earth_places",
+              "location_id": "new_york"
+            },
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5569.74,
+          "description": "New York → London",
+          "start_time": 0.0,
+          "end_time": 1.15,
+          "progress_start": 0.85350318,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 55.286946,
+              "lat": 25.214912,
+              "source_id": "natural_earth_places",
+              "location_id": "dubai"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5472.98,
+          "description": "London → Dubai",
+          "start_time": 1.15,
+          "end_time": 4.0,
+          "progress_start": 0.0,
+          "progress_end": 0.37254902,
+          "faint": false
+        },
+        {
+          "route_id": "N_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 4.478028,
+              "lat": 51.921915,
+              "source_id": "natural_earth_places",
+              "location_id": "rotterdam"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 320.07,
+          "description": "Sampled geographic connection: London → Rotterdam",
+          "start_time": 0.6,
+          "end_time": 1.6,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "Sampled geographic connection: London → Paris",
+          "start_time": 1.6,
+          "end_time": 2.6,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_03",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 13.399603,
+              "lat": 52.523764,
+              "source_id": "natural_earth_places",
+              "location_id": "berlin"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 930.73,
+          "description": "Sampled geographic connection: London → Berlin",
+          "start_time": 2.6,
+          "end_time": 3.6,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E007",
+          "kind": "new_variable",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "dubai",
+          "role": "variable",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "다음 연결/대안이라는 새 변수 공개",
+          "text": "NEXT · DUBAI",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E008",
+          "kind": "arrival",
+          "time": 1.15,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": false,
+          "description": "LONDON",
+          "text": "LONDON",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E009",
+          "kind": "route_start",
+          "time": 1.15,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "THE NEXT CONNECTION",
+          "text": "THE NEXT CONNECTION",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E010",
+          "kind": "network_expand",
+          "time": 2.68,
+          "duration": 0.7,
+          "target_id": "N_03",
+          "role": "progression",
+          "caused_by": "E009",
+          "meaningful": true,
+          "description": "다음 연결점 Dubai 공개",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 13.399603,
+            "lat": 52.523764,
+            "source_id": "natural_earth_places",
+            "location_id": "berlin"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "dubai",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "DUBAI",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E007",
+          "kind": "subtle_impact",
+          "time": 0.8,
+          "duration": 1.2,
+          "visual_event_id": "E007",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E008",
+          "kind": "soft_impact",
+          "time": 1.15,
+          "duration": 1.2,
+          "visual_event_id": "E008",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E009",
+          "kind": "digital_sweep",
+          "time": 1.15,
+          "duration": 1.2,
+          "visual_event_id": "E009",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E010",
+          "kind": "wide_riser",
+          "time": 2.68,
+          "duration": 1.2,
+          "visual_event_id": "E010",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.42,
+          "tilt": 0.7,
+          "yaw": -0.26,
+          "bank": 0.025,
+          "fov": 43,
+          "lon": -11.808557914009382,
+          "lat": 53.24860786205799,
+          "target_lon": -11.808557914009382,
+          "target_lat": 53.24860786205799
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.85350318
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.4
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 1.45,
+          "tilt": 0.4,
+          "yaw": 0.185,
+          "bank": 0.018,
+          "fov": 44,
+          "lon": 25.847269783502682,
+          "lat": 45.032325804226815,
+          "target_lon": 25.847269783502682,
+          "target_lat": 45.032325804226815
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 1.0
+          },
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.37254902
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.6
+        }
+      },
+      "directing_presets": [
+        "NEW_VARIABLE"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.4,
+      "motion_start": 0.0,
+      "description": "variable: Dubai",
+      "role": "variable",
+      "narration_event_ids": [
+        "E007",
+        "E008",
+        "E009",
+        "E010"
+      ],
+      "render_time_offset": 8.0
+    },
+    {
+      "hook": "",
+      "scene_id": "S004",
+      "start_time": 12.0,
+      "duration": 4.0,
+      "scene_type": "ROUTE_CHASE",
+      "narration": "연결망의 전체 구조가 드러납니다.",
+      "location": "Dubai",
+      "coordinates": {
+        "lon": 55.286946,
+        "lat": 25.214912,
+        "source_id": "natural_earth_places",
+        "location_id": "dubai"
+      },
+      "geographic_targets": [
+        "dubai"
+      ],
+      "camera_preset": "HORIZON_REVEAL",
+      "camera_start": {
+        "height": 1.45,
+        "tilt": 0.4,
+        "yaw": 0.185,
+        "bank": 0.018,
+        "fov": 44,
+        "lon": 25.847269783502682,
+        "lat": 45.032325804226815,
+        "target_lon": 25.847269783502682,
+        "target_lat": 45.032325804226815
+      },
+      "camera_end": {
+        "height": 0.32,
+        "tilt": 0.95,
+        "yaw": -0.30500000000000005,
+        "bank": 0.028,
+        "fov": 44,
+        "lon": 51.308482498597385,
+        "lat": 28.950516381560476,
+        "target_lon": 51.308482498597385,
+        "target_lat": 28.950516381560476
+      },
+      "camera_speed": 0.8,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "HERO",
+      "entities": [
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "dubai",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -73.995718,
+              "lat": 40.721562,
+              "source_id": "natural_earth_places",
+              "location_id": "new_york"
+            },
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5569.74,
+          "description": "New York → London",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 55.286946,
+              "lat": 25.214912,
+              "source_id": "natural_earth_places",
+              "location_id": "dubai"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5472.98,
+          "description": "London → Dubai",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 0.37254902,
+          "progress_end": 0.89542484,
+          "faint": false
+        },
+        {
+          "route_id": "N_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 4.478028,
+              "lat": 51.921915,
+              "source_id": "natural_earth_places",
+              "location_id": "rotterdam"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 320.07,
+          "description": "Sampled geographic connection: London → Rotterdam",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "Sampled geographic connection: London → Paris",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_03",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 13.399603,
+              "lat": 52.523764,
+              "source_id": "natural_earth_places",
+              "location_id": "berlin"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 930.73,
+          "description": "Sampled geographic connection: London → Berlin",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E011",
+          "kind": "peak_reveal",
+          "time": 1.1,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "peak",
+          "caused_by": "E010",
+          "meaningful": true,
+          "description": "주요 연결과 전체 공간 관계 동시 공개",
+          "text": "2,904 km TO THE NEXT CITY",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E012",
+          "kind": "milestone_reveal",
+          "time": 3.25,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E011",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "836 km REMAINING",
+          "value": 836,
+          "unit": "km",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "dubai",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "DUBAI",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E011",
+          "kind": "cinematic_hit",
+          "time": 1.1,
+          "duration": 1.2,
+          "visual_event_id": "E011",
+          "gain_db": -10
+        },
+        {
+          "id": "A_E012",
+          "kind": "soft_pulse",
+          "time": 3.25,
+          "duration": 0.75,
+          "visual_event_id": "E012",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 1.45,
+          "tilt": 0.4,
+          "yaw": 0.185,
+          "bank": 0.018,
+          "fov": 44,
+          "lon": 25.847269783502682,
+          "lat": 45.032325804226815,
+          "target_lon": 25.847269783502682,
+          "target_lat": 45.032325804226815
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 1.0
+          },
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.37254902
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.6
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.32,
+          "tilt": 0.95,
+          "yaw": -0.30500000000000005,
+          "bank": 0.028,
+          "fov": 44,
+          "lon": 51.308482498597385,
+          "lat": 28.950516381560476,
+          "target_lon": 51.308482498597385,
+          "target_lat": 28.950516381560476
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.89542484
+          }
+        ],
+        "lighting": "HERO",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.8
+        }
+      },
+      "directing_presets": [
+        "PEAK_MOMENT"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.6,
+      "motion_start": 0.0,
+      "description": "peak: Dubai",
+      "role": "peak",
+      "narration_event_ids": [
+        "E011",
+        "E012"
+      ],
+      "render_time_offset": 12.0
+    },
+    {
+      "hook": "",
+      "scene_id": "S005",
+      "start_time": 16.0,
+      "duration": 4.0,
+      "scene_type": "FINAL_OVERVIEW",
+      "narration": "새로운 연결이 보입니다.",
+      "location": "Dubai",
+      "coordinates": {
+        "lon": 55.286946,
+        "lat": 25.214912,
+        "source_id": "natural_earth_places",
+        "location_id": "dubai"
+      },
+      "geographic_targets": [
+        "dubai"
+      ],
+      "camera_preset": "FINAL_REVEAL",
+      "camera_start": {
+        "height": 0.32,
+        "tilt": 0.95,
+        "yaw": -0.30500000000000005,
+        "bank": 0.028,
+        "fov": 44,
+        "lon": 51.308482498597385,
+        "lat": 28.950516381560476,
+        "target_lon": 51.308482498597385,
+        "target_lat": 28.950516381560476
+      },
+      "camera_end": {
+        "height": 4.15,
+        "tilt": 0.4,
+        "yaw": 0.12,
+        "bank": 0.012,
+        "fov": 44,
+        "lon": -0.5376311904975201,
+        "lat": 74.63904629929516,
+        "target_lon": 1.3051568855143567,
+        "target_lat": 56.08115206233612
+      },
+      "camera_speed": 1.3,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "dubai",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 0.8
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -73.995718,
+              "lat": 40.721562,
+              "source_id": "natural_earth_places",
+              "location_id": "new_york"
+            },
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5569.74,
+          "description": "New York → London",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 55.286946,
+              "lat": 25.214912,
+              "source_id": "natural_earth_places",
+              "location_id": "dubai"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 5472.98,
+          "description": "London → Dubai",
+          "start_time": 0.0,
+          "end_time": 0.8,
+          "progress_start": 0.89542484,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "N_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 4.478028,
+              "lat": 51.921915,
+              "source_id": "natural_earth_places",
+              "location_id": "rotterdam"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 320.07,
+          "description": "Sampled geographic connection: London → Rotterdam",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "Sampled geographic connection: London → Paris",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_03",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 13.399603,
+              "lat": 52.523764,
+              "source_id": "natural_earth_places",
+              "location_id": "berlin"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 930.73,
+          "description": "Sampled geographic connection: London → Berlin",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_04",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": -3.685297,
+              "lat": 40.401972,
+              "source_id": "natural_earth_places",
+              "location_id": "madrid"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1264.29,
+          "description": "Sampled geographic connection: London → Madrid",
+          "start_time": 1.8,
+          "end_time": 2.7,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_05",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1432.58,
+          "description": "Sampled geographic connection: London → Rome",
+          "start_time": 2.6,
+          "end_time": 3.5,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E013",
+          "kind": "arrival",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "dubai",
+          "role": "progression",
+          "caused_by": "E012",
+          "meaningful": true,
+          "description": "DUBAI",
+          "text": "DUBAI",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E014",
+          "kind": "network_expand",
+          "time": 1.88,
+          "duration": 0.7,
+          "target_id": "N_04",
+          "role": "progression",
+          "caused_by": "E013",
+          "meaningful": true,
+          "description": "연결망 범위 확대",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -3.685297,
+            "lat": 40.401972,
+            "source_id": "natural_earth_places",
+            "location_id": "madrid"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E015",
+          "kind": "final_reveal",
+          "time": 3.35,
+          "duration": 0.7,
+          "target_id": "dubai",
+          "role": "payoff",
+          "caused_by": "E014",
+          "meaningful": true,
+          "description": "전체 연결 구조와 가정의 한계 공개",
+          "text": "CONNECTIONS REVEALED",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "dubai",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "NEW YORK",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        },
+        {
+          "text": "LONDON",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        },
+        {
+          "text": "DUBAI",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E013",
+          "kind": "soft_impact",
+          "time": 0.8,
+          "duration": 1.2,
+          "visual_event_id": "E013",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E014",
+          "kind": "wide_riser",
+          "time": 1.88,
+          "duration": 1.2,
+          "visual_event_id": "E014",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E015",
+          "kind": "deep_final_hit",
+          "time": 3.35,
+          "duration": 0.6499999999999999,
+          "visual_event_id": "E015",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.32,
+          "tilt": 0.95,
+          "yaw": -0.30500000000000005,
+          "bank": 0.028,
+          "fov": 44,
+          "lon": 51.308482498597385,
+          "lat": 28.950516381560476,
+          "target_lon": 51.308482498597385,
+          "target_lat": 28.950516381560476
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.89542484
+          }
+        ],
+        "lighting": "HERO",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.8
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 4.15,
+          "tilt": 0.4,
+          "yaw": 0.12,
+          "bank": 0.012,
+          "fov": 44,
+          "lon": -0.5376311904975201,
+          "lat": 74.63904629929516,
+          "target_lon": 1.3051568855143567,
+          "target_lat": 56.08115206233612
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "United Arab Emirates",
+          "United Kingdom",
+          "United States of America"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03",
+          "N_04",
+          "N_05"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 1.0
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 1.0
+        }
+      },
+      "directing_presets": [
+        "FINAL_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.8,
+      "motion_start": 0.0,
+      "description": "payoff: Dubai",
+      "role": "payoff",
+      "narration_event_ids": [
+        "E013",
+        "E014",
+        "E015"
+      ],
+      "render_time_offset": 16.0
+    }
+  ],
+  "required_plugins": [
+    "AVIATION",
+    "NETWORK",
+    "GEOGRAPHY"
+  ],
+  "sources": [
+    {
+      "id": "natural_earth_places",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "2026-10-04T11:59:04.739053+00:00",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "local_path": "populated_places_source.geojson",
+      "attribution_required": false
+    },
+    {
+      "id": "ourairports",
+      "url": "https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv",
+      "author": "OurAirports / DataHub",
+      "license": "ODC-PDDL-1.0",
+      "license_url": "https://opendatacommons.org/licenses/pddl/",
+      "downloaded_at": "2026-10-04T11:59:04.745131+00:00",
+      "sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "local_path": "airport_codes_source.csv",
+      "attribution_required": false
+    },
+    {
+      "id": "natural_earth_countries",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "preserved original MASTER GIS; first acquisition in assets/SOURCES.json",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "local_path": "../../cinematic-world-map/assets/gis/countries_50m.geojson",
+      "attribution_required": false,
+      "coordinate_provenance": "LABEL_X/LABEL_Y source label points; not centroid guesses"
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "name": "searoute 1.6.0 maritime network and ports",
+      "author": "Gent Halili and searoute-py contributors",
+      "license": "Apache-2.0",
+      "license_file": "data/shipping_sources/APACHE-2.0.txt",
+      "attribution_required": true,
+      "attribution": "Maritime route geometry derived from searoute-py 1.6.0 by Gent Halili and contributors, Apache-2.0. Routes are visualization-grade and are not navigational directions.",
+      "original_url": "https://github.com/genthalili/searoute-py",
+      "download_url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "package_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "downloaded_at_utc": "2026-10-04T12:01:52.348234+00:00",
+      "package_version": "1.6.0",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_order": "longitude,latitude",
+      "coordinate_reference_system": "EPSG:4326",
+      "files": {
+        "marnet_dict.py": {
+          "path": "data/shipping_sources/marnet_dict.py",
+          "sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3"
+        },
+        "ports_dict.py": {
+          "path": "data/shipping_sources/ports_dict.py",
+          "sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b"
+        },
+        "APACHE-2.0.txt": {
+          "path": "data/shipping_sources/APACHE-2.0.txt",
+          "sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66"
+        },
+        "PACKAGE_METADATA.txt": {
+          "path": "data/shipping_sources/PACKAGE_METADATA.txt",
+          "sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c"
+        }
+      },
+      "limitations": [
+        "The source library is explicitly for maritime visualization, not vessel navigation.",
+        "Canal and river segments are generalized network geometry; do not claim survey-grade canal geometry.",
+        "Routes are graph shortest-distance alternatives, not a forecast of ship choices, traffic volume, prices, delivery delay, or closure outcome.",
+        "Fixed-speed duration estimates from the source package are deliberately not used."
+      ],
+      "id": "SEAROUTE_1_6_0",
+      "url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "local_path": "data/shipping_sources/searoute-1.6.0.tar.gz"
+    },
+    {
+      "id": "NATURAL_EARTH_PHYSICAL_POINTS_10M",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_geography_regions_points.geojson",
+      "author": "Natural Earth contributors",
+      "license": "Public Domain",
+      "sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "local_path": "data/shipping_sources/natural_earth_physical_points.geojson",
+      "downloaded_at_utc": "2026-10-04T12:03:07.469430+00:00",
+      "attribution_required": false,
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_reference_system": "EPSG:4326",
+      "coordinate_precision": "generalized cartographic point from Natural Earth, not survey-grade landmark positioning"
+    }
+  ],
+  "metadata": {
+    "camera_provenance": [
+      {
+        "time": 4.0,
+        "route_id": "R_01",
+        "progress": 0.34394904,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 8.0,
+        "route_id": "R_01",
+        "progress": 0.85350318,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 12.0,
+        "route_id": "R_02",
+        "progress": 0.37254902,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 16.0,
+        "route_id": "R_02",
+        "progress": 0.89542484,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 20.0,
+        "method": "Sourced GIS spherical convex-hull focus and exact portrait camera-rig projection fit",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "network_overview": true
+      }
+    ],
+    "style_profile": "tension",
+    "story_pattern": "journey-network-reveal",
+    "coordinate_claim_targets": {
+      "F01": "new_york",
+      "F02": "london",
+      "F03": "dubai"
+    },
+    "final_overview": {
+      "method": "Sourced GIS spherical convex-hull focus and exact portrait camera-rig projection fit",
+      "focus": {
+        "lon": 1.3051568855143567,
+        "lat": 56.08115206233612
+      },
+      "height": 4.15,
+      "sample_count": 65,
+      "screen_bounds": {
+        "x_min": 0.2225321911688778,
+        "x_max": 0.8131883692702291,
+        "y_min": 0.39846750852021207,
+        "y_max": 0.6065478385456442
+      },
+      "source_ids": [
+        "natural_earth_places"
+      ],
+      "route_ids": [
+        "R_01",
+        "R_02"
+      ]
+    },
+    "semantic_visibility": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-04T18:04:53.417Z",
+      "passed": true,
+      "renderer_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+      "source_hashes": {
+        "adapter": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "legacy_renderer": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "aircraft": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+        "OpenSans": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "Noto": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "certifier": "de1798ac058f26a3033ff026ad195eadd5a4b4568ebd853cfe3bd50bf3dbe2a3"
+      },
+      "fps": 30,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "scoped_scene_ids": null,
+      "opening_hook_eligible": true,
+      "events": [
+        {
+          "event_id": "E001",
+          "scene_id": "S001",
+          "kind": "city_reveal",
+          "target_id": "new_york",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "scheduled_local_time": 0.6,
+          "eligible_frames": 19,
+          "eligible_primitives": [
+            "geographic_pulse"
+          ],
+          "first_eligible_local_time": 0.6,
+          "projection_at_scheduled_time": {
+            "x": 0.453977377116339,
+            "y": 0.5536081540755433,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "geographic_pulse",
+          "visible_seconds": 0.6333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.06133333333333333
+        },
+        {
+          "event_id": "E002",
+          "scene_id": "S001",
+          "kind": "route_start",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "scheduled_local_time": 1.3,
+          "eligible_frames": 41,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.3,
+          "projection_at_scheduled_time": {
+            "x": 0.3442165596668434,
+            "y": 0.6313776236709077,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "route_head",
+          "visible_seconds": 1.3666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E003",
+          "scene_id": "S001",
+          "kind": "entity_departure",
+          "target_id": "aircraft_R_01",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "scheduled_local_time": 1.5,
+          "eligible_frames": 39,
+          "eligible_primitives": [
+            "3D_entity"
+          ],
+          "first_eligible_local_time": 1.5666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.302715564842188,
+            "y": 0.6551843632306104,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "3D_entity",
+          "visible_seconds": 1.3,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2733333333333333
+        },
+        {
+          "event_id": "E004",
+          "scene_id": "S001",
+          "kind": "destination_preview",
+          "target_id": "london",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 2.4,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 2.466666666666667,
+          "projection_at_scheduled_time": {
+            "x": 1.154470287762941,
+            "y": 0.1993447240584672,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666687,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E005",
+          "scene_id": "S002",
+          "kind": "milestone_reveal",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 0.5,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 0.5666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 1.3395891685193662,
+            "y": 0.19915241017652868,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E006",
+          "scene_id": "S002",
+          "kind": "milestone_reveal",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 2.65,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 2.7,
+          "projection_at_scheduled_time": {
+            "x": 1.27165289927512,
+            "y": 0.3932042455484788,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.050000000000000266,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E007",
+          "scene_id": "S003",
+          "kind": "new_variable",
+          "target_id": "dubai",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 0.8,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 0.8666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 1.975414916952705,
+            "y": 0.599681480682793,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E009",
+          "scene_id": "S003",
+          "kind": "route_start",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 1.15,
+          "eligible_frames": 40,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.1666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.4917630937888183,
+            "y": 0.5068884720355707,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "route_head",
+          "visible_seconds": 1.3333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.01666666666666683,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E010",
+          "scene_id": "S003",
+          "kind": "network_expand",
+          "target_id": "N_03",
+          "coordinates": {
+            "lon": 13.399603,
+            "lat": 52.523764,
+            "source_id": "natural_earth_places",
+            "location_id": "berlin"
+          },
+          "scheduled_local_time": 2.68,
+          "eligible_frames": 27,
+          "eligible_primitives": [
+            "network"
+          ],
+          "first_eligible_local_time": 2.7,
+          "projection_at_scheduled_time": {
+            "x": 0.4339956692577921,
+            "y": 0.4272775041440167,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "network",
+          "visible_seconds": 0.9,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.020000000000000018,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E011",
+          "scene_id": "S004",
+          "kind": "peak_reveal",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 1.1,
+          "eligible_frames": 40,
+          "eligible_primitives": [
+            "information",
+            "network"
+          ],
+          "first_eligible_local_time": 1.1,
+          "projection_at_scheduled_time": {
+            "x": 1.5623680568724418,
+            "y": 1.0775444039892912,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "network",
+          "visible_seconds": 1.3333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E012",
+          "scene_id": "S004",
+          "kind": "milestone_reveal",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 3.25,
+          "eligible_frames": 20,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 3.3,
+          "projection_at_scheduled_time": {
+            "x": 1.0788227853356234,
+            "y": 0.6375947043117133,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 0.6666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.04999999999999982,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E013",
+          "scene_id": "S005",
+          "kind": "arrival",
+          "target_id": "dubai",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 0.8,
+          "eligible_frames": 19,
+          "eligible_primitives": [
+            "geographic_pulse"
+          ],
+          "first_eligible_local_time": 0.8,
+          "projection_at_scheduled_time": {
+            "x": 0.8076572737676385,
+            "y": 0.6006826819243831,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "geographic_pulse",
+          "visible_seconds": 0.6333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.06133333333333333
+        },
+        {
+          "event_id": "E014",
+          "scene_id": "S005",
+          "kind": "network_expand",
+          "target_id": "N_04",
+          "coordinates": {
+            "lon": -3.685297,
+            "lat": 40.401972,
+            "source_id": "natural_earth_places",
+            "location_id": "madrid"
+          },
+          "scheduled_local_time": 1.88,
+          "eligible_frames": 24,
+          "eligible_primitives": [
+            "network"
+          ],
+          "first_eligible_local_time": 1.9,
+          "projection_at_scheduled_time": {
+            "x": 0.24706757318148073,
+            "y": 0.5204413539961802,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "network",
+          "visible_seconds": 0.8,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.020000000000000018,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E015",
+          "scene_id": "S005",
+          "kind": "final_reveal",
+          "target_id": "dubai",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 3.35,
+          "eligible_frames": 18,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 3.4,
+          "projection_at_scheduled_time": {
+            "x": 0.804641869454026,
+            "y": 0.6178538641923872,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "information",
+          "visible_seconds": 0.6,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.04999999999999982,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        }
+      ],
+      "failures": [],
+      "scope": "Pure frozen-renderer pose, Earth occlusion, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.",
+      "font_layout_policy": "Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.",
+      "semantic_input_sha256": "259805146f8b7a538cf4d9728d94f482d5cd5a475e6b79333387565fdda701b7",
+      "certified_plan_bytes_sha256": "d32ba8c7b35c71ceae2ad3d840cf2eeb8635fa5e4785cbb15f5dc6b935cc5be2",
+      "certificate_source_fingerprint": "dbe03bef3fa1b002bd2e22ebc0cf6ed765afd7c562b09d98ddd7fc90aeca9636",
+      "certificate_cache_hit": false
+    },
+    "semantic_visibility_repairs": [
+      {
+        "scene_id": "S002",
+        "event_id": "E006",
+        "time": 2.65,
+        "before": {
+          "kind": "country_reveal",
+          "target_id": "new_york",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "F01",
+          "text": "UNITED STATES OF AMERICA",
+          "value": null,
+          "unit": ""
+        },
+        "after": {
+          "kind": "milestone_reveal",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01",
+          "text": "1,568 km REMAINING",
+          "value": 1568,
+          "unit": "km"
+        },
+        "route_id": "R_01",
+        "progress": 0.7185569220719532,
+        "length_km": 5569.7350360438095,
+        "remaining_km": 1567.5633717878504,
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "method": "SceneRoutes local smoothstep and sourced GIS angular-length geometry; no camera/route alteration"
+      }
+    ],
+    "estimates": {
+      "backend": "CPU_LOCAL",
+      "measured": false,
+      "prediction": true,
+      "scope": "uncached_scene_render_only",
+      "seconds": 8739.295,
+      "cost_usd": null,
+      "method": "median native elapsedSeconds / duration, applied to requested Scene durations",
+      "limitations": [
+        "Prediction for rendering all selected Scenes without cache; not an actual measured completion time.",
+        "Audio, TTS, subtitles, assembly, QC, planning, queueing and recovery wall time are excluded.",
+        "No cache-hit speedup, GPU cost or CINEMA multiplier is inferred from HIGH.",
+        "Camera, visible terrain/clouds, entity/network complexity and machine load can change rendering cost.",
+        "Recorded successful-QC hashes and matching native source provenance are used; large media/asset bytes are not rehashed for each request.",
+        "Bounded path/mtime checks detect missing or subsequently modified media, not deliberate same-mtime content tampering; final delivery requires full hash verification."
+      ],
+      "sources": [
+        {
+          "project_id": "project_b89a30908047",
+          "version": "v002",
+          "scene_id": "S001",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "native_elapsed_seconds": 1527.665,
+          "native_duration_seconds": 4.0,
+          "seconds_per_video_second": 381.91625,
+          "video_sha256": "c847b905bac4ba7ab25bb5ef4b122cbb556a100dcb493b0f095781de1be66c7a",
+          "plan_hash": "0a5ec0275b3bf15e12302dca6d5e564dbacf6cc4bf3879c0c3cc4b4aca4d8c05",
+          "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+          "result_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/project_result.json",
+          "result_metadata_sha256": "bd6b38d86f4e4bb41efaf2428862e0e7df031343e6dff564ec395ddd3897a866",
+          "resolved_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S001/scene_S001_v002.mp4",
+          "resolved_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S001/scene_S001_v002.audit.json",
+          "native_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S001/scene_S001_v001.mp4",
+          "native_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S001/scene_S001_v001.audit.json",
+          "native_scene_json_sha256": "539be1b1ff943455ea10b35955d90f74fa2998d00d6d07947599ef9af4065377",
+          "reused_in_this_completed_version": true
+        },
+        {
+          "project_id": "project_b89a30908047",
+          "version": "v002",
+          "scene_id": "S002",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "native_elapsed_seconds": 1633.467,
+          "native_duration_seconds": 4.0,
+          "seconds_per_video_second": 408.36675,
+          "video_sha256": "4d113396498bba952bcfa818ba7b11c2724b21fcb9688ce1c7e0c2bc942d577c",
+          "plan_hash": "0a5ec0275b3bf15e12302dca6d5e564dbacf6cc4bf3879c0c3cc4b4aca4d8c05",
+          "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+          "result_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/project_result.json",
+          "result_metadata_sha256": "bd6b38d86f4e4bb41efaf2428862e0e7df031343e6dff564ec395ddd3897a866",
+          "resolved_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S002/scene_S002_v002.mp4",
+          "resolved_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S002/scene_S002_v002.audit.json",
+          "native_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S002/scene_S002_v002.mp4",
+          "native_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S002/scene_S002_v002.audit.json",
+          "native_scene_json_sha256": "5936f5873a28f166f5e202d735c2f5b1fd2904f5dfeadb1c4af8541e663dddaf",
+          "reused_in_this_completed_version": false
+        },
+        {
+          "project_id": "project_b89a30908047",
+          "version": "v002",
+          "scene_id": "S005",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "native_elapsed_seconds": 1426.199,
+          "native_duration_seconds": 4.0,
+          "seconds_per_video_second": 356.54975,
+          "video_sha256": "3b85f60d8bb5851abf09fb92dc2c431edf2a8606bf9d7dfb8eb978fee65a6fc3",
+          "plan_hash": "0a5ec0275b3bf15e12302dca6d5e564dbacf6cc4bf3879c0c3cc4b4aca4d8c05",
+          "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+          "result_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/project_result.json",
+          "result_metadata_sha256": "bd6b38d86f4e4bb41efaf2428862e0e7df031343e6dff564ec395ddd3897a866",
+          "resolved_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S005/scene_S005_v002.mp4",
+          "resolved_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S005/scene_S005_v002.audit.json",
+          "native_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S005/scene_S005_v001.mp4",
+          "native_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S005/scene_S005_v001.audit.json",
+          "native_scene_json_sha256": "5d84b48a64e5c665099b53c815e7ca7bb6ca82562c76d8a1f14c708149d3f0ae",
+          "reused_in_this_completed_version": true
+        },
+        {
+          "project_id": "project_b89a30908047",
+          "version": "v003",
+          "scene_id": "S002",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "native_elapsed_seconds": 1686.933,
+          "native_duration_seconds": 4.0,
+          "seconds_per_video_second": 421.73325,
+          "video_sha256": "181ede4dcf2bb1568328168a20e04a60eba04839ce97b27b56fa729c442b9f85",
+          "plan_hash": "d70610a541bc693c4e3be17b7968d58a32d8b158a91047da90c3f3d874ef7271",
+          "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+          "result_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v003/renders/project_result.json",
+          "result_metadata_sha256": "6a5e06fc642c6fa64d87d396600cc6e30456f17afec8cfc8f70db8d8fb8ef59d",
+          "resolved_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v003/renders/S002/scene_S002_v003.mp4",
+          "resolved_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v003/renders/S002/scene_S002_v003.audit.json",
+          "native_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v003/renders/S002/scene_S002_v003.mp4",
+          "native_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v003/renders/S002/scene_S002_v003.audit.json",
+          "native_scene_json_sha256": "d0bb6570b999b93fd8e6782d3ed26734f6ff7607f096c65d089017bd8828fa78",
+          "reused_in_this_completed_version": false
+        },
+        {
+          "project_id": "project_b89a30908047",
+          "version": "v002",
+          "scene_id": "S003",
+          "quality": "HIGH",
+          "lighting_preset": "GEOGRAPHY_READABILITY",
+          "temporal_samples": 1,
+          "native_elapsed_seconds": 1595.949,
+          "native_duration_seconds": 4.0,
+          "seconds_per_video_second": 398.98725,
+          "video_sha256": "f925f7ed4140f0e611bae6c4e276c6417e7b54a88cd7e353229d4c5df925e282",
+          "plan_hash": "0a5ec0275b3bf15e12302dca6d5e564dbacf6cc4bf3879c0c3cc4b4aca4d8c05",
+          "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+          "result_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/project_result.json",
+          "result_metadata_sha256": "bd6b38d86f4e4bb41efaf2428862e0e7df031343e6dff564ec395ddd3897a866",
+          "resolved_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S003/scene_S003_v002.mp4",
+          "resolved_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S003/scene_S003_v002.audit.json",
+          "native_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S003/scene_S003_v001.mp4",
+          "native_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S003/scene_S003_v001.audit.json",
+          "native_scene_json_sha256": "06b6415276c9bd8a519475bd069c9928023fe8c8aed5ab4c437adc15c6c83936",
+          "reused_in_this_completed_version": true
+        },
+        {
+          "project_id": "project_b89a30908047",
+          "version": "v002",
+          "scene_id": "S004",
+          "quality": "HIGH",
+          "lighting_preset": "HERO",
+          "temporal_samples": 1,
+          "native_elapsed_seconds": 2401.648,
+          "native_duration_seconds": 4.0,
+          "seconds_per_video_second": 600.412,
+          "video_sha256": "e459561f577e6e85f35c3f11472cb5a11aac768bb7d203e32f69d62ebafd50fe",
+          "plan_hash": "0a5ec0275b3bf15e12302dca6d5e564dbacf6cc4bf3879c0c3cc4b4aca4d8c05",
+          "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+          "result_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/project_result.json",
+          "result_metadata_sha256": "bd6b38d86f4e4bb41efaf2428862e0e7df031343e6dff564ec395ddd3897a866",
+          "resolved_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S004/scene_S004_v002.mp4",
+          "resolved_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v002/renders/S004/scene_S004_v002.audit.json",
+          "native_movie": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S004/scene_S004_v001.mp4",
+          "native_audit": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_b89a30908047/versions/v001/renders/S004/scene_S004_v001.audit.json",
+          "native_scene_json_sha256": "a3acee9bd3aefbf48d25df2f9985dadd0a7189adc697413c2939ccfc1d471e11",
+          "reused_in_this_completed_version": true
+        }
+      ],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "duration_seconds": 4.0,
+          "seconds": 1580.566,
+          "measured": false,
+          "reference_count": 4,
+          "lighting_bucket_fallback": false,
+          "median_seconds_per_video_second": 395.1415,
+          "source_video_sha256": [
+            "c847b905bac4ba7ab25bb5ef4b122cbb556a100dcb493b0f095781de1be66c7a",
+            "4d113396498bba952bcfa818ba7b11c2724b21fcb9688ce1c7e0c2bc942d577c",
+            "3b85f60d8bb5851abf09fb92dc2c431edf2a8606bf9d7dfb8eb978fee65a6fc3",
+            "181ede4dcf2bb1568328168a20e04a60eba04839ce97b27b56fa729c442b9f85"
+          ]
+        },
+        {
+          "scene_id": "S002",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "duration_seconds": 4.0,
+          "seconds": 1580.566,
+          "measured": false,
+          "reference_count": 4,
+          "lighting_bucket_fallback": false,
+          "median_seconds_per_video_second": 395.1415,
+          "source_video_sha256": [
+            "c847b905bac4ba7ab25bb5ef4b122cbb556a100dcb493b0f095781de1be66c7a",
+            "4d113396498bba952bcfa818ba7b11c2724b21fcb9688ce1c7e0c2bc942d577c",
+            "3b85f60d8bb5851abf09fb92dc2c431edf2a8606bf9d7dfb8eb978fee65a6fc3",
+            "181ede4dcf2bb1568328168a20e04a60eba04839ce97b27b56fa729c442b9f85"
+          ]
+        },
+        {
+          "scene_id": "S003",
+          "quality": "HIGH",
+          "lighting_preset": "GEOGRAPHY_READABILITY",
+          "temporal_samples": 1,
+          "duration_seconds": 4.0,
+          "seconds": 1595.949,
+          "measured": false,
+          "reference_count": 1,
+          "lighting_bucket_fallback": false,
+          "median_seconds_per_video_second": 398.98725,
+          "source_video_sha256": [
+            "f925f7ed4140f0e611bae6c4e276c6417e7b54a88cd7e353229d4c5df925e282"
+          ],
+          "sample_warning": "One qualified native observation; uncertainty is not statistically quantified."
+        },
+        {
+          "scene_id": "S004",
+          "quality": "HIGH",
+          "lighting_preset": "HERO",
+          "temporal_samples": 1,
+          "duration_seconds": 4.0,
+          "seconds": 2401.648,
+          "measured": false,
+          "reference_count": 1,
+          "lighting_bucket_fallback": false,
+          "median_seconds_per_video_second": 600.412,
+          "source_video_sha256": [
+            "e459561f577e6e85f35c3f11472cb5a11aac768bb7d203e32f69d62ebafd50fe"
+          ],
+          "sample_warning": "One qualified native observation; uncertainty is not statistically quantified."
+        },
+        {
+          "scene_id": "S005",
+          "quality": "HIGH",
+          "lighting_preset": "CINEMATIC_NIGHT",
+          "temporal_samples": 1,
+          "duration_seconds": 4.0,
+          "seconds": 1580.566,
+          "measured": false,
+          "reference_count": 4,
+          "lighting_bucket_fallback": false,
+          "median_seconds_per_video_second": 395.1415,
+          "source_video_sha256": [
+            "c847b905bac4ba7ab25bb5ef4b122cbb556a100dcb493b0f095781de1be66c7a",
+            "4d113396498bba952bcfa818ba7b11c2724b21fcb9688ce1c7e0c2bc942d577c",
+            "3b85f60d8bb5851abf09fb92dc2c431edf2a8606bf9d7dfb8eb978fee65a6fc3",
+            "181ede4dcf2bb1568328168a20e04a60eba04839ce97b27b56fa729c442b9f85"
+          ]
+        }
+      ],
+      "eligible_reference_count": 6,
+      "rejected_reference_counts": {
+        "SUCCESSFUL_FINAL_QC_REQUIRED": 1
+      },
+      "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+      "reason": "UNCACHED_SCENE_PREDICTION_FROM_QUALIFIED_NATIVE_REFERENCES"
+    }
+  },
+  "gate": {
+    "passed": true,
+    "errors": [],
+    "warnings": [],
+    "retention": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "metrics": {
+        "meaningful_event_count": 14,
+        "average_event_interval": 1.4423,
+        "max_event_gap": 2.42,
+        "first_3s_events": 4,
+        "event_types": 10,
+        "max_same_kind_run": 2,
+        "peak_count": 1,
+        "camera_events_counted": false
+      },
+      "events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.6,
+          "duration": 0.7,
+          "target_id": "new_york",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "New York의 확인된 위치 공개",
+          "text": "NEW YORK",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "F01",
+          "absolute_time": 0.6,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "cause",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "연결 경로 선택 공개",
+          "text": "New York → London",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.3,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E003",
+          "kind": "entity_departure",
+          "time": 1.5,
+          "duration": 0.7,
+          "target_id": "aircraft_R_01",
+          "role": "progression",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "DEPARTURE",
+          "text": "DEPARTURE",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.5,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E004",
+          "kind": "destination_preview",
+          "time": 2.4,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "hint",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "다음 연결점 London 공개",
+          "text": "LONDON",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "F02",
+          "absolute_time": 2.4,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E005",
+          "kind": "milestone_reveal",
+          "time": 0.5,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "progression",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "3,532 km REMAINING",
+          "value": 3532,
+          "unit": "km",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01",
+          "absolute_time": 4.5,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E006",
+          "kind": "milestone_reveal",
+          "time": 2.65,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "progression",
+          "caused_by": "E005",
+          "meaningful": true,
+          "description": "현재 실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "1,568 km REMAINING",
+          "value": 1568,
+          "unit": "km",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01",
+          "absolute_time": 6.65,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E007",
+          "kind": "new_variable",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "dubai",
+          "role": "variable",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "다음 연결/대안이라는 새 변수 공개",
+          "text": "NEXT · DUBAI",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01",
+          "absolute_time": 8.8,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E009",
+          "kind": "route_start",
+          "time": 1.15,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "THE NEXT CONNECTION",
+          "text": "THE NEXT CONNECTION",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01",
+          "absolute_time": 9.15,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E010",
+          "kind": "network_expand",
+          "time": 2.68,
+          "duration": 0.7,
+          "target_id": "N_03",
+          "role": "progression",
+          "caused_by": "E009",
+          "meaningful": true,
+          "description": "다음 연결점 Dubai 공개",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 13.399603,
+            "lat": 52.523764,
+            "source_id": "natural_earth_places",
+            "location_id": "berlin"
+          },
+          "claim_id": "M01",
+          "absolute_time": 10.68,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E011",
+          "kind": "peak_reveal",
+          "time": 1.1,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "peak",
+          "caused_by": "E010",
+          "meaningful": true,
+          "description": "주요 연결과 전체 공간 관계 동시 공개",
+          "text": "2,904 km TO THE NEXT CITY",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01",
+          "absolute_time": 13.1,
+          "scene_id": "S004"
+        },
+        {
+          "id": "E012",
+          "kind": "milestone_reveal",
+          "time": 3.25,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E011",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "836 km REMAINING",
+          "value": 836,
+          "unit": "km",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01",
+          "absolute_time": 15.25,
+          "scene_id": "S004"
+        },
+        {
+          "id": "E013",
+          "kind": "arrival",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "dubai",
+          "role": "progression",
+          "caused_by": "E012",
+          "meaningful": true,
+          "description": "DUBAI",
+          "text": "DUBAI",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01",
+          "absolute_time": 16.8,
+          "scene_id": "S005"
+        },
+        {
+          "id": "E014",
+          "kind": "network_expand",
+          "time": 1.88,
+          "duration": 0.7,
+          "target_id": "N_04",
+          "role": "progression",
+          "caused_by": "E013",
+          "meaningful": true,
+          "description": "연결망 범위 확대",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -3.685297,
+            "lat": 40.401972,
+            "source_id": "natural_earth_places",
+            "location_id": "madrid"
+          },
+          "claim_id": "M01",
+          "absolute_time": 17.88,
+          "scene_id": "S005"
+        },
+        {
+          "id": "E015",
+          "kind": "final_reveal",
+          "time": 3.35,
+          "duration": 0.7,
+          "target_id": "dubai",
+          "role": "payoff",
+          "caused_by": "E014",
+          "meaningful": true,
+          "description": "전체 연결 구조와 가정의 한계 공개",
+          "text": "CONNECTIONS REVEALED",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "claim_id": "M01",
+          "absolute_time": 19.35,
+          "scene_id": "S005"
+        }
+      ]
+    },
+    "semantic_visibility": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-04T18:04:54.307Z",
+      "passed": true,
+      "renderer_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+      "source_hashes": {
+        "adapter": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "legacy_renderer": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "aircraft": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+        "OpenSans": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "Noto": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "certifier": "de1798ac058f26a3033ff026ad195eadd5a4b4568ebd853cfe3bd50bf3dbe2a3"
+      },
+      "fps": 30,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "scoped_scene_ids": null,
+      "opening_hook_eligible": true,
+      "events": [
+        {
+          "event_id": "E001",
+          "scene_id": "S001",
+          "kind": "city_reveal",
+          "target_id": "new_york",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "scheduled_local_time": 0.6,
+          "eligible_frames": 19,
+          "eligible_primitives": [
+            "geographic_pulse"
+          ],
+          "first_eligible_local_time": 0.6,
+          "projection_at_scheduled_time": {
+            "x": 0.453977377116339,
+            "y": 0.5536081540755433,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "geographic_pulse",
+          "visible_seconds": 0.6333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.06133333333333333
+        },
+        {
+          "event_id": "E002",
+          "scene_id": "S001",
+          "kind": "route_start",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "scheduled_local_time": 1.3,
+          "eligible_frames": 41,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.3,
+          "projection_at_scheduled_time": {
+            "x": 0.3442165596668434,
+            "y": 0.6313776236709077,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "route_head",
+          "visible_seconds": 1.3666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E003",
+          "scene_id": "S001",
+          "kind": "entity_departure",
+          "target_id": "aircraft_R_01",
+          "coordinates": {
+            "lon": -73.995718,
+            "lat": 40.721562,
+            "source_id": "natural_earth_places",
+            "location_id": "new_york"
+          },
+          "scheduled_local_time": 1.5,
+          "eligible_frames": 39,
+          "eligible_primitives": [
+            "3D_entity"
+          ],
+          "first_eligible_local_time": 1.5666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.302715564842188,
+            "y": 0.6551843632306104,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "3D_entity",
+          "visible_seconds": 1.3,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2733333333333333
+        },
+        {
+          "event_id": "E004",
+          "scene_id": "S001",
+          "kind": "destination_preview",
+          "target_id": "london",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 2.4,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 2.466666666666667,
+          "projection_at_scheduled_time": {
+            "x": 1.154470287762941,
+            "y": 0.1993447240584672,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666687,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E005",
+          "scene_id": "S002",
+          "kind": "milestone_reveal",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 0.5,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 0.5666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 1.3395891685193662,
+            "y": 0.19915241017652868,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E006",
+          "scene_id": "S002",
+          "kind": "milestone_reveal",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 2.65,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 2.7,
+          "projection_at_scheduled_time": {
+            "x": 1.27165289927512,
+            "y": 0.3932042455484788,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.050000000000000266,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E007",
+          "scene_id": "S003",
+          "kind": "new_variable",
+          "target_id": "dubai",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 0.8,
+          "eligible_frames": 38,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 0.8666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 1.975414916952705,
+            "y": 0.599681480682793,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 1.2666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E009",
+          "scene_id": "S003",
+          "kind": "route_start",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "scheduled_local_time": 1.15,
+          "eligible_frames": 40,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.1666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.4917630937888183,
+            "y": 0.5068884720355707,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "route_head",
+          "visible_seconds": 1.3333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.01666666666666683,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E010",
+          "scene_id": "S003",
+          "kind": "network_expand",
+          "target_id": "N_03",
+          "coordinates": {
+            "lon": 13.399603,
+            "lat": 52.523764,
+            "source_id": "natural_earth_places",
+            "location_id": "berlin"
+          },
+          "scheduled_local_time": 2.68,
+          "eligible_frames": 27,
+          "eligible_primitives": [
+            "network"
+          ],
+          "first_eligible_local_time": 2.7,
+          "projection_at_scheduled_time": {
+            "x": 0.4339956692577921,
+            "y": 0.4272775041440167,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "network",
+          "visible_seconds": 0.9,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.020000000000000018,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E011",
+          "scene_id": "S004",
+          "kind": "peak_reveal",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 1.1,
+          "eligible_frames": 40,
+          "eligible_primitives": [
+            "information",
+            "network"
+          ],
+          "first_eligible_local_time": 1.1,
+          "projection_at_scheduled_time": {
+            "x": 1.5623680568724418,
+            "y": 1.0775444039892912,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "network",
+          "visible_seconds": 1.3333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E012",
+          "scene_id": "S004",
+          "kind": "milestone_reveal",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 3.25,
+          "eligible_frames": 20,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 3.3,
+          "projection_at_scheduled_time": {
+            "x": 1.0788227853356234,
+            "y": 0.6375947043117133,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "first_primitive": "information",
+          "visible_seconds": 0.6666666666666666,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.04999999999999982,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        },
+        {
+          "event_id": "E013",
+          "scene_id": "S005",
+          "kind": "arrival",
+          "target_id": "dubai",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 0.8,
+          "eligible_frames": 19,
+          "eligible_primitives": [
+            "geographic_pulse"
+          ],
+          "first_eligible_local_time": 0.8,
+          "projection_at_scheduled_time": {
+            "x": 0.8076572737676385,
+            "y": 0.6006826819243831,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "geographic_pulse",
+          "visible_seconds": 0.6333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.06133333333333333
+        },
+        {
+          "event_id": "E014",
+          "scene_id": "S005",
+          "kind": "network_expand",
+          "target_id": "N_04",
+          "coordinates": {
+            "lon": -3.685297,
+            "lat": 40.401972,
+            "source_id": "natural_earth_places",
+            "location_id": "madrid"
+          },
+          "scheduled_local_time": 1.88,
+          "eligible_frames": 24,
+          "eligible_primitives": [
+            "network"
+          ],
+          "first_eligible_local_time": 1.9,
+          "projection_at_scheduled_time": {
+            "x": 0.24706757318148073,
+            "y": 0.5204413539961802,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "network",
+          "visible_seconds": 0.8,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.020000000000000018,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E015",
+          "scene_id": "S005",
+          "kind": "final_reveal",
+          "target_id": "dubai",
+          "coordinates": {
+            "lon": 55.286946,
+            "lat": 25.214912,
+            "source_id": "natural_earth_places",
+            "location_id": "dubai"
+          },
+          "scheduled_local_time": 3.35,
+          "eligible_frames": 18,
+          "eligible_primitives": [
+            "information"
+          ],
+          "first_eligible_local_time": 3.4,
+          "projection_at_scheduled_time": {
+            "x": 0.804641869454026,
+            "y": 0.6178538641923872,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "information",
+          "visible_seconds": 0.6,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.04999999999999982,
+          "allowed_onset_delay_seconds": 0.2833333333333333
+        }
+      ],
+      "failures": [],
+      "scope": "Pure frozen-renderer pose, Earth occlusion, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.",
+      "font_layout_policy": "Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.",
+      "semantic_input_sha256": "b2c75a918796a5360d36c267f555ce1062f5e8cba274f57d20373814d6bf86fe",
+      "certified_plan_bytes_sha256": "a5f8b8f4f8da78b1e9a002567e5da8c10382e029ed3f97b2328a60bf8fdb03d2",
+      "certificate_source_fingerprint": "dbe03bef3fa1b002bd2e22ebc0cf6ed765afd7c562b09d98ddd7fc90aeca9636",
+      "certificate_cache_hit": false
+    },
+    "narration_alignment": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E001",
+            "E002",
+            "E003",
+            "E004"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E001",
+              "kind": "city_reveal",
+              "scope": "scene_context",
+              "local_time": 0.6,
+              "absolute_time": 0.6,
+              "target_id": "new_york",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -73.995718,
+                  "lat": 40.721562,
+                  "source_id": "natural_earth_places",
+                  "location_id": "new_york",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F01",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E002",
+              "kind": "route_start",
+              "scope": "scene_context",
+              "local_time": 1.3,
+              "absolute_time": 1.3,
+              "target_id": "R_01",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -73.995718,
+                  "lat": 40.721562,
+                  "source_id": "natural_earth_places",
+                  "location_id": "new_york",
+                  "verified": true
+                },
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E003",
+              "kind": "entity_departure",
+              "scope": "scene_context",
+              "local_time": 1.5,
+              "absolute_time": 1.5,
+              "target_id": "aircraft_R_01",
+              "target_kind": "entity",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -73.995718,
+                  "lat": 40.721562,
+                  "source_id": "natural_earth_places",
+                  "location_id": "new_york",
+                  "verified": true
+                },
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E004",
+              "kind": "destination_preview",
+              "scope": "scene_context",
+              "local_time": 2.4,
+              "absolute_time": 2.4,
+              "target_id": "london",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F02",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "new_york"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S002",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E005",
+            "E006"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E005",
+              "kind": "milestone_reveal",
+              "scope": "scene_context",
+              "local_time": 0.5,
+              "absolute_time": 4.5,
+              "target_id": "R_01",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -73.995718,
+                  "lat": 40.721562,
+                  "source_id": "natural_earth_places",
+                  "location_id": "new_york",
+                  "verified": true
+                },
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E006",
+              "kind": "milestone_reveal",
+              "scope": "scene_context",
+              "local_time": 2.65,
+              "absolute_time": 6.65,
+              "target_id": "R_01",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -73.995718,
+                  "lat": 40.721562,
+                  "source_id": "natural_earth_places",
+                  "location_id": "new_york",
+                  "verified": true
+                },
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "london"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S003",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E007",
+            "E008",
+            "E009",
+            "E010"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E007",
+              "kind": "new_variable",
+              "scope": "scene_context",
+              "local_time": 0.8,
+              "absolute_time": 8.8,
+              "target_id": "dubai",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 55.286946,
+                  "lat": 25.214912,
+                  "source_id": "natural_earth_places",
+                  "location_id": "dubai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E008",
+              "kind": "arrival",
+              "scope": "scene_context",
+              "local_time": 1.15,
+              "absolute_time": 9.15,
+              "target_id": "london",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E009",
+              "kind": "route_start",
+              "scope": "scene_context",
+              "local_time": 1.15,
+              "absolute_time": 9.15,
+              "target_id": "R_02",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                },
+                {
+                  "lon": 55.286946,
+                  "lat": 25.214912,
+                  "source_id": "natural_earth_places",
+                  "location_id": "dubai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E010",
+              "kind": "network_expand",
+              "scope": "scene_context",
+              "local_time": 2.68,
+              "absolute_time": 10.68,
+              "target_id": "N_03",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                },
+                {
+                  "lon": 13.399603,
+                  "lat": 52.523764,
+                  "source_id": "natural_earth_places",
+                  "location_id": "berlin",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "dubai"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S004",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E011",
+            "E012"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E011",
+              "kind": "peak_reveal",
+              "scope": "scene_context",
+              "local_time": 1.1,
+              "absolute_time": 13.1,
+              "target_id": "R_02",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                },
+                {
+                  "lon": 55.286946,
+                  "lat": 25.214912,
+                  "source_id": "natural_earth_places",
+                  "location_id": "dubai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E012",
+              "kind": "milestone_reveal",
+              "scope": "scene_context",
+              "local_time": 3.25,
+              "absolute_time": 15.25,
+              "target_id": "R_02",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                },
+                {
+                  "lon": 55.286946,
+                  "lat": 25.214912,
+                  "source_id": "natural_earth_places",
+                  "location_id": "dubai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "dubai"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S005",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E013",
+            "E014",
+            "E015"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E013",
+              "kind": "arrival",
+              "scope": "scene_context",
+              "local_time": 0.8,
+              "absolute_time": 16.8,
+              "target_id": "dubai",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 55.286946,
+                  "lat": 25.214912,
+                  "source_id": "natural_earth_places",
+                  "location_id": "dubai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E014",
+              "kind": "network_expand",
+              "scope": "scene_context",
+              "local_time": 1.88,
+              "absolute_time": 17.88,
+              "target_id": "N_04",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": -0.118668,
+                  "lat": 51.501941,
+                  "source_id": "natural_earth_places",
+                  "location_id": "london",
+                  "verified": true
+                },
+                {
+                  "lon": -3.685297,
+                  "lat": 40.401972,
+                  "source_id": "natural_earth_places",
+                  "location_id": "madrid",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E015",
+              "kind": "final_reveal",
+              "scope": "scene_context",
+              "local_time": 3.35,
+              "absolute_time": 19.35,
+              "target_id": "dubai",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 55.286946,
+                  "lat": 25.214912,
+                  "source_id": "natural_earth_places",
+                  "location_id": "dubai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "dubai"
+          ],
+          "word_alignment": false
+        }
+      ],
+      "scope": "Declared same-Scene event/GIS/claim references and measured or supplied cue intervals; not speech recognition, lexical verification, word alignment, or proof that a named word occurs at an event timestamp",
+      "lexical_content_verified": false,
+      "word_alignment": false
+    }
+  },
+  "render_context": {
+    "lighting_anchor": {
+      "lon": -73.995718,
+      "lat": 40.721562,
+      "source_id": "natural_earth_places",
+      "location_id": "new_york"
+    },
+    "hero_anchor": {
+      "lon": 55.286946,
+      "lat": 25.214912,
+      "source_id": "natural_earth_places",
+      "location_id": "dubai"
+    }
+  },
+  "plan_hash": "ef691f8373c6cd20d800eda8d3eb8603430f5cbe3e00adf5d7f1db00ca5e3e7e"
+}
