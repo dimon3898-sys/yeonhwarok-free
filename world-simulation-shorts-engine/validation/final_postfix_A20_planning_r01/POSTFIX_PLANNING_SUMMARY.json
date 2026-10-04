@@ -1,0 +1,189 @@
+{
+  "project_id": "project_649b00d80d5b",
+  "version": "v001",
+  "plan_hash": "66ff516e6e1e1bde1c96cf1562808c654c0b6019cd3689b5a329a865a92c0f46",
+  "ui_passed": true,
+  "planning_seconds": 16.519,
+  "status": "planned",
+  "request": {
+    "topic": "뉴욕에서 런던을 거쳐 두바이까지 이어지는 항공 여행",
+    "duration": 20,
+    "style": "긴장감 있는 세계 시뮬레이션",
+    "quality": "HIGH",
+    "tts": true,
+    "subtitles": true,
+    "bgm": true,
+    "style_profile": "tension"
+  },
+  "gate_passed": true,
+  "gate_errors": [],
+  "gate_warnings": [],
+  "retention_metrics": {
+    "meaningful_event_count": 14,
+    "average_event_interval": 1.4423,
+    "max_event_gap": 2.42,
+    "first_3s_events": 4,
+    "event_types": 10,
+    "max_same_kind_run": 2,
+    "peak_count": 1,
+    "camera_events_counted": false
+  },
+  "semantic_visibility_passed": true,
+  "narration_alignment_passed": true,
+  "narration_warnings": [],
+  "required_plugins": [
+    "AVIATION",
+    "NETWORK",
+    "GEOGRAPHY"
+  ],
+  "hook": "뉴욕 → 런던 → 두바이 · 하나의 여정?",
+  "fact_claims": [
+    {
+      "id": "F01",
+      "status": "FACT",
+      "source_ids": [
+        "natural_earth_places"
+      ]
+    },
+    {
+      "id": "F02",
+      "status": "FACT",
+      "source_ids": [
+        "natural_earth_places"
+      ]
+    },
+    {
+      "id": "F03",
+      "status": "FACT",
+      "source_ids": [
+        "natural_earth_places"
+      ]
+    },
+    {
+      "id": "FD01",
+      "status": "FACT",
+      "source_ids": [
+        "natural_earth_places"
+      ]
+    },
+    {
+      "id": "FD02",
+      "status": "FACT",
+      "source_ids": [
+        "natural_earth_places"
+      ]
+    },
+    {
+      "id": "A01",
+      "status": "ASSUMPTION",
+      "source_ids": []
+    },
+    {
+      "id": "M01",
+      "status": "SIMULATION",
+      "source_ids": [
+        "natural_earth_places"
+      ]
+    }
+  ],
+  "scene_roles_lighting_gis": [
+    {
+      "id": "S001",
+      "role": "hook",
+      "lighting": "CINEMATIC_NIGHT",
+      "camera": "FAST_HOOK_DIVE",
+      "type": "EARTH_ESTABLISH",
+      "coordinates": {
+        "lon": -73.995718,
+        "lat": 40.721562,
+        "source_id": "natural_earth_places",
+        "location_id": "new_york"
+      },
+      "geographic_targets": [
+        "new_york"
+      ]
+    },
+    {
+      "id": "S002",
+      "role": "progression",
+      "lighting": "CINEMATIC_NIGHT",
+      "camera": "ROUTE_CHASE",
+      "type": "ROUTE_CHASE",
+      "coordinates": {
+        "lon": -0.118668,
+        "lat": 51.501941,
+        "source_id": "natural_earth_places",
+        "location_id": "london"
+      },
+      "geographic_targets": [
+        "london"
+      ]
+    },
+    {
+      "id": "S003",
+      "role": "variable",
+      "lighting": "GEOGRAPHY_READABILITY",
+      "camera": "NETWORK_EXPANSION",
+      "type": "COMPARISON",
+      "coordinates": {
+        "lon": 55.286946,
+        "lat": 25.214912,
+        "source_id": "natural_earth_places",
+        "location_id": "dubai"
+      },
+      "geographic_targets": [
+        "dubai"
+      ]
+    },
+    {
+      "id": "S004",
+      "role": "peak",
+      "lighting": "HERO",
+      "camera": "HORIZON_REVEAL",
+      "type": "ROUTE_CHASE",
+      "coordinates": {
+        "lon": 55.286946,
+        "lat": 25.214912,
+        "source_id": "natural_earth_places",
+        "location_id": "dubai"
+      },
+      "geographic_targets": [
+        "dubai"
+      ]
+    },
+    {
+      "id": "S005",
+      "role": "payoff",
+      "lighting": "CINEMATIC_NIGHT",
+      "camera": "FINAL_REVEAL",
+      "type": "FINAL_OVERVIEW",
+      "coordinates": {
+        "lon": 55.286946,
+        "lat": 25.214912,
+        "source_id": "natural_earth_places",
+        "location_id": "dubai"
+      },
+      "geographic_targets": [
+        "dubai"
+      ]
+    }
+  ],
+  "render_requests_before_approval": 0,
+  "exact_requests": [
+    {
+      "sequence": 0,
+      "action": "create_plan",
+      "path": "/api/projects",
+      "body": {
+        "topic": "뉴욕에서 런던을 거쳐 두바이까지 이어지는 항공 여행",
+        "duration": 20,
+        "style": "긴장감 있는 세계 시뮬레이션",
+        "quality": "HIGH",
+        "tts": true,
+        "subtitles": true,
+        "bgm": true
+      },
+      "at_utc": "2026-10-04T22:48:14.673Z"
+    }
+  ]
+}
