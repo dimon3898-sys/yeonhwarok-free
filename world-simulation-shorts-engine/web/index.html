@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10181e">
+  <meta name="color-scheme" content="dark">
+  <title>World Simulation · Shorts Studio</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script type="module" src="/static/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#topic">주제 입력으로 이동</a>
+  <header class="topbar">
+    <a class="wordmark" href="/" aria-label="World Simulation 홈"><span class="wordmark-symbol" aria-hidden="true">◒</span><span>WORLD SIMULATION<small>SHORTS STUDIO</small></span></a>
+    <div class="topbar-actions"><span id="connection" class="connection" role="status">연결 확인 중</span><button id="projects-toggle" class="button button-small button-quiet" type="button" aria-expanded="false" aria-controls="project-library">내 작업</button></div>
+  </header>
+
+  <main class="shell">
+    <section id="project-library" class="library panel" hidden aria-labelledby="library-title"><div class="section-heading"><h2 id="library-title">이전 작업 계속</h2><button id="projects-refresh" class="text-button" type="button">새로고침</button></div><p class="muted">완료된 장면은 유지됩니다. 진행 중인 작업도 여기에서 이어서 확인하세요.</p><div id="project-list" class="project-list"></div></section>
+
+    <div class="workspace">
+      <section class="brief panel" aria-labelledby="brief-title">
+        <div class="eyebrow">새로운 이야기</div>
+        <h1 id="brief-title">주제 하나로,<br>움직이는 세계.</h1>
+        <p class="intro">기획을 먼저 확인하고 승인하세요.<br>지구 위에서 이야기가 이어집니다.</p>
+        <form id="brief-form">
+          <div class="field"><label for="topic">어떤 이야기를 만들까요?</label><textarea id="topic" name="topic" rows="4" required maxlength="3000" placeholder="만약 수에즈 운하가 7일 동안 막힌다면?"></textarea><p class="field-note">항공·해상 물류·도시 연결·지리 시나리오를 입력하세요.</p></div>
+          <div class="form-row"><div class="field"><label for="duration">영상 길이</label><div class="input-unit"><input id="duration" name="duration" type="number" min="20" max="3600" step="1" value="75" required inputmode="numeric"><span>초</span></div></div><div class="field"><label for="quality">화질</label><select id="quality" name="quality"><option value="FAST">FAST · 프리뷰</option><option value="HIGH" selected>HIGH · 업로드</option><option value="CINEMA">CINEMA · 최고 품질</option></select></div></div>
+          <div class="field"><label for="style">연출 분위기</label><select id="style" name="style"><option value="긴장감 있는 세계 시뮬레이션">긴장감 있는 세계 시뮬레이션</option><option value="시네마틱 지리 다큐멘터리">시네마틱 지리 다큐멘터리</option><option value="차분한 여행과 탐험">차분한 여행과 탐험</option><option value="역동적인 국제 네트워크">역동적인 국제 네트워크</option></select></div>
+          <fieldset class="options"><legend>오디오와 자막</legend><label class="toggle"><span>나레이션 <small>TTS</small></span><input id="tts" name="tts" type="checkbox"><span class="switch" aria-hidden="true"></span></label><label class="toggle"><span>자막</span><input id="subtitles" name="subtitles" type="checkbox"><span class="switch" aria-hidden="true"></span></label><label class="toggle"><span>배경 음악</span><input id="bgm" name="bgm" type="checkbox" checked><span class="switch" aria-hidden="true"></span></label></fieldset>
+          <details class="detail-box audio-import"><summary>내 나레이션 파일 사용</summary><label for="narration-file" class="small-label">WAV 또는 MP3</label><input id="narration-file" type="file" accept="audio/wav,audio/x-wav,audio/mpeg,.wav,.mp3"><label class="rights-option"><input id="narration-rights" type="checkbox"><span>직접 제작했거나 사용권이 있는 음성입니다.</span></label><p id="narration-note" class="field-note">파일을 선택하면 해당 음성을 나레이션으로 사용합니다.</p></details>
+          <button id="create-plan" class="button button-primary button-full" type="submit">기획 생성 <span aria-hidden="true">↗</span></button>
+          <p class="form-footer">기획 생성만으로 렌더링을 시작하지 않습니다.</p>
+        </form>
+      </section>
+
+      <section class="result-column" aria-label="기획과 영상 결과">
+        <div id="empty-state" class="empty-state panel"><div class="orbital-mark" aria-hidden="true"><span></span></div><div class="eyebrow">PLAN → APPROVE → CREATE</div><h2>먼저, 이야기의 흐름을 설계합니다.</h2><p>장소와 사건, 카메라와 조명을 함께 확인한 뒤<br>영상 생성을 시작할 수 있습니다.</p><ol class="workflow"><li><span>01</span>주제 입력</li><li><span>02</span>기획 확인</li><li><span>03</span>승인과 생성</li><li><span>04</span>다운로드와 수정</li></ol></div>
+
+        <section id="plan-panel" class="panel plan-panel" hidden aria-labelledby="plan-title">
+          <div class="section-heading"><div class="eyebrow">SCENE PLAN</div><div class="version-controls"><label for="version-select" class="sr-only">프로젝트 버전</label><select id="version-select" aria-label="프로젝트 버전"></select></div></div>
+          <h2 id="plan-title"></h2>
+          <div id="plan-meta" class="plan-meta"></div>
+          <div id="hook-block" class="hook-block"><span class="small-label">첫 3초</span><p id="plan-hook"></p></div>
+          <div id="claim-summary" class="claim-summary"></div>
+          <div id="plan-gate" class="gate-message" role="status"></div>
+          <div id="scene-list" class="scene-list"></div>
+          <details id="script-details" class="detail-box"><summary>대본 보기</summary><div id="script-content" class="script-content"></div></details>
+          <details id="validation-details" class="detail-box"><summary>기획 검수와 사용 모듈</summary><div id="validation-content"></div></details>
+          <details id="clip-details" class="detail-box"><summary>외부 시네마틱 영상 삽입</summary><form id="clip-form"><div class="field"><label for="clip-scene">교체할 장면</label><select id="clip-scene"></select></div><div class="field"><label for="clip-file">MP4 영상</label><input id="clip-file" type="file" accept="video/mp4,.mp4" required></div><label class="rights-option"><input id="clip-rights" type="checkbox" required><span>직접 제작했거나 사용권이 있는 영상입니다.</span></label><button id="preview-clip" class="button button-secondary button-full" type="submit">삽입 기획 확인</button><p class="field-note">변경 내용을 확인하고 승인한 뒤 반영합니다.</p></form></details>
+          <div id="approval-bar" class="approval-bar"><p id="approval-note" class="muted"></p><button id="approve-render" class="button button-primary button-full" type="button">기획 승인 및 영상 생성 <span aria-hidden="true">→</span></button></div>
+        </section>
+
+        <section id="progress-panel" class="panel" hidden aria-labelledby="progress-title"><div class="section-heading"><h2 id="progress-title">영상 생성 중</h2><span id="progress-percent" class="progress-percent"></span></div><p id="progress-step" class="progress-step" aria-live="polite"></p><div class="progress-track" id="progress-track" role="progressbar" aria-label="영상 생성 진행률" aria-valuemin="0" aria-valuemax="100"><div id="progress-fill"></div></div><p id="progress-detail" class="muted"></p><p id="progress-recovery" class="field-note">이 창을 닫아도 작업 상태는 보존됩니다.</p><button id="resume-render" class="button button-secondary" type="button" hidden>실패한 단계부터 다시 시작</button></section>
+
+        <section id="output-panel" class="panel" hidden aria-labelledby="output-title"><div class="section-heading"><h2 id="output-title">완성된 영상</h2><span id="output-version" class="small-label"></span></div><video id="result-video" controls playsinline preload="metadata" aria-label="생성된 영상"></video><div id="downloads" class="downloads"></div><div id="output-notice" class="field-note"></div></section>
+
+        <section id="revision-panel" class="panel revision-panel" hidden aria-labelledby="revision-title"><div class="eyebrow">다음 버전</div><h2 id="revision-title">어떤 부분을 바꿀까요?</h2><form id="revision-form"><label for="revision-request" class="sr-only">수정 요청</label><textarea id="revision-request" rows="3" required maxlength="2000" placeholder="첫 3초를 더 강하게. 또는 32~38초 카메라를 빠르게 하고 항로 두 개 추가."></textarea><button id="preview-revision" class="button button-secondary button-full" type="submit">변경점 확인</button></form><div id="revision-preview" hidden><div id="revision-summary"></div><div id="revision-diff"></div><div class="revision-actions"><button id="cancel-revision" class="button button-quiet" type="button">취소</button><button id="approve-revision" class="button button-primary" type="button">변경 승인 및 장면 생성</button></div><p class="field-note">변경된 장면만 새로 만들고, 이전 버전은 보존합니다.</p></div></section>
+      </section>
+    </div>
+  </main>
+  <div id="notice" class="notice" role="alert" tabindex="-1" hidden><div><strong id="notice-title"></strong><p id="notice-message"></p><div id="notice-details"></div></div><button id="dismiss-notice" class="notice-close" type="button" aria-label="알림 닫기">×</button></div>
+  <footer class="site-footer">WORLD SIMULATION <span>지리는 정확하게. 이야기는 영화처럼.</span></footer>
+</body>
+</html>

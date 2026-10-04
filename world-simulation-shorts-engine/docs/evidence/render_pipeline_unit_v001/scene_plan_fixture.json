@@ -1,0 +1,2613 @@
+{
+  "schema_version": "1.0",
+  "project_id": "",
+  "version": 1,
+  "duration": 20.0,
+  "request": {
+    "topic": "런던에서 파리, 로마로 이어지는 민간 항공 여행",
+    "duration": 20.0,
+    "style": "cinematic",
+    "quality": "HIGH",
+    "tts": false,
+    "subtitles": false,
+    "bgm": true
+  },
+  "options": {
+    "tts": false,
+    "subtitles": false,
+    "bgm": true,
+    "quality": "HIGH"
+  },
+  "story": {
+    "hook": "런던 → 파리 → 로마 · 하나의 여정?",
+    "claims": [
+      {
+        "id": "F01",
+        "text": "London의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F02",
+        "text": "Paris의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F03",
+        "text": "Rome의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "FD01",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 343 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "FD02",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 1,105 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "A01",
+        "text": "입력한 도시 연결과 화면의 이동 시간은 시각화를 위한 가정입니다. 실제 항공편 일정이나 성능 예측이 아닙니다.",
+        "status": "ASSUMPTION",
+        "source_ids": [],
+        "scope": "scenario premise"
+      },
+      {
+        "id": "M01",
+        "text": "검증된 위치를 연결하는 구면 경로의 공간적 차이와 연결망을 시각화합니다.",
+        "status": "SIMULATION",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "assumption_ids": [
+          "A01"
+        ],
+        "scope": "visualization only"
+      }
+    ],
+    "beats": [
+      {
+        "scene_id": "S001",
+        "role": "hook",
+        "cause": null,
+        "summary": "hook: London"
+      },
+      {
+        "scene_id": "S002",
+        "role": "progression",
+        "cause": "S001",
+        "summary": "progression: Paris"
+      },
+      {
+        "scene_id": "S003",
+        "role": "variable",
+        "cause": "S002",
+        "summary": "variable: Rome"
+      },
+      {
+        "scene_id": "S004",
+        "role": "peak",
+        "cause": "S003",
+        "summary": "peak: Rome"
+      },
+      {
+        "scene_id": "S005",
+        "role": "payoff",
+        "cause": "S004",
+        "summary": "payoff: Rome"
+      }
+    ],
+    "domain": "aviation",
+    "planner": "offline-capability-bounded-v1",
+    "conclusion": "검증된 위치를 연결하는 구면 경로의 공간적 차이와 연결망을 시각화합니다.",
+    "limitations": [
+      "사실은 공개 GIS의 위치·형태·경로 자료에 한정합니다.",
+      "이동 속도·항로 선택·폐쇄의 결과는 가정 기반 시각화이며 예측이 아닙니다."
+    ]
+  },
+  "scenes": [
+    {
+      "hook": "런던 → 파리 → 로마 · 하나의 여정?",
+      "scene_id": "S001",
+      "start_time": 0.0,
+      "duration": 4.0,
+      "scene_type": "EARTH_ESTABLISH",
+      "narration": "런던 → 파리 → 로마 · 하나의 여정?",
+      "location": "London",
+      "coordinates": {
+        "lon": -0.118668,
+        "lat": 51.501941,
+        "source_id": "natural_earth_places",
+        "location_id": "london"
+      },
+      "geographic_targets": [
+        "london"
+      ],
+      "camera_preset": "FAST_HOOK_DIVE",
+      "camera_start": {
+        "height": 1.8,
+        "tilt": 0.35,
+        "yaw": -0.26,
+        "bank": 0.015,
+        "fov": 43,
+        "lon": -0.118668,
+        "lat": 51.501941,
+        "target_lon": -0.118668,
+        "target_lat": 51.501941,
+        "location_id": "london"
+      },
+      "camera_end": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": 0.7626333543081134,
+        "lat": 50.59856778523081,
+        "target_lon": 0.7626333543081134,
+        "target_lat": 50.59856778523081
+      },
+      "camera_speed": 1.8,
+      "camera_easing": "quintic_out",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "london",
+          "action": "move",
+          "start_time": 1.5,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "London → Paris",
+          "start_time": 1.3,
+          "end_time": 4.0,
+          "progress_start": 0.0,
+          "progress_end": 0.34394904,
+          "faint": false
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.6,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "London의 확인된 위치 공개",
+          "text": "LONDON",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "F01"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "cause",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "연결 경로 선택 공개",
+          "text": "London → Paris",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E003",
+          "kind": "entity_departure",
+          "time": 1.5,
+          "duration": 0.7,
+          "target_id": "aircraft_R_01",
+          "role": "progression",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "DEPARTURE",
+          "text": "DEPARTURE",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E004",
+          "kind": "destination_preview",
+          "time": 2.4,
+          "duration": 0.7,
+          "target_id": "paris",
+          "role": "hint",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "다음 연결점 Paris 공개",
+          "text": "PARIS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "F02"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "london",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "LONDON",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_OPEN",
+          "kind": "cinematic_hit",
+          "time": 0.0,
+          "duration": 1.0,
+          "visual_event_id": null,
+          "gain_db": -12
+        },
+        {
+          "id": "A_E001",
+          "kind": "soft_pulse",
+          "time": 0.6,
+          "duration": 1.2,
+          "visual_event_id": "E001",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E002",
+          "kind": "digital_sweep",
+          "time": 1.3,
+          "duration": 1.2,
+          "visual_event_id": "E002",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E003",
+          "kind": "pass_by",
+          "time": 1.5,
+          "duration": 1.2,
+          "visual_event_id": "E003",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E004",
+          "kind": "soft_pulse",
+          "time": 2.4,
+          "duration": 1.2,
+          "visual_event_id": "E004",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 1.8,
+          "tilt": 0.35,
+          "yaw": -0.26,
+          "bank": 0.015,
+          "fov": 43,
+          "lon": -0.118668,
+          "lat": 51.501941,
+          "target_lon": -0.118668,
+          "target_lat": 51.501941,
+          "location_id": "london"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [],
+        "active_routes": [],
+        "entities": [],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.0
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": 0.7626333543081134,
+          "lat": 50.59856778523081,
+          "target_lon": 0.7626333543081134,
+          "target_lat": 50.59856778523081
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.34394904
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.2
+        }
+      },
+      "directing_presets": [
+        "HOOK_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.0,
+      "motion_start": 0.0,
+      "description": "hook: London",
+      "role": "hook",
+      "narration_event_ids": [
+        "E001",
+        "E002",
+        "E003",
+        "E004"
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S002",
+      "start_time": 4.0,
+      "duration": 4.0,
+      "scene_type": "ROUTE_CHASE",
+      "narration": "곡선을 따라 다음 연결점으로 향합니다.",
+      "location": "Paris",
+      "coordinates": {
+        "lon": 2.352992,
+        "lat": 48.858092,
+        "source_id": "natural_earth_places",
+        "location_id": "paris"
+      },
+      "geographic_targets": [
+        "paris"
+      ],
+      "camera_preset": "ROUTE_CHASE",
+      "camera_start": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": 0.7626333543081134,
+        "lat": 50.59856778523081,
+        "target_lon": 0.7626333543081134,
+        "target_lat": 50.59856778523081
+      },
+      "camera_end": {
+        "height": 0.42,
+        "tilt": 0.7,
+        "yaw": -0.26,
+        "bank": 0.025,
+        "fov": 43,
+        "lon": 2.007645461545969,
+        "lat": 49.248606444227114,
+        "target_lon": 2.007645461545969,
+        "target_lat": 49.248606444227114
+      },
+      "camera_speed": 1.15,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "paris",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "London → Paris",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 0.34394904,
+          "progress_end": 0.85350318,
+          "faint": false
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E005",
+          "kind": "milestone_reveal",
+          "time": 0.5,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "progression",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "217 km REMAINING",
+          "value": 217,
+          "unit": "km",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E006",
+          "kind": "country_reveal",
+          "time": 2.65,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "progression",
+          "caused_by": "E005",
+          "meaningful": true,
+          "description": "United Kingdom의 위치 관계 공개",
+          "text": "UNITED KINGDOM",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "F01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "paris",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "PARIS",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E005",
+          "kind": "soft_pulse",
+          "time": 0.5,
+          "duration": 1.2,
+          "visual_event_id": "E005",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E006",
+          "kind": "soft_impact",
+          "time": 2.65,
+          "duration": 1.2,
+          "visual_event_id": "E006",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": 0.7626333543081134,
+          "lat": 50.59856778523081,
+          "target_lon": 0.7626333543081134,
+          "target_lat": 50.59856778523081
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.34394904
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.2
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.42,
+          "tilt": 0.7,
+          "yaw": -0.26,
+          "bank": 0.025,
+          "fov": 43,
+          "lon": 2.007645461545969,
+          "lat": 49.248606444227114,
+          "target_lon": 2.007645461545969,
+          "target_lat": 49.248606444227114
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.85350318
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.4
+        }
+      },
+      "directing_presets": [
+        "ROUTE_CHASE"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.2,
+      "motion_start": 0.0,
+      "description": "progression: Paris",
+      "role": "progression",
+      "narration_event_ids": [
+        "E005",
+        "E006"
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S003",
+      "start_time": 8.0,
+      "duration": 4.0,
+      "scene_type": "COMPARISON",
+      "narration": "다른 연결을 선택하면 어떻게 달라질까요?",
+      "location": "Rome",
+      "coordinates": {
+        "lon": 12.481313,
+        "lat": 41.897902,
+        "source_id": "natural_earth_places",
+        "location_id": "rome"
+      },
+      "geographic_targets": [
+        "rome"
+      ],
+      "camera_preset": "NETWORK_EXPANSION",
+      "camera_start": {
+        "height": 0.42,
+        "tilt": 0.7,
+        "yaw": -0.26,
+        "bank": 0.025,
+        "fov": 43,
+        "lon": 2.007645461545969,
+        "lat": 49.248606444227114,
+        "target_lon": 2.007645461545969,
+        "target_lat": 49.248606444227114
+      },
+      "camera_end": {
+        "height": 1.45,
+        "tilt": 0.4,
+        "yaw": 0.185,
+        "bank": 0.018,
+        "fov": 44,
+        "lon": 6.423353178815787,
+        "lat": 46.3716418806094,
+        "target_lon": 6.423353178815787,
+        "target_lat": 46.3716418806094
+      },
+      "camera_speed": 1.2,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "rome",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 1.15
+        },
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "rome",
+          "action": "move",
+          "start_time": 1.35,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        },
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "London → Paris",
+          "start_time": 0.0,
+          "end_time": 1.15,
+          "progress_start": 0.85350318,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1104.91,
+          "description": "Paris → Rome",
+          "start_time": 1.15,
+          "end_time": 4.0,
+          "progress_start": 0.0,
+          "progress_end": 0.37254902,
+          "faint": false
+        },
+        {
+          "route_id": "N_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 4.478028,
+              "lat": 51.921915,
+              "source_id": "natural_earth_places",
+              "location_id": "rotterdam"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 320.07,
+          "description": "Sampled geographic connection: London → Rotterdam",
+          "start_time": 0.6,
+          "end_time": 1.6,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": 13.399603,
+              "lat": 52.523764,
+              "source_id": "natural_earth_places",
+              "location_id": "berlin"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 877.16,
+          "description": "Sampled geographic connection: Paris → Berlin",
+          "start_time": 1.6,
+          "end_time": 2.6,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_03",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            },
+            {
+              "lon": 23.731375,
+              "lat": 37.985272,
+              "source_id": "natural_earth_places",
+              "location_id": "athens"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1052.06,
+          "description": "Sampled geographic connection: Rome → Athens",
+          "start_time": 2.6,
+          "end_time": 3.6,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E007",
+          "kind": "new_variable",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "rome",
+          "role": "variable",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "다음 연결/대안이라는 새 변수 공개",
+          "text": "NEXT · ROME",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E008",
+          "kind": "arrival",
+          "time": 1.15,
+          "duration": 0.7,
+          "target_id": "paris",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": false,
+          "description": "PARIS",
+          "text": "PARIS",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E009",
+          "kind": "route_start",
+          "time": 1.15,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "THE NEXT CONNECTION",
+          "text": "THE NEXT CONNECTION",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E010",
+          "kind": "network_expand",
+          "time": 2.68,
+          "duration": 0.7,
+          "target_id": "N_03",
+          "role": "progression",
+          "caused_by": "E009",
+          "meaningful": true,
+          "description": "다음 연결점 Paris 공개",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 23.731375,
+            "lat": 37.985272,
+            "source_id": "natural_earth_places",
+            "location_id": "athens"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "rome",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "ROME",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E007",
+          "kind": "subtle_impact",
+          "time": 0.8,
+          "duration": 1.2,
+          "visual_event_id": "E007",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E008",
+          "kind": "soft_impact",
+          "time": 1.15,
+          "duration": 1.2,
+          "visual_event_id": "E008",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E009",
+          "kind": "digital_sweep",
+          "time": 1.15,
+          "duration": 1.2,
+          "visual_event_id": "E009",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E010",
+          "kind": "wide_riser",
+          "time": 2.68,
+          "duration": 1.2,
+          "visual_event_id": "E010",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.42,
+          "tilt": 0.7,
+          "yaw": -0.26,
+          "bank": 0.025,
+          "fov": 43,
+          "lon": 2.007645461545969,
+          "lat": 49.248606444227114,
+          "target_lon": 2.007645461545969,
+          "target_lat": 49.248606444227114
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.85350318
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.4
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 1.45,
+          "tilt": 0.4,
+          "yaw": 0.185,
+          "bank": 0.018,
+          "fov": 44,
+          "lon": 6.423353178815787,
+          "lat": 46.3716418806094,
+          "target_lon": 6.423353178815787,
+          "target_lat": 46.3716418806094
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 1.0
+          },
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.37254902
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.6
+        }
+      },
+      "directing_presets": [
+        "NEW_VARIABLE"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.4,
+      "motion_start": 0.0,
+      "description": "variable: Rome",
+      "role": "variable",
+      "narration_event_ids": [
+        "E007",
+        "E008",
+        "E009",
+        "E010"
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S004",
+      "start_time": 12.0,
+      "duration": 4.0,
+      "scene_type": "ROUTE_CHASE",
+      "narration": "연결망의 전체 구조가 드러납니다.",
+      "location": "Rome",
+      "coordinates": {
+        "lon": 12.481313,
+        "lat": 41.897902,
+        "source_id": "natural_earth_places",
+        "location_id": "rome"
+      },
+      "geographic_targets": [
+        "rome"
+      ],
+      "camera_preset": "HORIZON_REVEAL",
+      "camera_start": {
+        "height": 1.45,
+        "tilt": 0.4,
+        "yaw": 0.185,
+        "bank": 0.018,
+        "fov": 44,
+        "lon": 6.423353178815787,
+        "lat": 46.3716418806094,
+        "target_lon": 6.423353178815787,
+        "target_lat": 46.3716418806094
+      },
+      "camera_end": {
+        "height": 0.32,
+        "tilt": 0.95,
+        "yaw": -0.30500000000000005,
+        "bank": 0.028,
+        "fov": 44,
+        "lon": 11.53382725610576,
+        "lat": 42.66499361058672,
+        "target_lon": 11.53382725610576,
+        "target_lat": 42.66499361058672
+      },
+      "camera_speed": 0.8,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "HERO",
+      "entities": [
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "rome",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 4.0
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "London → Paris",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1104.91,
+          "description": "Paris → Rome",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 0.37254902,
+          "progress_end": 0.89542484,
+          "faint": false
+        },
+        {
+          "route_id": "N_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 4.478028,
+              "lat": 51.921915,
+              "source_id": "natural_earth_places",
+              "location_id": "rotterdam"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 320.07,
+          "description": "Sampled geographic connection: London → Rotterdam",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": 13.399603,
+              "lat": 52.523764,
+              "source_id": "natural_earth_places",
+              "location_id": "berlin"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 877.16,
+          "description": "Sampled geographic connection: Paris → Berlin",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_03",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            },
+            {
+              "lon": 23.731375,
+              "lat": 37.985272,
+              "source_id": "natural_earth_places",
+              "location_id": "athens"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1052.06,
+          "description": "Sampled geographic connection: Rome → Athens",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E011",
+          "kind": "peak_reveal",
+          "time": 1.1,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "peak",
+          "caused_by": "E010",
+          "meaningful": true,
+          "description": "주요 연결과 전체 공간 관계 동시 공개",
+          "text": "586 km TO THE NEXT CITY",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E012",
+          "kind": "milestone_reveal",
+          "time": 3.25,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E011",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "169 km REMAINING",
+          "value": 169,
+          "unit": "km",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "rome",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "ROME",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E011",
+          "kind": "cinematic_hit",
+          "time": 1.1,
+          "duration": 1.2,
+          "visual_event_id": "E011",
+          "gain_db": -10
+        },
+        {
+          "id": "A_E012",
+          "kind": "soft_pulse",
+          "time": 3.25,
+          "duration": 0.75,
+          "visual_event_id": "E012",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 1.45,
+          "tilt": 0.4,
+          "yaw": 0.185,
+          "bank": 0.018,
+          "fov": 44,
+          "lon": 6.423353178815787,
+          "lat": 46.3716418806094,
+          "target_lon": 6.423353178815787,
+          "target_lat": 46.3716418806094
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 1.0
+          },
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.37254902
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.6
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.32,
+          "tilt": 0.95,
+          "yaw": -0.30500000000000005,
+          "bank": 0.028,
+          "fov": 44,
+          "lon": 11.53382725610576,
+          "lat": 42.66499361058672,
+          "target_lon": 11.53382725610576,
+          "target_lat": 42.66499361058672
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.89542484
+          }
+        ],
+        "lighting": "HERO",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.8
+        }
+      },
+      "directing_presets": [
+        "PEAK_MOMENT"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.6,
+      "motion_start": 0.0,
+      "description": "peak: Rome",
+      "role": "peak",
+      "narration_event_ids": [
+        "E011",
+        "E012"
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S005",
+      "start_time": 16.0,
+      "duration": 4.0,
+      "scene_type": "FINAL_OVERVIEW",
+      "narration": "같은 지구 위에서, 새로운 연결이 보입니다.",
+      "location": "Rome",
+      "coordinates": {
+        "lon": 12.481313,
+        "lat": 41.897902,
+        "source_id": "natural_earth_places",
+        "location_id": "rome"
+      },
+      "geographic_targets": [
+        "rome"
+      ],
+      "camera_preset": "FINAL_REVEAL",
+      "camera_start": {
+        "height": 0.32,
+        "tilt": 0.95,
+        "yaw": -0.30500000000000005,
+        "bank": 0.028,
+        "fov": 44,
+        "lon": 11.53382725610576,
+        "lat": 42.66499361058672,
+        "target_lon": 11.53382725610576,
+        "target_lat": 42.66499361058672
+      },
+      "camera_end": {
+        "height": 1.85,
+        "tilt": 0.4,
+        "yaw": 0.12,
+        "bank": 0.012,
+        "fov": 44,
+        "lon": 12.481313000000002,
+        "lat": 41.897902,
+        "target_lon": 12.481313000000002,
+        "target_lat": 41.897902
+      },
+      "camera_speed": 1.3,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "rome",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 0.8
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 342.59,
+          "description": "London → Paris",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1104.91,
+          "description": "Paris → Rome",
+          "start_time": 0.0,
+          "end_time": 0.8,
+          "progress_start": 0.89542484,
+          "progress_end": 1.0,
+          "faint": false
+        },
+        {
+          "route_id": "N_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": -0.118668,
+              "lat": 51.501941,
+              "source_id": "natural_earth_places",
+              "location_id": "london"
+            },
+            {
+              "lon": 4.478028,
+              "lat": 51.921915,
+              "source_id": "natural_earth_places",
+              "location_id": "rotterdam"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 320.07,
+          "description": "Sampled geographic connection: London → Rotterdam",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": 13.399603,
+              "lat": 52.523764,
+              "source_id": "natural_earth_places",
+              "location_id": "berlin"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 877.16,
+          "description": "Sampled geographic connection: Paris → Berlin",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_03",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            },
+            {
+              "lon": 23.731375,
+              "lat": 37.985272,
+              "source_id": "natural_earth_places",
+              "location_id": "athens"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1052.06,
+          "description": "Sampled geographic connection: Rome → Athens",
+          "start_time": 0.0,
+          "end_time": 4.0,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_04",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 2.352992,
+              "lat": 48.858092,
+              "source_id": "natural_earth_places",
+              "location_id": "paris"
+            },
+            {
+              "lon": -3.685297,
+              "lat": 40.401972,
+              "source_id": "natural_earth_places",
+              "location_id": "madrid"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1053.9,
+          "description": "Sampled geographic connection: Paris → Madrid",
+          "start_time": 1.8,
+          "end_time": 2.7,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        },
+        {
+          "route_id": "N_05",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 12.481313,
+              "lat": 41.897902,
+              "source_id": "natural_earth_places",
+              "location_id": "rome"
+            },
+            {
+              "lon": 28.974277,
+              "lat": 41.017602,
+              "source_id": "natural_earth_places",
+              "location_id": "istanbul"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1375.79,
+          "description": "Sampled geographic connection: Rome → Istanbul",
+          "start_time": 2.6,
+          "end_time": 3.5,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E013",
+          "kind": "arrival",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "rome",
+          "role": "progression",
+          "caused_by": "E012",
+          "meaningful": true,
+          "description": "ROME",
+          "text": "ROME",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E014",
+          "kind": "network_expand",
+          "time": 1.88,
+          "duration": 0.7,
+          "target_id": "N_04",
+          "role": "progression",
+          "caused_by": "E013",
+          "meaningful": true,
+          "description": "연결망 범위 확대",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -3.685297,
+            "lat": 40.401972,
+            "source_id": "natural_earth_places",
+            "location_id": "madrid"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E015",
+          "kind": "final_reveal",
+          "time": 3.35,
+          "duration": 0.7,
+          "target_id": "rome",
+          "role": "payoff",
+          "caused_by": "E014",
+          "meaningful": true,
+          "description": "전체 연결 구조와 가정의 한계 공개",
+          "text": "CONNECTIONS REVEALED",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "rome",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "ROME",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "start_time": 0.1,
+          "end_time": 4.0,
+          "role": "city",
+          "opacity": 0.9
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E013",
+          "kind": "soft_impact",
+          "time": 0.8,
+          "duration": 1.2,
+          "visual_event_id": "E013",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E014",
+          "kind": "wide_riser",
+          "time": 1.88,
+          "duration": 1.2,
+          "visual_event_id": "E014",
+          "gain_db": -15
+        },
+        {
+          "id": "A_E015",
+          "kind": "deep_final_hit",
+          "time": 3.35,
+          "duration": 0.6499999999999999,
+          "visual_event_id": "E015",
+          "gain_db": -15
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.32,
+          "tilt": 0.95,
+          "yaw": -0.30500000000000005,
+          "bank": 0.028,
+          "fov": 44,
+          "lon": 11.53382725610576,
+          "lat": 42.66499361058672,
+          "target_lon": 11.53382725610576,
+          "target_lat": 42.66499361058672
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.89542484
+          }
+        ],
+        "lighting": "HERO",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.8
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 1.85,
+          "tilt": 0.4,
+          "yaw": 0.12,
+          "bank": 0.012,
+          "fov": 44,
+          "lon": 12.481313000000002,
+          "lat": 41.897902,
+          "target_lon": 12.481313000000002,
+          "target_lat": 41.897902
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "France",
+          "Italy",
+          "United Kingdom"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "N_01",
+          "N_02",
+          "N_03",
+          "N_04",
+          "N_05"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 1.0
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 1.0
+        }
+      },
+      "directing_presets": [
+        "FINAL_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.8,
+      "motion_start": 0.0,
+      "description": "payoff: Rome",
+      "role": "payoff",
+      "narration_event_ids": [
+        "E013",
+        "E014",
+        "E015"
+      ]
+    }
+  ],
+  "required_plugins": [
+    "AVIATION",
+    "NETWORK",
+    "GEOGRAPHY"
+  ],
+  "sources": [
+    {
+      "id": "natural_earth_places",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "2026-10-04T11:59:04.739053+00:00",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "local_path": "populated_places_source.geojson",
+      "attribution_required": false
+    },
+    {
+      "id": "ourairports",
+      "url": "https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv",
+      "author": "OurAirports / DataHub",
+      "license": "ODC-PDDL-1.0",
+      "license_url": "https://opendatacommons.org/licenses/pddl/",
+      "downloaded_at": "2026-10-04T11:59:04.745131+00:00",
+      "sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "local_path": "airport_codes_source.csv",
+      "attribution_required": false
+    },
+    {
+      "id": "natural_earth_countries",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "preserved original MASTER GIS; first acquisition in assets/SOURCES.json",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "local_path": "../../cinematic-world-map/assets/gis/countries_50m.geojson",
+      "attribution_required": false,
+      "coordinate_provenance": "LABEL_X/LABEL_Y source label points; not centroid guesses"
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "name": "searoute 1.6.0 maritime network and ports",
+      "author": "Gent Halili and searoute-py contributors",
+      "license": "Apache-2.0",
+      "license_file": "data/shipping_sources/APACHE-2.0.txt",
+      "attribution_required": true,
+      "attribution": "Maritime route geometry derived from searoute-py 1.6.0 by Gent Halili and contributors, Apache-2.0. Routes are visualization-grade and are not navigational directions.",
+      "original_url": "https://github.com/genthalili/searoute-py",
+      "download_url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "package_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "downloaded_at_utc": "2026-10-04T12:01:52.348234+00:00",
+      "package_version": "1.6.0",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_order": "longitude,latitude",
+      "coordinate_reference_system": "EPSG:4326",
+      "files": {
+        "marnet_dict.py": {
+          "path": "data/shipping_sources/marnet_dict.py",
+          "sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3"
+        },
+        "ports_dict.py": {
+          "path": "data/shipping_sources/ports_dict.py",
+          "sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b"
+        },
+        "APACHE-2.0.txt": {
+          "path": "data/shipping_sources/APACHE-2.0.txt",
+          "sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66"
+        },
+        "PACKAGE_METADATA.txt": {
+          "path": "data/shipping_sources/PACKAGE_METADATA.txt",
+          "sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c"
+        }
+      },
+      "limitations": [
+        "The source library is explicitly for maritime visualization, not vessel navigation.",
+        "Canal and river segments are generalized network geometry; do not claim survey-grade canal geometry.",
+        "Routes are graph shortest-distance alternatives, not a forecast of ship choices, traffic volume, prices, delivery delay, or closure outcome.",
+        "Fixed-speed duration estimates from the source package are deliberately not used."
+      ],
+      "id": "SEAROUTE_1_6_0",
+      "url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "local_path": "data/shipping_sources/searoute-1.6.0.tar.gz"
+    },
+    {
+      "id": "NATURAL_EARTH_PHYSICAL_POINTS_10M",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_geography_regions_points.geojson",
+      "author": "Natural Earth contributors",
+      "license": "Public Domain",
+      "sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "local_path": "data/shipping_sources/natural_earth_physical_points.geojson",
+      "downloaded_at_utc": "2026-10-04T12:03:07.469430+00:00",
+      "attribution_required": false,
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_reference_system": "EPSG:4326",
+      "coordinate_precision": "generalized cartographic point from Natural Earth, not survey-grade landmark positioning"
+    }
+  ],
+  "metadata": {
+    "camera_provenance": [
+      {
+        "time": 4.0,
+        "route_id": "R_01",
+        "progress": 0.34394904458598724,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 8.0,
+        "route_id": "R_01",
+        "progress": 0.8535031847133757,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 12.0,
+        "route_id": "R_02",
+        "progress": 0.3725490196078431,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 16.0,
+        "route_id": "R_02",
+        "progress": 0.8954248366013071,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 20.0,
+        "route_id": "R_02",
+        "progress": 1.0,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      }
+    ]
+  },
+  "gate": {
+    "passed": true,
+    "errors": [],
+    "warnings": [],
+    "retention": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "metrics": {
+        "meaningful_event_count": 14,
+        "average_event_interval": 1.4423,
+        "max_event_gap": 2.42,
+        "first_3s_events": 4,
+        "event_types": 11,
+        "max_same_kind_run": 1,
+        "peak_count": 1,
+        "camera_events_counted": false
+      },
+      "events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.6,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "London의 확인된 위치 공개",
+          "text": "LONDON",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "F01",
+          "absolute_time": 0.6,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "cause",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "연결 경로 선택 공개",
+          "text": "London → Paris",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.3,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E003",
+          "kind": "entity_departure",
+          "time": 1.5,
+          "duration": 0.7,
+          "target_id": "aircraft_R_01",
+          "role": "progression",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "DEPARTURE",
+          "text": "DEPARTURE",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.5,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E004",
+          "kind": "destination_preview",
+          "time": 2.4,
+          "duration": 0.7,
+          "target_id": "paris",
+          "role": "hint",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "다음 연결점 Paris 공개",
+          "text": "PARIS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "F02",
+          "absolute_time": 2.4,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E005",
+          "kind": "milestone_reveal",
+          "time": 0.5,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "progression",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "217 km REMAINING",
+          "value": 217,
+          "unit": "km",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "M01",
+          "absolute_time": 4.5,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E006",
+          "kind": "country_reveal",
+          "time": 2.65,
+          "duration": 0.7,
+          "target_id": "london",
+          "role": "progression",
+          "caused_by": "E005",
+          "meaningful": true,
+          "description": "United Kingdom의 위치 관계 공개",
+          "text": "UNITED KINGDOM",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -0.118668,
+            "lat": 51.501941,
+            "source_id": "natural_earth_places",
+            "location_id": "london"
+          },
+          "claim_id": "F01",
+          "absolute_time": 6.65,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E007",
+          "kind": "new_variable",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "rome",
+          "role": "variable",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "다음 연결/대안이라는 새 변수 공개",
+          "text": "NEXT · ROME",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01",
+          "absolute_time": 8.8,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E009",
+          "kind": "route_start",
+          "time": 1.15,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "THE NEXT CONNECTION",
+          "text": "THE NEXT CONNECTION",
+          "coordinates": {
+            "lon": 2.352992,
+            "lat": 48.858092,
+            "source_id": "natural_earth_places",
+            "location_id": "paris"
+          },
+          "claim_id": "M01",
+          "absolute_time": 9.15,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E010",
+          "kind": "network_expand",
+          "time": 2.68,
+          "duration": 0.7,
+          "target_id": "N_03",
+          "role": "progression",
+          "caused_by": "E009",
+          "meaningful": true,
+          "description": "다음 연결점 Paris 공개",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 23.731375,
+            "lat": 37.985272,
+            "source_id": "natural_earth_places",
+            "location_id": "athens"
+          },
+          "claim_id": "M01",
+          "absolute_time": 10.68,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E011",
+          "kind": "peak_reveal",
+          "time": 1.1,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "peak",
+          "caused_by": "E010",
+          "meaningful": true,
+          "description": "주요 연결과 전체 공간 관계 동시 공개",
+          "text": "586 km TO THE NEXT CITY",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01",
+          "absolute_time": 13.1,
+          "scene_id": "S004"
+        },
+        {
+          "id": "E012",
+          "kind": "milestone_reveal",
+          "time": 3.25,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "progression",
+          "caused_by": "E011",
+          "meaningful": true,
+          "description": "실제 렌더 경로 진행률에서 계산한 남은 구면 거리; 압축된 이동 시간은 가정",
+          "text": "169 km REMAINING",
+          "value": 169,
+          "unit": "km",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01",
+          "absolute_time": 15.25,
+          "scene_id": "S004"
+        },
+        {
+          "id": "E013",
+          "kind": "arrival",
+          "time": 0.8,
+          "duration": 0.7,
+          "target_id": "rome",
+          "role": "progression",
+          "caused_by": "E012",
+          "meaningful": true,
+          "description": "ROME",
+          "text": "ROME",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01",
+          "absolute_time": 16.8,
+          "scene_id": "S005"
+        },
+        {
+          "id": "E014",
+          "kind": "network_expand",
+          "time": 1.88,
+          "duration": 0.7,
+          "target_id": "N_04",
+          "role": "progression",
+          "caused_by": "E013",
+          "meaningful": true,
+          "description": "연결망 범위 확대",
+          "text": "NEW CONNECTIONS",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": -3.685297,
+            "lat": 40.401972,
+            "source_id": "natural_earth_places",
+            "location_id": "madrid"
+          },
+          "claim_id": "M01",
+          "absolute_time": 17.88,
+          "scene_id": "S005"
+        },
+        {
+          "id": "E015",
+          "kind": "final_reveal",
+          "time": 3.35,
+          "duration": 0.7,
+          "target_id": "rome",
+          "role": "payoff",
+          "caused_by": "E014",
+          "meaningful": true,
+          "description": "전체 연결 구조와 가정의 한계 공개",
+          "text": "CONNECTIONS REVEALED",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 12.481313,
+            "lat": 41.897902,
+            "source_id": "natural_earth_places",
+            "location_id": "rome"
+          },
+          "claim_id": "M01",
+          "absolute_time": 19.35,
+          "scene_id": "S005"
+        }
+      ]
+    }
+  }
+}

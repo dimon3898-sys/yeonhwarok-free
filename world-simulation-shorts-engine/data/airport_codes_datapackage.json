@@ -1,0 +1,223 @@
+{
+  "bytes": 8842621,
+  "collection": "reference-data",
+  "count_of_rows": 85543,
+  "description": "Data contains the list of all airport codes,\nthe attributes are listed in the table schema. Some of the columns\ncontain attributes identifying airport locations,\nother codes (IATA, local if exist) that are relevant to\nidentification of an airport.",
+  "has_extended_version": true,
+  "has_solutions": [
+    "global-country-region-reference-data",
+    "logistics",
+    "worldwide-postal-code-database"
+  ],
+  "hash": "b985a79276a1dadceb9d3d18b41f5cc1",
+  "homepage": "http://www.ourairports.com/",
+  "licenses": [
+    {
+      "id": "odc-pddl",
+      "name": "ODC-PDDL-1.0",
+      "path": "https://opendatacommons.org/licenses/pddl/",
+      "title": "Open Data Commons Public Domain Dedication and License v1.0"
+    }
+  ],
+  "name": "airport-codes",
+  "profile": "data-package",
+  "resources": [
+    {
+      "bytes": 8842621,
+      "description": "List of airports and airfields worldwide with their IATA and ICAO codes, location identifiers, facility type, and geographic coordinates. Derived from the OurAirports public domain dataset by merging latitude and longitude into a single coordinates field.",
+      "dialect": {
+        "caseSensitiveHeader": false,
+        "delimiter": ",",
+        "doubleQuote": true,
+        "header": true,
+        "lineTerminator": "\n",
+        "quoteChar": "\"",
+        "skipInitialSpace": false
+      },
+      "encoding": "utf-8",
+      "format": "csv",
+      "hash": "d47e3cafbcd98b4816a895d8df23cffb",
+      "name": "airport-codes",
+      "path": "data/airport-codes.csv",
+      "profile": "tabular-data-resource",
+      "schema": {
+        "fields": [
+          {
+            "description": "OurAirports unique identifier for the airport (e.g. `00A`, `KLAX`, `ZYTX`).",
+            "format": "default",
+            "name": "ident",
+            "type": "string"
+          },
+          {
+            "description": "Facility type. One of: `small_airport`, `medium_airport`, `large_airport`, `heliport`, `seaplane_base`, `balloonport`.",
+            "format": "default",
+            "name": "type",
+            "type": "string"
+          },
+          {
+            "description": "Full name of the airport or airfield.",
+            "format": "default",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "description": "Elevation of the airport above sea level in feet. May be empty when unknown.",
+            "format": "default",
+            "name": "elevation_ft",
+            "type": "integer"
+          },
+          {
+            "description": "Two-letter continent code (e.g. `NA` = North America, `EU` = Europe, `AS` = Asia, `AF` = Africa, `OC` = Oceania, `SA` = South America, `AN` = Antarctica).",
+            "format": "default",
+            "name": "continent",
+            "type": "string"
+          },
+          {
+            "description": "ISO 3166-1 alpha-2 two-letter country code (e.g. `US`, `CN`, `GB`).",
+            "format": "default",
+            "name": "iso_country",
+            "type": "string"
+          },
+          {
+            "description": "ISO 3166-2 region code combining country and subdivision (e.g. `US-CA`, `CN-21`).",
+            "format": "default",
+            "name": "iso_region",
+            "type": "string"
+          },
+          {
+            "description": "Name of the city or municipality where the airport is located. May be empty.",
+            "format": "default",
+            "name": "municipality",
+            "type": "string"
+          },
+          {
+            "description": "ICAO (International Civil Aviation Organization) 4-letter airport code, used by air traffic control. May be empty for facilities without an ICAO designation.",
+            "format": "default",
+            "name": "icao_code",
+            "type": "string"
+          },
+          {
+            "description": "IATA (International Air Transport Association) 3-letter code, used in passenger ticketing and baggage handling. May be empty for facilities without commercial scheduled service.",
+            "format": "default",
+            "name": "iata_code",
+            "type": "string"
+          },
+          {
+            "description": "GPS navigation code for the airport; often the same as the ICAO code. May be empty.",
+            "format": "default",
+            "name": "gps_code",
+            "type": "string"
+          },
+          {
+            "description": "Local country-specific airport code; primarily used for US airports (FAA identifier). May be empty.",
+            "format": "default",
+            "name": "local_code",
+            "type": "string"
+          },
+          {
+            "description": "Geographic coordinates as a `\"latitude, longitude\"` decimal string, derived from the source `latitude_deg` and `longitude_deg` columns.",
+            "format": "default",
+            "name": "coordinates",
+            "type": "string"
+          }
+        ],
+        "missingValues": [
+          ""
+        ]
+      }
+    },
+    {
+      "description": "Pre-aggregated count of airports by facility type, matching the type values in airport-codes.csv.",
+      "encoding": "utf-8",
+      "format": "csv",
+      "name": "type-counts",
+      "path": "data/type-counts.csv",
+      "profile": "tabular-data-resource",
+      "schema": {
+        "fields": [
+          {
+            "description": "Facility type (e.g. `Large Airport`, `Small Airport`, `Heliport`).",
+            "format": "default",
+            "name": "type",
+            "type": "string"
+          },
+          {
+            "description": "Number of airports of this type in the dataset.",
+            "format": "default",
+            "name": "count",
+            "type": "integer"
+          }
+        ]
+      }
+    }
+  ],
+  "sources": [
+    {
+      "name": "Our Airports",
+      "path": "https://ourairports.com/data/",
+      "title": "Our Airports"
+    }
+  ],
+  "title": "Airport Codes",
+  "version": "0.2.0",
+  "views": [
+    {
+      "description": "Distribution of the world's ~72,000 active airports by facility type. Small airports dominate with over 42,000 facilities — the infrastructure of general aviation. Heliports number over 22,000. Large commercial airports handling scheduled passenger services number just 1,194 worldwide, underscoring how concentrated commercial aviation is.",
+      "name": "airports-by-type",
+      "resources": [
+        "airport-codes"
+      ],
+      "spec": {
+        "height": 340,
+        "marginLeft": 130,
+        "marks": [
+          {
+            "fill": "#3b82f6",
+            "sort": {
+              "y": "-x"
+            },
+            "staticData": [
+              {
+                "count": 42582,
+                "type": "Small Airport"
+              },
+              {
+                "count": 22726,
+                "type": "Heliport"
+              },
+              {
+                "count": 4067,
+                "type": "Medium Airport"
+              },
+              {
+                "count": 1255,
+                "type": "Seaplane Base"
+              },
+              {
+                "count": 1194,
+                "type": "Large Airport"
+              },
+              {
+                "count": 61,
+                "type": "Balloonport"
+              }
+            ],
+            "tip": true,
+            "type": "barX",
+            "x": "count",
+            "y": "type"
+          }
+        ],
+        "x": {
+          "grid": true,
+          "label": "Number of Airports"
+        },
+        "y": {
+          "label": null
+        }
+      },
+      "specType": "plot",
+      "title": "World Airports by Type"
+    }
+  ]
+}

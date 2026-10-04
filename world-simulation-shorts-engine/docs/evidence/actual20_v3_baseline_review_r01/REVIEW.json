@@ -1,0 +1,86 @@
+{
+  "review_date_utc": "2026-10-04",
+  "project_id": "project_b89a30908047",
+  "reviewed_version": "v001",
+  "review_kind": "static_visual_baseline_comparison",
+  "review_scope": "Existing MASTER V3 six stills, actual v001 ten-thumbnail contact sheet, prior preflight stills and three Scene1/2 extracted frames; one new actual v001 15-second still. No new GL render, full movie decode, realtime playback, direct listening or physical-phone test in this review.",
+  "full_goal_approved": false,
+  "corrected_v002_approved": false,
+  "baseline": {
+    "route": "Seoul-Tokyo-Singapore",
+    "time_seconds": [0.5, 2, 6, 10, 15, 19],
+    "frame_path_pattern": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/comparison_v3_{0.50,2.00,6.00,10.00,15.00,19.00}.png"
+  },
+  "automation": {
+    "route": "New York-London-Dubai",
+    "actual_contact_sheet": "projects/project_b89a30908047/versions/v001/qc/contact_sheet.png",
+    "contact_width_per_frame_pixels": 270,
+    "visually_reviewed_contact_times_seconds": [0, 1, 2, 3, 6, 10, 13.1, 14, 18, 19],
+    "new_actual_still": "docs/evidence/actual20_v3_baseline_review_r01/actual_v001_15_00.png",
+    "new_actual_still_time_seconds": 15,
+    "new_movie_frames_extracted_this_task": 1,
+    "previous_actual_still_folder": "docs/evidence/visual_readonly_project_b89a30908047_r01",
+    "time_comparison_limit": "Different geography, camera and choreography. Same clock time is not the same pose or a pixel-equivalence experiment. The actual 0.5-second frame is not directly viewed; actual 14 seconds complements 15 seconds for the shifted HERO peak."
+  },
+  "existing_qc_evidence": {
+    "path": "projects/project_b89a30908047/versions/v001/qc/qc_report.json",
+    "duration_seconds": 20,
+    "dimensions": [1080, 1920],
+    "fps": 30,
+    "decoded_frames": 600,
+    "render_audited_frames": 600,
+    "black_frames": 0,
+    "exact_duplicate_frames": 0,
+    "maximum_near_frozen_seconds": 0,
+    "clipping": 0,
+    "webgl_errors": 0,
+    "missing_assets": 0,
+    "broken_routes": 0,
+    "qc_passed": false,
+    "failure": "ACTUAL_RENDER_RETENTION_GATE_FAILED",
+    "root_event_failure": "E006 country_reveal not rendered",
+    "derived_event_failures": ["STAGNATION:4.3-second actual event gap", "BROKEN_CAUSALITY:E007 lacks E006"],
+    "retention_is_not_audience_measurement": true,
+    "qc_was_read_not_rerun_by_this_reviewer": true
+  },
+  "v001_source_provenance": {
+    "renderer_v3_sha256": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+    "aircraft_v3_sha256": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+    "core_v1_preserved_sha256": "551a2816b29162621fd26b51620dd7c6671bbca7962bebcf152163d63eff8b9f",
+    "earth_texture_dimensions": [8192, 4096],
+    "audit_atmosphere": "MASTER_V3_RGB_RAYLEIGH_12x4",
+    "hero_volumetrics_active_in_scene4": true,
+    "entity_scale": "cartographic_visual_proxy",
+    "provenance_is_input_or_rgb_equivalence_proof": false
+  },
+  "retained_visual_components": {
+    "sphere_and_curvature": "observed",
+    "original_shader_source": "recorded_in_completed_manifests",
+    "warm_night_city_lights": "observed",
+    "altitude_clouds_and_hero_volume": "observed_in_stills_and_recorded_in_audit",
+    "depth_atmosphere_and_3d_entity": "observed_and_recorded; continuous parallax and all occlusion not certified",
+    "original_aircraft_geometry": "retained; smaller upper-view HERO weakens perceived detail",
+    "primary_route_legibility": "observed",
+    "background_network_legibility": "weak_at_contact_sheet_scale"
+  },
+  "quality_concerns": [
+    {"id": "HERO_SEPARATION", "severity": "aesthetic_review", "evidence": "actual_v001_15_00.png vs comparison_v3_15.00.png; actual contact at 14 seconds", "finding": "At 15 seconds, aircraft is smaller and upper-view on brighter land; fuselage/intake/shadow separation is weaker than baseline. New HERO peak is earlier, so not a pose-matched numerical regression.", "action": "Judge whole corrected playback; camera/common lighting/exposure before adding effects."},
+    {"id": "DAY_TONE", "severity": "aesthetic_review", "evidence": "actual contact at 10 and 13.1 seconds", "finding": "Brighter Europe/day and region emphasis improve geographic readout but feel more like an explanatory map than baseline night shots.", "action": "Check day/night rhythm in full playback; not proof of a planar-renderer regression."},
+    {"id": "ENTITY_HANDOFF", "severity": "playback_check_candidate", "evidence": "completed Scene 1/2 audits and previously extracted boundary stills", "aircraft_boundary_angle_degrees": 4.461575474991998, "typical_scene_max_angle_degrees_approx": 0.32, "camera_boundary_angle_degrees": 0.002125172091180399, "finding": "No clear visible kink in the tiny aircraft from still pairs.", "action": "Inspect the real-time seam at 4 seconds; do not mandate GPU rerender from angle alone."}
+  ],
+  "rerender_appraisal": {
+    "new_clear_graphics_artifact_requiring_full20_gpu_rerender_found": false,
+    "requires_E006_actual_rendered_correction": true,
+    "baseline_cinematic_quality_fully_approved": false,
+    "note": "Static observations do not justify unconditional reuse or final approval. Corrected v002 QC and full playback remain required."
+  },
+  "limits": [
+    "Contact sheet is 10 visual samples, not 600 individually inspected frames.",
+    "No full realtime playback, physical phone, direct listening or audience-retention experiment.",
+    "Preflight frames remain preflight evidence; final r02 title hold near 20 seconds is not covered by the actual 19-second contact.",
+    "No local original target image or pixel comparison; photoreal city closeups/landmarks/live-action aircraft clip not implemented.",
+    "Surface uses 8K texture/bump, not actual DEM/buildings; clouds, atmosphere and reflection remain approximations.",
+    "Source SHA preservation is provenance, not equality of camera/uniform inputs or rendered RGB."
+  ],
+  "existing_sources_or_outputs_modified": false
+}

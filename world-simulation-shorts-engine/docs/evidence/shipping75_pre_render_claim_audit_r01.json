@@ -1,0 +1,124 @@
+{
+  "observed_at": "2026-10-04T17:42:42.445804+00:00",
+  "scope": "Read-only audit of preserved, unapproved B75 v001 plan; not rendered video",
+  "project_id": "project_eb9417557bfa",
+  "version": "v001",
+  "plan_hash": "4fa4b3b105789f4d4b0559645ea689b2ce4ee59b95d238e5b3973cfc4a3a2181",
+  "scene_plan_sha256": "b19b3d33acb7d63b2d873ae806dc11a83835679317f462aacfdc06256c7ad4fa",
+  "coordinate_claim_binding_passed": false,
+  "mismatched_events": [
+    {
+      "scene_id": "S001",
+      "event": {
+        "id": "E004",
+        "kind": "destination_preview",
+        "time": 2.4,
+        "duration": 0.7,
+        "target_id": "SINGAPORE_PORT",
+        "role": "hint",
+        "caused_by": "E003",
+        "meaningful": true,
+        "description": "다음 연결점 Suez Canal 공개",
+        "text": "SINGAPORE",
+        "value": null,
+        "unit": "",
+        "coordinates": {
+          "lon": 103.832461,
+          "lat": 1.239207,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SINGAPORE_PORT"
+        },
+        "claim_id": "F02"
+      },
+      "incorrect_claim": {
+        "id": "F02",
+        "text": "Suez Canal의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      "expected_claim": {
+        "id": "F03",
+        "text": "Singapore의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      "coordinate_verified": true
+    },
+    {
+      "scene_id": "S006",
+      "event": {
+        "id": "E024",
+        "kind": "destination_preview",
+        "time": 3.55,
+        "duration": 0.7,
+        "target_id": "SINGAPORE_PORT",
+        "role": "progression",
+        "caused_by": "E023",
+        "meaningful": true,
+        "description": "다음 연결점 Suez Canal 공개",
+        "text": "SINGAPORE",
+        "value": null,
+        "unit": "",
+        "coordinates": {
+          "lon": 103.832461,
+          "lat": 1.239207,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SINGAPORE_PORT"
+        },
+        "claim_id": "F02"
+      },
+      "incorrect_claim": {
+        "id": "F02",
+        "text": "Suez Canal의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      "expected_claim": {
+        "id": "F03",
+        "text": "Singapore의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      "coordinate_verified": true
+    }
+  ],
+  "route_lengths_km": {
+    "R_SUEZ": 15530.53897178717,
+    "R_CAPE": 21990.63187274913
+  },
+  "difference_km": 6460.092900961961,
+  "rounded_distance_difference": 6460,
+  "assumption": {
+    "id": "A01",
+    "text": "수에즈 경로가 7일 동안 차단된다고 가정합니다. 실제 폐쇄나 미래 예측이 아닙니다.",
+    "status": "ASSUMPTION",
+    "source_ids": [],
+    "scope": "scenario premise"
+  },
+  "simulation": {
+    "id": "M01",
+    "text": "폐쇄 가정 아래 검증된 해상 그래프에서 수에즈를 제외한 희망봉 우회 경로를 비교합니다. 실제 선박 선택·가격·지연을 예측하지 않습니다.",
+    "status": "SIMULATION",
+    "source_ids": [
+      "SEAROUTE_1_6_0"
+    ],
+    "assumption_ids": [
+      "A01"
+    ],
+    "scope": "visualization only"
+  },
+  "immutable_plan_modified": false,
+  "render_started": false
+}

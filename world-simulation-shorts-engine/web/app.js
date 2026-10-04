@@ -1,0 +1,418 @@
+const $ = (id) => document.getElementById(id);
+const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null };
+const ACTIVE_STATUSES = new Set(['queued', 'pending', 'running', 'rendering', 'assembling', 'audio', 'qc', 'resuming', 'processing']);
+const COMPLETE_STATUSES = new Set(['completed', 'complete', 'done', 'finished']);
+const FAILED_STATUSES = new Set(['failed', 'error', 'interrupted', 'qc_failed']);
+const cameraNames = { GLOBAL_ESTABLISH: '지구 전경', FAST_HOOK_DIVE: '빠른 도입', COUNTRY_APPROACH: '국가 접근', CITY_APPROACH: '도시 접근', GEOGRAPHY_APPROACH: '지형 접근', ROUTE_CHASE: '항로 추적', ENTITY_FOLLOW: '이동체 추적', EARTH_ORBIT: '지구 궤도', HORIZON_REVEAL: '수평선 공개', TERRITORY_OVERVIEW: '지역 전경', NETWORK_EXPANSION: '네트워크 확장', GLOBAL_PULLBACK: '지구 줌아웃', FINAL_REVEAL: '최종 공개' };
+const lightingNames = { CINEMATIC_NIGHT: '시네마틱 야간', GEOGRAPHY_READABILITY: '지형이 선명한 조명', DAY_DOCUMENTARY: '자연스러운 주간', HERO: '극적인 빛', DISASTER: '영향 지역 가독성', WAR_SIMULATION: '지역과 경로 가독성' };
+const typeNames = { EARTH_ESTABLISH: '지구 전경', COUNTRY_FOCUS: '국가', CITY_FOCUS: '도시', ROUTE: '경로', ROUTE_CHASE: '경로 추적', NETWORK: '네트워크', COMPARISON: '비교', TERRITORY: '영역', TIMELINE: '시간의 변화', CINEMATIC_CLIP: '시네마틱 영상', FINAL_OVERVIEW: '전체 결과' };
+const eventNames = { route_start: '새 경로 출발', route_reveal: '새 경로 공개', route_blocked: '경로 차단', alternate_route_reveal: '우회 경로 공개', city_reveal: '도시 등장', city_focus: '도시 강조', destination_pulse: '목적지 도착', network_expand: '네트워크 확장', network_expansion: '네트워크 확장', new_variable: '새로운 변수', counter_response: '대응 시작', entity_departure: '이동체 출발', entity_arrival: '이동체 도착', geography_reveal: '지형 공개', geography_change: '지리 변화', territory_change: '영역 변화', final_reveal: '최종 결과 공개', peak_moment: '핵심 변화', escalation: '상황 확대', comparison_reveal: '차이 공개', distance_reveal: '거리 변화 공개', destination_change: '목적지 변경', route_branch: '경로 분기', port_activation: '항구 활성화', route_progress: '이동 진행', consequence_reveal: '첫 결과 공개', assumption_reveal: '가정 공개', question_reveal: '질문 공개' };
+const statusNames = { draft: '기획 확인', planned: '기획 확인', ready: '기획 확인', approved: '승인 완료', queued: '생성 대기', pending: '생성 대기', running: '영상 생성 중', rendering: '장면 생성 중', assembling: '영상 결합 중', audio: '오디오 작업 중', qc: '품질 검수 중', completed: '완료', complete: '완료', done: '완료', finished: '완료', failed: '작업 중단', interrupted: '작업 중단', qc_failed: '품질 검수 확인 필요', blocked: '기획 수정 필요' };
+const pluginNames = { aviation: '항공', shipping: '해상 물류', network: '네트워크', geography: '지리', comparison: '지역 비교', travel: '여행·탐험', war: '전쟁 표현', war_vfx: '전쟁 효과', territory: '영역 변화', time_morph: '역사·시간 변화', geography_morph: '지형 변화', weather: '기상', disaster: '재난', economy: '경제 흐름', space: '우주' };
+
+function node(tag, text, className) { const element = document.createElement(tag); if (text !== undefined && text !== null) element.textContent = String(text); if (className) element.className = className; return element; }
+function clear(element) { element.replaceChildren(); }
+function compact(value, fallback = '') { if (value == null) return fallback; if (typeof value === 'string' || typeof value === 'number') return String(value); if (Array.isArray(value)) return value.map((item) => compact(item)).filter(Boolean).join(' · '); return value.summary || value.description || value.text || value.title || value.label || value.name || value.message || fallback; }
+function time(seconds) { const value = Math.max(0, Number(seconds) || 0); const minutes = Math.floor(value / 60); const remainder = value % 60; return `${minutes}:${remainder < 10 ? '0' : ''}${Number.isInteger(remainder) ? remainder : remainder.toFixed(1)}`; }
+function durationLabel(seconds) { const value = Number(seconds) || 0; return value < 60 ? `${value}초` : `${Math.floor(value / 60)}분${value % 60 ? ` ${Number((value % 60).toFixed(1))}초` : ''}`; }
+function scenesOf(plan) { return plan?.scenes || plan?.scene_plan?.scenes || plan?.scene_plan || []; }
+function hashOf(plan) { return plan?.plan_hash || plan?.hash || plan?.scene_plan?.plan_hash || ''; }
+function gateOf(plan) { return plan?.gate || plan?.retention_gate || plan?.gates?.retention || plan?.validation?.retention || plan?.retention || {}; }
+function gatePassed(plan) { const gate = gateOf(plan); return gate.passed === true || gate.pass === true || gate.status === 'passed'; }
+function projectId() { return state.project?.id || state.project?.project_id; }
+function apiPath(suffix = '') { return `/api/projects/${encodeURIComponent(projectId())}${suffix}`; }
+function statusValue(payload) { return String(payload?.status || payload?.job?.status || payload?.project?.status || '').toLowerCase(); }
+function isJobStatePayload(payload) {
+  const knownStatus = new Set(['planned', 'approved', ...ACTIVE_STATUSES, ...COMPLETE_STATUSES, ...FAILED_STATUSES]);
+  return knownStatus.has(statusValue(payload)) && !!(payload?.job_id || payload?.job?.job_id || Object.hasOwn(payload || {}, 'progress') || Array.isArray(payload?.outputs));
+}
+function named(value, mapping) { const raw = compact(value); return mapping[raw] || mapping[raw.toLowerCase()] || raw; }
+
+async function api(path, options = {}) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 45000);
+  try {
+    const response = await fetch(path, { credentials: 'same-origin', ...options, headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) }, signal: controller.signal });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || (payload.error && !isJobStatePayload(payload))) {
+      const error = payload.error || {};
+      const failure = new Error(typeof error === 'string' ? error : error.message || payload.message || `요청을 처리하지 못했습니다 (${response.status}).`);
+      failure.code = error.code || payload.code;
+      failure.details = error.details || payload.details;
+      throw failure;
+    }
+    return payload;
+  } catch (error) { if (error.name === 'AbortError') throw new Error('요청에 시간이 걸리고 있습니다. 작업 상태를 다시 확인해 주세요.'); throw error; }
+  finally { window.clearTimeout(timer); }
+}
+function post(path, body = {}) { return api(path, { method: 'POST', body: JSON.stringify(body) }); }
+function notify(error, title) {
+  const unsupported = error?.code === 'UNSUPPORTED_VISUAL_REQUIREMENT';
+  $('notice-title').textContent = title || (unsupported ? '이 주제에 필요한 연출 모듈을 확인해 주세요.' : '요청을 확인해 주세요.');
+  $('notice-message').textContent = error?.message || String(error);
+  clear($('notice-details'));
+  if (error?.details) {
+    const details = error.details;
+    const modules = details.required_plugins || details.required_modules || details.missing_plugins || details.plugins;
+    if (modules) $('notice-details').append(node('p', `필요한 모듈: ${compact(modules.map ? modules.map((item) => named(item, pluginNames)) : modules)}`, 'notice-details'));
+    const messages = details.issues || details.errors || details.warnings;
+    if (messages) for (const message of Array.isArray(messages) ? messages : [messages]) $('notice-details').append(node('p', compact(message), 'notice-details'));
+    if (typeof details === 'string') $('notice-details').append(node('p', details, 'notice-details'));
+  }
+  $('notice').hidden = false;
+  $('notice').focus({ preventScroll: true });
+}
+function dismissNotice() { $('notice').hidden = true; }
+async function withButton(button, label, operation) {
+  if (button.disabled) return;
+  const previous = button.textContent;
+  button.disabled = true; button.classList.add('is-busy'); button.textContent = label;
+  try { dismissNotice(); await operation(); }
+  catch (error) { notify(error); }
+  finally { button.disabled = false; button.classList.remove('is-busy'); button.textContent = previous; refreshApproval(); }
+}
+
+function receiveProject(payload) {
+  if (payload.project) state.project = payload.project;
+  if (payload.plan) state.plan = payload.plan;
+  if (payload.version) state.version = typeof payload.version === 'string' ? payload.version : payload.version.version || payload.version.id;
+  if (!state.version) state.version = state.project?.current_version || 'v001';
+  state.historical = state.version !== (state.project?.current_version || state.version);
+  try { localStorage.setItem('world-simulation.last-project', String(projectId())); } catch {}
+  renderPlan();
+}
+
+function renderPlan() {
+  if (!state.plan) return;
+  $('empty-state').hidden = true; $('plan-panel').hidden = false;
+  const plan = state.plan;
+  const scenes = scenesOf(plan);
+  const total = plan.duration || plan.total_duration || plan.request?.duration || plan.scene_plan?.duration || scenes.reduce((sum, scene) => sum + Number(scene.duration || 0), 0);
+  const title = plan.title || plan.story_plan?.title || state.project?.title || plan.topic || '새로운 세계 이야기';
+  $('plan-title').textContent = title;
+  clear($('plan-meta'));
+  for (const text of [durationLabel(total), `${scenes.length}개 장면`, `${plan.quality || plan.render_quality || plan.request?.quality || state.project?.quality || 'HIGH'} 화질`]) $('plan-meta').append(node('span', text, 'meta-chip'));
+  $('plan-meta').append(node('span', state.historical ? '이전 버전' : gatePassed(plan) ? '기획 검수 완료' : '기획 확인 필요', `meta-chip ${gatePassed(plan) ? 'status-ready' : 'status-warning'}`));
+  const hook = compact(plan.hook || plan.story_plan?.hook || plan.story?.hook || scenes[0]?.narration || plan.question);
+  $('plan-hook').textContent = hook;
+  $('hook-block').hidden = !hook;
+  renderClaims(plan, scenes);
+  const gate = gateOf(plan);
+  $('plan-gate').textContent = gatePassed(plan) ? '사건의 흐름과 장면 구성이 검수를 통과했습니다.' : '기획 검수를 통과한 뒤 영상 생성을 진행할 수 있습니다.';
+  $('plan-gate').className = `gate-message ${gatePassed(plan) ? '' : 'warning'}`;
+  clear($('scene-list'));
+  scenes.forEach((scene, index) => {
+    const article = node('article', null, 'scene-item');
+    const number = node('div', String(index + 1).padStart(2, '0'), 'scene-number');
+    number.append(node('small', `${time(scene.start_time)}–${time(Number(scene.start_time || 0) + Number(scene.duration || 0))}`));
+    const body = node('div'); const header = node('div', null, 'scene-header');
+    header.append(node('h3', compact(scene.location) || compact(scene.geographic_targets) || scene.title || typeNames[scene.scene_type] || `장면 ${index + 1}`));
+    const role = scene.directing_preset || scene.role || scene.story_role || scene.scene_role || '';
+    const peak = scene.is_peak || scene.peak || /^(peak|PEAK_MOMENT)$/i.test(role) || (scene.visual_events || []).some((event) => event.role === 'peak' || /peak_moment|peak_reveal/i.test(compact(event.type || event.kind || event.event || event)));
+    if (peak) header.append(node('span', '핵심 장면', 'peak-chip'));
+    body.append(header);
+    const summary = compact(scene.summary || scene.purpose || scene.main_event || scene.description);
+    const purpose = (summary && !/^(hook|progression|variable|peak|payoff|escalation|response)\s*:/i.test(summary) ? summary : '') || (scene.visual_events || []).map((event) => compact(event.description || event.summary) || named(event.type || event.kind || event.event || event, eventNames)).filter((text) => text && !/camera|zoom|pan/i.test(text)).slice(0, 2).join(' → ') || compact(scene.narration);
+    body.append(node('p', purpose, 'scene-purpose'));
+    const setting = node('div', null, 'scene-setting');
+    if (scene.camera_preset) setting.append(node('span', named(scene.camera_preset, cameraNames)));
+    if (scene.lighting_preset) setting.append(node('span', named(scene.lighting_preset, lightingNames)));
+    if (scene.fact_status) setting.append(node('span', { FACT: '사실', ASSUMPTION: '가정', SIMULATION: '시뮬레이션', MIXED: '사실·가정 구분' }[scene.fact_status] || scene.fact_status));
+    body.append(setting); article.append(number, body); $('scene-list').append(article);
+  });
+  const script = plan.script || plan.story_plan?.script || plan.narration;
+  clear($('script-content'));
+  if (typeof script === 'string') $('script-content').textContent = script;
+  else for (const scene of scenes) if (scene.narration) { const paragraph = node('p', null, 'script-paragraph'); paragraph.append(node('span', `${time(scene.start_time)}  `, 'small-label'), document.createTextNode(compact(scene.narration))); $('script-content').append(paragraph); }
+  $('script-details').hidden = !$('script-content').textContent;
+  renderValidation(plan, gate);
+  clear($('clip-scene'));
+  for (const scene of scenes) { const option = node('option', `${scene.scene_id} · ${time(scene.start_time)} · ${compact(scene.location)}`); option.value = scene.scene_id; $('clip-scene').append(option); }
+  $('clip-details').hidden = state.historical || ACTIVE_STATUSES.has(statusValue(state.status));
+  populateVersions(); refreshApproval();
+  $('revision-panel').hidden = state.historical || ACTIVE_STATUSES.has(statusValue(state.status));
+}
+
+function renderClaims(plan, scenes) {
+  clear($('claim-summary'));
+  const counts = { FACT: 0, ASSUMPTION: 0, SIMULATION: 0 };
+  const claims = plan.claims || plan.story_plan?.claims || plan.story?.claims || plan.research?.claims;
+  if (Array.isArray(claims) && claims.length) for (const claim of claims) { const kind = claim.fact_status || claim.status || claim.type; if (kind in counts) counts[kind]++; }
+  else for (const scene of scenes) if (scene.fact_status in counts) counts[scene.fact_status]++;
+  const labels = { FACT: '확인된 사실', ASSUMPTION: '설정된 가정', SIMULATION: '조건부 시뮬레이션' };
+  for (const [kind, count] of Object.entries(counts)) if (count) $('claim-summary').append(node('span', `${labels[kind]} ${count}`, `claim-chip ${kind.toLowerCase()}`));
+}
+
+function renderValidation(plan, gate) {
+  clear($('validation-content'));
+  const checks = gate.checks || gate.results || plan.validation?.checks || [];
+  const list = node('ul', null, 'validation-list');
+  const entries = Array.isArray(checks) ? checks : Object.entries(checks).map(([name, value]) => ({ name, ...(typeof value === 'object' ? value : { passed: value }) }));
+  for (const check of entries) { const passed = check.passed ?? check.pass ?? (check.status === 'passed'); const label = compact(check.label || check.message || check.description || check.name || check.code || check); list.append(node('li', `${passed ? '✓' : '·'} ${label}`, passed === false ? 'fail' : '')); }
+  const issues = gate.issues || gate.errors || gate.failures || [];
+  for (const issue of issues) list.append(node('li', compact(issue), 'fail'));
+  if (!list.childNodes.length) list.append(node('li', gatePassed(plan) ? '시청 지속과 사건 다양성 검수를 통과했습니다.' : '검수 결과를 확인해야 합니다.'));
+  $('validation-content').append(list);
+  const retention = gate.retention || {};
+  const metrics = retention.metrics || gate.metrics;
+  if (metrics) {
+    if (metrics.average_event_interval != null) $('validation-content').append(node('p', `의미 있는 사건 간격: 평균 ${Number(metrics.average_event_interval).toFixed(1)}초 · 가장 긴 간격 ${Number(metrics.max_event_gap || 0).toFixed(1)}초`, 'muted'));
+    if (metrics.first_3s_events != null) $('validation-content').append(node('p', `첫 3초 사건 ${metrics.first_3s_events}개 · 사건 유형 ${metrics.event_types || 0}개 · 핵심 변화 ${metrics.peak_count || 0}회`, 'muted'));
+  }
+  const plugins = plan.required_plugins || plan.plugins || plan.modules || plan.scene_plan?.required_plugins || [];
+  if (plugins.length) $('validation-content').append(node('p', `사용 모듈: ${plugins.map((plugin) => named(plugin, pluginNames)).join(' · ')}`, 'muted'));
+  const cpuEstimate = plan.metadata?.estimates;
+  const estimated = cpuEstimate?.seconds || plan.estimated_render_seconds || plan.estimates?.render_seconds;
+  if (estimated) $('validation-content').append(node('p', cpuEstimate?.scope === 'uncached_scene_render_only'
+    ? `캐시 없이 전체 장면 계산 시 예상: 약 ${durationLabel(Math.round(estimated))} · 오디오·검수 제외, 실측 기반 예측`
+    : `예상 생성 시간: 약 ${durationLabel(Math.round(estimated))}`, 'muted'));
+  else $('validation-content').append(node('p', '이 품질의 실제 측정 기록이 아직 없습니다. 생성 중 저장된 프레임의 처리 속도로 남은 시간을 표시합니다.', 'muted'));
+  const peak = plan.peak_moments || plan.story_plan?.peak_moments || [];
+  if (peak.length) $('validation-content').append(node('p', `핵심 변화: ${peak.map((item) => typeof item === 'number' ? time(item) : compact(item)).join(' · ')}`, 'muted'));
+  const claims = plan.claims || plan.story?.claims || plan.story_plan?.claims || [];
+  if (claims.length) {
+    $('validation-content').append(node('h3', '사실과 가정', 'validation-subtitle'));
+    const claimList = node('ul', null, 'validation-list');
+    for (const claim of claims) { const kind = claim.status || claim.fact_status || claim.type; const label = { FACT: '사실', ASSUMPTION: '가정', SIMULATION: '시뮬레이션' }[kind] || '정보'; claimList.append(node('li', `${label} · ${compact(claim.text || claim.description || claim)}`)); }
+    $('validation-content').append(claimList);
+  }
+}
+
+function refreshApproval() {
+  if (!state.plan) return;
+  const active = ACTIVE_STATUSES.has(statusValue(state.status));
+  const allowed = gatePassed(state.plan) && !!hashOf(state.plan) && !active && !state.historical;
+  $('approve-render').disabled = !allowed;
+  $('approve-render').setAttribute('aria-disabled', String(!allowed));
+  const approved = state.project?.approved || state.project?.approved_plan_hash === hashOf(state.plan) || state.plan.approved;
+  if (!$('approve-render').classList.contains('is-busy')) $('approve-render').textContent = approved ? '영상 생성 또는 이어서 생성 →' : '기획 승인 및 영상 생성 →';
+  $('approval-note').textContent = state.historical ? '이전 버전의 기획입니다. 최신 버전을 선택하면 새 수정 작업을 시작할 수 있습니다.' : active ? '승인된 기획으로 영상을 생성하고 있습니다.' : !gatePassed(state.plan) ? '기획 검수에서 확인이 필요한 항목을 먼저 수정해 주세요.' : !hashOf(state.plan) ? '기획 승인 정보를 확인할 수 없습니다. 기획을 다시 불러와 주세요.' : '위의 기획으로 생성합니다. 이전 결과물은 덮어쓰지 않습니다.';
+  $('approval-bar').hidden = COMPLETE_STATUSES.has(statusValue(state.status)) && !state.historical;
+}
+
+function populateVersions() {
+  clear($('version-select'));
+  const versions = state.versions.length ? state.versions : [{ version: state.version }];
+  for (const entry of versions) { const version = typeof entry === 'string' ? entry : entry.version || entry.id || entry.name; if (!version) continue; const option = node('option', `${version}${version === state.project?.current_version ? ' · 최신' : ''}`); option.value = version; $('version-select').append(option); }
+  if (![...$('version-select').options].some((option) => option.value === state.version)) { const option = node('option', state.version); option.value = state.version; $('version-select').append(option); }
+  $('version-select').value = state.version;
+}
+
+async function refreshVersions() {
+  if (!projectId()) return;
+  try { const payload = await api(apiPath('/versions')); state.versions = Array.isArray(payload) ? payload : payload.versions || []; populateVersions(); } catch { /* Version listing is secondary to the saved project. */ }
+}
+
+async function loadProject(id) {
+  stopPolling(); state.generation++; state.revision = null; state.status = null; state.version = null; state.versions = [];
+  $('revision-preview').hidden = true; $('progress-panel').hidden = true; $('output-panel').hidden = true;
+  const payload = await api(`/api/projects/${encodeURIComponent(id)}`);
+  receiveProject(payload); await refreshVersions(); await pollStatus(false);
+  $('plan-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function stopPolling() { if (state.pollTimer) window.clearTimeout(state.pollTimer); state.pollTimer = null; }
+async function pollStatus(repeat = true) {
+  if (!projectId()) return;
+  const generation = state.generation;
+  try {
+    const suffix = state.historical ? `?version=${encodeURIComponent(state.version)}` : '';
+    const payload = await api(apiPath(`/status${suffix}`));
+    if (generation !== state.generation) return;
+    // The selected historical plan must never be replaced by a current job response.
+    if (state.historical && payload.version && payload.version !== state.version) return;
+    state.status = payload; renderStatus(payload);
+    const active = ACTIVE_STATUSES.has(statusValue(payload));
+    if (repeat || active) state.pollTimer = window.setTimeout(() => pollStatus(active), active ? 2200 : 7000);
+  } catch (error) {
+    if (generation !== state.generation) return;
+    $('connection').textContent = '다시 연결 중'; $('connection').className = 'connection offline';
+    if (repeat) state.pollTimer = window.setTimeout(() => pollStatus(true), 5000);
+    else notify(error, '작업 상태를 확인하지 못했습니다.');
+  }
+}
+
+function renderStatus(payload) {
+  const status = statusValue(payload);
+  $('connection').textContent = '연결됨'; $('connection').className = 'connection online';
+  const job = payload.job || {};
+  const progress = typeof payload.progress === 'object' ? payload.progress || {} : job.progress && typeof job.progress === 'object' ? job.progress : {};
+  const active = ACTIVE_STATUSES.has(status);
+  const failed = FAILED_STATUSES.has(status);
+  $('progress-panel').hidden = !(active || failed);
+  $('progress-panel').classList.toggle('progress-panel-failed', failed);
+  if (active || failed) {
+    $('progress-title').textContent = failed ? '작업을 이어서 진행할 수 있습니다.' : '영상 생성 중';
+    const raw = progress.percent ?? progress.percentage ?? (typeof payload.progress === 'number' ? payload.progress : undefined) ?? (typeof job.progress === 'number' ? job.progress : undefined);
+    const percent = raw == null ? null : Math.min(100, Math.max(0, Number(raw)));
+    $('progress-percent').textContent = percent == null ? '' : `${Math.round(percent)}%`;
+    $('progress-fill').style.width = percent == null ? '25%' : `${percent}%`;
+    $('progress-track').classList.toggle('indeterminate', percent == null && active);
+    if (percent == null) $('progress-track').removeAttribute('aria-valuenow'); else $('progress-track').setAttribute('aria-valuenow', String(Math.round(percent)));
+    const sceneIndex = progress.scene_index ?? progress.current_scene ?? job.scene_index;
+    const sceneTotal = progress.scene_total ?? progress.total_scenes ?? job.scene_total;
+    const fallback = sceneIndex != null && sceneTotal ? `장면 ${sceneIndex}/${sceneTotal} 생성` : statusNames[status] || '작업 진행 중';
+    $('progress-step').textContent = compact(progress.label || progress.message || progress.stage || job.message || job.step || payload.message, fallback);
+    $('progress-detail').textContent = compact(payload.error || job.error || progress.detail || job.detail) || (progress.cached_scenes ? `완료된 장면 ${progress.cached_scenes}개를 재사용하고 있습니다.` : '완료된 단계는 자동으로 저장됩니다.');
+    $('resume-render').hidden = !failed || state.historical;
+    if (failed) $('progress-recovery').textContent = '완료된 장면과 이전 버전은 보존되어 있습니다.';
+  }
+  const outputs = payload.outputs || job.outputs;
+  renderOutputs(outputs, payload);
+  $('revision-panel').hidden = state.historical || active || !state.plan;
+  $('clip-details').hidden = state.historical || active;
+  refreshApproval();
+}
+
+function normalizedOutputs(outputs) {
+  if (!outputs) return [];
+  if (Array.isArray(outputs)) return outputs.map((item) => typeof item === 'string' ? { filename: item, name: item } : item);
+  return Object.entries(outputs).map(([key, value]) => typeof value === 'string' ? { filename: value, key, name: value } : { key, ...value }).filter((item) => item.filename || item.name || item.url || item.path);
+}
+function fileOf(output) { return output.filename || output.file || output.name || String(output.path || output.url || '').split('/').pop(); }
+function safeURL(value, fallback) {
+  if (!value) return fallback;
+  try { const url = new URL(value, location.origin); return url.origin === location.origin && ['http:', 'https:'].includes(url.protocol) ? url.href : fallback; } catch { return fallback; }
+}
+function friendlyFile(filename, key) {
+  const name = filename.toLowerCase();
+  if (/final.*muted|muted.*\.mp4/.test(name) || key === 'final_muted') return '무음 MP4';
+  if (/final.*\.mp4/.test(name) || key === 'final' || key === 'video') return '최종 MP4 다운로드';
+  if (/contact_sheet/.test(name)) return '주요 프레임';
+  if (/qc_report/.test(name)) return '품질 검수 보고서';
+  if (/source_report/.test(name)) return '출처 및 라이선스';
+  if (/scene_plan_readable/.test(name)) return '장면 기획';
+  if (/scene_plan.*\.json/.test(name)) return 'Scene 설계 파일';
+  if (/script.*\.txt/.test(name)) return '대본';
+  if (/\.zip$/.test(name)) return '전체 결과물 ZIP';
+  return filename;
+}
+function renderOutputs(outputs, payload) {
+  const list = normalizedOutputs(outputs);
+  const video = list.find((item) => /\.mp4(?:$|\?)/i.test(fileOf(item)) && !/muted|scene_\d/i.test(fileOf(item))) || list.find((item) => item.key === 'final' || item.key === 'video');
+  $('output-panel').hidden = !list.length;
+  if (!list.length) return;
+  const passed = payload.qc?.passed ?? payload.result?.qc?.passed ?? payload.qc_passed;
+  $('output-title').textContent = !video ? '기획 기록' : passed === false || statusValue(payload) === 'qc_failed' ? '검수가 필요한 영상' : '생성된 영상';
+  $('output-version').textContent = state.version;
+  clear($('downloads'));
+  for (const output of list) {
+    const filename = fileOf(output);
+    const fallback = `/download/${encodeURIComponent(projectId())}/${encodeURIComponent(state.version)}/${filename.split('/').map(encodeURIComponent).join('/')}`;
+    const link = node('a', friendlyFile(filename, output.key), `button ${output === video ? 'button-primary primary-download' : 'download-secondary'}`);
+    link.href = safeURL(output.download_url || output.url, fallback); link.download = filename.split('/').pop();
+    if (output === video) link.append(node('span', '↓'));
+    $('downloads').append(link);
+  }
+  $('result-video').hidden = !video;
+  if (video) {
+    const filename = fileOf(video);
+    const fallback = `/media/${encodeURIComponent(projectId())}/${encodeURIComponent(state.version)}/${filename.split('/').map(encodeURIComponent).join('/')}`;
+    const src = safeURL(video.media_url || video.video_url, fallback);
+    if ($('result-video').dataset.source !== src) { $('result-video').src = src; $('result-video').dataset.source = src; }
+  }
+  const preview = state.plan?.options?.quality === 'FAST';
+  $('output-notice').textContent = !video ? '기획을 승인한 뒤 영상 생성을 시작할 수 있습니다.' : passed === false ? '품질 검수에서 확인이 필요한 항목이 있습니다. 수정한 뒤 다시 검사해 주세요.' : preview ? 'FAST · 540×960 프리뷰입니다. 업로드용 영상은 HIGH 또는 CINEMA를 선택하세요.' : 'MP4를 내려받아 휴대폰에 저장할 수 있습니다.';
+}
+
+async function startRender() {
+  if (!gatePassed(state.plan) || !hashOf(state.plan) || state.historical) throw new Error('검수를 통과한 최신 기획을 승인한 뒤 진행해 주세요.');
+  const approved = await post(apiPath('/approve'), { plan_hash: hashOf(state.plan), version: state.version });
+  receiveProject(approved);
+  const job = await post(apiPath('/render'), { version: state.version });
+  state.status = { ...job, status: job.status || 'queued' }; renderStatus(state.status); stopPolling(); await pollStatus(true);
+  $('progress-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function renderRevision(payload) {
+  state.revision = payload; $('revision-preview').hidden = false;
+  const affected = payload.affected_scenes || [];
+  $('revision-summary').className = 'revision-summary';
+  $('revision-summary').textContent = affected.length ? `변경될 장면: ${affected.map((scene) => compact(scene)).join(' · ')}` : payload.summary || '아래 변경점을 확인한 뒤 승인해 주세요.';
+  clear($('revision-diff'));
+  const diff = payload.diff;
+  const rows = Array.isArray(diff) ? diff : Array.isArray(diff?.changes) ? diff.changes : diff && typeof diff === 'object' ? Object.entries(diff).map(([scene, changes]) => ({ scene_id: scene, changes })) : [];
+  const fieldNames = { camera_preset: '카메라', camera_speed: '카메라 속도', lighting_preset: '조명', entities: '이동체', routes: '경로', effects: '효과', narration: '대본', visual_events: '시각 사건', labels: '정보 표시', music_energy: '음악 에너지', duration: '장면 길이', transition_in: '시작 전환', transition_out: '종료 전환' };
+  function valueText(value) { if (value == null) return '없음'; if (typeof value === 'string') return named(named(value, cameraNames), lightingNames); if (typeof value === 'number' || typeof value === 'boolean') return String(value); if (Array.isArray(value)) return value.map((item) => compact(item, item.type || item.scene_id || '항목')).join(' · ') || '없음'; return compact(value, '장면 설정 변경'); }
+  for (const row of rows) {
+    const card = node('div', null, 'diff-item');
+    card.append(node('h3', `${row.scene_id || row.scene || '기획'}${row.path || row.field ? ` · ${fieldNames[(row.path || row.field).split('.').pop()] || row.label || '장면 설정'}` : ''}`));
+    if (row.summary || row.description) card.append(node('p', compact(row.summary || row.description)));
+    if ('before' in row || 'old' in row) card.append(node('p', `변경 전: ${valueText(row.before ?? row.old)}`, 'diff-before'));
+    if ('after' in row || 'new' in row) card.append(node('p', `변경 후: ${valueText(row.after ?? row.new)}`, 'diff-after'));
+    if (row.changes) {
+      const changes = Array.isArray(row.changes) ? row.changes : Object.entries(row.changes).map(([field, change]) => ({ field, ...(typeof change === 'object' ? change : { after: change }) }));
+      for (const change of changes) card.append(node('p', `${fieldNames[change.field || change.path] || change.label || '설정'}: ${valueText(change.before)} → ${valueText(change.after)}`, 'diff-after'));
+    }
+    $('revision-diff').append(card);
+  }
+  if (!rows.length) $('revision-diff').append(node('p', compact(diff, payload.summary || '선택한 장면의 변경 기획이 준비되었습니다.'), 'muted'));
+  const valid = payload.plan ? gatePassed(payload.plan) : payload.retention_gate?.passed !== false;
+  $('approve-revision').disabled = !valid || !payload.revision_id;
+  if (!valid) $('revision-diff').append(node('p', '변경 기획의 검수를 통과해야 새 장면을 생성할 수 있습니다.', 'gate-message warning'));
+  $('revision-preview').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+async function refreshLibrary() {
+  const payload = await api('/api/projects');
+  const projects = Array.isArray(payload) ? payload : payload.projects || [];
+  clear($('project-list'));
+  if (!projects.length) $('project-list').append(node('p', '아직 저장된 작업이 없습니다.', 'library-empty'));
+  for (const project of projects) {
+    const button = node('button', null, 'project-card'); button.type = 'button'; button.dataset.projectId = project.id || project.project_id;
+    button.append(node('strong', project.title || project.topic || '이름 없는 프로젝트'));
+    button.append(node('span', `${project.current_version || 'v001'} · ${statusNames[String(project.status).toLowerCase()] || '기획 확인'}${project.duration ? ` · ${durationLabel(project.duration)}` : ''}`));
+    button.addEventListener('click', () => withButton(button, '작업 불러오는 중', () => loadProject(project.id || project.project_id)));
+    $('project-list').append(button);
+  }
+}
+
+$('brief-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('create-plan'), '기획 생성 중', async () => {
+  const topic = $('topic').value.trim(); if (!topic) throw new Error('영상 주제를 입력해 주세요.');
+  stopPolling(); state.generation++; state.status = null; state.version = null; state.versions = []; state.revision = null;
+  const request = { topic, duration: Number($('duration').value), style: $('style').value, quality: $('quality').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked };
+  const narration = $('narration-file').files[0];
+  if (narration) {
+    if (!$('narration-rights').checked) throw new Error('나레이션 파일의 사용권을 확인해 주세요.');
+    if (!state.narrationAsset || state.narrationAsset.file !== narration) state.narrationAsset = { file: narration, asset: await uploadAsset(narration, 'narration') };
+    request.narration_audio = state.narrationAsset.asset.path;
+    request.narration_asset_id = state.narrationAsset.asset.asset_id;
+    request.tts = false;
+  }
+  const payload = await post('/api/projects', request);
+  $('output-panel').hidden = true; $('progress-panel').hidden = true; $('revision-preview').hidden = true;
+  receiveProject(payload); await refreshVersions(); await pollStatus(false); $('plan-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}); });
+$('approve-render').addEventListener('click', () => withButton($('approve-render'), '승인 확인 중', startRender));
+$('resume-render').addEventListener('click', () => withButton($('resume-render'), '작업 복구 중', startRender));
+$('revision-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('preview-revision'), '변경 기획 확인 중', async () => { const request = $('revision-request').value.trim(); if (!request) throw new Error('수정할 내용을 입력해 주세요.'); renderRevision(await post(apiPath('/revise'), { request, version: state.version })); }); });
+$('approve-revision').addEventListener('click', () => withButton($('approve-revision'), '변경 승인 중', async () => {
+  const revision = state.revision; if (!revision?.revision_id) throw new Error('변경점을 먼저 확인해 주세요.');
+  const payload = await post(apiPath(`/revisions/${encodeURIComponent(revision.revision_id)}/approve`), {});
+  receiveProject(payload); state.historical = false; $('revision-preview').hidden = true; state.revision = null; await refreshVersions();
+  const job = await post(apiPath('/render'), { version: state.version }); state.status = { ...job, status: job.status || 'queued' }; renderStatus(state.status); stopPolling(); await pollStatus(true); $('progress-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}));
+$('cancel-revision').addEventListener('click', () => { state.revision = null; $('revision-preview').hidden = true; });
+$('narration-file').addEventListener('change', () => { state.narrationAsset = null; const selected = !!$('narration-file').files.length; if (selected) $('tts').checked = false; $('tts').disabled = selected; $('narration-note').textContent = selected ? '선택한 음성을 사용하며, 자동 TTS는 끕니다.' : '파일을 선택하면 해당 음성을 나레이션으로 사용합니다.'; });
+$('clip-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('preview-clip'), '삽입 기획 확인 중', async () => { const file = $('clip-file').files[0]; if (!file || !$('clip-rights').checked) throw new Error('영상 파일과 사용권을 확인해 주세요.'); const asset = await uploadAsset(file, 'clip'); const payload = await post(apiPath('/clip'), { version: state.version, scene_id: $('clip-scene').value, asset_id: asset.asset_id }); $('revision-panel').hidden = false; renderRevision(payload); }); });
+$('version-select').addEventListener('change', async () => {
+  const version = $('version-select').value; if (version === state.version) return;
+  try { stopPolling(); state.generation++; const payload = await api(apiPath(`/versions/${encodeURIComponent(version)}/plan`)); state.version = version; state.plan = payload.plan || payload; state.historical = version !== state.project?.current_version; state.status = null; $('output-panel').hidden = true; $('progress-panel').hidden = true; renderPlan(); await pollStatus(false); } catch (error) { notify(error); populateVersions(); }
+});
+$('projects-toggle').addEventListener('click', () => { const open = $('project-library').hidden; $('project-library').hidden = !open; $('projects-toggle').setAttribute('aria-expanded', String(open)); if (open) refreshLibrary().catch(notify); });
+$('projects-refresh').addEventListener('click', () => refreshLibrary().catch(notify));
+$('dismiss-notice').addEventListener('click', dismissNotice);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && projectId()) { stopPolling(); pollStatus(ACTIVE_STATUSES.has(statusValue(state.status))); } });
+
+async function initialize() {
+  try {
+    const health = await api('/api/health');
+    $('connection').textContent = health.status === 'error' ? '환경 확인 필요' : '연결됨'; $('connection').className = `connection ${health.status === 'error' ? 'offline' : 'online'}`;
+    const last = localStorage.getItem('world-simulation.last-project');
+    if (last) await loadProject(last);
+  } catch (error) { $('connection').textContent = '연결 확인 필요'; $('connection').className = 'connection offline'; if (projectId()) notify(error, '이전 작업을 불러오지 못했습니다.'); }
+}
+async function uploadAsset(file, kind) {
+  return api(`/api/assets?filename=${encodeURIComponent(file.name)}&kind=${encodeURIComponent(kind)}&license=user_owned`, { method: 'POST', body: file, headers: { 'Content-Type': file.type || 'application/octet-stream' } });
+}
+initialize();
