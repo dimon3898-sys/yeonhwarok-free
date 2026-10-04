@@ -400,6 +400,11 @@ def _shipping_narration(start,end,duration,scene_events,route_specs,request,prev
     budget=(end-start)*.9
     return next((line for line in choices[stage]+compact[stage] if line!=previous and len(line.replace(' ',''))/5.8<=budget),'폐쇄를 가정합니다.' if stage=='closure' else compact[stage][-1])
 
+def repeated_city_reveal_events(scene):
+    """Shared exact filler predicate used by planning and its independent gate."""
+    from .retention import repeated_city_reveal_events as detect
+    return detect(scene)
+
 def replace_geographic_event_with_milestone(scene,event):
     """Replace an invisible place reveal with new, sourced current-route information.
 
@@ -451,6 +456,35 @@ def refresh_clock_dependent_route_information(scene,event):
         event.update(text=f'{remaining:,.0f} km REMAINING',value=round(remaining),unit='km',description='수정된 Scene 시각과 실제 렌더 경로 진행률에서 다시 계산한 남은 구면 거리; 압축된 이동 시간은 가정')
     event.update(claim_id='M01',coordinates=deepcopy(route['points'][-1]))
     return dict(scene_id=scene['scene_id'],event_id=event['id'],time=t,route_id=route['route_id'],progress=progress,completed=completed,length_km=length,remaining_km=remaining,source_ids=route['source_ids'],before=before,after={key:deepcopy(event.get(key)) for key in before},method='Exact edited SceneRoutes local smoothstep and sourced angular-length geometry')
+
+def replace_repeated_city_reveal_with_completed_connection(scene,event):
+    """A post-arrival filler summarizes a real complete curve, never fake motion."""
+    from .gis import verified_coordinate
+    candidates=[]
+    for route in scene['routes']:
+        if route.get('faint') or route['route_id'].startswith('N_'):continue
+        if route['points'][-1].get('location_id')!=event.get('target_id'):continue
+        if not all(verified_coordinate(point) for point in route['points']):continue
+        trial=deepcopy(event);trial.update(kind='milestone_reveal',target_id=route['route_id'])
+        record=refresh_clock_dependent_route_information(scene,trial)
+        if record['completed']:candidates.append((trial,record))
+    if not candidates:raise PlanningInputError('요약할 실제 완료된 출처 있는 연결이 없습니다.')
+    trial,record=candidates[-1]
+    original_time=event['time']
+    # Unlike a world-space region label, this summary uses the one-caption
+    # information layer. Preserve the final reveal's real reading window.
+    following=min((other['time'] for other in scene['visual_events'] if other['time']>original_time),default=scene['duration'])
+    latest=round(following-max(1.35,event.get('duration',.7))-1/30,6)
+    if latest<original_time:
+        previous=max((other['time'] for other in scene['visual_events'] if other['time']<original_time),default=-.1)
+        if latest<=max(0.,previous+.1):raise PlanningInputError('완료 연결 요약과 다음 사건의 읽기 시간을 확보할 수 없습니다.')
+        trial['time']=latest
+        record=refresh_clock_dependent_route_information(scene,trial)
+        if not record['completed']:raise PlanningInputError('앞당긴 요약 시각에는 경로가 완료되지 않았습니다.')
+    before={key:deepcopy(event.get(key)) for key in ('kind','target_id','coordinates','claim_id','text','value','unit','time')}
+    trial['kind']='connection_reveal'
+    event.update(trial)
+    return dict(scene_id=scene['scene_id'],event_id=event['id'],time=event['time'],before=before,after={key:deepcopy(event.get(key)) for key in before},route_id=record['route_id'],progress=record['progress'],completed=True,length_km=record['length_km'],source_ids=record['source_ids'],method='Actual completed sourced curve and total angular length; caption read window before the next event; no remaining movement or new entity')
 
 def _replace_geographic_event_with_comparison(scene,event):
     # At a stopped reference / before the alternative departure, a distance
@@ -692,6 +726,21 @@ def generate_plan(raw):
     if event_window_repairs:plan['metadata']['scene_event_window_repairs']=event_window_repairs
     plan['story']['pattern']=plan['metadata']['story_pattern']
     certificate=_certify_planned_events(plan)
+    repeated_city_repairs=[]
+    for scene in scenes:
+        for event in repeated_city_reveal_events(scene):
+            try:record=replace_geographic_event_with_milestone(scene,event)
+            except PlanningInputError:
+                try:record=replace_repeated_city_reveal_with_completed_connection(scene,event)
+                except PlanningInputError:continue
+            record['reason']='Progression reveal repeated an already-active verified city label; disclose a sourced completed connection instead' if record.get('completed') else 'Progression reveal repeated an already-active verified city label; disclose actual moving-route distance instead'
+            repeated_city_repairs.append(record)
+            for sound in scene['sound_events']:
+                if sound.get('visual_event_id')==event['id']:
+                    sound['kind']=SOUND_MAP[event['kind']];sound['time']=event['time']
+    if repeated_city_repairs:
+        plan['metadata']['repeated_city_reveal_repairs']=repeated_city_repairs
+        certificate=_certify_planned_events(plan,repair=False)
     from .schema import validate_plan
     plan['gate']=validate_plan(plan)
     return plan

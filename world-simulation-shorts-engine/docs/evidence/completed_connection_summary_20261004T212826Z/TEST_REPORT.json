@@ -1,0 +1,61 @@
+{
+  "created_at": "2026-10-04T21:38:34.988919+00:00",
+  "focused_tests": {
+    "command": "python3 -m unittest discover -s tests -p 'test_completed_connection_summaries.py' -v",
+    "count": 4,
+    "passed": 4,
+    "seconds": 191.637,
+    "plans_verified": [
+      "aviation180",
+      "aviation183.5",
+      "aviation180.013",
+      "shipping180",
+      "shipping183.5"
+    ],
+    "additional_actual_original_B75_unapproved_proposal": "Only S002/E008 and S009/E034 visual events/sound kinds change; exact preserved input SHA checked by test"
+  },
+  "exact_core_regression": {
+    "topic": "뉴욕에서 런던을 거쳐 파리로 연결하는 항공 여행",
+    "duration": 180,
+    "scene_count": 24,
+    "gate_passed": true,
+    "event": {
+      "id": "E089",
+      "kind": "connection_reveal",
+      "time": 5.466667,
+      "duration": 0.7,
+      "target_id": "R_02",
+      "role": "progression",
+      "caused_by": "E088",
+      "meaningful": true,
+      "description": "실제 렌더 경로가 완성된 시점의 연결과 출처 있는 전체 구면 거리; 운항 시간이나 배송 지연 예측이 아님",
+      "text": "LONDON -> PARIS · 343 km",
+      "value": 343,
+      "unit": "km",
+      "coordinates": {
+        "lon": 2.352992,
+        "lat": 48.858092,
+        "source_id": "natural_earth_places",
+        "location_id": "paris"
+      },
+      "claim_id": "M01"
+    },
+    "exact_frozen_route_metric": {
+      "progress": 1,
+      "total_km": 342.5925212314822,
+      "remaining_km": 0
+    },
+    "elapsed_seconds": 24.100921037010266
+  },
+  "source_sha256": {
+    "engine/planner.py": "6d5b8962efd6d340974a239d658df1a2167423a2b6cdb70c41324baca31ad75a",
+    "engine/revisions.py": "3a2865b53b8b8a8b02fa5c56ca75fc95995e948d9973c0687fe73f4daf44aed4",
+    "engine/retention.py": "39e94cd46461afc327161e7181f15dc5d23a70cf9f229a68aff654bac91b9f64",
+    "tests/test_planning_label_regression.py": "ad6785e3e9db5d163f82bafbd07d88e49efd6f2c50c43162c34a63fc0e5e5729",
+    "tests/test_completed_connection_summaries.py": "252b22f1f72df0216f55f1a1db290e1aeba019c5d6071e70cdba78c7719c8118",
+    "web/earth_adapter.js": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9"
+  },
+  "production_original_bytes_sha256": "7cf9775ffbff58a965884f7ba25bf34c3352432deb493f2a59ea6f21a3244fe5",
+  "production_original_preserved": true,
+  "scope": "Planning, typed provenance, retention, authored frame-grid, and pure frozen Three eligibility/geometry; no pixel/video/audio render or actual approval/server/worker/Git actions"
+}

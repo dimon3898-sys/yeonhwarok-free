@@ -1,0 +1,62 @@
+{
+  "created_at": "2026-10-04T20:48:37.397013+00:00",
+  "source_sha256": {
+    "engine/visibility.py": "5a46c8d9bb04efffac232c5dd488872635228f4a40b89ee4d4f8ca52ede72a0c",
+    "engine/qc.py": "b196a3e7cf2c57c1fe7184ce646d8a7276878f6eb66258df5a31f9ef4579da8a",
+    "tests/test_duplicate_place_labels.py": "17ea033c1c8544c683b33c4517dbdfd3a4f8a6e9e0afbe28271b58ce52fce12b"
+  },
+  "renderer_version": "2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646",
+  "renderer_hash_equals_cached_A20_renderer": true,
+  "unit_tests": {
+    "count": 18,
+    "passed": true,
+    "seconds": 1.975,
+    "log": "focused_tests.log",
+    "scope": "Synthetic native box fixtures and a mocked one-frame decoder for QC dispatch only; no video render/complete video QC"
+  },
+  "actual_native_probe": {
+    "aviation_no_narration": {
+      "project_id": "project_b89a30908047",
+      "version": "v003",
+      "native_frames": 600,
+      "findings": 0,
+      "unresolved": 0,
+      "comparison_exemptions": 0
+    },
+    "aviation_korean_narration": {
+      "project_id": "project_21a865e0dc8d",
+      "version": "v001",
+      "native_frames": 600,
+      "findings": 0,
+      "unresolved": 0,
+      "comparison_exemptions": 0
+    },
+    "shipping_completed_scenes_only": {
+      "project_id": "project_594442ec2df9",
+      "version": "v001",
+      "native_frames": 450,
+      "completed_scenes": 2,
+      "finding": {
+        "scene_id": "S002",
+        "event_id": "E008",
+        "text": "ROTTERDAM",
+        "target_id": "ROTTERDAM_PORT",
+        "first_local_time": 3.533333333333333,
+        "last_local_time": 4.633333333333334,
+        "audited_frame_count": 34,
+        "frame_equivalent_seconds": 1.1333333333333333,
+        "boxes_intersect": false
+      }
+    }
+  },
+  "actual_encoded_still_viewed": "../shipping75_native_progress_review_r01/S002/middle_E008_3_90_1080.png",
+  "integration_hook": "run_qc imports analyze_duplicate_place_labels after _audit_frames, adds DUPLICATE_PLACE_LABEL failure, persists duplicate_place_labels report and finding count in Markdown. Existing loaded worker QC function is not assumed updated.",
+  "not_performed": [
+    "New Earth/video render",
+    "Existing original plan/audit/QC mutation",
+    "Current worker/server reload",
+    "Git staging/commit/push",
+    "New actual full75 encoded QC",
+    "OCR or actual physical-phone/human audio review"
+  ]
+}

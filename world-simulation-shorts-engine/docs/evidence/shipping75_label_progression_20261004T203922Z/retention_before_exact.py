@@ -1,0 +1,52 @@
+"""Semantic-event pacing gates. Camera motion, glow and decorative particles never count."""
+from collections import Counter
+DECORATIVE={'camera_move','camera_push','camera_pull','zoom','pan','glow','particle','pulse','light_sweep','cloud_pass'}
+MEANINGFUL={'city_reveal','country_reveal','route_start','entity_departure','arrival','new_variable','route_blocked','alternate_route_reveal','network_expand','comparison_reveal','milestone_reveal','destination_preview','response','escalation','peak_reveal','final_reveal','route_choice','distance_reveal','region_reveal','connection_reveal','consequence_reveal'}
+
+def analyze_retention(plan):
+    duration=float(plan.get('duration',plan.get('request',{}).get('duration',0)))
+    events=[]
+    for scene in plan.get('scenes',[]):
+        for e in scene.get('visual_events',[]):
+            if isinstance(e,dict) and e.get('kind') in MEANINGFUL and e.get('meaningful',True):
+                events.append({**e,'absolute_time':round(float(scene['start_time'])+float(e.get('time',0)),6),'scene_id':scene['scene_id']})
+    events.sort(key=lambda e:e['absolute_time']);times=[e['absolute_time'] for e in events]
+    gaps=[b-a for a,b in zip([0.]+times,times+[duration])] if duration else []
+    interior=[b-a for a,b in zip(times,times[1:])]
+    average=sum(interior)/len(interior) if interior else duration
+    errors=[];warnings=[]
+    if not plan.get('scenes'):errors.append({'code':'NO_SCENES','message':'Scene이 없습니다.'})
+    first=plan.get('scenes',[{}])[0] if plan.get('scenes') else {}
+    if not first.get('camera_start') or first.get('camera_start')==first.get('camera_end') or float(first.get('motion_start',1))>.5:
+        errors.append({'code':'STATIC_OPENING','message':'첫 0.5초 내 카메라 이동이 필요합니다.'})
+    opening=[e for e in events if e['absolute_time']<=3]
+    hook=plan.get('story',{}).get('hook','')
+    if not hook.strip():errors.append({'code':'MISSING_HOOK','message':'첫 3초의 질문/상황이 없습니다.'})
+    if len(opening)<2 or not any(e.get('role')=='hint' or e['kind'] in {'destination_preview','route_choice'} for e in opening):
+        errors.append({'code':'WEAK_FIRST_3_SECONDS','message':'첫 3초에 의미 있는 사건과 다음 상황의 암시가 필요합니다.'})
+    if not 1<=average<=3:errors.append({'code':'EVENT_DENSITY','message':f'의미 있는 사건 평균 간격 {average:.2f}초: 허용 범위 1~3초.'})
+    if gaps and max(gaps)>3.01:errors.append({'code':'STAGNATION','message':f'의미 있는 사건이 없는 구간 {max(gaps):.2f}초.'})
+    longest=0;current=0;previous=None
+    for event in events:
+        current=current+1 if event['kind']==previous else 1;previous=event['kind'];longest=max(longest,current)
+    diversity=len(set(e['kind'] for e in events))
+    if longest>=4 or diversity<min(5,len(events)):
+        errors.append({'code':'EVENT_DIVERSITY','message':'같은 사건이 반복되거나 사건 유형이 너무 적습니다.'})
+    variables=[e for e in events if e.get('role')=='variable' or e['kind']=='new_variable']
+    if not any(duration*.2<=e['absolute_time']<=duration*.8 for e in variables):errors.append({'code':'MISSING_MID_VARIABLE','message':'중간의 새 변수가 없습니다.'})
+    peaks=[e for e in events if e.get('role')=='peak' or e['kind']=='peak_reveal']
+    if duration>=40 and not peaks:errors.append({'code':'MISSING_PEAK','message':'40초 이상 영상에는 Peak가 필요합니다.'})
+    if 70<=duration<=80 and len(peaks)<2:errors.append({'code':'MISSING_SECOND_PEAK','message':'70~80초 영상에는 중간과 최종 Peak가 필요합니다.'})
+    payoff=[e for e in events if e['kind']=='final_reveal' or e.get('role')=='payoff']
+    if not payoff or min(e['absolute_time'] for e in payoff)<duration*.8:
+        errors.append({'code':'EARLY_OR_MISSING_PAYOFF','message':'최종 보상은 영상 후반에 공개해야 합니다.'})
+    ids={e['id'] for e in events};seen=set()
+    for e in events:
+        dependency=e.get('caused_by')
+        if dependency and dependency not in seen:errors.append({'code':'BROKEN_CAUSALITY','message':f"{e['id']}의 원인 사건이 앞에 없습니다: {dependency}"})
+        if e['absolute_time']>3 and not dependency:errors.append({'code':'MISSING_CAUSALITY','message':f"{e['id']}에 앞 사건과의 인과/정보 연결이 없습니다."})
+        seen.add(e['id'])
+    return dict(passed=not errors,errors=errors,warnings=warnings,metrics=dict(meaningful_event_count=len(events),average_event_interval=round(average,4),max_event_gap=round(max(gaps,default=duration),4),first_3s_events=len(opening),event_types=diversity,max_same_kind_run=longest,peak_count=len(peaks),camera_events_counted=False),events=events)
+
+class RetentionAnalyzer:
+    analyze=staticmethod(analyze_retention)

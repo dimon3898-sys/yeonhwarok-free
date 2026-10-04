@@ -345,6 +345,10 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
     if changes and max(changes[:max(1, round(fps*.5))]) < .055:
         failures.append("FIRST_HALF_SECOND_STATIONARY")
     rendered = _audit_frames(audits)
+    from .visibility import analyze_duplicate_place_labels
+    duplicate_place_labels = analyze_duplicate_place_labels(plan, rendered, fps)
+    if not duplicate_place_labels["passed"]:
+        failures.append("DUPLICATE_PLACE_LABEL")
     subtitle_layout = analyze_subtitle_layout(subtitles, rendered, plan, output_width=width, output_height=height)
     if not subtitle_layout["passed"]:
         failures.append("SUBTITLE_LAYOUT_FAILED")
@@ -485,6 +489,7 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
               "maximum_camera_position_step_globe_radii": max(camera_steps, default=0.),
               "geography_readability_review": readability, "audio": audio, "retention": retention,
               "rendered_retention": rendered_retention,
+              "duplicate_place_labels": duplicate_place_labels,
               "subtitle_layout": subtitle_layout,
               "contact_sheet": str(contact),
               "review_scope": "Every encoded RGB frame decoded; technical checks complement direct full playback, mobile composition and aesthetic review. No audience-retention prediction or human listening claimed."}
@@ -494,6 +499,7 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
             f"File: {video.name}; {width}×{height}; {fps:g} fps; {actual_duration:.3f} s; H.264",
             f"Decoded: {count} frames; black: {len(black)}; exact duplicates: {len(duplicate)}; longest coarse freeze: {longest_frozen/fps:.3f} s",
             "", "Failures: " + (", ".join(report["failures"]) or "none"),
+            "Duplicate base/event place-label findings: " + str(len(duplicate_place_labels["findings"])),
             "Warnings: " + (", ".join(map(str, warnings)) or "none"), "", report["review_scope"], "",
             "Aesthetic approval and full playback must be recorded separately; an automatic PASS alone does not mean publication approval.", ""]
     with (outdir / "qc_report.md").open("x", encoding="utf-8") as stream:
