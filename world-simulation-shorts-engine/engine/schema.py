@@ -2,11 +2,101 @@
 from pathlib import Path
 import json, math
 from jsonschema import Draft202012Validator
-from .presets import CAMERA_PRESETS,LIGHTING_PRESETS,DIRECTING_PRESETS
+from .presets import CAMERA_PRESETS,LIGHTING_PRESETS,DIRECTING_PRESETS,FLAT_CAMERA_PRESETS,FLAT_MAP_VFX,FLAT_ENTITY_ACTIONS,QUALITY_PRESETS,scene_render_mode
 from .plugins import REGISTRY
 from .gis import verified_coordinate,resolve_location,UnknownLocation
 from .retention import analyze_retention
 SCHEMA_PATH=Path(__file__).resolve().parents[1]/'data'/'scene_plan.schema.json'
+
+def validate_flat_scene(scene, source_ids):
+    """Validate new geography/focus/action contracts without rewriting old plans."""
+    errors=[];sid=scene['scene_id'];mode=scene_render_mode(scene)
+    flat=mode=='FLAT_MAP_PREMIUM'
+    if (scene['camera_preset'] in FLAT_CAMERA_PRESETS)!=flat:
+        errors.append(dict(code='CAMERA_RENDER_MODE_MISMATCH',message=sid))
+    if not flat:
+        if any(e['type']=='ship' for e in scene['entities']):
+            errors.append(dict(code='UNSUPPORTED_VISUAL_REQUIREMENT',message='ship alias requires FLAT_MAP_PREMIUM; legacy cargo_ship remains supported',required_plugin='FLAT_MAP_PREMIUM'))
+        return errors
+    settings=scene.get('flat_map',{});duration=scene['duration']
+    from .assets import V3_ROOT,APP_ROOT
+    features=json.loads((V3_ROOT/'assets/gis/countries_50m.geojson').read_text())['features']
+    country_codes={f['properties'].get('ADM0_A3') for f in features}|{f['properties'].get('ISO_A3') for f in features}
+    def coordinate_check(coord,target=None):
+        if not verified_coordinate(coord):errors.append(dict(code='UNVERIFIED_FLAT_GIS_COORDINATE',message=sid,coordinate=coord))
+        if coord.get('source_id') not in source_ids:errors.append(dict(code='MISSING_GIS_SOURCE',message=sid,source=coord.get('source_id')))
+        if target and coord.get('location_id')!=target:errors.append(dict(code='FLAT_FOCUS_TARGET_MISMATCH',message=sid,target_id=target))
+    def timed(item):
+        if not 0<=item.get('start_time',0)<item.get('end_time',duration)<=duration+.001:
+            errors.append(dict(code='FLAT_EVENT_WINDOW_INVALID',message=sid))
+    for key in ('camera_start','camera_end','center'):
+        pose=settings.get(key,scene.get(key,{}))
+        if abs(pose.get('lat',scene['coordinates']['lat']))>80:
+            errors.append(dict(code='UNSUPPORTED_FLAT_PROJECTION_LATITUDE',message=sid,latitude=pose.get('lat'),required_plugin='POLAR_PROJECTION'))
+    for highlight in settings.get('country_highlights',[]):
+        timed(highlight)
+        if highlight['country'] not in country_codes:errors.append(dict(code='UNKNOWN_GIS_COUNTRY',message=sid,country=highlight['country']))
+        if highlight['source_id'] not in source_ids:errors.append(dict(code='MISSING_GIS_SOURCE',message=sid,source=highlight['source_id']))
+    for focus in settings.get('focus',[]):timed(focus);coordinate_check(focus['coordinates'],focus['target_id'])
+    next_event=settings.get('next_event')
+    if next_event:
+        coordinate_check(next_event['coordinates'])
+        event=next((e for e in scene['visual_events'] if e['id']==next_event['event_id']),None)
+        if (not event or abs(event['time']-next_event['event_time'])>.001 or event.get('coordinates')!=next_event['coordinates']):
+            errors.append(dict(code='NEXT_EVENT_CAMERA_BINDING_MISMATCH',message=sid,event_id=next_event['event_id']))
+        if next_event['event_time']-next_event['lead_time']<0:
+            errors.append(dict(code='NEXT_EVENT_CAMERA_NO_LEAD_WINDOW',message=sid))
+    terrain=settings.get('terrain_texture')
+    if terrain:
+        west,south,east,north=terrain['bounds']
+        if not -180<=west<east<=180 or not -90<=south<north<=90:
+            errors.append(dict(code='INVALID_FLAT_TERRAIN_BOUNDS',message=sid))
+        registered_path=terrain['url'].removeprefix('/static/')
+        manifest=APP_ROOT/'assets/flat/SOURCES.json'
+        rows=json.loads(manifest.read_text()) if manifest.is_file() else []
+        if isinstance(rows,dict):rows=rows.get('assets',[])
+        asset=next((item for item in rows if item.get('file')=='web/'+registered_path),None)
+        bounds=asset.get('geographic_bounds',{}) if asset else {}
+        if not asset or [bounds.get(k) for k in ['west','south','east','north']]!=terrain['bounds']:
+            errors.append(dict(code='UNREGISTERED_OR_MISLOCATED_FLAT_TERRAIN',message=sid))
+    entities={e['id']:e for e in scene['entities']};routes={r['route_id'] for r in scene['routes']}
+    # A new network connection must begin at its authored event, rather than
+    # counting a caption over a route that was already moving. Final overviews
+    # may show continued routes and deliberately do not use this freshness rule.
+    route_specs={r['route_id']:r for r in scene['routes']}
+    frame_seconds=1/QUALITY_PRESETS.get(scene.get('render_quality','HIGH'),QUALITY_PRESETS['HIGH'])['fps']
+    for event in scene['visual_events']:
+        if event.get('meaningful',True) and event.get('kind') in {'network_expand','network_expansion'}:
+            route=route_specs.get(event.get('target_id'))
+            if route is None:
+                errors.append(dict(code='FLAT_NETWORK_NEW_ROUTE_REQUIRED',message=sid,event_id=event['id']))
+            elif route.get('progress_start',0)!=0:
+                errors.append(dict(code='FLAT_NETWORK_ROUTE_ALREADY_ACTIVE',message=sid,event_id=event['id'],route_id=route['route_id']))
+            elif abs(route.get('start_time',0)-event['time'])>frame_seconds+1e-9:
+                errors.append(dict(code='FLAT_NETWORK_EVENT_TIMING_MISMATCH',message=sid,event_id=event['id'],route_id=route['route_id'],route_start_time=route.get('start_time',0),event_time=event['time'],allowed_seconds=frame_seconds))
+    for entity in entities.values():
+        if entity.get('coordinates'):coordinate_check(entity['coordinates'],entity.get('location_id'))
+    for action in scene.get('entity_actions',[]):
+        if action.get('entity_id') not in entities:errors.append(dict(code='UNKNOWN_FLAT_ACTION_ENTITY',message=sid))
+        if action.get('action') not in FLAT_ENTITY_ACTIONS:errors.append(dict(code='UNSUPPORTED_FLAT_ENTITY_ACTION',message=sid,action=action.get('action')))
+        if action.get('target_entity_id') and action['target_entity_id'] not in entities:errors.append(dict(code='UNKNOWN_FLAT_ACTION_TARGET',message=sid))
+        if action.get('action') in {'reroute','split','diverge'} and not action.get('route_id'):
+            errors.append(dict(code='FLAT_ACTION_ROUTE_REQUIRED',message=sid))
+        if action.get('action') in {'follow','merge','converge','intercept'} and not action.get('target_entity_id'):
+            errors.append(dict(code='FLAT_ACTION_TARGET_REQUIRED',message=sid))
+        if action.get('route_id') and action['route_id'] not in routes:errors.append(dict(code='MISSING_FLAT_ACTION_ROUTE',message=sid))
+        if not 0<=action.get('time',action.get('start_time',0))<duration+.001:errors.append(dict(code='FLAT_ACTION_OUT_OF_BOUNDS',message=sid))
+    for effect in scene.get('effects',[]):
+        kind=str(effect.get('kind','')).upper()
+        if kind in FLAT_MAP_VFX|{'COUNTRY_HIGHLIGHT','REGION_HIGHLIGHT'}:
+            if effect.get('coordinates'):coordinate_check(effect['coordinates'])
+            if effect.get('country'):
+                if effect['country'] not in country_codes:errors.append(dict(code='UNKNOWN_GIS_COUNTRY',message=sid,country=effect['country']))
+                if effect.get('source_id')!='natural_earth_countries' or effect.get('source_id') not in source_ids:errors.append(dict(code='FLAT_COUNTRY_SOURCE_REQUIRED',message=sid))
+            if effect.get('route_id') and effect['route_id'] not in routes:errors.append(dict(code='MISSING_FLAT_EFFECT_ROUTE',message=sid))
+        elif kind!='CITY_FOCUS':
+            errors.append(dict(code='UNSUPPORTED_VISUAL_REQUIREMENT',message='Unsupported flat VFX '+kind,required_plugin='FLAT_VFX_'+kind))
+    return errors
 
 def validate_plan(plan):
     errors=[];warnings=[]
@@ -48,6 +138,7 @@ def validate_plan(plan):
     event_ids=[]
     for scene in plan['scenes']:
         sid=scene['scene_id'];d=scene['duration']
+        errors.extend(validate_flat_scene(scene,source_ids))
         if abs(scene['start_time']-cursor)>.001:errors.append(dict(code='SCENE_GAP_OR_OVERLAP',message=sid))
         cursor+=d
         if scene['camera_preset'] not in CAMERA_PRESETS:errors.append(dict(code='UNKNOWN_CAMERA_PRESET',message=sid))

@@ -1,0 +1,110 @@
+{
+  "checked_at_utc": "2026-10-05T10:21:49.441868+00:00",
+  "source_before_sha256": "221a8a0762000934a038a9795a0918d4f708b094ded7af1ca7da5ce616cd3741",
+  "source_after_sha256": "c2886bfe61123ae69b5d7e6f16c3c599f40432e4881c572fc64b9e5f3c682a90",
+  "prior_candidate_sha256": "f86ca72d4040f1a01256e5f02330d18e5a64f752267ec5ca51ecfb12181a59d4",
+  "prior_candidate_bytes_preserved": true,
+  "new_candidate_sha256": "c6251a0913ac4a6088d0966877aea24c71610826a26c9f0d3bc63b0fc075b2f2",
+  "new_candidate_path": "docs/evidence/flat_sample_network_onset_fix_20261005T101954100433Z/scene_plan_candidate.json",
+  "passed": true,
+  "errors": [],
+  "changes_excluding_regenerated_gate": [
+    {
+      "path": "scenes[3].entities[1].start_time",
+      "before": 1.05,
+      "after": 1.7
+    },
+    {
+      "path": "scenes[3].routes[1].start_time",
+      "before": 1.05,
+      "after": 1.7
+    }
+  ],
+  "gate_retention_metrics": {
+    "meaningful_event_count": 12,
+    "average_event_interval": 1.2136,
+    "max_event_gap": 2.95,
+    "first_3s_events": 4,
+    "event_types": 11,
+    "max_same_kind_run": 1,
+    "peak_count": 1,
+    "camera_events_counted": false
+  },
+  "event_receipt_E011": {
+    "event_id": "E011",
+    "scene_id": "S004",
+    "kind": "network_expand",
+    "target_id": "R_TOKYO_TAIPEI",
+    "coordinates": {
+      "lon": 139.749462,
+      "lat": 35.686963,
+      "source_id": "natural_earth_places",
+      "location_id": "tokyo"
+    },
+    "scheduled_local_time": 1.7,
+    "eligible_frames": 27,
+    "eligible_primitives": [
+      "network"
+    ],
+    "first_eligible_local_time": 1.7333333333333334,
+    "projection_at_scheduled_time": {
+      "x": 0.7501952906485888,
+      "y": 0.41106218849284687,
+      "earth_occluded": false,
+      "depth_visible": true,
+      "inside_event_safe_area": true
+    },
+    "renderer_supported": true,
+    "first_primitive": "network",
+    "visible_seconds": 0.9,
+    "onset_latency_seconds": 0.03333333333333344,
+    "allowed_onset_delay_seconds": 0.03333333333333333,
+    "render_mode": "FLAT_MAP_PREMIUM",
+    "projection": "LOCAL_MERCATOR"
+  },
+  "authored_physical_binding": {
+    "scene_id": "S004",
+    "scene_start_time": 9.0,
+    "event_id": "E011",
+    "event_kind": "network_expand",
+    "route_id": "R_TOKYO_TAIPEI",
+    "entity_id": "aircraft_tokyo_support",
+    "before_local_start": 1.05,
+    "new_local_start": 1.7,
+    "new_absolute_start": 10.7,
+    "route_progress_start": 0.0,
+    "route_progress_end": 0.9,
+    "route_local_end": 3.0,
+    "entity_local_end": 3.0
+  },
+  "boundary_continuity": {
+    "S004_exit_unchanged": true,
+    "S004_exit_equals_S005_entry": true,
+    "other_four_scenes_identical": true
+  },
+  "handoff": {
+    "veil_start_local": 2.35,
+    "clear_interval_after_event_seconds": 0.65,
+    "downstream_route_progress_unchanged": true
+  },
+  "recommended_production_patch": [
+    {
+      "scene_id": "S004",
+      "route_id": "R_TOKYO_TAIPEI",
+      "field": "routes[].start_time",
+      "before": 1.05,
+      "after": 1.7
+    },
+    {
+      "scene_id": "S004",
+      "entity_id": "aircraft_tokyo_support",
+      "field": "entities[].start_time",
+      "before": 1.05,
+      "after": 1.7
+    }
+  ],
+  "render_started": false,
+  "approval_created": false,
+  "working_projects_modified": false,
+  "scope": "Builder-only two-line source correction; no core/schema/renderer/server/worker/active project/Git change. Current candidate and actual pixels are not modified. Fresh event is physically authored to begin at the scheduled network event; pure semantic receipt is eligibility, not final native pixel QC."
+}

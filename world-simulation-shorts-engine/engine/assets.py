@@ -152,7 +152,20 @@ def asset_registry() -> list[dict]:
 
 def validate_assets(plan: dict | None = None) -> dict:
     checked, errors, external = [], [], []
-    for asset in asset_registry():
+    registry = asset_registry()
+    if any(scene.get('render_mode') == 'FLAT_MAP_PREMIUM' for scene in (plan or {}).get('scenes', [])):
+        flat_sources = APP_ROOT / 'assets/flat/SOURCES.json'
+        if flat_sources.is_file():
+            rows = json.loads(flat_sources.read_text())
+            if isinstance(rows, dict):
+                rows = rows.get('assets', [])
+            for item in rows:
+                path = (APP_ROOT / item['file']).resolve()
+                if APP_ROOT.resolve() not in path.parents:
+                    errors.append({'code': 'FLAT_ASSET_PATH_OUTSIDE_LIBRARY', 'id': item.get('id')})
+                    continue
+                registry.append({**item, 'path': str(path)})
+    for asset in registry:
         path = Path(asset["path"])
         if not path.is_file():
             errors.append({"id": asset["id"], "code": "MISSING_ASSET", "path": str(path)})
@@ -196,11 +209,24 @@ def validate_assets(plan: dict | None = None) -> dict:
     return {"passed": not errors, "assets": checked, "external_assets": external, "errors": errors}
 
 
-def renderer_version() -> str:
+def renderer_version(scene: dict | None = None) -> str:
+    if (scene or {}).get('render_mode') == 'FLAT_MAP_PREMIUM':
+        files = [APP_ROOT/'web/flat_renderer.js', APP_ROOT/'web/flat_semantics.js',
+                 APP_ROOT/'web/render_flat.html', APP_ROOT/'tools/render_flat_scene.mjs', APP_ROOT/'web/map_transition.js',
+                 APP_ROOT/'assets/flat/SOURCES.json']
+        digest = hashlib.sha256(b'FLAT_MAP_PREMIUM/LOCAL_PROJECTION/v1')
+        for file in files:
+            if file.is_file():
+                digest.update(str(file.relative_to(REPOSITORY_ROOT)).encode())
+                digest.update(bytes.fromhex(sha256_file(file)))
+        return digest.hexdigest()
     files = [V3_ROOT / "src/renderer_v3.js", V3_ROOT / "src/aircraft_v3.js",
              V3_ROOT / "src/core_v1_preserved.js", V3_ROOT / "src/engine_v3.js",
              APP_ROOT / "web/earth_adapter.js", APP_ROOT / "web/render.html",
              APP_ROOT / "tools/render_scene.mjs"]
+    if any((scene or {}).get(key) in {'FLAT_TO_EARTH','EARTH_TO_FLAT'} for key in ['transition_in','transition_out']):
+        files += [APP_ROOT/'web/transition_adapter.js', APP_ROOT/'web/map_transition.js',
+                  APP_ROOT/'web/render_transition.html', APP_ROOT/'tools/render_transition_scene.mjs']
     digest = hashlib.sha256()
     for file in files:
         if file.is_file():
@@ -209,15 +235,26 @@ def renderer_version() -> str:
     return digest.hexdigest()
 
 
+def project_renderer_version(plan: dict | None = None) -> str:
+    versions = {scene['scene_id']: renderer_version(scene) for scene in (plan or {}).get('scenes', [])}
+    original = renderer_version()
+    if all(value == original for value in versions.values()):
+        return original
+    return hashlib.sha256(json.dumps(versions,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+
+
 def write_source_report(directory: Path, plan: dict, assets: dict | None = None) -> dict:
     directory.mkdir(parents=True, exist_ok=True)
     report = assets or validate_assets(plan)
     report = {**report, "geographic_sources": plan.get("sources", []),
               "claims": plan.get("story", {}).get("claims", []),
-              "renderer_version": renderer_version(),
+              "renderer_version": project_renderer_version(plan),
               "license_notice": "Earth day/night/cloud textures: Solar System Scope, CC BY 4.0. "
               "Modified by cinematic lighting, geographic overlays and camera rendering. "
               "NASA-derived imagery does not remove the texture author's CC BY attribution requirement."}
+    if any(scene.get('render_mode')=='FLAT_MAP_PREMIUM' or any(scene.get(k) in {'FLAT_TO_EARTH','EARTH_TO_FLAT'} for k in ['transition_in','transition_out']) for scene in plan.get('scenes', [])):
+        report['scene_renderers'] = {scene['scene_id']: {'render_mode': scene.get('render_mode','MASTER_V3_EARTH'), 'version': renderer_version(scene)} for scene in plan['scenes']}
+        report['license_notice'] += ' Optional FLAT_MAP_PREMIUM uses the same sourced geography and independently versioned projected-terrain renderer; backend selection is recorded for each scene.'
     json_file = directory / "source_report.json"
     with json_file.open("x", encoding="utf-8") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2)

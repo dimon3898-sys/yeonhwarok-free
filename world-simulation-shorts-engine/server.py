@@ -144,6 +144,8 @@ class Handler(BaseHTTPRequestHandler):
                     if not p.is_relative_to(v) or p.suffix.lower() not in {'.mp4','.png','.jpg','.jpeg','.md','.json','.txt','.wav','.mp3','.ass','.srt','.zip'}:raise EngineError('INVALID_FILE','파일 경로가 허용되지 않습니다.',status=404)
                     return self.file(p,parts[0]=='download',method=='HEAD')
                 if path in {'/','/index.html'}:return self.file(APP/'web'/'index.html',head=method=='HEAD')
+                if path=='/render_transition.html':return self.file(APP/'web'/'render_transition.html',head=method=='HEAD')
+                if path=='/render_flat.html':return self.file(APP/'web'/'render_flat.html',head=method=='HEAD')
                 if path=='/render.html':return self.file(APP/'web'/'render.html',head=method=='HEAD')
                 if parts[0]=='static':return self.scoped(APP/'web','/'.join(parts[1:]),method)
                 if parts[0]=='vendor' and len(parts)>1 and parts[1]=='three':return self.scoped(V3/'node_modules'/'three','/'.join(parts[2:]),method)

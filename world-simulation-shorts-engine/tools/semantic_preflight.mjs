@@ -119,12 +119,49 @@ class MetricsContext {
 }
 const allowances={information:.25,world_label:.4,'3D_entity':.24,route_head:0,route_barrier:0,network:0,clip_information:.09};
 const physical={route_start:new Set(['route_head']),entity_departure:new Set(['3D_entity']),route_blocked:new Set(['route_barrier']),network_expand:new Set(['network']),arrival:new Set(['geographic_pulse','world_label'])};
+let flatCertify=null,flatSourceHash=null;
+const flatScenes=plan.scenes.some(scene=>scene.render_mode==='FLAT_MAP_PREMIUM');
+if(flatScenes){
+ const file=path.join(appRoot,'web/flat_semantics.js'),bytes=fs.readFileSync(file);
+ const source=bytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'');
+ flatCertify=new Function('THREE',source+';return flatSceneEligibility;')(THREE);
+ flatSourceHash=createHash('sha256').update(bytes).digest('hex');
+}
+const {mapTransitionOpacity}=await import(pathToFileURL(path.join(appRoot,'web/map_transition.js')));
+const flatCountries=flatScenes?JSON.parse(fs.readFileSync(path.join(legacyRoot,'assets/gis/countries_50m.geojson'),'utf8')):null;
 const results=[], failures=[], scopeScenes=options.scene?new Set(options.scene.split(',')):null;
 if(scopeScenes)for(const id of scopeScenes)if(!plan.scenes.some(scene=>scene.scene_id===id))
   failures.push({code:'UNKNOWN_SCOPED_SCENE',scene_id:id});
 let hookEligible=false;
 for(const scene of plan.scenes) {
   if(scopeScenes&&!scopeScenes.has(scene.scene_id))continue;
+  if(scene.render_mode==='FLAT_MAP_PREMIUM'){
+    try{
+      const certified=flatCertify(scene,plan,fps,{width,height,context:new MetricsContext(),countries:flatCountries,visibilityFilter:time=>mapTransitionOpacity(scene,time)<=.4});
+      hookEligible ||= certified.opening_hook_eligible;
+      failures.push(...(certified.failures||[]));
+      if(!certified.numeric?.finite||certified.numeric.maxCameraAngleDegreesPerFrame>2.5)
+        failures.push({code:'FLAT_CAMERA_PREFLIGHT_FAILED',scene_id:scene.scene_id});
+      for(const result of certified.events){
+        if(!meaningful.has(result.kind))continue;
+        const event=scene.visual_events.find(e=>e.id===result.event_id);
+        const required=result.kind==='route_reroute'?new Set(['route_head']):physical[result.kind];
+        if(required&&result.eligible_primitives.some(p=>!required.has(p)))
+          failures.push({code:'PHYSICAL_EVENT_REQUIRES_PHYSICAL_PRIMITIVE',scene_id:scene.scene_id,event_id:event.id});
+        if(result.first_eligible_local_time===null){
+          failures.push({code:['city_reveal','country_reveal','arrival','destination_preview','region_reveal'].includes(event.kind)?'GEOGRAPHIC_EVENT_NOT_VISIBLE':'MEANINGFUL_EVENT_NOT_ELIGIBLE',event_id:event.id,scene_id:scene.scene_id,kind:event.kind,coordinates:event.coordinates||null,projection_at_scheduled_time:result.projection_at_scheduled_time});
+        }else{
+          const primitive=result.first_primitive;
+          const allowance=(primitive==='geographic_pulse'?.04*Number(event.duration??1.25):(['country_highlight','map_vfx'].includes(primitive)?.15:(allowances[primitive]??0)))+1/fps;
+          result.onset_latency_seconds=result.first_eligible_local_time-Number(event.time);result.allowed_onset_delay_seconds=allowance;
+          if(result.onset_latency_seconds>allowance+.00001)failures.push({code:'MEANINGFUL_EVENT_ELIGIBLE_LATE',event_id:event.id,scene_id:scene.scene_id,latency_seconds:result.onset_latency_seconds,allowed_seconds:allowance});
+          if(result.visible_seconds<.1-1e-6)failures.push({code:'MEANINGFUL_EVENT_ELIGIBLE_TOO_BRIEFLY',event_id:event.id,scene_id:scene.scene_id,visible_seconds:result.visible_seconds});
+        }
+        results.push({...result,render_mode:'FLAT_MAP_PREMIUM',projection:certified.numeric?.projection});
+      }
+    }catch(error){failures.push({code:'FLAT_SEMANTIC_CERTIFICATION_FAILED',scene_id:scene.scene_id,detail:String(error.stack||error)});}
+    continue;
+  }
   if(scene.scene_type==='CINEMATIC_CLIP') {
     const check=metadata.clips[scene.scene_id];
     if(!check?.passed)failures.push(...(check?.errors||[{code:'CINEMATIC_CLIP_REQUIRES_CLIP_PREFLIGHT'}]).map(error=>({...error,scene_id:scene.scene_id})));
@@ -171,7 +208,9 @@ for(const scene of plan.scenes) {
       failures.push({code:'SEMANTIC_LAYOUT_UNCERTIFIED',scene_id:scene.scene_id,time,detail:String(error.message)});
       break;
     }
-    if(Number(scene.start_time)+time<3&&context.labels.some(l=>l.kind==='hook_reveal'&&l.text&&l.opacity>.1))hookEligible=true;
+    const veil=mapTransitionOpacity(scene,time);
+    if(veil>.4)context.eventAudit=[];
+    if(Number(scene.start_time)+time<3&&veil<=.4&&context.labels.some(l=>l.kind==='hook_reveal'&&l.text&&l.opacity>.1))hookEligible=true;
     for(const event of expected) {
       const result=observed.get(event.id);
       if(result.projection_at_scheduled_time===null&&time+1e-8>=Number(event.time)&&event.coordinates) {
@@ -215,8 +254,8 @@ for(const scene of plan.scenes) {
 }
 if(!scopeScenes&&!hookEligible)failures.push({code:'OPENING_HOOK_NOT_ELIGIBLE'});
 const hash=data=>createHash('sha256').update(data).digest('hex');
-const sourceHashes={adapter:hash(adapterBytes),legacy_renderer:hash(original),aircraft:hash(fs.readFileSync(path.join(legacyRoot,'src/aircraft_v3.js'))),OpenSans:hash(fs.readFileSync(fonts.OpenSans)),Noto:hash(fs.readFileSync(fonts.Noto)),certifier:hash(fs.readFileSync(fileURLToPath(import.meta.url)))};
-const report={schema_version:1,created_at_utc:new Date().toISOString(),passed:failures.length===0,plan_path:planFile,plan_sha256:hash(planBytes),renderer_sha256:hash(adapterBytes),source_hashes:sourceHashes,fps,resolution:[width,height],scoped_scene_ids:scopeScenes?[...scopeScenes]:null,opening_hook_eligible:hookEligible,events:results,failures,scope:'Pure frozen-renderer pose, Earth occlusion, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.',font_layout_policy:'Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.'};
+const sourceHashes={flat_semantics:flatSourceHash,map_transition:hash(fs.readFileSync(path.join(appRoot,'web/map_transition.js'))),adapter:hash(adapterBytes),legacy_renderer:hash(original),aircraft:hash(fs.readFileSync(path.join(legacyRoot,'src/aircraft_v3.js'))),OpenSans:hash(fs.readFileSync(fonts.OpenSans)),Noto:hash(fs.readFileSync(fonts.Noto)),certifier:hash(fs.readFileSync(fileURLToPath(import.meta.url)))};
+const report={schema_version:1,created_at_utc:new Date().toISOString(),passed:failures.length===0,plan_path:planFile,plan_sha256:hash(planBytes),renderer_sha256:hash(adapterBytes),source_hashes:sourceHashes,fps,resolution:[width,height],scoped_scene_ids:scopeScenes?[...scopeScenes]:null,opening_hook_eligible:hookEligible,events:results,failures,scope:'Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.',font_layout_policy:'Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.'};
 if(options.output)fs.writeFileSync(path.resolve(options.output),JSON.stringify(report,null,2),{flag:'wx'});
 process.stdout.write(JSON.stringify(report)+'\n');
 if(!report.passed)process.exitCode=2;

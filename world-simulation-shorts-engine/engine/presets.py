@@ -16,6 +16,32 @@ CAMERA_PRESETS = {
     'GLOBAL_PULLBACK': dict(height=2.05, tilt=.35, yaw=.16, fov=45, speed=1.55, acceleration=.65, deceleration=.65, easing='smootherstep', bank=.02, motion_blur=.5),
     'FINAL_REVEAL': dict(height=1.85, tilt=.4, yaw=.12, fov=44, speed=1.3, acceleration=.6, deceleration=.8, easing='smootherstep', bank=.012, motion_blur=.35),
 }
+# Explicit opt-in only. Existing planner selects only its original Earth grammar.
+FLAT_CAMERA_PRESETS = {
+    'FLAT_ESTABLISH': dict(height=.8, tilt=.02, yaw=0., fov=43, speed=.85, acceleration=.45, deceleration=.65, easing='smootherstep', bank=0., motion_blur=.18),
+    'FLAT_COUNTRY_FOCUS': dict(height=.55, tilt=.025, yaw=0., fov=42, speed=.85, acceleration=.4, deceleration=.7, easing='smootherstep', bank=0., motion_blur=.16),
+    'FLAT_REGION_FOCUS': dict(height=.7, tilt=.02, yaw=0., fov=43, speed=.8, acceleration=.4, deceleration=.65, easing='smootherstep', bank=0., motion_blur=.16),
+    'FLAT_ROUTE_FOLLOW': dict(height=.48, tilt=.025, yaw=0., fov=43, speed=1.05, acceleration=.55, deceleration=.6, easing='smootherstep', bank=0., motion_blur=.22),
+    'FLAT_ENTITY_FOLLOW': dict(height=.4, tilt=.025, yaw=0., fov=42, speed=1.05, acceleration=.55, deceleration=.6, easing='smootherstep', bank=0., motion_blur=.22),
+    'FLAT_MULTI_COUNTRY': dict(height=1.1, tilt=.015, yaw=0., fov=44, speed=.8, acceleration=.45, deceleration=.65, easing='smootherstep', bank=0., motion_blur=.18),
+    'FLAT_PULLBACK': dict(height=1.4, tilt=.02, yaw=0., fov=44, speed=1.2, acceleration=.6, deceleration=.7, easing='smootherstep', bank=0., motion_blur=.25),
+    'FLAT_NEXT_EVENT_PREVIEW': dict(height=.65, tilt=.025, yaw=0., fov=43, speed=.95, acceleration=.5, deceleration=.65, easing='smootherstep', bank=0., motion_blur=.2),
+}
+CAMERA_PRESETS.update(FLAT_CAMERA_PRESETS)
+RENDER_MODES = {'MASTER_V3_EARTH', 'FLAT_MAP_PREMIUM'}
+FLAT_MAP_VFX = {'PULSE', 'RADAR', 'WARNING', 'IMPACT', 'SHOCKWAVE', 'AREA_HIGHLIGHT', 'ROUTE_BLOCK', 'ROUTE_REROUTE'}
+FLAT_ENTITY_ACTIONS = {'split', 'merge', 'converge', 'diverge', 'follow', 'intercept', 'stop', 'reroute', 'move', 'depart', 'arrive'}
+FLAT_SOUND_BINDINGS = {'route_blocked': 'warning_hit', 'route_reroute': 'transition_sweep',
+                       'country_reveal': 'soft_pulse', 'region_reveal': 'soft_pulse',
+                       'new_variable': 'tension_riser', 'peak_reveal': 'cinematic_hit'}
+
+def scene_render_mode(scene):
+    """Legacy immutable plans remain Earth; new flat mode must be explicit."""
+    mode = scene.get('render_mode', 'MASTER_V3_EARTH')
+    if mode not in RENDER_MODES:
+        raise ValueError('UNKNOWN_RENDER_MODE: ' + str(mode))
+    return mode
+
 LIGHTING_PRESETS = {
     'CINEMATIC_NIGHT': dict(surface_exposure=.48, ambient=.22, city_lights=1.1, coast_contrast=.7, cloud_opacity=.32, atmosphere=1.0, sun_intensity=.65, sun_lon=15, sun_lat=-12, grade='cool_warm'),
     'GEOGRAPHY_READABILITY': dict(surface_exposure=1.1, ambient=.7, city_lights=.5, coast_contrast=1.4, cloud_opacity=.13, atmosphere=.8, sun_intensity=1.15, sun_lon=35, sun_lat=15, grade='natural'),

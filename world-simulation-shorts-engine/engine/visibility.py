@@ -155,6 +155,7 @@ def _source_fingerprint() -> str:
              legacy / "node_modules" / "three" / "build" / "three.module.js",
              legacy / "assets" / "v3" / "fonts" / "OpenSans-Light.ttf",
              APP_ROOT / "web" / "fonts" / "NotoSansCJKkr-Regular.otf"]
+    paths += [APP_ROOT/'web/flat_semantics.js', APP_ROOT/'web/map_transition.js']
     digest = hashlib.sha256()
     for path in paths:
         digest.update(str(path).encode())

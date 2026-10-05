@@ -70,13 +70,19 @@ TTS/BGM/자막은 개별 ON/OFF입니다. TTS 기본 어댑터는 무료 오프�
 
 테스트 범위는 [docs/TEST_SCOPE.md](docs/TEST_SCOPE.md), 실제 제작 근거와 아직 남은 제한은 `QUALITY_REPORT_FINAL.md` 및 테스트 프로젝트의 `qc/` 기록에서 확인합니다. CPU 렌더 시간은 각 실제 실행의 `renders/project_result.json`에 측정합니다. 측정하지 않은 75초 HIGH 시간을 성공 기준처럼 제시하지 않습니다.
 
-최신 동결 코어는 [독립 venv175개 전체](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/REPORT.json)/[로그](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/unittest.log)에서 PASS(250.182초/wall253.847806초·source변경0)입니다.20초 실제완성·부분재렌더·공개파일 다운로드는 품질보고서의 별도 근거입니다.75초는 두Scene라벨 교정v003의 실제375px 승인·enqueue와 캐시3개 SHA검증을 마쳐 S004렌더 중입니다. 실제4K/375px 후보3프레임의 개선을 전체75초MP4/QC/실물휴대폰·공개앱 완료로 표시하지 않습니다.
+기존 코어의 [독립 venv175개 전체](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/REPORT.json)/[로그](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/unittest.log)는 PASS입니다. 기존 75초 HIGH 테스트 v003도 완성되어 [최종 MP4](../deliverables/WORLD_SIMULATION_ENGINE/SUEZ_CLOSURE_75S_TTS_v003/SUEZ_CLOSURE_75S_TTS_v003.mp4)로 보존했습니다. 이번 Flat 검증에서는 해당 영상을 재렌더하지 않습니다. 전체 재생·다운로드 검증과 실물 휴대폰·공개 앱 호스팅 검증은 구분합니다.
 
 175개 Python검사 후 라벨 Diff값 표시만 바꾼UI는 [별도375px GET-only 검수](validation/mobile_label_diff_display_r02/LABEL_DIFF_DISPLAY_REPORT.json)를 통과했습니다(API POST0·worker제어0; poll은 테스트browser에서만 정지). 새전체175개검사나 실물폰검증은 아닙니다. [공개tunnel feasibility](docs/evidence/public_tunnel_readonly_probe_20261005T013145606003Z/REPORT.md)는 origin 도달 전CONNECT403으로 설치·tunnel생성 없이 종료했으며 공개앱URL은 아직 없습니다.
 
 전체 저장소를 체크아웃하고 `cinematic-world-map`을 이 프로그램의 형제 폴더로 유지합니다. 회귀 테스트의 253KB 기술 패턴 MP4와 출처 기록은 `library/uploads/asset_ee0d2ae58134/`에 포함되며, 실제 영상에 넣는 I2V 자산이 아닙니다.
 
 설계는 [ARCHITECTURE.md](ARCHITECTURE.md), 모듈 추가는 [PLUGIN_GUIDE.md](PLUGIN_GUIDE.md), 렌더·복구는 [RENDER_GUIDE.md](RENDER_GUIDE.md), 사용자 작업은 [USER_GUIDE.md](USER_GUIDE.md)를 참고하세요.
+
+## 선택형 PREMIUM FLAT / 2.5D
+
+`FLAT_MAP_PREMIUM`은 기존 MASTER V3 Earth와 별도의 WebGL 렌더러입니다. 실제 Natural Earth 국경·해안선과 출처를 기록한 native shaded-relief 지역 텍스처를 사용합니다. 국가 강조, AUTO FOCUS, 다음 사건 카메라 예고, 진행 경로, 3D 이동체와 Map VFX를 기존 Scene·승인·부분 재렌더·캐시에 연결합니다. 일반 기획기의 Earth 기본값은 유지합니다.
+
+[사용 및 Scene 설정](docs/FLAT_MAP_PREMIUM_GUIDE.md), [지형 준비와 캐시](docs/FLAT_TERRAIN_CACHE.md), [실측 시간](FLAT_MAP_BENCHMARK.md), [샘플 품질 검수](FLAT_MAP_QUALITY_REPORT.md)를 참고하세요. 검증 범위는 약 15초 혼합 샘플이며 75초 전체 제작은 샘플 승인 이후입니다. 제공하는 지역 PNG만으로 샘플을 실행할 수 있습니다. 다른 지역의 native crop을 준비할 때만 별도 699MB 원본 TIFF가 필요하며, 해당 원본은 Git에 포함하지 않습니다.
 
 ## 출처와 라이선스
 

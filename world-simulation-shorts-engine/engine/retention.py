@@ -1,7 +1,7 @@
 """Semantic-event pacing gates. Camera motion, glow and decorative particles never count."""
 from collections import Counter
 DECORATIVE={'camera_move','camera_push','camera_pull','zoom','pan','glow','particle','pulse','light_sweep','cloud_pass'}
-MEANINGFUL={'city_reveal','country_reveal','route_start','entity_departure','arrival','new_variable','route_blocked','alternate_route_reveal','network_expand','comparison_reveal','milestone_reveal','destination_preview','response','escalation','peak_reveal','final_reveal','route_choice','distance_reveal','region_reveal','connection_reveal','consequence_reveal'}
+MEANINGFUL={'city_reveal','country_reveal','route_start','entity_departure','arrival','new_variable','route_blocked','alternate_route_reveal','network_expand','comparison_reveal','milestone_reveal','destination_preview','response','escalation','peak_reveal','final_reveal','route_choice','distance_reveal','region_reveal','connection_reveal','consequence_reveal','route_reroute'}
 
 def repeated_city_reveal_events(scene):
     """Exact known filler duplicate: plain region text repeats an active city.
@@ -59,7 +59,14 @@ def analyze_retention(plan):
     if not any(duration*.2<=e['absolute_time']<=duration*.8 for e in variables):errors.append({'code':'MISSING_MID_VARIABLE','message':'중간의 새 변수가 없습니다.'})
     peaks=[e for e in events if e.get('role')=='peak' or e['kind']=='peak_reveal']
     if duration>=40 and not peaks:errors.append({'code':'MISSING_PEAK','message':'40초 이상 영상에는 Peak가 필요합니다.'})
-    if 70<=duration<=80 and len(peaks)<2:errors.append({'code':'MISSING_SECOND_PEAK','message':'70~80초 영상에는 중간과 최종 Peak가 필요합니다.'})
+    if 70<=duration<=80 and len(peaks)<2:
+        # A deliberate, documented single causal payoff can be more natural.
+        # Existing plans keep the previous default two-peak requirement.
+        single_peak=plan.get('metadata',{}).get('peak_strategy')=='single_causal_peak'
+        rationale=plan.get('metadata',{}).get('peak_strategy_reason','').strip()
+        if single_peak and rationale and len(peaks)==1:
+            warnings.append({'code':'SINGLE_CAUSAL_PEAK','message':rationale})
+        else:errors.append({'code':'MISSING_SECOND_PEAK','message':'70~80초 영상에는 중간과 최종 Peak가 필요합니다. 자연스러운 단일 Peak는 명시적 근거를 기록해야 합니다.'})
     payoff=[e for e in events if e['kind']=='final_reveal' or e.get('role')=='payoff']
     if not payoff or min(e['absolute_time'] for e in payoff)<duration*.8:
         errors.append({'code':'EARLY_OR_MISSING_PAYOFF','message':'최종 보상은 영상 후반에 공개해야 합니다.'})

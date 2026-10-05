@@ -63,12 +63,12 @@ def analyze_rendered_retention(plan: dict, audits: list, fps: float = 30.) -> di
     """
     from .retention import MEANINGFUL, analyze_retention
     allowed_primitives = {"information", "world_label", "geographic_pulse", "route_head",
-                          "3D_entity", "route_barrier", "network", "clip_information"}
+                          "3D_entity", "route_barrier", "network", "clip_information", "country_highlight", "map_vfx"}
     physical_primitives = {"route_start": {"route_head"}, "entity_departure": {"3D_entity"},
                            "route_blocked": {"route_barrier"}, "network_expand": {"network"},
                            "arrival": {"geographic_pulse", "world_label"}}
     fade_allowances = {"information": .25, "world_label": .4, "3D_entity": .24,
-                       "route_head": 0., "route_barrier": 0., "network": 0., "clip_information": .09}
+                       "route_head": 0., "route_barrier": 0., "network": 0., "clip_information": .09, "country_highlight": .15, "map_vfx": .15}
     scenes = {scene["scene_id"]: scene for scene in plan["scenes"]}
     all_events = {event["id"]: (scene, event) for scene in plan["scenes"]
                   for event in scene.get("visual_events", []) if isinstance(event, dict)}
@@ -113,7 +113,16 @@ def analyze_rendered_retention(plan: dict, audits: list, fps: float = 30.) -> di
                     or abs(float(actual_time)-float(local)) > timestep+.00001):
                 errors.append({"code": "INVALID_DRAWN_EVENT_EVIDENCE", "frame": index, "event_id": eid})
                 continue
-            if event["kind"] in physical_primitives and primitive not in physical_primitives[event["kind"]]:
+            is_flat = scene.get('render_mode') == 'FLAT_MAP_PREMIUM'
+            if primitive in {'country_highlight', 'map_vfx'} and not is_flat:
+                errors.append({'code': 'FLAT_PRIMITIVE_IN_EARTH_SCENE', 'event_id': eid, 'frame': index})
+                continue
+            physical_required = physical_primitives.get(event['kind'])
+            if is_flat and event['kind'] == 'country_reveal':
+                physical_required = {'country_highlight', 'world_label', 'geographic_pulse'}
+            if is_flat and event['kind'] == 'route_reroute':
+                physical_required = {'route_head'}
+            if physical_required and primitive not in physical_required:
                 errors.append({"code": "PHYSICAL_EVENT_REQUIRES_PHYSICAL_PRIMITIVE", "frame": index,
                                "event_id": eid, "kind": event["kind"], "primitive": primitive})
                 continue
@@ -354,9 +363,15 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
         failures.append("SUBTITLE_LAYOUT_FAILED")
     warnings.extend(subtitle_layout.get("warnings", []))
     clipping, gl_errors, missing, broken = [], [], [], []
-    camera_angles, camera_steps = [], []
+    camera_angles, camera_steps, flat_camera_steps = [], [], []
     previous = None
+    scenes_by_id = {scene['scene_id']: scene for scene in plan['scenes']}
+    projection_transitions = []
     for index, audit in enumerate(rendered):
+        scene = scenes_by_id.get(audit.get('scene_id'), {})
+        is_flat = scene.get('render_mode') == 'FLAT_MAP_PREMIUM'
+        if is_flat and audit.get('render_mode') != 'FLAT_MAP_PREMIUM':
+            missing.append({'frame': index, 'code': 'FLAT_RENDER_MODE_AUDIT_MISSING'})
         for field in ["textClipped", "entityClipped", "routeDiscontinuities"]:
             if audit.get(field):
                 (clipping if field != "routeDiscontinuities" else broken).append({"frame": index, "field": field, "value": audit[field]})
@@ -366,7 +381,7 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
             missing.append({"frame": index, "code": "FONT_NOT_READY"})
         if audit.get("missingAssets") or audit.get("missingTextures"):
             missing.append({"frame": index, "assets": audit.get("missingAssets"), "textures": audit.get("missingTextures")})
-        if audit.get("sourceTextureSize") is not None and audit["sourceTextureSize"] != [8192, 4096]:
+        if not is_flat and audit.get("sourceTextureSize") is not None and audit["sourceTextureSize"] != [8192, 4096]:
             missing.append({"frame": index, "code": "V3_EARTH_TEXTURE_BASELINE_CHANGED"})
         numeric = []
         for field in ["cameraPosition", "cameraQuaternion", "cameraFov"]:
@@ -378,18 +393,35 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
         for entity in audit.get("entities", []):
             numeric.extend(entity.get("position", []))
             numeric.extend(entity.get("quaternion", []))
-            if entity.get("visible") and float(entity.get("radius", 1.)) < 1.-1e-6:
+            if not is_flat and entity.get("visible") and float(entity.get("radius", 1.)) < 1.-1e-6:
                 broken.append({"frame": index, "code": "ENTITY_INSIDE_EARTH", "entity": entity.get("id")})
         if any(not isinstance(value, (float, int)) or not math.isfinite(value) for value in numeric):
             broken.append({"frame": index, "code": "NONFINITE_CAMERA_OR_ENTITY_POSE"})
         if audit.get("routeInsideEarth"):
             broken.append({"frame": index, "code": "ROUTE_INSIDE_EARTH"})
         if previous is not None:
+            old_scene = scenes_by_id.get(previous.get('scene_id'), {})
+            mixed_projection = is_flat != (old_scene.get('render_mode') == 'FLAT_MAP_PREMIUM')
+            if mixed_projection:
+                transition = 'FLAT_TO_EARTH' if old_scene.get('render_mode') == 'FLAT_MAP_PREMIUM' else 'EARTH_TO_FLAT'
+                declared = old_scene.get('transition_out') == transition and scene.get('transition_in') == transition
+                projection_transitions.append({'frame': index, 'from_scene': old_scene.get('scene_id'),
+                                               'to_scene': scene.get('scene_id'), 'transition': transition,
+                                               'declared': declared, 'numeric_cross_space_comparison': False,
+                                               'visual_review_required': True})
+                if not declared:
+                    broken.append({'frame': index, 'code': 'UNDECLARED_MAP_EARTH_TRANSITION'})
             position, old_position = audit.get("cameraPosition"), previous.get("cameraPosition")
             quaternion, old_quaternion = audit.get("cameraQuaternion"), previous.get("cameraQuaternion")
-            if position and old_position:
-                camera_steps.append(float(np.linalg.norm(np.array(position)-np.array(old_position))))
-            if quaternion and old_quaternion:
+            if position and old_position and not mixed_projection:
+                step=float(np.linalg.norm(np.array(position)-np.array(old_position)))
+                if is_flat:
+                    span=audit.get('mapCameraSpan')
+                    if not isinstance(span,(int,float)) or not math.isfinite(span) or span<=0:
+                        broken.append({'frame':index,'code':'FLAT_CAMERA_SPAN_AUDIT_MISSING'})
+                    else:flat_camera_steps.append(step/span)
+                else:camera_steps.append(step)
+            if quaternion and old_quaternion and not mixed_projection:
                 dot = min(1., max(-1., abs(float(np.dot(quaternion, old_quaternion)))))
                 camera_angles.append(math.degrees(2*math.acos(dot)))
             # Route progress resets only when a new independent route is selected.
@@ -418,6 +450,8 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
         failures.append("BROKEN_ROUTE")
     if camera_angles and max(camera_angles) > 6:
         failures.append("CAMERA_ORIENTATION_JUMP")
+    if flat_camera_steps and max(flat_camera_steps) > .10:
+        failures.append('FLAT_CAMERA_POSITION_JUMP')
     if camera_steps and max(camera_steps) > .25:
         failures.append("CAMERA_POSITION_JUMP")
     # Geography brightness is an automatic review candidate, not a claim that
@@ -487,6 +521,8 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
               "missing_assets": missing, "broken_routes": broken,
               "maximum_camera_angle_step_degrees": max(camera_angles, default=0.),
               "maximum_camera_position_step_globe_radii": max(camera_steps, default=0.),
+              "projection_transitions": projection_transitions,
+              "maximum_flat_camera_step_view_spans": max(flat_camera_steps, default=0.),
               "geography_readability_review": readability, "audio": audio, "retention": retention,
               "rendered_retention": rendered_retention,
               "duplicate_place_labels": duplicate_place_labels,

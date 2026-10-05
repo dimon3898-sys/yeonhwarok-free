@@ -10,6 +10,20 @@ def _requested_window(text,scene):
     lo,hi=map(float,match.groups())
     return max(0.,lo-scene['start_time']),min(scene['duration'],hi-scene['start_time'])
 
+def _flat_network_visibility(scene,event_id):
+    """Use the exact projected rig; a globe forecast cannot certify flat edges."""
+    script=r'''import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';
+const app=process.cwd(),legacy=path.resolve(app,'../cinematic-world-map'),THREE=await import(pathToFileURL(path.join(legacy,'node_modules/three/build/three.module.js')));
+const source=fs.readFileSync(path.join(app,'web/flat_semantics.js'),'utf8').replace(/^import .*;$/gm,'').replace(/^export /gm,''),Core=new Function('THREE',source+';return FlatSceneCore;')(THREE);
+const input=JSON.parse(fs.readFileSync(0,'utf8')),scene=input.scene,event=scene.visual_events.find(e=>e.id===input.event_id),core=new Core(scene,{story:{hook:''}});let qualified=0,checked=0,first=null;
+for(let t=event.time+1/30;t<Math.min(scene.duration,event.time+1.25);t+=1/30){checked++;const frame=core.semanticFrame(t),e=frame.events.find(e=>e.event_id===event.id&&e.rendered_primitive==='network'&&e.visible);if(e){qualified++;first??=t;}}
+console.log(JSON.stringify({passed:qualified>=Math.min(12,checked),qualified_frames:qualified,checked_frames:checked,first_visible_time:first,event_id:event.id,route_id:event.target_id,method:'Shared projected map rig and actual network draw eligibility, no GL'}));'''
+    try:
+        result=subprocess.run(['node','--input-type=module','-e',script],input=json.dumps({'scene':scene,'event_id':event_id}),text=True,cwd=Path(__file__).resolve().parents[1],capture_output=True,timeout=12,check=True)
+        return json.loads(result.stdout)
+    except (OSError,subprocess.SubprocessError,ValueError) as error:
+        raise EngineError('UNSUPPORTED_VISUAL_REQUIREMENT','평면 카메라에서 추가 항로의 실제 가시성을 확인할 수 없습니다.',{'required_plugins':['VISIBLE_FLAT_NETWORK_COMPOSITION'],'reason':str(error)}) from error
+
 def _network_visibility(scene,event_id):
     """Certify a proposed connection with the actual, canvas-free Three camera.
 
@@ -17,6 +31,7 @@ def _network_visibility(scene,event_id):
     An unavailable geometry verifier fails closed rather than approving a hidden
     connection. Camera-only approximation is insufficient for event auditing.
     """
+    if scene.get('render_mode')=='FLAT_MAP_PREMIUM':return _flat_network_visibility(scene,event_id)
     script=r'''
 import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';
 const app=process.cwd(),legacy=path.resolve(app,'../cinematic-world-map'),THREE=await import(pathToFileURL(path.join(legacy,'node_modules/three/build/three.module.js'))),{createAircraftV3}=await import(pathToFileURL(path.join(legacy,'src/aircraft_v3.js')));
@@ -185,7 +200,12 @@ def preview_revision(store,pid,version,text):
         if re.search(r'빠르|빠르게|빠른|속도.*높|faster|speed up',text,re.I):s['camera_speed']=min(3.0,float(s.get('camera_speed',1))*1.2);matched=True
         if re.search(r'느리|천천히|slower',text,re.I):s['camera_speed']=max(.6,float(s.get('camera_speed',1))*.8);matched=True
         if re.search(r'영화|시네마|cinematic',text,re.I):s['lighting_preset']='HERO';s['render_quality']='CINEMA';matched=True
-        if re.search(r'줌아웃|zoom.?out|pull.?back',text,re.I):s['camera_preset']='GLOBAL_PULLBACK';s['camera_speed']=1.25;matched=True
+        if re.search(r'줌아웃|zoom.?out|pull.?back',text,re.I):
+            s['camera_preset']='FLAT_PULLBACK' if s.get('render_mode')=='FLAT_MAP_PREMIUM' else 'GLOBAL_PULLBACK';s['camera_speed']=1.25;matched=True
+            if s.get('render_mode')=='FLAT_MAP_PREMIUM':
+                config=s.setdefault('flat_map',{});end=config.setdefault('camera_end',{})
+                span=float(end.get('span_degrees',config.get('span_degrees',24)))
+                end['span_degrees']=min(150.,span*1.25)
         if re.search(r'비행기.*(?:빼|제거|없애)|remove.*aircraft',text,re.I):
             removed={x['id'] for x in s['entities'] if x['type']=='aircraft'}
             s['entities']=[x for x in s['entities'] if x['type']!='aircraft'];s['entity_actions']=[x for x in s['entity_actions'] if x.get('entity_id') in {e['id'] for e in s['entities']}]
@@ -201,7 +221,7 @@ def preview_revision(store,pid,version,text):
         if re.search(r'(?:폭발|효과|glow|effect).*(?:줄|낮|reduce)',text,re.I):
             s['effect_strength']=max(.1,float(s.get('effect_strength',1))*.6);matched=True
         if re.search(r'(?:약해|훅.*강|hook)',text,re.I):
-            s['camera_preset']='FAST_HOOK_DIVE';s['camera_speed']=min(3.,max(1.8,float(s.get('camera_speed',1)))*1.15)
+            s['camera_preset']='FLAT_ESTABLISH' if s.get('render_mode')=='FLAT_MAP_PREMIUM' else 'FAST_HOOK_DIVE';s['camera_speed']=min(3.,max(1.8,float(s.get('camera_speed',1)))*1.15)
             for e in s['visual_events']:
                 if e['time']<3:e['strength']=min(1.4,float(e.get('strength',1))*1.15)
             matched=True

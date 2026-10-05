@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from urllib.parse import urlencode
 import hashlib
+import ast
 import copy
 import json
 import shutil
@@ -12,11 +13,62 @@ import time
 import textwrap
 import numpy as np
 
-from .assets import APP_ROOT, sha256_file, renderer_version, validate_assets, write_source_report, resolve_user_asset, validate_clip_requirements
+from .assets import APP_ROOT, sha256_file, renderer_version, validate_assets, write_source_report, resolve_user_asset, validate_clip_requirements, asset_registry, project_renderer_version
 from .audio import create_audio, create_subtitles, finish_video, _ass_time
 from .backends import CPULocalBackend, quality_settings
 from .qc import probe_video, run_qc, valid_scene_file
 from .storage import atomic_json, canonical, plan_hash
+from .presets import scene_render_mode
+from .flat_subtitles import adapt_flat_subtitles
+
+
+def legacy_clip_source_hash(current_source: str | None = None) -> str:
+    """Retain old clip caches only for the byte-identical preserved clip code.
+
+    The compatibility value is the SHA of an actual read-only pre-flat source
+    file. Future changes to the clip function, referenced local helpers/constants
+    or imported symbol bindings fall back to the current module's actual SHA.
+    New, unrelated map dispatch cannot force an unchanged clip to rerender.
+    """
+    source = Path(__file__).read_text() if current_source is None else current_source
+    current_digest = hashlib.sha256(source.encode()).hexdigest()
+    preserved = Path(__file__).with_name('rendering_before_flat_preserved.py')
+    try:
+        original = preserved.read_text()
+        old_tree, new_tree = ast.parse(original), ast.parse(source)
+        def declarations(tree):
+            result = {}
+            bindings = {}
+            for node in tree.body:
+                if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.ClassDef)):
+                    result[node.name] = node
+                elif isinstance(node,(ast.Assign,ast.AnnAssign)):
+                    targets = node.targets if isinstance(node,ast.Assign) else [node.target]
+                    for target in targets:
+                        if isinstance(target,ast.Name):result[target.id] = node
+                elif isinstance(node,ast.Import):
+                    for alias in node.names:bindings[alias.asname or alias.name.split('.')[0]] = ('import',alias.name)
+                elif isinstance(node,ast.ImportFrom):
+                    for alias in node.names:bindings[alias.asname or alias.name] = ('from',node.level,node.module,alias.name)
+            return result,bindings
+        old, old_bindings = declarations(old_tree)
+        new, new_bindings = declarations(new_tree)
+        pending, checked = ['_render_clip'], set()
+        while pending:
+            name=pending.pop()
+            if name in checked:continue
+            checked.add(name)
+            if name not in old or name not in new:return current_digest
+            if (ast.dump(old[name],include_attributes=False)!=ast.dump(new[name],include_attributes=False)
+                    or ast.get_source_segment(original,old[name])!=ast.get_source_segment(source,new[name])):
+                return current_digest
+            references={node.id for node in ast.walk(old[name]) if isinstance(node,ast.Name) and isinstance(node.ctx,ast.Load)}
+            for reference in references:
+                if reference in old:pending.append(reference)
+                if reference in old_bindings and old_bindings[reference]!=new_bindings.get(reference):return current_digest
+        return sha256_file(preserved)
+    except (OSError,SyntaxError,ValueError):
+        return current_digest
 
 
 def scene_cache_key(scene: dict, assets: dict, quality: dict, renderer: str, render_context: dict | None = None) -> str:
@@ -42,7 +94,7 @@ def scene_cache_key(scene: dict, assets: dict, quality: dict, renderer: str, ren
         path = resolve_user_asset(clip.get("path", scene.get("clip_path", "")))
         if path.is_file():
             value["external_clip_sha256"] = sha256_file(path)
-        value["clip_renderer_version"] = sha256_file(Path(__file__))
+        value["clip_renderer_version"] = legacy_clip_source_hash()
     return hashlib.sha256(canonical(value)).hexdigest()
 
 
@@ -311,7 +363,7 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
         subtitles = create_subtitles(plan, directories["audio"], audio.get("narration_cues", []))
         atomic_json(subtitle_manifest, subtitles, exclusive=True)
     audio_seconds = time.monotonic()-audio_started
-    renderer = renderer_version()
+    renderer = project_renderer_version(plan)
     backend = CPULocalBackend()
     selected = set(scene_filter) if scene_filter is not None else None
     ids = {scene["scene_id"] for scene in plan["scenes"]}
@@ -347,7 +399,15 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
         if context["is_opening_scene"]:
             context["opening_hook"] = (scene.get("hook") or plan.get("story_plan", {}).get("hook") or
                                        plan.get("story", {}).get("hook") or plan.get("hook"))
-        key = scene_cache_key(scene, assets, settings, renderer, context)
+        mode = scene_render_mode(scene)
+        scene_renderer = renderer_version(scene)
+        scene_assets = assets
+        if mode == 'MASTER_V3_EARTH':
+            # A mixed project may resolve derived flat tiles too. They must never
+            # invalidate the cache of an unchanged Earth scene.
+            original_ids = {item['id'] for item in asset_registry()}
+            scene_assets = {**assets, 'assets': [item for item in assets['assets'] if item['id'] in original_ids]}
+        key = scene_cache_key(scene, scene_assets, settings, scene_renderer, context)
         cache = cache_root / key
         hit = _cached_scene(cache, scene["duration"], settings)
         scene_dir = directories["renders"] / sid
@@ -374,7 +434,7 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
                      "reused": True, "reuse_reason": "scene_hash_asset_renderer_quality_cache", "current_render_seconds": 0.,
                      "cached_render_scene_json_sha256": hit.get("scene_json_sha256"),
                      "scene_json_sha256": hashlib.sha256(canonical(scene)).hexdigest(), "render_context": context}
-            atomic_json(output.with_suffix(".reuse.json"), {"cache_key": key, "renderer_version": renderer,
+            atomic_json(output.with_suffix(".reuse.json"), {"cache_key": key, "renderer_version": scene_renderer,
                          "current_scene_json_sha256": entry["scene_json_sha256"],
                          "cached_render_scene_json_sha256": entry["cached_render_scene_json_sha256"],
                          "cached_video_sha256": hit["video_sha256"], "cached_audit_sha256": hit["audit_sha256"],
@@ -391,7 +451,7 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
             if not scene_json.is_file():
                 atomic_json(scene_json, scene, exclusive=True)
             progress({"stage": "scene_start", "scene_id": sid, "completed": index, "total": total,
-                      "message": f"Rendering Scene {index+1}/{total}; {quality}; V3 preserved assets"})
+                      "message": f"Rendering Scene {index+1}/{total}; {quality}; {mode}"})
             atomic_json(checkpoint, {"complete": False, "scene_id": sid, "completed_scenes": len(entries),
                                      "total_scenes": total, "scene_cache_key": key, "partial_video": str(output),
                                      "plan_hash": plan["plan_hash"]})
@@ -400,8 +460,11 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
                 native_manifest = _render_clip(scene, output, audit_path, settings, plan)
             else:
                 query = urlencode({"project": plan["project_id"], "version": plan["version"], "scene": sid})
-                url = base_url.rstrip("/") + "/render.html?" + query
-                command = ["node", str(APP_ROOT / "tools/render_scene.mjs"), "--url", url,
+                earth_handoff = mode == 'MASTER_V3_EARTH' and any(scene.get(k) in {'FLAT_TO_EARTH','EARTH_TO_FLAT'} for k in ['transition_in','transition_out'])
+                page_name = 'render_flat.html' if mode == 'FLAT_MAP_PREMIUM' else 'render_transition.html' if earth_handoff else 'render.html'
+                tool_name = 'render_flat_scene.mjs' if mode == 'FLAT_MAP_PREMIUM' else 'render_transition_scene.mjs' if earth_handoff else 'render_scene.mjs'
+                url = base_url.rstrip("/") + '/' + page_name + '?' + query
+                command = ["node", str(APP_ROOT / "tools" / tool_name), "--url", url,
                            "--output", str(output), "--audit", str(audit_path),
                            "--scene-json", str(scene_json), "--width", str(settings["internal_width"]),
                            "--height", str(round(settings["internal_width"]*16/9)),
@@ -421,7 +484,7 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
             if any(record.get("webglError") or record.get("textClipped") for record in audit_records):
                 raise RuntimeError("SCENE_RENDER_AUDIT_FAILED: " + sid)
             entry = {"scene_id": sid, "cache_key": key, "complete": True, "quality": settings,
-                     "movie": str(output), "audit": str(audit_path), "renderer_version": renderer,
+                     "movie": str(output), "audit": str(audit_path), "renderer_version": scene_renderer, "render_mode": mode,
                      "video_sha256": sha256_file(output), "audit_sha256": sha256_file(audit_path),
                      "elapsed_seconds": seconds, "current_render_seconds": seconds, "reused": False,
                      "scene_json_sha256": hashlib.sha256(canonical(scene)).hexdigest(), "render_context": context,
@@ -439,6 +502,9 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
         atomic_json(manifest_path, {"plan_hash": plan["plan_hash"], "renderer_version": renderer, "scenes": entries})
         atomic_json(checkpoint, {"complete": False, "completed_scenes": len(entries), "total_scenes": total,
                                  "plan_hash": plan["plan_hash"], "last_completed_scene": sid})
+    # Post-draw map labels/entities/focus boxes decide caption placement. OFF and
+    # old Earth plans are exact pass-throughs, keeping their original ASS files.
+    subtitles = adapt_flat_subtitles(plan, subtitles, audits, directories['audio'])
     progress({"stage": "scene_assembly", "completed": total, "total": total, "message": "Assembling validated independent scenes"})
     assembly_started = time.monotonic()
     assembled = directories["renders"] / "assembled_muted.mp4"
