@@ -1,6 +1,6 @@
 # World Simulation Shorts Engine — 진행 중 품질 검증 보고서
 
-**상태: 실제20초 HIGH의 TTS/자막/BGM ON 생성·QC·전체 브라우저 재생·다운로드, OFF 자연어 부분 수정 v003과 공개 GitHub 파일 전달은 통과했습니다. 최신 동결 코어는 독립 venv에서175/175 PASS입니다. 프로젝트 전체 완료는 아직 아닙니다.** 라벨 가독성 후보3프레임은 실제4K/375px에서 개선을 확인했습니다. B75 v003은 실제375px UI에서 두Scene 라벨 Diff·승인·enqueue를 통과했고 S001~S003의 MP4/audit를 SHA 동일한 캐시로 재사용해 S004를 렌더 중입니다. 75초 최종MP4·QC·실측, 공개 모바일 앱·실물 휴대폰·직접 청취는 대기입니다. 이전157개 게시 checkout의 새 설치 합격, 153개 실패와 교정 자료, 완료된20초 공개 바이트/SHA 및 ON 브라우저1drop 기록은 그대로 보존합니다.
+**상태: 20초 HIGH의 TTS/자막/BGM ON 생성·최종 QC·전체 브라우저 재생·다운로드와 자연어 부분 수정 v003은 통과했습니다. 수정 코어가 게시된 commit 365cdc488dd33765e39f5767b08203a952c17ee6의 새 체크아웃에서도 설치 및 157/157 회귀 PASS를 확인했습니다. 전체 프로젝트 완료는 아직 아닙니다.** 앞선 153개 실행의 장편 계획 실패 5개는 엄격한 게이트를 유지한 교정 후 해결됐으며 실패 자료도 보존합니다. 성공한 v002/v003 OFF 버전과 새 `project_21a865e0dc8d/v001` ON 버전은 별도 기록입니다. 코드와 OFF v003 결과에 이어 ON A20의 최종·무음 MP4와 ZIP도 실제 게시했고 아래의 immutable commit 다운로드 바이트/SHA가 일치합니다. B75 v001의 완료된 세 Scene은 보존했고 실패 화면의 375px overflow도 별도 브라우저 검사로 교정했습니다. UI 수정 후 A20/C40 기획은 실제 375px에서 다시 통과했습니다. S002/S009만 수정하는 B75 v002는 승인 후 S002 렌더 진행 중이며 75초 최종 QC/실측과 공개 모바일 앱·실물 휴대폰 검증은 대기입니다.
 
 이 갱신 전 두 보고서의 정확한 바이트와 SHA는 [quality_docs_before_130_update/SNAPSHOT_MANIFEST.json](docs/evidence/quality_docs_before_130_update_20261004T181126076353Z/SNAPSHOT_MANIFEST.json)에 새 파일로 보존했습니다. 과거 증거를 최신 결과로 덮어쓰지 않았습니다.
 
@@ -16,23 +16,19 @@ ON 결과의 GitHub 게시 검증을 반영하기 전 두 문서도 [quality_doc
 
 게시 커밋의 새 설치 157개 합격과 후속 모바일 기획 검증을 반영하기 전 두 문서도 [quality_docs_before_published_fresh_157_update/SNAPSHOT_MANIFEST.json](docs/evidence/quality_docs_before_published_fresh_157_update_20261004T225400993566Z/SNAPSHOT_MANIFEST.json)에 원본 바이트와 SHA로 배타적으로 보존했습니다.
 
-이번v003 승인 checkpoint 갱신 전 세 문서는 [정확한 원본 snapshot](docs/evidence/quality_docs_before_v003_approval_checkpoint_update_20261005T013657467465Z/SNAPSHOT_MANIFEST.json)에 바이트·SHA로 보존했습니다. 이전175개 문서 snapshot도 그대로 유지합니다.
-
 ## 완료 판정 현황
 
 | 항목 | 현재 상태 | 근거/제한 |
 |---|---|---|
 | 자연어 → Story/Scene Plan → Scene JSON | 구현·동작 검사 완료 | 지원 도메인의 검증된 GIS 장소/항로 사용 |
 | 정확한 계획 승인·버전·부분 수정·캐시 | 구조 검사·v002/v003 실제 부분 재렌더 **PASS** | 각 S002 신규 1개/캐시 4개; 미수정 4개 MP4 SHA 동일 |
-| 최신 동결 코어 회귀 | **175/175 PASS** | 독립 venv unittest250.182초/wall253.847806초, exit0·source_changes=[]; 새 설치·영상 렌더 벤치마크 아님 |
-| 이전 게시 commit 새 설치 | **157/157 PASS, 당시 소스 근거 보존** | setup wall682.586762초/포함된 unittest646.071초, 원본·새 checkout tracked545개 변화0 |
+| 전체 코어 회귀·게시 소스 설치 | **게시 commit 새 설치 157/157 PASS** | setup wall 682.586762초/포함된 unittest 646.071초, 원본·새 checkout tracked 545개 변화 0; 앞선 독립 venv 157 및 153개 실패 자료도 보존 |
 | UI 수정 후 A20/C40 기획 | **각 실제 375px PASS** | 16.519초/12.516초, Story/Scene JSON·GIS·조명/역할·gate 확인, 승인 0·렌더 0. 새 MP4 시험 아님 |
 | 첫 20초 HIGH v001 | **최종 QC 실패, 보존** | 뉴욕→런던→두바이, 5개 새 Scene, 600프레임 |
 | 교정 후 v002 | **PASS** | S002만 새 렌더, 4개 재사용, 실제 600프레임 QC·14/14 사건 |
 | 자연어 속도 수정 v003 | **PASS** | S002 신규 1개/캐시 4개, 전체 600프레임 QC와 재생·13개 첨부 다운로드 |
 | TTS/자막/BGM ON 20초 시험 | **PASS** | project_21a865e0dc8d/v001; 600프레임 QC·5개 안전 자막·전체 재생/13개 다운로드 |
-| 75초 HIGH 전체 생성·CPU 벤치마크 | **v003 승인·캐시3개 검증, S004 렌더 중** | S004/S005 라벨만 수정·다른8Scene 보존; 전체75초 MP4/QC/실제 총시간·전체 재생 미검증 |
-| 지명/상태 라벨·복합 수정 guard | **집중18개 PASS·최신175개에 포함** | 후보3개 실제4K→1080→375px 비교에서 개선 확인; 전체75초/실물phone 검증 아님 |
+| 75초 HIGH 전체 생성·CPU 벤치마크 | **두 Scene 교정 v002 승인 후 렌더 중** | v001의 3개 MP4/audit 보존; 정확한 Diff/hash 승인·enqueue PASS. 최종 MP4/QC/실제 총시간 및 정상 Scene 캐시 적용 확인 대기 |
 | 새 장소 라벨 중복 QC | **18개 집중 검사 PASS** | 두 기존 20초의 native 감사 각 600프레임 중복 0; 보충 감사이며 기존 전체 QC 재발급이 아님 |
 | MASTER V3와 실제 주요 프레임 비교 | 검토 기록 있음, 약점 명시 | V3 재질·대기·깊이 유지, HERO 상면 pose/분리감은 상대적으로 약함 |
 | OFF v002/v003·ON A20 전체 브라우저 재생·다운로드 | **PASS** | 각 13개 첨부 SHA·Range 206·끝까지 재생; ON은 1개 브라우저 drop 관측 |
@@ -44,7 +40,7 @@ ON 결과의 GitHub 게시 검증을 반영하기 전 두 문서도 [quality_doc
 
 ## 기존 프로젝트 보존과 재사용
 
-새 앱은 기존 `cinematic-world-map`과 분리된 `world-simulation-shorts-engine`에 구현했습니다. 기존 MASTER V1/V2/V3, 렌더러, GIS/그래픽 자산을 교체하는 구조가 아닙니다. 초기 [보존 검사](docs/evidence/original_preservation_pre_render_r01.json), [첫 Git 게시 전 재검사](docs/evidence/original_preservation_before_generator_publish_r01.json)에 이어 [175개 교정·v003 재개 후 읽기 전용 재검사](docs/evidence/original_preservation_after_175_and_v003_resume_20261005T013044Z.json)에서도 원본 **570개 파일 불일치/누락 0**, 원래 Git HEAD의 조상 관계·보존 archive/bundle 유지가 확인됐습니다. 새 생성기의 추가 commit으로 원본 이력을 삭제하거나 MASTER를 재렌더하지 않았습니다. 후속 최종 게시가 있으면 그 시점의 보존 근거를 별도로 추가합니다.
+새 앱은 기존 `cinematic-world-map`과 분리된 `world-simulation-shorts-engine`에 구현했습니다. 기존 MASTER V1/V2/V3, 렌더러, GIS/그래픽 자산을 교체하는 구조가 아닙니다. 초기 [보존 검사](docs/evidence/original_preservation_pre_render_r01.json), [첫 Git 게시 전 재검사](docs/evidence/original_preservation_before_generator_publish_r01.json)에 이어 [157개 회귀 교정 후 읽기 전용 재검사](docs/evidence/original_preservation_after_157_source_fix_r01.json)에서도 원본 **570개 파일 불일치/누락 0**, 원래 Git HEAD의 조상 관계·보존 archive/bundle 유지가 확인됐습니다. 새 생성기의 추가 commit으로 원본 이력을 삭제하거나 MASTER를 재렌더하지 않았습니다. 후속 최종 게시가 있으면 그 시점의 보존 근거를 별도로 추가합니다.
 
 V3의 Three.js/WebGL 3D 지구, 실제 8K 지표/야간광/구름 자산, 대기 셰이더, 3D 항공기·항로, 카메라와 색보정 구조를 읽어서 재사용합니다. V3의 완성 영상이나 서울→도쿄→싱가포르 고정 타임라인을 다시 재생하지 않습니다. 실제 생산 시험은 뉴욕→런던→두바이로 변경된 GIS·항로·Scene을 사용합니다.
 
@@ -65,8 +61,6 @@ TTS/BGM/자막은 각각 선택 사항입니다. 무료 오프라인 eSpeak와 �
 외부 MP4의 CINEMATIC_CLIP 슬롯은 사용권·길이·호환 사건을 검증합니다. 실제 출발/도착/네트워크 사건이 필요한 장면에 임의 외부 영상을 넣고 물리 사건을 발생했다고 기록하지 않습니다. 실제 HTTP 업로드·Diff·불변 버전 승인은 [clip_http_integration_r01/REPORT.json](docs/evidence/clip_http_integration_r01/REPORT.json)에 기록되어 있으나 해당 fixture는 기술 테스트 패턴이며 V3급 실영상 삽입/전체 렌더 합격이 아닙니다.
 
 ## 기획·회귀·오디오 기술 검사
-
-최신 [동결 코어 REPORT.json](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/REPORT.json)과 [unittest.log](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/unittest.log)는 **175/175 PASS**, unittest **250.182초**, wall **253.847806초**, exit0·`source_changes=[]`를 기록합니다. 검증된 독립 venv를 재사용한 전체 동작 회귀이며 새 dependency 설치·실제75초 영상·공개폰 검증이 아닙니다. 첫 wrapper의 보고서 키 불일치는 unittest 시작 전에 중단됐고 [별도 실패 자료](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011317566303Z/WRAPPER_PREFLIGHT_FAILURE.json)를 보존했습니다. 아래 과거157/130 등의 합격을 이번 실행으로 대체하지 않습니다.
 
 소스 교정 직후의 독립 venv 전체 검사 [TEST_REPORT.json](docs/evidence/final_core_clean_runtime_20261004T214044Z/TEST_REPORT.json)과 [unittest.log](docs/evidence/final_core_clean_runtime_20261004T214044Z/unittest.log)는 **157/157 PASS, exit code 0**, unittest **569.048초**, 프로세스 wall **577.391300초**, `source_changes=[]`를 기록합니다. 모든 dependency origin은 검증된 독립 venv 안에 있으며 시스템 site-packages를 상속하지 않았습니다. 후속 게시 checkout의 새 설치 646.071초 검사는 아래의 별도 근거입니다. 어느 시간도 성공한 cold 영상 벤치마크·새 OS/클라우드 설치·75초 영상 완료가 아닙니다.
 
@@ -120,21 +114,7 @@ S003은 [scene_results.json](docs/evidence/shipping75_quality_checkpoint_pause_2
 
 [통제된 일시정지 AFTER.json](docs/evidence/shipping75_quality_checkpoint_pause_20261004T214131Z/AFTER.json)은 S003 완료 뒤 자신의 S004 Chromium main만 종료하고 **S001~S003 MP4/audit SHA 전부 유지**, S004 partial checkpoint 보존, 서버 정상 유지와 job의 복구 가능한 실패 상태를 기록했습니다. [서버 r12 재로드 AFTER.json](docs/evidence/server_r12_source_reload_20261004T215102Z/AFTER.json)은 **재로드 시점**의 검증 소스 SHA 일치와 renderer version 불변, 기존 실패 버전 보존·health 정상·public URL 미설정을 확인했습니다. 이후 오류문 UI 표시의 두 파일 수정은 해당 엔진/테스트 합격과 별도 실제 브라우저 검수로 구분하며 모든 현재 UI SHA가 당시 81개 기록과 같다고 주장하지 않습니다.
 
-[v002 실제 375px 수정 승인 보고서](validation/final_B75_shipping_revision_v002_r02/UI_END_TO_END_REPORT.json)와 [승인 전 불변 검사](validation/final_B75_shipping_revision_v002_r02/pre_approval_revision_invariants.json)는 **S002/S009만 교정한 Diff 확인·승인·enqueue PASS**, 수정 승인 전 render request 0, 이전 계획 보존을 기록했습니다. v002 hash는 `6e0508972293e329b54498051cfec87887b167bab1bff60e57ec6ed10c22cc91`, job은 **job_0774eccd8b46**입니다. S002 E008은 R_SUEZ의 실제 Scene-local 진행률에 따른 **13,567km REMAINING**, S009 E034는 R_CAPE의 **681km REMAINING** 정보로 바뀌고 각 paired sound만 soft_pulse로 바뀌었습니다. 나머지 8개 Scene IR, 사건 ID/시각/원인과 실제 도착 E035는 유지됐습니다. 계획 게이트를 통과한 뒤 진행한 v002는 S001~S005의 완료 MP4/audit를 보존하고 라벨 가독성 교정을 위해 정지했습니다. [v002 통제된 품질 정지](docs/evidence/shipping75_label_readability_checkpoint_pause_20261005T003828308998Z/AFTER.json)는 완료5개 SHA 불변·불완전S006 checkpoint·복구 가능한 실패 상태를 기록합니다. [S001 cache SHA 확인](validation/final_B75_shipping_revision_v002_r02/cache_S001_bytes_verified.json)은 당시 원본/새 MP4·audit 일치의 별도 근거입니다. 이후 S004/S005 appearance만 교정한 v003의 실제UI Diff·승인·enqueue는 통과했고 아래 캐시3개를 재사용해 S004를 렌더 중입니다. 최종75초 조립/QC/전체 재생 합격은 아직 없습니다. 계획의 31,348.2초는 `measured=false`, `scope=uncached_scene_render_only`인 예측이며 캐시 없는 Scene 계산만을 대상으로 audio/assembly/QC/대기 시간을 제외합니다. **75초 완료/QC/실제 총 시간을 아직 측정한 값으로 보고하지 않습니다.**
-
-[실제v003 승인 보고서](validation/final_B75_shipping_revision_v003_r01/UI_END_TO_END_REPORT.json)와 [승인 전 불변 검사](validation/final_B75_shipping_revision_v003_r01/pre_approval_label_appearance_invariants.json)는375px에서 정확한S004/S005 Diff·승인·enqueue PASS와 승인 전 render0을 기록합니다. 불변 plan hash는 `37a6b049dc7b62d3bd28f06dfea54dbf722eb4efe5721d832962ada7db03d317`, job은 `job_be831b29cd88`입니다. [실제캐시3개](validation/final_B75_shipping_revision_v003_r01/actual_S001_S002_S003_cache_copies.json)의 S001/S002/S003 MP4와audit SHA가 이전 버전과 같고 각 `current_render_seconds=0`입니다. 기록의 이전 native elapsed는 현재 실행시간으로 더하지 않습니다. 전체75초 결과는 아직 없으며 S004 렌더 중입니다.
-
-## 라벨 가독성·조명 연동·범위 guard
-
-[집중18개 보고서](docs/evidence/mixed_label_edit_guard_20261005T005854961213Z/FOCUSED_TEST_REPORT_R05.json)는 unittest73.273초/wrapper73.891146초·source_changes=[]를 기록했고 최신175개 전체에도 포함됐습니다. DAY/GEOGRAPHY의 검증된 city 라벨은 navy `#102430`/최소52px/opacity1이며 generic 실제 조명 변경 시 NIGHT/HERO의 cool white `#e2e8ed`와 동기화됩니다. Camera-only 수정은 라벨을 보존합니다. 지명-only 요청은 status를, status-only는 city를 건드리지 않습니다. 상태 문구는 color/opacity만 보완하며 text·좌표·시간·46px 크기를 유지합니다. optional color/size가 없는 기존 계획도 계속 읽힙니다.
-
-[정확한 두 Scene 후보](docs/evidence/status_label_readability_20261005T004325040574Z/COMBINED_LABEL_FIELD_PROOF.json)는 `Scene4와Scene5 지명과 운하 상태 라벨의 대비를 높여.`에 대해 두city의6개 appearance 경로와 S005status2개만 변경하고 다른8Scene·나머지IR·v002 원본 바이트를 보존합니다. 상태46px 폭703.8361px는756px 안전폭 안이고52px의787.1887px는 이를 넘으므로 크기를 올리지 않았습니다. 이 보고서는 미승인 임시 후보이며 실제production v003 승인/영상 결과가 아닙니다.
-
-[실제 후보3프레임](docs/evidence/shipping75_status_candidate_native_stills_20261005T005330Z/REPORT.json)과 [root의375px 직접 비교](docs/evidence/shipping75_status_candidate_native_stills_20261005T005330Z/ROOT_VISUAL_REVIEW.json)는 S004 local6.2/S005 local1.8·2.9초를2160×3840에서 렌더해1080/375px로 줄인 뒤 city/status가 즉시 식별 가능하다고 기록했습니다. 전체Scene225프레임·작은 차단체·전환·전체75초 QC/재생이나 실물폰 인증은 아닙니다. frozen `earth_adapter.js` SHA c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9 및 `render_scene.mjs` SHA b8656dde9a783cd601375e335fa16328afc3e6ebd60d2934452686c749be4fa3는 유지됐습니다.
-
-[복합 요청 guard](docs/evidence/mixed_label_edit_guard_20261005T005854961213Z/README.md)는 인식 가능한 label appearance와 실제 camera/lighting/항로추가/선박추가/항공기제거 명령을 섞으면 `UNSUPPORTED_COMBINED_LABEL_EDIT`로 쓰기 전에 분리 요청을 요구합니다.21개 차단 문구·10개 허용 배경설명·기존 카메라+선박/항로2개 수정의 gate를 검사했습니다. 무제한 자연어 처리로 주장하지 않습니다. [r13 reload](docs/evidence/server_r13_label_source_reload_20261005T012346493550Z/AFTER.json)는 새175개 소스 로드·이전v002 파일 보존·renderer version2225c34373166e87f4ab1101e7d15756d2a82526668e64b1e1fb1f2184271646 불변을 기록하며 public URL은 없습니다.
-
-175개 Python 검사 뒤 `web/app.js`의 라벨 Diff 값 표시만 수정했습니다. [별도375px 표시검수](validation/mobile_label_diff_display_r02/LABEL_DIFF_DISPLAY_REPORT.json)는 저장된 승인제안의 실제 color/size/opacity 전후값과 기본색/46px를 표시하고 page width375·JS오류0·새revision/approve/render POST0을 기록합니다. 자동poll은 테스트브라우저 메모리에서만 정지했고 production hook·worker제어는 없습니다. 첫r01 livepoll timeout은 보존했습니다. JS SHA는 f8edd8e7de71abdffbd00a4b3e6084ec9829221ef66337a4c5c19952b5b54ddb이며 Python/engine/renderer/cache/승인IR은 불변입니다. 이는 새로운175개 전체UI 검사나 재렌더 결과가 아닙니다.
+[v002 실제 375px 수정 승인 보고서](validation/final_B75_shipping_revision_v002_r02/UI_END_TO_END_REPORT.json)와 [승인 전 불변 검사](validation/final_B75_shipping_revision_v002_r02/pre_approval_revision_invariants.json)는 **S002/S009만 교정한 Diff 확인·승인·enqueue PASS**, 수정 승인 전 render request 0, 이전 계획 보존을 기록했습니다. v002 hash는 `6e0508972293e329b54498051cfec87887b167bab1bff60e57ec6ed10c22cc91`, job은 **job_0774eccd8b46**입니다. S002 E008은 R_SUEZ의 실제 Scene-local 진행률에 따른 **13,567km REMAINING**, S009 E034는 R_CAPE의 **681km REMAINING** 정보로 바뀌고 각 paired sound만 soft_pulse로 바뀌었습니다. 나머지 8개 Scene IR, 사건 ID/시각/원인과 실제 도착 E035는 유지됐습니다. 계획 게이트를 통과해 S002 렌더 진행 중이며 이 갱신에 전달된 관찰값은 **125/225프레임**입니다. [S001 cache SHA 확인](validation/final_B75_shipping_revision_v002_r02/cache_S001_bytes_verified.json)은 원본/새 MP4·audit가 일치함을 기록하지만 S003 새 버전 복사와 남은 Scene의 완료를 주장하지 않습니다. 아직 두 Scene 최종 재렌더·75초 조립/QC/전체 재생 성공을 주장하지 않습니다. 계획의 31,348.2초는 `measured=false`, `scope=uncached_scene_render_only`인 예측이며 캐시 없는 Scene 계산만을 대상으로 audio/assembly/QC/대기 시간을 제외합니다. **75초 완료/QC/실제 총 시간을 아직 측정한 값으로 보고하지 않습니다.**
 
 ## 첫 실제 20초 HIGH 실행 — 실패도 보존
 
@@ -248,7 +228,7 @@ v003 시간도 현재 1개 신규 Scene/4개 캐시 실행만의 실측이며 �
 
 수정 파일은 `web/app.js`의 상태 오류 표시와 `web/style.css`의 해당 오류 wrapping 두 개뿐이며 변경 전후 정확한 바이트/SHA를 증거에 보존했습니다. Python/엔진/테스트/서버/render HTML/V3와 renderer version은 교정 직후 157개 합격 시점 이후 그대로입니다. 이 UI 검수 자체는 제한된 실제 브라우저 동작 검사이며 전체 unittest·공개 모바일 앱·실물 휴대폰 인증이 아닙니다. 이후 수정 UI가 포함된 게시 checkout의 새 설치·157개 회귀는 위 별도 근거입니다. 기존 완료된 20초의 재생/다운로드 성공을 실패 상태 UI 합격으로 대신 사용하지 않았습니다.
 
-후속 실제 375px 기획 검수는 당시 UI 수정이 포함된 소스로 새 **A20 뉴욕→런던→두바이 16.519초 PASS**, **C40 서울→싱가포르 가상 연결 12.516초 PASS**를 기록했습니다. [A20 UI 보고서](validation/final_postfix_A20_planning_r01/UI_END_TO_END_REPORT.json)/[기획 요약](validation/final_postfix_A20_planning_r01/POSTFIX_PLANNING_SUMMARY.json), [C40 UI 보고서](validation/final_postfix_C40_planning_r01/UI_END_TO_END_REPORT.json)/[기획 요약](validation/final_postfix_C40_planning_r01/POSTFIX_PLANNING_SUMMARY.json)에 실제 요청·Story/Scene JSON·GIS 출처 좌표·역할/조명/프리셋·FACT/가정/시뮬레이션·gate PASS를 보존했습니다. A20은 TTS/자막/BGM ON의 5개 Scene, C40은 TTS/자막 OFF·BGM ON의 6개 Scene입니다. 두 계획 모두 **승인 클릭 0·렌더 요청 0·planned**, 가로 넘침/JS 오류 0입니다. 새 MP4를 만들거나 완료된 기존 20초를 이 새 계획의 결과로 간주하지 않았습니다.
+후속 실제 375px 기획 검수는 UI 수정이 포함된 현재 소스로 새 **A20 뉴욕→런던→두바이 16.519초 PASS**, **C40 서울→싱가포르 가상 연결 12.516초 PASS**를 기록했습니다. [A20 UI 보고서](validation/final_postfix_A20_planning_r01/UI_END_TO_END_REPORT.json)/[기획 요약](validation/final_postfix_A20_planning_r01/POSTFIX_PLANNING_SUMMARY.json), [C40 UI 보고서](validation/final_postfix_C40_planning_r01/UI_END_TO_END_REPORT.json)/[기획 요약](validation/final_postfix_C40_planning_r01/POSTFIX_PLANNING_SUMMARY.json)에 실제 요청·Story/Scene JSON·GIS 출처 좌표·역할/조명/프리셋·FACT/가정/시뮬레이션·gate PASS를 보존했습니다. A20은 TTS/자막/BGM ON의 5개 Scene, C40은 TTS/자막 OFF·BGM ON의 6개 Scene입니다. 두 계획 모두 **승인 클릭 0·렌더 요청 0·planned**, 가로 넘침/JS 오류 0입니다. 새 MP4를 만들거나 완료된 기존 20초를 이 새 계획의 결과로 간주하지 않았습니다.
 
 완료 v002의 실제 375×812 브라우저 검사는 [UI_END_TO_END_REPORT.json](validation/production_NY20_v002_playback_download_r01/UI_END_TO_END_REPORT.json)에 **PASS**를 기록합니다. 최종/무음 MP4·보고서·contact sheet·계획·대본·5개 Scene을 포함한 **13개 파일을 실제 브라우저 attachment로 다운로드**했고 모두 HTTP와 저장 파일 SHA가 일치했습니다. 최종 MP4는 26,913,103 bytes, SHA `86708c1c0f68e74db8570ad2e42910d8b89d6310b4b78c8e429964a4306b4d00`; 무음은 26,193,149 bytes, SHA `daab3edd9317b6b7d46489ea9cc0ae19af965986a4ad2d86b3dc0d7ef96d90db`입니다. MP4 Range 요청은 HTTP 206/정확한 1,024 bytes를 반환했습니다.
 
@@ -278,8 +258,6 @@ ON A20의 최종·무음 MP4와 ZIP도 추가 main commit **632826e77d4ed305f6c3
 
 재사용 setup script는 공개 commit에 포함돼 새 checkout 설치/회귀가 확인됐지만 관리형 클라우드 설정 초안의 게시 상태는 별도입니다. [public_mobile_runtime_status_r02.json](docs/evidence/public_mobile_runtime_status_r02.json)은 현재 server health 정상, **public_url_configured=false·공개 HTTPS endpoint 없음·실제 휴대폰 E2E 미검증**을 기록합니다. 공용 호스팅/허용된 포트 전달·접근 방식이 준비된 뒤 실제 휴대폰에서 접속·기획 승인·상태 재개·MP4 다운로드를 검증해야 합니다. 내부 경로/localhost만으로 외부 앱 접속 완료를 선언하거나 GitHub 결과 다운로드를 공개 앱 배포로 해석하지 않습니다.
 
-[공개tunnel 읽기 전용probe](docs/evidence/public_tunnel_readonly_probe_20261005T013145606003Z/REPORT.md)는 QuickTunnel 제어주소로 가는 proxy CONNECT403을 origin 도달 전 확인했습니다(curl56/HTTP000). 설치·tunnel생성·포트공개는 하지 않았습니다. 공개 GitMP4 다운로드와 공개 상호작용앱은 별도이며 후자는 계속 미검증입니다.
-
 ## 지원 범위와 남은 약점
 
 - 현재 기획기는 검증된 장소 카탈로그와 지원 도메인 패턴을 사용하는 제한된 오프라인 방식입니다. 모든 질문의 자동 인터넷 조사나 물류·경제·기상 예측기는 아닙니다.
@@ -287,14 +265,14 @@ ON A20의 최종·무음 MP4와 ZIP도 추가 main commit **632826e77d4ed305f6c3
 - 육상 운송 그래프, 역사 GIS, Time/Geography Morph, 전쟁 VFX, 실제 기상/재난 시뮬레이션 등은 미설치 플러그인 요구로 차단합니다. 현대 항공 경로로 억지 대체하지 않습니다.
 - 밝기 임계/기하/프레임 QC는 전문적인 영상미, 실제 관객 유지율이나 인간 청취를 직접 인증하지 않습니다. v002의 실제 주요 프레임 검토는 기록되어 있으나 HERO pose의 상대적 약점과 외부 I2V/도시 근접 표현 부재는 남습니다.
 - 첫 국가 공개 가시성 결함은 v002의 실제 부분 재렌더·최종 QC·전체 브라우저 재생으로 교정됐습니다. CPU가 느리고 75초 HIGH의 실제 전체 시간을 아직 측정하지 못했습니다.
-- v003 자연어 속도 수정과 ON A20은 실제 Scene 렌더/QC/전체 브라우저 재생·다운로드를 통과했습니다. ON 브라우저 drop 1개와 기계적인 eSpeak·HERO 상면 pose 약점은 남깁니다. 코드/OFF v003의 공개 Git 전달·ON A20 최종/무음/ZIP의 공개 SHA 검증도 통과했습니다. 최신 동결 엔진/계획/QC 175/175 회귀와 별도 모바일 오류 표시 검수는 합격했습니다. B75는 완료된v002를 보존하고 두Scene appearance만 바꾼v003의 실제UI 승인을 마쳐 캐시3개 재사용·S004 렌더를 진행 중입니다. 75초 최종영상·실제 총시간·공개 휴대폰 앱·새 클라우드 세션 인증은 아직 대기입니다.
+- v003 자연어 속도 수정과 ON A20은 실제 Scene 렌더/QC/전체 브라우저 재생·다운로드를 통과했습니다. ON 브라우저 drop 1개와 기계적인 eSpeak·HERO 상면 pose 약점은 남깁니다. 코드/OFF v003의 공개 Git 전달·ON A20 최종/무음/ZIP의 공개 SHA 검증도 통과했습니다. 최신 독립 런타임 엔진/계획/QC 157/157 회귀와 별도 모바일 오류 표시 검수는 합격했습니다. B75는 정상 세 Scene을 보존하고 두 Scene 교정 v002의 실제 승인·enqueue를 마쳐 렌더 중입니다. 75초 최종영상·실제 총시간·공개 휴대폰 앱·새 클라우드 세션 인증은 아직 대기입니다.
 
 ## 최종 완료 전에 채울 근거
 
 1. 후속 75초 결과의 GitHub 게시와 공개 바이트/SHA 검증. OFF v003 및 ON A20의 공개 다운로드는 이미 확인됐습니다.
 2. V3 비교에서 남은 HERO pose 약점과 주간 지리 장면의 균형, 최종 제출 버전의 실제 프레임/전체 재생 검토.
 3. 실제 75초 HIGH Scene/오디오/자막/QC/총 시간과 성공한 MP4.
-4. 175/175 합격 코어 SHA와 별도 UI 표시 검수 근거가 최종 전달 소스와 일치하는지 유지할 것. 후속 소스 변경이 있으면 필요한 회귀를 다시 실행하고 이전 130/153개 결과를 최신 합격으로 대체하지 않습니다.
+4. 157/157 합격의 소스 SHA와 최종 전달 소스 일치를 유지할 것. 후속 소스 변경이 있으면 필요한 회귀를 다시 실행하고 이전 130/153개 결과를 최신 합격으로 대체하지 않습니다.
 5. 후속 최종 결과 추가 뒤 보존 재검사·관리형 환경 설정 게시 상태·저장소 파일과 정확한 다운로드 주소. 첫 코드/OFF v003 게시와 원본570개 보존은 이미 확인됐습니다.
 6. 공개 접속 경로와 실제 휴대폰의 생성·상태 복구·최종 MP4 다운로드 검증, 직접 청취의 실행 여부.
 

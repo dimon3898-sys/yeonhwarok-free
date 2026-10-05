@@ -7,7 +7,7 @@ An optional external planner can implement the same contract, but still passes g
 from copy import deepcopy
 from datetime import datetime,date,timezone
 import math,re
-from .gis import LOCATIONS,resolve_location,mentioned_locations,RouteEngine,great_circle_distance,coordinate_source_report,UnknownLocation
+from .gis import LOCATIONS,resolve_location,mentioned_locations,RouteEngine,great_circle_distance,coordinate_source_report,UnknownLocation,verified_coordinate
 from .presets import CAMERA_PRESETS,camera_state,choose_lighting
 from .plugins import UnsupportedVisualRequirement,require_plugins
 
@@ -23,6 +23,28 @@ UNSUPPORTED_PATTERNS={
  'ECONOMY':r'물가|인플레이션|주가|gdp|경제.{0,6}(예측|폭락)|가격.{0,6}(예측|상승)|predict.{0,8}prices'
 }
 SOUND_MAP={'city_reveal':'soft_pulse','country_reveal':'soft_impact','route_start':'digital_sweep','entity_departure':'pass_by','arrival':'soft_impact','new_variable':'subtle_impact','route_blocked':'low_impact','alternate_route_reveal':'transition_sweep','network_expand':'wide_riser','comparison_reveal':'digital_sweep','milestone_reveal':'soft_pulse','destination_preview':'soft_pulse','response':'transition_sweep','escalation':'wide_riser','peak_reveal':'cinematic_hit','final_reveal':'deep_final_hit','route_choice':'digital_sweep','distance_reveal':'soft_pulse','region_reveal':'soft_impact','connection_reveal':'digital_sweep','consequence_reveal':'soft_impact'}
+
+def apply_readable_place_labels(labels,lighting_preset,*,explicit_edit=False,include_status=False):
+    """Style only verified, persistent place labels using existing overlay fields.
+
+    Generated night/HERO labels retain the V3 baseline. An explicit place-label
+    edit uses cool white there; the two readable/day presets use dark ink on the
+    exposed surface. Verified status labels opt in to color/opacity only: their
+    existing font size is preserved for the long mobile-safe status text.
+    Captions and event-generated labels are untouched. No geography is changed.
+    The return value counts eligible labels, including already-correct no-ops.
+    """
+    if lighting_preset in {'GEOGRAPHY_READABILITY','DAY_DOCUMENTARY'}:color='#102430'
+    elif explicit_edit and lighting_preset in {'CINEMATIC_NIGHT','HERO'}:color='#e2e8ed'
+    else:return 0
+    eligible=0
+    for label in labels:
+        role=label.get('role')
+        if (role!='city' and not (include_status and role=='status')) or not str(label.get('text','')).strip() or not isinstance(label.get('coordinates'),dict) or not verified_coordinate(label['coordinates']):continue
+        label.update(color=color,opacity=1.0)
+        if role=='city':label['size']=max(52,label.get('size',46))
+        eligible+=1
+    return eligible
 
 class PlanningInputError(ValueError):
     code='UNSUPPORTED_INPUT'
@@ -708,6 +730,7 @@ def generate_plan(raw):
         if i==n-1:
             labels=[dict(text=place['id'][8:].upper() if place['kind']=='airport' else place['name'].upper(),coordinates=deepcopy(place['coordinates']),start_time=.1,end_time=d,role='city',opacity=.9) for place in locations]
         if scenario['domain']=='shipping' and role=='variable':labels.append(dict(text='ASSUMPTION · CANAL CLOSED',coordinates=deepcopy(loc['coordinates']),start_time=.8,end_time=d,role='status',opacity=.8))
+        apply_readable_place_labels(labels,light,include_status=True)
         timeline=dict(year=None,date=None,era='modern',timeline_position=round(start/duration,6))
         entry=deepcopy(previous_exit) if previous_exit else dict(camera=deepcopy(camera_begin),earth_rotation=0.,active_countries=[],active_routes=[],entities=[],lighting=light,timeline=timeline)
         exit_state=dict(camera=deepcopy(camera_end),earth_rotation=0.,active_countries=sorted({l.get('country','') for l in locations if l.get('country')}),active_routes=[r['route_id'] for r in visible],entities=[dict(id=e['id'],route_id=e['route_id'],progress=next(r['progress_end'] for r in visible if r['route_id']==e['route_id'])) for e in entities],lighting=light,timeline={**timeline,'timeline_position':round(end/duration,6)})

@@ -25,8 +25,6 @@ npm ci --prefix ../cinematic-world-map
 
 주제·길이·스타일·품질과 오디오 옵션을 입력하고 **기획 생성**을 누릅니다. 훅, 사건 순서, FACT/ASSUMPTION/SIMULATION, 카메라·조명·필요 모듈을 확인한 뒤 **기획 승인 및 영상 생성**을 누릅니다. 완료된 MP4는 서버의 첨부 다운로드 응답으로 받을 수 있습니다. 수정 요청은 변경점을 먼저 보여주고 승인 후 새 버전을 만듭니다. `장면 2 삭제`, `14초 장면에서 결론을 공개하지 마` 같은 구조 수정도 지원하며, 훅·Peak·인과관계가 깨지는 수정은 승인·렌더 게이트가 차단합니다.
 
-지명·운하 상태 라벨도 Scene별로 대비를 수정할 수 있습니다. `Scene4와Scene5 지명과 운하 상태 라벨의 대비를 높여.`는 선택Scene의 appearance만 바꾸고 지리·대본·경로·다른Scene은 보존합니다. 상태문구는 안전폭 때문에 기존 크기를 유지합니다. 조명을 낮/밤으로 바꾸면 검증된 지명·상태 색도 함께 바뀌고 camera-only 수정은 라벨을 유지합니다. 라벨수정과 실제camera/lighting/경로추가/이동체수정을 섞은 인식 가능한 명령은 `UNSUPPORTED_COMBINED_LABEL_EDIT`로 분리해서 요청하도록 안내합니다. 지원문법은 제한되어 있고 정확한 Diff승인이 계속 필요합니다.
-
 지원 예:
 
 - `런던에서 파리, 로마로 이어지는 민간 항공 여행` — 20초
@@ -69,10 +67,6 @@ TTS/BGM/자막은 개별 ON/OFF입니다. TTS 기본 어댑터는 무료 오프�
 ```
 
 테스트 범위는 [docs/TEST_SCOPE.md](docs/TEST_SCOPE.md), 실제 제작 근거와 아직 남은 제한은 `QUALITY_REPORT_FINAL.md` 및 테스트 프로젝트의 `qc/` 기록에서 확인합니다. CPU 렌더 시간은 각 실제 실행의 `renders/project_result.json`에 측정합니다. 측정하지 않은 75초 HIGH 시간을 성공 기준처럼 제시하지 않습니다.
-
-최신 동결 코어는 [독립 venv175개 전체](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/REPORT.json)/[로그](docs/evidence/final_core_mixed_label_guard_clean_runtime_20261005T011907404139Z/unittest.log)에서 PASS(250.182초/wall253.847806초·source변경0)입니다.20초 실제완성·부분재렌더·공개파일 다운로드는 품질보고서의 별도 근거입니다.75초는 두Scene라벨 교정v003의 실제375px 승인·enqueue와 캐시3개 SHA검증을 마쳐 S004렌더 중입니다. 실제4K/375px 후보3프레임의 개선을 전체75초MP4/QC/실물휴대폰·공개앱 완료로 표시하지 않습니다.
-
-175개 Python검사 후 라벨 Diff값 표시만 바꾼UI는 [별도375px GET-only 검수](validation/mobile_label_diff_display_r02/LABEL_DIFF_DISPLAY_REPORT.json)를 통과했습니다(API POST0·worker제어0; poll은 테스트browser에서만 정지). 새전체175개검사나 실물폰검증은 아닙니다. [공개tunnel feasibility](docs/evidence/public_tunnel_readonly_probe_20261005T013145606003Z/REPORT.md)는 origin 도달 전CONNECT403으로 설치·tunnel생성 없이 종료했으며 공개앱URL은 아직 없습니다.
 
 전체 저장소를 체크아웃하고 `cinematic-world-map`을 이 프로그램의 형제 폴더로 유지합니다. 회귀 테스트의 253KB 기술 패턴 MP4와 출처 기록은 `library/uploads/asset_ee0d2ae58134/`에 포함되며, 실제 영상에 넣는 I2V 자산이 아닙니다.
 

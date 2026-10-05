@@ -1,0 +1,130 @@
+{
+  "generated_at_utc": "2026-10-05T01:31:46.263198+00:00",
+  "scope": "Read-only official HTTPS GET probes, no credential/header dump, no installation, no tunnel provisioning, no open port. Only this evidence directory is created.",
+  "probes": [
+    {
+      "kind": "QuickTunnel_control_read_only",
+      "method": "GET",
+      "url": "https://api.trycloudflare.com/tunnel",
+      "started_at_utc": "2026-10-05T01:31:45.633094+00:00",
+      "finished_at_utc": "2026-10-05T01:31:45.673794+00:00",
+      "elapsed_seconds": 0.040698,
+      "curl_exit": 56,
+      "curl_reported_http_status": "000",
+      "origin_http_status": null,
+      "proxy_connect_status": 403,
+      "safe_header_subset": [
+        "HTTP/1.1 403 Forbidden",
+        "content-length: 16",
+        "content-type: text/plain",
+        "server: envoy",
+        "CURL_STATUS:000",
+        "CURL_SIZE_DOWNLOADED:0"
+      ],
+      "curl_error": "curl: (56) CONNECT tunnel failed, response 403",
+      "range": null,
+      "response_body_saved": false
+    },
+    {
+      "kind": "official_binary_metadata_one_byte",
+      "method": "GET",
+      "url": "https://github.com/cloudflare/cloudflared/releases/download/2026.9.3/cloudflared-linux-amd64",
+      "started_at_utc": "2026-10-05T01:31:45.639111+00:00",
+      "finished_at_utc": "2026-10-05T01:31:46.251119+00:00",
+      "elapsed_seconds": 0.612114,
+      "curl_exit": 0,
+      "curl_reported_http_status": "206",
+      "origin_http_status": 206,
+      "proxy_connect_status": null,
+      "safe_header_subset": [
+        "HTTP/1.1 200 OK",
+        "server: envoy",
+        "HTTP/2 302 ",
+        "content-type: text/html; charset=utf-8",
+        "server: envoy",
+        "content-length: 0",
+        "HTTP/1.1 200 OK",
+        "server: envoy",
+        "HTTP/2 206 ",
+        "server: envoy",
+        "content-type: application/octet-stream",
+        "content-range: bytes 0-0/40122749",
+        "content-length: 1",
+        "CURL_STATUS:206",
+        "CURL_SIZE_DOWNLOADED:1"
+      ],
+      "curl_error": "",
+      "range": "bytes=0-0",
+      "response_body_saved": false
+    }
+  ],
+  "official_release": {
+    "tag": "2026.9.3",
+    "latest_redirect_observation": {
+      "url": "https://github.com/cloudflare/cloudflared/releases/latest",
+      "http_status": 302,
+      "location": "https://github.com/cloudflare/cloudflared/releases/tag/2026.9.3",
+      "note": "Observed in the immediately preceding read-only audit; its precise request UTC was not recorded."
+    },
+    "linux_amd64_bytes": 40122749,
+    "download_url": "https://github.com/cloudflare/cloudflared/releases/download/2026.9.3/cloudflared-linux-amd64",
+    "installed": false
+  },
+  "official_quick_tunnel_constraints": {
+    "source_url": "https://raw.githubusercontent.com/cloudflare/cloudflared/2026.9.3/cmd/cloudflared/tunnel/quick_tunnel.go",
+    "http_status": 200,
+    "started_at_utc": "2026-10-05T01:29:56.580781+00:00",
+    "finished_at_utc": "2026-10-05T01:29:56.940657+00:00",
+    "line26": "Account-less Tunnels are for experimenting, have no uptime guarantee, are subject to Cloudflare Online Services Terms of Use; production should use a pre-created named tunnel.",
+    "line145": "QuickTunnel creation uses HTTP POST to the configured quick-service /tunnel endpoint; this audit never called POST.",
+    "line221": "Quick tunnels should not be used for production usage.",
+    "not_independently_verified_here": [
+      "concurrent-request limit",
+      "Server-Sent Events support",
+      "successful provisioning",
+      "public HTTPS application reachability",
+      "physical phone access"
+    ]
+  },
+  "prior_additional_observations": {
+    "api_github_com": "proxy CONNECT 403; curl exit56, reported HTTP000; public release API metadata unavailable via that hostname.",
+    "developers_cloudflare_com": "proxy CONNECT 403; curl exit56, reported HTTP000.",
+    "direct_dns": "socket.getaddrinfo for api.github.com and api.trycloudflare.com returned temporary failure; direct DNS failure is distinct from proxy-resolved GitHub HTTPS success."
+  },
+  "github_artifact_download": {
+    "source_evidence": "docs/evidence/github_A20_ON_publish_20261004T192400Z/GITHUB_VERIFICATION.json",
+    "source_evidence_sha256": "3dbc7f2965b07a94dc0cb67f4e94acc8c8b2aa84bc54fb40fa803c5d2902a3a3",
+    "previously_verified_at": "2026-10-04T19:24:24.161902+00:00",
+    "all_remote_file_bytes_verified": true,
+    "representative_file": {
+      "path": "deliverables/WORLD_SIMULATION_ENGINE/NY_LONDON_DUBAI_20S_TTS_v001/NY_LONDON_DUBAI_20S_TTS_v001.mp4",
+      "browser_url": "https://github.com/dimon3898-sys/yeonhwarok-free/raw/refs/heads/main/deliverables/WORLD_SIMULATION_ENGINE/NY_LONDON_DUBAI_20S_TTS_v001/NY_LONDON_DUBAI_20S_TTS_v001.mp4",
+      "http_status": 200,
+      "bytes": 27118124,
+      "matches_local": true
+    },
+    "retested_in_this_audit": false,
+    "distinction": "Existing verified public GitHub artifact download is available evidence; it does not run or expose the interactive Python rendering app."
+  },
+  "source_sha_before": {
+    "engine/planner.py": "1d4489985a3f402cb6f0404e25de44b4dba512495c26ee42188acdd7642b4ce5",
+    "engine/revisions.py": "49f34a6000da73a124a92012e42a7bf6d0d1664accb429c34c104d3e7cd3c82a",
+    "data/scene_plan.schema.json": "7f1d8550c2696359ba4642e6d54ceaf9cb1456cdd7c7f3d89407fab489e3006e",
+    "web/earth_adapter.js": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+    "tests/test_place_label_readability.py": "cff4baafd1a91087ba133a0b42464305b810b9e80cd25b060a22cdc540001c6f"
+  },
+  "source_sha_after": {
+    "engine/planner.py": "1d4489985a3f402cb6f0404e25de44b4dba512495c26ee42188acdd7642b4ce5",
+    "engine/revisions.py": "49f34a6000da73a124a92012e42a7bf6d0d1664accb429c34c104d3e7cd3c82a",
+    "data/scene_plan.schema.json": "7f1d8550c2696359ba4642e6d54ceaf9cb1456cdd7c7f3d89407fab489e3006e",
+    "web/earth_adapter.js": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+    "tests/test_place_label_readability.py": "cff4baafd1a91087ba133a0b42464305b810b9e80cd25b060a22cdc540001c6f"
+  },
+  "source_changes": [],
+  "install_performed": false,
+  "credentials_read_or_printed": false,
+  "tunnel_started": false,
+  "port_opened": false,
+  "source_test_server_git_mutation_performed": false,
+  "conclusion": "Official binary retrieval is reachable; QuickTunnel control CONNECT is actually rejected by the current proxy. No public app deployment or phone validation is established."
+}

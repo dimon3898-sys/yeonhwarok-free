@@ -1,0 +1,293 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-10-05T01:25:53.218556+00:00",
+  "scope": "Read-only v003 publication delta; only new evidence README/JSON/operator aid written; no source/test/project/render/worker/Git/network/export actions",
+  "source_head_observed": "f95932ec3aec93645bdec964ff7eaa4068ff2165",
+  "tool_contract_files": [
+    {
+      "path": "world-simulation-shorts-engine/tools/export_project.py",
+      "bytes": 2670,
+      "sha256": "7dfa3b807dfebbba2397f28b57c3dd356b6127528b28665b8162b5b6bc71ff28",
+      "tracked": true,
+      "reason": "unchanged_existing_export_or_benchmark_tool"
+    },
+    {
+      "path": "world-simulation-shorts-engine/tools/aggregate_benchmarks.py",
+      "bytes": 10910,
+      "sha256": "4d8298cd25b6ada9e6bfde57590b796623c8f534a559650abfb9c4a6b9b09608",
+      "tracked": true,
+      "reason": "unchanged_existing_export_or_benchmark_tool"
+    },
+    {
+      "path": "world-simulation-shorts-engine/tools/deliverable_evidence.py",
+      "bytes": 15554,
+      "sha256": "10f0ca1e5fd1fe30bb258df57a75af1555c160156871e0b8863c7633fe307ec4",
+      "tracked": true,
+      "reason": "unchanged_existing_export_or_benchmark_tool"
+    }
+  ],
+  "target": {
+    "project_id": "project_594442ec2df9",
+    "version": "v003",
+    "exists_at_observation": true,
+    "plan_hash_at_observation": "37a6b049dc7b62d3bd28f06dfea54dbf722eb4efe5721d832962ada7db03d317",
+    "actual_final_export_performed": false,
+    "final_QC_or_approval_not_claimed": true
+  },
+  "measured_partial_v002_Scene_file_observations": [
+    {
+      "scene_id": "S001",
+      "duration_seconds": 7.5,
+      "movie_bytes_measured": 9550248,
+      "audit_bytes_measured": 855688,
+      "recorded_video_sha256": "cc9e4d533f14052b6cd86b752fdec9216cacc6e2300f09f4f904094ccb8ed9b4",
+      "reused_in_v002": true,
+      "v002_current_render_seconds_recorded": 0.0,
+      "original_native_elapsed_seconds_recorded": 2799.3983918149897,
+      "hash_not_recomputed_here": true
+    },
+    {
+      "scene_id": "S002",
+      "duration_seconds": 7.5,
+      "movie_bytes_measured": 6368836,
+      "audit_bytes_measured": 753383,
+      "recorded_video_sha256": "577da3a2ca1496f0d1e73f972c1ffda4444d5b0367987f4ab2fe4df9c28973c2",
+      "reused_in_v002": false,
+      "v002_current_render_seconds_recorded": 4353.98304495601,
+      "original_native_elapsed_seconds_recorded": 4353.98304495601,
+      "hash_not_recomputed_here": true
+    },
+    {
+      "scene_id": "S003",
+      "duration_seconds": 7.5,
+      "movie_bytes_measured": 4762653,
+      "audit_bytes_measured": 733914,
+      "recorded_video_sha256": "a99e7bd1b2519fdd9e178dd13e412a0a28808a55a46fbb8f0acf1f0218fa0c03",
+      "reused_in_v002": true,
+      "v002_current_render_seconds_recorded": 0.0,
+      "original_native_elapsed_seconds_recorded": 4536.156115663995,
+      "hash_not_recomputed_here": true
+    },
+    {
+      "scene_id": "S004",
+      "duration_seconds": 7.5,
+      "movie_bytes_measured": 4952905,
+      "audit_bytes_measured": 735458,
+      "recorded_video_sha256": "f0072f260f9496fc3c74dcd7b9c4356cbd6359a7415db53dcb438061b6f7c465",
+      "reused_in_v002": false,
+      "v002_current_render_seconds_recorded": 2360.643085417003,
+      "original_native_elapsed_seconds_recorded": 2360.643085417003,
+      "hash_not_recomputed_here": true
+    },
+    {
+      "scene_id": "S005",
+      "duration_seconds": 7.5,
+      "movie_bytes_measured": 6970040,
+      "audit_bytes_measured": 1060071,
+      "recorded_video_sha256": "35d74bbba336f2192b8965f0d2ac82074333ae64f53f68a2a5559aa7ce7542a7",
+      "reused_in_v002": false,
+      "v002_current_render_seconds_recorded": 2726.895308806008,
+      "original_native_elapsed_seconds_recorded": 2726.895308806008,
+      "hash_not_recomputed_here": true
+    }
+  ],
+  "measured_partial_movie_bytes": 32604682,
+  "measured_partial_scene_seconds": 37.5,
+  "final_sizes": {
+    "measured_final": false,
+    "final_mp4_bytes": null,
+    "final_ZIP_bytes": null,
+    "required_part_count": null,
+    "no_size_or_time_extrapolation_performed": true
+  },
+  "future_inspect_export_split_verify_commands_not_executed": "set -euo pipefail\ncd /workspace/yeonhwarok-free/world-simulation-shorts-engine\nworld_version='projects/project_594442ec2df9/versions/v003'\nworld_zip='../deliverables/WORLD_SIMULATION_ENGINE/SUEZ_CLOSURE_75S_TTS_v003.zip'\nworld_run='/workspace/deliverables/shipping75-publication-v003-r01'\nmkdir \"$world_run\"\nset -o noclobber\n.venv/bin/python tools/export_project.py inspect \"$world_version\" > \"$world_run/INSPECT.json\"\n.venv/bin/python tools/export_project.py export \"$world_version\" --output \"$world_zip\" > \"$world_run/EXPORT_REPORT.json\"\n.venv/bin/python tools/aggregate_benchmarks.py \"$world_version\" --output \"$world_run/BENCHMARK_REPORT.json\"\nif [ \"$(stat -c %s \"$world_zip\")\" -gt 104857600 ]; then\n  .venv/bin/python tools/export_project.py split \"$world_zip\" --max-part-mib 90 > \"$world_run/SPLIT_REPORT.json\"\n  .venv/bin/python tools/export_project.py verify \"$world_zip.parts.json\" > \"$world_run/PARTS_VERIFIED.json\"\nfi\n",
+  "future_post_push_verify_command_not_executed": "world_published_commit=\"$(git -C /workspace/yeonhwarok-free rev-parse HEAD)\"\npython3 /workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/shipping75_publication_v003_preparation_r01/verify_public_downloads.py \\\n  --repo /workspace/yeonhwarok-free \\\n  --delivery-dir /workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/SUEZ_CLOSURE_75S_TTS_v003 \\\n  --commit \"$world_published_commit\" \\\n  --output /workspace/deliverables/shipping75-publication-v003-r01/GITHUB_VERIFICATION.json\n",
+  "ordinary_Git_limit_bytes": 104857600,
+  "max_split_part_bytes": 94371840,
+  "LFS_authenticated_ready_evidence": false,
+  "LFS_quota_verified_evidence": false,
+  "strict_final_export_QC_hash_gate_unchanged": true,
+  "cached_current_render_time_zero_native_time_separate": true,
+  "must_selectively_include_new_source_test_dependency": [
+    {
+      "path": "world-simulation-shorts-engine/tests/test_place_label_readability.py",
+      "bytes": 29094,
+      "sha256": "cff4baafd1a91087ba133a0b42464305b810b9e80cd25b060a22cdc540001c6f",
+      "tracked": false,
+      "reason": "new_18_test_discovery_module"
+    },
+    {
+      "path": "world-simulation-shorts-engine/tests/fixtures/shipping75_v002_label_readability_original.json",
+      "bytes": 582882,
+      "sha256": "12d997d125443af691267b88ef6743d4295438c108705f6af8bea154abaffab5",
+      "tracked": false,
+      "reason": "byte_exact_required_fixture_not_mutable_project_plan"
+    }
+  ],
+  "modified_newapp_source_observed": [
+    {
+      "path": "world-simulation-shorts-engine/engine/planner.py",
+      "bytes": 70242,
+      "sha256": "1d4489985a3f402cb6f0404e25de44b4dba512495c26ee42188acdd7642b4ce5",
+      "tracked": true,
+      "reason": "frozen_owner_source_change_not_edited_here"
+    },
+    {
+      "path": "world-simulation-shorts-engine/engine/revisions.py",
+      "bytes": 28335,
+      "sha256": "49f34a6000da73a124a92012e42a7bf6d0d1664accb429c34c104d3e7cd3c82a",
+      "tracked": true,
+      "reason": "frozen_owner_source_change_not_edited_here"
+    },
+    {
+      "path": "world-simulation-shorts-engine/data/scene_plan.schema.json",
+      "bytes": 30028,
+      "sha256": "7f1d8550c2696359ba4642e6d54ceaf9cb1456cdd7c7f3d89407fab489e3006e",
+      "tracked": true,
+      "reason": "frozen_owner_source_change_not_edited_here"
+    }
+  ],
+  "fixture_portability": {
+    "expected_exact_SHA": "12d997d125443af691267b88ef6743d4295438c108705f6af8bea154abaffab5",
+    "path_relative_to_test_checkout": true,
+    "historical_absolute_estimate_provenance_fields": [
+      {
+        "field": ".metadata.estimates.sources[0].result_path",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[0].resolved_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[0].resolved_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[0].native_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[0].native_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[1].result_path",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[1].resolved_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[1].resolved_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[1].native_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[1].native_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[2].result_path",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[2].resolved_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[2].resolved_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[2].native_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[2].native_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[3].result_path",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[3].resolved_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[3].resolved_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[3].native_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[3].native_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[4].result_path",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[4].resolved_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[4].resolved_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[4].native_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[4].native_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[5].result_path",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[5].resolved_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[5].resolved_audit",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[5].native_movie",
+        "historical_estimate_only": true
+      },
+      {
+        "field": ".metadata.estimates.sources[5].native_audit",
+        "historical_estimate_only": true
+      }
+    ],
+    "active_scene_file_pointers": [],
+    "fresh_runtime_or_test_execution_not_performed_here": true
+  },
+  "verification_helper": {
+    "path": "docs/evidence/shipping75_publication_v003_preparation_r01/verify_public_downloads.py",
+    "syntax_AST_parsed_only": true,
+    "executed": false,
+    "actual_public_repo_prefix_fixed": true,
+    "remote_main_commit_and_HTTP200_byteSHA_required": true,
+    "whole_remote_parts_SHA_required": true,
+    "no_source_or_Git_mutation": true,
+    "raw_credentials_or_proxy_values_not_stored": true
+  },
+  "ownership_files": [
+    "docs/evidence/shipping75_publication_v003_preparation_r01/README.md",
+    "docs/evidence/shipping75_publication_v003_preparation_r01/PREPARATION.json",
+    "docs/evidence/shipping75_publication_v003_preparation_r01/verify_public_downloads.py"
+  ]
+}

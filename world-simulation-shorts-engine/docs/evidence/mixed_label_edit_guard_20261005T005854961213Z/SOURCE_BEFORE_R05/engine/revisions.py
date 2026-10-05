@@ -103,37 +103,8 @@ def _status_label_edit_requested(text):
     if re.search(r'자막|subtitle|caption',text,re.I):return False
     return bool(re.search(r'상태\s*(?:라벨|레이블)|status\s*labels?',text,re.I) and re.search(r'안\s*보|안\s*읽|대비|가독|읽기|선명|contrast|readab|legib',text,re.I))
 
-def _explicit_secondary_scene_edit(text):
-    """Recognize bounded directives, not background/readability explanations.
-
-    Dedicated label edits cannot also execute generic scene operations. Fail
-    closed for explicit supported directives rather than silently dropping one;
-    'bright ground', 'night backdrop' and 'fast camera movement' are context.
-    """
-    directive=r'(?:바꿔|바꾸(?:고|어|세요)|변경(?:해|하(?:고|세요))|전환(?:해|하(?:고|세요))|해\s*(?:줘|주세요))'
-    no_past_context=r'(?!\s*(?:나서|나니|보니|있는|있을|난\s*뒤))'
-    patterns=(
-        rf'(?:낮|주간|밤|야간)\s*(?:으)?로\s*(?:{directive}{no_past_context}|[,;]|(?=[.!?。]|$))',
-        rf'조명(?:을|를)?\s*(?:조금\s*|좀\s*|더\s*)*(?:밝게|어둡게)\s*{directive}{no_past_context}',
-        rf'카메라(?:를|을)?\s*(?:조금\s*|좀\s*|더\s*)*(?:빠르게|느리게|천천히)\s*(?:{directive}|하고|움직여\s*(?:줘|주고|주세요)|[,;]|(?=[.!?。]|$)){no_past_context}',
-        r'카메라(?:의)?\s*속도(?:를)?\s*(?:조금\s*|좀\s*|더\s*)*(?:높여|높이고|낮춰|낮추(?:고|세요))',
-        rf'줌아웃\s*(?:해\s*(?:줘|주고|주세요)|하고){no_past_context}',
-        r'\b(?:switch|change|set)\s+(?:(?:the\s+)?(?:scene|lighting|it)\s+)?(?:to\s+)?(?:day|night|daytime|nighttime)\b',
-        r'\b(?:make|set)\s+(?:the\s+)?camera\s+(?:a\s+little\s+)?(?:faster|slower)\b',
-        r'\b(?:speed\s+up|slow\s+down)\s+(?:the\s+)?camera\b',
-        r'\b(?:faster|slower)\s+camera\s*(?=[.!?;,]|$)',
-        r'\b(?:zoom\s+out|pull\s+back)\s*(?:please|and|then|[,;]|$)',
-        r'(?:항로|경로)(?:를|을)?\s*(?:(?:한|두|세|\d+)\s*(?:개|줄)\s*)?(?:를|을)?\s*추가(?!된|한|되)',
-        r'(?:배(?!경)|선박)(?:를|을)?\s*(?:(?:한|두|세|\d+)\s*척\s*)?(?:를|을)?\s*추가(?!된|한|되)',
-        rf'(?:비행기|항공기)(?:를|을)?\s*(?:빼(?:고|줘|주세요|(?=\s*[,.;]|$))|제거(?:해|하(?:고|세요))|없애(?:고|줘|주세요)){no_past_context}',
-        r'\badd\s+(?:(?:one|two|three|\d+)\s+)?(?:routes?|ships?)\b|\bremove\s+(?:the\s+)?aircraft\b',
-    )
-    return any(re.search(pattern,text,re.I) for pattern in patterns)
-
 def preview_revision(store,pid,version,text):
     if not isinstance(text,str) or not text.strip():raise EngineError('EMPTY_EDIT','수정 내용을 입력해 주세요.')
-    if (_place_label_edit_requested(text) or _status_label_edit_requested(text)) and _explicit_secondary_scene_edit(text):
-        raise EngineError('UNSUPPORTED_COMBINED_LABEL_EDIT','라벨 대비와 조명·카메라·이동체·항로 변경은 각각 요청해 주세요. 조명 변경은 지명·상태 색상도 함께 맞춥니다.')
     old=store.get(pid,version)['plan'];new=copy.deepcopy(old);targets=_selected(new,text);changes=[];geometry_checks=[];ship_ids={};ship_phases={};proposal_warnings=[]
     if not targets:raise EngineError('EDIT_TARGET_NOT_FOUND','해당 시간 또는 장소의 장면이 없습니다.')
     from .advanced_revisions import apply_advanced_edit

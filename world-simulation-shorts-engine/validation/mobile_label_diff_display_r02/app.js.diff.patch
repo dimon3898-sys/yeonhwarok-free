@@ -1,0 +1,36 @@
+--- web/app.js.before
++++ web/app.js.after
+@@ -349,16 +349,29 @@
+   const diff = payload.diff;
+   const rows = Array.isArray(diff) ? diff : Array.isArray(diff?.changes) ? diff.changes : diff && typeof diff === 'object' ? Object.entries(diff).map(([scene, changes]) => ({ scene_id: scene, changes })) : [];
+   const fieldNames = { camera_preset: '카메라', camera_speed: '카메라 속도', lighting_preset: '조명', entities: '이동체', routes: '경로', effects: '효과', narration: '대본', visual_events: '시각 사건', labels: '정보 표시', music_energy: '음악 에너지', duration: '장면 길이', transition_in: '시작 전환', transition_out: '종료 전환' };
+-  function valueText(value) { if (value == null) return '없음'; if (typeof value === 'string') return named(named(value, cameraNames), lightingNames); if (typeof value === 'number' || typeof value === 'boolean') return String(value); if (Array.isArray(value)) return value.map((item) => compact(item, item.type || item.scene_id || '항목')).join(' · ') || '없음'; return compact(value, '장면 설정 변경'); }
++  function valueText(value, field) {
++    if (value == null) return '없음';
++    if (typeof value === 'string') return named(named(value, cameraNames), lightingNames);
++    if (typeof value === 'number' || typeof value === 'boolean') return String(value);
++    if (Array.isArray(value)) return value.map((item) => {
++      const text = compact(item, item.type || item.scene_id || '항목');
++      if (field !== 'labels') return text;
++      const color = item.color || '기본 #e2e8ed';
++      const size = item.size ?? '기본 46';
++      const opacity = Math.round((item.opacity ?? .96) * 100);
++      return `${text} (색상 ${color}, 크기 ${size}, 불투명도 ${opacity}%)`;
++    }).join(' · ') || '없음';
++    return compact(value, '장면 설정 변경');
++  }
+   for (const row of rows) {
+     const card = node('div', null, 'diff-item');
+     card.append(node('h3', `${row.scene_id || row.scene || '기획'}${row.path || row.field ? ` · ${fieldNames[(row.path || row.field).split('.').pop()] || row.label || '장면 설정'}` : ''}`));
+     if (row.summary || row.description) card.append(node('p', compact(row.summary || row.description)));
+-    if ('before' in row || 'old' in row) card.append(node('p', `변경 전: ${valueText(row.before ?? row.old)}`, 'diff-before'));
+-    if ('after' in row || 'new' in row) card.append(node('p', `변경 후: ${valueText(row.after ?? row.new)}`, 'diff-after'));
++    if ('before' in row || 'old' in row) card.append(node('p', `변경 전: ${valueText(row.before ?? row.old, row.field || row.path)}`, 'diff-before'));
++    if ('after' in row || 'new' in row) card.append(node('p', `변경 후: ${valueText(row.after ?? row.new, row.field || row.path)}`, 'diff-after'));
+     if (row.changes) {
+       const changes = Array.isArray(row.changes) ? row.changes : Object.entries(row.changes).map(([field, change]) => ({ field, ...(typeof change === 'object' ? change : { after: change }) }));
+-      for (const change of changes) card.append(node('p', `${fieldNames[change.field || change.path] || change.label || '설정'}: ${valueText(change.before)} → ${valueText(change.after)}`, 'diff-after'));
++      for (const change of changes) card.append(node('p', `${fieldNames[change.field || change.path] || change.label || '설정'}: ${valueText(change.before, change.field || change.path)} → ${valueText(change.after, change.field || change.path)}`, 'diff-after'));
+     }
+     $('revision-diff').append(card);
+   }
