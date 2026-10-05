@@ -22,6 +22,7 @@ from scipy.signal import resample_poly
 
 from .assets import APP_ROOT, V3_ROOT, resolve_user_asset
 from .narration import validate_narration_bindings, attach_narration_timing
+from .sfx_library import production_audio_enabled, render_sound_events
 
 SR = 48000
 
@@ -207,6 +208,89 @@ def _ducking(cues: list[dict], duration: float) -> np.ndarray:
     return envelope
 
 
+def _production_energy_points(plan: dict) -> list[tuple[float, float]]:
+    """Event/pace energy, including a short breath after each narrative peak."""
+    duration = float(plan["duration"])
+    fast = str(plan.get("request", {}).get("pace", plan.get("options", {}).get("pace", "FAST"))).replace("PACE_", "") == "FAST"
+    points = {0.: .82, min(duration, .30 if fast else .55): .98,
+              min(duration, 1.75 if fast else 2.3): .53, duration: .025}
+    for scene in plan.get("scenes", []):
+        start = float(scene["start_time"])
+        base = max(.20, min(.80, float(scene.get("music_energy", .5))*.82))
+        if start > 0:
+            points[min(duration, start+.18)] = base
+        for event in scene.get("visual_events", []):
+            if not isinstance(event, dict):
+                continue
+            at = start+float(event.get("time", 0.))
+            kind, role = event.get("kind"), event.get("role")
+            if kind == "new_variable" or role == "variable":
+                points[max(0., at-.20)] = base
+                points[min(duration, at+.14)] = .81
+            if role == "peak" or kind == "peak_reveal":
+                points[max(0., at-.34)] = max(base, .62)
+                points[min(duration, at+.08)] = .98
+                points[min(duration, at+.56)] = .40
+                points[min(duration, at+.94)] = .65
+            if role == "payoff" or kind == "final_reveal":
+                points[max(0., at-.34)] = .76
+                points[min(duration, at+.08)] = 1.12
+                points[min(duration, at+.48)] = .82
+    # Ending always resolves, even if a late event wrote the endpoint above.
+    points[duration] = .025
+    return sorted(points.items())
+
+
+def _production_music(duration: float, plan: dict) -> tuple[np.ndarray, dict]:
+    """Original low-mid score, rhythmic swells rather than full-film speed-up."""
+    music = np.zeros((round(duration*SR), 2), np.float64)
+    t = np.arange(len(music))/SR
+    points = _production_energy_points(plan)
+    energy = np.interp(t, [p[0] for p in points], [p[1] for p in points])
+    envelope = (1-np.exp(-t*10))*np.clip((duration-t)/.16, 0, 1)*energy
+    pace = str(plan.get("request", {}).get("pace", plan.get("options", {}).get("pace", "FAST"))).replace("PACE_", "")
+    # A very quiet pulse under the sustained score accelerates energy without
+    # changing narration timing or using an intrusive midrange melody.
+    pulse_hz = {"FAST": 1.15, "NORMAL": .82, "CINEMATIC": .56}.get(pace, .82)
+    rhythm = .88+.12*(.5+.5*np.sin(2*np.pi*pulse_hz*t))**3
+    for k, (frequency, amplitude) in enumerate([(36.708, .022), (55., .010), (73.416, .015),
+                                                (110., .0065), (146.832, .0038), (174.614, .0018),
+                                                (220., .0012), (293.665, .0005)]):
+        signal = amplitude*np.sin(2*np.pi*frequency*t+.12*np.sin(t*(.13+k*.018)))*envelope*rhythm
+        music[:, 0] += signal*.73
+        delayed = np.zeros_like(signal)
+        delay = 11+k*7
+        delayed[delay:] = signal[:-delay]
+        music[:, 1] += delayed*.72
+    return music, {"pace": pace, "pulse_hz": pulse_hz, "energy_points": [list(p) for p in points],
+                   "source": "Original engine/audio.py procedural composition", "license": "CC0-1.0",
+                   "speech_band_notice": "No midrange lead; the mix still requires final listening with the chosen voice"}
+
+
+def _production_ducking(cues: list[dict], narration: np.ndarray, duration: float) -> tuple[np.ndarray, np.ndarray, dict]:
+    """Speech has priority over effects/music; external un-timed voice is detected."""
+    from scipy.ndimage import uniform_filter1d, maximum_filter1d
+    # Reuse measured scene-cue ramps. Actual signal RMS adds coverage for a
+    # supplied narration file without cues, including the subtitles-OFF case.
+    cue_duck = _ducking(cues, duration)
+    # The running-sum filter can leave tiny negative roundoff after silence.
+    activity = np.sqrt(np.maximum(0., uniform_filter1d(np.mean(narration**2, axis=1), size=round(.025*SR))))
+    active = (activity > 10**(-46/20)).astype(np.float64)
+    # Conservative nearby-speech reservation and smoothing avoid abrupt gain
+    # changes or a peak effect masking the beginning of the next sentence.
+    reserved = maximum_filter1d(active, size=round(.30*SR)+1, mode="constant")
+    smoothed = uniform_filter1d(reserved, size=round(.14*SR), mode="nearest")
+    speech = np.maximum(np.clip((1-cue_duck)/.72, 0, 1), smoothed)
+    music_duck = 1-.84*speech
+    sound_duck = 1-.75*speech
+    return music_duck, sound_duck, {"bgm_minimum_gain": .16, "sfx_minimum_gain": .25,
+            "cue_attack_seconds": .18, "cue_release_seconds": .45,
+            "signal_rms_window_seconds": .025, "signal_threshold_dbfs": -46,
+            "signal_reservation_seconds": .30, "signal_smoothing_seconds": .14,
+            "speech_reserved_fraction": float(np.mean(speech > .5)), "tts_speed_changed": False,
+            "scope": "Measured cue / amplitude-based priority envelopes; not word ASR or guaranteed perceptual intelligibility"}
+
+
 def create_audio(plan: dict, directory: Path, provider: TTSProvider | None = None) -> dict:
     directory.mkdir(parents=True, exist_ok=True)
     binding_report = validate_narration_bindings(plan)
@@ -220,36 +304,51 @@ def create_audio(plan: dict, directory: Path, provider: TTSProvider | None = Non
     alignment_path = directory / "narration_alignment.json"
     with alignment_path.open("x", encoding="utf-8") as stream:
         json.dump(alignment, stream, ensure_ascii=False, indent=2)
-    synthesis = _synth_class()(duration)
-    events = []
-    for scene in plan["scenes"]:
-        for event in scene.get("sound_events", []):
-            if isinstance(event, str):
-                event = {"kind": event, "time": 0.}
-            time = float(scene["start_time"]) + float(event.get("time", event.get("timestamp", 0)))
-            if time < 0 or time >= duration:
-                raise RuntimeError(f"SOUND_EVENT_OUTSIDE_PROJECT: {event}")
-            kind = event.get("kind", event.get("type", "soft_pulse")).lower()
-            level = float(event["gain"]) if "gain" in event else (10**(float(event["gain_db"])/20)
-                                                                  if "gain_db" in event else .12)
-            if "whoosh" in kind or "riser" in kind or "sweep" in kind:
-                synthesis.whoosh(time, min(float(event.get("duration", 1.2)), duration-time), level)
-            elif "pass" in kind or "engine" in kind:
-                length = min(float(event.get("duration", 1.2)), duration-time)
-                offset = round(time*SR)
-                end = min(len(synthesis.audio), offset+round(length*SR))
-                before = synthesis.audio[offset:end].copy()
-                synthesis.passby(time, length)
-                synthesis.audio[offset:end] = before+(synthesis.audio[offset:end]-before)*(level/.17)
-            elif "hit" in kind or "impact" in kind:
-                synthesis.hit(time, level, deep=("deep" in kind or "final" in kind))
-            else:
-                synthesis.pulse(time, level*.4)
-            events.append({**event, "absolute_time": time, "linear_gain": level, "scene_id": scene["scene_id"]})
-    music = _music(duration, plan) if plan.get("options", {}).get("bgm", True) else np.zeros_like(narration)
-    duck = _ducking(cues, duration)
-    sound_gain = np.sqrt(duck)  # Softly reduce effects during speech, preserving the cue.
-    mix = synthesis.audio*sound_gain[:, None] + music*duck[:, None] + narration
+    production = production_audio_enabled(plan)
+    production_sound = production_music = production_duck = None
+    if production:
+        effects, production_sound = render_sound_events(plan, APP_ROOT / "assets/audio/production_sfx_v1")
+        events = production_sound["events"]
+        music, production_music = _production_music(duration, plan)
+        if not plan.get("options", {}).get("bgm", True):
+            music[:] = 0
+        duck, sound_gain, production_duck = _production_ducking(cues, narration, duration)
+        for name, record in [("sfx_history.json", production_sound["history"]),
+                             ("sfx_cues.json", production_sound), ("sfx_sources.json", production_sound["sources"])]:
+            with (directory / name).open("x", encoding="utf-8") as stream:
+                json.dump(record, stream, ensure_ascii=False, indent=2)
+    else:
+        synthesis = _synth_class()(duration)
+        events = []
+        for scene in plan["scenes"]:
+            for event in scene.get("sound_events", []) if plan.get("options", {}).get("sfx", True) else []:
+                if isinstance(event, str):
+                    event = {"kind": event, "time": 0.}
+                time = float(scene["start_time"]) + float(event.get("time", event.get("timestamp", 0)))
+                if time < 0 or time >= duration:
+                    raise RuntimeError(f"SOUND_EVENT_OUTSIDE_PROJECT: {event}")
+                kind = event.get("kind", event.get("type", "soft_pulse")).lower()
+                level = float(event["gain"]) if "gain" in event else (10**(float(event["gain_db"])/20)
+                                                                      if "gain_db" in event else .12)
+                if "whoosh" in kind or "riser" in kind or "sweep" in kind:
+                    synthesis.whoosh(time, min(float(event.get("duration", 1.2)), duration-time), level)
+                elif "pass" in kind or "engine" in kind:
+                    length = min(float(event.get("duration", 1.2)), duration-time)
+                    offset = round(time*SR)
+                    end = min(len(synthesis.audio), offset+round(length*SR))
+                    before = synthesis.audio[offset:end].copy()
+                    synthesis.passby(time, length)
+                    synthesis.audio[offset:end] = before+(synthesis.audio[offset:end]-before)*(level/.17)
+                elif "hit" in kind or "impact" in kind:
+                    synthesis.hit(time, level, deep=("deep" in kind or "final" in kind))
+                else:
+                    synthesis.pulse(time, level*.4)
+                events.append({**event, "absolute_time": time, "linear_gain": level, "scene_id": scene["scene_id"]})
+        effects = synthesis.audio
+        music = _music(duration, plan) if plan.get("options", {}).get("bgm", True) else np.zeros_like(narration)
+        duck = _ducking(cues, duration)
+        sound_gain = np.sqrt(duck)  # Preserved legacy mix law.
+    mix = effects*sound_gain[:, None] + music*duck[:, None] + narration
     fade = np.clip((duration-np.arange(len(mix))/SR)/.12, 0, 1)
     mix *= fade[:, None]
     peak = float(np.max(np.abs(mix))) if len(mix) else 0.
@@ -290,6 +389,12 @@ def create_audio(plan: dict, directory: Path, provider: TTSProvider | None = Non
               "narration_alignment": alignment, "narration_alignment_file": str(alignment_path),
               "ducking_release_seconds": .45, "direct_listening": False,
               "license": "Procedural music/effects CC0-1.0; no reference audio sampled."}
+    if production:
+        report.update({"production_defaults": "v1", "sfx": bool(plan.get("options", {}).get("sfx", True)),
+                       "sfx_library": production_sound, "music_energy": production_music,
+                       "speech_priority": production_duck,
+                       "sfx_history_file": str(directory / "sfx_history.json"),
+                       "sfx_sources_file": str(directory / "sfx_sources.json")})
     with (directory / "audio_report.json").open("x", encoding="utf-8") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2)
     return report

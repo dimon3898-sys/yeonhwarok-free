@@ -80,3 +80,11 @@ def analyze_retention(plan):
 
 class RetentionAnalyzer:
     analyze=staticmethod(analyze_retention)
+
+
+def dead_time_gate(plan):
+    """Expose the production-only motion/dead-time checks alongside Retention."""
+    from .pace import analyze_dead_time
+    return analyze_dead_time(plan)
+
+RetentionAnalyzer.analyze_dead_time = staticmethod(dead_time_gate)

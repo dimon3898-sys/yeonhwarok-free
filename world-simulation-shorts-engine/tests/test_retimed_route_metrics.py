@@ -22,7 +22,7 @@ console.log(JSON.stringify({progress,total_km:total,remaining_km:total*(1-progre
 class RetimedRouteMetricTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.plan=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
+        cls.plan=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
 
     def test_information_hold_retiming_refreshes_the_actual_local_progress_number(self):
         plan=deepcopy(self.plan);scene=plan['scenes'][1];prior=next(e for e in scene['visual_events'] if e['id']=='E005')

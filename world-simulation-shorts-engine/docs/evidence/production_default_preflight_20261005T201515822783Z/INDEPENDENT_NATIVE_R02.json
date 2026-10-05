@@ -1,0 +1,94 @@
+{
+  "at_utc": "2026-10-05T21:00:53.397627+00:00",
+  "candidate": "project_f185ebb678ea/v002",
+  "plan_sha256": "fe5acff84191dd6956556508677f6efcfbca8c769c92e6909a9b601b52bedd58",
+  "scope": "Independent actual native4K/mobile-strip review before encoded12s render. Not final MP4 or source guard for future modified adapter.",
+  "capture_elapsed_seconds": 246.335,
+  "source_guard": {
+    "flat_polish_renderer.js": true,
+    "earth_polish_adapter.js": true,
+    "geographic_polish_transition.js": true,
+    "flat_renderer.js": true,
+    "flat_semantics.js": true,
+    "earth_adapter.js": true,
+    "flat_entity_separation_polish.js": true,
+    "production_visual_adapter.js": true
+  },
+  "source_guard_passed": true,
+  "positive_observations": [
+    "Native terrain and coastline clear at375px; source texture preserved under selected country tint.",
+    "Main route brighter/thicker than auxiliaries and aircraft direction identifiable.",
+    "S004 three aircraft visually separated at9.85s.",
+    "Information continuity across10.1/10.5/10.9s Flat-to-Earth; no full-screen opaque veil.",
+    "No large final generated banner. Shanghai is a genuinely new verified catalog context node, with no edge progress before11.2 and label/edge creation afterward.",
+    "Final11.9667s Shanghai label mobile-readable and fourth context-node route fully formed.",
+    "Duplicate TOKYO and repeated ASSUME TAIPEI wording corrected."
+  ],
+  "blocking_findings": [
+    {
+      "event_id": "E008",
+      "label": "ASSUMPTION",
+      "expected_geographic_target": "taipei",
+      "actual_anchor_location": "tokyo",
+      "cause": "Production prepareFrame unconditionally replaces coordinates for every label carrying route_id; inherited R_SEOUL_TOKYO is not appropriate for destination status.",
+      "required_fix": "Only intended distance/progress/route annotations should follow route head; city/status label preserves explicit verified coordinates."
+    },
+    {
+      "event_id": "E009",
+      "label": "ASSUMED HOLD",
+      "expected_geographic_target": "tokyo",
+      "actual_anchor": {
+        "x": 1701.7503583480918,
+        "y": 1519.490967716849
+      },
+      "actual_label_box": {
+        "x": 1030.44375,
+        "y": 2179.0909677168493,
+        "width": 848.75625,
+        "height": 135
+      },
+      "vertical_top_from_anchor_mobile_pixels": 114.51388888888896,
+      "cause": "Inherited stacked collision placement moves label far below correct anchor; no visual leader.",
+      "required_fix": "Bounded target-adjacent status placement or subtle leader so hold is clearly attached toTokyo, notTaipei."
+    }
+  ],
+  "earth_onset_samples": [
+    {
+      "global_time": 10.1,
+      "fresh_edge_progress": 0,
+      "shanghai_opacity": null,
+      "event_primitives": []
+    },
+    {
+      "global_time": 10.5,
+      "fresh_edge_progress": 0,
+      "shanghai_opacity": null,
+      "event_primitives": []
+    },
+    {
+      "global_time": 10.9,
+      "fresh_edge_progress": 0,
+      "shanghai_opacity": null,
+      "event_primitives": []
+    },
+    {
+      "global_time": 11.3,
+      "fresh_edge_progress": 0.0553935860058317,
+      "shanghai_opacity": 0.3100781250000039,
+      "event_primitives": [
+        "network"
+      ]
+    },
+    {
+      "global_time": 11.9666666667,
+      "fresh_edge_progress": 1,
+      "shanghai_opacity": 0.98,
+      "event_primitives": [
+        "world_label"
+      ]
+    }
+  ],
+  "recommendation": "Do not start full sample until the two scoped status anchoring/layout issues are corrected and actual new guarded native pixels checked. Earth/terrain/country/entity/route style needs no redesign.",
+  "render_started_by_this_audit": false,
+  "75_second_or_master_render": false
+}

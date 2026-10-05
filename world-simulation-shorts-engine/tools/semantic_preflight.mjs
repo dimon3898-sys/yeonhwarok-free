@@ -38,6 +38,13 @@ const classes=new Function('THREE','Renderer','RouteGraphics','createAircraftV3'
   adapterSource+';return {SceneRoutes,GenericCamera,GenericEntities,GenericEffects,GenericRouteGraphics,SceneEarthRenderer,REPRESENTED_EVENT_KINDS};'
 )(THREE,class {},RouteGraphics,createAircraftV3,geo,clamp,smooth);
 const {SceneRoutes,GenericCamera,GenericEntities,GenericEffects,GenericRouteGraphics,SceneEarthRenderer,REPRESENTED_EVENT_KINDS}=classes;
+const productionBytes=plan.scenes.some(scene=>scene.production_defaults?.version==='v1')?fs.readFileSync(path.join(appRoot,'web/production_visual_adapter.js')):null;
+const production=productionBytes?new Function('THREE','SceneFlatEntitySeparationPolishRenderer','SceneEarthPolishRenderer','flatClamp','flatNumber','flatSmooth','flatCameraEase','flatWindow','flatCoordinate',
+ productionBytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {productionLabelScene,productionCameraIntervals,productionFlatCameraValues,productionUsesRouteHeadAnchor,SceneProductionEarthRenderer};'
+)(THREE,class {},SceneEarthRenderer,clamp,(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback,smooth,
+ (value,kind='smootherstep')=>{const p=clamp(value);if(kind==='smootherstep')return p*p*p*(p*(p*6-15)+10);if(kind==='quintic_out')return 1-(1-p)**5;if(kind==='linear')return p;if(kind==='ease_in')return p*p;if(kind==='ease_out')return 1-(1-p)**2;return smooth(p);},
+ (time,start,end,fade=.24,hold=false)=>time<start||time>end?0:smooth((time-start)/Math.min(fade,Math.max(.01,(end-start)/3)))*(hold?1:1-smooth((time-end+fade)/fade)),
+ value=>{const q=value?.coordinates||value;return {lon:Number(q.lon??q.longitude??q[0]),lat:Number(q.lat??q.latitude??q[1])};}):null;
 const python=`import json,sys,subprocess,textwrap,math
 from fontTools.ttLib import TTFont
 from engine.retention import MEANINGFUL
@@ -88,7 +95,7 @@ const strings=[plan.story?.hook||plan.story_plan?.hook||plan.hook||''];
 for(const scene of plan.scenes) {
   strings.push(scene.hook||'');
   for(const annotation of (scene.cinematic_clip||scene.clip||{}).annotations||[])strings.push(annotation.text||'');
-  for(const item of [...(scene.labels||[]),...(scene.visual_events||[])])
+  for(const item of [...(scene.labels||[]),...(scene.visual_events||[]),...(scene.text_events||[])])
     strings.push(item.text||item.label||item.description||'',String(item.value??''),String(item.unit??''));
 }
 strings.push('0123456789,. KM世界 항로 서울');
@@ -120,11 +127,31 @@ class MetricsContext {
 const allowances={information:.25,world_label:.4,'3D_entity':.24,route_head:0,route_barrier:0,network:0,clip_information:.09};
 const physical={route_start:new Set(['route_head']),entity_departure:new Set(['3D_entity']),route_blocked:new Set(['route_barrier']),network_expand:new Set(['network']),arrival:new Set(['geographic_pulse','world_label'])};
 let flatCertify=null,flatSourceHash=null;
+let productionFlatCertify=null;
 const flatScenes=plan.scenes.some(scene=>scene.render_mode==='FLAT_MAP_PREMIUM');
 if(flatScenes){
  const file=path.join(appRoot,'web/flat_semantics.js'),bytes=fs.readFileSync(file);
  const source=bytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'');
  flatCertify=new Function('THREE',source+';return flatSceneEligibility;')(THREE);
+ if(production){
+  const FlatSceneCore=new Function('THREE',source+';return FlatSceneCore;')(THREE);
+  const createProductionCore=(scene,plan,options)=>{
+   const adapted=production.productionLabelScene(scene),core=new FlatSceneCore(adapted,plan,options);
+   core.cam.values=time=>production.productionFlatCameraValues(core.cam,time);
+   const originalLabels=core.overlayLabels.bind(core);
+   core.overlayLabels=time=>{
+    if(scene.text_density==='NONE')return [];
+    const original=core.sceneSpec;
+    core.sceneSpec={...original,labels:(original.labels||[]).map(label=>{const route=production.productionUsesRouteHeadAnchor(label)?core.route(label.route_id):null;return route?{...label,coordinates:{...label.coordinates,...route.coordinate(core.routeProgress(route,time))}}:label;})};
+    try{return originalLabels(time).filter(label=>scene.production_defaults.large_titles===true||!label.information);}
+    finally{core.sceneSpec=original;}
+   };
+   return core;
+  };
+  const needle='const core=new FlatSceneCore(scene,plan,options),observed=';
+  if(!source.includes(needle))throw Error('PRODUCTION_SEMANTIC_CORE_CONTRACT_CHANGED');
+  productionFlatCertify=new Function('THREE','createProductionCore',source.replace(needle,'const core=createProductionCore(scene,plan,options),observed=')+';return flatSceneEligibility;')(THREE,createProductionCore);
+ }
  flatSourceHash=createHash('sha256').update(bytes).digest('hex');
 }
 const {mapTransitionOpacity}=await import(pathToFileURL(path.join(appRoot,'web/map_transition.js')));
@@ -137,7 +164,13 @@ for(const scene of plan.scenes) {
   if(scopeScenes&&!scopeScenes.has(scene.scene_id))continue;
   if(scene.render_mode==='FLAT_MAP_PREMIUM'){
     try{
-      const certified=flatCertify(scene,plan,fps,{width,height,context:new MetricsContext(),countries:flatCountries,visibilityFilter:time=>mapTransitionOpacity(scene,time)<=.4});
+      const productionScene=scene.production_defaults?.version==='v1';
+      const certified=(productionScene?productionFlatCertify:flatCertify)(scene,plan,fps,{width,height,context:new MetricsContext(),countries:flatCountries,visibilityFilter:time=>productionScene&&scene.visual_polish?.version==='v004'||mapTransitionOpacity(scene,time)<=.4});
+      if(productionScene&&Number(scene.start_time)===0){
+       const hook=scene.hook||plan.story?.hook||plan.story_plan?.hook;
+       certified.opening_hook_eligible=Boolean(hook&&certified.events.some(event=>event.first_eligible_local_time!==null&&event.first_eligible_local_time<Math.min(3,scene.duration)));
+       certified.opening_hook_scope='Story/narration question plus actual eligible early geographic/event primitive; generated title banner not required';
+      }
       hookEligible ||= certified.opening_hook_eligible;
       failures.push(...(certified.failures||[]));
       if(!certified.numeric?.finite||certified.numeric.maxCameraAngleDegreesPerFrame>2.5)
@@ -190,26 +223,32 @@ for(const scene of plan.scenes) {
   }
   for(const event of scene.visual_events||[])if(event.meaningful!==false&&!REPRESENTED_EVENT_KINDS.has(String(event.kind).toLowerCase()))
     failures.push({code:'UNSUPPORTED_SEMANTIC_EVENT',event_id:event.id,scene_id:scene.scene_id,kind:event.kind});
+  const productionScene=scene.production_defaults?.version==='v1';
+  const renderedScene=productionScene?production.productionLabelScene(scene):scene;
   const expected=(scene.visual_events||[]).filter(e=>e.meaningful!==false&&meaningful.has(e.kind));
-  const camera=new THREE.PerspectiveCamera(44,9/16,.02,30),routes=new SceneRoutes(scene),cam=new GenericCamera(camera,scene,routes);
+  const camera=new THREE.PerspectiveCamera(44,9/16,.02,30),routes=new SceneRoutes(renderedScene),cam=new GenericCamera(camera,renderedScene,routes);
+  if(productionScene){const originalValues=cam.values.bind(cam);cam.values=time=>{const {travel,zoom}=production.productionCameraIntervals(scene,3);const value=originalValues(Math.min(scene.duration,time/travel*scene.duration)),z=originalValues(Math.min(scene.duration,time/zoom*scene.duration));value.height=z.height;value.fov=z.fov;value.p=clamp(time/scene.duration);return value;};}
   const map={groups:{routes:new THREE.Group(),effects:new THREE.Group(),entities:new THREE.Group()}};
   const graphics=new GenericRouteGraphics(map,routes),effects=new GenericEffects(map,scene,routes),entities=new GenericEntities(scene,routes,map.groups.entities);
-  const context={sceneSpec:scene,plan,duration:scene.duration,camera,cam,routes,graphics,effects,entities,w:width,h:height,ctx:new MetricsContext(),labels:[]};
+  const context={sceneSpec:renderedScene,plan,duration:scene.duration,camera,cam,routes,graphics,effects,entities,w:width,h:height,ctx:new MetricsContext(),labels:[]};
   context.project=SceneEarthRenderer.prototype.project.bind(context);
-  context.drawStoryInformation=SceneEarthRenderer.prototype.drawStoryInformation.bind(context);
+  context.drawStoryInformation=(productionScene?production.SceneProductionEarthRenderer:SceneEarthRenderer).prototype.drawStoryInformation.bind(context);
   const observed=new Map(expected.map(event=>[event.id,{event_id:event.id,scene_id:scene.scene_id,kind:event.kind,target_id:event.target_id,coordinates:event.coordinates||null,scheduled_local_time:event.time,eligible_frames:0,eligible_primitives:new Set(),first_eligible_local_time:null,projection_at_scheduled_time:null}]));
   for(let frame=0;frame<Math.round(scene.duration*fps);frame++) {
     const time=frame/fps;
     cam.update(time);entities.update(time,camera);graphics.update(time,camera);effects.update(time);
     try {
+      const actualScene=context.sceneSpec;
+      if(productionScene)context.sceneSpec={...actualScene,labels:(actualScene.labels||[]).map(label=>{const route=production.productionUsesRouteHeadAnchor(label)?routes.byId(label.route_id):null;if(!route)return label;const point=route.curve.getPoint(routes.progress(time,route)).normalize();return {...label,coordinates:{...label.coordinates,lon:Math.atan2(-point.z,point.x)*180/Math.PI,lat:Math.asin(clamp(point.y,-1,1))*180/Math.PI}};})};
       SceneEarthRenderer.prototype.overlay.call(context,time);
-      SceneEarthRenderer.prototype.dispatchEventAudit.call(context,time);
+      context.sceneSpec=actualScene;
+      (productionScene?production.SceneProductionEarthRenderer:SceneEarthRenderer).prototype.dispatchEventAudit.call(context,time);
     } catch(error) {
       failures.push({code:'SEMANTIC_LAYOUT_UNCERTIFIED',scene_id:scene.scene_id,time,detail:String(error.message)});
       break;
     }
     const veil=mapTransitionOpacity(scene,time);
-    if(veil>.4)context.eventAudit=[];
+    if(veil>.4&&!productionScene)context.eventAudit=[];
     if(Number(scene.start_time)+time<3&&veil<=.4&&context.labels.some(l=>l.kind==='hook_reveal'&&l.text&&l.opacity>.1))hookEligible=true;
     for(const event of expected) {
       const result=observed.get(event.id);
@@ -255,6 +294,7 @@ for(const scene of plan.scenes) {
 if(!scopeScenes&&!hookEligible)failures.push({code:'OPENING_HOOK_NOT_ELIGIBLE'});
 const hash=data=>createHash('sha256').update(data).digest('hex');
 const sourceHashes={flat_semantics:flatSourceHash,map_transition:hash(fs.readFileSync(path.join(appRoot,'web/map_transition.js'))),adapter:hash(adapterBytes),legacy_renderer:hash(original),aircraft:hash(fs.readFileSync(path.join(legacyRoot,'src/aircraft_v3.js'))),OpenSans:hash(fs.readFileSync(fonts.OpenSans)),Noto:hash(fs.readFileSync(fonts.Noto)),certifier:hash(fs.readFileSync(fileURLToPath(import.meta.url)))};
+if(productionBytes)sourceHashes.production_visual_adapter=hash(productionBytes);
 const report={schema_version:1,created_at_utc:new Date().toISOString(),passed:failures.length===0,plan_path:planFile,plan_sha256:hash(planBytes),renderer_sha256:hash(adapterBytes),source_hashes:sourceHashes,fps,resolution:[width,height],scoped_scene_ids:scopeScenes?[...scopeScenes]:null,opening_hook_eligible:hookEligible,events:results,failures,scope:'Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.',font_layout_policy:'Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.'};
 if(options.output)fs.writeFileSync(path.resolve(options.output),JSON.stringify(report,null,2),{flag:'wx'});
 process.stdout.write(JSON.stringify(report)+'\n');

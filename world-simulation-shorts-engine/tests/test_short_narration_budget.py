@@ -14,9 +14,9 @@ class ShortNarrationBudgetTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.provider=ESpeakProvider()
-        cls.request=dict(topic='뉴욕 → 런던 → 두바이 민간 항공 경로',duration=20,quality='HIGH',tts=True)
+        cls.request=dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 경로',duration=20,quality='HIGH',tts=True)
         cls.plan=generate_plan(cls.request)
-        cls.virtual_plan=generate_plan(dict(topic='만약 서울에서 도쿄를 거치지 않고 싱가포르로 이동한다면?',duration=20,quality='HIGH',tts=True))
+        cls.virtual_plan=generate_plan(dict(production_preset='LEGACY', topic='만약 서울에서 도쿄를 거치지 않고 싱가포르로 이동한다면?',duration=20,quality='HIGH',tts=True))
 
     def test_default_tts_on_20_second_plan_fits_actual_voice_with_reserve(self):
         for plan in [self.plan,self.virtual_plan]:

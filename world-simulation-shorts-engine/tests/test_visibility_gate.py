@@ -17,7 +17,7 @@ from engine.visibility import semantic_input_hash
 class MandatoryVisibilityGateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.request = dict(topic='뉴욕에서 런던을 거쳐 두바이까지 이어지는 항공 여행',
+        cls.request = dict(production_preset='LEGACY', topic='뉴욕에서 런던을 거쳐 두바이까지 이어지는 항공 여행',
                            duration=20, quality='HIGH', tts=False, subtitles=False, bgm=True)
         cls.plan = generate_plan(cls.request)
 

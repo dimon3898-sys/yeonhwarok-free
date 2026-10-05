@@ -111,7 +111,13 @@ class Handler(BaseHTTPRequestHandler):
             path=urllib.parse.unquote(urllib.parse.urlsplit(self.path).path);q=urllib.parse.parse_qs(urllib.parse.urlsplit(self.path).query)
             parts=path.strip('/').split('/');store=self.app.store
             if method in {'GET','HEAD'} and path=='/favicon.ico':self.send_response(204);self.end_headers();return
-            if method=='GET' and path=='/api/health':return self.json({'ok':True,'name':'World Simulation Shorts Engine','renderer':'MASTER_V3','render_backend':'CPU_LOCAL','public_url_configured':bool(os.environ.get('WORLD_ENGINE_PUBLIC_URL'))})
+            if method=='GET' and path=='/api/health':
+                from engine.production import production_default_status
+                production=production_default_status()
+                return self.json({'ok':True,'name':'World Simulation Shorts Engine','renderer':'PRODUCTION_DEFAULT' if production['active'] else 'MASTER_V3','production_preset':production['preset'],'render_backend':'CPU_LOCAL','public_url_configured':bool(os.environ.get('WORLD_ENGINE_PUBLIC_URL'))})
+            if method=='GET' and path=='/api/production-default':
+                from engine.production import production_default_status
+                return self.json(production_default_status())
             if method=='POST' and path=='/api/assets':return self.upload_asset(q)
             if path=='/api/projects':
                 if method=='GET':return self.json({'projects':store.list()})
@@ -147,6 +153,8 @@ class Handler(BaseHTTPRequestHandler):
                 if path=='/render_transition.html':return self.file(APP/'web'/'render_transition.html',head=method=='HEAD')
                 if path=='/render_flat_polish.html':return self.file(APP/'web'/'render_flat_polish.html',head=method=='HEAD')
                 if path=='/render_flat_separation_polish.html':return self.file(APP/'web'/'render_flat_separation_polish.html',head=method=='HEAD')
+                if path=='/render_production_flat.html':return self.file(APP/'web'/'render_production_flat.html',head=method=='HEAD')
+                if path=='/render_production_earth.html':return self.file(APP/'web'/'render_production_earth.html',head=method=='HEAD')
                 if path=='/render_earth_polish.html':return self.file(APP/'web'/'render_earth_polish.html',head=method=='HEAD')
                 if path=='/render_flat.html':return self.file(APP/'web'/'render_flat.html',head=method=='HEAD')
                 if path=='/render.html':return self.file(APP/'web'/'render.html',head=method=='HEAD')

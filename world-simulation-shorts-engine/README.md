@@ -1,6 +1,8 @@
 # World Simulation Shorts Engine
 
-자연어 주제를 검토 가능한 기획으로 바꾸고, 승인된 Scene JSON을 MASTER V3의 3D 지구 렌더러로 장면별 제작하는 프로그램입니다. 기존 `cinematic-world-map`의 코드·GIS·자산·MASTER V1/V2/V3는 읽기 전용 공용 라이브러리로 사용합니다. 새 프로젝트와 결과는 이 디렉터리에 별도로 저장합니다.
+자연어 주제를 검토 가능한 기획으로 바꾸고, 승인된 Scene JSON을 PREMIUM FLAT v004와 MASTER V3의 3D 지구 렌더러로 장면별 제작하는 프로그램입니다. 기존 `cinematic-world-map`의 코드·GIS·자산·MASTER V1/V2/V3는 읽기 전용 공용 라이브러리로 사용합니다. 새 프로젝트와 결과는 이 디렉터리에 별도로 저장합니다.
+
+Production Default v1은 실제 12초 통합 영상 검수를 통과하여 활성화되었습니다. 기본 Pace는 FAST, 지도 텍스트는 최소 정보형, 효과음은 사건별 Variant입니다. 기존 저장된 계획과 출력은 바뀌지 않습니다. [통합 영상 및 비교본](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1), [QC 보고서](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/QC_REPORT.md), [실측 시간](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/BENCHMARK.md)을 확인할 수 있습니다. 이번 통합에서 75초 영상은 렌더하지 않았습니다.
 
 ## 실행
 
@@ -80,10 +82,18 @@ TTS/BGM/자막은 개별 ON/OFF입니다. TTS 기본 어댑터는 무료 오프�
 
 ## 선택형 PREMIUM FLAT / 2.5D
 
-`FLAT_MAP_PREMIUM`은 기존 MASTER V3 Earth와 별도의 WebGL 렌더러입니다. 실제 Natural Earth 국경·해안선과 출처를 기록한 native shaded-relief 지역 텍스처를 사용합니다. 국가 강조, AUTO FOCUS, 다음 사건 카메라 예고, 진행 경로, 3D 이동체와 Map VFX를 기존 Scene·승인·부분 재렌더·캐시에 연결합니다. 일반 기획기의 Earth 기본값은 유지합니다.
+`FLAT_MAP_PREMIUM`은 기존 MASTER V3 Earth와 별도의 WebGL 렌더러입니다. 실제 Natural Earth 국경·해안선과 출처를 기록한 native shaded-relief 지역 텍스처를 사용합니다. 국가 강조, AUTO FOCUS, 다음 사건 카메라 예고, 진행 경로, 3D 이동체와 Map VFX를 기존 Scene·승인·부분 재렌더·캐시에 연결합니다. Production Default 검증 인증이 활성화되면 새 기획의 일반 지도 장면은 승인된 v004를 사용하고, 중요 Peak와 세계 규모 공개에는 V3 Earth를 사용합니다. 기존 저장 기획은 자동 변경하지 않습니다. 현재 native Flat 지형 검증 범위는 동아시아이며 다른 지역은 가독성 조명을 적용한 기존 V3 Earth로 처리합니다.
+
+## Production Default 선택
+
+PACE_FAST / PACE_NORMAL / PACE_CINEMATIC은 카메라·경로의 실제 진행 시간을 조절합니다. 기본 Pace는 FAST이며, 렌더 품질 FAST/HIGH/CINEMA와 별개입니다. 전체 MP4나 TTS를 배속하지 않습니다. SFX도 TTS·BGM·자막과 독립적으로 켜고 끌 수 있습니다. 지도에 필요한 짧은 라벨과 숫자만 표시하고, 이벤트 시점에 맞춘 효과음 변형과 반복 방지, 음성 우선 ducking을 사용합니다.
+
+[Production Default](docs/PRODUCTION_DEFAULT.md), [Pace](docs/PACE_SYSTEM.md), [효과음 및 라이선스](docs/SFX_LIBRARY.md)에 선택 규칙과 검증 범위를 기록합니다. 기존 Scene JSON에는 새 필드를 강제로 추가하지 않습니다. 활성화 여부는 `/api/production-default`에서 확인할 수 있으며, 인증과 핵심 소스가 다르면 활성화하지 않습니다.
 
 [사용 및 Scene 설정](docs/FLAT_MAP_PREMIUM_GUIDE.md), [지형 준비와 캐시](docs/FLAT_TERRAIN_CACHE.md), [실측 시간](FLAT_MAP_BENCHMARK.md), [샘플 품질 검수](FLAT_MAP_QUALITY_REPORT.md)를 참고하세요. 검증 범위는 약 15초 혼합 샘플이며 75초 전체 제작은 샘플 승인 이후입니다. 제공하는 지역 PNG만으로 샘플을 실행할 수 있습니다. 다른 지역의 native crop을 준비할 때만 별도 699MB 원본 TIFF가 필요하며, 해당 원본은 Git에 포함하지 않습니다.
 
 ## 출처와 라이선스
 
 지구 day/night/cloud 텍스처: Solar System Scope, CC BY 4.0. V3에 보존된 출처·SHA를 재사용합니다. NASA 기반이라는 이유로 저작자의 CC BY 조건을 제거하지 않습니다. 도시: Natural Earth Public Domain. 공항: OurAirports/DataHub ODC-PDDL. 해상 그래프: searoute-py 1.6.0 Apache-2.0, 항해용 지도가 아닙니다. 폰트: Open Sans Apache-2.0, 한글 Noto Sans CJK KR SIL OFL 1.1. 각 프로젝트의 `source_report.md/json`에 원본 URL, 저작자, 라이선스와 해시를 기록합니다.
+
+전체 회귀 검사 **255개 PASS**(293.622초), 핵심 소스·승격 인증서·MP4 전후 해시 동일. [실제 검사 결과](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/REGRESSION_REPORT.json).

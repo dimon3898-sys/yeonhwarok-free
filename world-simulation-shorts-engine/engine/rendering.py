@@ -73,6 +73,15 @@ def legacy_clip_source_hash(current_source: str | None = None) -> str:
 
 def scene_cache_key(scene: dict, assets: dict, quality: dict, renderer: str, render_context: dict | None = None) -> str:
     visual_scene = copy.deepcopy(scene)
+    if scene.get('production_defaults', {}).get('version') == 'v1':
+        # Only the new production policy separates audio choices from pixels.
+        # The full input Scene JSON is still preserved in the render manifest;
+        # all legacy cache hashes retain their original complete JSON contract.
+        for field in ['sound_events', 'music_energy', 'sfx_category', 'sfx_variant', 'sfx_intensity']:
+            visual_scene.pop(field, None)
+        for event in visual_scene.get('visual_events', []):
+            for field in ['sfx_category', 'sfx_variant', 'sfx_intensity']:
+                event.pop(field, None)
     if "render_time_offset" in visual_scene:
         # Modern scene deletion can retime assembly without changing a frame.
         # Its immutable shader clock and geographic/camera state remain hashed.
@@ -85,7 +94,10 @@ def scene_cache_key(scene: dict, assets: dict, quality: dict, renderer: str, ren
                     timeline.pop("timeline_position", None)
         for event in visual_scene.get("visual_events", []):
             event.pop("caused_by", None)  # Plan causality metadata does not shade pixels.
-    value = {"scene_json": visual_scene, "assets": {a["id"]: a["actual_sha256"] for a in assets["assets"]},
+    visual_assets = assets['assets']
+    if scene.get('production_defaults', {}).get('version') == 'v1':
+        visual_assets = [asset for asset in visual_assets if asset.get('asset_role') != 'audio_source']
+    value = {"scene_json": visual_scene, "assets": {a["id"]: a["actual_sha256"] for a in visual_assets},
              "renderer_version": renderer, "quality_preset": quality}
     if render_context is not None:
         value["scene_render_context"] = render_context
@@ -469,6 +481,9 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
                     if scene['visual_polish'].get('entity_separation') == 'v1':
                         page_name = 'render_flat_separation_polish.html'
                         tool_name = 'render_flat_separation_polish_scene.mjs'
+                if scene.get('production_defaults', {}).get('version') == 'v1':
+                    page_name = 'render_production_flat.html' if mode == 'FLAT_MAP_PREMIUM' else 'render_production_earth.html'
+                    tool_name = 'render_production_scene.mjs'
                 url = base_url.rstrip("/") + '/' + page_name + '?' + query
                 command = ["node", str(APP_ROOT / "tools" / tool_name), "--url", url,
                            "--output", str(output), "--audit", str(audit_path),

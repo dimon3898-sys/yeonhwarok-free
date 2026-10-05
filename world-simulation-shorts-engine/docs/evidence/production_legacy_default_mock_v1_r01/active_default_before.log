@@ -1,0 +1,32 @@
+test_new_75_second_plan_uses_exact_rendered_remaining_distance_and_keeps_arrival (test_planning_label_regression.PlanningLabelRegressionTests.test_new_75_second_plan_uses_exact_rendered_remaining_distance_and_keeps_arrival) ... FAIL
+test_natural_correction_changes_only_the_invisible_event_and_its_synced_sound (test_semantic_planning.SemanticPlanningTests.test_natural_correction_changes_only_the_invisible_event_and_its_synced_sound) ... FAIL
+test_shifted_peak_uses_new_scene_progress_or_completed_sourced_connection (test_retimed_route_metrics.RetimedRouteMetricTests.test_shifted_peak_uses_new_scene_progress_or_completed_sourced_connection) ... FAIL
+
+======================================================================
+FAIL: test_new_75_second_plan_uses_exact_rendered_remaining_distance_and_keeps_arrival (test_planning_label_regression.PlanningLabelRegressionTests.test_new_75_second_plan_uses_exact_rendered_remaining_distance_and_keeps_arrival)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tests/test_planning_label_regression.py", line 59, in test_new_75_second_plan_uses_exact_rendered_remaining_distance_and_keeps_arrival
+    self.assertIn('REMAINING',event['text'])
+AssertionError: 'REMAINING' not found in '13,351 km'
+
+======================================================================
+FAIL: test_natural_correction_changes_only_the_invisible_event_and_its_synced_sound (test_semantic_planning.SemanticPlanningTests.test_natural_correction_changes_only_the_invisible_event_and_its_synced_sound)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tests/test_semantic_planning.py", line 18, in test_natural_correction_changes_only_the_invisible_event_and_its_synced_sound
+    self.assertFalse(validate_plan(original)['passed'])
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_shifted_peak_uses_new_scene_progress_or_completed_sourced_connection (test_retimed_route_metrics.RetimedRouteMetricTests.test_shifted_peak_uses_new_scene_progress_or_completed_sourced_connection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tests/test_retimed_route_metrics.py", line 53, in test_shifted_peak_uses_new_scene_progress_or_completed_sourced_connection
+    self.assertEqual(moved['value'],round(expected['total_km']))
+AssertionError: 2844.397869 != 5473
+
+----------------------------------------------------------------------
+Ran 3 tests in 60.042s
+
+FAILED (failures=3)

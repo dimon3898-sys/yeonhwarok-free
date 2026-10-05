@@ -11,7 +11,7 @@ APP=Path(__file__).resolve().parents[1]
 
 class SemanticPlanningTests(unittest.TestCase):
     def test_natural_correction_changes_only_the_invisible_event_and_its_synced_sound(self):
-        original=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20,quality='HIGH'))
+        original=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20,quality='HIGH'))
         legacy_event=next(event for event in json.loads((APP/'tests/fixtures/semantic_e006_regression.json').read_text())['scenes'][0]['visual_events'] if event['id']=='E006')
         original['scenes'][1]['visual_events']=[deepcopy(legacy_event) if event['id']=='E006' else event for event in original['scenes'][1]['visual_events']]
         next(sound for sound in original['scenes'][1]['sound_events'] if sound['visual_event_id']=='E006')['kind']='soft_impact'
@@ -36,7 +36,7 @@ class SemanticPlanningTests(unittest.TestCase):
             self.assertEqual(result['version'],'v002');self.assertEqual(base_path.read_bytes(),base_bytes)
 
     def test_shipping_physical_barrier_arrival_and_final_payoff_have_real_draw_windows(self):
-        result=generate_plan(dict(topic='수에즈 운하가 7일 동안 막힌다면?',duration=75,quality='HIGH'))
+        result=generate_plan(dict(production_preset='LEGACY', topic='수에즈 운하가 7일 동안 막힌다면?',duration=75,quality='HIGH'))
         self.assertTrue(result['gate']['passed'],result['gate']['errors'])
         certificate=result['gate']['semantic_visibility'];observed={row['event_id']:row for row in certificate['events']}
         for scene in result['scenes']:
@@ -55,7 +55,7 @@ class SemanticPlanningTests(unittest.TestCase):
         for before,after in zip(result['scenes'],result['scenes'][1:]):self.assertEqual(before['exit_state'],after['entry_state'])
 
     def test_information_next_to_scene_boundary_gets_an_actual_readable_window(self):
-        result=generate_plan(dict(topic='만약 서울과 싱가포르를 직접 연결한다면?',duration=40))
+        result=generate_plan(dict(production_preset='LEGACY', topic='만약 서울과 싱가포르를 직접 연결한다면?',duration=40))
         self.assertTrue(result['gate']['passed'],result['gate']['errors'])
         repairs=result['metadata']['scene_event_window_repairs'];self.assertTrue(repairs)
         observed={row['event_id']:row for row in result['gate']['semantic_visibility']['events']}

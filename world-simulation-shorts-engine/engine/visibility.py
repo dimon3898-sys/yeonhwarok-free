@@ -147,7 +147,7 @@ def analyze_duplicate_place_labels(plan: dict[str, Any], frames: list[dict[str, 
             "scope": "Post-draw world-label boxes with opacity > .1; distinct base/event placements for an unambiguous same place ID and text in one Earth view. Disjoint boxes also fail. Separately identified panels/views, clip scenes and information/caption labels are excluded; COMPARISON scene type alone is not exempt. Not OCR or a claim that unresolved targets are duplicate-free."}
 
 
-def _source_fingerprint() -> str:
+def _source_fingerprint(plan: dict[str, Any] | None = None) -> str:
     legacy = APP_ROOT.parent / "cinematic-world-map"
     paths = [TOOL, Path(__file__), APP_ROOT / "web" / "earth_adapter.js", APP_ROOT / "engine" / "retention.py",
              APP_ROOT / "engine" / "assets.py", APP_ROOT / "engine" / "rendering.py",
@@ -156,6 +156,10 @@ def _source_fingerprint() -> str:
              legacy / "assets" / "v3" / "fonts" / "OpenSans-Light.ttf",
              APP_ROOT / "web" / "fonts" / "NotoSansCJKkr-Regular.otf"]
     paths += [APP_ROOT/'web/flat_semantics.js', APP_ROOT/'web/map_transition.js']
+    if any(scene.get('production_defaults', {}).get('version') == 'v1' for scene in (plan or {}).get('scenes', [])):
+        paths += [APP_ROOT/'web/production_visual_adapter.js', APP_ROOT/'web/flat_polish_renderer.js',
+                  APP_ROOT/'web/flat_entity_separation_polish.js', APP_ROOT/'web/earth_polish_adapter.js',
+                  APP_ROOT/'web/geographic_polish_transition.js']
     digest = hashlib.sha256()
     for path in paths:
         digest.update(str(path).encode())
@@ -183,7 +187,7 @@ def certify_semantic_visibility(plan: dict[str, Any], *, scene_ids: list[str] | 
     try:
         if not TOOL.is_file():
             raise FileNotFoundError("Semantic visibility tool is missing")
-        source_fingerprint = _source_fingerprint()
+        source_fingerprint = _source_fingerprint(plan)
         # User-provided bytes can change at an identical path. Mixed clip plans
         # always recheck actual scoped media/bytes/license/metadata, without cache.
         contains_clip = any(scene.get("scene_type") == "CINEMATIC_CLIP" for scene in plan.get("scenes", []))

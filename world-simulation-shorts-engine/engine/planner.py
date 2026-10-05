@@ -627,7 +627,7 @@ def _certify_planned_events(plan,repair=True):
     if repairs:plan['metadata']['semantic_visibility_repairs']=repairs
     return certificate
 
-def generate_plan(raw):
+def _generate_legacy_plan(raw):
     request=_request(raw);duration=request['duration'];scenario=_scenario(request);require_plugins(scenario['plugins'])
     locations=scenario['locations'];n=max(5,math.ceil(duration/7.5));total_frames=round(duration*30);bounds=[round(total_frames*i/n)/30 for i in range(n+1)];events=_event_schedule(duration,scenario)
     event_window_repairs=[]
@@ -764,6 +764,29 @@ def generate_plan(raw):
     if repeated_city_repairs:
         plan['metadata']['repeated_city_reveal_repairs']=repeated_city_repairs
         certificate=_certify_planned_events(plan,repair=False)
+    from .schema import validate_plan
+    plan['gate']=validate_plan(plan)
+    return plan
+
+
+def generate_plan(raw):
+    """Keep saved/legacy grammar; opt new requests into the quality-gated default."""
+    from .production import requested_production_profile,apply_production_defaults
+    try:profile=requested_production_profile(raw)
+    except ValueError as error:raise PlanningInputError(str(error),{'code':'INVALID_PRODUCTION_PRESET'}) from error
+    if profile is None:return _generate_legacy_plan(raw)
+    from .pace import normalize_pace
+    try:pace=normalize_pace(raw.get('pace','FAST'))
+    except ValueError as error:raise PlanningInputError(str(error),{'code':'INVALID_PACE'}) from error
+    if not isinstance(raw.get('sfx',True),bool):raise PlanningInputError('sfx 값은 true/false여야 합니다.')
+    plan=_generate_legacy_plan(raw)
+    plan=apply_production_defaults(plan,pace=pace,profile=profile)
+    # Existing renderer eligibility is rechecked after authoring the new IR;
+    # neither a preset flag nor a valid JSON schema is proof of rendered pixels.
+    from .visibility import certify_semantic_visibility
+    from .production import fit_production_readability
+    certificate=certify_semantic_visibility(plan)
+    if not certificate['passed']:fit_production_readability(plan,certificate)
     from .schema import validate_plan
     plan['gate']=validate_plan(plan)
     return plan

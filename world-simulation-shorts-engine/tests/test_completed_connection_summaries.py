@@ -18,7 +18,7 @@ class CompletedConnectionSummaryTests(unittest.TestCase):
         cls.plans={}
         for domain,topic,durations in [('aviation','런던 → 파리 → 로마 민간 항공 여행',[180,183.5,180.013]),('shipping','수에즈 운하가 7일 동안 막힌다면?',[180,183.5])]:
             for duration in durations:
-                cls.plans[(domain,duration)]=generate_plan(dict(topic=topic,duration=duration,quality='HIGH'))
+                cls.plans[(domain,duration)]=generate_plan(dict(production_preset='LEGACY', topic=topic,duration=duration,quality='HIGH'))
 
     def test_long_and_fractional_duration_plans_pass_strict_gates_on_the_integer_frame_grid(self):
         for (domain,requested),plan in self.plans.items():

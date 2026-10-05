@@ -12,7 +12,7 @@ from engine.gis import verified_coordinate
 class AdvancedEditTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.original=generate_plan(dict(topic='런던 → 파리 → 로마 민간 항공 여행',duration=20,quality='HIGH',tts=False,subtitles=False,bgm=True))
+        cls.original=generate_plan(dict(production_preset='LEGACY', topic='런던 → 파리 → 로마 민간 항공 여행',duration=20,quality='HIGH',tts=False,subtitles=False,bgm=True))
         assert cls.original['gate']['passed'],cls.original['gate']['errors']
 
     def test_simple_edit_and_aircraft_removal_are_not_scene_deletion(self):
@@ -128,7 +128,7 @@ class AdvancedEditTests(unittest.TestCase):
 class PhysicalEventBindingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.plan=generate_plan(dict(topic='런던 → 파리 → 로마 민간 항공 여행',duration=20))
+        cls.plan=generate_plan(dict(production_preset='LEGACY', topic='런던 → 파리 → 로마 민간 항공 여행',duration=20))
 
     def test_route_start_is_the_actual_animated_path_onset(self):
         for scene in self.plan['scenes']:
@@ -159,7 +159,7 @@ class PhysicalEventBindingTests(unittest.TestCase):
                 self.assertTrue(any(abs(r['progress_end']-1)<1e-6 for r in matching))
 
     def test_country_comparison_does_not_claim_an_aircraft_departure(self):
-        plan=generate_plan(dict(topic='미국과 중국 국가 위치 비교',duration=20))
+        plan=generate_plan(dict(production_preset='LEGACY', topic='미국과 중국 국가 위치 비교',duration=20))
         self.assertTrue(plan['gate']['passed'],plan['gate']['errors'])
         self.assertFalse(any(e['kind']=='entity_departure' for s in plan['scenes'] for e in s['visual_events']))
         self.assertFalse(any(s['entities'] for s in plan['scenes']))
@@ -168,7 +168,7 @@ class PhysicalEventBindingTests(unittest.TestCase):
 class DerivedCameraAnchorTests(unittest.TestCase):
     def test_intercontinental_camera_anchors_match_actual_route_boundary(self):
         from engine.gis import RouteEngine
-        plan=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
+        plan=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
         self.assertTrue(plan['gate']['passed'],plan['gate']['errors'])
         provenance={p['time']:p for p in plan['metadata']['camera_provenance']}
         for scene in plan['scenes']:
@@ -202,7 +202,7 @@ class DerivedCameraAnchorTests(unittest.TestCase):
 
     def test_milestone_numeric_value_matches_renderer_scene_easing(self):
         from engine.gis import great_circle_distance
-        plan=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
+        plan=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
         for scene in plan['scenes']:
             for event in scene['visual_events']:
                 if event['kind']!='milestone_reveal':continue
@@ -214,7 +214,7 @@ class DerivedCameraAnchorTests(unittest.TestCase):
                 self.assertAlmostEqual(event['value'],round(length*(1-progress)),delta=1)
 
     def test_final_overview_fits_entire_long_haul_network_without_city_invention(self):
-        plan=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
+        plan=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
         framing=plan['metadata']['final_overview'];camera=plan['scenes'][-1]['camera_end']
         self.assertEqual(set(framing['route_ids']),{'R_01','R_02'})
         self.assertNotIn('location_id',camera)
@@ -233,7 +233,7 @@ class FrameGridTests(unittest.TestCase):
     def test_arbitrary_duration_uses_cumulative_integer_frame_boundaries(self):
         for duration in (20,75,183.5,180.013,31.71):
             with self.subTest(duration=duration):
-                plan=generate_plan(dict(topic='런던 → 파리 → 로마 민간 항공 여행',duration=duration))
+                plan=generate_plan(dict(production_preset='LEGACY', topic='런던 → 파리 → 로마 민간 항공 여행',duration=duration))
                 self.assertTrue(plan['gate']['passed'],plan['gate']['errors'])
                 self.assertEqual(sum(round(s['duration']*30) for s in plan['scenes']),round(plan['duration']*30))
                 for scene in plan['scenes']:
@@ -248,13 +248,13 @@ class DomainAndStyleTests(unittest.TestCase):
         cases=[('런던 → 파리 자동차 여행','LAND_ROUTING'),('from London to Paris road trip','LAND_ROUTING'),('1900년 세계지도에서 런던 → 파리','HISTORICAL_GIS'),('역사적 국경 지도 미국과 중국 비교','TIME_MORPH')]
         for topic,module in cases:
             with self.subTest(topic=topic),self.assertRaises(UnsupportedVisualRequirement) as raised:
-                generate_plan(dict(topic=topic,duration=20))
+                generate_plan(dict(production_preset='LEGACY', topic=topic,duration=20))
             self.assertIn(module,raised.exception.modules)
-        modern=generate_plan(dict(topic='2025년 뉴욕 → 런던 민간 항공 경로',duration=20))
+        modern=generate_plan(dict(production_preset='LEGACY', topic='2025년 뉴욕 → 런던 민간 항공 경로',duration=20))
         self.assertTrue(modern['gate']['passed'],modern['gate']['errors'])
 
     def test_style_changes_real_scene_lighting_and_speed_with_exact_joins(self):
-        baseline=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
+        baseline=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20))
         travel=generate_plan({**baseline['request'],'style':'차분한 여행과 탐험'})
         documentary=generate_plan({**baseline['request'],'style':'시네마틱 지리 다큐멘터리'})
         network=generate_plan({**baseline['request'],'style':'역동적인 국제 네트워크'})
@@ -274,7 +274,7 @@ class DomainAndStyleTests(unittest.TestCase):
     def test_unknown_style_is_not_silently_ignored(self):
         from engine.planner import PlanningInputError
         with self.assertRaises(PlanningInputError) as raised:
-            generate_plan(dict(topic='런던 → 파리',duration=20,style='unimplemented comic style'))
+            generate_plan(dict(production_preset='LEGACY', topic='런던 → 파리',duration=20,style='unimplemented comic style'))
         self.assertEqual(raised.exception.as_dict()['code'],'UNSUPPORTED_STYLE')
 
 if __name__=='__main__':unittest.main()

@@ -28,7 +28,7 @@ for (let i = 2; i < process.argv.length; i++) {
   if (!key.startsWith('--')) throw new Error(`Unexpected argument: ${key}`);
   args[key.slice(2)] = process.argv[i + 1]?.startsWith('--') || i + 1 === process.argv.length ? true : process.argv[++i];
 }
-for (const flag of ['help', 'start-render', 'approve-revision', 'tts', 'subtitles', 'no-bgm']) if (args[flag] != null && args[flag] !== true) throw new Error(`--${flag} is a flag and takes no value.`);
+for (const flag of ['help', 'start-render', 'approve-revision', 'tts', 'subtitles', 'no-bgm', 'no-sfx']) if (args[flag] != null && args[flag] !== true) throw new Error(`--${flag} is a flag and takes no value.`);
 if (args.help) {
   console.log('Use --topic TEXT [--duration 20] [--quality HIGH] [--start-render], --approve-project PID [--version v001], --revise-project PID --request TEXT [--approve-revision], or --inspect-project PID [--version v001]. Optional --tts --subtitles --no-bgm --base-url URL --output-dir NEW_PATH --chromium PATH --playback-timeout-ms NUMBER --narration-file FILE.');
   process.exit(0);
@@ -92,6 +92,9 @@ async function createPlan() {
   await page.locator('#topic').fill(topic);
   await page.locator('#duration').fill(String(duration));
   await page.locator('#quality').selectOption(quality);
+  if (args.pace) await page.locator('#pace').selectOption(String(args.pace).replace(/^PACE_/, '').toUpperCase());
+  if (await page.locator('#sfx').count()) await setToggle('sfx', !args['no-sfx']);
+  evidence.production_input_options = await page.evaluate(() => ({pace: document.getElementById('pace')?.value, sfx: document.getElementById('sfx')?.checked}));
   if (args.style) await page.locator('#style').selectOption(String(args.style));
   await setToggle('tts', !!args.tts);
   await setToggle('subtitles', !!args.subtitles);
@@ -253,6 +256,11 @@ async function actualDownload(outputRecord, index) {
   const links = await page.locator('#downloads a').evaluateAll((elements) => elements.map((element) => element.href));
   const linkIndex = links.indexOf(absolute);
   check(linkIndex >= 0, `No actual UI download link is present for ${name}.`);
+  // Click at a human pace: completed projects include independent Scene files,
+  // so an unpaced burst can hit Chromium's automatic-download rate limiter.
+  // Keep the normal browser policy enabled and verify every real attachment.
+  evidence.download_pacing_ms = 250;
+  await page.waitForTimeout(evidence.download_pacing_ms);
   const [download] = await Promise.all([page.waitForEvent('download', { timeout: 60000 }), page.locator('#downloads a').nth(linkIndex).click()]);
   const target = path.join(output, 'downloads', `${String(index + 1).padStart(2, '0')}_${path.basename(name).replace(/[^\p{L}\p{N}_. -]/gu, '_')}`);
   await download.saveAs(target);

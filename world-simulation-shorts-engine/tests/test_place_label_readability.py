@@ -30,8 +30,8 @@ class PlaceLabelReadabilityTests(unittest.TestCase):
         if sha256(cls.original_bytes).hexdigest() != ORIGINAL_SHA:
             raise AssertionError('The exact production-plan fixture was changed')
         cls.original = json.loads(cls.original_bytes)
-        cls.future_shipping = generate_plan(deepcopy(cls.original['request']))
-        cls.future_day = generate_plan(dict(
+        cls.future_shipping = generate_plan({**deepcopy(cls.original['request']), 'production_preset': 'LEGACY'})
+        cls.future_day = generate_plan(dict(production_preset='LEGACY',
             topic='런던에서 파리, 로마로 이어지는 민간 항공 여행',
             duration=20, quality='HIGH', style='차분한 여행과 탐험'))
 

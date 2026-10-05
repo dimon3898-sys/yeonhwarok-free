@@ -25,7 +25,7 @@ from engine.storage import EngineError, ProjectStore, atomic_json
 
 
 def request(topic: str, duration: float = 20) -> dict:
-    return {"topic": topic, "duration": duration, "style": "긴장감 있는 세계 시뮬레이션",
+    return {'production_preset': 'LEGACY', "topic": topic, "duration": duration, "style": "긴장감 있는 세계 시뮬레이션",
             "quality": "HIGH", "tts": False, "subtitles": False, "bgm": True}
 
 

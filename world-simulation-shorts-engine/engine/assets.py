@@ -153,6 +153,17 @@ def asset_registry() -> list[dict]:
 def validate_assets(plan: dict | None = None) -> dict:
     checked, errors, external = [], [], []
     registry = asset_registry()
+    if (plan or {}).get('production_defaults', {}).get('version') == 'v1':
+        from .sfx_library import catalog
+        sounds = catalog()
+        file = APP_ROOT / 'engine/sfx_library.py'
+        registry.append({'id':'production-sfx-library', 'file':'engine/sfx_library.py',
+                         'path':str(file), 'sha256':sounds['source_sha256'],
+                         'url':'Repository original engine/sfx_library.py; no sampled audio',
+                         'author':'Cinematic World Map project', 'license':'CC0-1.0',
+                         'license_url':'https://creativecommons.org/publicdomain/zero/1.0/',
+                         'attribution_required':False, 'download_date':'Not downloaded; original procedural synthesis',
+                         'asset_role':'audio_source'})
     if any(scene.get('render_mode') == 'FLAT_MAP_PREMIUM' for scene in (plan or {}).get('scenes', [])):
         flat_sources = APP_ROOT / 'assets/flat/SOURCES.json'
         if flat_sources.is_file():
@@ -210,6 +221,20 @@ def validate_assets(plan: dict | None = None) -> dict:
 
 
 def renderer_version(scene: dict | None = None) -> str:
+    # Approved production policy is an additive adapter. Old scenes retain the
+    # exact frozen renderer/source hashes; new scenes truthfully include it.
+    if (scene or {}).get('production_defaults', {}).get('version') == 'v1':
+        original = dict(scene)
+        original.pop('production_defaults')
+        digest = hashlib.sha256(b'PRODUCTION_DEFAULT/VISUAL/v1' + bytes.fromhex(renderer_version(original)))
+        for name in ['web/production_visual_adapter.js', 'web/render_production_flat.html',
+                     'web/render_production_earth.html', 'tools/render_production_scene.mjs']:
+            file = APP_ROOT / name
+            if not file.is_file():
+                raise FileNotFoundError('PRODUCTION_VISUAL_DEPENDENCY_MISSING: ' + name)
+            digest.update(name.encode())
+            digest.update(bytes.fromhex(sha256_file(file)))
+        return digest.hexdigest()
     if (scene or {}).get('visual_polish', {}).get('entity_separation') == 'v1':
         original = {**scene, 'visual_polish': {k:v for k,v in scene['visual_polish'].items() if k != 'entity_separation'}}
         digest = hashlib.sha256(b'VISUAL_POLISH/ENTITY_SEPARATION/v1' + bytes.fromhex(renderer_version(original)))
@@ -277,6 +302,10 @@ def write_source_report(directory: Path, plan: dict, assets: dict | None = None)
               "license_notice": "Earth day/night/cloud textures: Solar System Scope, CC BY 4.0. "
               "Modified by cinematic lighting, geographic overlays and camera rendering. "
               "NASA-derived imagery does not remove the texture author's CC BY attribution requirement."}
+    if plan.get('production_defaults', {}).get('version') == 'v1':
+        from .sfx_library import catalog
+        report['production_sound_catalog'] = catalog()
+        report['license_notice'] += ' Production SFX variants are original CC0-1.0 procedural synthesis, not unlicensed sampled audio; the generated WAV file hashes are recorded in the audio source report.'
     if any(scene.get('render_mode')=='FLAT_MAP_PREMIUM' or any(scene.get(k) in {'FLAT_TO_EARTH','EARTH_TO_FLAT'} for k in ['transition_in','transition_out']) for scene in plan.get('scenes', [])):
         report['scene_renderers'] = {scene['scene_id']: {'render_mode': scene.get('render_mode','MASTER_V3_EARTH'), 'version': renderer_version(scene)} for scene in plan['scenes']}
         report['license_notice'] += ' Optional FLAT_MAP_PREMIUM uses the same sourced geography and independently versioned projected-terrain renderer; backend selection is recorded for each scene.'

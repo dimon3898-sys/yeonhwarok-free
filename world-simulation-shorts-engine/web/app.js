@@ -92,6 +92,7 @@ function renderPlan() {
   $('plan-title').textContent = title;
   clear($('plan-meta'));
   for (const text of [durationLabel(total), `${scenes.length}개 장면`, `${plan.quality || plan.render_quality || plan.request?.quality || state.project?.quality || 'HIGH'} 화질`]) $('plan-meta').append(node('span', text, 'meta-chip'));
+  if (plan.production_defaults?.version === 'v1') $('plan-meta').append(node('span', `${plan.request?.pace || plan.scenes?.[0]?.pace || 'FAST'} 진행 · 지도 중심`, 'meta-chip'));
   $('plan-meta').append(node('span', state.historical ? '이전 버전' : gatePassed(plan) ? '기획 검수 완료' : '기획 확인 필요', `meta-chip ${gatePassed(plan) ? 'status-ready' : 'status-warning'}`));
   const hook = compact(plan.hook || plan.story_plan?.hook || plan.story?.hook || scenes[0]?.narration || plan.question);
   $('plan-hook').textContent = hook;
@@ -117,6 +118,8 @@ function renderPlan() {
     const setting = node('div', null, 'scene-setting');
     if (scene.camera_preset) setting.append(node('span', named(scene.camera_preset, cameraNames)));
     if (scene.lighting_preset) setting.append(node('span', named(scene.lighting_preset, lightingNames)));
+    if (scene.visual_mode) setting.append(node('span', { FLAT_MAP: '선명한 지도', '3D_EARTH': '3D 지구', HERO: '결과 전경', CINEMATIC_CLIP: '시네마틱 영상' }[scene.visual_mode] || scene.visual_mode));
+    if (scene.pace) setting.append(node('span', `${scene.pace} 진행`));
     if (scene.fact_status) setting.append(node('span', { FACT: '사실', ASSUMPTION: '가정', SIMULATION: '시뮬레이션', MIXED: '사실·가정 구분' }[scene.fact_status] || scene.fact_status));
     body.append(setting); article.append(number, body); $('scene-list').append(article);
   });
@@ -399,7 +402,7 @@ async function refreshLibrary() {
 $('brief-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('create-plan'), '기획 생성 중', async () => {
   const topic = $('topic').value.trim(); if (!topic) throw new Error('영상 주제를 입력해 주세요.');
   stopPolling(); state.generation++; state.status = null; state.version = null; state.versions = []; state.revision = null;
-  const request = { topic, duration: Number($('duration').value), style: $('style').value, quality: $('quality').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked };
+  const request = { topic, duration: Number($('duration').value), style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
   const narration = $('narration-file').files[0];
   if (narration) {
     if (!$('narration-rights').checked) throw new Error('나레이션 파일의 사용권을 확인해 주세요.');

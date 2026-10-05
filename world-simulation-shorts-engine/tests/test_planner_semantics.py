@@ -10,7 +10,7 @@ from engine.planner import generate_plan
 from engine.plugins import UnsupportedVisualRequirement
 
 def plan(topic,duration=20):
-    return generate_plan(dict(topic=topic,duration=duration,quality='HIGH',tts=True))
+    return generate_plan(dict(production_preset='LEGACY', topic=topic,duration=duration,quality='HIGH',tts=True))
 
 class HistoricalMapGuardTests(unittest.TestCase):
     def test_recent_past_geographic_states_require_historical_gis(self):

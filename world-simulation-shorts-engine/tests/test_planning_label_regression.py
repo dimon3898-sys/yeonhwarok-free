@@ -19,7 +19,7 @@ from test_retimed_route_metrics import rendered_metric
 class PlanningLabelRegressionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.plan=generate_plan(dict(topic='만약 수에즈 운하가 7일 동안 막힌다면?',duration=75,style='긴장감 있는 세계 시뮬레이션',quality='HIGH',tts=True,subtitles=True,bgm=True))
+        cls.plan=generate_plan(dict(production_preset='LEGACY', topic='만약 수에즈 운하가 7일 동안 막힌다면?',duration=75,style='긴장감 있는 세계 시뮬레이션',quality='HIGH',tts=True,subtitles=True,bgm=True))
         cls.legacy=deepcopy(cls.plan)
         for index,event_id,location_id,claim_id in [(1,'E008','ROTTERDAM_PORT','F01'),(8,'E034','SINGAPORE_PORT','F03')]:
             scene=cls.legacy['scenes'][index];location=resolve_location(location_id)
@@ -83,7 +83,7 @@ class PlanningLabelRegressionTests(unittest.TestCase):
 
     def test_20_second_gates_and_typed_claims_stay_valid_and_stationary_route_is_not_faked(self):
         for topic in ['뉴욕 → 런던 → 두바이 민간 항공 여행','만약 수에즈 운하가 7일 동안 막힌다면?']:
-            plan=generate_plan(dict(topic=topic,duration=20,quality='HIGH'))
+            plan=generate_plan(dict(production_preset='LEGACY', topic=topic,duration=20,quality='HIGH'))
             self.assertTrue(plan['gate']['passed'],plan['gate']['errors'])
             targets=plan['metadata']['coordinate_claim_targets']
             for scene in plan['scenes']:

@@ -10,9 +10,9 @@ APP=Path(__file__).resolve().parents[1]
 class RevisionGeometryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.shipping=generate_plan(dict(topic='수에즈 운하가 7일 동안 막힌다면?',duration=75,quality='HIGH'))
-        cls.europe=generate_plan(dict(topic='런던 → 파리 → 로마 민간 항공 여행',duration=20,quality='HIGH'))
-        cls.atlantic=generate_plan(dict(topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20,quality='HIGH'))
+        cls.shipping=generate_plan(dict(production_preset='LEGACY', topic='수에즈 운하가 7일 동안 막힌다면?',duration=75,quality='HIGH'))
+        cls.europe=generate_plan(dict(production_preset='LEGACY', topic='런던 → 파리 → 로마 민간 항공 여행',duration=20,quality='HIGH'))
+        cls.atlantic=generate_plan(dict(production_preset='LEGACY', topic='뉴욕 → 런던 → 두바이 민간 항공 여행',duration=20,quality='HIGH'))
 
     def proposal(self,plan,text):
         with tempfile.TemporaryDirectory(prefix='wss_revision_test_') as directory:

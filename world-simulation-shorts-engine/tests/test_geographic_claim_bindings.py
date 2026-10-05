@@ -9,8 +9,8 @@ from engine.schema import validate_plan
 class GeographicClaimBindingTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.shipping=generate_plan(dict(topic='수에즈 운하가 7일 동안 막힌다면?',duration=75,quality='HIGH'))
-        cls.aviation=generate_plan(dict(topic='서울 → 도쿄 → 싱가포르 민간 항공 경로',duration=75,quality='HIGH'))
+        cls.shipping=generate_plan(dict(production_preset='LEGACY', topic='수에즈 운하가 7일 동안 막힌다면?',duration=75,quality='HIGH'))
+        cls.aviation=generate_plan(dict(production_preset='LEGACY', topic='서울 → 도쿄 → 싱가포르 민간 항공 경로',duration=75,quality='HIGH'))
 
     def test_shipping_destination_previews_use_the_singapore_fact_and_description(self):
         self.assertTrue(self.shipping['gate']['passed'],self.shipping['gate']['errors'])

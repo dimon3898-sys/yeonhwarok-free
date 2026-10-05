@@ -76,6 +76,16 @@
         },
         "tts_language": {
           "type": "string"
+        },
+        "sfx": {
+          "type": "boolean"
+        },
+        "pace": {
+          "enum": [
+            "FAST",
+            "NORMAL",
+            "CINEMATIC"
+          ]
         }
       },
       "additionalProperties": false
@@ -506,6 +516,15 @@
                   "type": "number",
                   "minimum": 0,
                   "maximum": 1
+                },
+                "speed_easing": {
+                  "enum": [
+                    "linear",
+                    "ease_in",
+                    "ease_out",
+                    "ease_in_out",
+                    "smoothstep"
+                  ]
                 }
               },
               "additionalProperties": false
@@ -618,6 +637,22 @@
                   "items": {
                     "type": "string"
                   }
+                },
+                "speed_easing": {
+                  "enum": [
+                    "linear",
+                    "ease_in",
+                    "ease_out",
+                    "ease_in_out",
+                    "smoothstep"
+                  ]
+                },
+                "visibility_role": {
+                  "enum": [
+                    "primary",
+                    "secondary",
+                    "context"
+                  ]
                 }
               },
               "additionalProperties": false
@@ -714,6 +749,43 @@
                 },
                 "unit": {
                   "type": "string"
+                },
+                "sfx_category": {
+                  "enum": [
+                    "CAMERA_MOVE",
+                    "FAST_ZOOM",
+                    "COUNTRY_REVEAL",
+                    "CITY_REVEAL",
+                    "ENTITY_SPAWN",
+                    "AIRCRAFT_PASS",
+                    "SHIP_PASS",
+                    "ROUTE_START",
+                    "ROUTE_PROGRESS",
+                    "ROUTE_BLOCK",
+                    "REROUTE",
+                    "RADAR",
+                    "WARNING",
+                    "IMPACT",
+                    "SHOCKWAVE",
+                    "NETWORK_EXPAND",
+                    "NEW_VARIABLE",
+                    "MID_PEAK",
+                    "FINAL_PEAK",
+                    "FINAL_REVEAL",
+                    "TRANSITION"
+                  ]
+                },
+                "sfx_variant": {
+                  "type": "string",
+                  "pattern": "^[A-Z][A-Z0-9_]*$"
+                },
+                "sfx_intensity": {
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "PEAK"
+                  ]
                 }
               },
               "additionalProperties": false
@@ -824,6 +896,43 @@
                 },
                 "gain_db": {
                   "type": "number"
+                },
+                "sfx_category": {
+                  "enum": [
+                    "CAMERA_MOVE",
+                    "FAST_ZOOM",
+                    "COUNTRY_REVEAL",
+                    "CITY_REVEAL",
+                    "ENTITY_SPAWN",
+                    "AIRCRAFT_PASS",
+                    "SHIP_PASS",
+                    "ROUTE_START",
+                    "ROUTE_PROGRESS",
+                    "ROUTE_BLOCK",
+                    "REROUTE",
+                    "RADAR",
+                    "WARNING",
+                    "IMPACT",
+                    "SHOCKWAVE",
+                    "NETWORK_EXPAND",
+                    "NEW_VARIABLE",
+                    "MID_PEAK",
+                    "FINAL_PEAK",
+                    "FINAL_REVEAL",
+                    "TRANSITION"
+                  ]
+                },
+                "sfx_variant": {
+                  "type": "string",
+                  "pattern": "^[A-Z][A-Z0-9_]*$"
+                },
+                "sfx_intensity": {
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "PEAK"
+                  ]
                 }
               },
               "additionalProperties": false
@@ -1482,6 +1591,278 @@
               }
             },
             "additionalProperties": false
+          },
+          "production_defaults": {
+            "type": "object",
+            "required": [
+              "version"
+            ],
+            "properties": {
+              "version": {
+                "const": "v1"
+              },
+              "profile": {
+                "enum": [
+                  "PRODUCTION_DEFAULT",
+                  "PRODUCTION_DEFAULT_CANDIDATE"
+                ]
+              },
+              "large_titles": {
+                "type": "boolean"
+              },
+              "visual": {
+                "const": "PREMIUM_FLAT_v004"
+              },
+              "pace": {
+                "enum": [
+                  "FAST",
+                  "NORMAL",
+                  "CINEMATIC"
+                ]
+              },
+              "text": {
+                "const": "MINIMAL_INFORMATIONAL"
+              },
+              "sfx": {
+                "const": "EVENT_DRIVEN_VARIANTS"
+              },
+              "earth": {
+                "const": "PEAK_ONLY"
+              },
+              "retention": {
+                "type": "boolean"
+              },
+              "event_diversity": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "visual_mode": {
+            "enum": [
+              "FLAT_MAP",
+              "3D_EARTH",
+              "HERO",
+              "CINEMATIC_CLIP"
+            ]
+          },
+          "pace": {
+            "enum": [
+              "FAST",
+              "NORMAL",
+              "CINEMATIC"
+            ]
+          },
+          "text_density": {
+            "enum": [
+              "NONE",
+              "MINIMAL",
+              "INFORMATIONAL"
+            ]
+          },
+          "sfx_intensity": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "PEAK"
+            ]
+          },
+          "motion_timing": {
+            "type": "object",
+            "required": [
+              "camera_travel_duration",
+              "focus_transition_duration",
+              "tts_playback_rate"
+            ],
+            "properties": {
+              "camera_travel_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "zoom_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "focus_transition_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "route_speed_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "entity_speed_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "transition_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "peak_hold_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "next_event_lead_time": {
+                "type": "number",
+                "minimum": 0
+              },
+              "dead_time_removed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "tts_playback_rate": {
+                "const": 1.0
+              },
+              "camera_speed_reference": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "focus_target": {
+            "type": "object",
+            "required": [
+              "target_id",
+              "coordinates"
+            ],
+            "properties": {
+              "target_id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "country",
+                  "city",
+                  "entity",
+                  "route",
+                  "region"
+                ]
+              },
+              "coordinates": {
+                "type": "object",
+                "required": [
+                  "lon",
+                  "lat",
+                  "source_id"
+                ],
+                "properties": {
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "source_id": {
+                    "type": "string"
+                  },
+                  "location_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              }
+            },
+            "additionalProperties": false
+          },
+          "text_events": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "event_id",
+                "text",
+                "coordinates",
+                "start_time",
+                "end_time",
+                "role"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "event_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "coordinates": {
+                  "type": "object",
+                  "required": [
+                    "lon",
+                    "lat",
+                    "source_id"
+                  ],
+                  "properties": {
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "source_id": {
+                      "type": "string"
+                    },
+                    "location_id": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "start_time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "end_time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "role": {
+                  "enum": [
+                    "country",
+                    "city",
+                    "distance",
+                    "route",
+                    "status",
+                    "title",
+                    "question"
+                  ]
+                },
+                "priority": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "large_title_approved": {
+                  "type": "boolean"
+                },
+                "route_id": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
           }
         },
         "additionalProperties": false,
@@ -1614,14 +1995,26 @@
           },
           {
             "if": {
-              "required": ["visual_polish"],
+              "required": [
+                "visual_polish"
+              ],
               "properties": {
-                "visual_polish": {"required": ["entity_separation"]}
+                "visual_polish": {
+                  "required": [
+                    "entity_separation"
+                  ]
+                }
               }
             },
             "then": {
-              "required": ["render_mode"],
-              "properties": {"render_mode": {"const": "FLAT_MAP_PREMIUM"}}
+              "required": [
+                "render_mode"
+              ],
+              "properties": {
+                "render_mode": {
+                  "const": "FLAT_MAP_PREMIUM"
+                }
+              }
             }
           }
         ]
@@ -1684,6 +2077,52 @@
     },
     "revision": {
       "type": "object"
+    },
+    "production_defaults": {
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "const": "v1"
+        },
+        "profile": {
+          "enum": [
+            "PRODUCTION_DEFAULT",
+            "PRODUCTION_DEFAULT_CANDIDATE"
+          ]
+        },
+        "large_titles": {
+          "type": "boolean"
+        },
+        "visual": {
+          "const": "PREMIUM_FLAT_v004"
+        },
+        "pace": {
+          "enum": [
+            "FAST",
+            "NORMAL",
+            "CINEMATIC"
+          ]
+        },
+        "text": {
+          "const": "MINIMAL_INFORMATIONAL"
+        },
+        "sfx": {
+          "const": "EVENT_DRIVEN_VARIANTS"
+        },
+        "earth": {
+          "const": "PEAK_ONLY"
+        },
+        "retention": {
+          "type": "boolean"
+        },
+        "event_diversity": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false,

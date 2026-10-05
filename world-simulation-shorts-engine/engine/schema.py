@@ -193,6 +193,12 @@ def validate_plan(plan):
     narration_alignment=validate_narration_bindings(plan)
     errors+=narration_alignment['errors'];warnings+=narration_alignment['warnings']
     retention=analyze_retention(plan);errors+=retention['errors'];warnings+=retention['warnings']
+    production_validation=None
+    if plan.get('production_defaults',{}).get('version')=='v1':
+        from .production import validate_production_plan
+        production_validation=validate_production_plan(plan)
+        errors+=production_validation.get('errors',[])
+        warnings+=production_validation.get('warnings',[])
     semantic_visibility=None
     # Validate actual renderer eligibility rather than trusting a saved planner
     # certificate. Invalid GIS/capabilities never reach renderer preflight.
@@ -201,5 +207,7 @@ def validate_plan(plan):
         semantic_visibility=certify_semantic_visibility(plan)
         if not semantic_visibility['passed']:
             errors.extend(semantic_visibility['failures'])
-    return dict(passed=not errors,errors=errors,warnings=warnings,retention=retention,
+    result=dict(passed=not errors,errors=errors,warnings=warnings,retention=retention,
                 semantic_visibility=semantic_visibility,narration_alignment=narration_alignment)
+    if production_validation is not None:result['production_validation']=production_validation
+    return result

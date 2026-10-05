@@ -76,3 +76,14 @@ def choose_lighting(scene_type, role):
     if role=='peak': return 'HERO'
     if scene_type=='EARTH_ESTABLISH':return 'CINEMATIC_NIGHT'
     return 'GEOGRAPHY_READABILITY' if scene_type=='CITY_FOCUS' else 'CINEMATIC_NIGHT'
+
+
+# Production policy is a separate opt-in layer. Existing shot constants remain
+# immutable so historical plans and renderer cache keys retain their semantics.
+PACE_PRESETS = ('FAST', 'NORMAL', 'CINEMATIC')
+PRODUCTION_VISUAL_MODES = ('FLAT_MAP', '3D_EARTH', 'HERO', 'CINEMATIC_CLIP')
+PRODUCTION_TEXT_DENSITIES = ('NONE', 'MINIMAL', 'INFORMATIONAL')
+
+def production_preset():
+    from .production import PRODUCTION_PRESET
+    return deepcopy(PRODUCTION_PRESET)
