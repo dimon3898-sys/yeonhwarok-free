@@ -463,6 +463,12 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
                 earth_handoff = mode == 'MASTER_V3_EARTH' and any(scene.get(k) in {'FLAT_TO_EARTH','EARTH_TO_FLAT'} for k in ['transition_in','transition_out'])
                 page_name = 'render_flat.html' if mode == 'FLAT_MAP_PREMIUM' else 'render_transition.html' if earth_handoff else 'render.html'
                 tool_name = 'render_flat_scene.mjs' if mode == 'FLAT_MAP_PREMIUM' else 'render_transition_scene.mjs' if earth_handoff else 'render_scene.mjs'
+                if scene.get('visual_polish', {}).get('version') == 'v004':
+                    page_name = 'render_flat_polish.html' if mode == 'FLAT_MAP_PREMIUM' else 'render_earth_polish.html'
+                    tool_name = 'render_flat_polish_scene.mjs' if mode == 'FLAT_MAP_PREMIUM' else 'render_earth_polish_scene.mjs'
+                    if scene['visual_polish'].get('entity_separation') == 'v1':
+                        page_name = 'render_flat_separation_polish.html'
+                        tool_name = 'render_flat_separation_polish_scene.mjs'
                 url = base_url.rstrip("/") + '/' + page_name + '?' + query
                 command = ["node", str(APP_ROOT / "tools" / tool_name), "--url", url,
                            "--output", str(output), "--audit", str(audit_path),

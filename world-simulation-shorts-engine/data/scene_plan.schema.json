@@ -1467,6 +1467,21 @@
               }
             },
             "additionalProperties": false
+          },
+          "visual_polish": {
+            "type": "object",
+            "required": [
+              "version"
+            ],
+            "properties": {
+              "version": {
+                "const": "v004"
+              },
+              "entity_separation": {
+                "const": "v1"
+              }
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false,
@@ -1568,6 +1583,45 @@
                   }
                 ]
               }
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "visual_polish"
+              ]
+            },
+            "then": {
+              "required": [
+                "render_mode"
+              ],
+              "properties": {
+                "render_mode": {
+                  "enum": [
+                    "FLAT_MAP_PREMIUM",
+                    "MASTER_V3_EARTH"
+                  ]
+                }
+              },
+              "not": {
+                "properties": {
+                  "scene_type": {
+                    "const": "CINEMATIC_CLIP"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "required": ["visual_polish"],
+              "properties": {
+                "visual_polish": {"required": ["entity_separation"]}
+              }
+            },
+            "then": {
+              "required": ["render_mode"],
+              "properties": {"render_mode": {"const": "FLAT_MAP_PREMIUM"}}
             }
           }
         ]

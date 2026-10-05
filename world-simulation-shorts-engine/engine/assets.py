@@ -210,6 +210,31 @@ def validate_assets(plan: dict | None = None) -> dict:
 
 
 def renderer_version(scene: dict | None = None) -> str:
+    if (scene or {}).get('visual_polish', {}).get('entity_separation') == 'v1':
+        original = {**scene, 'visual_polish': {k:v for k,v in scene['visual_polish'].items() if k != 'entity_separation'}}
+        digest = hashlib.sha256(b'VISUAL_POLISH/ENTITY_SEPARATION/v1' + bytes.fromhex(renderer_version(original)))
+        for name in ['web/flat_entity_separation_polish.js', 'web/render_flat_separation_polish.html', 'tools/render_flat_separation_polish_scene.mjs']:
+            file = APP_ROOT / name
+            if not file.is_file():
+                raise FileNotFoundError('VISUAL_POLISH_DEPENDENCY_MISSING: ' + name)
+            digest.update(name.encode())
+            digest.update(bytes.fromhex(sha256_file(file)))
+        return digest.hexdigest()
+    # Explicit, versioned polish leaves every legacy renderer/cache digest intact.
+    if (scene or {}).get('visual_polish', {}).get('version') == 'v004':
+        original = dict(scene)
+        original.pop('visual_polish')
+        digest = hashlib.sha256(b'VISUAL_POLISH/v004' + bytes.fromhex(renderer_version(original)))
+        for name in ['web/flat_polish_renderer.js', 'web/earth_polish_adapter.js',
+                     'web/geographic_polish_transition.js', 'web/render_flat_polish.html',
+                     'web/render_earth_polish.html', 'tools/render_flat_polish_scene.mjs',
+                     'tools/render_earth_polish_scene.mjs']:
+            file = APP_ROOT / name
+            if not file.is_file():
+                raise FileNotFoundError('VISUAL_POLISH_DEPENDENCY_MISSING: ' + name)
+            digest.update(name.encode())
+            digest.update(bytes.fromhex(sha256_file(file)))
+        return digest.hexdigest()
     if (scene or {}).get('render_mode') == 'FLAT_MAP_PREMIUM':
         files = [APP_ROOT/'web/flat_renderer.js', APP_ROOT/'web/flat_semantics.js',
                  APP_ROOT/'web/render_flat.html', APP_ROOT/'tools/render_flat_scene.mjs', APP_ROOT/'web/map_transition.js',

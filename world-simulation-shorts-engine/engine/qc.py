@@ -413,10 +413,35 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
                     broken.append({'frame': index, 'code': 'UNDECLARED_MAP_EARTH_TRANSITION'})
             position, old_position = audit.get("cameraPosition"), previous.get("cameraPosition")
             quaternion, old_quaternion = audit.get("cameraQuaternion"), previous.get("cameraQuaternion")
+            # A v004 plane/sphere handoff rebases the actual draw coordinates.
+            # Compare its recorded equivalent geographic rigs in common units,
+            # while retaining the actual draw camera and units in each audit.
+            registered = (is_flat and scene.get('visual_polish', {}).get('version') == 'v004'
+                          and audit.get('registeredCameraUnits') == 'normalized_earth_radius'
+                          and previous.get('registeredCameraUnits') == 'normalized_earth_radius')
+            if registered:
+                position, old_position = audit.get('registeredCameraPosition'), previous.get('registeredCameraPosition')
+                quaternion, old_quaternion = audit.get('registeredCameraQuaternion'), previous.get('registeredCameraQuaternion')
+                if not position or not quaternion or not all(isinstance(v,(int,float)) and math.isfinite(v) for v in position+quaternion):
+                    broken.append({'frame':index,'code':'REGISTERED_CAMERA_AUDIT_MISSING'})
+            if (scene.get('visual_polish',{}).get('version') == 'v004'
+                    and audit.get('projectionTransition') and previous.get('projectionTransition')):
+                old_anchors={p.get('text'):p for p in previous.get('geographic_anchor_projections',[])}
+                for point in audit.get('geographic_anchor_projections',[]):
+                    old_point=old_anchors.get(point.get('text'))
+                    if point.get('visible') and old_point and old_point.get('visible'):
+                        values=[point.get('x'),point.get('y'),old_point.get('x'),old_point.get('y')]
+                        if not all(isinstance(v,(int,float)) and math.isfinite(v) for v in values):
+                            broken.append({'frame':index,'code':'GEOGRAPHIC_ANCHOR_AUDIT_INVALID'})
+                        elif math.hypot(values[0]-values[2],values[1]-values[3]) > audit.get('renderResolution',[width])[0]*.075:
+                            broken.append({'frame':index,'code':'GEOGRAPHIC_ANCHOR_SCREEN_JUMP','target':point.get('text')})
             if position and old_position and not mixed_projection:
                 step=float(np.linalg.norm(np.array(position)-np.array(old_position)))
                 if is_flat:
                     span=audit.get('mapCameraSpan')
+                    if registered:
+                        scale=audit.get('projectionTransition',{}).get('scale')
+                        span=span*scale if isinstance(span,(int,float)) and isinstance(scale,(int,float)) else None
                     if not isinstance(span,(int,float)) or not math.isfinite(span) or span<=0:
                         broken.append({'frame':index,'code':'FLAT_CAMERA_SPAN_AUDIT_MISSING'})
                     else:flat_camera_steps.append(step/span)
