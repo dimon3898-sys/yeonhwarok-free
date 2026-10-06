@@ -1,17 +1,19 @@
 # gcube 휴대폰 운영 안내
 
 공개 이미지: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v001`.
-[최초 공개 빌드](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37450727724)가 성공했고, 익명 GHCR manifest 요청 HTTP200으로 공개 접근을 확인했습니다. 최초 빌드 소스는 [b9972cad8a013f2dca3c5edcc8d485c695b98382](https://github.com/dimon3898-sys/yeonhwarok-free/commit/b9972cad8a013f2dca3c5edcc8d485c695b98382)입니다. **gcube 실제 배포·NVIDIA GPU 렌더·실물 Android 로그인/다운로드·비용 실측은 아직 대기 중입니다.** gcube는 유료 서비스이며 사용하지 않는 배포 시간도 과금됩니다.
+[전체 이미지·로그인 검증 빌드](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37453463360)가 성공했고, 익명 GHCR manifest/config 요청 HTTP200으로 공개 접근을 확인했습니다. [최신 게시 증거](../../../deliverables/WORLD_SIMULATION_ENGINE/GCUBE_CPU_ACCEPTANCE_v001/evidence/GHCR_FINAL_PUBLICATION.json)에 정확한 소스 commit과 digest를 기록합니다. **gcube 실제 배포·NVIDIA GPU 렌더·실물 Android 로그인/다운로드·비용 실측은 아직 대기 중입니다.** gcube는 유료 서비스이며 사용하지 않는 배포 시간도 과금됩니다.
 
 ## 휴대폰에서 설정하는 5단계
 
 1. [gcube 콘솔](https://console.gcube.ai/)에 로그인해 실제 충전 금액·포인트 잔액·요금을 확인합니다. 필요한 포인트를 충전하고, 저장소 관리에서 **gcube 자체 Personal Storage**를 준비합니다. 실제 계정에서 제공하는 용량·요금을 확인합니다. 컨테이너 연결 경로는 `/world-storage`입니다.
 2. **Workload Mode → 새 워크로드 등록(Create Workload)**에서 저장소 유형 **GitHub**, 위 이미지 주소, 컨테이너 포트 **8000**을 지정합니다. **컨테이너 명령은 비워** 이미지 시작 설정을 사용합니다. Personal Storage에서 준비한 자체 저장소를 선택하고 `/world-storage`에 연결합니다. 환경변수에 `WORLD_ENGINE_OWNER_CODE`로 직접 정한 **16자 이상 512자 이하의 비밀 로그인 코드**를 넣습니다. 앞뒤 공백·제어 문자를 피하고 공개 문서나 이미지에 넣지 않습니다. 필수 환경변수는 `WORLD_ENGINE_OWNER_CODE` 하나입니다. 포트 8000, `gpu-required`, 필수 저장소 `/world-storage`는 이미지·프로그램 기본값을 사용합니다.
 3. **현재 사용 가능한 GPU**에서 CPU·RAM·디스크와 실제 시간당 요금을 함께 비교해 필요한 조건을 충족하는 가장 저렴한 노드를 고릅니다. 노드 선택 기준은 **CPU 4코어 이상·RAM 8GB 이상, RAM 16GB 권장**입니다. 8GB는 로컬 검증의 메모리 제한 조건이며 gcube가 보장하는 최소 요구 사양으로 확인한 값은 아닙니다. RTX5070은 실제 제공·가격·GPU 검수 조건이 맞을 때 선택하며, 더 비싼 GPU의 속도 우위를 미리 가정하지 않습니다. 이미지 포트 검증과 총 예상 금액을 확인한 뒤 배포합니다. 최소 CUDA 버전 입력이 필요하면 실제 드라이버 조건을 확인합니다. 이 엔진은 CUDA Toolkit을 사용하지 않으므로 임의 CUDA 버전을 요구하지 않습니다.
-4. 상태가 **배포**가 되면 워크로드 상세 **개요 → 서비스 URL**을 엽니다. 공식 주소 형식은 `https://xxxxxxxx.gcube.ai`이며 실제 발급 주소를 사용합니다. 소유자 코드로 WorldEngine에 로그인하고 아래 GPU·저장소 검수를 확인합니다. 필요할 때만 실제 주소의 origin(경로 없이 `https://발급호스트`)을 `WORLD_ENGINE_PUBLIC_ORIGIN`으로 명시합니다. 먼저 10~15초 QA 계획으로 GPU·저장소·재생·다운로드를 확인합니다. 이후 주제 입력 → 계획 확인 → 승인 → 렌더 → 재생·MP4 다운로드 순서로 사용합니다. 별도 75초·80초 샘플 렌더는 실행하지 않았습니다. 소유자 전용 **다운로드 속도 측정** 링크는 UI에 추가 예정이며, 반영된 이미지에서는 로그인 후 해당 링크로 휴대폰 전송 시간을 확인합니다.
+4. 상태가 **배포**가 되면 워크로드 상세 **개요 → 서비스 URL**을 엽니다. 공식 주소 형식은 `https://xxxxxxxx.gcube.ai`이며 실제 발급 주소를 사용합니다. 소유자 코드로 WorldEngine에 로그인하고 아래 GPU·저장소 검수를 확인합니다. 필요할 때만 실제 주소의 origin(경로 없이 `https://발급호스트`)을 `WORLD_ENGINE_PUBLIC_ORIGIN`으로 명시합니다. 첫 화면의 기존 **12초 QA 계획**을 선택해 확인·승인하고 GPU·저장소·재생·다운로드를 검사합니다. 이후 주제 입력 → 계획 확인 → 승인 → 렌더 → 재생·MP4 다운로드 순서로 사용합니다. 별도 75초·80초 샘플 렌더는 실행하지 않았습니다. 로그인 후 **GPU·메모리 측정 기록 다운로드** 링크로 모델·드라이버·WebGL·부팅 시간과 제한된 CPU/RAM/GPU 표본을 저장할 수 있습니다. 이 기록은 포인트 소비량이나 다운로드 속도의 측정값을 제공하지 않습니다.
 5. MP4 다운로드와 필요한 상태 보존을 확인한 뒤 gcube 워크로드 목록에서 **배포중지 → 확인**을 누르고 **종료** 상태를 확인합니다. **브라우저 닫기, 앱 로그아웃, 서버 종료·오류는 gcube 워크로드 중지나 과금 중지를 뜻하지 않습니다.** 재배포 후 같은 코드와 저장소로 로그인해 이전 파일·상태가 남았는지 확인합니다. 자동 깨우기와 서비스 주소 유지 여부는 아직 검증되지 않았습니다.
 
 ## 실제 환경에서 확인할 조건
+
+GPU 프로파일을 별도로 입력하지 않으면 EGL을 먼저 검사하고, 브라우저 그리기 실패 때만 Vulkan을 한 번 검사합니다. 선택된 프로파일은 실제 렌더에도 동일하게 적용합니다. 두 시도 모두 NVIDIA WebGL 그리기 검수가 필요하며 CPU로 조용히 전환하지 않습니다. 장치가 없거나 설정이 잘못된 경우에는 재시도 없이 중단합니다. 이 선택 로직의 모의 테스트는 실제 gcube 드라이버 호환성 검증과 구분합니다.
 
 이미지의 기본 드라이버 설정은 `NVIDIA_DRIVER_CAPABILITIES=graphics,utility`입니다. 이미지는 시작할 때 NVIDIA 장치와 같은 서버 계정의 Chromium WebGL2 그리기·GPU renderer를 확인합니다. `gpu-required`에서 하드웨어 GPU를 확인하지 못하면 시작을 중단합니다. GPU 장치가 보이는 것만으로 성공으로 처리하지 않습니다. GPU 확인은 **Flat와 Earth 각각의 브라우저 그리기**에 필요하며 한쪽이나 단순 장치 탐지만으로 두 모드의 실동작을 보장하지 않습니다. GPU 그리기 후 픽셀 읽기·전송(CPU readback), 오디오 처리, 원래 FFmpeg **CPU `libx264`** 인코딩, QC가 이어집니다. CUDA Toolkit·NVENC를 사용하지 않으며 전체 속도 향상은 실제 렌더 측정 전까지 미확인입니다. 이미지의 영상 길이 상한은 180초이고 작업 마감은 기본 3,600초입니다. 고급 설정 `WORLD_ENGINE_MAX_JOB_SECONDS`로 최대 14,400초까지 조정할 수 있으나 실제 시간·비용을 확인한 경우에만 사용합니다. 작업 마감은 provider 과금 중지가 아닙니다. 짧은 10~15초 QA와 80초 운영 비용 검증은 각각 확인해야 합니다. 기존 승인된 12초 픽스처는 legacy `FAST`, 새 자연어 계획은 `FAST_PLUS`를 사용하므로 같은 프로파일의 속도 측정으로 취급하지 않습니다.
 

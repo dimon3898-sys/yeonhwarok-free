@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "started_at_utc": "2026-10-06T11:13:38.403202+00:00",
+  "base": "http://localhost:18100",
+  "real_http": true,
+  "real_browser": false,
+  "physical_phone_tested": false,
+  "container_started_by_this_runner": false,
+  "provider_api_calls": 0,
+  "secret_values_recorded": false,
+  "gpu_speedup_claimed": false,
+  "render_requested": false,
+  "render_complete": true,
+  "checks": [
+    {
+      "check": "unauthenticated_route",
+      "route": "/",
+      "status": 303
+    },
+    {
+      "check": "unauthenticated_route",
+      "route": "/auth/login",
+      "status": 200
+    },
+    {
+      "check": "unauthenticated_route",
+      "route": "/api/health",
+      "status": 200
+    },
+    {
+      "check": "unauthenticated_route",
+      "route": "/api/projects",
+      "status": 401
+    },
+    {
+      "check": "owner_login",
+      "passed": true
+    },
+    {
+      "check": "authenticated_ui",
+      "passed": true
+    },
+    {
+      "check": "relogin_with_new_cookie_jar",
+      "passed": true
+    }
+  ],
+  "downloads": [
+    {
+      "name": "final.mp4",
+      "bytes": 18480982,
+      "sha256": "1d46a40b44d2b0140d60f83f6dabef1e3ae6fe316c9392ddd8a7bc99eaab5cee",
+      "server_sha256_verified": true,
+      "http_range_verified": true,
+      "http_head_verified": true
+    },
+    {
+      "name": "final_muted.mp4",
+      "bytes": 18086855,
+      "sha256": "88537078a5a1071bdcff13d0aafdfe090145f2a9da9c3ec947d56c4c1a1bb475",
+      "server_sha256_verified": true,
+      "http_range_verified": true,
+      "http_head_verified": true
+    }
+  ],
+  "failure": null,
+  "runtime_health": {
+    "provider": "GCUBE",
+    "render_backend": "CPU_VERIFIED",
+    "gpu": {
+      "render_mode": "cpu",
+      "gpu_profile": "egl",
+      "gpu_rendering_verified": false,
+      "models": [],
+      "speedup_measured": false
+    },
+    "storage": {
+      "persistent_mount_detected": false,
+      "filesystem_probe_passed": true,
+      "mode": "ephemeral"
+    },
+    "limits": {
+      "max_duration": 180.0
+    }
+  },
+  "planning": {
+    "project_id": "project_0a506dcbde45",
+    "duration": 20.0,
+    "plan_hash": "b95e04098eeb9043358ffb1a6721d8e8ffbeef6e73e5956642ccd4e5fb1fb41e",
+    "gate_passed": true,
+    "elapsed_seconds": 6.993051377001393,
+    "approved": false,
+    "render_started": false
+  },
+  "project_id": "project_282faa7350ea",
+  "version": "v001",
+  "plan_hash": "cbe94fc0412edb5280c5f6cdc9823b1c21f3ad6c13fc3116c9bd0100a433bc72",
+  "duration": 12.0,
+  "observed_phases": [
+    {
+      "status": "complete",
+      "at_utc": "2026-10-06T11:13:45.676457+00:00"
+    }
+  ],
+  "automatic_qc": {
+    "passed": true,
+    "duration": 12.0,
+    "decoded_frames": 360,
+    "dimensions": [
+      1080,
+      1920
+    ],
+    "fps": 30.0,
+    "codec": "h264",
+    "failures": [],
+    "publication_quality": true
+  },
+  "actual_execution_metrics": {
+    "scene_render_seconds": 2898.1403752080005,
+    "scene_count": 5,
+    "rendered_scene_count": 5,
+    "cached_scene_count": 0,
+    "audio_preparation_seconds": 1.3905654780028271,
+    "audio_reused": false,
+    "assembly_audio_mux_subtitles_seconds": 2.0550597719993675,
+    "qc_seconds": 10.673994194999977,
+    "total_seconds": 2915.365194001999,
+    "measured": true,
+    "backend": "CPU_LOCAL",
+    "benchmark_scope": "This version's actual execution only; cached prior rendering time is not included"
+  },
+  "all_scenes_native_this_run": true,
+  "metrics_backend_label_preserved": "CPU_LOCAL",
+  "passed": true,
+  "completed_at_utc": "2026-10-06T11:13:45.856219+00:00",
+  "validation_scope": "Real HTTP short render, independent client reconnect, backend QC, final/muted SHA, Range and HEAD.",
+  "finished_at_utc": "2026-10-06T11:13:45.856241+00:00"
+}

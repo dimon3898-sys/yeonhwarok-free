@@ -121,7 +121,7 @@ def main():
     if str(APP) != '/opt/world-engine/world-simulation-shorts-engine':
         raise BootError('IMAGE_LAYOUT_REQUIRED')
     from deployment.gcube.storage import NativePersonalStorage
-    from deployment.gcube.gpu import probe_gpu_runtime
+    from deployment.gcube.graphics_start import select_graphics_profile
     from deployment.security import private_json
     from deployment.start_codespace import _runtime_preflight
     env = dict(os.environ)
@@ -144,7 +144,7 @@ def main():
         return subprocess.run(command, **kwargs)
     probe_env = dict(env)
     probe_env.pop('WORLD_ENGINE_OWNER_CODE', None)
-    gpu = probe_gpu_runtime(environ=probe_env, runner=run_probe)
+    gpu = select_graphics_profile(probe_env, runner=run_probe)
     cache = configure_image_paths(APP, storage, gpu['cache_namespace'])
     if os.geteuid() == 0:
         os.setgroups([])
@@ -166,6 +166,7 @@ def main():
     child_env['CHROMIUM_PATH'] = str(APP / 'deployment/gcube/chromium_wrapper.py')
     child_env['WORLD_ENGINE_CHROMIUM_REAL'] = '/usr/bin/chromium'
     child_env['WORLD_ENGINE_RENDER_MODE'] = gpu['render_mode']
+    child_env['WORLD_ENGINE_GPU_PROFILE'] = gpu['gpu_profile']
     child_env['HOME'] = account.pw_dir
     command = [sys.executable, '-m', 'deployment.gcube.server', '--host', '0.0.0.0',
                '--port', '8000', '--internal-port', '8001', '--state-root', str(runtime),
