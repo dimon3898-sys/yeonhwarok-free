@@ -14,11 +14,7 @@
 
 ## 기존 Codespace에 적용
 
-현재 fictional-cod Codespace를 그대로 사용한다. 저장소 루트의 터미널에서 아래 한 번만 실행한 뒤 기존7860 브라우저 탭을 다시 연다.
-
-```sh
-git pull --ff-only origin main && python3 world-simulation-shorts-engine/deployment/start_codespace.py --refresh
-```
+현재 Codespace 이름은 **solid-space-fishstick**이다. 휴대폰에서는 [명령 입력 없는 기존 Codespace 자동 시작](CODESPACES_MOBILE_AUTOSTART.md)에 따라 최초 한 번 **Source Control → … → Pull**, 그다음 같은 환경의 **Stop → Start → Ports 7860**을 사용한다. 이후 재시작은 자동 main 반영·서버 준비를 수행한다. 터미널 명령을 입력할 필요가 없다.
 
 Fast-forward가 불가능하면 자동 reset·stash·덮어쓰기를 하지 않는다. 변경된 파일은 그대로 보존하고 Git 충돌 원인을 확인한다. refresh는 해당 상태 폴더와 포트에 정확히 연결된 자기 서버만 정상 종료 신호로 갱신한다. 다른 프로세스나 진행 중인 작업을 강제 종료하지 않는다. 기존 owner-code와 세션·프로젝트 상태를 유지하며 새 Codespace나 컨테이너 재빌드가 필요하지 않다.
 

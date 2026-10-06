@@ -61,7 +61,8 @@ def _source_fingerprint(args, origin):
     # Include policy/worker/startup code outside the independently certified core.
     names = ('deployment/__init__.py', 'deployment/security.py',
              'deployment/mobile_server.py', 'deployment/resume_evidence.py',
-             'deployment/start_codespace.py', 'data/production_rhythm_promotion_v001.json')
+             'deployment/start_codespace.py', 'deployment/codespaces_autostart.py',
+             'data/production_rhythm_promotion_v001.json')
     files = {name: hashlib.sha256((APP/name).read_bytes()).hexdigest() for name in names}
     contract = {'files': files, 'port': args.port, 'internal_port': args.internal_port,
                 'public_origin': origin, 'interpreter': str(Path(sys.executable).absolute())}
@@ -235,9 +236,16 @@ def main(argv=None):
     parser.add_argument('--internal-port', type=int, default=7861)
     parser.add_argument('--state-root', type=Path, default=APP/'deployment/runtime/mobile')
     parser.add_argument('--refresh', action='store_true', help='Gracefully restart only this verified idle deployment server.')
+    parser.add_argument('--no-sync', action='store_true', help='Internal second stage: start from the already checked checkout.')
     args = parser.parse_args(argv)
     if not 1 <= args.port <= 65535 or not 1 <= args.internal_port <= 65535 or args.port == args.internal_port:
         raise StartupError('INVALID_PORTS', 'Choose two different ports in the range 1–65535.')
+    # Keep the cached Codespaces postStartCommand path unchanged. Once this
+    # script is pulled, every container start can update main before importing
+    # the gateway in a fresh child process. Local development remains offline.
+    if os.environ.get('CODESPACES') == 'true' and not args.no_sync:
+        from deployment.codespaces_autostart import automatic_start
+        return automatic_start(args)
     origin = codespaces_origin(args.port)
     state = args.state_root.resolve()
     if args.state_root.is_symlink() or not state.is_relative_to(APP/'deployment/runtime'):

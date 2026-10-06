@@ -2,7 +2,7 @@
 
 기존 엔진과 MASTER/Flat/Rhythm 파일을 유지하면서 인증·작업 복구를 별도 계층으로 추가했다. 이 폴더는 새 렌더러가 아니다. 검증 결과와 실제 배포 상태는 `DEPLOYMENT_REPORT.md`에 기록한다.
 
-이미 사용하는 Codespace의7860 로그인에 `INVALID_ORIGIN`이 발생하면 [기존 Codespace Origin 수정 및 적용](CODESPACES_ORIGIN_FIX.md)을 사용한다. 새 Codespace를 만들지 않고 현재 서버 코드만 갱신한다.
+현재 사용하는 **solid-space-fishstick**의 휴대폰 적용은 [명령 입력 없는 기존 Codespace 자동 시작](CODESPACES_MOBILE_AUTOSTART.md)을 따른다. 최초 한 번 **Source Control → … → Pull** 후 **Stop → Start → Ports 7860**으로 적용한다. 이후 재시작 때 최신 main과 인증 서버를 자동 준비한다. 새 Codespace나 재빌드는 필요하지 않다. 로그인 `INVALID_ORIGIN`의 원인·보안 검증 기록은 [Origin 수정](CODESPACES_ORIGIN_FIX.md)에 보존한다.
 
 ## 휴대폰으로 시작하기
 
