@@ -2,10 +2,13 @@
 from pathlib import Path
 from types import SimpleNamespace
 import tempfile
+import os
 import unittest
+from unittest.mock import Mock, patch
 
 from deployment.gcube.start import (BootError, configure_image_paths, integer_option,
                                      link_image_path, seed_audio)
+from deployment.gcube import start
 
 
 class BootstrapTests(unittest.TestCase):
@@ -71,6 +74,91 @@ class BootstrapTests(unittest.TestCase):
                 configure_image_paths(app,SimpleNamespace(cache_root=cache,audio_root=audio),namespace)
             self.assertEqual(outside.stat().st_uid,before.st_uid)
             self.assertFalse((app/'cache').exists())
+
+    def test_preflight_failure_keeps_a_read_only_foreground_status(self):
+        for code in ('GPU_HARDWARE_UNAVAILABLE', 'WORLD_ENGINE_OWNER_CODE_REQUIRED',
+                     'STORAGE_MOUNT_REQUIRED'):
+            with self.subTest(code=code):
+                listener = Mock()
+                listener.start.return_value = listener
+                listener.error_code = code
+                stopping = Mock()
+                stopping.is_set.return_value = False
+                # A successful wait models an external SIGTERM, not a retry.
+                stopping.wait.return_value = True
+                with patch('deployment.gcube.boot_status.BootStatusServer', return_value=listener), \
+                     patch.object(start, 'run_engine', side_effect=BootError(code)) as engine, \
+                     patch.object(start.threading, 'Event', return_value=stopping), \
+                     patch.object(start.signal, 'signal'), patch('builtins.print'):
+                    self.assertEqual(start.main(), 0)
+                self.assertEqual(listener.start.call_count, 2)
+                listener.set_phase.assert_called_once_with('blocked', error_code=code)
+                stopping.wait.assert_called_once_with(1)
+                engine.assert_called_once_with(listener, stopping)
+                listener.close.assert_called_once()
+
+    def test_unexpected_engine_exit_is_visible_and_does_not_retry_render(self):
+        listener = Mock()
+        listener.start.return_value = listener
+        listener.error_code = 'WORLD_ENGINE_PROCESS_EXITED'
+        stopping = Mock()
+        stopping.is_set.return_value = False
+        stopping.wait.return_value = True
+        with patch('deployment.gcube.boot_status.BootStatusServer', return_value=listener), \
+             patch.object(start, 'run_engine', return_value=2) as engine, \
+             patch.object(start.threading, 'Event', return_value=stopping), \
+             patch.object(start.signal, 'signal'), patch('builtins.print'):
+            self.assertEqual(start.main(), 0)
+        listener.set_phase.assert_called_once_with('blocked', error_code='WORLD_ENGINE_PROCESS_EXITED')
+        self.assertEqual(engine.call_count, 1)
+
+    def test_requested_stop_closes_listener_without_a_false_boot_failure(self):
+        listener = Mock()
+        listener.start.return_value = listener
+        stopping = Mock()
+        stopping.is_set.return_value = True
+        with patch('deployment.gcube.boot_status.BootStatusServer', return_value=listener), \
+             patch.object(start, 'run_engine', return_value=0), \
+             patch.object(start.threading, 'Event', return_value=stopping), \
+             patch.object(start.signal, 'signal'):
+            self.assertEqual(start.main(), 0)
+        listener.set_phase.assert_not_called()
+        stopping.wait.assert_not_called()
+        listener.close.assert_called_once()
+
+    def test_fixed_image_links_use_only_the_writable_runtime_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder);app = root/'image';runtime = root/'run'
+            cache = root/'saved-cache';audio = root/'saved-audio'
+            (app/'assets/image_audio_seed').mkdir(parents=True)
+            (app/'assets/image_audio_seed/pulse.wav').write_bytes(b'approved')
+            runtime.mkdir(mode=0o700);cache.mkdir();audio.mkdir()
+            (app/'cache').symlink_to(runtime/'cache')
+            (app/'assets/audio').symlink_to(runtime/'audio')
+            storage = SimpleNamespace(cache_root=cache,audio_root=audio,
+                                      uid=os.geteuid(),gid=os.getegid())
+            old = 'cpu-'+'a'*64;new = 'gpu-'+'b'*64
+            configure_image_paths(app,storage,old,link_root=runtime)
+            (cache/old/'prior.mp4').write_bytes(b'keep')
+            configure_image_paths(app,storage,new,link_root=runtime)
+            configure_image_paths(app,storage,new,link_root=runtime)
+            self.assertEqual((app/'cache').resolve(),cache/new)
+            self.assertEqual((cache/old/'prior.mp4').read_bytes(),b'keep')
+            self.assertEqual(os.readlink(app/'cache'),str(runtime/'cache'))
+            self.assertEqual(os.readlink(app/'assets/audio'),str(runtime/'audio'))
+            self.assertEqual((app/'assets/image_audio_seed/pulse.wav').read_bytes(),b'approved')
+
+    def test_fixed_runtime_link_rejects_a_foreign_target_without_replacing_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder);app = root/'image';runtime = root/'run'
+            cache = root/'saved-cache';audio = root/'saved-audio';outside = root/'other'
+            app.mkdir();runtime.mkdir(mode=0o700);cache.mkdir();audio.mkdir();outside.mkdir()
+            (app/'cache').symlink_to(runtime/'cache')
+            (runtime/'cache').symlink_to(outside)
+            with self.assertRaisesRegex(BootError,'IMAGE_WRITABLE_PATH_CONFLICT'):
+                configure_image_paths(app,SimpleNamespace(cache_root=cache,audio_root=audio),
+                                      'cpu-'+'a'*64,link_root=runtime)
+            self.assertEqual((runtime/'cache').resolve(),outside)
 
 
 if __name__=='__main__':

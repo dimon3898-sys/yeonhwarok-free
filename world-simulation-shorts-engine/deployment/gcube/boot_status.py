@@ -1,0 +1,269 @@
+"""Read-only port-8000 startup status while the real engine is unavailable.
+
+The entrypoint owns this listener and its foreground lifetime. It must close the
+listener before starting the owner-authenticated engine on the same port. An
+``ok`` liveness response is deliberately never an engine-readiness claim.
+"""
+from __future__ import annotations
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
+import re
+from socketserver import ThreadingMixIn
+import threading
+
+
+_OWNER = (
+    "gcube 환경변수 WORLD_ENGINE_OWNER_CODE에 앞뒤 공백 없는 16자 이상의 "
+    "로그인 코드를 입력하세요. 기존 저장소는 이전과 같은 코드를 사용하세요."
+)
+_STORAGE = (
+    "gcube Personal Storage를 /world-storage에 연결하세요. 첫 테스트에서만 "
+    "WORLD_ENGINE_STORAGE_MODE=ephemeral을 명시할 수 있으며, 이 경우 종료하면 "
+    "결과가 사라질 수 있습니다. 기존 자료를 삭제하거나 권한을 바꾸지 마세요."
+)
+_GPU = (
+    "NVIDIA GPU와 그래픽 드라이버 전달을 확인하세요. GPU 검증을 통과하지 않아 "
+    "렌더를 시작하지 않았습니다. CPU로 자동 전환하지 않습니다."
+)
+_RUNTIME = "필수 실행환경을 확인할 수 없습니다. 새 배포 이미지와 설정을 확인하세요."
+_MESSAGES = {
+    "STARTUP_BLOCKED": "초기화가 중단되었습니다. 배포 설정과 gcube 컨테이너 로그의 오류 코드를 확인하세요.",
+    "WORLD_ENGINE_OWNER_CODE_REQUIRED": _OWNER,
+    "STORAGE_OWNER_CODE_INVALID": _OWNER,
+    "STORAGE_OWNER_CODE_MISMATCH": _OWNER,
+    "STORAGE_MOUNT_REQUIRED": _STORAGE,
+    "STORAGE_MODE": _STORAGE,
+    "STORAGE_UNSAFE_PATH": _STORAGE,
+    "STORAGE_OWNERSHIP": _STORAGE,
+    "STORAGE_UNSAFE_FILE": _STORAGE,
+    "STORAGE_FOREIGN_ROOT": _STORAGE,
+    "STORAGE_INITIALIZATION_RACE": _STORAGE,
+    "STORAGE_UNSUPPORTED": _STORAGE,
+    "STORAGE_PROBE_CHANGED": _STORAGE,
+    "GPU_HARDWARE_UNAVAILABLE": _GPU,
+    "GPU_WEBGL_UNVERIFIED": _GPU,
+    "GPU_BROWSER_PROBE_FAILED": _GPU,
+    "GPU_PROFILE_INVALID": _GPU,
+    "GPU_BROWSER_UNAVAILABLE": _RUNTIME,
+    "GPU_WRAPPER_NOT_EXECUTABLE": _RUNTIME,
+    "CPU_FALLBACK_UNVERIFIED": _RUNTIME,
+    "WORLD_ENGINE_BOOT_FAILED": _RUNTIME,
+    "WORLD_ENGINE_SERVER_EXITED": _RUNTIME,
+    "WORLD_ENGINE_PROCESS_EXITED": _RUNTIME,
+    "RUNTIME_PREFLIGHT_FAILED": _RUNTIME,
+    "CERTIFIED_SOURCE_MISMATCH": _RUNTIME,
+    "MISSING_DEPENDENCY": _RUNTIME,
+    "CERTIFICATE_INCOMPLETE": _RUNTIME,
+    "ASSETS_INVALID": _RUNTIME,
+    "IMAGE_LAYOUT_REQUIRED": _RUNTIME,
+    "INVALID_WORLD_ENGINE_MAX_DURATION": "WORLD_ENGINE_MAX_DURATION은 5~180 사이의 정수여야 합니다.",
+    "INVALID_WORLD_ENGINE_MAX_JOB_SECONDS": "WORLD_ENGINE_MAX_JOB_SECONDS는 60~14400 사이의 정수여야 합니다.",
+    "INVALID_RENDER_PROFILE": _RUNTIME,
+    "UNSAFE_IMAGE_AUDIO": _RUNTIME,
+    "UNSAFE_PERSISTED_AUDIO": _STORAGE,
+    "PERSISTED_AUDIO_CONFLICT": _STORAGE,
+    "IMAGE_WRITABLE_PATH_CONFLICT": _RUNTIME,
+    "IMAGE_WRITABLE_PATH_NOT_EMPTY": _RUNTIME,
+    "UNSAFE_PERSISTED_CACHE": _STORAGE,
+    "PERSISTED_CACHE_OWNERSHIP": _STORAGE,
+    "IMAGE_AUDIO_SEED_CONFLICT": _RUNTIME,
+}
+KNOWN_ERROR_CODES = frozenset(_MESSAGES)
+_SAFE_CODE = re.compile(r"[A-Z][A-Z0-9_]{0,79}\Z")
+
+
+def safe_error_code(value):
+    """Return a fixed public identifier, never a raw exception or env value."""
+    if isinstance(value, str) and _SAFE_CODE.fullmatch(value) and value in KNOWN_ERROR_CODES:
+        return value
+    return "STARTUP_BLOCKED"
+
+
+class _BoundedServer(ThreadingMixIn, HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+    block_on_close = False
+    request_queue_size = 32
+
+    def __init__(self, address, owner):
+        self.owner = owner
+        self.slots = threading.BoundedSemaphore(32)
+        super().__init__(address, _Handler)
+
+    def get_request(self):
+        request, address = super().get_request()
+        request.settimeout(5)
+        return request, address
+
+    def process_request(self, request, client_address):
+        if not self.slots.acquire(blocking=False):
+            try:
+                request.sendall(
+                    b"HTTP/1.0 503 Service Unavailable\r\nConnection: close\r\n"
+                    b"Content-Length: 0\r\nCache-Control: no-store\r\n\r\n"
+                )
+            except OSError:
+                pass
+            finally:
+                self.shutdown_request(request)
+            return
+        try:
+            super().process_request(request, client_address)
+        except BaseException:
+            self.slots.release()
+            raise
+
+    def process_request_thread(self, request, client_address):
+        try:
+            super().process_request_thread(request, client_address)
+        finally:
+            self.slots.release()
+
+    def handle_error(self, request, client_address):
+        # No traceback, headers, request body, or path can enter startup logs.
+        pass
+
+
+class _Handler(BaseHTTPRequestHandler):
+    server_version = "WorldEngineBoot"
+    sys_version = ""
+    protocol_version = "HTTP/1.0"
+
+    def log_message(self, format, *args):
+        pass
+
+    def send_error(self, code, message=None, explain=None):
+        # BaseHTTPRequestHandler normally reflects invalid verbs/version strings
+        # into an HTML error page. Keep parser failures fixed and non-reflective.
+        if code == 501:
+            code = 405
+        self.request_version = "HTTP/1.0"
+        self._json(code, {"error": {"code": "ENGINE_NOT_READY"}, "engine_ready": False})
+
+    def _reply(self, status, payload, content_type="application/json; charset=utf-8"):
+        self.close_connection = True
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(payload)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Connection", "close")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; form-action 'none'; base-uri 'none'")
+        self.end_headers()
+        if self.command != "HEAD":
+            self.wfile.write(payload)
+
+    def _json(self, status, record):
+        self._reply(status, json.dumps(record, ensure_ascii=False, separators=(",", ":")).encode("utf-8"))
+
+    def _read_only(self):
+        phase, code = self.server.owner.snapshot()
+        # URLs and all reverse-proxy headers are deliberately not reflected.
+        # This server has no authentication, state changes, assets, or engine API.
+        path = self.path.partition("?")[0]
+        if path in {"/api/health", "/healthz"}:
+            self._json(200, {"ok": True, "authentication_required": True,
+                             "engine_ready": False, "phase": phase, "error_code": code})
+        elif path == "/readyz":
+            self._json(503, {"ok": False, "engine_ready": False, "phase": phase,
+                             "error_code": code})
+        elif path in {"/", "/auth/login"}:
+            if phase == "blocked":
+                title, description = "초기화가 중단되었습니다", _MESSAGES[code]
+                detail = "<p class=code>오류 코드: " + code + "</p>"
+            else:
+                title, description = "World Engine 준비 중", "저장소와 실행환경을 확인하고 있습니다. 아직 로그인과 영상 생성을 시작할 수 없습니다. 잠시 후 새로고침하세요."
+                detail = ""
+            page = (
+                "<!doctype html><html lang=ko><meta charset=utf-8>"
+                "<meta name=viewport content='width=device-width,initial-scale=1'>"
+                "<title>World Engine 시작 상태</title><style>"
+                "body{margin:0;background:#101722;color:#edf3fa;font:16px/1.6 sans-serif}"
+                "main{max-width:36rem;padding:2rem 1.2rem;margin:auto}h1{font-size:1.5rem}"
+                ".code{overflow-wrap:anywhere;font-family:monospace;color:#b7d9f1}"
+                "small{display:block;color:#b8c4d0;margin-top:2rem}</style>"
+                "<main><h1>" + title + "</h1><p>" + description + "</p>" + detail +
+                "<p>영상 생성 엔진: 아직 준비되지 않음</p>"
+                "<small>gcube Workload 실행 중에는 유휴 상태도 과금될 수 있습니다. "
+                "테스트를 마치거나 설정을 수정할 때 gcube에서 Workload를 중지하세요. "
+                "브라우저를 닫는 것만으로 과금이 멈추지는 않습니다.</small></main></html>"
+            )
+            self._reply(200, page.encode("utf-8"), "text/html; charset=utf-8")
+        else:
+            self._json(503, {"error": {"code": "ENGINE_NOT_READY"}, "engine_ready": False})
+
+    do_GET = _read_only
+    do_HEAD = _read_only
+
+    def _no_actions(self):
+        # Never read, evaluate, log, or dispatch request bodies.
+        self._json(405, {"error": {"code": "ENGINE_NOT_READY"}, "engine_ready": False})
+
+    do_POST = _no_actions
+    do_PUT = _no_actions
+    do_PATCH = _no_actions
+    do_DELETE = _no_actions
+    do_OPTIONS = _no_actions
+    do_TRACE = _no_actions
+    do_CONNECT = _no_actions
+
+
+class BootStatusServer:
+    """Idempotent temporary listener, with explicit handoff to the real server."""
+
+    def __init__(self, host="0.0.0.0", port=8000):
+        self.host = host
+        self.port = port
+        self._requested_port = port
+        self._phase = "checking"
+        self._code = None
+        self._state_lock = threading.Lock()
+        self._lifecycle_lock = threading.Lock()
+        self._server = None
+        self._thread = None
+
+    @property
+    def server_address(self):
+        return self.host, self.port
+
+    def snapshot(self):
+        with self._state_lock:
+            return self._phase, self._code
+
+    @property
+    def error_code(self):
+        return self.snapshot()[1]
+
+    def set_phase(self, phase, error_code=None):
+        if phase not in {"checking", "blocked"}:
+            raise ValueError("Invalid startup phase")
+        with self._state_lock:
+            self._phase = phase
+            self._code = safe_error_code(error_code) if phase == "blocked" else None
+
+    def start(self):
+        with self._lifecycle_lock:
+            if self._server is not None:
+                return self
+            server = _BoundedServer((self.host, self._requested_port), self)
+            self.port = server.server_port
+            thread = threading.Thread(target=server.serve_forever,
+                                      kwargs={"poll_interval": 0.1},
+                                      name="gcube-boot-status", daemon=True)
+            self._server, self._thread = server, thread
+            thread.start()
+        return self
+
+    def close(self):
+        with self._lifecycle_lock:
+            server, thread = self._server, self._thread
+            if server is None:
+                return
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
+            self._server, self._thread = None, None
+
+    stop_listener = close

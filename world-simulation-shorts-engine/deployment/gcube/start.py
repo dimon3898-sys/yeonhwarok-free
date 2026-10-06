@@ -13,8 +13,10 @@ import signal
 import stat
 import subprocess
 import sys
+import threading
 import time
-from urllib.request import urlopen
+import uuid
+from urllib.request import ProxyHandler, build_opener
 
 APP = Path(__file__).resolve().parents[2]
 
@@ -80,7 +82,47 @@ def link_image_path(source, target):
     source.symlink_to(target, target_is_directory=True)
 
 
-def configure_image_paths(app, storage, namespace):
+def managed_runtime_link(source, target, storage, link_root):
+    """Update only a fixed image link in its private writable runtime directory.
+
+    Immutable image parents remain root-owned. A provider may run the bootstrap
+    as UID 1000, so it must not need to rename or unlink files in those parents.
+    """
+    source, target, link_root = Path(source), Path(target).resolve(), Path(link_root)
+    name = 'audio' if source.name == 'audio' else 'cache'
+    leaf = link_root / name
+    if (not source.is_symlink() or os.readlink(source) != str(leaf)):
+        return False
+    if link_root.is_symlink() or not link_root.is_dir() or link_root.resolve() != link_root:
+        raise BootError('IMAGE_WRITABLE_PATH_CONFLICT')
+    info = link_root.stat()
+    uid, gid = getattr(storage, 'uid', os.geteuid()), getattr(storage, 'gid', os.getegid())
+    if info.st_uid != uid or info.st_gid != gid or stat.S_IMODE(info.st_mode) != 0o700:
+        raise BootError('IMAGE_WRITABLE_PATH_CONFLICT')
+    if leaf.exists() or leaf.is_symlink():
+        if not leaf.is_symlink() or leaf.lstat().st_uid != uid or leaf.lstat().st_gid != gid:
+            raise BootError('IMAGE_WRITABLE_PATH_CONFLICT')
+        previous = Path(os.readlink(leaf))
+        allowed = (previous == Path(storage.audio_root).resolve() if name == 'audio' else
+                   previous.parent == Path(storage.cache_root).resolve() and
+                   re.fullmatch(r'(?:cpu|gpu)-[a-f0-9]{64}', previous.name))
+        if not previous.is_absolute() or not allowed:
+            raise BootError('IMAGE_WRITABLE_PATH_CONFLICT')
+        if previous == target:
+            return True
+    pending = link_root / ('.' + name + '-' + uuid.uuid4().hex)
+    try:
+        pending.symlink_to(target, target_is_directory=True)
+        if os.geteuid() == 0:
+            os.chown(pending, uid, gid, follow_symlinks=False)
+        os.replace(pending, leaf)  # Only the image-owned runtime symlink changes.
+    finally:
+        if pending.is_symlink():
+            pending.unlink()
+    return True
+
+
+def configure_image_paths(app, storage, namespace, *, link_root='/run/world-engine'):
     if not re.fullmatch(r'(?:cpu|gpu)-[a-f0-9]{64}', namespace):
         raise BootError('INVALID_RENDER_PROFILE')
     cache = Path(storage.cache_root) / namespace
@@ -104,24 +146,27 @@ def configure_image_paths(app, storage, namespace):
     finally:
         os.close(fd)
     # Mutable outputs are separate from the read-only approved source/data/assets.
-    link_image_path(Path(app) / 'cache', cache)
+    if not managed_runtime_link(Path(app) / 'cache', cache, storage, link_root):
+        link_image_path(Path(app) / 'cache', cache)
     audio = Path(app) / 'assets/audio'
     saved = Path(app) / 'assets/image_audio_seed'
     if not audio.is_symlink() and audio.is_dir():
         if saved.exists():
             raise BootError('IMAGE_AUDIO_SEED_CONFLICT')
         audio.rename(saved)
-    link_image_path(audio, storage.audio_root)
+    if not managed_runtime_link(audio, storage.audio_root, storage, link_root):
+        link_image_path(audio, storage.audio_root)
     return cache
 
 
-def main():
+def run_engine(status, stopping_event):
     began = time.monotonic()
     started_at = datetime.now(timezone.utc).isoformat()
     if str(APP) != '/opt/world-engine/world-simulation-shorts-engine':
         raise BootError('IMAGE_LAYOUT_REQUIRED')
     from deployment.gcube.storage import NativePersonalStorage
     from deployment.gcube.graphics_start import select_graphics_profile
+    from deployment.gcube.gpu_access import collect_device_groups
     from deployment.security import private_json
     from deployment.start_codespace import _runtime_preflight
     env = dict(os.environ)
@@ -137,17 +182,18 @@ def main():
     env['HOME'] = account.pw_dir
     storage = NativePersonalStorage(base, mode=mode, uid=account.pw_uid, gid=account.pw_gid).prepare(
         explicit_owner_code=code)
+    device_groups = collect_device_groups()
     # Prove graphics access with the same unprivileged identity as the server.
     def run_probe(command, **kwargs):
         if os.geteuid() == 0:
-            kwargs.update(user=account.pw_uid, group=account.pw_gid, extra_groups=[])
+            kwargs.update(user=account.pw_uid, group=account.pw_gid, extra_groups=device_groups)
         return subprocess.run(command, **kwargs)
     probe_env = dict(env)
     probe_env.pop('WORLD_ENGINE_OWNER_CODE', None)
     gpu = select_graphics_profile(probe_env, runner=run_probe)
     cache = configure_image_paths(APP, storage, gpu['cache_namespace'])
     if os.geteuid() == 0:
-        os.setgroups([])
+        os.setgroups(device_groups)
         os.setgid(account.pw_gid)
         os.setuid(account.pw_uid)
     seed_audio(APP / 'assets/image_audio_seed', storage.audio_root)
@@ -176,24 +222,34 @@ def main():
         command += ['--public-origin', env['WORLD_ENGINE_PUBLIC_ORIGIN']]
     if env.get('WORLD_ENGINE_LOCAL_MODE') == '1':
         command += ['--local-mode']
+    from deployment.gcube.telemetry import Telemetry
+    telemetry = Telemetry(runtime)
+    # Port 8000 is live during the bounded preflight. Release its read-only
+    # startup listener only when the private/authenticated engine can take over.
+    status.close()
+    if stopping_event.is_set():
+        return 0
     server = subprocess.Popen(command, cwd=APP, env=child_env, stdin=subprocess.DEVNULL)
     stopping = False
     def stop(signum, frame):
         nonlocal stopping
+        stopping_event.set()
         if not stopping and server.poll() is None:
             stopping = True
             server.terminate()
     signal.signal(signal.SIGTERM, stop)
     signal.signal(signal.SIGINT, stop)
-    from deployment.gcube.telemetry import Telemetry
-    telemetry = Telemetry(runtime)
-    telemetry.start()
+    if stopping_event.is_set():
+        stop(None, None)
+    health_opener = build_opener(ProxyHandler({}))
     try:
+        telemetry.start()
         deadline = time.monotonic() + 60
         while server.poll() is None and time.monotonic() < deadline:
             try:
-                with urlopen('http://127.0.0.1:8000/api/health', timeout=2) as response:
-                    if response.status == 200 and json.load(response).get('ok'):
+                with health_opener.open('http://127.0.0.1:8000/api/health', timeout=2) as response:
+                    value = json.load(response)
+                    if response.status == 200 and value.get('ok') and value.get('engine_ready') is True:
                         report['start']['server_boot_seconds'] = time.monotonic() - began
                         private_json(runtime / 'gcube-runtime.json', report)
                         print('World Engine ready on8000; owner-code is private; no provider stop or GPU speedup is implied.', flush=True)
@@ -217,10 +273,49 @@ def main():
         telemetry.close()
 
 
+def main():
+    """Keep liveness separate from permission to render or engine readiness.
+
+    A rejected GPU or missing configuration remains a visibly blocked, read-only
+    status service. It never admits a render, creates an owner login, changes
+    storage policy, retries forever, or silently selects a CPU renderer.
+    """
+    from deployment.gcube.boot_status import BootStatusServer
+    status = BootStatusServer().start()
+    stopping = threading.Event()
+
+    def stop(_signum, _frame):
+        stopping.set()
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    try:
+        try:
+            result = run_engine(status, stopping)
+            if stopping.is_set():
+                return result
+            raise BootError('WORLD_ENGINE_PROCESS_EXITED')
+        except Exception as error:
+            if stopping.is_set():
+                return 0
+            code = getattr(error, 'code', 'STARTUP_BLOCKED')
+            status.set_phase('blocked', error_code=code)
+            status.start()
+            signal.signal(signal.SIGTERM, stop)
+            signal.signal(signal.SIGINT, stop)
+            print('GCUBE startup blocked: ' + status.error_code, file=sys.stderr, flush=True)
+            while not stopping.wait(1):
+                pass
+            return 0
+    finally:
+        status.close()
+
+
 if __name__ == '__main__':
     try:
         sys.exit(main())
     except Exception as error:
         # Never log environment values, owner code or raw third-party responses.
-        print('GCUBE startup blocked: ' + getattr(error, 'code', type(error).__name__), file=sys.stderr)
+        from deployment.gcube.boot_status import safe_error_code
+        print('GCUBE startup blocked: ' + safe_error_code(getattr(error, 'code', None)), file=sys.stderr)
         sys.exit(2)

@@ -274,6 +274,43 @@ class GatewayTests(unittest.TestCase):
         with self.assertRaises(EngineError):
             self.app.validate_request({"topic": "test", "duration": 75})
 
+    def test_kubelet_and_istio_health_never_bind_an_origin(self):
+        for host in ("10.42.0.12:8000", "[fd00::5324]:8000", "localhost:8000"):
+            for path in ("/api/health", "/healthz", "/readyz"):
+                headers = {"Host": host, "X-Forwarded-Host": "internal-service:8000",
+                           "X-Forwarded-Proto": "http", "User-Agent": "kube-probe/1.30"}
+                with self.subTest(host=host, path=path):
+                    status, _, body = self.call("GET", path, headers=headers)
+                    self.assertEqual(status, 200)
+                    self.assertEqual(json.loads(body), {"ok": True, "engine_ready": True,
+                                     "phase": "ready", "authentication_required": True})
+        self.assertIsNone(self.app.bound_origin)
+        self.assertFalse(self.app.binding_path.exists())
+
+    def test_probe_headers_cannot_reach_authentication_or_mutations(self):
+        headers = {"Host": "10.42.0.12:8000", "X-Forwarded-Host": "internal-service:8000",
+                   "X-Forwarded-Proto": "http", "Origin": None}
+        for method, path in (("GET", "/auth/login"), ("GET", "/api/projects"),
+                             ("POST", "/auth/login"), ("POST", "/api/projects"),
+                             ("POST", "/api/health"), ("POST", "/healthz")):
+            with self.subTest(method=method, path=path):
+                status, _, _ = self.call(method, path, {} if method == "POST" else None, headers=headers)
+                self.assertIn(status, {400, 403})
+        self.assertIsNone(self.app.bound_origin)
+
+    def test_liveness_does_not_accept_an_explicit_foreign_origin(self):
+        for path in ("/api/health", "/healthz", "/readyz"):
+            status, _, _ = self.call("GET", path,
+                                    headers={"Host": "10.42.0.12:8000", "Origin": "https://evil.example"})
+            self.assertIn(status, {400, 403})
+
+    def test_readiness_head_does_not_open_project_data(self):
+        status, headers, body = self.call("HEAD", "/readyz", headers={"Host": "10.42.0.12:8000"})
+        self.assertEqual(status, 200)
+        self.assertEqual(body, b"")
+        self.assertGreater(int(headers["Content-Length"]), 0)
+        self.assertNotIn("Access-Control-Allow-Origin", headers)
+
 
 if __name__ == "__main__":
     from engine.storage import EngineError

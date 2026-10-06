@@ -25,8 +25,13 @@ RUN --mount=type=secret,id=proxy_ca \
     && useradd --uid 1000 --create-home engine \
     && chmod -R a+rX /opt/world-engine \
     && chmod 0755 deployment/gcube/chromium_wrapper.py \
-    && mkdir -p deployment/runtime cache assets/audio /data /world-storage \
-    && chown -R engine:engine deployment/runtime cache assets/audio
+    && mkdir -p deployment/runtime cache assets/audio /data /world-storage /run/world-engine \
+    && mv assets/audio assets/image_audio_seed \
+    && rmdir cache \
+    && ln -s /run/world-engine/cache cache \
+    && ln -s /run/world-engine/audio assets/audio \
+    && chmod 0700 /run/world-engine /data \
+    && chown -R engine:engine deployment/runtime /run/world-engine /data
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 CHROMIUM_PATH=/usr/bin/chromium \
     NVIDIA_DRIVER_CAPABILITIES=graphics,utility
 ENV WORLD_ENGINE_MAX_DURATION=180
@@ -35,5 +40,6 @@ ENV WORLD_ENGINE_MAX_DURATION=180
 USER root
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=3 \
-    CMD ["python", "-c", "import json,sys,urllib.request; opener=urllib.request.build_opener(urllib.request.ProxyHandler({})); response=opener.open('http://127.0.0.1:8000/api/health',timeout=3); value=json.loads(response.read(4096)); sys.exit(0 if response.status==200 and value.get('ok') is True and value.get('authentication_required') is True else 1)"]
-ENTRYPOINT ["/usr/bin/tini", "--", "python", "-m", "deployment.gcube.start"]
+    CMD ["python", "-c", "import json,sys,urllib.request; opener=urllib.request.build_opener(urllib.request.ProxyHandler({})); response=opener.open('http://127.0.0.1:8000/healthz',timeout=3); value=json.loads(response.read(4096)); sys.exit(0 if response.status==200 and value.get('ok') is True and value.get('authentication_required') is True else 1)"]
+ENTRYPOINT ["/usr/bin/tini", "-g", "--", "python", "-m", "deployment.gcube.start"]
+CMD []

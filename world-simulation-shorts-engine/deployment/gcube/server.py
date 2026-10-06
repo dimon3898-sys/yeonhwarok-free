@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import fcntl
 import html
+import ipaddress
 import json
 import os
 from pathlib import Path
@@ -161,7 +162,8 @@ class GcubeApplication(MobileApplication):
         devices = devices if isinstance(devices, list) else []
         models = [device["name"][:128] for device in devices
                   if isinstance(device, dict) and isinstance(device.get("name"), str)][:4]
-        return {"ok": True, "authentication_required": True, "provider": "GCUBE",
+        return {"ok": True, "engine_ready": True, "phase": "ready",
+                "authentication_required": True, "provider": "GCUBE",
                 "public_origin_bound": bool(self.bound_origin),
                 "render_backend": "GPU_VERIFIED" if verified else "CPU_VERIFIED" if mode == "cpu" else "UNVERIFIED",
                 "gpu": {"render_mode": mode, "gpu_profile": profile, "gpu_rendering_verified": verified,
@@ -182,6 +184,38 @@ class GcubeHandler(MobileHandler):
             if len(self.path) > 4096 or target.scheme or target.netloc:
                 raise SecurityError("INVALID_TARGET", "요청 주소를 확인해 주세요.")
             path = unquote(target.path)
+            # Kubelet/Istio probes use a Pod IP or localhost authority rather
+            # than the external HTTPS origin. Only fixed read-only liveness
+            # facts bypass the origin policy, never authentication or APIs.
+            if method in {"GET", "HEAD"} and path in {"/healthz", "/readyz", "/api/health"}:
+                origin = RequestPolicy._single_header(self.headers, "Origin")
+                host = RequestPolicy._single_header(self.headers, "Host")
+                probe = path in {"/healthz", "/readyz"}
+                if path == "/api/health" and host:
+                    try:
+                        authority = urlsplit("http://" + host)
+                        numeric = authority.hostname
+                        probe = numeric in {"localhost", "0.0.0.0"}
+                        if not probe:
+                            ipaddress.ip_address(numeric)
+                            probe = True
+                        probe = probe and not authority.username and not authority.password and not authority.path
+                        # Reject malformed or out-of-range ports before the
+                        # authority can be used even for this read-only route.
+                        authority.port
+                    except (ValueError, TypeError):
+                        probe = False
+                    bound = urlsplit(self.app.bound_origin).netloc if self.app.bound_origin else None
+                    local_health = (self.client_address[0] in {"127.0.0.1", "::1"}
+                                    and host in {f"127.0.0.1:{self.app.public_port}",
+                                                 f"localhost:{self.app.public_port}"}
+                                    and all(RequestPolicy._single_header(self.headers, name) is None
+                                            for name in ("X-Forwarded-Host", "X-Forwarded-Proto")))
+                    if host == bound or local_health:
+                        probe = False
+                if probe and origin is None:
+                    return self.json({"ok": True, "engine_ready": True, "phase": "ready",
+                                      "authentication_required": True})
             # Container liveness is a read-only exception on the loopback peer.
             # It cannot bind an origin, authenticate, or reach any other route.
             if method in {"GET", "HEAD"} and path == "/api/health" and self.client_address[0] in {"127.0.0.1", "::1"}:
