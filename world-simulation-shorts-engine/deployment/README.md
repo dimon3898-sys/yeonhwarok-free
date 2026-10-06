@@ -2,6 +2,8 @@
 
 기존 엔진과 MASTER/Flat/Rhythm 파일을 유지하면서 인증·작업 복구를 별도 계층으로 추가했다. 이 폴더는 새 렌더러가 아니다. 검증 결과와 실제 배포 상태는 `DEPLOYMENT_REPORT.md`에 기록한다.
 
+이미 사용하는 Codespace의7860 로그인에 `INVALID_ORIGIN`이 발생하면 [기존 Codespace Origin 수정 및 적용](CODESPACES_ORIGIN_FIX.md)을 사용한다. 새 Codespace를 만들지 않고 현재 서버 코드만 갱신한다.
+
 ## 휴대폰으로 시작하기
 
 공식 저장소 진입 주소: https://codespaces.new/dimon3898-sys/yeonhwarok-free?quickstart=1 (이미 실행 중인 웹앱 주소가 아니다).

@@ -356,7 +356,7 @@ class MobileHandler(Handler):
         self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self' blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'")
         self.send_header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
         self.send_header('Cache-Control', 'no-store')
-        if self.app.policy.secure_cookie:
+        if getattr(self, '_effective_origin', '').startswith('https://'):
             self.send_header('Strict-Transport-Security', 'max-age=31536000')
         super().end_headers()
 
@@ -371,7 +371,7 @@ class MobileHandler(Handler):
         value = token or ''
         age = 0 if delete else self.app.sessions.lifetime
         result = f'{self.app.sessions.cookie_name}={value}; Path=/; Max-Age={age}; HttpOnly; SameSite=Strict'
-        if self.app.policy.secure_cookie:
+        if getattr(self, '_effective_origin', '').startswith('https://'):
             result += '; Secure'
         self.send_header('Set-Cookie', result)
 
@@ -415,10 +415,9 @@ class MobileHandler(Handler):
             target = urlsplit(self.path)
             if len(self.path) > 4096 or target.scheme or target.netloc:
                 raise SecurityError('INVALID_TARGET', '요청 주소를 확인해 주세요.')
-            host = self.headers.get('Host', '')
-            self.app.policy.check_host(host)
+            self._effective_origin = self.app.policy.check_request(
+                self.headers, method=method, peer_ip=self.client_address[0])
             if method == 'POST':
-                self.app.policy.check_origin(self.headers.get('Origin'), host)
                 content_length(self.headers, 16 * 1024**2 if target.path == '/api/assets' else 64 * 1024)
             path = unquote(target.path)
             if method in {'GET', 'HEAD'} and path == '/api/health':

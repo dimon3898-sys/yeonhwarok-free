@@ -7,6 +7,7 @@ import hmac
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import stat
 import threading
@@ -182,29 +183,162 @@ class RateLimiter:
             return True
 
 
+LOCAL_NAMES = {'localhost', '127.0.0.1'}
+
+
+def codespaces_origin(port, environ=None):
+    """Derive one origin from server environment, never from request headers.
+
+    Codespaces may omit its forwarding-domain variable; its documented HTTPS
+    domain is still app.github.dev. A wildcard, a different port or Codespace,
+    and alternate domains are not admitted by this automatic configuration.
+    """
+    env = os.environ if environ is None else environ
+    name = env.get('CODESPACE_NAME')
+    if not name:
+        return None
+    domain = env.get('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN') or 'app.github.dev'
+    if (not isinstance(name, str) or not isinstance(domain, str) or
+            not re.fullmatch(r'[a-z0-9](?:[a-z0-9-]*[a-z0-9])?', name.lower()) or
+            domain.lower() != 'app.github.dev' or isinstance(port, bool) or
+            not isinstance(port, int) or not 1 <= port <= 65535 or
+            len(f'{name}-{port}') > 63):
+        raise SecurityError('INVALID_CODESPACES_ORIGIN', 'Codespaces 서버 주소 설정을 확인해 주세요.')
+    return f'https://{name.lower()}-{port}.app.github.dev'
+
+
+def _authority(value, scheme):
+    if not isinstance(value, str) or not value or not value.isascii() or re.search(r'[\s,\\/?#@]', value):
+        raise ValueError('Invalid authority')
+    parsed = urlsplit('//' + value)
+    name, port = parsed.hostname, parsed.port
+    if (not name or len(name) > 253 or parsed.path or parsed.query or parsed.fragment or
+            parsed.username is not None or parsed.password is not None or
+            not all(re.fullmatch(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?', label)
+                    for label in name.split('.')) or
+            (port is not None and not 1 <= port <= 65535) or value.endswith(':')):
+        raise ValueError('Invalid authority')
+    if port == {'http': 80, 'https': 443}[scheme]:
+        port = None
+    return name + (f':{port}' if port is not None else '')
+
+
+def _origin(value, *, configuration=False):
+    if not isinstance(value, str) or not value or not value.isascii() or re.search(r'[\s,\\]', value):
+        raise ValueError('Invalid origin')
+    parsed = urlsplit(value)
+    if (parsed.scheme not in {'http', 'https'} or not parsed.netloc or
+            parsed.path not in ({'', '/'} if configuration else {''}) or
+            parsed.query or parsed.fragment or '?' in value or '#' in value):
+        raise ValueError('Invalid origin')
+    return f'{parsed.scheme}://{_authority(parsed.netloc, parsed.scheme)}'
+
+
 class RequestPolicy:
-    def __init__(self, public_origins=(), *, local_port=7860):
+    def __init__(self, public_origins=(), *, local_port=7860, environ=None):
+        self.codespace_origin = codespaces_origin(local_port, environ)
+        self.local_hosts = {_authority(f'127.0.0.1:{local_port}', 'http'),
+                            _authority(f'localhost:{local_port}', 'http')}
         self.origins = set()
-        self.hosts = {f'127.0.0.1:{local_port}', f'localhost:{local_port}'}
         for value in public_origins:
-            u = urlsplit(value)
-            if u.scheme not in {'https', 'http'} or not u.netloc or u.path not in {'', '/'} or u.query or u.fragment or u.username:
-                raise SecurityError('INVALID_PUBLIC_ORIGIN', '공개 주소 설정을 확인해 주세요.')
-            if u.scheme != 'https' and u.hostname not in {'localhost', '127.0.0.1'}:
+            try:
+                origin = _origin(value, configuration=True)
+            except (ValueError, TypeError):
+                raise SecurityError('INVALID_PUBLIC_ORIGIN', '공개 주소 설정을 확인해 주세요.') from None
+            parsed = urlsplit(origin)
+            if parsed.scheme != 'https' and parsed.hostname not in LOCAL_NAMES:
                 raise SecurityError('HTTPS_REQUIRED', '공개 주소에는 HTTPS가 필요합니다.')
-            self.origins.add(f'{u.scheme}://{u.netloc}')
-            self.hosts.add(u.netloc)
+            if self.codespace_origin and parsed.hostname not in LOCAL_NAMES and origin != self.codespace_origin:
+                raise SecurityError('INVALID_CODESPACES_ORIGIN', '현재 Codespace의 서버 주소만 허용됩니다.')
+            self.origins.add(origin)
+            if parsed.scheme == 'http' and parsed.hostname in LOCAL_NAMES:
+                self.local_hosts.add(parsed.netloc)
+        if self.codespace_origin:
+            self.origins.add(self.codespace_origin)
+        self.hosts = self.local_hosts | {urlsplit(x).netloc for x in self.origins}
+        # Compatibility for callers inspecting configuration. Cookies themselves
+        # use each request's verified effective origin, preserving local HTTP.
         self.secure_cookie = any(x.startswith('https://') for x in self.origins)
 
     def check_host(self, host):
-        if host not in self.hosts:
+        try:
+            parsed = urlsplit('//' + host)
+            canonical = _authority(host, 'http' if parsed.hostname in LOCAL_NAMES else 'https')
+            if parsed.hostname in LOCAL_NAMES and canonical not in self.hosts:
+                https_authority = _authority(host, 'https')
+                if f'https://{https_authority}' in self.origins:
+                    canonical = https_authority
+        except (ValueError, TypeError):
+            raise SecurityError('INVALID_HOST', '허용되지 않은 주소입니다.', 400) from None
+        if canonical not in self.hosts:
             raise SecurityError('INVALID_HOST', '허용되지 않은 주소입니다.', 400)
+        return canonical
 
     def check_origin(self, origin, host):
-        self.check_host(host)
-        expected = self.origins | {f'http://{h}' for h in self.hosts if h.split(':')[0] in {'localhost', '127.0.0.1'}}
-        if origin not in expected:
+        canonical_host = self.check_host(host)
+        try:
+            canonical = _origin(origin)
+        except (ValueError, TypeError):
+            raise SecurityError('INVALID_ORIGIN', '같은 사이트의 요청만 허용됩니다.', 403) from None
+        expected = self.origins | {f'http://{h}' for h in self.local_hosts}
+        if canonical not in expected or (canonical_host not in self.local_hosts and
+                                        urlsplit(canonical).netloc != canonical_host):
             raise SecurityError('INVALID_ORIGIN', '같은 사이트의 요청만 허용됩니다.', 403)
+        return canonical
+
+    @staticmethod
+    def _single_header(headers, name):
+        values = headers.get_all(name, []) if hasattr(headers, 'get_all') else ([headers[name]] if name in headers else [])
+        if len(values) > 1 or (values and (not isinstance(values[0], str) or
+                                         re.search(r'[\s,]', values[0]))):
+            code = 'INVALID_ORIGIN' if name == 'Origin' else 'INVALID_HOST' if name == 'Host' else 'INVALID_FORWARDED_HEADERS'
+            raise SecurityError(code, '요청 주소 헤더를 확인해 주세요.', 403 if name != 'Host' else 400)
+        return values[0] if values else None
+
+    def check_request(self, headers, *, method='GET', peer_ip=None):
+        """Validate the proxy envelope without expanding the fixed allowlist.
+
+        Codespaces TLS ends before the Python HTTP listener. The peer may be a
+        Docker bridge rather than loopback; neither its IP nor forwarded headers
+        grant access. Every authority must already be configured, and owner-code
+        authentication remains mandatory. Missing/null mutation Origin fails.
+        """
+        host = self.check_host(self._single_header(headers, 'Host'))
+        origin = self._single_header(headers, 'Origin')
+        forwarded_host = self._single_header(headers, 'X-Forwarded-Host')
+        proto = self._single_header(headers, 'X-Forwarded-Proto')
+        if proto is not None and proto not in {'http', 'https'}:
+            raise SecurityError('INVALID_FORWARDED_HEADERS', '프록시 주소 헤더를 확인해 주세요.', 403)
+        if forwarded_host is not None:
+            forwarded_host = self.check_host(forwarded_host)
+            effective = f'https://{forwarded_host}'
+            if (effective not in self.origins or proto == 'http' or
+                    (host not in self.local_hosts and host != forwarded_host)):
+                raise SecurityError('INVALID_FORWARDED_HEADERS', '프록시 주소 헤더를 확인해 주세요.', 403)
+        elif host not in self.local_hosts:
+            effective = f'https://{host}'
+            if effective not in self.origins or proto == 'http':
+                raise SecurityError('INVALID_FORWARDED_HEADERS', '프록시 주소 헤더를 확인해 주세요.', 403)
+        else:
+            effective = f'http://{host}'
+            # Older tunnels preserve Origin but rewrite Host, with no XFH.
+            # Exact configured HTTPS Origin is safe; do not learn a new origin.
+            if origin is not None:
+                candidate = self.check_origin(origin, host)
+                if candidate.startswith('https://') and candidate in self.origins:
+                    if proto == 'http':
+                        raise SecurityError('INVALID_FORWARDED_HEADERS', '프록시 주소 헤더를 확인해 주세요.', 403)
+                    effective = candidate
+            elif proto == 'https':
+                https_origins = {x for x in self.origins if x.startswith('https://')}
+                if len(https_origins) != 1:
+                    raise SecurityError('INVALID_FORWARDED_HEADERS', '프록시 공개 주소를 확인해 주세요.', 403)
+                effective = next(iter(https_origins))
+        if origin is not None or method not in {'GET', 'HEAD', 'OPTIONS'}:
+            canonical_origin = self.check_origin(origin, host)
+            if canonical_origin != effective:
+                raise SecurityError('INVALID_ORIGIN', '같은 사이트의 요청만 허용됩니다.', 403)
+        return effective
 
 
 def content_length(headers, maximum, *, required=True):
