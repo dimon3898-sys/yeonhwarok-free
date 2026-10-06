@@ -1,0 +1,651 @@
+{
+  "title": "gcube workload deployment and persistence official-source research",
+  "generated_at_utc": "2026-10-06T10:00:27.388843+00:00",
+  "generated_at_kst": "2026-10-06T19:00:27.388843+09:00",
+  "scope": "Read-only HTTP discovery and official document/package source inspection. No login, token acquisition, payments, workload creation/start/stop/API call, CLI execution/installation, application edit/Git operation or render was performed.",
+  "official_source_provenance": {
+    "discovery": "GitHub public repository search identified Data-Alliance gcube examples and pinned gai-platform-docs. The docs README explicitly links the gcube console and published docs. Official docs direct users to install gcube-cli; PyPI package description calls itself the official gcube tool and links same Data-Alliance docs and gcube.ai.",
+    "console_url": "https://console.gcube.ai/",
+    "main_site_url": "https://gcube.ai/",
+    "published_docs_url": "https://data-alliance.github.io/gai-platform-docs/",
+    "documented_workload_page_url": "https://gcube.ai/ko/demand/workload/list",
+    "documented_access_token_url": "https://gcube.ai/ko/demand/user/access-token",
+    "actual_site_ui_verified": false,
+    "notes": "Console/site URLs are documented, not invented or confirmed active in this session. Native console/pricing fetches were denied by inherited proxy CONNECT403. GitHub source is current master/main fetch; downloaded-byte SHA256 is not a repository commit."
+  },
+  "verified_facts": [
+    {
+      "id": "documented_create_ui",
+      "fact": "Workload Mode → 새 워크로드 등록; enter description, registry and image; verify image/auto-detected EXPOSE port; optional startup command/env/Personal Storage/max HTTP connections; GPU model/VRAM/hourly price/available-only filter; Istio proxy/consistent hash/minCUDA/shared-memory options; review expected total, choose immediate deployment, register. This is the documented UI, not a live logged-in UI observation.",
+      "sources": [
+        "register",
+        "cli_workload_doc"
+      ]
+    },
+    {
+      "id": "image_and_port",
+      "fact": "GitHub image format is ghcr.io/owner/repository:tag. EXPOSE is used for port auto-detection and port can be specified explicitly. Official Qwen serving workload uses port8000. The app must bind the matching internal port. Public registry needs no registry credential.",
+      "sources": [
+        "register",
+        "cli_workload_doc",
+        "demo_workload"
+      ]
+    },
+    {
+      "id": "command_env",
+      "fact": "Command and container env are supported; if command omitted, docs say image default CMD or ENTRYPOINT runs. Exact command override/argv precedence versus ENTRYPOINT is not specified. Released skill says blank command uses image default CMD.",
+      "sources": [
+        "register",
+        "cli_workload_doc"
+      ],
+      "package_sources": [
+        "gcube_cli/skills/gcube_skill.md"
+      ]
+    },
+    {
+      "id": "service_https",
+      "fact": "Deploy activates Service URL after several minutes; workload detail Overview supplies it. Official Ollama guide states format https://xxxxxxxx.gcube.ai. No actual WorldEngine hostname was obtained; HTTPS proxy forwarded headers and injected hostname/origin environment variables were not documented in reviewed sources.",
+      "sources": [
+        "deploy",
+        "api_serving"
+      ]
+    },
+    {
+      "id": "billing_until_stop",
+      "fact": "Official serving guide says billing runs from deploy until stop and continues while unused. Stop doc says point deduction stops on workload termination. Released CLI skeleton explicitly says without STOP schedule it will not auto-stop and billing continues. A default idle shutdown or request-triggered wake is not established.",
+      "sources": [
+        "api_serving",
+        "stop"
+      ],
+      "package_sources": [
+        "gcube_cli/commands/workload.py"
+      ]
+    },
+    {
+      "id": "destructive_stop",
+      "fact": "Official stop guide warns all working data and environment are deleted on stop if backup storage is not configured. Connect Personal Storage ahead of time and select it when registering the workload. Do not rely on local container files surviving stop/restart.",
+      "sources": [
+        "stop",
+        "storage"
+      ]
+    },
+    {
+      "id": "legacy_personal_storage",
+      "fact": "User docs describe Dropbox OAuth or AWS S3 credentials/region, a container mount path that supports reads/writes, and explicit workload Personal Storage selection. Docs do not specify live backup sync, startup restore timing, POSIX guarantees, fcntl/flock, atomic rename or 0600 handling.",
+      "sources": [
+        "storage",
+        "stop"
+      ]
+    },
+    {
+      "id": "native_gcube_storage",
+      "fact": "Latest released CLI0.4.2 supports native gcube storage distinguished by a non-null bucket, and literal mount key gcube in userStorages; legacy external mounts use a StorageSER key. It filters storage entries to PV/PVC Bound. Official gcube-file-api design mounts a user JuiceFS PVC in an internal on-demand Pod. This proves a native PVC design exists, but not current user account entitlement/UI activation, pricing, capacity or workload POSIX behavior.",
+      "sources": [
+        "file_api_readme"
+      ],
+      "package_sources": [
+        "gcube_cli/api/storage.py",
+        "gcube_cli/api/workload.py",
+        "gcube_cli/skills/gcube_skill.md"
+      ]
+    },
+    {
+      "id": "api_and_schedule",
+      "fact": "Released official CLI defaults to https://api.gcube.ai and supports start GET /api/workloads/gai/{SER}/state/deploy, stop GET /api/workloads/gai/{SER}/state/finish; schedule GET/PUT/DELETE /api/workloads/gai/{SER}/schedule. PUT replaces all schedules. This was source inspection only; none of these endpoints was contacted.",
+      "package_sources": [
+        "gcube_cli/api/client.py",
+        "gcube_cli/api/workload.py"
+      ]
+    },
+    {
+      "id": "gpu_prices",
+      "fact": "GPU model, CPU, RAM, disk and hourly price depend on selected specification/node. Official docs say providers set different rates and actual charge uses selected node rate. Available resources must be read live. Official demo rate table contains several GPUs but no RTX5070; it is benchmark cost commentary, not a live price list.",
+      "sources": [
+        "cli_gpu_doc",
+        "set_price",
+        "demo_rates"
+      ]
+    },
+    {
+      "id": "points",
+      "fact": "Released official skill says 1P=1KRW. Official point docs separately list Network Point from traffic usage. Point insufficiency block exists as a returned state/CLI warning, but its exact timing, stopped-storage/network billing and exhaustion/refund contract are not verified.",
+      "sources": [
+        "cli_point_doc"
+      ],
+      "package_sources": [
+        "gcube_cli/skills/gcube_skill.md"
+      ]
+    },
+    {
+      "id": "legitimate_render",
+      "fact": "Official what-is-gcube page explicitly lists video rendering and GPU accelerated rendering pipelines as platform workloads. Whether this specific engine actually uses RTX graphics/CUDA/NVENC remains an independent hardware/configuration test. Minimum CUDA selection alone does not establish EGL/graphics/video device exposure.",
+      "sources": [
+        "about"
+      ]
+    }
+  ],
+  "user_reported_only": {
+    "account_exists": true,
+    "minimum_top_up_points": 20000,
+    "vat_inclusive_payment_krw": 22000,
+    "verification": "Parent supplied these as user-reported observations. This research did not access the account, verify minimum top-up/VAT/current balance, or pay."
+  },
+  "material_unverified_conditions": [
+    "Current actual logged-in UI fields and account-entitled native gcube storage creation/capacity/price; account balance.",
+    "RTX5070 versus RTX5070Ti current availability, VRAM/CPU/RAM/disk package, final hourly rate, selected node behavior, VAT/network charges and charge rounding.",
+    "HTTPS proxy forwarded header values/trust boundary, original Host header, provider-injected hostname/env, actual public app URL and URL stability on stop/redeployment.",
+    "Exact containerCommand replacement semantics versus Docker ENTRYPOINT; graphics/video driver capability exposure for Chromium/EGL/NVENC; CUDA minimum alone is insufficient.",
+    "Legacy backup startup restore/sync guarantees; native/legacy storage fcntl locks, atomic rename and restrictive mode semantics; data protection before stopping.",
+    "Billing exhaustion hard stop, default idle termination, on-demand wake, current actual API permissions and schedule execution guarantees."
+  ],
+  "secondary_compatibility_warning": {
+    "source_url": "https://raw.githubusercontent.com/chaeyoon-08/gcube-rag-mcp/main/README.md",
+    "official_status": "Not independently verified as official; this owner supplies some images in Data-Alliance examples.",
+    "finding": "README explicitly describes Dropbox/S3 as FUSE and SQLite-lock incompatibility, keeping DB local with periodic backup/startup restore. This is a concrete compatibility warning, not an authoritative blanket platform claim, especially given native JuiceFS design.",
+    "body_metadata": {
+      "id": "rag_5070_readme",
+      "url": "https://raw.githubusercontent.com/chaeyoon-08/gcube-rag-mcp/main/README.md",
+      "fetched_at_utc": "2026-10-06T09:57:14.446074+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 5372,
+      "sha256": "c3b729e0cd96693f385d7e139b92c145cd4b72430ba13c69a7cdf451f850cfd7"
+    },
+    "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/rag_5070_readme.md"
+  },
+  "recommended_pre_activation_checks": [
+    "Use image built with correct EXPOSE and default startup; avoid unknown command override. Inject app-owned credentials as env, and optionally an exact WORLD_ENGINE_PUBLIC_ORIGIN after the real Service URL is issued; do not invent hostname/env metadata.",
+    "Select actual node GPU/CPU/RAM/disk/rate in UI and review total; create/deploy remains an externally authorized paid action, not performed here.",
+    "Prefer account-provided native gcube storage if available and compatible. Verify lock/atomic rename/0600 semantics on the actual mount before putting live engine state/auth there; otherwise keep active state local and use explicit safe backup/export/restore design.",
+    "Do not stop until required files are safely exported or persistence is verified. Without an explicit STOP schedule or manual stop the workload continues billing; the service URL is inactive when stopped, and automatic wake is not documented.",
+    "Validate actual provider HTTPS Host/Origin behavior and phone owner-login/download flow without running an unauthorized sample video."
+  ],
+  "sources": [
+    {
+      "id": "cli_readme",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gcube-cli-examples/main/README.md",
+      "fetched_at_utc": "2026-10-06T09:55:01.370635+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 3096,
+      "sha256": "12a9241d0ab843a2a92e129fcce6f9b888bf14d410a1d953fdbf3fb75b543cd5",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gcube-cli-examples/main/README.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_readme.md",
+      "quotations": [
+        {
+          "line_start": 8,
+          "line_end": 11,
+          "quotation": "스킬 (`skills/gcube-workload-create.zip`) 은 활용 2 에서 사용됩니다.\n\n> 본 자료는 작성 시점(2026-05)의 gcube CLI 기준입니다.\n> 최신 gcube CLI 와 명령·옵션이 다를 수 있으며, 추후 업데이트 예정입니다."
+        }
+      ]
+    },
+    {
+      "id": "demo_workload",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gcube-demo-qwen-tts/main/workload.yml",
+      "fetched_at_utc": "2026-10-06T09:55:21.378534+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 864,
+      "sha256": "ea780332ae2441974c3e5314821fb314e2bcf6c2ad85671ecbf8d1ba25a189ef",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gcube-demo-qwen-tts/main/workload.yml",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/demo_workload.md",
+      "quotations": [
+        {
+          "line_start": 1,
+          "line_end": 13,
+          "quotation": "description: \"Qwen3-TTS CustomVoice 음성합성(TTS) 데모 (한국어 화자 Sohee)\"\ncuda: \"\" # 비워둠 — torch cu128 휠이 CUDA 런타임 자체 포함 (Blackwell/RTX50 지원, 선택값)\nsharedMemory: 1\n\ncontainers:\n  - containerImage: \"yjoh/qwen-tts:latest\" # Docker Hub 공개\n    repo: docker.io # Docker Hub (ECR Public 데이터 한도 회피 — 큰 이미지)\n    port: 8000 # uvicorn (Dockerfile EXPOSE 8000 / entrypoint uvicorn :8000)\n    maxConnection: 20 # 웹 UI 기준(gpu.json 폴링+다중 뷰어). GPU는 lock으로 1건씩 직렬화라 안전\n    containerCommand: \"\"\n    isCredential: false # Docker Hub 공개 repo → 인증 불필요\n    containerEnvs: [] # 별도 키 없음 (Qwen3-TTS 한국어 네이티브). 필요시 ATTN_IMPL=eager 등\n    userStorages: [] # 마운트 없음 (오디오 저장 X, 모델은 이미지에 구움)"
+        }
+      ]
+    },
+    {
+      "id": "demo_rates",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gcube-demo-qwen-tts/main/rates.py",
+      "fetched_at_utc": "2026-10-06T09:55:21.379095+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 952,
+      "sha256": "473ddbe3dc5d0e83b1724f40abfceeca79d5c6e858e5d0cf08e77f081c05a995",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gcube-demo-qwen-tts/main/rates.py",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/demo_rates.md",
+      "quotations": [
+        {
+          "line_start": 1,
+          "line_end": 10,
+          "quotation": "\"\"\"GPU 시간당 요금표(원) — 단일 소스(single source of truth).\nbench_push.py·gpu_metrics.py가 import해서 쓰고, 웹UI는 gpu_metrics가 gpu.json에\n실어 보내는 rate를 그대로 사용한다(app.js에 요금표 중복 X). 값 수정은 여기 한 곳만.\n기준: gcube-demo 비교탭(pricing.js).\"\"\"\nimport re\n\nRATES = {\n    \"5090\": 1159, \"4090\": 489, \"4080\": 326,\n    \"5060ti\": 309, \"5060\": 121, \"4060ti\": 168, \"4060\": 168,\n    \"3080\": 92, \"3070\": 75, \"a100\": 4270, \"h100\": 9200,"
+        }
+      ]
+    },
+    {
+      "id": "official_readme",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/README.md",
+      "fetched_at_utc": "2026-10-06T09:55:37.213598+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 388,
+      "sha256": "dc16dd12546be8c33bb31a25aa9121a093272cad90905dd2d43f8de3fbb57505",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/README.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/official_readme.md",
+      "quotations": [
+        {
+          "line_start": 1,
+          "line_end": 5,
+          "quotation": "## Gcube 문서\n![image](https://github.com/user-attachments/assets/ebb4ac40-0b92-4468-8e77-5b9b86c174ec)\n\nGcube 문서 페이지입니다. Gcube 플랫폼에 대한 소개는 [Gcube 웹사이트](https://console.gcube.ai/)를 참고하세요. <br>\n이 문서에 대한 웹사이트는 [Gcube Docs](https://data-alliance.github.io/gai-platform-docs/)에서 확인하실 수 있습니다."
+        }
+      ]
+    },
+    {
+      "id": "register",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/register-workload.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.096331+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 3844,
+      "sha256": "13c83a62a540fb47fb09f8b116980b8bbb7bd7d0a598ba10d373edb845fc8f1d",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/register-workload.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/register.md",
+      "quotations": [
+        {
+          "line_start": 9,
+          "line_end": 18,
+          "quotation": "## **시작 전 확인사항**\n\n- 포인트가 충분히 충전되어 있어야 합니다.\n- 사용할 컨테이너 이미지의 URL을 미리 준비해두세요.\n\n## **① 기본 정보 입력**\n\n1. Workload Mode 좌측 메뉴에서 새 워크로드 등록을 클릭합니다.\n![001_register-workload](img/register-workload/001_register-workload.png)\n1. 워크로드 설명란에 이 워크로드의 용도를 간단히 작성합니다."
+        },
+        {
+          "line_start": 24,
+          "line_end": 46,
+          "quotation": "\n| **항목** | **설명** |\n| --- | --- |\n| 저장소 유형 | 컨테이너 이미지가 저장된 플랫폼 선택 |\n| 컨테이너 이미지 | 저장소별 이미지 URL 입력 |\n| 컨테이너 포트 | 이미지 검증 시 자동 입력 |\n| 컨테이너 명령 | 컨테이너 실행 시 시작 명령어 (선택) |\n| 컨테이너 환경변수 | 컨테이너 내부 환경변수 설정 (선택) |\n| 개인 Storage | 백업용 개인 저장소 연결 (선택) |\n| 동시 처리 요청 수 | 서비스로 한 번에 전달할 수 있는 HTTP 요청 또는 연결 수 |\n\n**저장소별 이미지 URL 입력 형식**\n\n| **저장소** | **입력 형식** | **예시** |\n| --- | --- | --- |\n| Docker Hub | username/repository:tag | ollama/ollama:latest |\n| NVIDIA NGC | nvcr.io/nvidia/repository:tag | nvcr.io/nvidia/cuda:12.0.0-base-ubuntu22.04 |\n| GitHub | ghcr.io/owner/repository:tag | ghcr.io/organization/app:1.0 |\n| Red Hat Quay | quay.io/namespace/repository:tag | quay.io/redhat/ubi8:latest |\n\n이미지 URL을 올바르게 입력하면 녹색 체크 표시와 함께 포트가 자동 입력됩니다.<br> 유효하지 않은 이미지는 빨간색 표시가 나타납니다.\n\n## **③ GPU 선택**"
+        },
+        {
+          "line_start": 52,
+          "line_end": 77,
+          "quotation": "| GPU 모델명 | 원하는 GPU 모델 검색 및 선택 |\n| GPU 메모리 | 필요한 최소 VRAM 용량 설정 |\n| 비용 | 시간당 최소~최대 비용 범위로 필터링 |\n| 사용가능한 GPU만 보기 | 현재 즉시 사용 가능한 GPU만 표시 |\n\n**Tier 구분 기준**\n\n- Tier 1: 클라우드 사업자\n- Tier 2: 전용 서버\n- Tier 3: PC방, 개인\n\n## **④ 옵션 설정**\n\n![005_register-workload](img/register-workload/005_register-workload.png)\n\n| **항목** | **설명** |\n| --- | --- |\n| Istio 프록시 사용 | 컨테이너 네트워크 트래픽 관리 프록시 사용 여부 |\n| Istio L7 Consistent Hash | 동일 클라이언트 요청을 같은 Pod로 라우팅 |\n| 최소 CUDA 버전 | 필요한 최소 CUDA 버전 지정 |\n| 공유 메모리 | 프로세스 간 데이터 공유 영역 크기 |\n\n## **⑤ 등록**\n\n![006_register-workload](img/register-workload/006_register-workload.png)\n1. 총 예상 금액을 확인합니다."
+        },
+        {
+          "line_start": 81,
+          "line_end": 85,
+          "quotation": "## **등록 예시 — Ollama**\n\n!!! tip\n    Ollama로 DeepSeek 모델을 실행하는 기본적인 워크로드 등록 예시입니다.\n"
+        }
+      ]
+    },
+    {
+      "id": "deploy",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/deploy-workload.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.097392+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 1273,
+      "sha256": "f38f6198c368dc5914443c1916ef7d779da1a7c36f26796d66b11ecf94165c8d",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/deploy-workload.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/deploy.md",
+      "quotations": [
+        {
+          "line_start": 3,
+          "line_end": 7,
+          "quotation": "등록된 워크로드를 배포해 GPU 자원 사용을 시작합니다.\n\n!!! tip\n    배포가 완료되면 서비스 URL이 활성화되어 워크로드에 접속할 수 있습니다. \n    배포에는 수 분이 소요될 수 있습니다."
+        },
+        {
+          "line_start": 11,
+          "line_end": 15,
+          "quotation": "1. 워크로드 목록에서 배포할 워크로드 항목의 배포 버튼을 클릭합니다.\n![001_deploy-workload.png](img/deploy-workload/001_deploy-workload.png)\n1. 확인 팝업에서 확인 버튼을 클릭합니다.\n2. 워크로드 상태가 미배포 → 배포로 변경되고 서비스 URL이 활성화됩니다.\n![002_deploy-workload.png](img/deploy-workload/002_deploy-workload.png)"
+        },
+        {
+          "line_start": 23,
+          "line_end": 29,
+          "quotation": "## **배포 상태 종류**\n\n| **상태** | **설명** |\n| --- | --- |\n| 미배포 | 등록은 됐지만 아직 실행되지 않은 상태 |\n| 배포 중 | 배포 명령 후 준비 중인 상태 |\n| 배포 | 정상 실행 중, 서비스 URL 접속 가능 |"
+        }
+      ]
+    },
+    {
+      "id": "stop",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/stop-workload.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.098052+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 1392,
+      "sha256": "7f8ea67123b85abb4646198c6f6818225798b015772638034f2f2c473a36d715",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/stop-workload.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/stop.md",
+      "quotations": [
+        {
+          "line_start": 3,
+          "line_end": 11,
+          "quotation": "배포된 워크로드를 중단합니다.\n\n!!! tip\n    워크로드를 종료하면 포인트 차감이 중단됩니다. \n    종료 전 데이터 저장 여부를 반드시 확인하세요.\n\n!!! warning\n    백업 저장소를 설정하지 않은 경우 종료 시 작업 중이던 데이터와 환경이 모두 삭제됩니다.<br>\n    사전에 저장소 관리에서 개인 Storage를 설정하세요."
+        },
+        {
+          "line_start": 15,
+          "line_end": 25,
+          "quotation": "1. 워크로드 목록에서 종료할 항목의 배포중지 버튼을 클릭합니다.\n![001_stop-workload.png](img/stop-workload/001_stop-workload.png)\n1. 확인 팝업에서 확인 버튼을 클릭합니다.\n2. 워크로드 상태가 배포 → 종료로 변경되며 서비스가 중단됩니다.\n![002_stop-workload.png](img/stop-workload/002_stop-workload.png)\n\n## **종료 후 데이터 보존 방법**\n\n워크로드 종료 후에도 데이터를 보존하려면 사전에 개인 Storage를 연결하고 워크로드 등록 시 설정해야 합니다.\n\n- 저장소 관리 → 백업 데이터 개인 저장소 연결 등록"
+        }
+      ]
+    },
+    {
+      "id": "storage",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/sign-up/storage-management.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.099455+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 2658,
+      "sha256": "37a15465d2888fba5f209f033c74070d38994698eb853dcff1ed324fea0f2350",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/sign-up/storage-management.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/storage.md",
+      "quotations": [
+        {
+          "line_start": 9,
+          "line_end": 13,
+          "quotation": "## **저장소 관리 진입 방법**\n\n1. 화면 우측 상단 이름 옆 화살표를 클릭한 후 저장소 관리를 클릭합니다.\n![001_storage-management](img/storage-management/001_storage-management.png)\n1. 컨테이너 이미지 저장소 인증정보 등록과 백업 데이터 개인 저장소 연결 두 섹션이 표시됩니다."
+        },
+        {
+          "line_start": 17,
+          "line_end": 25,
+          "quotation": "\n개인(프라이빗) 저장소의 컨테이너 이미지를 워크로드에 사용하려면 인증 정보를 먼저 등록해야 합니다.\n\n1. **+ 인증 정보 등록** 버튼을 클릭합니다.\n![003_storage-management](img/storage-management/003_storage-management.png)\n1. 사용할 저장소 제공 업체를 선택하고 필요한 정보를 입력합니다.\n![004_storage-management](img/storage-management/004_storage-management.png)\n2. 등록 버튼을 클릭하면 완료됩니다.\n"
+        },
+        {
+          "line_start": 28,
+          "line_end": 50,
+          "quotation": "## **백업 데이터 개인 저장소 연결**\n\n워크로드 종료 시 데이터를 보존하려면 개인 저장소(Dropbox, AWS S3 등)를 연결해야 합니다.\n\n1. **+ 개인 백업 저장소 연결** 버튼을 클릭합니다.\n![005_storage-management](img/storage-management/005_storage-management.png)\n2. 유형을 선택하고 저장소 제공 업체를 선택합니다.\n![006_storage-management](img/storage-management/006_storage-management.png)\n3. 필요한 인증 정보를 입력합니다.\n\n| **저장소** | **필요 정보** |\n| --- | --- |\n| Dropbox | Dropbox 계정 인증 (OAuth) |\n| AWS S3 | IAM Access Key, Secret Access Key, Bucket Region |\n1. 저장소 설명과 컨테이너 내부 마운트 경로를 설정합니다.\n\n예: /data/data → 컨테이너 내부에서 저장소가 마운트되는 경로. 이 위치에서 파일을 읽고 쓸 수 있습니다.\n\n1. 등록 버튼을 클릭하면 완료됩니다.\n![007_storage-management](img/storage-management/007_storage-management.png)\n\n!!! warning\n    워크로드 등록 시 개인 Storage 항목에서 이 저장소를 선택해야 실제로 데이터가 백업됩니다."
+        }
+      ]
+    },
+    {
+      "id": "cli_workload_doc",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-workload.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.101563+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 8483,
+      "sha256": "852e7c094cd87c2ee07675853a88c1aaeda1869f35d9019fb86f9d1a262f9ff0",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-workload.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_workload_doc.md",
+      "quotations": [
+        {
+          "line_start": 64,
+          "line_end": 80,
+          "quotation": "| `--description` | 워크로드 이름 (2-80자) |\n| `--image` | 컨테이너 이미지 |\n| `--gpu` | GPU 코드 (`gcube gpu list`의 CODE 값) |\n| `--cuda` | CUDA 버전 코드 (선택, [CUDA 버전 코드 표](http://127.0.0.1:8000/gai-platform-docs/user-guide/gcube-cli/cli-workload/#cuda) 참고) |\n| `--repo` | 레지스트리 (기본: `docker.io`) |\n| `--port` | 서비스 포트 (기본: 자동 감지) |\n| `--credential` | 비공개 레지스트리 인증 사용 |\n\n!!! note \"`--image` 입력 형식\"\n    Docker 이미지는 `저장소/이미지명:태그` 형식으로 입력합니다.\n\n    | 예시 | 설명 |\n    |---|---|\n    | `ollama/ollama:latest` | Docker Hub의 ollama 이미지, 최신 버전 |\n    | `pytorch/pytorch:2.0` | Docker Hub의 pytorch 이미지, 2.0 버전 |\n    | `ghcr.io/myorg/myapp:v1.0` | GitHub Container Registry의 이미지 |\n"
+        },
+        {
+          "line_start": 102,
+          "line_end": 130,
+          "quotation": "\n**workload.yaml 형식:**\n\n```yaml\ndescription: \"My ML Training Job\"     # 필수 (2-80자)\ncuda: \"12040\"                          # CUDA 버전 코드 (선택)\nsharedMemory: 1                        # 공유 메모리 크기(GB), GPU VRAM 미만으로 설정\n\ncontainers:\n  - containerImage: \"pytorch/pytorch:2.0\"\n    repo: docker.io\n    port: 0                            # 0 = 자동 감지\n    maxConnection: 4                   # 최대 동시 HTTP 접속 수\n    containerCommand: \"python train.py\"\n    isCredential: false                # 비공개 레지스트리 사용 시 true\n    containerEnvs:\n      - EPOCHS: \"100\"\n      - BATCH_SIZE: \"32\"\n\ngpuSpecs:\n  - gpuCode: \"029\"                     # gcube gpu list의 CODE 값\n  #- gpuCode: \"031\"                    # 멀티 GPU: 다른 gpuCode 추가 (이기종 GPU 가능)\n```\n\n!!! note \"YAML 필드 보충 설명\"\n    - `sharedMemory`: 컨테이너 간 공유 메모리(`/dev/shm`) 크기입니다. PyTorch DataLoader 등 멀티프로세스 학습 시 기본값(64MB)이 부족할 수 있어 설정합니다. GPU VRAM 용량 미만으로 설정하세요.\n    - `maxConnection`: 해당 컨테이너로 들어오는 최대 동시 HTTP 접속 수입니다.\n    - `containerCommand`: 생략하면 이미지에 정의된 기본 `CMD` 또는 `ENTRYPOINT`가 실행됩니다.\n    - `gpuSpecs`: 항목을 반복하면 멀티 GPU로 구성됩니다. 동일한 `gpuCode`를 반복하면 같은 기종 여러 대, 다른 `gpuCode`를 입력하면 이기종 GPU 조합이 됩니다."
+        },
+        {
+          "line_start": 173,
+          "line_end": 184,
+          "quotation": "## **시작 / 중지 / 삭제**\n\n```bash\ngcube workload start <SER>\ngcube workload stop <SER>          # 확인 프롬프트\ngcube workload stop <SER> -y       # 확인 없이 중지\ngcube workload delete <SER>        # 확인 프롬프트\ngcube workload delete <SER> -y     # 확인 없이 삭제\n```\n\n!!! warning\n    워크로드 삭제 시 컨테이너 내부 데이터는 복구할 수 없습니다. 작업 데이터는 미리 백업하세요."
+        }
+      ]
+    },
+    {
+      "id": "cli_gpu_doc",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-gpu.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.117121+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 1224,
+      "sha256": "2380902d8642fd5b59d79f6b7d04cc5fcf5b72bbd1cdaef9ae7afb57e556fbba",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-gpu.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_gpu_doc.md",
+      "quotations": [
+        {
+          "line_start": 8,
+          "line_end": 25,
+          "quotation": "\n```bash\ngcube gpu list          # 현재 즉시 사용 가능한 GPU만 표시\ngcube gpu list --all    # 사용 중이거나 공유 중지된 GPU를 포함한 전체 목록\n```\n\n출력 예시:\n\n```\nCODE  GPU_NAME    TIER   GPU  VRAM(GB)  CPU  MEM(GB)  DISK(GB)  PRICE/HR(₩)\n001   rtxa2000    tier3  1    6         8    32        100       500 ~ 600\n029   rtx3090     tier3  1    24        16   64        100       1,200 ~ 1,500\n```\n\n!!! note \"컬럼 설명\"\n    - `CODE`: 워크로드 등록 시 `--gpu` 또는 `gpuCode`에 사용하는 GPU 식별 코드\n    - `TIER`: GPU 공급자 유형 — `tier1` 클라우드 사업자 / `tier2` 전용 서버 / `tier3` 개인 PC\n    - `PRICE/HR`: 범위로 표시되는 이유는 공급자가 설정한 가격이 노드마다 다를 수 있기 때문입니다. 실제 과금은 선택한 노드의 단가로 결정됩니다."
+        }
+      ]
+    },
+    {
+      "id": "cli_point_doc",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-point.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.118249+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 1149,
+      "sha256": "1d4aa340c670619e81f029a26e5fbd35c282feee08ac675be90f5e6ae94bbd40",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-point.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_point_doc.md",
+      "quotations": [
+        {
+          "line_start": 34,
+          "line_end": 40,
+          "quotation": "    | `Available Point` | 현재 사용 가능한 잔액 |\n    | `Charged Point` | 누적 충전 총액 |\n    | `Spent Point` | 누적 사용 총액 |\n    | `Network Point` | 네트워크 트래픽 사용에 따라 차감되는 포인트 |\n\n---\n"
+        }
+      ]
+    },
+    {
+      "id": "about",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/sign-up/what-is-gcube.ko.md",
+      "fetched_at_utc": "2026-10-06T09:55:56.122722+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 2309,
+      "sha256": "0c489a92a5a99e39dab640b3c8723806802a78f3492b6e86c2e7a6df921eaced",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/sign-up/what-is-gcube.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/about.md",
+      "quotations": [
+        {
+          "line_start": 17,
+          "line_end": 24,
+          "quotation": "---\n\n## gcube로 할 수 있는 것\n\n| 워크로드 | 설명 |\n|----------|------|\n| **AI/ML 학습** | 딥러닝 모델 학습 및 파인튜닝 |\n| **LLM 추론** | Ollama, vLLM 등 오픈소스 모델 서빙 |"
+        },
+        {
+          "line_start": 47,
+          "line_end": 50,
+          "quotation": "<!-- 카드 UI (Mintlify 환경): CardGroup cols=3 으로 전환 권장 -->\n\n- **[워크로드 시작하기](../workload/workload-dashboard.ko.md)** — 첫 번째 GPU 워크로드를 5분 안에 실행\n- **[요금 및 플랜](https://gcube.ai/ko/price)** — Tier별 비용 효율적 플랜 확인"
+        }
+      ]
+    },
+    {
+      "id": "api_serving",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/platform-guide/ollama-api.ko.md",
+      "fetched_at_utc": "2026-10-06T09:56:24.284270+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 11413,
+      "sha256": "fdd9c984f3d422c2439ec53229bae2ba42016d5079dab2558f6f7c649238e18d",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/platform-guide/ollama-api.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/api_serving.md",
+      "quotations": [
+        {
+          "line_start": 47,
+          "line_end": 50,
+          "quotation": "\n!!! warning \"요금 주의\"\n워크로드는 **배포 후부터 중지할 때까지 시간 단위로 과금**됩니다. 사용 후 반드시 워크로드를 중지하세요. \n중지 방법은 [워크로드-워크로드 중지](../workload/stop-workload.md) 항목을 참고하세요."
+        },
+        {
+          "line_start": 233,
+          "line_end": 238,
+          "quotation": "gcube 워크로드 세부 정보 화면 **개요 탭**에서 **\"서비스 URL\"** 을 복사합니다.\n\n> 💡 서비스 URL은 워크로드 세부 정보 화면 상단 **개요** 섹션에 위치합니다. `https://xxxxxxxx.gcube.ai` 형태입니다.\n> \n\ngcube 워크로드 정보 중 “**서비스 URL**”을 복사한 후, API 호스트 입력란에 붙여 넣습니다."
+        },
+        {
+          "line_start": 274,
+          "line_end": 282,
+          "quotation": "## 4단계 — 워크로드 중지 및 삭제\n\n!!! warning \"반드시 확인하세요\"\n워크로드를 중지하지 않으면 사용하지 않는 동안에도 **요금이 계속 부과**됩니다.\n\n### 4-1. 워크로드 중지\n\n워크로드 관리에서 배포중인 워크로드의 **\"배포 중지\"** 버튼을 클릭합니다. \n워크로드 상태가 '**배포 중지**'로 바뀌면 과금이 멈춥니다."
+        }
+      ]
+    },
+    {
+      "id": "cli_overview",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-overview.ko.md",
+      "fetched_at_utc": "2026-10-06T09:56:24.288587+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 2981,
+      "sha256": "a4daa236c68c4a62cc29fb83b0803339c0c5f1cebdcf6b2e94994ee1fcfcfa93",
+      "final_url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/gcube-cli/cli-overview.ko.md",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_overview.md",
+      "quotations": [
+        {
+          "line_start": 9,
+          "line_end": 16,
+          "quotation": "Python 3.10 이상이 필요합니다.\n\n!!! note\n    터미널(Windows: 명령 프롬프트 또는 PowerShell, macOS/Linux: Terminal)을 실행한 뒤 아래 명령어를 입력합니다.\n\n```bash\npip install gcube-cli\ngcube --version     # 설치가 정상적으로 완료되면 버전 번호가 출력됩니다"
+        },
+        {
+          "line_start": 21,
+          "line_end": 33,
+          "quotation": "## **인증 설정**\n\n1. [gcube 웹 콘솔](https://gcube.ai)에 로그인합니다.\n\n2. **GCUBE 액세스 토큰 관리** 메뉴에서 토큰을 생성 후 복사합니다.\n\n    !!! note\n        웹 콘솔 로그인 후 우측 상단 사용자명 메뉴에서 \"내 프로필\" 클릭 → **GCUBE 액세스 토큰**에서 토큰을 발급할 수 있습니다.\n\n3. 아래 명령어로 토큰을 설정합니다.\n\n```bash\ngcube configure set --token \"eyJ...\"    # eyJ... 부분을 복사한 실제 토큰으로 교체하세요"
+        }
+      ]
+    },
+    {
+      "id": "file_api_readme",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gcube-file-api/main/README.md",
+      "fetched_at_utc": "2026-10-06T09:57:14.443688+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 2880,
+      "sha256": "48793eb86bd44e67ed89ee740b16149e31a6872d5d0344df0d52f55c686a07bd",
+      "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/file_api_readme.md",
+      "quotations": [
+        {
+          "line_start": 1,
+          "line_end": 21,
+          "quotation": "# gcube-file-api\n\ngcube-file-api is a lightweight internal File API service for the gcube platform.\n\nIt is designed to run as an on-demand Kubernetes Pod inside a user's namespace, mount the user's JuiceFS PVC, and expose file operations through HTTP APIs.\n\n## Purpose\n\n- List files and directories\n- Upload files\n- Download files\n- Delete files or directories\n- Create directories\n- Rename files or directories\n\n## Runtime Model\n\n    gcube frontend\n      -> gcube platform API\n      -> gcube-file-api Service\n      -> JuiceFS PVC mounted at /mnt/storage"
+        },
+        {
+          "line_start": 55,
+          "line_end": 70,
+          "quotation": "    docker build -t gcube-file-api:dev .\n\n## Run locally\n\n    docker run --rm -p 8080:8080 -v /tmp:/mnt/storage gcube-file-api:dev\n\n## Environment Variables\n\n| Name | Default | Description |\n|---|---|---|\n| STORAGE_ROOT | /mnt/storage | Mounted storage root path |\n\n## Kubernetes Runtime\n\nIn production, this service should run as an on-demand Pod in the user's Kubernetes namespace.\n"
+        },
+        {
+          "line_start": 83,
+          "line_end": 97,
+          "quotation": "\nThis service must not be exposed directly to users in production.\n\nProduction access should go through the gcube platform API or an internal reverse proxy that performs authentication and authorization.\n\nRecommended production rules:\n\n- Use ClusterIP Service, not NodePort\n- Do not expose gcube-file-api directly to the Internet\n- Run the Pod in the user's namespace\n- Mount only the user's own JuiceFS PVC\n- Disable ServiceAccount token mount if Kubernetes API access is not required\n- Apply NetworkPolicy to allow access only from the platform namespace or ingress gateway\n- Validate all paths to prevent path traversal\n- Block deletion or rename of the storage root path"
+        }
+      ]
+    }
+  ],
+  "official_cli_package": {
+    "metadata_url": "https://pypi.org/pypi/gcube-cli/json",
+    "version": "0.4.2",
+    "wheel_upload_at_utc": "2026-09-01T04:21:31.789116Z",
+    "id": "cli_wheel",
+    "url": "https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl",
+    "fetched_at_utc": "2026-10-06T09:57:45.268441+00:00",
+    "attempts": 1,
+    "status": 200,
+    "bytes": 112007,
+    "sha256": "9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692",
+    "pypi_hash_matched": true,
+    "executed_or_installed": false,
+    "quotation_sources": [
+      {
+        "source_url": "https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl",
+        "wheel_member": "gcube_cli/api/storage.py",
+        "member_sha256": "4780cbd90c4014e71254c54c44ad099d218824afcf0d7db4f4385547cf0f4187",
+        "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/api/storage.py",
+        "quotations": [
+          {
+            "line_start": 11,
+            "line_end": 29,
+            "quotation": "@dataclass\nclass Storage:\n    \"\"\"One personal storage (PVC) entry returned by the storage list API.\"\"\"\n\n    ser: str\n    description: str\n    storage_type: str   # JSON: type\n    capacity: str\n    access_mode: str    # JSON: accessMode\n    bucket: str | None = None  # non-null → gcube storage\n\n    @property\n    def is_gcube(self) -> bool:\n        return self.bucket is not None\n\n    @property\n    def mount_key(self) -> str:\n        \"\"\"Key to use in workload userStorages: 'gcube' for gcube type, ser otherwise.\"\"\"\n        return \"gcube\" if self.is_gcube else self.ser"
+          },
+          {
+            "line_start": 45,
+            "line_end": 67,
+            "quotation": "        \"\"\"Return True only if both pvStatus and pvcStatus are 'bound'.\"\"\"\n        return (\n            str(d.get(\"pvStatus\", \"\")).lower() == \"bound\"\n            and str(d.get(\"pvcStatus\", \"\")).lower() == \"bound\"\n        )\n\n\nclass StorageAPI:\n    \"\"\"High-level personal storage API client.\"\"\"\n\n    def __init__(self, client: Client) -> None:\n        self._client = client\n\n    def list(self, owner: str) -> list[Storage]:\n        \"\"\"GET /api/users/storage/list?owner={email}\n\n        Returns only storages where both pvStatus and pvcStatus are 'bound'.\n        \"\"\"\n        data = self._client.get(\"/api/users/storage/list\", params={\"owner\": owner})\n        items: list[dict[str, Any]] = data.get(\n            \"userStorages\", data.get(\"storages\", data.get(\"data\", data.get(\"items\", [])))\n        )\n        return [Storage.from_dict(item) for item in items if Storage.is_bound(item)]"
+          }
+        ]
+      },
+      {
+        "source_url": "https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl",
+        "wheel_member": "gcube_cli/api/workload.py",
+        "member_sha256": "bf4a5b8059528c1928a4f5109e662e0ccba9faa5a87e26be64b6cd62dd354b6e",
+        "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/api/workload.py",
+        "quotations": [
+          {
+            "line_start": 488,
+            "line_end": 507,
+            "quotation": "        ``GET /api/workloads/gai/{ser}``\n        \"\"\"\n        data = self._client.get(f\"{_GAI_BASE}{ser}\")\n        item: dict[str, Any] = data.get(\"workload\", data.get(\"data\", data))\n        return Workload.from_dict(item)\n\n    def start(self, ser: str) -> None:\n        \"\"\"Deploy (start) a workload.\n\n        ``GET /api/workloads/gai/{ser}/state/deploy``\n        \"\"\"\n        self._client.get(f\"{_GAI_BASE}{ser}/state/deploy\")\n\n    def stop(self, ser: str) -> None:\n        \"\"\"Finish (stop) a workload.\n\n        ``GET /api/workloads/gai/{ser}/state/finish``\n        \"\"\"\n        self._client.get(f\"{_GAI_BASE}{ser}/state/finish\")\n"
+          },
+          {
+            "line_start": 531,
+            "line_end": 582,
+            "quotation": "        return Workload.from_dict(item)\n\n    # -- Schedule API --\n\n    def get_schedules(self, ser: str) -> builtins.list[ScheduleEntry]:\n        \"\"\"Fetch schedules for a workload.\n\n        ``GET /api/workloads/gai/{ser}/schedule``\n        \"\"\"\n        data = self._client.get(f\"{_GAI_BASE}{ser}/schedule\")\n        return [ScheduleEntry.from_response(s) for s in data.get(\"schedules\", [])]\n\n    def save_schedules(\n        self,\n        ser: str,\n        entries: builtins.list[ScheduleEntry],\n        time_zone: str = _SCHEDULE_TIMEZONE_DEFAULT,\n    ) -> builtins.list[ScheduleEntry]:\n        \"\"\"Save (replace all) schedules for a workload.\n\n        ``PUT /api/workloads/gai/{ser}/schedule``\n        PUT semantics: full replacement — send every entry including disabled ones.\n        \"\"\"\n        body: dict[str, Any] = {\n            \"timeZone\": time_zone,\n            \"schedules\": [e.to_request_dict() for e in entries],\n        }\n        data = self._client.put(f\"{_GAI_BASE}{ser}/schedule\", json=body)\n        return [ScheduleEntry.from_response(s) for s in data.get(\"schedules\", [])]\n\n    def delete_schedules(self, ser: str) -> None:\n        \"\"\"Delete all schedules for a workload.\n\n        ``DELETE /api/workloads/gai/{ser}/schedule``\n        \"\"\"\n        self._client.delete(f\"{_GAI_BASE}{ser}/schedule\")\n\n    def get_schedule_logs(\n        self,\n        ser: str,\n        start_num: int = 0,\n        scale_num: int = 20,\n    ) -> tuple[builtins.list[dict[str, Any]], int]:\n        \"\"\"Fetch schedule execution history.\n\n        ``GET /api/workloads/gai/{ser}/schedule/logs``\n        Returns (logs, totalNum).\n        \"\"\"\n        data = self._client.get(\n            f\"{_GAI_BASE}{ser}/schedule/logs\",\n            params={\"startNum\": str(start_num), \"scaleNum\": str(scale_num)},\n        )"
+          },
+          {
+            "line_start": 645,
+            "line_end": 654,
+            "quotation": "                f\"    containerCommand: {_qs(ct.get('containerCommand', ''))}\",\n                f\"    isCredential: {'true' if ct.get('isCredential') else 'false'}\",\n                f\"    containerEnvs: {_qs(envs)}\",\n                \"    # containerEnvs:\",\n                \"    #   - KEY: VALUE\",\n                f\"    userStorages: {_qs(storages)}\",\n                '    # userStorages:',\n                '    #   - \"123\": \"/mnt/data\"         # SER mount key — see: gcube storage list',\n                '    #   - gcube: \"/mnt/gcube-data\"   # gcube storage — use literal key \\'gcube\\'',\n            ]"
+          }
+        ]
+      },
+      {
+        "source_url": "https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl",
+        "wheel_member": "gcube_cli/api/client.py",
+        "member_sha256": "1c5aaf297156cd2b8027f64762cd2d81a6c35f113b0529c58dfb699f97fd4d27",
+        "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/api/client.py",
+        "quotations": [
+          {
+            "line_start": 291,
+            "line_end": 298,
+            "quotation": "            \"No token configured. Run: gcube auth login\",\n            err=True,\n        )\n        sys.exit(1)\n\n    base_url = platform_url or config.platform_url or \"https://api.gcube.ai\"\n    return Client(base_url=base_url, token=token, debug=debug)\n"
+          }
+        ]
+      },
+      {
+        "source_url": "https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl",
+        "wheel_member": "gcube_cli/commands/workload.py",
+        "member_sha256": "cfccc7f5bc0551db2727d0fa5e57e2a57e2b6573b7c7b779cd65f1965006a12e",
+        "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/commands/workload.py",
+        "quotations": [
+          {
+            "line_start": 1028,
+            "line_end": 1041,
+            "quotation": "    userStorages: []\n    # userStorages:\n    #   - \"123\": \"/mnt/data\"         # SER-based (S3/drive) — MOUNT KEY from: gcube storage list\n    #   - gcube: \"/mnt/gcube-data\"   # gcube storage — use literal key 'gcube'\n\ngpuSpecs:\n  - gpuCode: \"\"                      # required — run 'gcube gpu list' for CODE\n  # add more entries for additional replicas:\n  # - gpuCode: \"\"\n\n# --- Schedule (set separately after register) ---\n# gcube workload schedule <SER> -f schedule.yaml\n# gcube workload schedule <SER> --days Mon-Fri --start 09:00 --stop 18:00\n# Without a STOP schedule, the workload will not auto-stop and billing continues."
+          }
+        ]
+      },
+      {
+        "source_url": "https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl",
+        "wheel_member": "gcube_cli/skills/gcube_skill.md",
+        "member_sha256": "5497277e2d825c9d8824ef97800ac0540d38c8581e0c3a1ac28d0bbf6946ddd7",
+        "downloaded_body_path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/skills/gcube_skill.md",
+        "quotations": [
+          {
+            "line_start": 223,
+            "line_end": 244,
+            "quotation": "\n**containerCommand** (optional)\n- Command to execute when the container starts. If left blank, the image's default CMD runs.\n\n**containerEnvs** (optional, YAML only)\n- Environment variables for use inside the container. Each entry is a single key-value object (not a flat map).\n- Example in YAML:\n  ```yaml\n  containerEnvs:\n    - HF_TOKEN: \"hf_abc123\"\n    - CUDA_VISIBLE_DEVICES: \"0,1\"\n  ```\n\n**userStorages** (optional, YAML only)\n- Select pre-registered personal storage and enter the mount path inside the container. Multiple storages can be added.\n- Personal storage must be registered first via the web console before it can be selected.\n- Run `gcube storage list` to get MOUNT KEY values. For gcube built-in storage, use the literal key `gcube`.\n- Example in YAML:\n  ```yaml\n  userStorages:\n    - \"95\": \"/mnt/data\"           # external storage by MOUNT KEY\n    - gcube: \"/mnt/gcube-data\"    # gcube built-in storage"
+          },
+          {
+            "line_start": 560,
+            "line_end": 574,
+            "quotation": "## Storage\n\n```bash\ngcube storage list                      # List personal storages\n```\n\nOutput columns: MOUNT KEY, DESCRIPTION, TYPE, CAPACITY, ACCESS MODE.\n\nThe `MOUNT KEY` is used in workload YAML `userStorages` to mount storage into containers:\n\n```yaml\nuserStorages:\n  - \"95\": \"/mnt/data\"          # external storage by MOUNT KEY\n  - gcube: \"/mnt/gcube-data\"   # gcube built-in storage (literal key 'gcube')\n```"
+          },
+          {
+            "line_start": 631,
+            "line_end": 634,
+            "quotation": "- Spending Summary: total / prev month / this month\n\nAll amounts are in Points (P), where 1P = 1 KRW.\n"
+          }
+        ]
+      }
+    ]
+  },
+  "failed_download_observations": [
+    {
+      "id": "platform_readme",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/main/README.md",
+      "fetched_at_utc": "2026-10-06T09:55:21.376527+00:00",
+      "attempts": 1,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "official_console",
+      "url": "https://console.gcube.ai/",
+      "fetched_at_utc": "2026-10-06T09:55:37.216346+00:00",
+      "attempts": 1,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    {
+      "id": "official_pricing",
+      "url": "https://gcube.ai/ko/price",
+      "fetched_at_utc": "2026-10-06T09:56:24.305035+00:00",
+      "attempts": 1,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    }
+  ],
+  "validation": {
+    "primary_official_sources": 15,
+    "quotation_ranges": 41,
+    "hashes_and_exact_quotes_validated": true,
+    "actual_account_or_provider_deployment_tested": false
+  },
+  "evidence_imported_at_utc": "2026-10-06T10:16:33.186617+00:00",
+  "evidence_directory": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001"
+}

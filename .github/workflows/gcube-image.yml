@@ -1,0 +1,133 @@
+name: Build and publish Gcube image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/gcube-image.yml
+      - world-simulation-shorts-engine/requirements.txt
+      - world-simulation-shorts-engine/server.py
+      - world-simulation-shorts-engine/engine/**
+      - world-simulation-shorts-engine/data/**
+      - world-simulation-shorts-engine/web/**
+      - world-simulation-shorts-engine/assets/**
+      - world-simulation-shorts-engine/tools/**
+      - world-simulation-shorts-engine/deployment/**
+      - cinematic-world-map/package.json
+      - cinematic-world-map/package-lock.json
+      - cinematic-world-map/src/**
+      - cinematic-world-map/assets/**
+      - cinematic-world-map/tools/sound.py
+      - deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/PRODUCTION_RHYTHM_QC_CERTIFICATE.json
+      - deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/production_rhythm_master_10_15s.mp4
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: gcube-image-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
+    steps:
+      - name: Checkout approved sources
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 1
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build the complete image for local smoke testing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: |
+            ${{ env.IMAGE }}:gcube-v001
+            ${{ env.IMAGE }}:gcube-v001-sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Verify CPU startup and private health before publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_name="world-engine-gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          smoke_env="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.env"
+          cleanup() {
+            docker rm --force "$smoke_name" >/dev/null 2>&1 || true
+            rm -f "$smoke_env"
+          }
+          trap cleanup EXIT
+          umask 077
+          python - "$smoke_env" <<'PY'
+          import os, secrets, sys
+          owner = secrets.token_urlsafe(32)
+          print('::add-mask::' + owner)
+          with open(sys.argv[1], 'x', encoding='utf-8') as stream:
+              stream.write('WORLD_ENGINE_OWNER_CODE=' + owner + '\n')
+              stream.write('WORLD_ENGINE_RENDER_MODE=cpu\n')
+              stream.write('WORLD_ENGINE_STORAGE_MODE=ephemeral\n')
+              stream.write('WORLD_ENGINE_STORAGE_PATH=/data\n')
+              stream.write('WORLD_ENGINE_LOCAL_MODE=1\n')
+              stream.write('WORLD_ENGINE_PUBLIC_ORIGIN=http://127.0.0.1:18000\n')
+          os.chmod(sys.argv[1], 0o600)
+          PY
+          docker run --detach --name "$smoke_name" \
+            --publish 127.0.0.1:18000:8000 --env-file "$smoke_env" \
+            "${IMAGE}:gcube-v001" >/dev/null
+          python - <<'PY'
+          import json, time
+          from urllib.error import HTTPError, URLError
+          from urllib.request import ProxyHandler, build_opener
+          endpoint = 'http://127.0.0.1:18000'
+          local = build_opener(ProxyHandler({}))
+          deadline = time.monotonic() + 90
+          while time.monotonic() < deadline:
+              try:
+                  with local.open(endpoint + '/api/health', timeout=2) as response:
+                      health = json.load(response)
+                  if health.get('ok') is True and health.get('authentication_required') is True:
+                      break
+              except (HTTPError, URLError, TimeoutError, ValueError):
+                  pass
+              time.sleep(1)
+          else:
+              raise SystemExit('CPU gateway did not become ready within 90 seconds')
+          gpu = health.get('gpu', {})
+          storage = health.get('storage', {})
+          if gpu.get('render_mode') != 'cpu' or gpu.get('gpu_rendering_verified') is not False:
+              raise SystemExit('Smoke test did not verify the explicit CPU profile')
+          if storage.get('mode') != 'ephemeral':
+              raise SystemExit('Smoke test did not use ephemeral storage')
+          try:
+              with local.open(endpoint + '/api/projects', timeout=2):
+                  raise SystemExit('Unauthenticated project access unexpectedly succeeded')
+          except HTTPError as error:
+              if error.code != 401:
+                  raise SystemExit('Unauthenticated project access did not require login')
+          print('CPU startup and owner authentication passed; no render was requested')
+          PY
+      - name: Authenticate to GHCR after successful CPU smoke test
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish tested development image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker push "${IMAGE}:gcube-v001"
+          docker push "${IMAGE}:gcube-v001-sha-${GITHUB_SHA}"
+          echo 'Publication preserves existing package visibility; anonymous pulls require a public package.'
