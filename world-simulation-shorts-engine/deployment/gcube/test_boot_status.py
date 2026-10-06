@@ -182,6 +182,59 @@ class BootStatusTests(unittest.TestCase):
         self.assertTrue(all(row["engine_ready"] is False for row in records))
         self.assertTrue(all(row["error_code"] == "GPU_HARDWARE_UNAVAILABLE" for row in records))
 
+    def test_gpu_failure_displays_observed_stages_without_admitting_render(self):
+        diagnostic = {
+            "schema_version": 1, "render_mode": "gpu-required", "gpu_profile": "egl",
+            "failed_stage": "D", "reason_code": "WEBGL_CONTEXT_UNAVAILABLE",
+            "stages": [{"id": letter, "status": state} for letter, state in
+                       (("A", "PASS"), ("B", "PASS"), ("C", "PASS"),
+                        ("D", "FAIL"), ("E", "NOT_RUN"), ("F", "NOT_RUN"))],
+            "nvidia_devices": [{"name": "NVIDIA GeForce RTX 3070", "driver_version": "616.56",
+                                "memory_total_mib": 8192, "uuid": "GPU-private-uuid"}],
+            "runtime": {"libraries": {"nvidia_egl": False, "nvidia_vulkan": False},
+                        "driver_delivery": {"egl_vendor_manifest": False,
+                                            "vulkan_nvidia_icd": False}},
+            "webgl": {"context_available": False, "renderer": None},
+            "owner_code": "secret-never-echoed", "raw_stderr": "/private/owner-code.txt",
+            "profile_attempts": [{"backend": "egl", "status": "failed"},
+                                 {"backend": "vulkan", "status": "failed"}],
+        }
+        self.status.set_phase("blocked", "GPU_WEBGL_UNVERIFIED", gpu_diagnostics=diagnostic)
+        status, _, body = self.call("GET", "/")
+        self.assertEqual(status, 200)
+        text = body.decode()
+        self.assertIn("RTX 3070", text)
+        self.assertIn("실패 단계: D", text)
+        self.assertIn("그래픽 드라이버 전달", text)
+        self.assertIn("gcube에서 Workload를 중지", text)
+        self.assertIn("영상 생성 엔진: 아직 준비되지 않음", text)
+        self.assertNotIn("WebGL VERIFIED", text)
+        for secret in ("GPU-private-uuid", "secret-never-echoed", "/private/owner-code.txt"):
+            self.assertNotIn(secret, text)
+        health = json.loads(self.call("GET", "/api/health")[2])
+        self.assertFalse(health["engine_ready"])
+        self.assertEqual(health["gpu_diagnostics"]["failed_stage"], "D")
+        self.assertNotIn("uuid", json.dumps(health))
+        self.assertEqual(self.call("GET", "/readyz")[0], 503)
+        self.assertEqual(self.call("POST", "/api/projects", "{}")[0], 405)
+        self.assertEqual(self.call("POST", "/auth/login", "{}")[0], 405)
+
+    def test_gpu_diagnostic_snapshot_is_private_and_not_reused_for_other_errors(self):
+        self.status.set_phase("blocked", "GPU_WEBGL_UNVERIFIED", gpu_diagnostics={
+            "schema_version": 1, "gpu_profile": "egl", "failed_stage": "E",
+            "webgl": {"renderer": "ANGLE (Google, Vulkan SwiftShader Device)",
+                      "software_renderer": True, "context_available": True},
+        })
+        diagnostic = self.status.gpu_diagnostics
+        diagnostic["webgl"]["renderer"] = "secret"
+        self.assertNotIn(b"secret", self.call("GET", "/")[2])
+        self.assertIn(b"SwiftShader", self.call("GET", "/")[2])
+        self.status.set_phase("blocked", "STORAGE_MOUNT_REQUIRED", gpu_diagnostics=diagnostic)
+        self.assertIsNone(self.status.gpu_diagnostics)
+        self.assertNotIn("gpu_diagnostics", json.loads(self.call("GET", "/api/health")[2]))
+        self.status.set_phase("checking")
+        self.assertIsNone(self.status.gpu_diagnostics)
+
 
 if __name__ == "__main__":
     unittest.main()

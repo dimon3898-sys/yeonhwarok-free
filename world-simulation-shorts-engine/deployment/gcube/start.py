@@ -42,6 +42,63 @@ def _sha(path):
     return h.hexdigest()
 
 
+def run_graphics_probe(command, **kwargs):
+    """Bound the private Node/Chromium probe and reap its own process group.
+
+    A timeout must not leave a GPU browser running while the status screen is
+    blocked. Other preflight commands keep subprocess.run's existing behavior.
+    """
+    if not command or command[0] != 'node':
+        return subprocess.run(command, **kwargs)
+    timeout = kwargs.pop('timeout', 60)
+    check = kwargs.pop('check', False)
+    if kwargs.pop('capture_output', False):
+        if 'stdout' in kwargs or 'stderr' in kwargs:
+            raise ValueError('capture_output conflicts with stdout/stderr')
+        kwargs['stdout'] = kwargs['stderr'] = subprocess.PIPE
+    with subprocess.Popen(command, start_new_session=True, **kwargs) as process:
+        try:
+            output, error = process.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            # The process group was created by this call, never a provider or
+            # unrelated engine process. Preserve the root/engine identity opts.
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            try:
+                output, error = process.communicate(timeout=5)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                if process.stdout:
+                    process.stdout.close()
+                if process.stderr:
+                    process.stderr.close()
+                output = error = None
+            raise subprocess.TimeoutExpired(command, timeout, output=output, stderr=error) from None
+        if check and process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, command, output=output, stderr=error)
+        return subprocess.CompletedProcess(command, process.returncode, output, error)
+
+
+def prepare_gpu_environment(env):
+    """Apply only bounded NVIDIA loader selectors to the explicit child env."""
+    from deployment.gcube.graphics_runtime import GraphicsRuntimeError, prepare_graphics_runtime
+    try:
+        updates, facts = prepare_graphics_runtime(env)
+    except GraphicsRuntimeError as error:
+        allowed = {'GPU_GRAPHICS_RUNTIME_PATH_UNSAFE', 'GPU_GRAPHICS_RUNTIME_PATH_UNWRITABLE'}
+        code = str(error) if str(error) in allowed else 'GPU_BROWSER_PROBE_FAILED'
+        failure = BootError(code)
+        failure.diagnostics = {'schema_version': 1, 'render_mode': 'gpu-required',
+                               'gpu_profile': 'egl', 'failed_stage': 'C', 'reason_code': code,
+                               'stages': [{'id': 'C', 'status': 'FAIL', 'reason_code': code}]}
+        raise failure from None
+    allowed_updates = {'__EGL_VENDOR_LIBRARY_FILENAMES', 'VK_DRIVER_FILES', 'VK_ICD_FILENAMES'}
+    env.update({name: value for name, value in updates.items() if name in allowed_updates})
+    return facts
+
+
 def seed_audio(source, destination):
     """Preserve the approved library and never replace a persisted generated asset."""
     source, destination = Path(source), Path(destination)
@@ -182,15 +239,22 @@ def run_engine(status, stopping_event):
     env['HOME'] = account.pw_dir
     storage = NativePersonalStorage(base, mode=mode, uid=account.pw_uid, gid=account.pw_gid).prepare(
         explicit_owner_code=code)
+    graphics_facts = prepare_gpu_environment(env)
+    # Only descriptor selectors returned by the bounded NVIDIA loader helper
+    # change. The same explicit env is passed to admission and the engine child;
+    # no user credentials or global process environment are added to logs.
+    print('GCUBE NVIDIA graphics loader: ' + json.dumps(graphics_facts, ensure_ascii=False,
+          separators=(',', ':'), allow_nan=False), flush=True)
     device_groups = collect_device_groups()
     # Prove graphics access with the same unprivileged identity as the server.
     def run_probe(command, **kwargs):
         if os.geteuid() == 0:
             kwargs.update(user=account.pw_uid, group=account.pw_gid, extra_groups=device_groups)
-        return subprocess.run(command, **kwargs)
+        return run_graphics_probe(command, **kwargs)
     probe_env = dict(env)
     probe_env.pop('WORLD_ENGINE_OWNER_CODE', None)
     gpu = select_graphics_profile(probe_env, runner=run_probe)
+    gpu['graphics_runtime_preparation'] = graphics_facts
     cache = configure_image_paths(APP, storage, gpu['cache_namespace'])
     if os.geteuid() == 0:
         os.setgroups(device_groups)
@@ -299,11 +363,19 @@ def main():
             if stopping.is_set():
                 return 0
             code = getattr(error, 'code', 'STARTUP_BLOCKED')
-            status.set_phase('blocked', error_code=code)
+            diagnostics = getattr(error, 'diagnostics', None)
+            if isinstance(code, str) and code.startswith('GPU_') and isinstance(diagnostics, dict):
+                status.set_phase('blocked', error_code=code, gpu_diagnostics=diagnostics)
+            else:
+                status.set_phase('blocked', error_code=code)
             status.start()
             signal.signal(signal.SIGTERM, stop)
             signal.signal(signal.SIGINT, stop)
             print('GCUBE startup blocked: ' + status.error_code, file=sys.stderr, flush=True)
+            observed = status.gpu_diagnostics
+            if isinstance(observed, dict) and observed:
+                print('GCUBE GPU diagnosis: ' + json.dumps(observed, ensure_ascii=False,
+                      separators=(',', ':'), allow_nan=False), file=sys.stderr, flush=True)
             while not stopping.wait(1):
                 pass
             return 0

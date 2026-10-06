@@ -7,6 +7,7 @@ listener before starting the owner-authenticated engine on the same port. An
 from __future__ import annotations
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import html
 import json
 import re
 from socketserver import ThreadingMixIn
@@ -24,7 +25,7 @@ _STORAGE = (
 )
 _GPU = (
     "NVIDIA GPU와 그래픽 드라이버 전달을 확인하세요. GPU 검증을 통과하지 않아 "
-    "렌더를 시작하지 않았습니다. CPU로 자동 전환하지 않습니다."
+    "렌더를 시작하지 않았습니다. CPU로 자동 전환하지 않습니다. gcube Workload를 중지하세요."
 )
 _RUNTIME = "필수 실행환경을 확인할 수 없습니다. 새 배포 이미지와 설정을 확인하세요."
 _MESSAGES = {
@@ -46,6 +47,8 @@ _MESSAGES = {
     "GPU_BROWSER_PROBE_FAILED": _GPU,
     "GPU_PROFILE_INVALID": _GPU,
     "GPU_BROWSER_UNAVAILABLE": _RUNTIME,
+    "GPU_GRAPHICS_RUNTIME_PATH_UNSAFE": _RUNTIME,
+    "GPU_GRAPHICS_RUNTIME_PATH_UNWRITABLE": _RUNTIME,
     "GPU_WRAPPER_NOT_EXECUTABLE": _RUNTIME,
     "CPU_FALLBACK_UNVERIFIED": _RUNTIME,
     "WORLD_ENGINE_BOOT_FAILED": _RUNTIME,
@@ -71,6 +74,26 @@ _MESSAGES = {
 }
 KNOWN_ERROR_CODES = frozenset(_MESSAGES)
 _SAFE_CODE = re.compile(r"[A-Z][A-Z0-9_]{0,79}\Z")
+_GPU_REASONS = {
+    "DEVICE_NODES_ABSENT": "NVIDIA 장치가 컨테이너에 전달되지 않았습니다.",
+    "NVIDIA_QUERY_FAILED": "nvidia-smi에서 NVIDIA 장치를 확인하지 못했습니다.",
+    "NVIDIA_QUERY_TIMEOUT": "nvidia-smi 확인 시간이 초과되었습니다.",
+    "CHROMIUM_START_FAILED": "Chromium을 시작하지 못했습니다.",
+    "CHROMIUM_TIMEOUT": "Chromium 시작 시간이 초과되었습니다.",
+    "CHROMIUM_EVALUATION_FAILED": "Chromium에서 WebGL 진단을 실행하지 못했습니다.",
+    "PROBE_OUTPUT_INVALID": "GPU 진단 응답을 확인하지 못했습니다.",
+    "DRIVER_GRAPHICS_MISSING": "NVIDIA GPU는 표시되지만 EGL/Vulkan 그래픽 드라이버 전달이 확인되지 않았습니다.",
+    "WEBGL2_CONTEXT_UNAVAILABLE": "Chromium에서 WebGL2 context를 생성하지 못했습니다.",
+    "DEBUG_RENDERER_UNAVAILABLE": "실제 WebGL renderer 정보를 확인하지 못했습니다.",
+    "SOFTWARE_RENDERER_REJECTED": "소프트웨어 renderer가 감지되어 NVIDIA GPU 렌더를 차단했습니다.",
+    "NVIDIA_RENDERER_MISSING": "WebGL renderer에서 NVIDIA GPU를 확인하지 못했습니다.",
+    "NVIDIA_DEVICE_MISMATCH": "WebGL renderer와 전달된 NVIDIA GPU 모델이 일치하지 않습니다.",
+    "WEBGL_DRAW_FAILED": "WebGL 테스트 frame의 실제 GPU 그리기 결과를 확인하지 못했습니다.",
+    "GPU_PROBE_SHADER_FAILED": "GPU 검증용 WebGL shader를 생성하지 못했습니다.",
+    "GPU_PROBE_PROGRAM_FAILED": "GPU 검증용 WebGL program을 연결하지 못했습니다.",
+    "GPU_GRAPHICS_RUNTIME_PATH_UNSAFE": "NVIDIA 그래픽 초기화용 디렉터리의 안전성을 확인하지 못했습니다.",
+    "GPU_GRAPHICS_RUNTIME_PATH_UNWRITABLE": "NVIDIA 그래픽 초기화용 디렉터리에 필요한 파일을 기록하지 못했습니다.",
+}
 
 
 def safe_error_code(value):
@@ -78,6 +101,77 @@ def safe_error_code(value):
     if isinstance(value, str) and _SAFE_CODE.fullmatch(value) and value in KNOWN_ERROR_CODES:
         return value
     return "STARTUP_BLOCKED"
+
+
+def safe_gpu_diagnostics(value):
+    """Share the probe's strict projection, never expose raw process output."""
+    from deployment.gcube.gpu import sanitize_gpu_diagnostics
+    return sanitize_gpu_diagnostics(value)
+
+
+def gpu_diagnostic_html(diagnostic):
+    """A static, mobile-sized view of observed GPU stages, with no scripts."""
+    if not diagnostic:
+        return ""
+    escape = lambda value: html.escape(str(value), quote=True)
+    stage_names = {"A": "NVIDIA 장치 전달", "B": "nvidia-smi", "C": "Chromium 실행",
+                   "D": "WebGL context", "E": "실제 NVIDIA renderer", "F": "테스트 frame GPU render"}
+    rows = []
+    for stage in diagnostic.get("stages", []):
+        ident = stage.get("id")
+        if ident in stage_names:
+            rows.append("<tr><th>" + ident + ". " + stage_names[ident] + "</th><td>" +
+                        escape(stage.get("status", "NOT_RUN")) + "</td></tr>")
+    devices = diagnostic.get("nvidia_devices", [])
+    if devices:
+        rows.append("<tr><th>GPU</th><td>" + escape(", ".join(device.get("name", "") for device in devices)) + "</td></tr>")
+        rows.append("<tr><th>Driver</th><td>" + escape(", ".join(device.get("driver_version") or "확인하지 못함" for device in devices)) + "</td></tr>")
+    if diagnostic.get("gpu_profile"):
+        rows.append("<tr><th>Backend</th><td>" + escape(diagnostic["gpu_profile"]) + "</td></tr>")
+    webgl = diagnostic.get("webgl", {})
+    renderer = webgl.get("unmasked_renderer") or webgl.get("renderer") or "확인하지 못함"
+    vendor = webgl.get("unmasked_vendor") or webgl.get("vendor") or "확인하지 못함"
+    rows.extend(("<tr><th>WebGL renderer</th><td>" + escape(renderer) + "</td></tr>",
+                 "<tr><th>WebGL vendor</th><td>" + escape(vendor) + "</td></tr>",
+                 "<tr><th>Software renderer</th><td>" +
+                 ("YES · GPU 검증 실패" if webgl.get("software_renderer") is True else
+                  "NO" if webgl.get("context_available") is True else "확인하지 못함") + "</td></tr>"))
+    reason = diagnostic.get("reason_code")
+    if reason:
+        rows.append("<tr><th>진단 코드</th><td>" + escape(reason) + "</td></tr>")
+    failed = diagnostic.get("failed_stage")
+    detail = ("<p>실패 단계: " + escape(failed) + " · " + stage_names.get(failed, "확인 필요") + "</p>") if failed else ""
+    if reason in _GPU_REASONS:
+        detail += "<p>" + _GPU_REASONS[reason] + "</p>"
+    runtime = diagnostic.get("runtime", {})
+    delivery = runtime.get("driver_delivery", {})
+    libraries = runtime.get("libraries", {})
+    if delivery or libraries:
+        rows.append("<tr><th>NVIDIA EGL / Vulkan 전달</th><td>" +
+                    ("YES" if delivery.get("egl_vendor_manifest") is True else "NO") + " / " +
+                    ("YES" if delivery.get("vulkan_nvidia_icd") is True else "NO") + "</td></tr>")
+    # No third-party failure string is inserted into the page. Observed fixed
+    # graphics-delivery facts provide useful guidance without exposing stderr.
+    if failed in {"C", "D", "E", "F"} and libraries and not (
+            libraries.get("nvidia_egl") is True or libraries.get("nvidia_vulkan") is True):
+        detail += "<p>NVIDIA GPU는 표시되더라도 그래픽 드라이버 전달이 없으면 WebGL을 검증할 수 없습니다. gcube의 NVIDIA graphics runtime 전달을 확인해야 합니다.</p>"
+    elif failed:
+        detail += "<p>위 단계에서 실제 GPU 렌더 증명을 완료하지 못했습니다. 표시된 진단 코드와 renderer를 확인하세요.</p>"
+    attempts = diagnostic.get("profile_attempts", [])
+    if attempts:
+        detail += "<p>검증한 backend: " + escape(" → ".join(
+            str(attempt.get("backend", "")) + " (" + str(attempt.get("status", "")) + ")"
+            for attempt in attempts)) + "</p>"
+        for attempt in attempts:
+            observed = attempt.get("diagnostics", {})
+            if not observed:
+                continue
+            actual = observed.get("webgl", {})
+            identity = actual.get("unmasked_renderer") or actual.get("renderer") or "확인하지 못함"
+            detail += ("<p class=code>" + escape(attempt.get("backend", "")) +
+                       ": " + escape(observed.get("reason_code") or attempt.get("status", "")) +
+                       " · renderer: " + escape(identity) + "</p>")
+    return "<section aria-label='GPU 진단'><h2>GPU / WebGL 진단</h2>" + detail + "<table>" + "".join(rows) + "</table></section>"
 
 
 class _BoundedServer(ThreadingMixIn, HTTPServer):
@@ -160,12 +254,16 @@ class _Handler(BaseHTTPRequestHandler):
 
     def _read_only(self):
         phase, code = self.server.owner.snapshot()
+        diagnostic = self.server.owner.gpu_diagnostics
         # URLs and all reverse-proxy headers are deliberately not reflected.
         # This server has no authentication, state changes, assets, or engine API.
         path = self.path.partition("?")[0]
         if path in {"/api/health", "/healthz"}:
-            self._json(200, {"ok": True, "authentication_required": True,
-                             "engine_ready": False, "phase": phase, "error_code": code})
+            record = {"ok": True, "authentication_required": True,
+                      "engine_ready": False, "phase": phase, "error_code": code}
+            if diagnostic:
+                record["gpu_diagnostics"] = diagnostic
+            self._json(200, record)
         elif path == "/readyz":
             self._json(503, {"ok": False, "engine_ready": False, "phase": phase,
                              "error_code": code})
@@ -173,6 +271,8 @@ class _Handler(BaseHTTPRequestHandler):
             if phase == "blocked":
                 title, description = "초기화가 중단되었습니다", _MESSAGES[code]
                 detail = "<p class=code>오류 코드: " + code + "</p>"
+                if diagnostic:
+                    detail += gpu_diagnostic_html(diagnostic)
             else:
                 title, description = "World Engine 준비 중", "저장소와 실행환경을 확인하고 있습니다. 아직 로그인과 영상 생성을 시작할 수 없습니다. 잠시 후 새로고침하세요."
                 detail = ""
@@ -183,6 +283,8 @@ class _Handler(BaseHTTPRequestHandler):
                 "body{margin:0;background:#101722;color:#edf3fa;font:16px/1.6 sans-serif}"
                 "main{max-width:36rem;padding:2rem 1.2rem;margin:auto}h1{font-size:1.5rem}"
                 ".code{overflow-wrap:anywhere;font-family:monospace;color:#b7d9f1}"
+                "h2{font-size:1.1rem}table{width:100%;border-collapse:collapse;font-size:.85rem}"
+                "th,td{padding:.45rem .25rem;text-align:left;border-bottom:1px solid #344352;overflow-wrap:anywhere}th{width:48%}"
                 "small{display:block;color:#b8c4d0;margin-top:2rem}</style>"
                 "<main><h1>" + title + "</h1><p>" + description + "</p>" + detail +
                 "<p>영상 생성 엔진: 아직 준비되지 않음</p>"
@@ -219,6 +321,7 @@ class BootStatusServer:
         self._requested_port = port
         self._phase = "checking"
         self._code = None
+        self._gpu_diagnostics = None
         self._state_lock = threading.Lock()
         self._lifecycle_lock = threading.Lock()
         self._server = None
@@ -236,12 +339,22 @@ class BootStatusServer:
     def error_code(self):
         return self.snapshot()[1]
 
-    def set_phase(self, phase, error_code=None):
+    @property
+    def gpu_diagnostics(self):
+        with self._state_lock:
+            # This shape contains no secret/raw exception/env values; callers
+            # receive a copy so a concurrent HTTP read cannot mutate our state.
+            return json.loads(json.dumps(self._gpu_diagnostics)) if self._gpu_diagnostics else None
+
+    def set_phase(self, phase, error_code=None, *, gpu_diagnostics=None):
         if phase not in {"checking", "blocked"}:
             raise ValueError("Invalid startup phase")
         with self._state_lock:
             self._phase = phase
             self._code = safe_error_code(error_code) if phase == "blocked" else None
+            self._gpu_diagnostics = (safe_gpu_diagnostics(gpu_diagnostics)
+                                     if phase == "blocked" and self._code.startswith("GPU_")
+                                     and isinstance(gpu_diagnostics, dict) else None)
 
     def start(self):
         with self._lifecycle_lock:

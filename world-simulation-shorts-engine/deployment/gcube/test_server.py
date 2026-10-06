@@ -261,6 +261,93 @@ class GatewayTests(unittest.TestCase):
         self.assertEqual(value["limits"]["max_duration"], 20)
         self.assertIsNone(self.app.bound_origin)
 
+    def test_gpu_diagnostic_routes_keep_existing_owner_and_origin_checks(self):
+        routes = ("/api/gcube/gpu", "/gcube/gpu", "/gcube/gpu.json")
+        for path in routes:
+            self.assertEqual(self.call("GET", path)[0], 401)
+        self.login()
+        private_json(self.runtime / "gcube-runtime.json", {
+            "gpu": {"render_mode": "cpu", "gpu_rendering_verified": False,
+                    "diagnostics": {"schema_version": 1, "render_mode": "cpu",
+                                    "gpu_profile": "cpu", "webgl": {
+                                        "renderer": "ANGLE (Google, Vulkan SwiftShader Device)",
+                                        "software_renderer": True, "context_available": True,
+                                        "context_version": 2, "webgl2": True, "draw_passed": True},
+                                    "owner_code": PASSWORD, "stderr": "private-engine-stderr"}},
+            "owner": PASSWORD, "path": str(self.runtime)})
+        for path in routes:
+            status, headers, body = self.call("GET", path)
+            self.assertEqual(status, 200, body)
+            self.assertEqual(headers["Cache-Control"], "no-store")
+            self.assertNotIn(PASSWORD.encode(), body)
+            self.assertNotIn(str(self.runtime).encode(), body)
+            self.assertNotIn(b"private-engine-stderr", body)
+            self.assertNotIn(b"WebGL VERIFIED", body)
+            self.assertEqual(self.call("POST", path, {})[0], 405)
+            self.assertIn(self.call("GET", path, origin=OTHER)[0], {400, 403})
+            self.assertEqual(self.call("HEAD", path)[0], 200)
+            self.assertEqual(self.call("HEAD", path)[2], b"")
+        record = json.loads(self.call("GET", "/api/gcube/gpu")[2])
+        self.assertEqual(record["render_mode"], "cpu")
+        self.assertFalse(record["gpu_rendering_verified"])
+        self.assertIn("CPU 비교 모드", record["message"])
+        self.assertIn("SwiftShader", record["diagnostics"]["webgl"]["renderer"])
+        self.cookie = None
+        for path in routes:
+            self.assertEqual(self.call("GET", path)[0], 401)
+
+    def test_gpu_diagnostic_verified_message_requires_observed_gpu_draw_proof(self):
+        self.login()
+        stages = [{"id": letter, "status": "PASS"} for letter in "ABCDEF"]
+        diagnostic = {"schema_version": 1, "render_mode": "gpu-required", "gpu_profile": "egl",
+                      "failed_stage": None, "stages": stages,
+                      "nvidia_devices": [{"name": "NVIDIA GeForce RTX 3070", "driver_version": "616.56",
+                                          "memory_total_mib": 8192, "uuid": "private-gpu-uuid"}],
+                      "webgl": {"vendor": "WebKit", "renderer": "WebKit WebGL",
+                                "unmasked_vendor": "NVIDIA Corporation", "unmasked_renderer": "NVIDIA GeForce RTX 3070",
+                                "context_available": True, "context_version": 2,
+                                "webgl2": True, "draw_passed": True, "software_renderer": False}}
+        report = {"gpu": {"render_mode": "gpu-required", "gpu_rendering_verified": True,
+                          "diagnostics": diagnostic}}
+        private_json(self.runtime / "gcube-runtime.json", report)
+        value = json.loads(self.call("GET", "/gcube/gpu.json")[2])
+        self.assertTrue(value["gpu_rendering_verified"])
+        self.assertIn("RTX 3070 WebGL VERIFIED", value["message"])
+        self.assertIn("World Engine READY", value["message"])
+        self.assertNotIn(b"private-gpu-uuid", self.call("GET", "/gcube/gpu")[2])
+        self.assertIn(b"GPU / WebGL", self.call("GET", "/")[2])
+        for modified in ("software", "missing_frame", "missing_stage", "cpu"):
+            with self.subTest(modified=modified):
+                changed = json.loads(json.dumps(report))
+                if modified == "software":
+                    changed["gpu"]["diagnostics"]["webgl"]["unmasked_renderer"] = "ANGLE (Google, Vulkan SwiftShader Device)"
+                elif modified == "missing_frame":
+                    changed["gpu"]["diagnostics"]["webgl"]["draw_passed"] = False
+                elif modified == "missing_stage":
+                    changed["gpu"]["diagnostics"]["stages"][-1]["status"] = "NOT_RUN"
+                else:
+                    changed["gpu"]["render_mode"] = "cpu"
+                private_json(self.runtime / "gcube-runtime.json", changed)
+                value = json.loads(self.call("GET", "/api/gcube/gpu")[2])
+                self.assertFalse(value["gpu_rendering_verified"])
+                self.assertNotIn("WebGL VERIFIED", value["message"])
+
+    def test_gpu_diagnostic_runtime_corruption_never_leaks_or_claims_gpu_success(self):
+        self.login()
+        path = self.runtime / "gcube-runtime.json"
+        for text in ("not-json-private-secret", 'null', '[]', '{"gpu":[]}'):
+            path.write_text(text)
+            path.chmod(0o600)
+            value = json.loads(self.call("GET", "/api/gcube/gpu")[2])
+            self.assertFalse(value["gpu_rendering_verified"])
+            self.assertEqual(value["diagnostics"], {})
+            self.assertNotIn("secret", json.dumps(value))
+        path.unlink()
+        path.symlink_to(self.access)
+        value = json.loads(self.call("GET", "/api/gcube/gpu")[2])
+        self.assertFalse(value["gpu_rendering_verified"])
+        self.assertNotIn(PASSWORD, json.dumps(value))
+
     def test_loopback_health_exception_does_not_open_other_paths(self):
         local = {"Host": f"127.0.0.1:{self.port}", "X-Forwarded-Host": None, "X-Forwarded-Proto": None}
         self.assertEqual(self.call("GET", "/api/health", headers=local)[0], 200)

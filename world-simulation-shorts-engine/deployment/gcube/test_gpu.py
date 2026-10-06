@@ -6,6 +6,7 @@ import unittest
 from unittest.mock import patch
 
 from deployment.gcube import gpu
+from deployment.gcube import gpu_runtime_facts
 from deployment.gcube.chromium_wrapper import (BrowserProfileError, browser_arguments,
                                               browser_executable, browser_profile)
 
@@ -19,6 +20,7 @@ def probe(renderer='ANGLE (NVIDIA, NVIDIA GeForce RTX 5070, OpenGL 4.6)'):
     return {'schema_version':1,'browser_version':'140.0.0.0',
             'webgl':{'context_available':True,'context_version':2,'draw_passed':True,
                      'webgl_error':0,'renderer':renderer,'vendor':'Google Inc. (NVIDIA)',
+                     'pixel':[255,0,0,255],
                      'debug_renderer_available':True,'max_texture_size':16384,
                      'max_renderbuffer_size':16384},
             'system_info_available':False,'system_info':None}
@@ -79,6 +81,93 @@ class GPUAdmission(unittest.TestCase):
                 gpu.classify_probe(probe(name),[device()])
         self.assertTrue(gpu.classify_probe(probe(),[device()]))
 
+    def test_nvidia_vendor_alone_and_mismatched_physical_adapter_cannot_pass(self):
+        for renderer in ('ANGLE (AMD, AMD Radeon)', 'ANGLE (NVIDIA, NVIDIA RTX 3070)',
+                         'ANGLE (Intel, Intel UHD Graphics)'):
+            with self.subTest(renderer=renderer), self.assertRaises(gpu.GPUError):
+                gpu.classify_probe(probe(renderer), [device()])
+        current = device()
+        current.update(name='NVIDIA GeForce RTX 3070', driver_version='616.56', memory_total_mib=8192)
+        self.assertTrue(gpu.classify_probe(probe('ANGLE (NVIDIA, NVIDIA GeForce RTX 3070/PCIe/SSE2)'), [current]))
+
+    def test_similar_model_names_do_not_match_different_physical_adapters(self):
+        for model, renderer in (('NVIDIA GeForce RTX 3070', 'ANGLE (NVIDIA, NVIDIA GeForce RTX 3070 Ti)'),
+                                ('NVIDIA A10', 'ANGLE (NVIDIA, NVIDIA A100-SXM4-40GB)')):
+            current = device()
+            current['name'] = model
+            with self.subTest(model=model), self.assertRaises(gpu.GPUError):
+                gpu.classify_probe(probe(renderer), [current])
+
+    def test_actual_pixel_is_required_even_if_draw_passed_flag_is_true(self):
+        for pixel in (None, [0,0,0,255], [255,0,0,0], [255,True,0,255], [255,0,0]):
+            failed = probe()
+            failed['webgl']['pixel'] = pixel
+            with self.subTest(pixel=pixel), self.assertRaises(gpu.GPUError):
+                gpu.classify_probe(failed, [device()])
+
+    def test_explicit_unmasked_identity_overrides_legacy_renderer_alias(self):
+        failed = probe()
+        failed['webgl']['unmasked_renderer'] = 'ANGLE (Google, SwiftShader Device)'
+        with self.assertRaises(gpu.GPUError):
+            gpu.classify_probe(failed, [device()])
+
+    def test_gpu_failure_reports_context_identity_and_draw_stages_separately(self):
+        expected = [('context_available', False, 'D', 'WEBGL2_CONTEXT_UNAVAILABLE'),
+                    ('renderer', 'llvmpipe', 'E', 'SOFTWARE_RENDERER_REJECTED'),
+                    ('renderer', 'ANGLE (NVIDIA, RTX 3070)', 'E', 'NVIDIA_DEVICE_MISMATCH'),
+                    ('pixel', [0,0,0,255], 'F', 'WEBGL_DRAW_FAILED')]
+        for key, value, stage, reason in expected:
+            current = probe()
+            current['webgl'][key] = value
+            with self.subTest(key=key, value=value):
+                self.assertEqual(gpu.probe_failure(current, [device()]), (stage, reason))
+
+    def test_sanitized_diagnostics_exclude_uuid_environment_paths_and_unknown_errors(self):
+        source = {'render_mode':'gpu-required', 'gpu_profile':'egl', 'failed_stage':'E',
+                  'reason_code':'SOFTWARE_RENDERER_REJECTED', 'nvidia_devices':[device()],
+                  'webgl':probe('ANGLE (Google, SwiftShader Device)')['webgl'],
+                  'runtime':{'environment':{'NVIDIA_VISIBLE_DEVICES':{'present':True,'selection':'configured',
+                                'value':'GPU-1234-abcd'}, 'OWNER_CODE':'do-not-emit'},
+                             'libraries':{'nvidia_egl':True}, 'secret':'do-not-emit'},
+                  'stderr':'/tmp/private do-not-emit', 'stages':[{'id':'E','status':'FAIL',
+                                'name':'do-not-emit','reason_code':'SOFTWARE_RENDERER_REJECTED'}]}
+        safe = gpu.sanitize_gpu_diagnostics(source)
+        serialized = json.dumps(safe)
+        self.assertNotIn('GPU-1234-abcd', serialized)
+        self.assertNotIn('do-not-emit', serialized)
+        self.assertNotIn('/tmp/private', serialized)
+        self.assertTrue(safe['webgl']['software_renderer'])
+        self.assertEqual(safe['stages'][4]['name'], 'NVIDIA renderer identity')
+        self.assertEqual(gpu.sanitize_gpu_diagnostics(None), {})
+
+    def test_runtime_inventory_does_not_return_device_selection_values(self):
+        inventory = gpu.graphics_runtime_inventory({'NVIDIA_VISIBLE_DEVICES':'GPU-1234-abcd',
+                                                    'CUDA_VISIBLE_DEVICES':'0,1',
+                                                    'WORLD_ENGINE_OWNER_CODE':'do-not-emit'})
+        self.assertEqual(inventory['environment']['CUDA_VISIBLE_DEVICES']['selection'], 'index-list')
+        self.assertEqual(inventory['environment']['NVIDIA_VISIBLE_DEVICES']['selection'], 'configured')
+        self.assertNotIn('GPU-1234-abcd', json.dumps(inventory))
+        self.assertNotIn('do-not-emit', json.dumps(inventory))
+
+    def test_selector_inventory_never_reads_an_arbitrary_environment_path(self):
+        for selector in ('/tmp/private.json', '/run/world-engine/nvidia-graphics-../../private.json',
+                         '/run/world-engine/nvidia-graphics-abc/../../../etc/shadow'):
+            with self.subTest(selector=selector), patch('pathlib.Path.read_text') as read:
+                self.assertFalse(gpu_runtime_facts._prepared_manifest_present(
+                    {'__EGL_VENDOR_LIBRARY_FILENAMES':selector}, 'egl'))
+                read.assert_not_called()
+
+    def test_malformed_diagnostic_fields_are_safely_ignored(self):
+        safe = gpu.sanitize_gpu_diagnostics({'render_mode':{}, 'gpu_profile':[], 'failed_stage':{},
+            'reason_code':[], 'stages':[{'id':{}, 'status':[], 'reason_code':{}}],
+            'webgl':{'reason_code':{}, 'renderer':{}, 'pixel':[255,{},0,255]},
+            'profile_attempts':[{'backend':{}}]})
+        self.assertIsNone(safe['render_mode'])
+        self.assertIsNone(safe['failed_stage'])
+        self.assertEqual(safe['profile_attempts'], [])
+        self.assertIsNone(safe['webgl']['renderer'])
+        self.assertIsNone(safe['webgl']['pixel'])
+
     def test_missing_identity_failed_draw_and_unavailable_hardware_fail(self):
         for field,value in (('renderer',None),('debug_renderer_available',False),
                             ('draw_passed',False),('webgl_error',1282),('context_version',1)):
@@ -129,6 +218,37 @@ class GPUAdmission(unittest.TestCase):
         self.assertEqual(result['cuda']['driver_supported_cuda_max_version'],'12.8')
         self.assertFalse(result['cuda']['toolkit']['nvcc_present'])
         self.assertEqual(result['cuda']['toolkit']['status'],'not_detected')
+        self.assertEqual([stage['status'] for stage in result['diagnostics']['stages']], ['PASS']*6)
+        self.assertEqual(result['diagnostics']['webgl']['pixel'], [255,0,0,255])
+
+    def test_failed_probe_keeps_real_safe_renderer_and_context_evidence(self):
+        def run(command, **kwargs):
+            if command[0] == 'nvidia-smi':
+                return subprocess.CompletedProcess(command,0,'NVIDIA GeForce RTX 5070, GPU-1234-abcd, 570.124.04, 12288, 0\n','')
+            return subprocess.CompletedProcess(command,0,json.dumps(probe('ANGLE (Google, SwiftShader Device)')),'secret stderr')
+        with patch.object(gpu,'browser_executable',return_value='/usr/bin/chromium'):
+            with self.assertRaises(gpu.GPUError) as raised:
+                gpu.probe_gpu_runtime(environ={},runner=run)
+        diagnostic = raised.exception.diagnostics
+        self.assertEqual(diagnostic['failed_stage'], 'E')
+        self.assertEqual(diagnostic['reason_code'], 'SOFTWARE_RENDERER_REJECTED')
+        self.assertEqual(diagnostic['webgl']['renderer'], 'ANGLE (Google, SwiftShader Device)')
+        self.assertTrue(diagnostic['webgl']['draw_passed'])
+        self.assertNotIn('secret stderr', json.dumps(diagnostic))
+        self.assertEqual(diagnostic['stages'][5]['status'], 'NOT_RUN')
+
+    def test_browser_launch_failure_returns_fixed_code_without_raw_stderr(self):
+        def run(command, **kwargs):
+            if command[0] == 'nvidia-smi':
+                return subprocess.CompletedProcess(command,0,'NVIDIA GeForce RTX 5070, GPU-1234-abcd, 570.124.04, 12288, 0\n','')
+            return subprocess.CompletedProcess(command,2,json.dumps({'browser_started':False,
+                'browser_version':None,'error_code':'DRIVER_GRAPHICS_MISSING'}),'private stderr')
+        with patch.object(gpu,'browser_executable',return_value='/usr/bin/chromium'):
+            with self.assertRaises(gpu.GPUError) as raised:
+                gpu.probe_gpu_runtime(environ={},runner=run)
+        self.assertEqual(raised.exception.diagnostics['failed_stage'], 'C')
+        self.assertEqual(raised.exception.diagnostics['reason_code'], 'DRIVER_GRAPHICS_MISSING')
+        self.assertNotIn('private stderr', json.dumps(raised.exception.diagnostics))
 
     def test_optional_cuda_toolkit_and_driver_versions_remain_distinct(self):
         def run(command,**kwargs):

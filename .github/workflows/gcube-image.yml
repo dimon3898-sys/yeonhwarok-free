@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 45
     env:
       IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
-      RELEASE_TAG: gcube-v002
+      RELEASE_TAG: gcube-v003
     steps:
       - name: Checkout approved sources
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -149,17 +149,14 @@ jobs:
           for case in cases:
               health = wait_for(case, case in ('root', 'nonroot'))
               if case in ('root', 'nonroot'):
-                  if (health.get('gpu', {}).get('render_mode') != 'cpu'
-                          or health.get('gpu', {}).get('gpu_rendering_verified') is not False
-                          or health.get('storage', {}).get('mode') != 'ephemeral'):
-                      raise RuntimeError('Explicit CPU profile or ephemeral storage was not verified')
-                  try:
-                      clients[case].open(endpoints[case] + '/api/projects', timeout=5)
-                  except HTTPError as error:
-                      if error.code != 401:
-                          raise RuntimeError('Unauthenticated access was not rejected')
-                  else:
-                      raise RuntimeError('Unauthenticated project access succeeded')
+                  for protected_path in ('/api/projects', '/api/gcube/gpu', '/gcube/gpu.json', '/gcube/gpu'):
+                      try:
+                          clients[case].open(endpoints[case] + protected_path, timeout=5)
+                      except HTTPError as error:
+                          if error.code != 401:
+                              raise RuntimeError('Unauthenticated access was not rejected for ' + protected_path)
+                      else:
+                          raise RuntimeError('Unauthenticated protected access succeeded for ' + protected_path)
                   owner = next(line.partition('=')[2] for line in (folder / (case + '.env')).read_text().splitlines()
                                if line.startswith('WORLD_ENGINE_OWNER_CODE='))
                   request = Request(endpoints[case] + '/auth/login', data=json.dumps({'password': owner}).encode(),
@@ -167,6 +164,33 @@ jobs:
                   with clients[case].open(request, timeout=5) as response:
                       if json.load(response).get('authenticated') is not True:
                           raise RuntimeError('Owner login failed for ' + case)
+                  # Before owner login, numeric-host kube probes deliberately
+                  # return only liveness/readiness. Inspect the normal bound
+                  # health projection only after login with the same Origin.
+                  bound_health = get(case, '/api/health', headers={'Origin': endpoints[case]})
+                  if (bound_health.get('gpu', {}).get('render_mode') != 'cpu'
+                          or bound_health.get('gpu', {}).get('gpu_rendering_verified') is not False
+                          or bound_health.get('storage', {}).get('mode') != 'ephemeral'):
+                      raise RuntimeError('Explicit CPU profile or ephemeral storage was not verified')
+                  for diagnostics_path in ('/api/gcube/gpu', '/gcube/gpu.json'):
+                      gpu_view = get(case, diagnostics_path)
+                      if (gpu_view.get('engine_ready') is not True
+                              or gpu_view.get('gpu_rendering_verified') is not False
+                              or gpu_view.get('render_mode') != 'cpu'
+                              or 'WebGL VERIFIED' in gpu_view.get('message', '')
+                              or not isinstance(gpu_view.get('diagnostics'), dict)):
+                          raise RuntimeError('Owner GPU diagnostics incorrectly claimed NVIDIA admission')
+                      webgl = gpu_view['diagnostics'].get('webgl', {})
+                      if (webgl.get('context_available') is not True or webgl.get('context_version') != 2
+                              or webgl.get('draw_passed') is not True or webgl.get('webgl_error') != 0
+                              or webgl.get('software_renderer') is not True
+                              or not re.search(r'swiftshader|llvmpipe|softpipe|software|lavapipe',
+                                               ' '.join(str(webgl.get(key, '')) for key in
+                                                        ('vendor', 'renderer', 'unmasked_vendor', 'unmasked_renderer')), re.I)):
+                          raise RuntimeError('Fresh image Chromium/WebGL2 draw did not verify the explicit CPU test profile')
+                  with clients[case].open(endpoints[case] + '/gcube/gpu', timeout=5) as response:
+                      if response.status != 200 or 'text/html' not in response.headers.get('Content-Type', ''):
+                          raise RuntimeError('Owner GPU diagnostic page failed')
                   projects = get(case, '/api/projects').get('projects', [])
                   if (len(projects) != 1 or projects[0].get('status') != 'planned'
                           or not re.fullmatch(r'project_[a-f0-9]{12}', projects[0].get('id', ''))):
@@ -185,6 +209,17 @@ jobs:
                               or not response.headers.get('Content-Disposition', '').startswith('attachment;')):
                           raise RuntimeError('Owner measurement download did not verify CPU runtime')
               else:
+                  if case == 'gpu-required':
+                      gpu_failure = health.get('gpu_diagnostics', {})
+                      stages = {row.get('id'): row.get('status') for row in gpu_failure.get('stages', [])}
+                      if (gpu_failure.get('failed_stage') not in {'A', 'B'}
+                              or set(stages) != set('ABCDEF') or stages.get('B') != 'FAIL'
+                              or any(stages.get(stage) == 'PASS' for stage in 'CDEF')):
+                          raise RuntimeError('GPU-required startup did not expose the actual failed GPU stage')
+                      with clients[case].open(endpoints[case] + '/', timeout=5) as response:
+                          page = response.read(1024 * 1024).decode('utf-8')
+                          if 'GPU / WebGL 진단' not in page or 'Workload를 중지하세요' not in page:
+                              raise RuntimeError('Blocked GPU diagnostic and billing guidance were missing')
                   ready = get(case, '/readyz', expected_status=503)
                   if ready.get('engine_ready') is not False or ready.get('error_code') != expected[case]:
                       raise RuntimeError('Blocked startup incorrectly claimed readiness')
@@ -230,11 +265,21 @@ jobs:
               if value.get('engine_ready') is not False or value.get('error_code') != expected[case]:
                   raise RuntimeError('Blocked diagnostics changed or quietly fell back to CPU')
           for case in ('root', 'nonroot'):
-              value = get(case, '/api/health')
-              if value.get('engine_ready') is not True or value.get('gpu', {}).get('render_mode') != 'cpu':
+              value = get(case, '/api/gcube/gpu')
+              if (value.get('engine_ready') is not True or value.get('render_mode') != 'cpu'
+                      or value.get('gpu_rendering_verified') is not False):
                   raise RuntimeError('Ready engine lost its explicit CPU profile')
-          print('Fresh root/UID1000 image boot, 0.0.0.0:8000, owner login, Pod-IP health, sustained foreground lifetime, and three fail-closed startup diagnostics passed; no render was requested')
+          print('Fresh Chromium WebGL2 CPU draw, owner-gated GPU diagnostic routes, root/UID1000 image boot, 0.0.0.0:8000, owner login, Pod-IP health, sustained foreground lifetime, and three fail-closed startup diagnostics passed; no render was requested')
           PY
+      - name: Verify GPU admission and software renderer rejection contracts in the built image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --entrypoint python "${IMAGE}:${RELEASE_TAG}" \
+            -m unittest deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
+            deployment.gcube.test_chromium_wrapper deployment.gcube.test_graphics_runtime \
+            deployment.gcube.test_gpu_access deployment.gcube.test_boot_status \
+            deployment.gcube.test_server deployment.gcube.test_start
       - name: Report bounded startup diagnostics after a failure
         if: failure()
         shell: bash

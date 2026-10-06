@@ -19,6 +19,7 @@ def report(profile='egl', mode='gpu-required'):
         'webgl': {
             'context_available': True, 'context_version': 2,
             'draw_passed': True, 'webgl_error': 0,
+            'pixel': [255,0,0,255],
             'debug_renderer_available': True,
             'renderer': 'ANGLE (Google, SwiftShader)' if cpu else 'ANGLE (NVIDIA, RTX 5070)',
             'vendor': 'Google Inc.' if cpu else 'NVIDIA Corporation',
@@ -28,6 +29,41 @@ def report(profile='egl', mode='gpu-required'):
 
 
 class ProfileSelection(unittest.TestCase):
+    def test_both_backend_failures_keep_distinct_safe_stages_and_renderers(self):
+        def probe(**kwargs):
+            profile = kwargs['environ']['WORLD_ENGINE_GPU_PROFILE']
+            reason = 'WEBGL2_CONTEXT_UNAVAILABLE' if profile == 'egl' else 'SOFTWARE_RENDERER_REJECTED'
+            failed_stage = 'D' if profile == 'egl' else 'E'
+            raise GPUError('GPU_WEBGL_UNVERIFIED', diagnostics={
+                'render_mode':'gpu-required', 'gpu_profile':profile, 'reason_code':reason,
+                'failed_stage':failed_stage, 'webgl':{'renderer':None if profile == 'egl' else 'llvmpipe',
+                    'context_available':profile != 'egl'},
+                'stages':[{'id':failed_stage,'status':'FAIL','reason_code':reason}],
+                'stderr':'do-not-reflect'})
+        with self.assertRaises(GPUError) as raised:
+            select_graphics_profile({}, probe=probe)
+        diagnostics = raised.exception.diagnostics
+        self.assertEqual(len(diagnostics['profile_attempts']), 2)
+        self.assertEqual([attempt['diagnostics']['failed_stage'] for attempt in diagnostics['profile_attempts']], ['D','E'])
+        self.assertEqual(diagnostics['profile_attempts'][1]['diagnostics']['webgl']['renderer'], 'llvmpipe')
+        self.assertNotIn('do-not-reflect', str(diagnostics))
+
+    def test_success_keeps_failed_backend_evidence_and_selected_verified_backend(self):
+        def probe(**kwargs):
+            profile = kwargs['environ']['WORLD_ENGINE_GPU_PROFILE']
+            if profile == 'egl':
+                raise GPUError('GPU_WEBGL_UNVERIFIED', diagnostics={
+                    'render_mode':'gpu-required', 'gpu_profile':'egl', 'failed_stage':'D',
+                    'reason_code':'WEBGL2_CONTEXT_UNAVAILABLE'})
+            current = report('vulkan')
+            current['diagnostics'] = {'render_mode':'gpu-required', 'gpu_profile':'vulkan',
+                                     'reason_code':'VERIFIED', 'failed_stage':None,
+                                     'webgl':current['webgl']}
+            return current
+        selected = select_graphics_profile({}, probe=probe)
+        self.assertEqual(selected['diagnostics']['gpu_profile'], 'vulkan')
+        self.assertEqual([attempt['status'] for attempt in selected['diagnostics']['profile_attempts']], ['failed','verified'])
+
     def test_default_egl_success_preserves_report_runner_and_private_environment(self):
         source_report = report()
         source_env = {'PRIVATE_TOKEN': 'private-value', 'PATH': '/usr/bin'}
@@ -82,6 +118,9 @@ class ProfileSelection(unittest.TestCase):
                     select_graphics_profile({}, probe=probe)
                 self.assertIs(raised.exception, first)
                 self.assertEqual(calls, ['egl', 'vulkan'])
+                self.assertEqual([item['backend'] for item in raised.exception.diagnostics['profile_attempts']], ['egl', 'vulkan'])
+                self.assertEqual([item['error_code'] for item in raised.exception.diagnostics['profile_attempts']],
+                                 ['GPU_BROWSER_PROBE_FAILED', second_code])
 
     def test_hardware_wrapper_configuration_and_cpu_errors_do_not_retry(self):
         for code in ('GPU_HARDWARE_UNAVAILABLE', 'GPU_WRAPPER_NOT_EXECUTABLE',

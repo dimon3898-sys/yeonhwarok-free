@@ -26,6 +26,7 @@ from deployment.mobile_server import (APP_ROOT, BoundedHTTPServer, InternalHandl
                                       MobileApplication, MobileHandler, checked_state_root)
 from deployment.security import RequestPolicy, SecurityError, content_length, private_json
 from deployment.gcube.diagnostics import DiagnosticsError, build_mobile_diagnostics
+from deployment.gcube.boot_status import gpu_diagnostic_html, safe_gpu_diagnostics
 from engine.storage import EngineError
 
 PROVIDER_HOST = re.compile(r"([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)\.gcube\.ai")
@@ -176,6 +177,34 @@ class GcubeApplication(MobileApplication):
                             "message": "유휴 상태에서도 과금될 수 있습니다. 다운로드 후 gCube Workload를 중지해 주세요."},
                 "limits": {"max_duration": self.maximum_duration}}
 
+    def gpu_diagnostics(self):
+        """Owner-only observed graphics proof, projected from the private report."""
+        gpu = {}
+        path = self.state_root / "gcube-runtime.json"
+        if (path.is_file() and not path.is_symlink() and path.stat().st_size <= 256 * 1024
+                and not stat.S_IMODE(path.stat().st_mode) & 0o077):
+            try:
+                value = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(value, dict) and isinstance(value.get("gpu"), dict):
+                    gpu = value["gpu"]
+            except (OSError, ValueError):
+                pass
+        mode = gpu.get("render_mode") if gpu.get("render_mode") in {"gpu-required", "cpu"} else "unknown"
+        diagnostic = safe_gpu_diagnostics(gpu.get("diagnostics"))
+        stages = {row.get("id"): row.get("status") for row in diagnostic.get("stages", [])}
+        webgl = diagnostic.get("webgl", {})
+        verified = (mode == "gpu-required" and gpu.get("gpu_rendering_verified") is True
+                    and not diagnostic.get("failed_stage") and stages.get("E") == "PASS"
+                    and stages.get("F") == "PASS" and webgl.get("draw_passed") is True
+                    and webgl.get("software_renderer") is False)
+        devices = diagnostic.get("nvidia_devices", [])
+        models = ", ".join(device.get("name", "") for device in devices) or "NVIDIA"
+        message = (models + " WebGL VERIFIED · World Engine READY" if verified else
+                   "CPU 비교 모드 · NVIDIA WebGL 검증 아님" if mode == "cpu" else
+                   "NVIDIA WebGL 진단 증명 미확인")
+        return {"engine_ready": True, "gpu_rendering_verified": verified,
+                "render_mode": mode, "message": message, "diagnostics": diagnostic}
+
 
 class GcubeHandler(MobileHandler):
     def dispatch(self, method):
@@ -234,13 +263,35 @@ class GcubeHandler(MobileHandler):
                 return self._html(LOGIN_HTML)
             # A restored auth.json must not grant access before the origin binds.
             if not self.app.bound_origin and path != "/auth/login":
-                if path.startswith(("/api/", "/media/", "/download/", "/auth/")):
+                if path.startswith(("/api/", "/media/", "/download/", "/auth/")) or path in {
+                        "/gcube/gpu", "/gcube/gpu.json"}:
                     raise SecurityError("AUTH_REQUIRED", "소유자 로그인이 필요합니다.", 401)
                 self.send_response(303)
                 self.send_header("Location", "/auth/login")
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
+            if path in {"/api/gcube/gpu", "/gcube/gpu", "/gcube/gpu.json"}:
+                if not self.app.sessions.claims(self._token()):
+                    raise SecurityError("AUTH_REQUIRED", "소유자 로그인이 필요합니다.", 401)
+                if method not in {"GET", "HEAD"}:
+                    raise SecurityError("METHOD_NOT_ALLOWED", "읽기 전용 요청입니다.", 405)
+                record = self.app.gpu_diagnostics()
+                if path != "/gcube/gpu":
+                    return self.json(record)
+                body = ("<!doctype html><html lang=ko><meta charset=utf-8>"
+                        "<meta name=viewport content='width=device-width,initial-scale=1'>"
+                        "<title>World Engine GPU 진단</title><style>"
+                        "body{margin:0;background:#101722;color:#edf3fa;font:16px/1.6 sans-serif}"
+                        "main{max-width:36rem;padding:1.5rem 1rem;margin:auto}h1{font-size:1.25rem}"
+                        "h2{font-size:1.1rem}table{width:100%;border-collapse:collapse;font-size:.85rem}"
+                        "th,td{padding:.45rem .25rem;text-align:left;border-bottom:1px solid #344352;overflow-wrap:anywhere}"
+                        "th{width:48%}a{color:#b7d9f1}</style><main><h1>" + html.escape(record["message"]) +
+                        "</h1>" + gpu_diagnostic_html(record["diagnostics"]) +
+                        "<p>GPU 속도 향상과 실제 영상 렌더 시간은 별도 실측이 필요합니다.</p>"
+                        "<p>검증 실패 시 gcube Workload를 중지하세요. 브라우저 종료만으로 과금이 멈추지 않습니다.</p>"
+                        "<p><a href='/'>World Engine으로 돌아가기</a> · <a href='/gcube/gpu.json'>진단 JSON</a></p></main></html>")
+                return self._html(body)
             if path in {"/api/gcube/benchmark", "/gcube/benchmark.json"}:
                 if not self.app.sessions.claims(self._token()):
                     raise SecurityError("AUTH_REQUIRED", "소유자 로그인이 필요합니다.", 401)
@@ -319,7 +370,9 @@ class GcubeHandler(MobileHandler):
             storage = "영구 저장 공간 감지됨" if health["storage"]["persistent_mount_detected"] else "영구 저장 공간 미확인 · 최종 MP4를 다운로드해 보관하세요."
             message = html.escape(health["billing"]["message"])
             graphics = ("3D NVIDIA 그래픽 확인 · " + ", ".join(health["gpu"]["models"])) if health["gpu"]["gpu_rendering_verified"] else "CPU 비교 모드 · GPU 가속 미사용" if health["gpu"]["render_mode"] == "cpu" else "그래픽 검증 미확인"
-            note = f'<aside role="note" aria-label="서버 상태" style="max-width:45rem;margin:.75rem auto;padding:.8rem;border:1px solid #a4d8ee;border-radius:.5rem;background:#10202b;color:#eff5fa;font:12px/1.5 system-ui">{html.escape(graphics)} · FFmpeg 인코딩은 CPU<br>{message}<br>{html.escape(storage)}<br><a href="/gcube/benchmark.json" download style="color:#a4d8ee">GPU·메모리 측정 기록 다운로드</a></aside>'
+            if health["gpu"]["gpu_rendering_verified"]:
+                graphics = self.app.gpu_diagnostics()["message"]
+            note = f'<aside role="note" aria-label="서버 상태" style="max-width:45rem;margin:.75rem auto;padding:.8rem;border:1px solid #a4d8ee;border-radius:.5rem;background:#10202b;color:#eff5fa;font:12px/1.5 system-ui">{html.escape(graphics)} · FFmpeg 인코딩은 CPU<br>{message}<br>{html.escape(storage)}<br><a href="/gcube/gpu" style="color:#a4d8ee">GPU / WebGL 진단</a> · <a href="/gcube/benchmark.json" download style="color:#a4d8ee">GPU·메모리 측정 기록 다운로드</a></aside>'
             text = Path(path).read_text(encoding="utf-8")
             return self._html(text.replace("<body>", "<body>" + note, 1))
         return super().file(path, attachment, head)

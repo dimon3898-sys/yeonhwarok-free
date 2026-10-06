@@ -1,8 +1,11 @@
 """Bootstrap preservation and scope boundaries; no render or provider call."""
 from pathlib import Path
 from types import SimpleNamespace
+import subprocess
 import tempfile
 import os
+import shutil
+import time
 import unittest
 from unittest.mock import Mock, patch
 
@@ -111,6 +114,121 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(start.main(), 0)
         listener.set_phase.assert_called_once_with('blocked', error_code='WORLD_ENGINE_PROCESS_EXITED')
         self.assertEqual(engine.call_count, 1)
+
+    def test_gpu_exception_delivers_diagnostics_without_retry_or_raw_exception_log(self):
+        listener = Mock()
+        listener.start.return_value = listener
+        listener.error_code = 'GPU_WEBGL_UNVERIFIED'
+        listener.gpu_diagnostics = {'failed_stage': 'E', 'gpu_profile': 'egl'}
+        stopping = Mock()
+        stopping.is_set.return_value = False
+        stopping.wait.return_value = True
+        error = BootError('GPU_WEBGL_UNVERIFIED')
+        error.diagnostics = {'failed_stage': 'E', 'gpu_profile': 'egl',
+                             'raw_stderr': 'private-stderr-secret'}
+        with patch('deployment.gcube.boot_status.BootStatusServer', return_value=listener), \
+             patch.object(start, 'run_engine', side_effect=error) as engine, \
+             patch.object(start.threading, 'Event', return_value=stopping), \
+             patch.object(start.signal, 'signal'), patch('builtins.print') as logger:
+            self.assertEqual(start.main(), 0)
+        listener.set_phase.assert_called_once_with('blocked', error_code=error.code,
+                                                   gpu_diagnostics=error.diagnostics)
+        engine.assert_called_once_with(listener, stopping)
+        self.assertNotIn('private-stderr-secret', str(logger.call_args_list))
+        self.assertIn('failed_stage', str(logger.call_args_list))
+        listener.close.assert_called_once()
+
+    def test_timed_out_browser_probe_kills_only_its_created_process_group(self):
+        process = Mock()
+        process.pid = 123456
+        process.returncode = -9
+        process.communicate.side_effect = [subprocess.TimeoutExpired(['node', 'gpu_probe.mjs'], 60),
+                                           ('', '')]
+        process.__enter__ = Mock(return_value=process)
+        process.__exit__ = Mock(return_value=False)
+        with patch.object(start.subprocess, 'Popen', return_value=process) as launch, \
+             patch.object(start.os, 'killpg') as terminate_group:
+            with self.assertRaises(subprocess.TimeoutExpired):
+                start.run_graphics_probe(['node', 'gpu_probe.mjs'], capture_output=True,
+                                         text=True, timeout=60, check=False,
+                                         user=1000, group=1000, extra_groups=[44, 109])
+        terminate_group.assert_called_once_with(process.pid, start.signal.SIGKILL)
+        opts = launch.call_args.kwargs
+        self.assertTrue(opts['start_new_session'])
+        self.assertEqual(opts['user'], 1000)
+        self.assertEqual(opts['extra_groups'], [44, 109])
+        self.assertNotIn('timeout', opts)
+        self.assertNotIn('check', opts)
+
+    def test_nvidia_query_keeps_the_existing_bounded_runner(self):
+        result = subprocess.CompletedProcess(['nvidia-smi'], 0, 'observed', '')
+        with patch.object(start.subprocess, 'run', return_value=result) as run, \
+             patch.object(start.subprocess, 'Popen') as launch:
+            observed = start.run_graphics_probe(['nvidia-smi'], capture_output=True,
+                                                text=True, timeout=10, check=False)
+        self.assertIs(observed, result)
+        run.assert_called_once_with(['nvidia-smi'], capture_output=True, text=True, timeout=10,
+                                    check=False)
+        launch.assert_not_called()
+
+    @unittest.skipUnless(os.name == 'posix' and shutil.which('node') and Path('/proc').is_dir(),
+                         'Requires local Node and Linux process inspection')
+    def test_actual_timed_out_probe_leaves_no_running_child(self):
+        script = ("const{spawn}=require('node:child_process');"
+                  "const child=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],"
+                  "{stdio:'ignore'});console.log(child.pid);setInterval(()=>{},1000)")
+        with self.assertRaises(subprocess.TimeoutExpired) as caught:
+            start.run_graphics_probe(['node', '-e', script], capture_output=True,
+                                     text=True, timeout=.5, check=False)
+        output = caught.exception.output
+        if isinstance(output, bytes):
+            output = output.decode()
+        pid = int(output.strip())
+        state_path = Path('/proc') / str(pid) / 'stat'
+        # An orphan already killed with SIGKILL can briefly await init's reaping.
+        # A zombie has no CPU/GPU execution and is acceptable during that wait.
+        deadline = time.monotonic() + 2
+        while state_path.exists() and time.monotonic() < deadline:
+            try:
+                if state_path.read_text().split(') ', 1)[1][0] == 'Z':
+                    return
+            except FileNotFoundError:
+                return
+            time.sleep(.02)
+        self.assertFalse(state_path.exists(), 'Timed-out private browser child is still running')
+
+    def test_nvidia_loader_selectors_reach_only_the_explicit_probe_and_child_env(self):
+        env = {'WORLD_ENGINE_RENDER_MODE': 'gpu-required', 'WORLD_ENGINE_OWNER_CODE': 'private-secret'}
+        before = dict(os.environ)
+        facts = {'hardware_verification_performed': False, 'status': 'prepared'}
+        updates = {'__EGL_VENDOR_LIBRARY_FILENAMES': '/run/world-engine/nvidia-graphics-test/10_nvidia.json',
+                   'VK_DRIVER_FILES': '/run/world-engine/nvidia-graphics-test/nvidia_icd.json',
+                   'VK_ICD_FILENAMES': '/run/world-engine/nvidia-graphics-test/nvidia_icd.json',
+                   'WORLD_ENGINE_RENDER_MODE': 'cpu', 'WORLD_ENGINE_OWNER_CODE': 'changed-secret'}
+        with patch('deployment.gcube.graphics_runtime.prepare_graphics_runtime',
+                   return_value=(updates, facts)) as prepare:
+            observed = start.prepare_gpu_environment(env)
+        self.assertIs(observed, facts)
+        self.assertEqual(env['WORLD_ENGINE_RENDER_MODE'], 'gpu-required')
+        self.assertEqual(env['WORLD_ENGINE_OWNER_CODE'], 'private-secret')
+        self.assertEqual(env['VK_DRIVER_FILES'], updates['VK_DRIVER_FILES'])
+        self.assertEqual(env['__EGL_VENDOR_LIBRARY_FILENAMES'], updates['__EGL_VENDOR_LIBRARY_FILENAMES'])
+        self.assertEqual(dict(os.environ), before)
+        prepare.assert_called_once_with(env)
+
+    def test_graphics_runtime_path_errors_remain_blocked_and_have_a_fixed_failed_stage(self):
+        from deployment.gcube.graphics_runtime import GraphicsRuntimeError
+        for code in ('GPU_GRAPHICS_RUNTIME_PATH_UNSAFE', 'GPU_GRAPHICS_RUNTIME_PATH_UNWRITABLE',
+                     'raw-private-filesystem-error'):
+            with self.subTest(code=code), \
+                 patch('deployment.gcube.graphics_runtime.prepare_graphics_runtime',
+                       side_effect=GraphicsRuntimeError(code)), \
+                 self.assertRaises(BootError) as caught:
+                start.prepare_gpu_environment({'WORLD_ENGINE_RENDER_MODE': 'gpu-required'})
+            expected = code if code.startswith('GPU_GRAPHICS_RUNTIME_') else 'GPU_BROWSER_PROBE_FAILED'
+            self.assertEqual(caught.exception.code, expected)
+            self.assertEqual(caught.exception.diagnostics['failed_stage'], 'C')
+            self.assertNotIn('raw-private-filesystem-error', str(caught.exception.diagnostics))
 
     def test_requested_stop_closes_listener_without_a_false_boot_failure(self):
         listener = Mock()

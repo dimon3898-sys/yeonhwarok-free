@@ -15,7 +15,7 @@ COPY . /opt/world-engine
 RUN --mount=type=secret,id=proxy_ca \
     apt-get update && apt-get install -y --no-install-recommends \
       chromium ffmpeg espeak-ng fonts-noto-cjk ca-certificates git tini \
-      libegl1 libgl1 libglvnd0 libvulkan1 \
+      libegl1 libgles2 libopengl0 libgl1 libglvnd0 libvulkan1 \
     && rm -rf /var/lib/apt/lists/* \
     && if [ -f /run/secrets/proxy_ca ]; then \
       cat /etc/ssl/certs/ca-certificates.crt /run/secrets/proxy_ca > /tmp/build-ca.pem; \
@@ -34,6 +34,9 @@ RUN --mount=type=secret,id=proxy_ca \
     && chown -R engine:engine deployment/runtime /run/world-engine /data
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 CHROMIUM_PATH=/usr/bin/chromium \
     NVIDIA_DRIVER_CAPABILITIES=graphics,utility
+# Only vendor-neutral EGL/GLES/OpenGL/Vulkan loaders are installed above.
+# Matching NVIDIA userspace driver libraries come from the provider's graphics
+# runtime injection; no NVIDIA kernel driver/CUDA toolkit is baked into this image.
 ENV WORLD_ENGINE_MAX_DURATION=180
 # Bootstrap prepares storage and permanently drops to UID 1000 before serving.
 # Device selection belongs to the provider's GPU allocation.
