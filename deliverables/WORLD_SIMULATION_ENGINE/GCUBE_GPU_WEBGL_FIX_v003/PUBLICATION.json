@@ -1,0 +1,195 @@
+{
+  "recorded_at": "2026-10-06T23:51:50.940264+00:00",
+  "release": "gcube-v003",
+  "container_image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v003",
+  "immutable_tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v003-sha-deaaa03022e4318dd684bd476b3b3773b8bb539b",
+  "source_commit": "deaaa03022e4318dd684bd476b3b3773b8bb539b",
+  "digest": "sha256:80152862088aa88474ccafb90e8d6902db43b56f4a5cc41db18ad5c6dc0089ec",
+  "config_digest": "sha256:e940e1ce1c711b87e4a3fc6c7c684cec501cf16b9aa01c4a1904c6c23e260d3c",
+  "anonymous_public_pull_verified": true,
+  "previous_releases_unchanged": {
+    "gcube-v001": true,
+    "gcube-v002": true
+  },
+  "previous_releases_digest": {
+    "gcube-v002": "sha256:92b72a9e87625502d16a300b4831c8a206d8b58e44c414f74e28f0fa46574a8c",
+    "gcube-v001": "sha256:207a3058986f7ef0e46a7eaa95422833438b23ff3123c5daea1140a80031a3f2"
+  },
+  "actions_run_url": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37548320087",
+  "actions_overall_status": "Success",
+  "actions_job_url": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37548320087/job/112557583063",
+  "required_steps": {
+    "Build the complete image for local smoke testing": {
+      "number": "4",
+      "name": "Build the complete image for local smoke testing",
+      "conclusion": "success",
+      "started-at": "2026-10-06T23:46:12Z",
+      "completed-at": "2026-10-06T23:48:11Z"
+    },
+    "Verify full-image foreground boot, owner login and blocked diagnostics": {
+      "number": "5",
+      "name": "Verify full-image foreground boot, owner login and blocked diagnostics",
+      "conclusion": "success",
+      "started-at": "2026-10-06T23:48:11Z",
+      "completed-at": "2026-10-06T23:49:17Z"
+    },
+    "Verify GPU admission and software renderer rejection contracts in the built image": {
+      "number": "6",
+      "name": "Verify GPU admission and software renderer rejection contracts in the built image",
+      "conclusion": "success",
+      "started-at": "2026-10-06T23:49:17Z",
+      "completed-at": "2026-10-06T23:49:31Z"
+    },
+    "Publish tested development image": {
+      "number": "9",
+      "name": "Publish tested development image",
+      "conclusion": "success",
+      "started-at": "2026-10-06T23:49:32Z",
+      "completed-at": "2026-10-06T23:50:32Z"
+    }
+  },
+  "image_config": {
+    "architecture": "amd64",
+    "operating_system": "linux",
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "python",
+      "-m",
+      "deployment.gcube.start"
+    ],
+    "command": null,
+    "exposed_ports": [
+      "8000/tcp"
+    ],
+    "user": "root",
+    "driver_capabilities": "graphics,utility",
+    "owner_secret_embedded": false,
+    "healthcheck": {
+      "Test": [
+        "CMD",
+        "python",
+        "-c",
+        "import json,sys,urllib.request; opener=urllib.request.build_opener(urllib.request.ProxyHandler({})); response=opener.open('http://127.0.0.1:8000/healthz',timeout=3); value=json.loads(response.read(4096)); sys.exit(0 if response.status==200 and value.get('ok') is True and value.get('authentication_required') is True else 1)"
+      ],
+      "Interval": 30000000000,
+      "Timeout": 5000000000,
+      "StartPeriod": 90000000000,
+      "Retries": 3
+    }
+  },
+  "public_layer_access": {
+    "recorded_at": "2026-10-06T23:51:27.887119+00:00",
+    "anonymous": true,
+    "layer_count": 9,
+    "all_layer_access_verified": true,
+    "full_layer_downloads": 0,
+    "layer_body_bytes_read": 0,
+    "layers": [
+      {
+        "digest": "sha256:56d14e8ac0f63e3493f7ebeff7526ecd2517aebd1260a98cf7b4af110b542115",
+        "expected_compressed_bytes": 29166224,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "29166224",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:6e0ba8ba048777f5354b5a7cb497ae5261116fac8246160c06fc045c8300c582",
+        "expected_compressed_bytes": 3342298,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "3342298",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:86a9e13e035d8e44ae37bfebc52c7fc68898fde19b4b26dd0585f2231fcfaf2c",
+        "expected_compressed_bytes": 15966608,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "15966608",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:f9d2fb07d6f062d06ddc7aa58191cc5359c728f54af6cebe69a37d2c89e72a0d",
+        "expected_compressed_bytes": 249,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "249",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:4cba35dc95bbef8a7fbe824f75638ea4a158dda30c9998d23760133886cf1637",
+        "expected_compressed_bytes": 45914090,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "45914090",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:b0428f9776d307fbac2ed911a3eef856f6743706b8d31d82c0643389e716bb45",
+        "expected_compressed_bytes": 11164568,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "11164568",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:98444ae18b8ddc0829336161010501c89b11aac70867a65d9c47a3e80eb8aa1b",
+        "expected_compressed_bytes": 153,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "153",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:67712f4761d2e3e7b7053de5a9cc631f2e069f61fbad13e5a4903498a215a0fe",
+        "expected_compressed_bytes": 124001631,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "124001631",
+        "body_bytes_read": 0
+      },
+      {
+        "digest": "sha256:471691f2205c7120654d30b50220f75d10063a00a7245189aec975c0eac31af2",
+        "expected_compressed_bytes": 539762647,
+        "http_status": 200,
+        "method": "HEAD",
+        "response_host": "ghcr.io",
+        "content_length": "539762647",
+        "body_bytes_read": 0
+      }
+    ]
+  },
+  "actual_cpu_validations": {
+    "fresh_complete_image_cases": 5,
+    "positive_cases": [
+      "root",
+      "uid1000"
+    ],
+    "sustained_root_foreground_minimum_seconds": 60,
+    "actual_cpu_chromium_webgl2_draw": true,
+    "software_renderer_as_nvidia_rejected": true,
+    "anonymous_gpu_diagnostics_authentication_required": true,
+    "owner_login_and_safe_gpu_diagnostics": true,
+    "negative_gpu_admission_no_hardware": true,
+    "failed_stage_diagnostics_and_billing_guidance": true,
+    "state_changes_blocked_when_not_ready": true,
+    "built_image_contract_tests": 112
+  },
+  "actual_nvidia_gpu_test": false,
+  "actual_gcube_webgl_test": "Requires re-deploy on user RTX 3070; not claimed by CPU/Actions results",
+  "actual_video_render_requested": false,
+  "actual_provider_points_consumed": null,
+  "local_full_image_or_layer_downloads": 0,
+  "first_ci_failure_resolved": "Root-only startup test fixtures were missing storage uid/gid; fixture-only correction retained production ownership checks"
+}
