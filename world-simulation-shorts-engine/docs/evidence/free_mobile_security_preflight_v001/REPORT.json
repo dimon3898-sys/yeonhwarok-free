@@ -1,0 +1,1166 @@
+{
+  "created_at_utc": "2026-10-06T02:14:16.272849+00:00",
+  "scope": "Read-only core security/dependency/storage preflight; only these new REPORT files written. No tests/render/install/server-control/exploit/network/Git write; no secret values inspected.",
+  "baseline_commit": "8d7c60446476ce2358cd92300ddecbf44fe9f8de",
+  "current_head": "8d7c60446476ce2358cd92300ddecbf44fe9f8de",
+  "baseline_is_ancestor": true,
+  "raw_core_internet_exposure_safe": false,
+  "wrapper_required_before_public_exposure": true,
+  "findings": [
+    {
+      "id": "S01",
+      "severity": "BLOCKER",
+      "title": "원본 서버 인증·소유권 부재",
+      "evidence": [
+        "server.py:109-151",
+        "server.py:226-229"
+      ],
+      "actual": "GET 프로젝트/계획/상태/다운로드와 POST 기획/승인/렌더/수정/업로드에 인증이 없다. Origin 검사는 optional이며 Origin 없는 직접 요청을 허용한다.",
+      "wrapper_recommendation": "HTTPS 소유자 로그인/session을 모든 API·미디어·다운로드에 적용. Secure/HttpOnly/SameSite cookie, 만료·CSRF·Origin·로그인 rate limit. 프로젝트ID를 권한으로 간주하지 않음."
+    },
+    {
+      "id": "S02",
+      "severity": "HIGH",
+      "title": "요청·렌더·디스크 비용 DoS 경계 없음",
+      "evidence": [
+        "server.py:34-46,74,96-99,173-195",
+        "engine/planner.py:94-112",
+        "engine/audio.py:123-128"
+      ],
+      "actual": "ThreadingHTTPServer와 queued job마다 thread 생성이 무제한이다. render_lock은 동시에1개만 렌더하지만 queue/thread 수는 제한하지 않는다. 기획20~3600초; JSON>2MB만 거절해 음수 Content-Length read(-1) 차단이 없다. 업로드256MiB이며 집계 quota/socket deadline/media 길이 한도가 없다. 나레이션은 전체 decode 뒤 길이를 검사한다.",
+      "wrapper_recommendation": "single active + single queued job, 연결/요청 rate 제한, read/write timeout, 단일 decimal Content-Length와 크기 하한/상한, Transfer-Encoding 거절. JSON64KiB/주제·수정 길이 제한, 배포별 영상·Scene·quality·디스크 quota, 오디오 사전 길이 제한. 품질을 몰래 낮추지 않음."
+    },
+    {
+      "id": "S03",
+      "severity": "HIGH",
+      "title": "미디어 자동 감지에 외부 참조·무기한 subprocess 가능",
+      "evidence": [
+        "server.py:189",
+        "engine/audio.py:38-46",
+        "engine/rendering.py:163,200-205",
+        "engine/qc.py:16-18"
+      ],
+      "actual": "ffprobe/ffmpeg argv에 shell injection은 없지만 default protocol/autodetect와 timeout 부재가 있다. MP4로 이름만 바꾼 playlist/HLS/참조 미디어는 검증 이전에 네트워크/다른 로컬 파일 참조를 시도할 수 있다. 공격은 실행하지 않았다.",
+      "wrapper_recommendation": "upload ingestion override에서 첫 probe 전에 format/protocol whitelist/정확한 허용 container 지정, timeout10초와 CPU/RAM/pids/filesize 제한. container/codec/stream 수/해상도/길이 검증 및 단일 로컬 파일 정규화. playlist/외부참조 거절. worker 외부망 차단과 credential mount 금지; loopback 내부 renderer만 허용."
+    },
+    {
+      "id": "S04",
+      "severity": "HIGH",
+      "title": "Chromium OS sandbox 비활성",
+      "evidence": [
+        "tools/render_rhythm_scene.mjs:46",
+        "tools/render_production_scene.mjs:44"
+      ],
+      "actual": "--no-sandbox 및 unsafe SwiftShader로 승인된 로컬 그래픽을 렌더한다. 브라우저/미디어 취약점 발생 시 worker 파일권한이 경계다.",
+      "wrapper_recommendation": "비루트 컨테이너, read-only 승인 code/assets, 별도 writable runtime/tmp/cache, Docker socket/클라우드 credential mount 없음, capabilities 제거/no-new-privileges와 CPU/RAM/pids 제한. 사용자 URL을 브라우징하지 않음."
+    },
+    {
+      "id": "S05",
+      "severity": "HIGH",
+      "title": "시작 recovery가 기존 tree 수정·복수 worker lock 없음",
+      "evidence": [
+        "server.py:14-15",
+        "engine/storage.py:90-122",
+        "engine/rendering.py:134-151,437-460,526-532"
+      ],
+      "actual": "Application 초기화에서 queued/rendering 상태를 interrupted로 바꾼다. Store/render lock은 process-local; 여러 replica가 공유 status/cache를 동시에 쓰면 race. 완료 Scene/checksum cache와 승인/plan hash gate는 유지되어 있다. durable worker lease/자동 job supervisor는 없다.",
+      "wrapper_recommendation": "새 배포 전용 project root와 단일 worker/replica, 기존 Masters/projects/배포본 read-only mount. 새 runtime에서 checkpoint 복구, 외부 lease/supervisor와 시간 예산. old status를 startup에서 수정하지 않음."
+    },
+    {
+      "id": "S06",
+      "severity": "MEDIUM",
+      "title": "경로 guard는 있으나 자산 허용 root가 넓음",
+      "evidence": [
+        "server.py:148-151,196-198",
+        "engine/storage.py:41-51",
+        "engine/assets.py:86-93",
+        "engine/revisions.py:286-295",
+        "web/app.js:409-411"
+      ],
+      "actual": "PID/version/asset/revision regex와 resolve containment, static hidden segment 거절이 있다. upload filename 정규화/서버 ID 생성. 다만 asset resolver는 APP/V3 전체를 허용하고 ProjectStore directory symlink를 거절하지 않는다. 확인한 web/asset/library 경로에는 symlink가 없었다.",
+      "wrapper_recommendation": "narration_asset_id 소유권과 실제 등록 경로 일치 확인, private upload runtime으로 한정, runtime symlink path component 거절, 다운로드는 실제 approved output allowlist만 허용. raw Scene JSON/경로/플러그인/명령 입력 endpoint를 만들지 않음."
+    },
+    {
+      "id": "S07",
+      "severity": "MEDIUM",
+      "title": "공개 HTTP 헤더·오류 노출 경계 없음",
+      "evidence": [
+        "server.py:94-108,202-215,226-229",
+        "web/app.js:13,35"
+      ],
+      "actual": "nosniff/Range206/인코딩된 Content-Disposition은 있다. CSP/frame-ancestors/referrer/HTTPS/HSTS/auth cookie 경계는 없다. plan/status/error에 absolute path/log가 노출될 수 있다. UI 사용자 문구는 textContent로 표시하여 직접 stored-XSS 경로는 관찰하지 않았다.",
+      "wrapper_recommendation": "고정 allowed Host/Origin, trusted proxy에서만 forwarded header 신뢰, HTTPS·private cache policy·CSP/frame-ancestors none/Referrer-Policy, 오류 정제. native render HTML은 inline code 때문에 private 전용 CSP 필요. 모바일 Range/다운로드 유지."
+    },
+    {
+      "id": "S08",
+      "severity": "BLOCKER",
+      "title": "reverse proxy 뒤 loopback 인증 우회 금지",
+      "evidence": [
+        "engine/rendering.py:482-501",
+        "server.py:147-169"
+      ],
+      "actual": "native Chromium은 local HTML/assets/plan API를 읽어야 한다. 원본 전체 핸들러 인증은 native callback을 깨뜨릴 수 있다. public reverse proxy는 모든 외부 요청을127.0.0.1 client로 전달할 수 있다.",
+      "wrapper_recommendation": "공개 인증 listener와 unexposed127.0.0.1 read-only renderer listener를 분리. 공개 ingress가 닿는 port에서 loopback IP라는 이유로 인증 우회 금지. 사용자 base_url/URL 입력 금지."
+    },
+    {
+      "id": "S09",
+      "severity": "MEDIUM",
+      "title": "승인28 소스 변경 시 FAST_PLUS promotion 무효",
+      "evidence": [
+        "engine/rhythm_promotion.py:19-31",
+        "docs/evidence/rhythm_source_lock_final_v001/SOURCE_LOCK.json"
+      ],
+      "actual": "promotion은 28 실제 source hashes/final movie/evidence hash를 확인한다. 기존 server/UI/engine을 수정하면 승인 기준이 깨진다.",
+      "wrapper_recommendation": "deployment/mobile_server.py subclass/adapter와 deployment 문서를 별도 추가. original28, approved shader/material/GIS/font 및 oldMaster lock 유지. wrapper의 새 보안 검증은 독립적으로 기록."
+    }
+  ],
+  "observed_positive_controls": [
+    "감사한 HTTP/media/render 경로는 subprocess argument vector이며 shell=True/os.system 또는 사용자 arbitrary command 실행을 발견하지 않았다.",
+    "렌더 전에 schema/semantic gate, hash-bound user approval, 저장된 Scene plan을 재검수한다.",
+    "완료 Scene/cache/final SHA/QC 검사와 불량 결과 보존 및 부분 재개 구조가 있다.",
+    "GPUCloud는 adapter 부재 fail-closed, 승인/비용 cap/finally stop_worker 구조다. 실제 HTTP renderer는 CPU_LOCAL만 선택해 유료 GPU를 암묵 provisioning하지 않는다.",
+    "UI는 textContent, static/download containment, ID regex와 일부 요청·업로드 상한이 있다.",
+    "Python requirements와 Three/Playwright 버전·package lock이 고정돼 있다. 취약점 advisory/network 검사는 하지 않았다."
+  ],
+  "preservation_lock": {
+    "purpose": "Minimum source/approved graphics/old movie/current promotion lock; not a replacement for prior1012 full preservation audit.",
+    "unique_files": 95,
+    "unique_bytes": 1427401815,
+    "all_expected_baseline_bytes_match": true,
+    "entries": [
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/data/scene_plan.schema.json",
+        "bytes": 67646,
+        "sha256": "0540a3ecc0b696535bf06b0760d1c5f5e2096d30d875ce059658f4599a1d95a8",
+        "git_blob_sha1": "6925b25c937ed82915fe790a8800b6fd698a68c4",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "0540a3ecc0b696535bf06b0760d1c5f5e2096d30d875ce059658f4599a1d95a8",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/assets.py",
+        "bytes": 22881,
+        "sha256": "e7100467a290621d1ec56c03c4219bcf3a34a96b3ee4a1288b099900dc599af9",
+        "git_blob_sha1": "7492375ee13635779c88bcf676b4f900d0020c0c",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "e7100467a290621d1ec56c03c4219bcf3a34a96b3ee4a1288b099900dc599af9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/audio.py",
+        "bytes": 37526,
+        "sha256": "6bf21b89f5414bf96fb6c6bf029f8635960c37348ab664d650ae38853c280fca",
+        "git_blob_sha1": "aeac9d00f9e6c79c4dcc14e5983db67caeb1cd23",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "6bf21b89f5414bf96fb6c6bf029f8635960c37348ab664d650ae38853c280fca",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/pace.py",
+        "bytes": 11823,
+        "sha256": "cb64889ab037eaaa844ed8072bdbc78914928bb7043c96b5836b9155d8541e6c",
+        "git_blob_sha1": "68fe42fd05446918dc4e3562ec3bc3f902422828",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "cb64889ab037eaaa844ed8072bdbc78914928bb7043c96b5836b9155d8541e6c",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/planner.py",
+        "bytes": 72164,
+        "sha256": "fb27a576f602695bf935c4eb9c2bde6e6c240db82e3924acbbf0f88d8ed1598b",
+        "git_blob_sha1": "7d69b8a89dd15ed09af6f6a70405ad9825a90430",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "fb27a576f602695bf935c4eb9c2bde6e6c240db82e3924acbbf0f88d8ed1598b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/presets.py",
+        "bytes": 7787,
+        "sha256": "c3de0b679df7437647b2134b9e778790d44670cbe6a5b57d551ae08cf010206a",
+        "git_blob_sha1": "aa4852abb10eb46935655586d31ecd8c96df44b8",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "c3de0b679df7437647b2134b9e778790d44670cbe6a5b57d551ae08cf010206a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/production.py",
+        "bytes": 42672,
+        "sha256": "54e17407d6015f960a2eb4ead00d33d64149c4eeefbfef295504e4cfccfd1df0",
+        "git_blob_sha1": "f98f51f561c359bb05fdb41a504bebd1befc973a",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "54e17407d6015f960a2eb4ead00d33d64149c4eeefbfef295504e4cfccfd1df0",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/qc.py",
+        "bytes": 35940,
+        "sha256": "a05b4fbb1563644ae5b241f2610e16052f920d3060b91d8d51979d15b0237ab1",
+        "git_blob_sha1": "d58412aed809bcc3e755308a42bd928ca8922202",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "a05b4fbb1563644ae5b241f2610e16052f920d3060b91d8d51979d15b0237ab1",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/rendering.py",
+        "bytes": 41527,
+        "sha256": "4bde273d96bb642891d627fcf237faffbb87835c24f0fe9c5009ce03dc95ae5e",
+        "git_blob_sha1": "c8cfabdafe960b11c83fc7943fa201a0f801dd6d",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "4bde273d96bb642891d627fcf237faffbb87835c24f0fe9c5009ce03dc95ae5e",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/retention.py",
+        "bytes": 7136,
+        "sha256": "003fa57bc28381183f06767a7770d172d3b1461a41d5f45bdcc8a49d27971e22",
+        "git_blob_sha1": "44af69b50e90d314a8ed9a120439748c0ae955b2",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "003fa57bc28381183f06767a7770d172d3b1461a41d5f45bdcc8a49d27971e22",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/rhythm.py",
+        "bytes": 15150,
+        "sha256": "ccadcc37d8ce03093e800692e92a6b3fdf506e4e854595e776ad3c9c20dcc463",
+        "git_blob_sha1": "c501f9518f6842d77334ad7613198559f6afdbde",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "ccadcc37d8ce03093e800692e92a6b3fdf506e4e854595e776ad3c9c20dcc463",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/rhythm_promotion.py",
+        "bytes": 2313,
+        "sha256": "2782cc62fedf80d012f89d4224ca6c18be42ff14ab32c508b9a2be2c13405bb8",
+        "git_blob_sha1": "78f05cf66d4f6259ae996fc89117bcc4e74de86b",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "2782cc62fedf80d012f89d4224ca6c18be42ff14ab32c508b9a2be2c13405bb8",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/rhythm_qc.py",
+        "bytes": 13039,
+        "sha256": "7bc6aea301a5aae1c8cd5eb27c2069c03f8d4b102e40924b2485d95446bcbe8a",
+        "git_blob_sha1": "956b8bf687046c52cfcd907d8403a56a9a2b6bf6",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "7bc6aea301a5aae1c8cd5eb27c2069c03f8d4b102e40924b2485d95446bcbe8a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/rhythm_sound.py",
+        "bytes": 30840,
+        "sha256": "95f52e8c384059a1670b063d58bf38decebc63ba28bbdd685400904b5e3e3f02",
+        "git_blob_sha1": "bcf3530dc3d3558c6593a42723a0ea585b40178a",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "95f52e8c384059a1670b063d58bf38decebc63ba28bbdd685400904b5e3e3f02",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/schema.py",
+        "bytes": 18736,
+        "sha256": "431c89628478fdfb9ccc8893c794a6cd5fb0f08cf0f7d7f3605e00dc99fdd72f",
+        "git_blob_sha1": "58e0bffa61b4f26705c78e49868a7988ee25a1cf",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "431c89628478fdfb9ccc8893c794a6cd5fb0f08cf0f7d7f3605e00dc99fdd72f",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/sfx_library.py",
+        "bytes": 19723,
+        "sha256": "dc90d7a74125da8914a56c6446d1b1d4e44ba7259fef7095603012663ad9ec9a",
+        "git_blob_sha1": "d500959a27ac0611bf30027a71e64e56f70986ef",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "dc90d7a74125da8914a56c6446d1b1d4e44ba7259fef7095603012663ad9ec9a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/visibility.py",
+        "bytes": 13850,
+        "sha256": "7aba33d46358e091514c8690e97b26c6948b1865c96931737d6e8b4afc3e93a1",
+        "git_blob_sha1": "2f4377c19f69a39cbd9fb446efcc53b62ce3aa9d",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "7aba33d46358e091514c8690e97b26c6948b1865c96931737d6e8b4afc3e93a1",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/server.py",
+        "bytes": 19363,
+        "sha256": "50595c5ef26830772c4676c62aa6fab4509eebb22020d378eb5c6cb5a735458f",
+        "git_blob_sha1": "3a9cca573b6b1be31b371cb00f70c5d268ccfc2e",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "50595c5ef26830772c4676c62aa6fab4509eebb22020d378eb5c6cb5a735458f",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tools/build_rhythm_master_sample.py",
+        "bytes": 4277,
+        "sha256": "c428e69db7d33eb30da2c5ee9bce9b5a81f9fb45d096a81cb2753ba04c548eab",
+        "git_blob_sha1": "15544ea0fd360533fe481e15725890dda88b5e15",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "c428e69db7d33eb30da2c5ee9bce9b5a81f9fb45d096a81cb2753ba04c548eab",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tools/render_production_scene.mjs",
+        "bytes": 10789,
+        "sha256": "2e915233a46f876a7535291de247ab4f508d13ef2462ef42d81102f5d82cf310",
+        "git_blob_sha1": "1c106742af7283433087ed713d606d9961c4530a",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "2e915233a46f876a7535291de247ab4f508d13ef2462ef42d81102f5d82cf310",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tools/render_rhythm_scene.mjs",
+        "bytes": 11171,
+        "sha256": "a011ceef6e2e4ebffe97d2d0bfd96875d29149007ce9e4471f68d1645df01c0c",
+        "git_blob_sha1": "b6eac4bdd3fe24c6f1481a350e404d09c6968d0e",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "a011ceef6e2e4ebffe97d2d0bfd96875d29149007ce9e4471f68d1645df01c0c",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/tools/semantic_preflight.mjs",
+        "bytes": 26865,
+        "sha256": "c89149e0946dfa6418c0b95748313fc79941f1a788c749615ace76f46dbdfccc",
+        "git_blob_sha1": "b5bb4ab582877341d78fba7ebb98522a4ef6279e",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "c89149e0946dfa6418c0b95748313fc79941f1a788c749615ace76f46dbdfccc",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/index.html",
+        "bytes": 10670,
+        "sha256": "4082aa8ad3346603f6a709da51287f525328d0c0d5c7734488a073a1bd60363d",
+        "git_blob_sha1": "f107e4164c16832b42a10a23d3fc154a11b0fac7",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "4082aa8ad3346603f6a709da51287f525328d0c0d5c7734488a073a1bd60363d",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/production_visual_adapter.js",
+        "bytes": 20906,
+        "sha256": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+        "git_blob_sha1": "9c36e9347664964f44896c837e3b1d68d4ceb3de",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/render_production_earth.html",
+        "bytes": 1914,
+        "sha256": "bd1eb18f7f44b75313814c1b5e1b1b6effa77a65a82bfa0d09be17d39c1caba3",
+        "git_blob_sha1": "4f37802dd98d90745349ce3f1403e266dc83b693",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "bd1eb18f7f44b75313814c1b5e1b1b6effa77a65a82bfa0d09be17d39c1caba3",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/render_production_flat.html",
+        "bytes": 2016,
+        "sha256": "0d80afa003bf3296d745a133e491ac837f8620a60f94a482b79d8c8a32f2c1af",
+        "git_blob_sha1": "aa9697e91c5f95a326f69dd8647e8cb6906a868c",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "0d80afa003bf3296d745a133e491ac837f8620a60f94a482b79d8c8a32f2c1af",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/render_rhythm_flat.html",
+        "bytes": 2110,
+        "sha256": "1d8db1a3060db682711cd1ee4ecca860c201b6307786483d4cf0aea4982adb3c",
+        "git_blob_sha1": "0999803f4f9b85b061abb41d15e61931959fd007",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "1d8db1a3060db682711cd1ee4ecca860c201b6307786483d4cf0aea4982adb3c",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/rhythm_visual_adapter.js",
+        "bytes": 7274,
+        "sha256": "f0b92ebd06acd2ae675621e6564eeb3f30a75be1ee3e8e1e91024a5d7bb8383b",
+        "git_blob_sha1": "46edd789219289086fb0696e992394b60eb9db20",
+        "stable_during_read": true,
+        "group": "approved28_source_lock",
+        "expected_sha256": "f0b92ebd06acd2ae675621e6564eeb3f30a75be1ee3e8e1e91024a5d7bb8383b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s.mp4",
+        "bytes": 12722587,
+        "sha256": "681a72b85b0686d89fe66b0597facfa272b8561b7d4858ac96670d634dc6153b",
+        "git_blob_sha1": "26e7ff62acaaa2817e25aad911b43acbc283f0bd",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "681a72b85b0686d89fe66b0597facfa272b8561b7d4858ac96670d634dc6153b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_muted.mp4",
+        "bytes": 11998149,
+        "sha256": "97f876d4242301e7153ed9f5728065f0e5e452469bccdb2db53cd309bafb9296",
+        "git_blob_sha1": "8ef36a011060b04d25c461eeaf7ec8bf5522970f",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "97f876d4242301e7153ed9f5728065f0e5e452469bccdb2db53cd309bafb9296",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_v2.mp4",
+        "bytes": 14358640,
+        "sha256": "6e8a716d2609253e6b8adc02816394bff5d2e974a2540d527780b7e517468f68",
+        "git_blob_sha1": "e213481b14a53a9e314e7372de04b1128b8153ed",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "6e8a716d2609253e6b8adc02816394bff5d2e974a2540d527780b7e517468f68",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_v2_muted.mp4",
+        "bytes": 13658148,
+        "sha256": "4172d1cadfd2a72f1f4a5183531200fcd0b7e76e559f289021abcd14a2be1f71",
+        "git_blob_sha1": "c82ebdd6a0c1f0919be33f6c48f5246973a52010",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "4172d1cadfd2a72f1f4a5183531200fcd0b7e76e559f289021abcd14a2be1f71",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_v2_picture_review_r1.mp4",
+        "bytes": 13658597,
+        "sha256": "9bcfd884d49fa00d478ffdded475b1656da3504abb5a4a214a8a0b07680d0901",
+        "git_blob_sha1": "aa4bf48f96e70b97159ad3813173e7f91267cf5b",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "9bcfd884d49fa00d478ffdded475b1656da3504abb5a4a214a8a0b07680d0901",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_v2_sound_review_r1.mp4",
+        "bytes": 14362863,
+        "sha256": "04c39799a4f503bc4bc7ae56012b06ff513620ddb7c0f941066391794e896da9",
+        "git_blob_sha1": "dc9801cefa066843808e1f84781c8d3c9e14eb71",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "04c39799a4f503bc4bc7ae56012b06ff513620ddb7c0f941066391794e896da9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_v3.mp4",
+        "bytes": 21211440,
+        "sha256": "e450cd5e283e34916593e6ecc34c9618e4dee4ecc2d71b38043e5ceb1037eedb",
+        "git_blob_sha1": "47c20aadcd809627619def450c6bb187541fbb8c",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "e450cd5e283e34916593e6ecc34c9618e4dee4ecc2d71b38043e5ceb1037eedb",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/outputs/master_cinematic_20s_v3_muted.mp4",
+        "bytes": 20503139,
+        "sha256": "a75471fdb6e76e5db027800fc9adbd8dda2dd74e1a38a19c1e5de55bfcaf9773",
+        "git_blob_sha1": "93825b4806bc2ff4ea88108c5d23728c53e6f462",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "a75471fdb6e76e5db027800fc9adbd8dda2dd74e1a38a19c1e5de55bfcaf9773",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/SUEZ_CLOSURE_75S_TTS_v003/SUEZ_CLOSURE_75S_TTS_v003.mp4",
+        "bytes": 80096989,
+        "sha256": "7ffecc7a19bc40416168269c05a8930a6c5394ea3b09d483c3c571deba28f7a9",
+        "git_blob_sha1": "3a836839c5840494f81189f42b8fbbf07b607183",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "7ffecc7a19bc40416168269c05a8930a6c5394ea3b09d483c3c571deba28f7a9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/master_cinematic_20s.mp4",
+        "bytes": 12722587,
+        "sha256": "681a72b85b0686d89fe66b0597facfa272b8561b7d4858ac96670d634dc6153b",
+        "git_blob_sha1": "26e7ff62acaaa2817e25aad911b43acbc283f0bd",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "681a72b85b0686d89fe66b0597facfa272b8561b7d4858ac96670d634dc6153b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/master_cinematic_20s_muted.mp4",
+        "bytes": 11998149,
+        "sha256": "97f876d4242301e7153ed9f5728065f0e5e452469bccdb2db53cd309bafb9296",
+        "git_blob_sha1": "8ef36a011060b04d25c461eeaf7ec8bf5522970f",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "97f876d4242301e7153ed9f5728065f0e5e452469bccdb2db53cd309bafb9296",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/master_cinematic_20s_v2.mp4",
+        "bytes": 14358640,
+        "sha256": "6e8a716d2609253e6b8adc02816394bff5d2e974a2540d527780b7e517468f68",
+        "git_blob_sha1": "e213481b14a53a9e314e7372de04b1128b8153ed",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "6e8a716d2609253e6b8adc02816394bff5d2e974a2540d527780b7e517468f68",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/master_cinematic_20s_v2_muted.mp4",
+        "bytes": 13658148,
+        "sha256": "4172d1cadfd2a72f1f4a5183531200fcd0b7e76e559f289021abcd14a2be1f71",
+        "git_blob_sha1": "c82ebdd6a0c1f0919be33f6c48f5246973a52010",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "4172d1cadfd2a72f1f4a5183531200fcd0b7e76e559f289021abcd14a2be1f71",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/master_cinematic_20s_v3.mp4",
+        "bytes": 21211440,
+        "sha256": "e450cd5e283e34916593e6ecc34c9618e4dee4ecc2d71b38043e5ceb1037eedb",
+        "git_blob_sha1": "47c20aadcd809627619def450c6bb187541fbb8c",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "e450cd5e283e34916593e6ecc34c9618e4dee4ecc2d71b38043e5ceb1037eedb",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/master_cinematic_20s_v3_muted.mp4",
+        "bytes": 20503139,
+        "sha256": "a75471fdb6e76e5db027800fc9adbd8dda2dd74e1a38a19c1e5de55bfcaf9773",
+        "git_blob_sha1": "93825b4806bc2ff4ea88108c5d23728c53e6f462",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "a75471fdb6e76e5db027800fc9adbd8dda2dd74e1a38a19c1e5de55bfcaf9773",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/final/final.mp4",
+        "bytes": 80096989,
+        "sha256": "7ffecc7a19bc40416168269c05a8930a6c5394ea3b09d483c3c571deba28f7a9",
+        "git_blob_sha1": "3a836839c5840494f81189f42b8fbbf07b607183",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "7ffecc7a19bc40416168269c05a8930a6c5394ea3b09d483c3c571deba28f7a9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/final/final_muted.mp4",
+        "bytes": 77687955,
+        "sha256": "c90a305438a160eb28cb1c5a729a221618efab05f07a764743be2932830c18b6",
+        "git_blob_sha1": "794e2ce20998ccf9b34ae6f4678e879c06f9863f",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "c90a305438a160eb28cb1c5a729a221618efab05f07a764743be2932830c18b6",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S001/scene_S001_v003.mp4",
+        "bytes": 9550248,
+        "sha256": "cc9e4d533f14052b6cd86b752fdec9216cacc6e2300f09f4f904094ccb8ed9b4",
+        "git_blob_sha1": "a3e9345cdf3d73b9f7e021f467edd32d71a76954",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "cc9e4d533f14052b6cd86b752fdec9216cacc6e2300f09f4f904094ccb8ed9b4",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S002/scene_S002_v003.mp4",
+        "bytes": 6368836,
+        "sha256": "577da3a2ca1496f0d1e73f972c1ffda4444d5b0367987f4ab2fe4df9c28973c2",
+        "git_blob_sha1": "d20ada780c7e24aa15b8dd66ef1bfea1f3416b27",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "577da3a2ca1496f0d1e73f972c1ffda4444d5b0367987f4ab2fe4df9c28973c2",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S003/scene_S003_v003.mp4",
+        "bytes": 4762653,
+        "sha256": "a99e7bd1b2519fdd9e178dd13e412a0a28808a55a46fbb8f0acf1f0218fa0c03",
+        "git_blob_sha1": "984cf41818bba703eada86b63dd1fb0b0be0e00a",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "a99e7bd1b2519fdd9e178dd13e412a0a28808a55a46fbb8f0acf1f0218fa0c03",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S004/scene_S004_v003.mp4",
+        "bytes": 4956801,
+        "sha256": "d2a16319718c39f38a0cc03135756e0e61aac226bc08695e1d429118b09be367",
+        "git_blob_sha1": "2a88705d1314952e0e5f784473df8b3d13805c37",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "d2a16319718c39f38a0cc03135756e0e61aac226bc08695e1d429118b09be367",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S005/scene_S005_v003.mp4",
+        "bytes": 6983700,
+        "sha256": "702ec1ab5e6d4f24bb89a7bdbbd8852f8056743cc84884ad9fb04225886a84d2",
+        "git_blob_sha1": "bdfd1f9de103b7ce83197c697578946d5d4ab26c",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "702ec1ab5e6d4f24bb89a7bdbbd8852f8056743cc84884ad9fb04225886a84d2",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S006/scene_S006_v003.mp4",
+        "bytes": 6529685,
+        "sha256": "9b3528ba57b8503da6b0bcb550f9f59690c53612439c1156c1ccb920fd8c136e",
+        "git_blob_sha1": "a928031e54c4baceb013e92ae0d6892801aeba23",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "9b3528ba57b8503da6b0bcb550f9f59690c53612439c1156c1ccb920fd8c136e",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S007/scene_S007_v003.mp4",
+        "bytes": 4518802,
+        "sha256": "b9de6c57e5d570641899788ad96d165db26e07b5d69857cdb59da2979f98326a",
+        "git_blob_sha1": "c1605b5f7ffae43f52dbdbe10473844ce5fcd575",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "b9de6c57e5d570641899788ad96d165db26e07b5d69857cdb59da2979f98326a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S008/scene_S008_v003.mp4",
+        "bytes": 4683914,
+        "sha256": "e0c7d5e9e113d470bdd6ac8912e16b2c7148cd12450febeaddd4a86e92fb8af2",
+        "git_blob_sha1": "3a3e1ce69f3324ba4bd541cbac1c6bb7ec38c6a0",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "e0c7d5e9e113d470bdd6ac8912e16b2c7148cd12450febeaddd4a86e92fb8af2",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S009/scene_S009_v003.mp4",
+        "bytes": 16528303,
+        "sha256": "af26a2631b4ac614ee7bcfa2a275b65ab3b6bf0970655d36b146ac6c1d3512c7",
+        "git_blob_sha1": "40e3338a0c6b7f496ea5b09a673494ca4da0d943",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "af26a2631b4ac614ee7bcfa2a275b65ab3b6bf0970655d36b146ac6c1d3512c7",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/S010/scene_S010_v003.mp4",
+        "bytes": 8355709,
+        "sha256": "59d22e518efaa0b8516900bf346b118e8e604bde5573bb60a34c0fff1a055e1b",
+        "git_blob_sha1": "e75814eae4c8f6b68ea95c6802795faf41b64354",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "59d22e518efaa0b8516900bf346b118e8e604bde5573bb60a34c0fff1a055e1b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/projects/project_594442ec2df9/versions/v003/renders/assembled_muted.mp4",
+        "bytes": 73226711,
+        "sha256": "1656c5cced1767ba8f6b1de702a06086ee8befe2264180f3e542df7d6c628ac0",
+        "git_blob_sha1": "7d8be7b15908a6bc882adf0dd89ca184fa5fd7a6",
+        "stable_during_read": true,
+        "group": "oldMASTER_and_75s_movie",
+        "expected_sha256": "1656c5cced1767ba8f6b1de702a06086ee8befe2264180f3e542df7d6c628ac0",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/flat_renderer.js",
+        "bytes": 36672,
+        "sha256": "144487d6824a10cedb4c002629620859817d0b0b89e4fdc65d805c6e29c8dde4",
+        "git_blob_sha1": "3f2d6185e9611f689d485a3e03ac703fc9643c4b",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "144487d6824a10cedb4c002629620859817d0b0b89e4fdc65d805c6e29c8dde4",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/flat_semantics.js",
+        "bytes": 25909,
+        "sha256": "cd023936304a4579f1fe52849c66b47c5e94d69958c714e437b371dce511eedd",
+        "git_blob_sha1": "c70524ac5e4f005e1f67640d6d4b641b5d04543e",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "cd023936304a4579f1fe52849c66b47c5e94d69958c714e437b371dce511eedd",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/fonts/NotoSansCJKkr-Regular.otf",
+        "bytes": 16433088,
+        "sha256": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "git_blob_sha1": "c7e991f156447f048852f5739e960347f99dbf8c",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+        "bytes": 4565076,
+        "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+        "git_blob_sha1": "8948689d8aa2de78210e608469eabddbf0e0f267",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/v3/fonts/OpenSans-Light.ttf",
+        "bytes": 222412,
+        "sha256": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "git_blob_sha1": "0d381897da20345fa63112f19042561f44ee3aa0",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/gis/earth-topology.png",
+        "bytes": 378243,
+        "sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+        "git_blob_sha1": "666be0091174dd72c56b7b778a69ce69bcd5de27",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/gis/countries_50m.geojson",
+        "bytes": 3083490,
+        "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+        "git_blob_sha1": "9d99f26dc470fcdbd08b062c813005acbdf73ccb",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/gis/coastlines_50m.geojson",
+        "bytes": 1640858,
+        "sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+        "git_blob_sha1": "4ead47f5323a3a71495a12442ba936c969b6fae2",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/assets/flat/SOURCES.json",
+        "bytes": 5873,
+        "sha256": "20e51ab95c7d524d8a8f2f34769deb3d59e5b446eafa633068381b99a04e6b17",
+        "git_blob_sha1": "c1a67f6819a0c37b233d72fc89c23822141fc63f",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "20e51ab95c7d524d8a8f2f34769deb3d59e5b446eafa633068381b99a04e6b17",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/flat_assets/natural_earth_1_east_asia.png",
+        "bytes": 13947958,
+        "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+        "git_blob_sha1": "145d963f5e3b280b14dd45feb66cf30a2035959e",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.png",
+        "bytes": 17800192,
+        "sha256": "23c9ed6b954528fb98267d103f6e066e650461a7a817304b6cc2d4aa3d55a522",
+        "git_blob_sha1": "a3dc871d4579b62141de8e240f27b765940a941e",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "23c9ed6b954528fb98267d103f6e066e650461a7a817304b6cc2d4aa3d55a522",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/flat_polish_renderer.js",
+        "bytes": 23495,
+        "sha256": "329e0da4ec4d21f0f4d26e63257709718dd27c7af3c406fe062e320657da554b",
+        "git_blob_sha1": "5fbea73af0e1a9a5ca1e5849b5e1652e9fe119c2",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "329e0da4ec4d21f0f4d26e63257709718dd27c7af3c406fe062e320657da554b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/earth_polish_adapter.js",
+        "bytes": 16393,
+        "sha256": "667c8079db74356300a1f97c0fae9a0ac56553abf7e6160d9a7f090a7e953d5e",
+        "git_blob_sha1": "fcde51fe9b4f08dbcd26a22264925647ae347aa1",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "667c8079db74356300a1f97c0fae9a0ac56553abf7e6160d9a7f090a7e953d5e",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/geographic_polish_transition.js",
+        "bytes": 18501,
+        "sha256": "843feb33625242de9673ea5e9461d7876bce83cfb67cf05f8a6a281ef08efb6a",
+        "git_blob_sha1": "11d96679ac7ac997d7aa27beeab613e5478bab39",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "843feb33625242de9673ea5e9461d7876bce83cfb67cf05f8a6a281ef08efb6a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/flat_entity_separation_polish.js",
+        "bytes": 14896,
+        "sha256": "e73df2e7e9dc1038e4121272b5dbdd0dc87c0b7c3f4a74eb6751607e94a8b97e",
+        "git_blob_sha1": "a0ff96aad002e54000bdb4897c76857d9b3666ac",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "e73df2e7e9dc1038e4121272b5dbdd0dc87c0b7c3f4a74eb6751607e94a8b97e",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/earth_adapter.js",
+        "bytes": 48619,
+        "sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "git_blob_sha1": "0f580b9a6225f5622a791e2dde0bb3cb5433d125",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/src/renderer_v3.js",
+        "bytes": 28718,
+        "sha256": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "git_blob_sha1": "1ed885079a57a05f698c3a92f9948c5f72c6c358",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/src/engine_v3.js",
+        "bytes": 5034,
+        "sha256": "7e35b088d7de740d61c2e0c8765f0b941839b8896bc297e8765adf991f4f4aad",
+        "git_blob_sha1": "31b729563cd14dd3e9fd44858a7b871a3740429e",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "7e35b088d7de740d61c2e0c8765f0b941839b8896bc297e8765adf991f4f4aad",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/src/core_v1_preserved.js",
+        "bytes": 24065,
+        "sha256": "551a2816b29162621fd26b51620dd7c6671bbca7962bebcf152163d63eff8b9f",
+        "git_blob_sha1": "762492e3f74670c5607d9bf58e8edd41852da4f9",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "551a2816b29162621fd26b51620dd7c6671bbca7962bebcf152163d63eff8b9f",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/v3/earth/earth-night-8k.jpg",
+        "bytes": 3144468,
+        "sha256": "9894e83a585a22c1c425e7ca4f987a9ba625bf08ecee45d3c9dcacae3c2ad5f7",
+        "git_blob_sha1": "e211b6c029408c07d4a7be84c78e0f5feaa88233",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "9894e83a585a22c1c425e7ca4f987a9ba625bf08ecee45d3c9dcacae3c2ad5f7",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/v3/earth/earth-clouds-8k.jpg",
+        "bytes": 11619184,
+        "sha256": "c792eca228989d36ebb45d3ea6ff1198be5e21a25d70d2fbcb2124ffd14ba7f5",
+        "git_blob_sha1": "cddc9fd2a47bdf6174027551e49ba24f4d56ea44",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "c792eca228989d36ebb45d3ea6ff1198be5e21a25d70d2fbcb2124ffd14ba7f5",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+        "bytes": 699969932,
+        "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+        "git_blob_sha1": "8711fb2fe3a39d3a8dde020c6856b7ab7df0ddb0",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tfw",
+        "bytes": 173,
+        "sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+        "git_blob_sha1": "59f56fb3c988641d7e49eae934c7c31e74d74502",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.prj",
+        "bytes": 147,
+        "sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+        "git_blob_sha1": "b13a71791932a9ecb82a81800e49b3d5b307a195",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.README.html",
+        "bytes": 29897,
+        "sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+        "git_blob_sha1": "b95bdae4ba59db7d776ff65ac2b99789d3389cdc",
+        "stable_during_read": true,
+        "group": "approved_graphics_materials_GIS_fonts",
+        "expected_sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/storage.py",
+        "bytes": 8855,
+        "sha256": "aac5cbd83ef2ba99a4e89efd579e66281f0b3aa15eb380c4ae3515d6fec35715",
+        "git_blob_sha1": "01fe11da99bda9553600df269508e6b82c5e1d72",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "01fe11da99bda9553600df269508e6b82c5e1d72",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/backends.py",
+        "bytes": 5151,
+        "sha256": "93fec5fbe33d338efab28bd1ad4a64d5d79b860ecb906971427bee621dc20f73",
+        "git_blob_sha1": "619a50b87f23fa026569460bcf2857f21a0b028b",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "619a50b87f23fa026569460bcf2857f21a0b028b",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/engine/revisions.py",
+        "bytes": 30764,
+        "sha256": "2e52485e8643f0e2f1b542db967ba1daa7bea68c0eaf7ef3d6b011758bb3decf",
+        "git_blob_sha1": "9c34575c005929b01eaf568f102eb0d467d47893",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "9c34575c005929b01eaf568f102eb0d467d47893",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/requirements.txt",
+        "bytes": 79,
+        "sha256": "fed55ff182bfb44f42fbd90c460f5ac54d5e9dad98e060debb98d8416fcfb96b",
+        "git_blob_sha1": "adf8155fe72a4f9ad5bb0f2e830559a8f753d7da",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "adf8155fe72a4f9ad5bb0f2e830559a8f753d7da",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/web/app.js",
+        "bytes": 41293,
+        "sha256": "3b85ee35043133c69a35249e7e6e81e897c0f9888719e1505acaa9ebfbdd4939",
+        "git_blob_sha1": "903a94490df783fe2b30cafe9c602f3aa77e32bc",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "903a94490df783fe2b30cafe9c602f3aa77e32bc",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/package.json",
+        "bytes": 304,
+        "sha256": "b5c91a7a3bf6326ffd396dc285e14b226cb1b6f0715268b055d303dc5833e7a2",
+        "git_blob_sha1": "ccec44dd34c9243bcf6f2361e732e5497f02721a",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "ccec44dd34c9243bcf6f2361e732e5497f02721a",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/cinematic-world-map/package-lock.json",
+        "bytes": 2099,
+        "sha256": "cd6d339f66be951cf2e7a261dc4e82147031c4965febe66078489c856332e088",
+        "git_blob_sha1": "23007c711bea04274cc662c9b0f0800897d91148",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "23007c711bea04274cc662c9b0f0800897d91148",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/data/production_rhythm_promotion_v001.json",
+        "bytes": 3514,
+        "sha256": "aef9d2c593238d9c7fc5184f856bb21085201c4843627a026bbc49cab565f482",
+        "git_blob_sha1": "2aabd3f6d48cfb5204e3faf2d0107a186059fcb8",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "2aabd3f6d48cfb5204e3faf2d0107a186059fcb8",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/data/production_default_promotion.json",
+        "bytes": 2484,
+        "sha256": "05c1979f7f3c29e1a67595d4095150b7942dbe7c46ec4f11b0a1748373f3282c",
+        "git_blob_sha1": "bc0cfdbffcf829f8cb4ca9c000943d32ad5ff91d",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "bc0cfdbffcf829f8cb4ca9c000943d32ad5ff91d",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/PRODUCTION_RHYTHM_QC_CERTIFICATE.json",
+        "bytes": 5414,
+        "sha256": "d787e772d5d080b79fd9f016575a413754cfa4dcb53b2a41b51972e5d594dd3b",
+        "git_blob_sha1": "4f08561133f01a140d3775c9a8d5d0b4cb330380",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "4f08561133f01a140d3775c9a8d5d0b4cb330380",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/FILE_MANIFEST.json",
+        "bytes": 9343,
+        "sha256": "ab9cd871944c77e5e605e022ec485cb19205f46bc851c0700602028616415bae",
+        "git_blob_sha1": "7cc0a9a71f6bd8c5057ebb3081891fe37aa966cf",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "7cc0a9a71f6bd8c5057ebb3081891fe37aa966cf",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/production_rhythm_master_10_15s.mp4",
+        "bytes": 17682618,
+        "sha256": "3d584631ccc03905fccd3aaeb87075b60022a5031ff55086b4903e05c71c2ded",
+        "git_blob_sha1": "0d088bfd594e1bef901c2e846ec16af1d55b4ad9",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "0d088bfd594e1bef901c2e846ec16af1d55b4ad9",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/production_rhythm_master_muted.mp4",
+        "bytes": 17260953,
+        "sha256": "274371f30f9a2a9f3c1bd66f55704ab3fdf336d8afb93a67dfe27c4f48cd0803",
+        "git_blob_sha1": "389021fea449b2e9741b2b26fb50b069c64cb4ec",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "389021fea449b2e9741b2b26fb50b069c64cb4ec",
+        "matches": true
+      },
+      {
+        "path": "/workspace/yeonhwarok-free/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/production_rhythm_master_sfx_only.mp4",
+        "bytes": 17414582,
+        "sha256": "b2fa77102efb6c524554d054ad624a654e0d76e345abdcf377c5f2d61cded000",
+        "git_blob_sha1": "204d053bb0ab832ab93d39fb933bc329ecac8f6f",
+        "stable_during_read": true,
+        "group": "audited_security_dependencies_current_promotion_release",
+        "expected_git_blob_sha1": "204d053bb0ab832ab93d39fb933bc329ecac8f6f",
+        "matches": true
+      }
+    ],
+    "prior_full_preservation": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/docs/evidence/rhythm_independent_preservation_final_v001/INDEPENDENT_PRESERVATION.json",
+    "oldMASTER_75s_movie_entries": 28,
+    "approved_graphics_entries": 25,
+    "approved_source_lock_entries": 28
+  },
+  "resources": {
+    "cgroup_memory_limit_bytes": 34359738368,
+    "cgroup_cpu_max": "400000 100000",
+    "quota_equivalent_vCPU": 4.0,
+    "disk_total_bytes": 33770192896,
+    "disk_available_bytes": 20236611584,
+    "directory_sizes_bytes": {
+      "world-simulation-shorts-engine/assets": 5339048,
+      "world-simulation-shorts-engine/library": 700259073,
+      "world-simulation-shorts-engine/cache": 262919220,
+      "world-simulation-shorts-engine/web": 48501158,
+      "world-simulation-shorts-engine/tools/runtime": 18342321,
+      "cinematic-world-map/assets": 71562374,
+      "cinematic-world-map/node_modules": 45993807,
+      "deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001": 57975451
+    },
+    "actual_prior_12s_HIGH_metrics": {
+      "main": {
+        "scene_render_seconds": 981.0027602179907,
+        "scene_count": 5,
+        "rendered_scene_count": 4,
+        "cached_scene_count": 1,
+        "audio_preparation_seconds": 1.5613450779928826,
+        "audio_reused": false,
+        "assembly_audio_mux_subtitles_seconds": 1.7872834129957482,
+        "qc_seconds": 10.593221993010957,
+        "total_seconds": 996.5757881189929,
+        "measured": true,
+        "backend": "CPU_LOCAL",
+        "benchmark_scope": "This version's actual execution only; cached prior rendering time is not included"
+      },
+      "sfx_only": {
+        "scene_render_seconds": 0.0,
+        "scene_count": 5,
+        "rendered_scene_count": 0,
+        "cached_scene_count": 5,
+        "audio_preparation_seconds": 1.581737564993091,
+        "audio_reused": false,
+        "assembly_audio_mux_subtitles_seconds": 1.2067473419883754,
+        "qc_seconds": 9.707791741006076,
+        "total_seconds": 13.830002466012957,
+        "measured": true,
+        "backend": "CPU_LOCAL",
+        "benchmark_scope": "This version's actual execution only; cached prior rendering time is not included"
+      },
+      "scope": "Actual runs only; source cache rendering costs are not charged again. Full task wall time is recorded separately. No extrapolated 75-second benchmark.",
+      "main_version": "v004",
+      "sfx_only_version": "v005",
+      "duration_seconds": 12,
+      "internal_dimensions": [
+        2160,
+        3840
+      ],
+      "output_dimensions": [
+        1080,
+        1920
+      ],
+      "fps": 30,
+      "audio_only_video_render_count": 0,
+      "no_earth_render": true,
+      "no_75s_render": true
+    },
+    "peak_render_RSS_measured": false
+  },
+  "deployment_requirements": {
+    "runtime": "Pinned Python requirements; sibling cinematic-world-map with Three/Playwright; ffmpeg/ffprobe, Chromium/SwiftShader, offline eSpeak or supplied narration. Root separately audits exact Python/Node/FFmpeg/Docker availability.",
+    "budget_proposal": "단일 worker 시작 예산4vCPU/8GiB 후 실제 peak RSS 측정. 이것은 설계 권고이며 실측 최소가 아니다. 현재 성공한 environment는4vCPU/32GiB quota. 작은 free/serverless instance의 native4K 처리능력을 인증하지 않음.",
+    "storage": "durable project/cache/upload/final volume과 read-only old outputs 필요. 현재 directory 실측 포함. native terrain crop을 재사용하므로699969932-byte NaturalEarth 원본을 작업마다 다시 받거나 계산할 필요 없음. 소스/라이선스 archive 별도 유지. 전체 workspace 약11.8GB 사용; 보존 범위·프로젝트 수에 따라 용량 달라짐. 남은 공간 reserve 검사; old approved outputs 자동삭제 금지.",
+    "workers": "1renderer replica, durable lease/supervisor/checkpoint, 벽시계/CPU/RAM/pids quota. 중단 시 자기 worker process group만 종료하고 완료 Scene 보존.",
+    "public_boundary": "authenticated owner-only HTTPS. multi-tenant로 간주하려면 project와asset 소유권 추가. 내부 loopback read-only renderer port를 공개 forwarding하지 않음.",
+    "limits_proposal": "JSON64KiB·주제/수정2k문자, 업로드256MiB보다 낮은 배포 정책, probe10s, media 길이/stream/해상도/codec 사전 제한, singleactive/singlequeued, 명시적 영상 duration/scene 상한. Local core 기능은 변경하지 않음."
+  },
+  "limits": [
+    "새 wrapper 코드/보안 테스트는 아직 검수하지 않았다. 이 보고서는 원본 local/LAN 서버 대상.",
+    "악성 미디어·network exfiltration exploit을 실행하지 않았다.",
+    "dependency advisory/network scan/설치/새 렌더/peakRSS benchmark/hosting 속도/실제폰 테스트 없음.",
+    "비밀 값 조회, 서버 process 제어, Git write 없음. 호스팅 영속성은 아직 증명되지 않음."
+  ],
+  "hash_receipt_resource_collection_seconds": 3.809047621994978
+}

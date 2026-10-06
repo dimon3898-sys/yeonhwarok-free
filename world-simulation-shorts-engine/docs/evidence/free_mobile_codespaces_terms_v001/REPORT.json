@@ -1,0 +1,539 @@
+{
+  "report_version": "free_mobile_codespaces_terms_v001",
+  "observed_at_utc": "2026-10-06T03:14:43.370873+00:00",
+  "observed_at_kst": "2026-10-06T12:14:43.370873+09:00",
+  "scope": "Official current GitHub Codespaces terms research for a personally owned, on-demand mobile Python/FFmpeg/Chromium application. Documentation observation only; no provider Codespace was created or started.",
+  "runtime_observation": {
+    "observations_current": true,
+    "connectivity": "connected",
+    "configured_secrets": [],
+    "configured_runtime_variables": [],
+    "configured_outbound_identities": [],
+    "status_network_state": "unknown",
+    "executor_network_policy": "restricted inherited proxy; raw.githubusercontent.com allowed; vpn_configured false",
+    "tls_verification_preserved": true,
+    "proxy_preserved": true,
+    "provider_creation_or_login_attempted": false,
+    "blocked_api_bypassed": false
+  },
+  "free_plan_terms": {
+    "account_type": "GitHub Free personal account",
+    "organization_or_enterprise_free_quota": false,
+    "included_compute_core_hours_per_month": 120,
+    "included_storage_gb_month": 15,
+    "core_usage_multiplier_for_2_core": 2,
+    "derived_max_active_hours_for_2_core_with_all_quota_remaining": 60,
+    "derivation": "120 core-hours / 2 = 60 active hours; creation/start time and other personally billed Codespaces share the quota. This is not 120 wall-clock hours.",
+    "compute_billing": "Only while Codespace is active; starts on create/start and stops on stop/delete.",
+    "storage_billing": "Time-based, calculated hourly in GB-hours throughout each billing cycle while Codespace exists, including when stopped.",
+    "nominal_disk_capacity_is_not_included_storage_quota": true,
+    "custom_base_image_counted": true,
+    "repository_assets_extensions_input_output_files_counted": true,
+    "default_devcontainer_base_image_excluded_even_when_features_added": true,
+    "deletion_refunds_already_accrued_monthly_storage": false,
+    "usage_reset": "Compute allowance resets and accrued storage resets at start of monthly billing cycle.",
+    "current_account_usage_or_remaining_quota_observed": false,
+    "documented_smallest_machine": {
+      "cpu_cores": 2,
+      "ram_gb": 8,
+      "disk_storage_gb": 32,
+      "availability_in_this_account_observed": false
+    }
+  },
+  "zero_cost_controls": {
+    "without_valid_payment_method": "Official documentation says usage is blocked once included quota is used up.",
+    "with_valid_payment_method": "Do not assume a default zero budget; review personal-account budgets before creating or resuming a Codespace.",
+    "required_budget_scope": "Whole personal account; Codespaces product-level budget covers the product rather than a single compute/storage SKU.",
+    "documented_hard_stop_control": "Stop usage when budget limit is reached",
+    "alerts_alone_block_usage": false,
+    "included_usage_alerts_percent": [
+      90,
+      100
+    ],
+    "budget_alerts_percent": [
+      75,
+      90,
+      100
+    ],
+    "budget_covers_use_before_creation": false,
+    "zero_dollar_amount_acceptance_verified_in_authenticated_ui": false,
+    "zero_dollar_budget_guidance": "For an existing valid payment method, verify a $0 Codespaces product/account budget with Stop usage when budget limit is reached enabled before creating a Codespace. The official how-to documents an amount field and stop control but does not explicitly establish minimum amount/$0 acceptance; account UI was not accessed here.",
+    "account_billing_or_settings_changed": false,
+    "cost_guarantee_for_this_user": "Not established: payment-method status, accepted hard-stop configuration, current included usage, provider session and actual bill were not accessible. No paid resource was activated."
+  },
+  "lifecycle_terms": {
+    "default_idle_timeout_minutes": 30,
+    "maximum_continuous_lifetime_hours": 12,
+    "maximum_lifetime_applies_even_when_active": true,
+    "stop_restart_preserves_saved_project_files": true,
+    "default_stopped_codespace_retention_days": 30,
+    "automatic_deletion_can_remove_unexported_work": true,
+    "always_on_free_hosting_claim_supported": false,
+    "minimum_configurable_idle_timeout_minutes": 5,
+    "maximum_configurable_idle_timeout_minutes": 240,
+    "real_activity": "File changes from the editor and terminal output count as activity; continuing terminal output prevents idle timeout, within the separate 12-hour maximum lifetime.",
+    "artificial_keepalive_recommended": false
+  },
+  "compatibility_and_limitations": {
+    "documented_service": "Cloud development environment with forwarded application port; on-demand personal use, not continuous free production hosting.",
+    "benchmark_scope": "Root may validate the application in a local Docker container constrained to 2 CPU/8GB. That does not establish actual GitHub Codespaces speed, disk usage, billing or mobile/provider end-to-end behavior.",
+    "storage_note": "A custom Docker/devcontainer image and local video scratch/cache can consume the 15GB-month allowance even while stopped. Default universal image base has different billing treatment, so choose/review the actual configuration.",
+    "remote_provider_or_phone_end_to_end_verified": false
+  },
+  "minimal_user_actions": [
+    {
+      "step": 1,
+      "action": "Sign into own GitHub personal account and check current Codespaces included usage and billing at https://github.com/settings/billing; verify no valid payment method, or a confirmed $0 Codespaces product/account budget with the hard-stop option before creation."
+    },
+    {
+      "step": 2,
+      "action": "Create/resume one Codespace from the repository using the smallest suitable machine, subject to repository configuration and actual quota. Codespace creation/login is performed by the user, not by this research."
+    },
+    {
+      "step": 3,
+      "action": "Use the application through its private forwarded HTTPS port while signed into the same GitHub account. Account/port details require provider confirmation."
+    },
+    {
+      "step": 4,
+      "action": "Download/export videos and needed project checkpoints. Stop promptly after work to halt compute; delete Codespaces no longer needed to halt future storage accumulation. Confirm exported files before deletion."
+    }
+  ],
+  "sources": [
+    {
+      "path": "content/billing/concepts/product-billing/github-codespaces.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/billing/concepts/product-billing/github-codespaces.md",
+      "utc": "2026-10-06T03:08:02.469236+00:00",
+      "status": 200,
+      "bytes": 11567,
+      "sha256": "0440b5edf6e73b05c4e611f8667de519c4b73736aed20adaf03683d1bd8d41df",
+      "quotations": [
+        {
+          "text": "| {% data variables.product.prodname_dotcom %} Free for personal accounts | 15 GB-month | 120 hrs |",
+          "source_line_start": 72
+        },
+        {
+          "text": "If your account does not have a valid payment method on file, usage is blocked once you use up your quota.",
+          "source_line_start": 81
+        },
+        {
+          "text": "* **Storage:** Storage charges accumulate throughout the month based on hourly usage. Your accrued storage charges reset to zero at the start of each billing cycle.",
+          "source_line_start": 39
+        },
+        {
+          "text": "* **Custom base image**: the storage volume for your codespace includes the custom dev container, in addition to all the files in the repository and codespace.",
+          "source_line_start": 58
+        },
+        {
+          "text": "Containers based on the default image are not included in your storage volume, even if you add features in your dev container configuration.",
+          "source_line_start": 60
+        },
+        {
+          "text": "| Codespaces compute  |  2 core      | 1 hour          | 2                         | $0.18 |",
+          "source_line_start": 105
+        },
+        {
+          "text": "| Codespaces storage  |  Storage     | 1 GB-month | Not applicable             | $0.07 |",
+          "source_line_start": 110
+        }
+      ]
+    },
+    {
+      "path": "content/billing/concepts/budgets-and-alerts.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/billing/concepts/budgets-and-alerts.md",
+      "utc": "2026-10-06T03:08:03.222084+00:00",
+      "status": 200,
+      "bytes": 6226,
+      "sha256": "1528e37f64971753f6c8c02c44ca0cd8bba4c166c461687360551b8625903a19",
+      "quotations": [
+        {
+          "text": "In addition to budget alerts, {% data variables.product.github %} can send email notifications when the included usage for your plan reaches 90% and 100% during a billing period.",
+          "source_line_start": 48
+        },
+        {
+          "text": "When you first create a budget, be aware that the budget applies only to metered usage from the date of its creation onwards. Any use made before you created the budget is not included in the calculations. This means that you may exceed your budget in the first billing cycle after you create your budget, even if you select the option stop usage when the limit is reached.",
+          "source_line_start": 70
+        }
+      ]
+    },
+    {
+      "path": "content/billing/how-tos/set-up-budgets.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/billing/how-tos/set-up-budgets.md",
+      "utc": "2026-10-06T03:08:03.402701+00:00",
+      "status": 200,
+      "bytes": 16509,
+      "sha256": "1e517fd1956d855fb2eebf1d299114621e1337c68d06a2c8638f6f09f5504462",
+      "quotations": [
+        {
+          "text": "Usage of metered products can count toward multiple applicable budgets at the same time, and if any budget with **Stop usage when budget limit is reached** enabled is exhausted, additional usage is blocked.",
+          "source_line_start": 34
+        },
+        {
+          "text": "* To limit spending at a Product-level, in \"Product-level budget\" choose a product from the dropdown, for example: {% data variables.product.prodname_codespaces %}.",
+          "source_line_start": 54
+        },
+        {
+          "text": "To stop any usage and further spending once the budget limit is reached, select **Stop usage when budget limit is reached**, if available.",
+          "source_line_start": 61
+        },
+        {
+          "text": "If you do not select **Stop usage when budget limit is reached**, you will be notified by email if you exceed your budget, but usage **will not** be stopped.",
+          "source_line_start": 63
+        }
+      ]
+    },
+    {
+      "path": "data/reusables/billing/default-over-quota-behavior.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/billing/default-over-quota-behavior.md",
+      "utc": "2026-10-06T03:08:15.885442+00:00",
+      "status": 200,
+      "bytes": 342,
+      "sha256": "ac1103c292401608f44f6e789c5725aa5893bbc790e7ea07b17959ffdbfe143a",
+      "quotations": [
+        {
+          "text": "If your account does not have a valid payment method on file, usage is blocked once you use up your quota.",
+          "source_line_start": 1
+        },
+        {
+          "text": "If you have a valid payment method on file, spending may be limited by one or more budgets. Check the budgets set for your account to ensure they are appropriate for your usage needs.",
+          "source_line_start": 3
+        }
+      ]
+    },
+    {
+      "path": "data/reusables/codespaces/tips-included-usage.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/codespaces/tips-included-usage.md",
+      "utc": "2026-10-06T03:08:15.886066+00:00",
+      "status": 200,
+      "bytes": 127,
+      "sha256": "1c48083d9027025f38749c0cae9484171528f7afda1d71501ac971a2a002c10b",
+      "quotations": []
+    },
+    {
+      "path": "content/codespaces/troubleshooting/troubleshooting-included-usage.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/troubleshooting/troubleshooting-included-usage.md",
+      "utc": "2026-10-06T03:08:15.886615+00:00",
+      "status": 200,
+      "bytes": 11225,
+      "sha256": "0cf716701dab7952d53de5b455b70a1009238665c49fa5b5148e6d86d0a5fea9",
+      "quotations": [
+        {
+          "text": "{% data variables.product.prodname_codespaces %} compute is counted in core hours, which is the sum of the time a codespace is active, multiplied by the multiplier for the codespace's machine type: for example, a multiplier of 2 for a 2-core machine, or a multiplier of 8 for an 8-core machine.",
+          "source_line_start": 25
+        },
+        {
+          "text": "* Your codespaces consume storage while they exist. You should delete a codespace you have finished using and know that you will not use again.",
+          "source_line_start": 81
+        },
+        {
+          "text": "Storage is calculated hourly and added to your existing storage usage. Consumed storage is therefore cumulative for the duration of your month-long billing cycle.",
+          "source_line_start": 96
+        },
+        {
+          "text": "Deleting a codespace, or a prebuild, will not reduce the usage figure for the current month, but it will reduce the rate at which storage usage accumulates.",
+          "source_line_start": 96
+        },
+        {
+          "text": "Storage of base dev containers built from the default dev container image is free of charge and does not consume your included storage.",
+          "source_line_start": 62
+        },
+        {
+          "text": "If you use an alternative base image, then the resulting container and all of the files in the codespace will be counted as used storage.",
+          "source_line_start": 62
+        }
+      ]
+    },
+    {
+      "path": "content/codespaces/about-codespaces/understanding-the-codespace-lifecycle.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/about-codespaces/understanding-the-codespace-lifecycle.md",
+      "utc": "2026-10-06T03:08:15.887460+00:00",
+      "status": 200,
+      "bytes": 9049,
+      "sha256": "de5d8644d1f92e0c9ae96c06a299ff5e62094b8b6c9ceee1d2b8d7337883d496",
+      "quotations": [
+        {
+          "text": "You may stop and restart a codespace without losing changes that you have made to your project.",
+          "source_line_start": 23
+        },
+        {
+          "text": "A codespace has a maximum lifetime of 12 hours, regardless of your idle timeout policy or settings. This limit applies even while you are actively using the codespace.",
+          "source_line_start": 49
+        },
+        {
+          "text": "By default, inactive codespaces are deleted after 30 days, but you can customize your codespace retention period.",
+          "source_line_start": 75
+        },
+        {
+          "text": "If you create a codespace, it will continue to accrue storage charges until it is deleted, irrespective of whether it is active or stopped.",
+          "source_line_start": 77
+        }
+      ]
+    },
+    {
+      "path": "data/reusables/user-settings/access_billing_settings_url.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/user-settings/access_billing_settings_url.md",
+      "utc": "2026-10-06T03:08:15.887912+00:00",
+      "status": 200,
+      "bytes": 166,
+      "sha256": "5205eb52216c0cb175ce54b3e9132ce6281f9a6f0f44af43ef2f5e55b004e876",
+      "quotations": [
+        {
+          "text": "[https://github.com/settings/billing](https://github.com/settings/billing?ref_product=github&ref_type=engagement&ref_style=text)",
+          "source_line_start": 1
+        }
+      ]
+    },
+    {
+      "path": "content/billing/how-tos/products/view-productlicense-use.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/billing/how-tos/products/view-productlicense-use.md",
+      "utc": "2026-10-06T03:08:15.889768+00:00",
+      "status": 200,
+      "bytes": 8549,
+      "sha256": "413902cac9b8137f0a0980189ee3d438ac5939fce1afb2dbca89c2829bd76204",
+      "quotations": []
+    },
+    {
+      "path": "content/codespaces/about-codespaces/what-are-codespaces.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/about-codespaces/what-are-codespaces.md",
+      "utc": "2026-10-06T03:13:15.153788+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 6690,
+      "sha256": "dd09162a3e75bae557b667dbdb95a111bac3fc38bf139a67d60ec2d008b2a2d1",
+      "quotations": [
+        {
+          "text": "Each codespace you create is hosted by {% data variables.product.prodname_dotcom %} in a Docker container, running on a virtual machine. You can choose from a selection of virtual machine types, from 2 cores, 8 GB RAM, and 32 GB storage, up to 32 cores, 128 GB RAM, and 128 GB storage.",
+          "source_line_start": 20
+        }
+      ]
+    },
+    {
+      "path": "content/codespaces/setting-your-user-preferences/setting-your-timeout-period-for-github-codespaces.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/setting-your-user-preferences/setting-your-timeout-period-for-github-codespaces.md",
+      "utc": "2026-10-06T03:13:15.154454+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 3918,
+      "sha256": "8b429a6db4ac527544893a474c52d70c36f43fdeeb832c65f850d1a5e2e35a67",
+      "quotations": [
+        {
+          "text": "A codespace will stop running after a period of inactivity. By default this period is 30 minutes, but you can specify a longer or shorter default timeout period in your personal settings on {% data variables.product.prodname_dotcom %}. The updated setting will apply to any new codespaces you create. You can also specify a timeout when you use {% data variables.product.prodname_cli %} to create a codespace.",
+          "source_line_start": 18
+        },
+        {
+          "text": "Regardless of your idle timeout setting, a codespace has a maximum lifetime of 12 hours. For more information, see [AUTOTITLE](/codespaces/about-codespaces/understanding-the-codespace-lifecycle#maximum-lifetime-of-a-codespace).",
+          "source_line_start": 20
+        },
+        {
+          "text": "1. Under \"Default idle timeout\", enter the time that you want, then click **Save**. The time must be between 5 minutes and 240 minutes (4 hours).",
+          "source_line_start": 39
+        }
+      ]
+    },
+    {
+      "path": "content/codespaces/about-codespaces/deep-dive.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/about-codespaces/deep-dive.md",
+      "utc": "2026-10-06T03:13:15.154970+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 17907,
+      "sha256": "6ca1be513db4678b18c953c05e4ccb0ef50a06d6f0674c9dd7f801acfb97c698",
+      "quotations": [
+        {
+          "text": "When you create a codespace, a virtual machine (VM) is created using either the stable or {% data variables.release-phases.public_preview %} release of the VM host image. For more information, see [AUTOTITLE](/codespaces/setting-your-user-preferences/choosing-the-stable-or-beta-host-image). The host image defines the version of Linux that is used for the VM. The VM is both dedicated and private to you. Having a dedicated VM ensures that you have the entire set of compute resources from that machine available to you. If necessary, this also allows you to have full root access to your container.",
+          "source_line_start": 42
+        },
+        {
+          "text": "{% data variables.product.prodname_github_codespaces %} uses a Docker container as the development environment. This container is created based on configurations that you can define in a `devcontainer.json` file and, optionally, a Dockerfile. If you create a codespace from {% data variables.product.company_short %}'s blank template, or from a repository with no `devcontainer.json` file, {% data variables.product.prodname_github_codespaces %} uses a default image, which has many languages and runtimes available. For more information, see [AUTOTITLE](/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers). For details of what the default image for dev containers includes, see the [`devcontainers/images`](https://github.com/devcontainers/images/tree/main/src/universal) repository.",
+          "source_line_start": 48
+        },
+        {
+          "text": "Your codespace will keep running while you are using it, up to a maximum lifetime of 12 hours, but will time out after a period of inactivity. File changes from the editor and terminal output are counted as activity, so your codespace will not time out if terminal output is continuing. The default inactivity timeout period is 30 minutes. You can define your personal timeout setting for codespaces you create, but this may be overruled by an organization timeout policy. For more information, see [AUTOTITLE](/codespaces/setting-your-user-preferences/setting-your-timeout-period-for-github-codespaces). For more information about the maximum lifetime, see [AUTOTITLE](/codespaces/about-codespaces/understanding-the-codespace-lifecycle#maximum-lifetime-of-a-codespace).",
+          "source_line_start": 85
+        },
+        {
+          "text": "When an application running inside {% data variables.product.prodname_github_codespaces %} outputs a port to the console, {% data variables.product.prodname_github_codespaces %} detects the localhost URL pattern and automatically forwards the port. You can click on the URL in the terminal, or the link in the \"toast\" notification message that pops up at the bottom right corner of {% data variables.product.prodname_vscode_shortname %}, to open the port in a browser. By default, {% data variables.product.prodname_github_codespaces %} forwards the port using HTTP. For more information on port forwarding, see [AUTOTITLE](/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace).",
+          "source_line_start": 107
+        },
+        {
+          "text": "While ports can be forwarded automatically, they are not publicly accessible to the internet. By default, all ports are private, but you can manually make a port available to your organization or public, and then share access through a URL. For more information, see [AUTOTITLE](/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace#sharing-a-port).",
+          "source_line_start": 109
+        }
+      ]
+    },
+    {
+      "path": "content/codespaces/setting-up-your-project-for-codespaces/setting-up-your-repository/facilitating-quick-creation-and-resumption-of-codespaces.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/setting-up-your-project-for-codespaces/setting-up-your-repository/facilitating-quick-creation-and-resumption-of-codespaces.md",
+      "utc": "2026-10-06T03:13:15.155535+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 7287,
+      "sha256": "2704fe378a0610a7d9d289cd1722a90a04d313ef70148c351a9abc96f962fd6b",
+      "quotations": [
+        {
+          "text": "* Create a codespace for the default branch of the repository:",
+          "source_line_start": 31
+        },
+        {
+          "text": "  `https://codespaces.new/OWNER/REPO-NAME`",
+          "source_line_start": 32
+        },
+        {
+          "text": "You can create a link to a page for resuming your most recent codespace that matches the repository, branch, and other options specified in the URL.",
+          "source_line_start": 60
+        },
+        {
+          "text": "Add `?quickstart=1` to a `codespaces.new` URL, such as the URLs listed in the previous section of this article. This produces a URL that displays a \"Resume codespace\" page.",
+          "source_line_start": 62
+        },
+        {
+          "text": "For example, the URL `https://codespaces.new/octo-org/octo-repo?quickstart=1` opens a page to allow you to resume your most recent codespace for the default branch of the `octo-org/octo-repo` repository.",
+          "source_line_start": 64
+        },
+        {
+          "text": "If no matching codespaces are found, the page is titled \"Create codespace\" and a button is displayed for creating a new codespace with matching parameters.",
+          "source_line_start": 72
+        },
+        {
+          "text": "This type of URL is useful, for instance, in a README for your repository as it gives people a way of either creating a codespace, or resuming their codespace, in just a couple of clicks.",
+          "source_line_start": 74
+        }
+      ]
+    },
+    {
+      "path": "data/reusables/codespaces/port-visibility-settings.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/codespaces/port-visibility-settings.md",
+      "utc": "2026-10-06T03:13:15.156316+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 267,
+      "sha256": "f10b294e7216b3c20d72364325d9fad5995dd6f879e4f1d4f31924ba8ab46cb6",
+      "quotations": [
+        {
+          "text": "* `private` - Visible only to you. This is the default setting when you forward a port.",
+          "source_line_start": 3
+        },
+        {
+          "text": "* `org` - Visible to members of the organization that owns the repository.",
+          "source_line_start": 4
+        },
+        {
+          "text": "* `public` - Visible to anyone who knows the URL and port number.",
+          "source_line_start": 5
+        }
+      ]
+    },
+    {
+      "path": "data/reusables/codespaces/using-tools-to-access-ports-1.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/codespaces/using-tools-to-access-ports-1.md",
+      "utc": "2026-10-06T03:13:15.156770+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 1116,
+      "sha256": "2d829b670cf38687ec8b96b91c15d16efac3c639f3238dafb841a6e217ae75b0",
+      "quotations": [
+        {
+          "text": "When you forward a port, your application becomes available at the URL `https://CODESPACENAME-PORT.app.github.dev`. For example, `https://monalisa-hot-potato-vrpqrxxrx7x2rxx-4000.app.github.dev`. If you forward a private port from the {% data variables.product.prodname_vscode_shortname %} desktop application, your application will also be available at a localhost port such as `127.0.0.1:4000`.",
+          "source_line_start": 3
+        },
+        {
+          "text": "To access your application using a REST client, such as Postman, or a command-line tool like curl, you don't need to authenticate if you're using a localhost port, or if you're accessing a public port at the remote domain. However, to connect to a private port at the remote domain, you must authenticate by using the `GITHUB_TOKEN` access token in your request.",
+          "source_line_start": 5
+        }
+      ]
+    },
+    {
+      "path": "content/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace.md",
+      "utc": "2026-10-06T03:13:15.157777+00:00",
+      "purpose": "Validate independently delegated source quotations for saved report; no provider API operation.",
+      "status": 200,
+      "bytes": 7267,
+      "sha256": "46527ab2edfbaa4c0d63c70ae09cd890a0258b849ac32cc12e8d04fe99aa7587",
+      "quotations": [
+        {
+          "text": "Port forwarding gives you access to TCP ports running within your codespace. For example, if you're running a web application on a particular port in your codespace, you can forward that port. This allows you to access the application from the browser on your local machine for testing and debugging.",
+          "source_line_start": 18
+        },
+        {
+          "text": "By default, {% data variables.product.prodname_github_codespaces %} forwards ports using HTTP but you can update any port to use HTTPS, as needed. If you update a port with public visibility to use HTTPS, the port's visibility will automatically change to private.",
+          "source_line_start": 34
+        },
+        {
+          "text": "1. Select the protocol needed for this port. The protocol that you select will be remembered for this port for the lifetime of the codespace.",
+          "source_line_start": 41
+        }
+      ]
+    },
+    {
+      "path": "data/reusables/codespaces/port-forwarding-sharing.md",
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/codespaces/port-forwarding-sharing.md",
+      "utc": "2026-10-06T03:13:40.898201+00:00",
+      "status": 200,
+      "bytes": 862,
+      "sha256": "46b094a055104cf6f52215a51251dca06b34ac4cb873c46af6fc9b3b30256e69",
+      "quotations": [
+        {
+          "text": "If you want to share a forwarded port with others, you can either make the port private to your organization or make the port public. After you make a port private to your organization, anyone in the organization with the port's URL can view the running application. After you make a port public, anyone who knows the URL and port number can view the running application without needing to authenticate.",
+          "source_line_start": 6
+        }
+      ]
+    }
+  ],
+  "failed_http_observations": [
+    {
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/codespaces/overview.md",
+      "status": 404,
+      "attempts": 1,
+      "correction": "Use content/codespaces/about-codespaces/understanding-the-codespace-lifecycle.md and other current files."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/github/docs/main/content/billing/managing-billing-for-your-products/managing-billing-for-github-codespaces/about-billing-for-github-codespaces.md",
+      "status": 404,
+      "attempts": 1,
+      "correction": "Legacy URL is a redirect_from entry in current content/billing/concepts/product-billing/github-codespaces.md; current raw source HTTP200."
+    },
+    {
+      "url": "https://raw.githubusercontent.com/github/docs/main/data/reusables/billing/codespaces-included-quotas.md",
+      "status": 404,
+      "attempts": 1,
+      "correction": "Personal quota table is inline in current billing document; no repeated failed download."
+    }
+  ],
+  "verification": {
+    "official_source_repository": "github/docs",
+    "sources_main_branch_dynamic": true,
+    "download_contents_fingerprinted_sha256": true,
+    "source_quotations_checked_against_saved_body": true,
+    "source_sha_type": "SHA-256 of downloaded bytes, not a Git commit SHA",
+    "writes_limited_to_new_assigned_report_files": true,
+    "git_or_render_commands_run_by_this_agent": false,
+    "official_sources_http_200": 17,
+    "source_quote_count": 51,
+    "independent_machine_port_research": "Identified concurrently by /root/flat_reference_and_qc; final cited source bodies separately downloaded and quotations validated here through allowed official raw host.",
+    "each_failed_url_attempts_at_most_two": true
+  },
+  "mobile_access": {
+    "forwarded_application_url_format": "https://CODESPACENAME-PORT.app.github.dev",
+    "default_port_visibility": "private",
+    "private_visibility": "Visible only to you",
+    "private_remote_authentication_required": true,
+    "browser_guidance": "Sign into same GitHub personal account and open private forwarded app URL. CLI/REST token guidance in source is not a browser-token storage recommendation.",
+    "upstream_port_protocol": "HTTP for the existing plain Python HTTP server",
+    "http_upstream_recommendation_is_compatibility_derivation": true,
+    "external_https_documented_separately_from_upstream_protocol": true,
+    "repository_entry_url": "https://codespaces.new/dimon3898-sys/yeonhwarok-free?quickstart=1",
+    "entry_url_evidence": "Apply official codespaces.new/OWNER/REPO-NAME and quickstart=1 documented formats; matching most-recent Codespace for default branch can be resumed, otherwise create page is shown.",
+    "entry_link_used_to_create_or_resume_codespace": false,
+    "invented_machine_query_parameter": false,
+    "actual_forwarded_provider_url_available": false,
+    "phone_tested": false
+  },
+  "scope_limitations": [
+    "No provider account/login/OAuth/payment/card settings were accessed or changed.",
+    "No provider Codespace was created, started, stopped, or deleted by this agent.",
+    "No external app deployment or new render was performed by this agent.",
+    "Main-branch official document content was observed at recorded UTC times and fingerprinted; documentation is not an account-specific provider execution test.",
+    "Default zero-dollar paid budget, $0 UI acceptance and this account hard-stop configuration were not verified.",
+    "No direct network route, proxy removal, TLS disabling or blocked GitHub REST API bypass was attempted."
+  ]
+}

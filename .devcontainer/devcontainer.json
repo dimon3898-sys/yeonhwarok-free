@@ -1,0 +1,11 @@
+{
+  "name": "World Simulation Shorts — mobile CPU",
+  "build": {"dockerfile": "../world-simulation-shorts-engine/deployment/Dockerfile", "context": ".."},
+  "remoteUser": "engine",
+  "overrideCommand": true,
+  "hostRequirements": {"cpus": 2, "memory": "8gb", "storage": "32gb"},
+  "forwardPorts": [7860],
+  "portsAttributes": {"7860": {"label": "World Simulation mobile", "onAutoForward": "notify", "visibility": "private"}},
+  "postStartCommand": "python3 world-simulation-shorts-engine/deployment/start_codespace.py",
+  "shutdownAction": "stopContainer"
+}
