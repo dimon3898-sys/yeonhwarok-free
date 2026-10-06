@@ -54,7 +54,8 @@ class BootstrapTests(unittest.TestCase):
             root=Path(folder);app=root/'image';cache=root/'persisted-cache';audio=root/'persisted-audio'
             (app/'cache').mkdir(parents=True);(app/'assets/audio').mkdir(parents=True)
             (app/'assets/audio/license.json').write_bytes(b'approved');cache.mkdir();audio.mkdir()
-            storage=SimpleNamespace(cache_root=cache,audio_root=audio)
+            storage=SimpleNamespace(cache_root=cache,audio_root=audio,
+                                    uid=os.getuid(),gid=os.getgid())
             with self.assertRaisesRegex(BootError,'INVALID_RENDER_PROFILE'):
                 configure_image_paths(app,storage,'gpu-'+('../'*21)+'x')
             namespace='gpu-'+'a'*64
@@ -274,7 +275,8 @@ class BootstrapTests(unittest.TestCase):
             (app/'cache').symlink_to(runtime/'cache')
             (runtime/'cache').symlink_to(outside)
             with self.assertRaisesRegex(BootError,'IMAGE_WRITABLE_PATH_CONFLICT'):
-                configure_image_paths(app,SimpleNamespace(cache_root=cache,audio_root=audio),
+                configure_image_paths(app,SimpleNamespace(cache_root=cache,audio_root=audio,
+                                                         uid=os.getuid(),gid=os.getgid()),
                                       'cpu-'+'a'*64,link_root=runtime)
             self.assertEqual((runtime/'cache').resolve(),outside)
 
