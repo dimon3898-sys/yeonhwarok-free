@@ -160,6 +160,8 @@ def _source_fingerprint(plan: dict[str, Any] | None = None) -> str:
         paths += [APP_ROOT/'web/production_visual_adapter.js', APP_ROOT/'web/flat_polish_renderer.js',
                   APP_ROOT/'web/flat_entity_separation_polish.js', APP_ROOT/'web/earth_polish_adapter.js',
                   APP_ROOT/'web/geographic_polish_transition.js']
+    if any(scene.get('rhythm_visual', {}).get('version') == 'v1' for scene in (plan or {}).get('scenes', [])):
+        paths += [APP_ROOT/'web/rhythm_visual_adapter.js']
     digest = hashlib.sha256()
     for path in paths:
         digest.update(str(path).encode())

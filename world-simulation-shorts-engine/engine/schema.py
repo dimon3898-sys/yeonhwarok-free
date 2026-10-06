@@ -199,6 +199,12 @@ def validate_plan(plan):
         production_validation=validate_production_plan(plan)
         errors+=production_validation.get('errors',[])
         warnings+=production_validation.get('warnings',[])
+    rhythm_validation=None
+    if plan.get('rhythm_policy',{}).get('version')=='v1':
+        from .rhythm import validate_rhythm_plan
+        rhythm_validation=validate_rhythm_plan(plan)
+        errors+=rhythm_validation.get('errors',[])
+        warnings+=rhythm_validation.get('warnings',[])
     semantic_visibility=None
     # Validate actual renderer eligibility rather than trusting a saved planner
     # certificate. Invalid GIS/capabilities never reach renderer preflight.
@@ -210,4 +216,5 @@ def validate_plan(plan):
     result=dict(passed=not errors,errors=errors,warnings=warnings,retention=retention,
                 semantic_visibility=semantic_visibility,narration_alignment=narration_alignment)
     if production_validation is not None:result['production_validation']=production_validation
+    if rhythm_validation is not None:result['rhythm_validation']=rhythm_validation
     return result

@@ -2,7 +2,9 @@
 
 자연어 주제를 검토 가능한 기획으로 바꾸고, 승인된 Scene JSON을 PREMIUM FLAT v004와 MASTER V3의 3D 지구 렌더러로 장면별 제작하는 프로그램입니다. 기존 `cinematic-world-map`의 코드·GIS·자산·MASTER V1/V2/V3는 읽기 전용 공용 라이브러리로 사용합니다. 새 프로젝트와 결과는 이 디렉터리에 별도로 저장합니다.
 
-Production Default v1은 실제 12초 통합 영상 검수를 통과하여 활성화되었습니다. 기본 Pace는 FAST, 지도 텍스트는 최소 정보형, 효과음은 사건별 Variant입니다. 기존 저장된 계획과 출력은 바뀌지 않습니다. [통합 영상 및 비교본](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1), [QC 보고서](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/QC_REPORT.md), [실측 시간](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/BENCHMARK.md)을 확인할 수 있습니다. 이번 통합에서 75초 영상은 렌더하지 않았습니다.
+보존된 Production Default v1의 기본 Pace는 FAST였습니다. [기존 통합 영상 및 비교본](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1), [QC 보고서](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/QC_REPORT.md), [실측 시간](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/BENCHMARK.md)은 그대로 유지합니다.
+
+새 리듬 확장은 승인된 그래픽 위에 FAST_PLUS, 개별 동작 Speed Ramp, Micro Beat/Pause, 사건별 SFX Layer와 BGM Energy/Sidechain을 추가합니다. [12초 검증 샘플과 보고서](../deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001), [구조·캐시·검수 범위](docs/RHYTHM_SYSTEM.md)를 제공합니다. 별도 기술 검증 인증이 유효하면 권장값은 FAST_PLUS / TTS OFF / 자막 OFF / BGM·SFX ON입니다. 기존 Pace와 음성·자막 ON/OFF는 유지하며, 저장된 계획은 자동 변경하지 않습니다. 이번 작업에서는 75초 영상과 MASTER를 렌더하지 않습니다. 직접 청취 및 실제 시청 지속률의 우열은 기술 인증과 구분하여 사용자 검수를 기다립니다.
 
 ## 실행
 
@@ -86,7 +88,7 @@ TTS/BGM/자막은 개별 ON/OFF입니다. TTS 기본 어댑터는 무료 오프�
 
 ## Production Default 선택
 
-PACE_FAST / PACE_NORMAL / PACE_CINEMATIC은 카메라·경로의 실제 진행 시간을 조절합니다. 기본 Pace는 FAST이며, 렌더 품질 FAST/HIGH/CINEMA와 별개입니다. 전체 MP4나 TTS를 배속하지 않습니다. SFX도 TTS·BGM·자막과 독립적으로 켜고 끌 수 있습니다. 지도에 필요한 짧은 라벨과 숫자만 표시하고, 이벤트 시점에 맞춘 효과음 변형과 반복 방지, 음성 우선 ducking을 사용합니다.
+PACE_FAST_PLUS / PACE_FAST / PACE_NORMAL / PACE_CINEMATIC은 카메라·경로의 실제 진행 시간을 조절하며, 렌더 품질 FAST/HIGH/CINEMA와 별개입니다. 전체 MP4나 TTS를 배속하지 않습니다. SFX도 TTS·BGM·자막과 독립적으로 켜고 끌 수 있습니다. 지도에 필요한 짧은 라벨과 숫자만 표시하고, 이벤트 시점에 맞춘 효과음 변형과 반복 방지, 음성 우선 ducking을 사용합니다.
 
 [Production Default](docs/PRODUCTION_DEFAULT.md), [Pace](docs/PACE_SYSTEM.md), [효과음 및 라이선스](docs/SFX_LIBRARY.md)에 선택 규칙과 검증 범위를 기록합니다. 기존 Scene JSON에는 새 필드를 강제로 추가하지 않습니다. 활성화 여부는 `/api/production-default`에서 확인할 수 있으며, 인증과 핵심 소스가 다르면 활성화하지 않습니다.
 

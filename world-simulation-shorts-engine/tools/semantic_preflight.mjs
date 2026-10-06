@@ -45,6 +45,12 @@ const production=productionBytes?new Function('THREE','SceneFlatEntitySeparation
  (value,kind='smootherstep')=>{const p=clamp(value);if(kind==='smootherstep')return p*p*p*(p*(p*6-15)+10);if(kind==='quintic_out')return 1-(1-p)**5;if(kind==='linear')return p;if(kind==='ease_in')return p*p;if(kind==='ease_out')return 1-(1-p)**2;return smooth(p);},
  (time,start,end,fade=.24,hold=false)=>time<start||time>end?0:smooth((time-start)/Math.min(fade,Math.max(.01,(end-start)/3)))*(hold?1:1-smooth((time-end+fade)/fade)),
  value=>{const q=value?.coordinates||value;return {lon:Number(q.lon??q.longitude??q[0]),lat:Number(q.lat??q.latitude??q[1])};}):null;
+// Optional additive component clock: the same installer is used by the native
+// rhythm renderer. No canvas, shader or inherited production path is changed.
+const rhythmBytes=plan.scenes.some(scene=>scene.rhythm_visual)?fs.readFileSync(path.join(appRoot,'web/rhythm_visual_adapter.js')):null;
+const rhythm=rhythmBytes?new Function('SceneProductionFlatRenderer','productionCameraIntervals','productionFlatCameraValues',
+ rhythmBytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {installRhythmOnFlatCore};'
+)(class {},production.productionCameraIntervals,production.productionFlatCameraValues):null;
 const python=`import json,sys,subprocess,textwrap,math
 from fontTools.ttLib import TTFont
 from engine.retention import MEANINGFUL
@@ -146,6 +152,7 @@ if(flatScenes){
     try{return originalLabels(time).filter(label=>scene.production_defaults.large_titles===true||!label.information);}
     finally{core.sceneSpec=original;}
    };
+   if(scene.rhythm_visual)rhythm.installRhythmOnFlatCore(core);
    return core;
   };
   const needle='const core=new FlatSceneCore(scene,plan,options),observed=';
@@ -295,6 +302,7 @@ if(!scopeScenes&&!hookEligible)failures.push({code:'OPENING_HOOK_NOT_ELIGIBLE'})
 const hash=data=>createHash('sha256').update(data).digest('hex');
 const sourceHashes={flat_semantics:flatSourceHash,map_transition:hash(fs.readFileSync(path.join(appRoot,'web/map_transition.js'))),adapter:hash(adapterBytes),legacy_renderer:hash(original),aircraft:hash(fs.readFileSync(path.join(legacyRoot,'src/aircraft_v3.js'))),OpenSans:hash(fs.readFileSync(fonts.OpenSans)),Noto:hash(fs.readFileSync(fonts.Noto)),certifier:hash(fs.readFileSync(fileURLToPath(import.meta.url)))};
 if(productionBytes)sourceHashes.production_visual_adapter=hash(productionBytes);
+if(rhythmBytes)sourceHashes.rhythm_visual_adapter=hash(rhythmBytes);
 const report={schema_version:1,created_at_utc:new Date().toISOString(),passed:failures.length===0,plan_path:planFile,plan_sha256:hash(planBytes),renderer_sha256:hash(adapterBytes),source_hashes:sourceHashes,fps,resolution:[width,height],scoped_scene_ids:scopeScenes?[...scopeScenes]:null,opening_hook_eligible:hookEligible,events:results,failures,scope:'Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.',font_layout_policy:'Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.'};
 if(options.output)fs.writeFileSync(path.resolve(options.output),JSON.stringify(report,null,2),{flag:'wx'});
 process.stdout.write(JSON.stringify(report)+'\n');

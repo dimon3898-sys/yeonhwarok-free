@@ -154,6 +154,7 @@ class Handler(BaseHTTPRequestHandler):
                 if path=='/render_flat_polish.html':return self.file(APP/'web'/'render_flat_polish.html',head=method=='HEAD')
                 if path=='/render_flat_separation_polish.html':return self.file(APP/'web'/'render_flat_separation_polish.html',head=method=='HEAD')
                 if path=='/render_production_flat.html':return self.file(APP/'web'/'render_production_flat.html',head=method=='HEAD')
+                if path=='/render_rhythm_flat.html':return self.file(APP/'web'/'render_rhythm_flat.html',head=method=='HEAD')
                 if path=='/render_production_earth.html':return self.file(APP/'web'/'render_production_earth.html',head=method=='HEAD')
                 if path=='/render_earth_polish.html':return self.file(APP/'web'/'render_earth_polish.html',head=method=='HEAD')
                 if path=='/render_flat.html':return self.file(APP/'web'/'render_flat.html',head=method=='HEAD')

@@ -84,7 +84,8 @@
           "enum": [
             "FAST",
             "NORMAL",
-            "CINEMATIC"
+            "CINEMATIC",
+            "FAST_PLUS"
           ]
         }
       },
@@ -772,7 +773,24 @@
                     "MID_PEAK",
                     "FINAL_PEAK",
                     "FINAL_REVEAL",
-                    "TRANSITION"
+                    "TRANSITION",
+                    "CAMERA_SOFT_MOVE",
+                    "CAMERA_FAST_MOVE",
+                    "ZOOM_IN",
+                    "ZOOM_OUT",
+                    "REGION_REVEAL",
+                    "ENTITY_MOVE",
+                    "ROUTE_COMPLETE",
+                    "ROUTE_REROUTE",
+                    "SCAN",
+                    "ALERT",
+                    "IMPACT_LIGHT",
+                    "IMPACT_MEDIUM",
+                    "IMPACT_HEAVY",
+                    "COUNTER_RESPONSE",
+                    "TRANSITION_LIGHT",
+                    "TRANSITION_FAST",
+                    "TRANSITION_HEAVY"
                   ]
                 },
                 "sfx_variant": {
@@ -784,7 +802,8 @@
                     "LOW",
                     "MEDIUM",
                     "HIGH",
-                    "PEAK"
+                    "PEAK",
+                    "SUBTLE"
                   ]
                 }
               },
@@ -858,6 +877,19 @@
                   "type": "number",
                   "minimum": 24,
                   "maximum": 96
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "world_label",
+                    "hook_reveal"
+                  ]
+                },
+                "event_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "additionalProperties": false
@@ -919,7 +951,24 @@
                     "MID_PEAK",
                     "FINAL_PEAK",
                     "FINAL_REVEAL",
-                    "TRANSITION"
+                    "TRANSITION",
+                    "CAMERA_SOFT_MOVE",
+                    "CAMERA_FAST_MOVE",
+                    "ZOOM_IN",
+                    "ZOOM_OUT",
+                    "REGION_REVEAL",
+                    "ENTITY_MOVE",
+                    "ROUTE_COMPLETE",
+                    "ROUTE_REROUTE",
+                    "SCAN",
+                    "ALERT",
+                    "IMPACT_LIGHT",
+                    "IMPACT_MEDIUM",
+                    "IMPACT_HEAVY",
+                    "COUNTER_RESPONSE",
+                    "TRANSITION_LIGHT",
+                    "TRANSITION_FAST",
+                    "TRANSITION_HEAVY"
                   ]
                 },
                 "sfx_variant": {
@@ -931,7 +980,8 @@
                     "LOW",
                     "MEDIUM",
                     "HIGH",
-                    "PEAK"
+                    "PEAK",
+                    "SUBTLE"
                   ]
                 }
               },
@@ -1617,7 +1667,8 @@
                 "enum": [
                   "FAST",
                   "NORMAL",
-                  "CINEMATIC"
+                  "CINEMATIC",
+                  "FAST_PLUS"
                 ]
               },
               "text": {
@@ -1650,7 +1701,8 @@
             "enum": [
               "FAST",
               "NORMAL",
-              "CINEMATIC"
+              "CINEMATIC",
+              "FAST_PLUS"
             ]
           },
           "text_density": {
@@ -1665,7 +1717,8 @@
               "LOW",
               "MEDIUM",
               "HIGH",
-              "PEAK"
+              "PEAK",
+              "SUBTLE"
             ]
           },
           "motion_timing": {
@@ -1863,6 +1916,179 @@
               },
               "additionalProperties": false
             }
+          },
+          "rhythm_micro_beats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "time",
+                "duration",
+                "kind",
+                "music_energy"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "duration": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "kind": {
+                  "enum": [
+                    "REVEAL",
+                    "FOCUS",
+                    "MOVE",
+                    "RESPONSE",
+                    "IMPACT",
+                    "NEXT_CUE",
+                    "BUILD",
+                    "PEAK",
+                    "RELEASE",
+                    "MICRO_PAUSE"
+                  ]
+                },
+                "music_energy": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "visual_event_id": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "rhythm_visual": {
+            "type": "object",
+            "required": [
+              "version",
+              "camera",
+              "zoom",
+              "routes"
+            ],
+            "properties": {
+              "version": {
+                "const": "v1"
+              },
+              "camera": {
+                "type": "object",
+                "required": [
+                  "knots"
+                ],
+                "properties": {
+                  "knots": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 16,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "phase",
+                        "speed"
+                      ],
+                      "properties": {
+                        "phase": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "speed": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 4
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "zoom": {
+                "type": "object",
+                "required": [
+                  "knots"
+                ],
+                "properties": {
+                  "knots": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 16,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "phase",
+                        "speed"
+                      ],
+                      "properties": {
+                        "phase": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "speed": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 4
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "routes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "route_id",
+                    "knots"
+                  ],
+                  "properties": {
+                    "route_id": {
+                      "type": "string"
+                    },
+                    "knots": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 16,
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "phase",
+                          "speed"
+                        ],
+                        "properties": {
+                          "phase": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "speed": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
           }
         },
         "additionalProperties": false,
@@ -2103,7 +2329,8 @@
           "enum": [
             "FAST",
             "NORMAL",
-            "CINEMATIC"
+            "CINEMATIC",
+            "FAST_PLUS"
           ]
         },
         "text": {
@@ -2119,6 +2346,73 @@
           "type": "boolean"
         },
         "event_diversity": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rhythm_policy": {
+      "type": "object",
+      "required": [
+        "version",
+        "sfx_core_onset_offset_frames",
+        "micro_pauses",
+        "bgm_sidechain"
+      ],
+      "properties": {
+        "version": {
+          "const": "v1"
+        },
+        "sfx_core_onset_offset_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "micro_pauses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "time",
+              "duration",
+              "scene_id",
+              "event_id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "time": {
+                "type": "number",
+                "minimum": 0
+              },
+              "duration": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 0.3
+              },
+              "scene_id": {
+                "type": "string"
+              },
+              "event_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "bgm_sidechain": {
+          "type": "boolean"
+        },
+        "reference_pattern": {
+          "type": "string"
+        },
+        "sfx_library_content_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "preserve_authored_sfx_choices": {
           "type": "boolean"
         }
       },

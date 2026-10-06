@@ -464,6 +464,9 @@ def refresh_clock_dependent_route_information(scene,event):
     if not route:raise PlanningInputError('수정된 거리 정보의 출처 있는 경로를 찾을 수 없습니다.',{'code':'UNSUPPORTED_VISUAL_REQUIREMENT','required_plugins':['VERIFIED_ROUTE_METRIC'],'scene_id':scene['scene_id'],'event_id':event['id']})
     t=float(event['time']);u=max(0.,min(1.,(t-route['start_time'])/max(.001,route['end_time']-route['start_time'])))
     progress=route['progress_start']+(route['progress_end']-route['progress_start'])*u*u*(3-2*u)
+    if scene.get('rhythm_visual',{}).get('version')=='v1':
+        from .rhythm import route_rhythm_progress
+        progress=route_rhythm_progress(scene,route,t)
     length=sum(great_circle_distance(a,b) for a,b in zip(route['points'],route['points'][1:]));remaining=max(0.,length*(1-progress))
     before={key:deepcopy(event.get(key)) for key in ('text','value','unit','description','claim_id','coordinates')}
     completed=progress>=1-1e-8
@@ -776,11 +779,20 @@ def generate_plan(raw):
     except ValueError as error:raise PlanningInputError(str(error),{'code':'INVALID_PRODUCTION_PRESET'}) from error
     if profile is None:return _generate_legacy_plan(raw)
     from .pace import normalize_pace
-    try:pace=normalize_pace(raw.get('pace','FAST'))
+    from .production import production_default_status
+    recommendation=production_default_status().get('recommended',{})
+    rhythm_active=recommendation.get('pace')=='FAST_PLUS'
+    raw=deepcopy(raw)
+    if rhythm_active:
+        raw.setdefault('tts',False);raw.setdefault('subtitles',False)
+    try:pace=normalize_pace(raw.get('pace',recommendation.get('pace','FAST')))
     except ValueError as error:raise PlanningInputError(str(error),{'code':'INVALID_PACE'}) from error
     if not isinstance(raw.get('sfx',True),bool):raise PlanningInputError('sfx 값은 true/false여야 합니다.')
     plan=_generate_legacy_plan(raw)
     plan=apply_production_defaults(plan,pace=pace,profile=profile)
+    if pace=='FAST_PLUS':
+        from .rhythm import apply_rhythm_policy
+        plan=apply_rhythm_policy(plan)
     # Existing renderer eligibility is rechecked after authoring the new IR;
     # neither a preset flag nor a valid JSON schema is proof of rendered pixels.
     from .visibility import certify_semantic_visibility

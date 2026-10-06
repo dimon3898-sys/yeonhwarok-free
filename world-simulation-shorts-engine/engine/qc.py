@@ -269,7 +269,8 @@ def analyze_subtitle_layout(subtitles: dict | None, audits: list, plan: dict | N
             "scope": "Exact-font metric bounds and active-timestamp intersections with post-draw label boxes, scaled to final output; overlap warns, unsafe caption geometry fails; not pixel-level glyph recognition"}
 
 
-def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict | None = None) -> dict:
+def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict | None = None,
+           sound_cues: dict | None = None) -> dict:
     outdir.mkdir(parents=True, exist_ok=True)
     metadata = probe_video(video)
     stream = next(s for s in metadata["streams"] if s["codec_type"] == "video")
@@ -518,6 +519,12 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
     except (ValueError, KeyError, TypeError) as error:
         failures.append("FINAL_RETENTION_VALIDATION_ERROR")
         warnings.append(str(error))
+    rhythm_sound_sync = None
+    if plan.get('rhythm_policy', {}).get('version') == 'v1':
+        from .rhythm_qc import analyze_frame_sound_sync
+        rhythm_sound_sync = analyze_frame_sound_sync(plan, rendered, sound_cues, fps)
+        if not rhythm_sound_sync['passed']:
+            failures.append('RHYTHM_SOUND_FRAME_SYNC_FAILED')
     columns = 4
     rows = max(1, math.ceil(len(captures)/columns))
     sheet = Image.new("RGB", (columns*270, rows*520), "#07101a")
@@ -550,6 +557,7 @@ def run_qc(video: Path, plan: dict, audits: list, outdir: Path, subtitles: dict 
               "maximum_flat_camera_step_view_spans": max(flat_camera_steps, default=0.),
               "geography_readability_review": readability, "audio": audio, "retention": retention,
               "rendered_retention": rendered_retention,
+              **({'rhythm_sound_sync': rhythm_sound_sync} if rhythm_sound_sync is not None else {}),
               "duplicate_place_labels": duplicate_place_labels,
               "subtitle_layout": subtitle_layout,
               "contact_sheet": str(contact),

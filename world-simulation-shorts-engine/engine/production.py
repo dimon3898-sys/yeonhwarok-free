@@ -33,6 +33,10 @@ CAMERA_TO_FLAT={'GLOBAL_ESTABLISH':'FLAT_ESTABLISH','FAST_HOOK_DIVE':'FLAT_COUNT
 
 def production_default_status(path=None):
     """Read a promotion record backed by immutable, successfully tested evidence."""
+    if path is None:
+        from .rhythm_promotion import rhythm_default_status
+        rhythm=rhythm_default_status()
+        if rhythm['active']:return rhythm
     path=Path(path or PROMOTION_PATH)
     if not path.is_file():return dict(active=False,reason='short_integration_test_not_promoted',preset='LEGACY')
     try:
@@ -400,7 +404,7 @@ def apply_production_defaults(plan, *, pace=None, profile='PRODUCTION_DEFAULT_CA
         for h in scene.get('flat_map',{}).get('country_highlights',[]):h['color']=colors[h['country']]
     # For very short samples preserve the density gate without accelerating TTS:
     # strengthen the initial event and reserve .8s for the last visible reward.
-    if plan['duration']<20 and pace=='FAST' and not preserved:
+    if plan['duration']<20 and pace in {'FAST','FAST_PLUS'} and not preserved:
         first=plan['scenes'][0]
         meaningful=[e for e in first['visual_events'] if e.get('meaningful',True)]
         if meaningful:

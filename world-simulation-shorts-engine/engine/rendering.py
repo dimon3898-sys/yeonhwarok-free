@@ -77,7 +77,7 @@ def scene_cache_key(scene: dict, assets: dict, quality: dict, renderer: str, ren
         # Only the new production policy separates audio choices from pixels.
         # The full input Scene JSON is still preserved in the render manifest;
         # all legacy cache hashes retain their original complete JSON contract.
-        for field in ['sound_events', 'music_energy', 'sfx_category', 'sfx_variant', 'sfx_intensity']:
+        for field in ['sound_events', 'music_energy', 'sfx_category', 'sfx_variant', 'sfx_intensity', 'rhythm_micro_beats']:
             visual_scene.pop(field, None)
         for event in visual_scene.get('visual_events', []):
             for field in ['sfx_category', 'sfx_variant', 'sfx_intensity']:
@@ -314,6 +314,14 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
     project_dir = Path(project_dir).resolve()
     progress = progress or (lambda record: None)
     started = time.monotonic()
+    bounded_sample=plan.get('metadata',{}).get('rhythm_sample_render_authorization')
+    if bounded_sample:
+        if not 10<=float(plan['duration'])<=min(15.,float(bounded_sample['maximum_duration'])):
+            raise RuntimeError('RHYTHM_SAMPLE_DURATION_NOT_AUTHORIZED')
+        allowed=set(bounded_sample['renderable_scene_ids'])
+        if scene_filter is not None and not set(scene_filter).issubset(allowed):
+            raise RuntimeError('RHYTHM_SAMPLE_SCENE_NOT_AUTHORIZED')
+        if scene_filter is None:scene_filter=list(allowed)
     from .schema import validate_plan
     validation = validate_plan(plan)
     if not validation["passed"]:
@@ -484,6 +492,11 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
                 if scene.get('production_defaults', {}).get('version') == 'v1':
                     page_name = 'render_production_flat.html' if mode == 'FLAT_MAP_PREMIUM' else 'render_production_earth.html'
                     tool_name = 'render_production_scene.mjs'
+                if scene.get('rhythm_visual', {}).get('version') == 'v1':
+                    if mode != 'FLAT_MAP_PREMIUM':
+                        raise RuntimeError('RHYTHM_NATIVE_MODE_UNSUPPORTED: ' + sid)
+                    page_name = 'render_rhythm_flat.html'
+                    tool_name = 'render_rhythm_scene.mjs'
                 url = base_url.rstrip("/") + '/' + page_name + '?' + query
                 command = ["node", str(APP_ROOT / "tools" / tool_name), "--url", url,
                            "--output", str(output), "--audit", str(audit_path),
@@ -562,7 +575,8 @@ def render_project(project_dir: Path, plan: dict, base_url: str, progress=None,
             index += 1
         qc_dir = qc_dir / f"attempt{index:03}"
         qc_dir.mkdir()
-    qc = json.loads(qc_file.read_text()) if qc_file.is_file() else run_qc(Path(outputs["final"]), plan, audits, qc_dir, subtitles=subtitles)
+    qc = json.loads(qc_file.read_text()) if qc_file.is_file() else run_qc(Path(outputs["final"]), plan, audits, qc_dir,
+        subtitles=subtitles, **({'sound_cues': audio.get('sfx_library')} if plan.get('rhythm_policy', {}).get('version') == 'v1' else {}))
     qc_seconds = time.monotonic()-qc_started
     metrics = {"scene_render_seconds": render_seconds, "scene_count": total,
                "rendered_scene_count": sum(not entry.get("reused", False) for entry in entries),

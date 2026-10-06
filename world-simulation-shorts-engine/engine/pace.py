@@ -3,6 +3,9 @@ from copy import deepcopy
 import math
 
 PACE_PROFILES = {
+    'FAST_PLUS': dict(camera_fraction=.66, zoom_fraction=.60, route_speed_factor=1.36,
+                     focus_transition_duration=.14, transition_duration=.30,
+                     next_event_lead_time=.30, peak_hold_duration=.8, travel_limit=3.8),
     'FAST': dict(camera_fraction=.72, zoom_fraction=.66, route_speed_factor=1.20,
                  focus_transition_duration=.18, transition_duration=.38,
                  next_event_lead_time=.35, peak_hold_duration=.8, travel_limit=4.2),
@@ -18,7 +21,7 @@ PACE_PROFILES = {
 def normalize_pace(value='FAST'):
     value = str(value).upper().removeprefix('PACE_')
     if value not in PACE_PROFILES:
-        raise ValueError('Pace must be FAST / NORMAL / CINEMATIC')
+        raise ValueError('Pace must be FAST_PLUS / FAST / NORMAL / CINEMATIC')
     return value
 
 
@@ -151,7 +154,7 @@ def analyze_dead_time(plan):
         events=[e for e in scene.get('visual_events',[]) if e.get('kind') in MEANINGFUL and e.get('meaningful',True)]
         absolute.extend((float(scene['start_time'])+float(e['time']),sid,e['id']) for e in events)
         transition=float(scene.get('map_transition',{}).get('duration',scene.get('flat_map',{}).get('transition_duration',0)))
-        limit=.6 if pace=='FAST' else 1. if pace=='NORMAL' else 1.5
+        limit=.6 if pace in {'FAST','FAST_PLUS'} else 1. if pace=='NORMAL' else 1.5
         if transition>limit+.001:errors.append(dict(code='DEAD_TIME_LONG_TRANSITION',scene_id=sid,duration=transition,max_seconds=limit))
         for route in scene.get('routes',[]):
             if route.get('faint') or route.get('progress_start',0)==route.get('progress_end',1):continue

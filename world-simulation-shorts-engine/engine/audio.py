@@ -23,6 +23,8 @@ from scipy.signal import resample_poly
 from .assets import APP_ROOT, V3_ROOT, resolve_user_asset
 from .narration import validate_narration_bindings, attach_narration_timing
 from .sfx_library import production_audio_enabled, render_sound_events
+from .rhythm_sound import (rhythm_audio_enabled, render_rhythm_sound_events,
+                           rhythm_bgm_envelope, bgm_event_sidechain)
 
 SR = 48000
 
@@ -251,7 +253,7 @@ def _production_music(duration: float, plan: dict) -> tuple[np.ndarray, dict]:
     pace = str(plan.get("request", {}).get("pace", plan.get("options", {}).get("pace", "FAST"))).replace("PACE_", "")
     # A very quiet pulse under the sustained score accelerates energy without
     # changing narration timing or using an intrusive midrange melody.
-    pulse_hz = {"FAST": 1.15, "NORMAL": .82, "CINEMATIC": .56}.get(pace, .82)
+    pulse_hz = {"FAST_PLUS": 1.38, "FAST": 1.15, "NORMAL": .82, "CINEMATIC": .56}.get(pace, .82)
     rhythm = .88+.12*(.5+.5*np.sin(2*np.pi*pulse_hz*t))**3
     for k, (frequency, amplitude) in enumerate([(36.708, .022), (55., .010), (73.416, .015),
                                                 (110., .0065), (146.832, .0038), (174.614, .0018),
@@ -304,12 +306,26 @@ def create_audio(plan: dict, directory: Path, provider: TTSProvider | None = Non
     alignment_path = directory / "narration_alignment.json"
     with alignment_path.open("x", encoding="utf-8") as stream:
         json.dump(alignment, stream, ensure_ascii=False, indent=2)
-    production = production_audio_enabled(plan)
+    rhythm = rhythm_audio_enabled(plan)
+    production = production_audio_enabled(plan) or rhythm
     production_sound = production_music = production_duck = None
+    rhythm_energy = rhythm_sidechain = None
     if production:
-        effects, production_sound = render_sound_events(plan, APP_ROOT / "assets/audio/production_sfx_v1")
+        if rhythm:
+            effects, production_sound = render_rhythm_sound_events(plan, APP_ROOT / "assets/audio/production_sfx_v2")
+        else:
+            effects, production_sound = render_sound_events(plan, APP_ROOT / "assets/audio/production_sfx_v1")
         events = production_sound["events"]
         music, production_music = _production_music(duration, plan)
+        if rhythm:
+            energy, rhythm_energy = rhythm_bgm_envelope(plan, duration)
+            times = np.arange(len(music))/SR
+            old_points = _production_energy_points(plan)
+            old_energy = np.interp(times, [p[0] for p in old_points], [p[1] for p in old_points])
+            music *= (energy/np.maximum(old_energy, .001))[:, None]
+            sidechain, rhythm_sidechain = bgm_event_sidechain(plan, events, duration)
+            music *= sidechain[:, None]
+            production_music.update({"rhythm_energy": rhythm_energy, "event_sidechain": rhythm_sidechain})
         if not plan.get("options", {}).get("bgm", True):
             music[:] = 0
         duck, sound_gain, production_duck = _production_ducking(cues, narration, duration)
@@ -354,6 +370,24 @@ def create_audio(plan: dict, directory: Path, provider: TTSProvider | None = Non
     peak = float(np.max(np.abs(mix))) if len(mix) else 0.
     limiter = min(1., .72/max(peak, 1e-12))
     mix *= limiter
+    rhythm_stems = None
+    if rhythm:
+        # These share the actual mix's ducking, fade and safety gain. They are
+        # explicitly before integrated mastering, whose filter is not linear.
+        rhythm_stems = {}
+        for name, stem in [("sfx", effects*sound_gain[:, None]),
+                           ("bgm", music*duck[:, None]), ("narration", narration)]:
+            stem = (stem*fade[:, None]*limiter).astype(np.float32)
+            path = directory/(name+"_stem.wav")
+            with path.open("xb") as stream:
+                wavfile.write(stream, SR, stem)
+            rhythm_stems[name] = {"file": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "pcm_sha256": hashlib.sha256(stem.tobytes()).hexdigest(), "duration": len(stem)/SR,
+                "sample_rate": SR, "channels": 2,
+                "peak_dbfs": 20*np.log10(max(float(np.max(np.abs(stem))), 1e-12)),
+                "rms_dbfs": 20*np.log10(max(float(np.sqrt(np.mean(stem.astype(np.float64)**2))), 1e-12)),
+                "stage": "Actual mix contribution after narration duck / rhythm envelope / event sidechain / shared fade and limiter, before integrated loudness mastering",
+                "shared_limiter_gain": limiter, "shared_end_fade_seconds": .12}
     destination = directory / "mix.wav"
     raw = directory / "mix_raw.wav"
     if destination.exists() or raw.exists():
@@ -395,6 +429,12 @@ def create_audio(plan: dict, directory: Path, provider: TTSProvider | None = Non
                        "speech_priority": production_duck,
                        "sfx_history_file": str(directory / "sfx_history.json"),
                        "sfx_sources_file": str(directory / "sfx_sources.json")})
+    if rhythm:
+        report.update({"rhythm_policy_version": "v1", "rhythm_energy": rhythm_energy,
+                       "bgm_event_sidechain": rhythm_sidechain, "stems": rhythm_stems,
+                       "sfx_onset_policy": production_sound["onset_policy"],
+                       "sfx_library_content_sha256": production_sound["library_content_sha256"],
+                       "stem_mastering_notice": "Stem samples sum to mix_raw within float32 rounding; final mix applies measured integrated loudness normalization. SFX-only comparison can reuse identical muted video without any visual render."})
     with (directory / "audio_report.json").open("x", encoding="utf-8") as stream:
         json.dump(report, stream, ensure_ascii=False, indent=2)
     return report

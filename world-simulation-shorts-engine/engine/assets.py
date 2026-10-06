@@ -164,6 +164,16 @@ def validate_assets(plan: dict | None = None) -> dict:
                          'license_url':'https://creativecommons.org/publicdomain/zero/1.0/',
                          'attribution_required':False, 'download_date':'Not downloaded; original procedural synthesis',
                          'asset_role':'audio_source'})
+    if (plan or {}).get('rhythm_policy', {}).get('version') == 'v1':
+        from .rhythm_sound import catalog as rhythm_catalog
+        sounds = rhythm_catalog()
+        registry.append({'id':'rhythm-sfx-library', 'file':'engine/rhythm_sound.py',
+                         'path':str(APP_ROOT/'engine/rhythm_sound.py'), 'sha256':sounds['source_sha256'],
+                         'url':'Repository original engine/rhythm_sound.py; no reference audio sampled',
+                         'author':'Cinematic World Map project', 'license':'CC0-1.0',
+                         'license_url':'https://creativecommons.org/publicdomain/zero/1.0/',
+                         'attribution_required':False, 'download_date':'Not downloaded; original procedural synthesis',
+                         'asset_role':'audio_source'})
     if any(scene.get('render_mode') == 'FLAT_MAP_PREMIUM' for scene in (plan or {}).get('scenes', [])):
         flat_sources = APP_ROOT / 'assets/flat/SOURCES.json'
         if flat_sources.is_file():
@@ -221,6 +231,17 @@ def validate_assets(plan: dict | None = None) -> dict:
 
 
 def renderer_version(scene: dict | None = None) -> str:
+    if (scene or {}).get('rhythm_visual', {}).get('version') == 'v1':
+        original = dict(scene)
+        original.pop('rhythm_visual')
+        digest = hashlib.sha256(b'PRODUCTION_RHYTHM/VISUAL/v1' + bytes.fromhex(renderer_version(original)))
+        for name in ['web/rhythm_visual_adapter.js', 'web/render_rhythm_flat.html', 'tools/render_rhythm_scene.mjs']:
+            file = APP_ROOT / name
+            if not file.is_file():
+                raise FileNotFoundError('RHYTHM_VISUAL_DEPENDENCY_MISSING: ' + name)
+            digest.update(name.encode())
+            digest.update(bytes.fromhex(sha256_file(file)))
+        return digest.hexdigest()
     # Approved production policy is an additive adapter. Old scenes retain the
     # exact frozen renderer/source hashes; new scenes truthfully include it.
     if (scene or {}).get('production_defaults', {}).get('version') == 'v1':
@@ -306,6 +327,10 @@ def write_source_report(directory: Path, plan: dict, assets: dict | None = None)
         from .sfx_library import catalog
         report['production_sound_catalog'] = catalog()
         report['license_notice'] += ' Production SFX variants are original CC0-1.0 procedural synthesis, not unlicensed sampled audio; the generated WAV file hashes are recorded in the audio source report.'
+    if plan.get('rhythm_policy', {}).get('version') == 'v1':
+        from .rhythm_sound import catalog as rhythm_catalog
+        report['rhythm_sound_catalog'] = rhythm_catalog()
+        report['license_notice'] += ' Rhythm SFX v2 retains the original library and adds original CC0 variants, isolated audio stems and per-layer timestamp/source hashes.'
     if any(scene.get('render_mode')=='FLAT_MAP_PREMIUM' or any(scene.get(k) in {'FLAT_TO_EARTH','EARTH_TO_FLAT'} for k in ['transition_in','transition_out']) for scene in plan.get('scenes', [])):
         report['scene_renderers'] = {scene['scene_id']: {'render_mode': scene.get('render_mode','MASTER_V3_EARTH'), 'version': renderer_version(scene)} for scene in plan['scenes']}
         report['license_notice'] += ' Optional FLAT_MAP_PREMIUM uses the same sourced geography and independently versioned projected-terrain renderer; backend selection is recorded for each scene.'
