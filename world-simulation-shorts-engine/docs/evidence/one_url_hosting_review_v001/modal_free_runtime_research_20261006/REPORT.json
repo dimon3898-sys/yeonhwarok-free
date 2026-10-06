@@ -1,0 +1,405 @@
+{
+  "title": "Modal free-runtime official-source review for WorldEngine",
+  "generated_at_utc": "2026-10-06T07:35:17.203001+00:00",
+  "generated_at_kst": "2026-10-06T16:35:17.203001+09:00",
+  "source_snapshot": "Official modal-labs GitHub main branches fetched 2026-10-06; SHA256 identifies downloaded bytes, not a Git commit.",
+  "scope": "Read-only official-source research. No Modal account, credential, signup, login, deployment, paid activation, provider benchmark, Git change, or application render was performed.",
+  "conclusion": "Modal is a technically credible legitimate compute-service candidate for a deployed ASGI portal, bounded CPU render function or Sandbox, and durable Volume. Current official examples state free signup, Starter (free), and $30/month free-tier credits. No-card admission and a zero-cost billing hard stop are not verified; the route must remain conditional until the actual account/pricing/billing page confirms them.",
+  "verified_facts": [
+    {
+      "id": "official_compute_service",
+      "fact": "Official SDK describes high-performance serverless applications, so this is a compute-platform architecture rather than use of development-only CI or Codespaces as production hosting.",
+      "sources": [
+        "modal_client_readme",
+        "modal_fastapi"
+      ]
+    },
+    {
+      "id": "free_signup_example",
+      "fact": "The current official examples README explicitly instructs signup for a free account and setting an API key. This does not state no-card eligibility.",
+      "sources": [
+        "modal_examples_readme"
+      ]
+    },
+    {
+      "id": "monthly_credit_example",
+      "fact": "A current official Discord bot example explicitly says $30/month of credits on the free tier. Another current official example names Starter (free). These are example commentary, not an independently verified current pricing contract or a guarantee for this user account.",
+      "sources": [
+        "modal_free_monthly_example",
+        "modal_starter_example"
+      ]
+    },
+    {
+      "id": "persistent_url",
+      "fact": "modal serve is temporary and disappears when its terminal is interrupted. modal deploy makes the Web Function persistently available even after the terminal/computer closes. The .modal.run hostname shown in examples is a template, not a deployed WorldEngine URL.",
+      "sources": [
+        "modal_basic_web"
+      ]
+    },
+    {
+      "id": "browser_auth",
+      "fact": "requires_proxy_auth=True causes ordinary browser requests to receive HTTP401 unless provider token headers are supplied. The intended mobile entry should expose the app login page with the existing owner app authentication and CSRF checks, rather than requiring Modal workspace proxy headers on that page.",
+      "sources": [
+        "modal_basic_web"
+      ]
+    },
+    {
+      "id": "long_background_work",
+      "fact": "Function.spawn returns immediately and exposes a pollable FunctionCall. Official example functions use timeout=2*HOURS. Default function and Sandbox timeout is 300 seconds, so long-render lifetime must be explicitly bounded. A universal maximum lifetime was not verified.",
+      "sources": [
+        "modal_functions",
+        "modal_starter_example",
+        "modal_app",
+        "modal_sandbox"
+      ]
+    },
+    {
+      "id": "resource_request",
+      "fact": "Function and Sandbox APIs support fractional CPU request/limit and memory request/limit in MiB; CPU throttles at its configured hard limit. cpu=(2,2), memory=(8192,8192) expresses a bounded 2-core/8GiB request, but actual Starter allocation/admission and performance are not tested.",
+      "sources": [
+        "modal_app",
+        "modal_sandbox"
+      ]
+    },
+    {
+      "id": "durable_files",
+      "fact": "Volumes are filesystem mounts for durable state shared across functions. Explicit commit publishes writes and reload reads later changes; concurrent writes to the same file risk lost data, and reload requires closed files. Use a single render owner and separate job paths. Storage pricing/free allowance is unknown.",
+      "sources": [
+        "modal_volume"
+      ]
+    },
+    {
+      "id": "sandbox_ports",
+      "fact": "Sandbox supports Secrets as environment variables, durable Volume mount points, named lookup under a deployed app, TLS encrypted-port tunnels, and port-to-Tunnel metadata. Sandbox tunnel URL stability across replacement is not documented in these sources; keep the user-facing URL on the deployed ASGI broker.",
+      "sources": [
+        "modal_sandbox"
+      ]
+    },
+    {
+      "id": "authorization",
+      "fact": "The official SDK skill states that executing Modal-dependent code requires internet access and an authorization token, and that Modal has no local development mode. Adapter-only local checks cannot count as provider validation.",
+      "sources": [
+        "modal_skill"
+      ]
+    }
+  ],
+  "unverified_material_conditions": [
+    "No-card signup/admission, Github-login/account verification requirements, current account eligibility for Starter, actual credit grant and monthly renewal date.",
+    "A provider-enforced billing hard stop when free credits run out; whether no card alone blocks overages; alerts versus stop semantics and treatment of existing accrued costs.",
+    "Current CPU, RAM, network, durable Volume storage unit prices/free allowance and whether retained storage accrues cost while compute is stopped.",
+    "Universal maximum function/Sandbox lifetime, exact Starter concurrency/resource allocation limits and latency on this workload.",
+    "Actual stable app deployment URL, automatic wake, private owner login, persistent output download, recovery and Android end-to-end behavior."
+  ],
+  "recommended_conditional_architecture": [
+    "Deploy one ASGI gateway on Modal with normal application owner login and CSRF enforcement; keep the engine core unchanged.",
+    "On an approved plan, execute a bounded render Function.spawn or Sandbox with 2 CPU and 8192MiB, one active job, explicit timeout/idle cutoff and no permanently warm containers by default.",
+    "Persist plans, state, checkpoints and output files in a Modal Volume with explicit commit/reload and single-writer coordination; stream authorized downloads through the app URL.",
+    "Before production activation verify no-card/free eligibility and enforceable zero-paid billing behavior in the actual account; missing provider authorization/network is the concrete external blocker."
+  ],
+  "hf_zerogpu_comparison": {
+    "evidence_report": "/tmp/free_mobile_stable_url_research_20261006/REPORT.json",
+    "facts": "Current official HF docs require PRO/Team/Enterprise to create Docker or ordinary Gradio compute Spaces; free personal account exception is up to 2 Gradio ZeroGPU Spaces, with verified email and account age >30 days. ZeroGPU is exclusively Gradio. Python3.12.12 is listed. No general CPU-only prohibition was found, but no affirmative guarantee establishes CPU-only long render hosting eligibility, CPU/RAM allocation or reliable background runtime. Do not introduce fake GPU/CUDA calls to claim qualification.",
+    "conclusion": "ZeroGPU is not a verified no-card substitute for the existing Docker renderer; actual account eligibility and a legitimate Gradio design would still need verification."
+  },
+  "network_observations": [
+    "Official raw.githubusercontent.com Modal sources succeeded through inherited proxy with normal TLS validation.",
+    "Initial guessed official repository paths returned HTTP404 or corresponding download exceptions once; corrected py/modal and 07_web paths succeeded. No path was retried more than twice.",
+    "Parent reports native modal.com blocked under the session network policy. This subagent did not bypass that block, authenticate or execute the Modal CLI; current pricing/billing pages were not obtained."
+  ],
+  "sources": [
+    {
+      "id": "modal_client_readme",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/README.md",
+      "fetched_at_utc": "2026-10-06T07:22:51.924976+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 2356,
+      "sha256": "b24b1969879592bf1199f4d06c5c1fbfcb9c2e833c13eacad60359083e514911",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_client_readme.md",
+      "quotations": [
+        {
+          "line_start": 5,
+          "line_end": 5,
+          "quotation": "This repository contains the source code for [Modal's](https://modal.com) official SDKs."
+        },
+        {
+          "line_start": 15,
+          "line_end": 15,
+          "quotation": "The [Modal](https://modal.com/) Python SDK allows you to deploy high-performance serverless applications and programmatically interact with the Modal platform."
+        }
+      ]
+    },
+    {
+      "id": "modal_examples_readme",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-examples/main/README.md",
+      "fetched_at_utc": "2026-10-06T07:22:51.925945+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 1257,
+      "sha256": "689da5cde679c1f465988d2b2257d95f60956c7ea2b304c27be17b55c027803b",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_examples_readme.md",
+      "quotations": [
+        {
+          "line_start": 12,
+          "line_end": 13,
+          "quotation": "First, sign up for a free account at [modal.com](https://modal.com/) and follow\nthe setup instructions to install the `modal` package and set your API key."
+        }
+      ]
+    },
+    {
+      "id": "modal_skill",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/py/modal/skills/modal/SKILL.md",
+      "fetched_at_utc": "2026-10-06T07:23:33.703632+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 5490,
+      "sha256": "066fb404f4d8a69268790cc0f8df917bc2fafa72a757a82ca495cc978703d0fd",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_skill.md",
+      "quotations": [
+        {
+          "line_start": 19,
+          "line_end": 23,
+          "quotation": "Modal is a platform for AI workloads. It offers highly scalable serverless compute (including GPUs) with minimal configuration.\n\nUsing the CLI or running code that depends on the `modal` library requires internet access and an authorization token. There is no \"local development mode\" with Modal.\n\n# Documentation"
+        }
+      ]
+    },
+    {
+      "id": "modal_functions",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/py/modal/_functions.py",
+      "fetched_at_utc": "2026-10-06T07:23:33.704585+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 112480,
+      "sha256": "8483f745b23393f9e3cd51359a20b687339b4db21af7e2d0d431e6dd686fa60c",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_functions.md",
+      "quotations": [
+        {
+          "line_start": 2208,
+          "line_end": 2221,
+          "quotation": "    @live_method\n    async def spawn(self, *args: P.args, **kwargs: P.kwargs) -> \"_FunctionCall[ReturnType]\":\n        \"\"\"Calls the function with the given arguments, without waiting for the results.\n\n        Conceptually similar to `multiprocessing.pool.apply_async`, or a Future/Promise in other contexts.\n\n        Args:\n            *args: Positional arguments forwarded to the remote function.\n            **kwargs: Keyword arguments forwarded to the remote function.\n\n        Returns:\n            A [`modal.FunctionCall`](https://modal.com/docs/sdk/py/latest/FunctionCall) object\n            that can later be polled or waited for using\n            [`.get(timeout=...)`](https://modal.com/docs/sdk/py/latest/FunctionCall#get)."
+        }
+      ]
+    },
+    {
+      "id": "modal_volume",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/py/modal/volume.py",
+      "fetched_at_utc": "2026-10-06T07:23:33.705311+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 70570,
+      "sha256": "3ac1194c08ab37d4b154c31432f37b81059bca758a5c57f62327b67bd14145ab",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_volume.md",
+      "quotations": [
+        {
+          "line_start": 485,
+          "line_end": 502,
+          "quotation": "class _Volume(_Object, type_prefix=\"vo\"):\n    \"\"\"A writeable volume that can be used to share files between one or more Modal functions.\n\n    The contents of a volume is exposed as a filesystem. You can use it to share data between different functions, or\n    to persist durable state across several instances of the same function.\n\n    Unlike a networked filesystem, you need to explicitly reload the volume to see changes made since it was mounted.\n    Similarly, you need to explicitly commit any changes you make to the volume for the changes to become visible\n    outside the current container.\n\n    Concurrent modification is supported, but concurrent modifications of the same files should be avoided! Last write\n    wins in case of concurrent modification of the same file - any data the last writer didn't have when committing\n    changes will be lost!\n\n    As a result, volumes are typically not a good fit for use cases where you need to make concurrent modifications to\n    the same file (nor is distributed file locking supported).\n\n    Volumes can only be reloaded if there are no open files for the volume - attempting to reload with open files"
+        },
+        {
+          "line_start": 509,
+          "line_end": 520,
+          "quotation": "        app = modal.App()\n        volume = modal.Volume.from_name(\"my-persisted-volume\", create_if_missing=True)\n\n        @app.function(volumes={\"/root/foo\": volume})\n        def f():\n            with open(\"/root/foo/bar.txt\", \"w\") as f:\n                f.write(\"hello\")\n            volume.commit()  # Persist changes\n\n        @app.function(volumes={\"/root/foo\": volume})\n        def g():\n            volume.reload()  # Fetch latest changes"
+        }
+      ]
+    },
+    {
+      "id": "modal_app",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/py/modal/app.py",
+      "fetched_at_utc": "2026-10-06T07:23:33.706962+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 74703,
+      "sha256": "b4020b5e2deb93e7762a074b28632c07b6b04a188f05c3df11f88f2e7d5f1906",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_app.md",
+      "quotations": [
+        {
+          "line_start": 818,
+          "line_end": 822,
+          "quotation": "        scaledown_window: int | None = None,\n        proxy: _Proxy | None = None,\n        retries: int | Retries | None = None,\n        timeout: int = 300,\n        startup_timeout: int | None = None,"
+        },
+        {
+          "line_start": 845,
+          "line_end": 865,
+          "quotation": "            secrets: Secrets to inject into the container as environment variables.\n            gpu: GPU request; either a single GPU type or a list of types.\n            serialized: Whether to send the function over using cloudpickle.\n            network_file_systems: Mountpoints for Modal NetworkFileSystems.\n            volumes: Mount points for Modal Volumes & CloudBucketMounts.\n            cpu:\n                Specify, in fractional CPU cores, how many CPU cores to request. Or, pass (request, limit) to\n                additionally specify a hard limit in fractional CPU cores. CPU throttling will prevent a container from\n                exceeding its specified limit.\n            memory:\n                Specify, in MiB, a memory request which is the minimum memory required. Or, pass (request, limit) to\n                additionally specify a hard limit in MiB.\n            ephemeral_disk: Specify, in MiB, the ephemeral disk size for the Function.\n            min_containers: Minimum number of containers to keep warm, even when Function is idle.\n            max_containers: Limit on the number of containers that can be concurrently running.\n            buffer_containers: Number of additional idle containers to maintain under active load.\n            scaledown_window: Max time (in seconds) a container can remain idle while scaling down.\n            proxy: Reference to a Modal Proxy to use in front of this function.\n            retries: Number of times to retry each input in case of failure.\n            timeout: Maximum execution time for inputs and startup time in seconds.\n            startup_timeout: Maximum startup time in seconds with higher precedence than `timeout`."
+        }
+      ]
+    },
+    {
+      "id": "modal_fastapi",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-examples/main/07_web/fastapi_app.py",
+      "fetched_at_utc": "2026-10-06T07:25:15.902896+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 1326,
+      "sha256": "9386cced3a401bedd771fd41e682d866e52357fd2a06069ee90edfedd610c9ea",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_fastapi.md",
+      "quotations": [
+        {
+          "line_start": 7,
+          "line_end": 8,
+          "quotation": "# This example shows how you can deploy a [FastAPI](https://fastapi.tiangolo.com/) app with Modal.\n# You can serve any app written in an ASGI-compatible web framework (like FastAPI) using this pattern or you can server WSGI-compatible frameworks like Flask with [`wsgi_app`](https://modal.com/docs/guide/webhooks#wsgi)."
+        },
+        {
+          "line_start": 37,
+          "line_end": 40,
+          "quotation": "@app.function()\n@modal.asgi_app()\ndef fastapi_app():\n    return web_app"
+        }
+      ]
+    },
+    {
+      "id": "modal_basic_web",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-examples/main/07_web/basic_web.py",
+      "fetched_at_utc": "2026-10-06T07:25:15.904033+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 10629,
+      "sha256": "15adf78347eaf9ac3fac23bb5f8f0d1e59f88ea3fc1516e7bdef57c740aae4d1",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_basic_web.md",
+      "quotations": [
+        {
+          "line_start": 51,
+          "line_end": 51,
+          "quotation": "# In the output, you should see a URL that ends with `hello-dev.modal.run`."
+        },
+        {
+          "line_start": 59,
+          "line_end": 65,
+          "quotation": "# By running the App with `modal serve`, you created a temporary endpoint that will disappear if you interrupt your terminal.\n# These temporary endpoints are great for debugging -- when you save a change to any of your dependent files, the endpoint will redeploy.\n# Try changing the message to something else, hitting save, and then hitting refresh in your browser or re-sending\n# the request from `/docs` or the command line. You should see the new message, along with logs in your terminal showing the redeploy and the request.\n\n# When you're ready to deploy the Web Function persistently, run `modal deploy basic_web.py`.\n# Now, your Function will be available even when you've closed your terminal or turned off your computer."
+        },
+        {
+          "line_start": 173,
+          "line_end": 175,
+          "quotation": "# To protect your Modal Web Functions so that they can't be triggered except\n# by members of your [Modal workspace](https://modal.com/docs/guide/workspaces),\n# add the `requires_proxy_auth=True` flag to the `fastapi_endpoint` decorator."
+        },
+        {
+          "line_start": 184,
+          "line_end": 192,
+          "quotation": "# The `expensive-secret` endpoint URL will still be printed to the output when you `modal serve` or `modal deploy`,\n# along with a \"🔑\" emoji indicating that it is secured with proxy authentication.\n# If you head to that URL via the browser, you will get a\n# [`401 Unauthorized`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401) error code in response.\n# You should also check the dashboard page for this app (at the URL printed at the very top of the `modal` command output)\n# so you can see that no containers were spun up to handle the request -- this authorization is handled entirely inside Modal's infrastructure.\n\n# You can trigger the Web Function by [creating a Proxy Auth Token](https://modal.com/settings/proxy-auth-tokens)\n# and then including the token ID and secret in the `Modal-Key` and `Modal-Secret` headers."
+        }
+      ]
+    },
+    {
+      "id": "modal_free_monthly_example",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-examples/main/07_web/discord_bot.py",
+      "fetched_at_utc": "2026-10-06T07:30:07.801641+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 16093,
+      "sha256": "d22df95470099f498327a7ef1f09dee3df29bf25a9d590ed0acedf4e3fb9550c",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_free_monthly_example.md",
+      "quotations": [
+        {
+          "line_start": 247,
+          "line_end": 248,
+          "quotation": "# Modal charges a minimum of about 2¢ an hour for live containers (pricing details [here](https://modal.com/pricing)).\n# Note that that still fits within Modal's $30/month of credits on the free tier."
+        },
+        {
+          "line_start": 250,
+          "line_end": 253,
+          "quotation": "# 2. We have to respond to Discord that quickly, but we don't have to respond to the user that quickly.\n# We instead send an acknowledgement so that they know we're alive and they can close their connection to us.\n# We also trigger our `reply` Modal Function, which will respond to the user via Discord's Interactions API,\n# but we don't wait for the result, we just `spawn` the call."
+        }
+      ]
+    },
+    {
+      "id": "modal_starter_example",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-examples/main/06_gpu_and_ml/embeddings/amazon_embeddings.py",
+      "fetched_at_utc": "2026-10-06T07:30:07.803386+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 11655,
+      "sha256": "54eaac22ba89036fef0bf5ad5190b0d8898d5e342dc70a4c33eba0cc7f1e8d10",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_starter_example.md",
+      "quotations": [
+        {
+          "line_start": 84,
+          "line_end": 85,
+          "quotation": "@app.function(\n    image=modal.Image.debian_slim().uv_pip_install(\"datasets==3.5.1\"), timeout=2 * HOURS"
+        },
+        {
+          "line_start": 177,
+          "line_end": 178,
+          "quotation": "# On Modal's Starter (free) and Team plans, the maximum number of concurrent GPUs is lower,\n# reducing the total number of concurrent batches and so the throughput."
+        },
+        {
+          "line_start": 196,
+          "line_end": 199,
+          "quotation": "    max_containers=100,\n    scaledown_window=5 * MINUTES,  # idle for 5 min without inputs before scaling down\n    retries=3,  # handle transient failures and storms in the cloud\n    timeout=2 * HOURS,  # run for at most 2 hours"
+        }
+      ]
+    },
+    {
+      "id": "modal_sandbox",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/py/modal/sandbox.py",
+      "fetched_at_utc": "2026-10-06T07:30:43.411076+00:00",
+      "attempts": 1,
+      "status": 200,
+      "bytes": 148094,
+      "sha256": "ce5b93f10e5440b5acd487949e85443d91d35b07842ffa5d052cf8ee37213d9f",
+      "downloaded_body_path": "/tmp/modal_free_runtime_research_20261006/modal_sandbox.md",
+      "quotations": [
+        {
+          "line_start": 631,
+          "line_end": 642,
+          "quotation": "        image: _Image | None = None,\n        env: dict[str, str | None] | None = None,\n        secrets: Collection[_Secret] | None = None,\n        network_file_systems: dict[str | os.PathLike, _NetworkFileSystem] = {},\n        timeout: int = 300,\n        idle_timeout: int | None = None,\n        workdir: str | None = None,\n        gpu: str | None = None,\n        cloud: str | None = None,\n        region: str | Sequence[str] | None = None,\n        cpu: float | tuple[float, float] | None = None,\n        memory: int | tuple[int, int] | None = None,"
+        },
+        {
+          "line_start": 676,
+          "line_end": 692,
+          "quotation": "            image: The image to run as the container for the sandbox.\n            env: Environment variables to set in the Sandbox.\n            secrets: Secrets to inject into the Sandbox as environment variables.\n            network_file_systems: Network file systems to mount into the sandbox.\n            timeout: Maximum lifetime of the sandbox in seconds.\n            idle_timeout: The amount of time in seconds that a sandbox can be idle before being terminated.\n            workdir: Working directory of the sandbox.\n            gpu: GPU reservation for the sandbox.\n            cloud: Cloud provider for the sandbox.\n            region: Region or regions to run the sandbox on.\n            cpu:\n                Specify, in fractional CPU cores, how many CPU cores to request. Or, pass (request, limit) to\n                additionally specify a hard limit in fractional CPU cores. CPU throttling will prevent a container\n                from exceeding its specified limit.\n            memory:\n                Specify, in MiB, a memory request which is the minimum memory required. Or, pass (request, limit) to\n                additionally specify a hard limit in MiB."
+        },
+        {
+          "line_start": 707,
+          "line_end": 715,
+          "quotation": "            volumes: Mount points for Modal Volumes and CloudBucketMounts.\n            pty:\n                Enable a PTY for the Sandbox entrypoint command. When enabled, all output (stdout and stderr from the\n                process) is multiplexed into stdout, and the stderr stream is effectively empty.\n            encrypted_ports: List of ports to tunnel into the sandbox. Encrypted ports are tunneled with TLS.\n            h2_ports: List of encrypted ports to tunnel into the sandbox, using HTTP/2.\n            unencrypted_ports: List of ports to tunnel into the sandbox without encryption.\n            custom_domain:\n                Allow connections to the Sandbox via a subdomain of this parent rather than a default Modal domain."
+        },
+        {
+          "line_start": 1356,
+          "line_end": 1379,
+          "quotation": "    @staticmethod\n    async def from_name(\n        app_name: str,\n        name: str,\n        *,\n        environment_name: str | None = None,\n        client: _Client | None = None,\n    ) -> \"_Sandbox\":\n        \"\"\"Get a running Sandbox by name from a deployed App.\n\n        A Sandbox's name is the `name` argument passed to `Sandbox.create`.\n\n        Args:\n            app_name: Name of the deployed app to look up the sandbox under.\n            name: Sandbox name to resolve.\n            environment_name: Optional environment name for the lookup; defaults to the configured environment.\n            client: Modal client to use for the RPC; defaults to `Client.from_env()` when omitted.\n\n        Returns:\n            A `Sandbox` handle for the running sandbox.\n\n        Raises:\n            NotFoundError: If no running sandbox exists with the given name.\n        \"\"\""
+        },
+        {
+          "line_start": 1928,
+          "line_end": 1941,
+          "quotation": "    async def tunnels(self, timeout: int = 50) -> dict[int, Tunnel]:\n        \"\"\"Get Tunnel metadata for the sandbox.\n\n        NOTE: Previous to client [v0.64.153](https://modal.com/docs/sdk/py/changelog#064153-2024-09-30), this\n        returned a list of `TunnelData` objects.\n\n        Args:\n            timeout: Maximum time in seconds to wait for tunnel metadata when not already cached.\n\n        Returns:\n            A dictionary mapping container port to `Tunnel` metadata.\n\n        Raises:\n            SandboxTimeoutError: If the tunnels are not available after the timeout."
+        }
+      ]
+    }
+  ],
+  "failed_download_observations": [
+    {
+      "id": "modal_docs_readme",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-docs/main/README.md",
+      "fetched_at_utc": "2026-10-06T07:22:51.944764+00:00",
+      "attempts": 1,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "modal_client_functions",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/modal/_functions.py",
+      "fetched_at_utc": "2026-10-06T07:22:51.945294+00:00",
+      "attempts": 1,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "modal_client_volumes",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-client/main/modal/volume.py",
+      "fetched_at_utc": "2026-10-06T07:22:51.946090+00:00",
+      "attempts": 1,
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "modal_examples_asgi",
+      "url": "https://raw.githubusercontent.com/modal-labs/modal-examples/main/07_web_endpoints/fastapi_app.py",
+      "fetched_at_utc": "2026-10-06T07:22:51.946585+00:00",
+      "attempts": 1,
+      "error": "HTTP Error 404: Not Found"
+    }
+  ],
+  "validation": {
+    "successful_primary_sources": 11,
+    "exact_quotation_ranges": 25,
+    "byte_counts_and_sha256_verified": true,
+    "provider_deployment_tested": false,
+    "zero_cost_guaranteed": false
+  }
+}
