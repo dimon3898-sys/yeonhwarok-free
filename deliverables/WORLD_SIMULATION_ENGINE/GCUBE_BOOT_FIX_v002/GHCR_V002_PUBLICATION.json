@@ -1,0 +1,212 @@
+{
+  "recorded_at": "2026-10-06T21:56:35.200765+00:00",
+  "release": "gcube-v002",
+  "source_revision": "fd55458572e9e6645d0a4af47db718d816c655f9",
+  "public_image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v002",
+  "immutable_image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v002-sha-fd55458572e9e6645d0a4af47db718d816c655f9",
+  "digest": "sha256:92b72a9e87625502d16a300b4831c8a206d8b58e44c414f74e28f0fa46574a8c",
+  "config_digest": "sha256:b028356482225ed47290cdd873b7afcfadec4a268dc33b1353cce4b0dd1c4f09",
+  "anonymous_pull_metadata_http_200": true,
+  "layer_downloads": 0,
+  "workflow": {
+    "url": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37536595336",
+    "status": "Success",
+    "definition": {
+      "url": "https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/fd55458572e9e6645d0a4af47db718d816c655f9/.github/workflows/gcube-image.yml",
+      "http_status": 200,
+      "sha256": "e0e8068e2c67e343bfca00776212d71cd76318b68258fea56f5c5199e96ecfce",
+      "v002_tag_only": true,
+      "engine_ready_assertions": true,
+      "five_fresh_full_image_cases": true
+    },
+    "steps": [
+      {
+        "number": "1",
+        "name": "Set up job",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:49:50Z",
+        "completed-at": "2026-10-06T21:49:54Z"
+      },
+      {
+        "number": "2",
+        "name": "Checkout approved sources",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:49:54Z",
+        "completed-at": "2026-10-06T21:50:13Z"
+      },
+      {
+        "number": "3",
+        "name": "Set up Buildx",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:50:13Z",
+        "completed-at": "2026-10-06T21:50:26Z"
+      },
+      {
+        "number": "4",
+        "name": "Build the complete image for local smoke testing",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:50:26Z",
+        "completed-at": "2026-10-06T21:52:25Z"
+      },
+      {
+        "number": "5",
+        "name": "Verify full-image foreground boot, owner login and blocked diagnostics",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:52:25Z",
+        "completed-at": "2026-10-06T21:53:31Z"
+      },
+      {
+        "number": "6",
+        "name": "Report bounded startup diagnostics after a failure",
+        "conclusion": "skipped",
+        "started-at": "2026-10-06T21:53:31Z",
+        "completed-at": "2026-10-06T21:53:31Z"
+      },
+      {
+        "number": "7",
+        "name": "Authenticate to GHCR after successful CPU smoke test",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:53:31Z",
+        "completed-at": "2026-10-06T21:53:31Z"
+      },
+      {
+        "number": "8",
+        "name": "Publish tested development image",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:53:31Z",
+        "completed-at": "2026-10-06T21:54:24Z"
+      },
+      {
+        "number": "13",
+        "name": "Post Authenticate to GHCR after successful CPU smoke test",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:54:24Z",
+        "completed-at": "2026-10-06T21:54:24Z"
+      },
+      {
+        "number": "14",
+        "name": "Post Build the complete image for local smoke testing",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:54:24Z",
+        "completed-at": "2026-10-06T21:54:26Z"
+      },
+      {
+        "number": "15",
+        "name": "Post Set up Buildx",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:54:26Z",
+        "completed-at": "2026-10-06T21:54:30Z"
+      },
+      {
+        "number": "16",
+        "name": "Post Checkout approved sources",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:54:30Z",
+        "completed-at": "2026-10-06T21:54:30Z"
+      },
+      {
+        "number": "17",
+        "name": "Complete job",
+        "conclusion": "success",
+        "started-at": "2026-10-06T21:54:30Z",
+        "completed-at": "2026-10-06T21:54:30Z"
+      }
+    ]
+  },
+  "full_image_validation": {
+    "root_cpu_boot_login": true,
+    "uid_1000_cpu_boot_login": true,
+    "foreground_minimum_seconds": {
+      "root": 60,
+      "uid_1000": 20,
+      "blocked_each": 30
+    },
+    "bind": "0.0.0.0:8000",
+    "actual_bridge_ip_probe": true,
+    "kubelet_health_paths": [
+      "/healthz",
+      "/api/health"
+    ],
+    "ready_engine_health_requires_engine_ready_true": true,
+    "blocked_cases": {
+      "missing_owner": "WORLD_ENGINE_OWNER_CODE_REQUIRED",
+      "gpu_required_without_gpu": "GPU_HARDWARE_UNAVAILABLE",
+      "missing_required_mount": "STORAGE_MOUNT_REQUIRED"
+    },
+    "blocked_liveness_http_200": true,
+    "blocked_readiness_http_503": true,
+    "blocked_actions_http_405": true,
+    "blocked_engine_ready_false": true,
+    "quiet_cpu_fallback": false,
+    "approval_requested": false,
+    "render_requested": false
+  },
+  "image_configuration": {
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "python",
+      "-m",
+      "deployment.gcube.start"
+    ],
+    "cmd": null,
+    "empty_default_command": true,
+    "exposed_ports": {
+      "8000/tcp": {}
+    },
+    "healthcheck": {
+      "Test": [
+        "CMD",
+        "python",
+        "-c",
+        "import json,sys,urllib.request; opener=urllib.request.build_opener(urllib.request.ProxyHandler({})); response=opener.open('http://127.0.0.1:8000/healthz',timeout=3); value=json.loads(response.read(4096)); sys.exit(0 if response.status==200 and value.get('ok') is True and value.get('authentication_required') is True else 1)"
+      ],
+      "Interval": 30000000000,
+      "Timeout": 5000000000,
+      "StartPeriod": 90000000000,
+      "Retries": 3
+    },
+    "default_user": "root",
+    "owner_secret_in_image": false,
+    "provider_device_selection_override_in_image": false
+  },
+  "v001_preservation": {
+    "before": {
+      "gcube-v001": "sha256:207a3058986f7ef0e46a7eaa95422833438b23ff3123c5daea1140a80031a3f2",
+      "gcube-v001-sha-d03881a924cc4d7af7447d2f8129d09e7cbff65d": "sha256:207a3058986f7ef0e46a7eaa95422833438b23ff3123c5daea1140a80031a3f2"
+    },
+    "after": {
+      "gcube-v001": "sha256:207a3058986f7ef0e46a7eaa95422833438b23ff3123c5daea1140a80031a3f2",
+      "gcube-v001-sha-d03881a924cc4d7af7447d2f8129d09e7cbff65d": "sha256:207a3058986f7ef0e46a7eaa95422833438b23ff3123c5daea1140a80031a3f2"
+    },
+    "unchanged": true
+  },
+  "limits": {
+    "actual_gcube_node_5324_gpu_or_istio_restart_tested": false,
+    "actual_gcube_failure_log_received": false,
+    "actual_gcube_nvidia_webgl_certified": false,
+    "gpu_speedup_measured": false,
+    "provider_charges_incurred": false
+  },
+  "evidence": {
+    "FINAL_V002_PUBLICATION_run.json": {
+      "sha256": "b514f671d09bb6c6a7be496dd692ac83f11829bb0e41c046adf756e9f7d836fb"
+    },
+    "FINAL_V002_PUBLICATION_job.json": {
+      "sha256": "1b7bf9f7b7a15b72b3bf41745e4d8211713499d35e8c29179940e39c1db585ca"
+    },
+    "FINAL_V002_PUBLICATION_registry.json": {
+      "sha256": "0467d16bd5b2a726ce3a0572736fc35da318e7fe93ac76d855ecb5774b2b5793"
+    },
+    "FINAL_V002_PUBLICATION_config.json": {
+      "sha256": "77912bc8ed1612864f0eff9f671cf7a9516c463f3ba95ddd1196260fc6515a1b"
+    },
+    "FINAL_V002_PUBLICATION_workflow_definition.json": {
+      "sha256": "679ae790f61f2263dadeb67bb7d740253748ced1fee786d9c57cef86a05506b1"
+    },
+    "V001_BEFORE_PUBLICATION.json": {
+      "sha256": "e41c39456f85c3f106e997864bd387f2d720a483e6c3f2e454520144741e1e26"
+    }
+  }
+}
