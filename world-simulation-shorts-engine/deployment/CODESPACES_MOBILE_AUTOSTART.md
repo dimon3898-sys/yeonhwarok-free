@@ -32,7 +32,11 @@ Git checkout 중 timeout이 발생하면 일부 tracked 파일이 변경되었�
 
 ## 검증 범위
 
-임시 bare Git 저장소의 실제 fast-forward·반복 시작·파일 보존·실패/timeout 검사와 기존 Origin/인증/작업복구 회귀 검사를 수행한다. 시작 subprocess fixture와 실제 로컬 gateway 검증은 원격 사용자의 Codespace 실행 검증과 구분한다. 결과는 `validation/codespaces_autostart.json`에 기록한다.
+신규37개와 기존 Origin/인증/시작/작업복구84개, 총 **121개 회귀 테스트가19.872초에 통과**했다. 임시 bare Git 저장소에서 실제 fast-forward·반복 시작·파일 보존·실패/timeout·동시 fetch 간섭을 검사했다.
+
+별도 sparse checkout에서 **실제 GitHub main fetch/fast-forward** 후 새 private 상태의 실제 로컬 gateway 시작·동일 PID 재사용·정상 갱신을 확인했다(준비부터 검사까지4.315초, 종료 시간 제외). Codespaces 형태의 HTTPS 헤더로 로그인303·Secure/HttpOnly/SameSite=Strict 쿠키·갱신 후 세션 유지·외부 Origin403을 확인했다. 시도별 private 기록3개가 준비 상태를 보존했고, jobs/렌더 요청은0이었다. 자신의 검증 서버만 정상 종료했다.
+
+승인된 core/renderer28개 SHA와 `.devcontainer/devcontainer.json` 전체 바이트가 동일하다. 이 로컬·격리 검증은 원격 사용자의 Codespace 실행이나 실제 휴대폰 테스트와 구분한다. 실제 결과와 검증된 코드 SHA는 `validation/codespaces_autostart.json`에 기록한다.
 
 현재 관리형 작업환경에서 사용자 Codespaces API는 Forbidden이었다. 따라서 **solid-space-fishstick 내부의 최초 Pull을 원격으로 대신 수행했다고 주장하지 않는다.** 휴대폰 최초 적용만 위의 Git 화면 조작이 필요하다. 이후 자동 시작의 성공 여부는 준비 기록과 실제7860 화면으로 확인한다.
 
