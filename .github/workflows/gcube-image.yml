@@ -91,12 +91,12 @@ jobs:
           docker run --detach --name "$smoke_name" \
             --publish 127.0.0.1:18000:8000 --env-file "$smoke_env" \
             "${IMAGE}:gcube-v001" >/dev/null
-          python - <<'PY'
-          import http.client, json, time
+          python - "$smoke_env" <<'PY'
+          import http.client, http.cookiejar, json, pathlib, re, sys, time
           from urllib.error import HTTPError, URLError
-          from urllib.request import ProxyHandler, build_opener
+          from urllib.request import HTTPCookieProcessor, ProxyHandler, Request, build_opener
           endpoint = 'http://127.0.0.1:18000'
-          local = build_opener(ProxyHandler({}))
+          local = build_opener(ProxyHandler({}), HTTPCookieProcessor(http.cookiejar.CookieJar()))
           deadline = time.monotonic() + 90
           while time.monotonic() < deadline:
               try:
@@ -121,7 +121,36 @@ jobs:
           except HTTPError as error:
               if error.code != 401:
                   raise SystemExit('Unauthenticated project access did not require login')
-          print('CPU startup and owner authentication passed; no render was requested')
+          owner = next(line.partition('=')[2] for line in pathlib.Path(sys.argv[1]).read_text().splitlines()
+                       if line.startswith('WORLD_ENGINE_OWNER_CODE='))
+          request = Request(endpoint + '/auth/login', data=json.dumps({'password': owner}).encode(),
+                            headers={'Origin': endpoint, 'Content-Type': 'application/json'}, method='POST')
+          with local.open(request, timeout=5) as response:
+              if json.load(response).get('authenticated') is not True:
+                  raise SystemExit('Owner login did not succeed')
+          with local.open(endpoint + '/api/projects', timeout=5) as response:
+              projects = json.load(response).get('projects', [])
+          if len(projects) != 1:
+              raise SystemExit('The unapproved short validation project was not prepared')
+          project = projects[0]
+          if project.get('status') != 'planned' or not re.fullmatch(r'project_[a-f0-9]{12}', project.get('id', '')):
+              raise SystemExit('The short validation project was not left unapproved')
+          with local.open(endpoint + '/api/projects/' + project['id'], timeout=5) as response:
+              detail = json.load(response)
+          plan = detail.get('plan', {})
+          if (detail.get('version') != 'v001' or plan.get('duration') != 12 or
+                  len(plan.get('scenes', [])) != 5 or plan.get('gate', {}).get('passed') is not True):
+              raise SystemExit('The prepared validation plan was not the certified short fixture')
+          with local.open(endpoint + '/', timeout=5) as response:
+              if b'/gcube/benchmark.json' not in response.read(1024 * 1024):
+                  raise SystemExit('Mobile UI did not expose owner measurement download')
+          with local.open(endpoint + '/gcube/benchmark.json', timeout=5) as response:
+              diagnostics = json.load(response)
+              if diagnostics.get('runtime', {}).get('render_mode') != 'cpu':
+                  raise SystemExit('Measurement download did not record the CPU profile')
+              if not response.headers.get('Content-Disposition', '').startswith('attachment;'):
+                  raise SystemExit('Owner measurement response was not a download')
+          print('CPU startup, owner login, mobile UI, unapproved short plan and measurement download passed; no render was requested')
           PY
       - name: Report bounded startup diagnostics after a failure
         if: failure()

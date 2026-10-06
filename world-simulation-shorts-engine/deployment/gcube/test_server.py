@@ -128,6 +128,35 @@ class GatewayTests(unittest.TestCase):
         self.assertNotIn("Access-Control-Allow-Origin", headers)
         self.assertEqual(self.call("GET", "/static/app.js")[0], 200)
 
+    def test_measurement_download_is_owner_only_and_read_only(self):
+        self.assertEqual(self.call("GET", "/api/gcube/benchmark")[0], 401)
+        self.login()
+        private_json(self.runtime / "gcube-runtime.json", {"gpu": {"render_mode": "cpu"}, "owner": PASSWORD})
+        status, _, record = self.call("GET", "/api/gcube/benchmark")
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(record)["runtime"]["render_mode"], "cpu")
+        self.assertNotIn(PASSWORD.encode(), record)
+        status, headers, body = self.call("GET", "/gcube/benchmark.json")
+        self.assertEqual(status, 200)
+        self.assertIn('attachment; filename="world-engine-gcube-measurements.json"', headers["Content-Disposition"])
+        self.assertEqual(headers["Cache-Control"], "no-store")
+        self.assertNotIn("Access-Control-Allow-Origin", headers)
+        status, headers, body = self.call("HEAD", "/gcube/benchmark.json")
+        self.assertEqual(status, 200)
+        self.assertEqual(body, b"")
+        self.assertGreater(int(headers["Content-Length"]), 0)
+        self.assertEqual(self.call("POST", "/api/gcube/benchmark", {})[0], 405)
+        self.assertIn(self.call("GET", "/gcube/benchmark.json", origin=OTHER)[0], {400, 403})
+        saved_cookie, self.cookie = self.cookie, None
+        self.assertEqual(self.call("GET", "/api/gcube/benchmark")[0], 401)
+        self.assertEqual(self.call("GET", "/gcube/benchmark.json")[0], 401)
+        self.cookie = saved_cookie
+        (self.runtime / "gcube-runtime.json").write_text("broken")
+        status, _, body = self.call("GET", "/api/gcube/benchmark")
+        self.assertEqual(status, 503)
+        self.assertEqual(json.loads(body)["error"]["code"], "DIAGNOSTIC_RUNTIME_INVALID")
+        self.assertNotIn(str(self.runtime).encode(), body)
+
     def test_invalid_hosts_origins_and_forwarding_do_not_bind(self):
         cases = [
             {"Host": "attacker.example"}, {"Host": "x.gcube.ai.evil.example"},

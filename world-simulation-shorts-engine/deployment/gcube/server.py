@@ -24,6 +24,7 @@ sys.path.insert(0, _ENGINE_ROOT)
 from deployment.mobile_server import (APP_ROOT, BoundedHTTPServer, InternalHandler,
                                       MobileApplication, MobileHandler, checked_state_root)
 from deployment.security import RequestPolicy, SecurityError, content_length, private_json
+from deployment.gcube.diagnostics import DiagnosticsError, build_mobile_diagnostics
 from engine.storage import EngineError
 
 PROVIDER_HOST = re.compile(r"([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)\.gcube\.ai")
@@ -206,6 +207,26 @@ class GcubeHandler(MobileHandler):
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
+            if path in {"/api/gcube/benchmark", "/gcube/benchmark.json"}:
+                if not self.app.sessions.claims(self._token()):
+                    raise SecurityError("AUTH_REQUIRED", "소유자 로그인이 필요합니다.", 401)
+                if method not in {"GET", "HEAD"}:
+                    raise SecurityError("METHOD_NOT_ALLOWED", "읽기 전용 요청입니다.", 405)
+                try:
+                    record = build_mobile_diagnostics(self.app.state_root)
+                except DiagnosticsError as error:
+                    raise SecurityError(error.code, "측정 기록을 읽지 못했습니다.", 503) from None
+                if path == "/api/gcube/benchmark":
+                    return self.json(record)
+                body = json.dumps(record, ensure_ascii=False, indent=2, allow_nan=False).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Disposition", 'attachment; filename="world-engine-gcube-measurements.json"')
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                if method != "HEAD":
+                    self.wfile.write(body)
+                return
             return super().dispatch(method)
         except (BrokenPipeError, ConnectionResetError):
             pass
@@ -264,7 +285,7 @@ class GcubeHandler(MobileHandler):
             storage = "영구 저장 공간 감지됨" if health["storage"]["persistent_mount_detected"] else "영구 저장 공간 미확인 · 최종 MP4를 다운로드해 보관하세요."
             message = html.escape(health["billing"]["message"])
             graphics = ("3D NVIDIA 그래픽 확인 · " + ", ".join(health["gpu"]["models"])) if health["gpu"]["gpu_rendering_verified"] else "CPU 비교 모드 · GPU 가속 미사용" if health["gpu"]["render_mode"] == "cpu" else "그래픽 검증 미확인"
-            note = f'<aside role="note" aria-label="서버 상태" style="max-width:45rem;margin:.75rem auto;padding:.8rem;border:1px solid #a4d8ee;border-radius:.5rem;background:#10202b;color:#eff5fa;font:12px/1.5 system-ui">{html.escape(graphics)} · FFmpeg 인코딩은 CPU<br>{message}<br>{html.escape(storage)}</aside>'
+            note = f'<aside role="note" aria-label="서버 상태" style="max-width:45rem;margin:.75rem auto;padding:.8rem;border:1px solid #a4d8ee;border-radius:.5rem;background:#10202b;color:#eff5fa;font:12px/1.5 system-ui">{html.escape(graphics)} · FFmpeg 인코딩은 CPU<br>{message}<br>{html.escape(storage)}<br><a href="/gcube/benchmark.json" download style="color:#a4d8ee">GPU·메모리 측정 기록 다운로드</a></aside>'
             text = Path(path).read_text(encoding="utf-8")
             return self._html(text.replace("<body>", "<body>" + note, 1))
         return super().file(path, attachment, head)
