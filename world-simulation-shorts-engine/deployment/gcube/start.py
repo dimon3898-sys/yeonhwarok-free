@@ -158,6 +158,8 @@ def main():
                           'message': '유휴 상태도 과금됩니다. MP4 다운로드 후 gcube Workload를 중지하세요.'},
               'limits': {'max_duration': duration, 'maximum_job_seconds': job_seconds}}
     runtime = Path(storage.runtime_root)
+    from deployment.gcube.validation_fixture import seed_once
+    report['validation_project'] = seed_once(runtime)
     private_json(runtime / 'gcube-runtime.json', report)
     child_env = dict(env)
     child_env.pop('WORLD_ENGINE_OWNER_CODE', None)

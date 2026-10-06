@@ -156,10 +156,15 @@ class GcubeApplication(MobileApplication):
         verified = gpu.get("gpu_rendering_verified") is True
         mode = gpu.get("render_mode") if gpu.get("render_mode") in {"gpu-required", "cpu"} else "unknown"
         profile = gpu.get("gpu_profile") if isinstance(gpu.get("gpu_profile"), str) and len(gpu["gpu_profile"]) <= 80 else None
+        devices = gpu.get("nvidia_devices")
+        devices = devices if isinstance(devices, list) else []
+        models = [device["name"][:128] for device in devices
+                  if isinstance(device, dict) and isinstance(device.get("name"), str)][:4]
         return {"ok": True, "authentication_required": True, "provider": "GCUBE",
                 "public_origin_bound": bool(self.bound_origin),
                 "render_backend": "GPU_VERIFIED" if verified else "CPU_VERIFIED" if mode == "cpu" else "UNVERIFIED",
                 "gpu": {"render_mode": mode, "gpu_profile": profile, "gpu_rendering_verified": verified,
+                        "models": models,
                         "speedup_measured": gpu.get("speedup_measured") is True},
                 "storage": {"persistent_mount_detected": storage.get("persistent_mount_detected") is True,
                             "filesystem_probe_passed": storage.get("filesystem_probe_passed") is True,
@@ -258,7 +263,8 @@ class GcubeHandler(MobileHandler):
             health = self.app.runtime_health()
             storage = "영구 저장 공간 감지됨" if health["storage"]["persistent_mount_detected"] else "영구 저장 공간 미확인 · 최종 MP4를 다운로드해 보관하세요."
             message = html.escape(health["billing"]["message"])
-            note = f'<aside role="note" aria-label="서버 상태" style="max-width:45rem;margin:.75rem auto;padding:.8rem;border:1px solid #a4d8ee;border-radius:.5rem;background:#10202b;color:#eff5fa;font:12px/1.5 system-ui">{message}<br>{html.escape(storage)}</aside>'
+            graphics = ("3D NVIDIA 그래픽 확인 · " + ", ".join(health["gpu"]["models"])) if health["gpu"]["gpu_rendering_verified"] else "CPU 비교 모드 · GPU 가속 미사용" if health["gpu"]["render_mode"] == "cpu" else "그래픽 검증 미확인"
+            note = f'<aside role="note" aria-label="서버 상태" style="max-width:45rem;margin:.75rem auto;padding:.8rem;border:1px solid #a4d8ee;border-radius:.5rem;background:#10202b;color:#eff5fa;font:12px/1.5 system-ui">{html.escape(graphics)} · FFmpeg 인코딩은 CPU<br>{message}<br>{html.escape(storage)}</aside>'
             text = Path(path).read_text(encoding="utf-8")
             return self._html(text.replace("<body>", "<body>" + note, 1))
         return super().file(path, attachment, head)

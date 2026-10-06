@@ -64,7 +64,12 @@ jobs:
           set -euo pipefail
           smoke_name="world-engine-gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           smoke_env="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.env"
+          smoke_diagnostics="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.diagnostics"
           cleanup() {
+            smoke_status=$?
+            if [ "$smoke_status" -ne 0 ]; then
+              docker logs --tail 100 "$smoke_name" 2>/dev/null | python -c 'import re, sys; allowed = re.compile(r"(?:GCUBE startup blocked: [A-Za-z][A-Za-z0-9_]{0,79}|World Engine ready on8000; owner-code is private; no provider stop or GPU speedup is implied\.)"); [print(line.rstrip()) for line in sys.stdin if allowed.fullmatch(line.rstrip())]' > "$smoke_diagnostics" || true
+            fi
             docker rm --force "$smoke_name" >/dev/null 2>&1 || true
             rm -f "$smoke_env"
           }
@@ -87,7 +92,7 @@ jobs:
             --publish 127.0.0.1:18000:8000 --env-file "$smoke_env" \
             "${IMAGE}:gcube-v001" >/dev/null
           python - <<'PY'
-          import json, time
+          import http.client, json, time
           from urllib.error import HTTPError, URLError
           from urllib.request import ProxyHandler, build_opener
           endpoint = 'http://127.0.0.1:18000'
@@ -99,7 +104,7 @@ jobs:
                       health = json.load(response)
                   if health.get('ok') is True and health.get('authentication_required') is True:
                       break
-              except (HTTPError, URLError, TimeoutError, ValueError):
+              except (OSError, http.client.HTTPException, ValueError):
                   pass
               time.sleep(1)
           else:
@@ -118,6 +123,17 @@ jobs:
                   raise SystemExit('Unauthenticated project access did not require login')
           print('CPU startup and owner authentication passed; no render was requested')
           PY
+      - name: Report bounded startup diagnostics after a failure
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker image inspect "${IMAGE}:gcube-v001" --format '{"Id":{{json .Id}},"Size":{{json .Size}},"Architecture":{{json .Architecture}},"WorkingDir":{{json .Config.WorkingDir}},"Entrypoint":{{json .Config.Entrypoint}},"Cmd":{{json .Config.Cmd}}}' | python -c 'import sys; value = sys.stdin.read(8192).strip(); print("::notice title=Gcube image configuration::" + value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")) if value else None' || true
+          smoke_diagnostics="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.diagnostics"
+          if [ -f "$smoke_diagnostics" ]; then
+            head -n 100 "$smoke_diagnostics" | python -c 'import sys; [print("::notice title=Gcube startup::" + line.rstrip()) for line in sys.stdin]'
+            rm -f "$smoke_diagnostics"
+          fi
       - name: Authenticate to GHCR after successful CPU smoke test
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:

@@ -26,7 +26,7 @@ APP = Path(__file__).resolve().parents[2]
 if str(APP) in sys.path:
     sys.path.remove(str(APP))
 sys.path.insert(0, str(APP))
-SOURCE = APP.parent / "deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json"
+SOURCE = Path(__file__).resolve().with_name("validation_scene_plan.json")
 TOPIC = "서울에서 도쿄를 거쳐 타이베이로 이어지는 민간 항공 연결"
 PROJECT = re.compile(r"project_[a-z0-9_]{6,64}")
 VERSION = re.compile(r"v\d{3,}")
@@ -164,11 +164,11 @@ class Client:
         with self.open(method, route, data, headers) as response:
             body = response.read(2 * 1024**2 + 1)
             require(len(body) <= 2 * 1024**2, "HTTP_BODY_TOO_LARGE")
-            return response.status, dict(response.headers), body
+            return response.status, {key.lower(): value for key, value in response.headers.items()}, body
 
     def json(self, method, route, data=None, *, expected=200, headers=None):
         status, _headers, body = self.call(method, route, data, headers)
-        require(status == expected, "HTTP_STATUS_UNEXPECTED")
+        require(status == expected, f"HTTP_STATUS_UNEXPECTED_{status}")
         try:
             value = json.loads(body)
         except (ValueError, UnicodeError):
@@ -264,8 +264,15 @@ def run(base, access_file, output, *, project=None, version="v001", render=False
             return evidence
         deadline = time.monotonic() + timeout
         observed = []
+        evidence["observed_phases"] = observed
         while status.get("status") != "complete":
             value = status.get("status")
+            progress = status.get("progress") if isinstance(status.get("progress"), dict) else {}
+            evidence["last_status"] = {"status": value, "job_id": status.get("job_id"),
+                                       "progress": {key: progress.get(key) for key in ("stage", "completed", "total", "completed_frames", "total_frames")}}
+            error = status.get("error")
+            if isinstance(error, dict) and re.fullmatch(r"[A-Z0-9_]{1,80}", error.get("code", "")):
+                evidence["backend_error_code"] = error["code"]
             if not observed or observed[-1]["status"] != value:
                 observed.append({"status": value, "at_utc": utc()})
             require(value not in {"failed", "interrupted", "qc_failed"}, "BACKGROUND_RENDER_FAILED")
@@ -276,7 +283,11 @@ def run(base, access_file, output, *, project=None, version="v001", render=False
         result = status.get("result", {})
         qc = result.get("qc", {})
         require(qc.get("passed") is True, "AUTOMATIC_QC_FAILED")
-        evidence["automatic_qc"] = {key: qc.get(key) for key in ("passed", "duration", "decoded_frames", "failures", "publication_quality")}
+        require(result.get("plan_hash") == plan_hash, "RENDERED_PLAN_HASH_MISMATCH")
+        require(abs(float(qc.get("duration", 0)) - 12) <= .075 and qc.get("decoded_frames") == 360
+                and qc.get("dimensions") == [1080, 1920] and abs(float(qc.get("fps", 0)) - 30) < .01
+                and qc.get("codec") == "h264", "FINAL_MEDIA_SPEC_MISMATCH")
+        evidence["automatic_qc"] = {key: qc.get(key) for key in ("passed", "duration", "decoded_frames", "dimensions", "fps", "codec", "failures", "publication_quality")}
         metrics = result.get("metrics", {})
         evidence["actual_execution_metrics"] = metrics
         evidence["all_scenes_native_this_run"] = metrics.get("rendered_scene_count") == 5 and metrics.get("cached_scene_count") == 0
@@ -307,7 +318,7 @@ def run(base, access_file, output, *, project=None, version="v001", render=False
             with destination.open("rb") as target:
                 require(ranged == target.read(1024), "HTTP_RANGE_BYTES_MISMATCH")
             head_status, head_headers, head_body = client.call("HEAD", download_route)
-            require(head_status == 200 and head_body == b"" and int(head_headers.get("Content-Length", -1)) == size, "HTTP_HEAD_FAILED")
+            require(head_status == 200 and head_body == b"" and int(head_headers.get("content-length", -1)) == size, "HTTP_HEAD_FAILED")
             evidence["downloads"].append({"name": name, "bytes": size, "sha256": actual_sha, "server_sha256_verified": True, "http_range_verified": True, "http_head_verified": True})
         require(len(evidence["downloads"]) == 2, "FINAL_DOWNLOADS_INCOMPLETE")
         evidence.update(passed=True, render_complete=True, completed_at_utc=utc(),
