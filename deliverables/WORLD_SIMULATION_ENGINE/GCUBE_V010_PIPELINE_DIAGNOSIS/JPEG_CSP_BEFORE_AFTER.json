@@ -1,0 +1,14 @@
+{
+  "scope": "Actual Chromium JPEG decode only; no WebGL/map render",
+  "policy": "default-src 'self'; connect-src 'self'; img-src 'self' data:",
+  "before": "CSP_REJECTED: fetch(dataURI)",
+  "after": {
+    "decoded": [
+      1080,
+      1920
+    ],
+    "decodeError": false
+  },
+  "fix": "Decode identical base64 JPEG bytes in a Blob; no request, changed JPEG bytes or CSP relaxation",
+  "regression": "test_real_browser_jpeg_decode_keeps_csp_without_fetch_or_webgl"
+}

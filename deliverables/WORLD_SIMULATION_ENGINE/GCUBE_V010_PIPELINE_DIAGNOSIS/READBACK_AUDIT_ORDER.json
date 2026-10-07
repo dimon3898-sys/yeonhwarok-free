@@ -1,0 +1,26 @@
+{
+  "scope": "Actual production callback with injected readback error; no GPU/WebGL map draw",
+  "original_order": [
+    "renderFrame",
+    "JPEG_toDataURL",
+    "native_audit",
+    "audit_gate",
+    "encoder_stdin"
+  ],
+  "corrected_order": [
+    "renderFrame",
+    "JPEG_toDataURL",
+    "native_audit",
+    "JPEG_Blob_decode",
+    "audit_gate",
+    "JPEG_validity_gate",
+    "lazy_encoder_stdin"
+  ],
+  "injected_readback_webgl_error": 1286,
+  "browser_errors": [],
+  "observed_native_audit_webgl_error": 1286,
+  "failed_invariant": "WEBGL_ERROR",
+  "result": "REJECTED",
+  "bypassed_audit": false,
+  "gpu_test_frame": "NOT_RUN"
+}
