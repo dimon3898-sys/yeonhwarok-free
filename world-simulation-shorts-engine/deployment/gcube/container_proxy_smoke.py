@@ -53,17 +53,22 @@ def main():
             "X-Forwarded-For": "203.0.113.8, 10.42.0.2, 127.0.0.6",
             "X-Envoy-External-Address": "203.0.113.8",
             "Forwarded": 'for=203.0.113.8;proto=https;host="' + service + '", for=10.42.0.2;proto=http'}
+    captured = len(sys.argv) > 4 and sys.argv[4] == 'captured-http'
+    if captured:
+        fixture = json.loads((Path(__file__).parent/'fixtures/gcube_v007_internal_http.json').read_text())
+        base = dict(fixture['headers'])
+        service, origin = base['Host'], 'https://' + base['Host']
     cookie = None
     subprocess.run(["docker", "exec", "--detach", name, "python", "-c", LOOPBACK_RELAY], check=True)
 
-    def call(method, path, data=None, headers=None):
+    def call(method, path, data=None, headers=None, *, direct=False):
         values = dict(base)
         if cookie: values["Cookie"] = cookie
         if method == "POST": values["Origin"] = origin
         values.update(headers or {})
         payload = json.dumps(data).encode() if data is not None else None
         if payload is not None: values["Content-Type"] = "application/json"
-        connection = http.client.HTTPConnection("127.0.0.1", endpoint_port, timeout=5)
+        connection = http.client.HTTPConnection("127.0.0.1", endpoint_port+2 if direct else endpoint_port, timeout=5)
         connection.request(method, path, body=payload, headers=values)
         response = connection.getresponse()
         result = response.status, dict(response.getheaders()), response.read()
@@ -85,6 +90,12 @@ def main():
         raise AssertionError("PROXY_CONTAINER_NOT_READY")
     ready_at = time.monotonic()
     assert record["gpu"]["render_mode"] == "cpu" and record["gpu"]["gpu_rendering_verified"] is False
+    if captured:
+        assert call('GET','/api/health',direct=True)[0] == 403
+        status,_,page=call('GET','/auth/login')
+        assert status==200 and b'owner-login-fields" disabled' in page and b'/auth/secure-login.js' in page
+        assert call('GET','/auth/secure-login.js')[0]==200
+        assert call('POST','/auth/login',{'password':owner},headers={'Origin':'http://'+service})[0]==403
     for path in ("/api/projects", "/api/gcube/proxy", "/gcube/gpu.json"):
         assert call("GET", path)[0] == 401
     for password in (None, "wrong"):
@@ -94,12 +105,14 @@ def main():
     assert status == 200 and json.loads(body)["authenticated"] is True
     assert all(flag in headers["Set-Cookie"] for flag in ("Secure", "HttpOnly", "SameSite=Strict"))
     cookie = headers["Set-Cookie"].split(";", 1)[0]
-    for xff in ("203.0.113.8", "203.0.113.8, 10.42.0.2", "203.0.113.8, 10.42.0.2, 127.0.0.6"):
+    for xff in (base['X-Forwarded-For'],) if captured else ("203.0.113.8", "203.0.113.8, 10.42.0.2", "203.0.113.8, 10.42.0.2, 127.0.0.6"):
         status, _, body = call("GET", "/api/gcube/proxy", headers={"X-Forwarded-For": xff})
         record = json.loads(body)
         assert status == 200 and record["xff_entry_count"] == len(xff.split(","))
-        assert record["forwarded_host"] == service and record["effective_origin"] == origin
-        assert b"203.0.113.8" not in body and cookie.encode() not in body
+        assert record["forwarded_host"] == (None if captured else service) and record["effective_origin"] == origin
+        assert record['forwarded_proto'] == ('http' if captured else 'https')
+        assert record['forwarded_proto_is_browser_tls_proof'] is False
+        assert b"203.0.113.8" not in body and b'8.8.8.8' not in body and cookie.encode() not in body
     assert call("GET", "/auth/session")[0] == 200
     assert call("GET", "/api/projects")[0] == 200
     status, _, body = call("GET", "/gcube/gpu.json")
@@ -127,6 +140,7 @@ def main():
     print(json.dumps({"proxy_owner_http": "PASS", "blocked_mutation_requests": len(routes) * len(attacks),
                       "server_alive_seconds_after_ready": round(time.monotonic() - ready_at, 3),
                       "bound": "0.0.0.0:8000", "render_requested": False,
+                      "fixture": "user-reported v007 capture shape, redacted addresses" if captured else "legacy HTTPS proxy",
                       "test_runtime": "explicit CPU comparison; not NVIDIA GPU validation"}))
 
 

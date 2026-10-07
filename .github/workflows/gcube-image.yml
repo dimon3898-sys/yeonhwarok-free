@@ -37,19 +37,27 @@ jobs:
     timeout-minutes: 45
     env:
       IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
-      RELEASE_TAG: gcube-v005
+      RELEASE_TAG: gcube-v008
     steps:
       - name: Checkout approved sources
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 1
+      - name: Preserve all published image tags
+        shell: bash
+        run: |
+          set -euo pipefail
+          if docker manifest inspect "${IMAGE}:${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo 'Release tag already exists; publication must never overwrite it.'
+            exit 1
+          fi
       - name: Set up Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Build the complete image for local smoke testing
         uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: .
-          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.proxy-v008
           platforms: linux/amd64
           load: true
           push: false
@@ -59,6 +67,34 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+      - name: Verify RTX4080S runtime packages and official Chromium backend order
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import os,subprocess
+          for package in ('libegl1','libvulkan1','libx11-6','libxext6'):
+              state=subprocess.check_output(['dpkg-query','-W','-f=${Status}',package],text=True)
+              assert state=='install ok installed', package
+              print(package+': '+state)
+          from deployment.gcube.chromium_wrapper import browser_arguments
+          from deployment.gcube.graphics_start import select_graphics_profile
+          from deployment.gcube.gpu import GPUError
+          assert os.environ.get('WORLD_ENGINE_RENDER_MODE') != 'cpu'
+          assert os.environ.get('NVIDIA_DRIVER_CAPABILITIES') != 'all'
+          for profile, angle in [('vulkan','vulkan'),('egl','gl-egl')]:
+              args=browser_arguments(['--headless','--no-sandbox','--use-angle=swiftshader'],{'WORLD_ENGINE_GPU_PROFILE':profile})
+              assert '--use-gl=angle' in args and '--use-angle='+angle in args
+              assert '--disable-software-rasterizer' in args and '--use-angle=swiftshader' not in args
+          calls=[]
+          def fail(**kwargs):
+              calls.append(kwargs['environ']['WORLD_ENGINE_GPU_PROFILE'])
+              raise GPUError('GPU_WEBGL_UNVERIFIED')
+          try:select_graphics_profile({},probe=fail)
+          except GPUError:pass
+          assert calls==['vulkan','egl']
+          print('Required runtime packages installed; official Vulkan then GL-EGL; both failures stay blocked; no physical NVIDIA GPU available in CI')
+          PY
       - name: Verify full-image foreground boot, owner login and blocked diagnostics
         shell: bash
         run: |
@@ -271,16 +307,27 @@ jobs:
                   raise RuntimeError('Ready engine lost its explicit CPU profile')
           print('Fresh Chromium WebGL2 CPU draw, owner-gated GPU diagnostic routes, root/UID1000 image boot, 0.0.0.0:8000, owner login, Pod-IP health, sustained foreground lifetime, and three fail-closed startup diagnostics passed; no render was requested')
           PY
-      - name: Verify GPU admission and software renderer rejection contracts in the built image
+      - name: Full proxy/security regressions and v007 target diagnostics in the operating image
         shell: bash
         run: |
           set -euo pipefail
-          docker run --rm --entrypoint python "${IMAGE}:${RELEASE_TAG}" \
-            -m unittest deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
+          # Legacy fixtures require root-owned source-adjacent scratch files;
+          # use temporary mounts only. Production startup still drops to UID1000.
+          docker run --rm --user 0:0 --tmpfs /tmp:rw,nosuid,nodev,size=512m,mode=1777 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" /tmp/proxy-diag/run_checks.py \
+            tests.test_mobile_deployment_security tests.test_codespaces_origin \
+            deployment.gcube.test_storage deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
             deployment.gcube.test_chromium_wrapper deployment.gcube.test_graphics_runtime \
-            deployment.gcube.test_gpu_access deployment.gcube.test_boot_status \
-            deployment.gcube.test_server deployment.gcube.test_proxy deployment.gcube.test_start
-      - name: Verify fresh-image Istio HTTPS proxy login and 60-second server lifetime
+            deployment.gcube.test_gpu_access deployment.gcube.test_boot_status deployment.gcube.test_server \
+            deployment.gcube.test_proxy deployment.gcube.test_start deployment.gcube.test_diagnostics \
+            deployment.gcube.test_validation_fixture deployment.gcube.test_internal_http
+          docker run --rm --user 1000:1000 --workdir /tmp/proxy-diag \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" /tmp/proxy-diag/run_checks.py test_observer test_server_diag
+      - name: Verify captured Istio HTTP profile, secure owner login and 61-second lifetime
         shell: bash
         run: |
           set -euo pipefail
@@ -302,10 +349,10 @@ jobs:
           PY
           # A temporary same-Pod TCP relay reproduces Envoy's loopback peer;
           # the public gateway never trusts the Docker host bridge address.
-          docker run --detach --name "$smoke_name" --publish 127.0.0.1:18010:18011 \
+          docker run --detach --name "$smoke_name" --publish 127.0.0.1:18010:18011 --publish 127.0.0.1:18012:8000 \
             --env-file "$smoke_directory/test.env" "${IMAGE}:${RELEASE_TAG}" >/dev/null
           python world-simulation-shorts-engine/deployment/gcube/container_proxy_smoke.py \
-            "$smoke_directory/test.env" "$smoke_name" 18010
+            "$smoke_directory/test.env" "$smoke_name" 18010 captured-http
       - name: Report bounded startup diagnostics after a failure
         if: failure()
         shell: bash
@@ -330,7 +377,7 @@ jobs:
           docker push "${IMAGE}:${RELEASE_TAG}"
           docker push "${IMAGE}:${RELEASE_TAG}-sha-${GITHUB_SHA}"
           echo 'Publication preserves existing package visibility; anonymous pulls require a public package.'
-      - name: Verify anonymous public pull of the published v005 image
+      - name: Verify anonymous public pull of the published v008 image
         shell: bash
         run: |
           set -euo pipefail

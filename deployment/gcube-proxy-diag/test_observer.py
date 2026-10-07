@@ -41,9 +41,9 @@ class ObserverTests(unittest.TestCase):
         self.assertFalse(report['engine_ready']); self.assertEqual(report['gpu'], 'NOT_RUN')
         return report
 
-    def test_pinned_source_and_all_twenty_one_failure_sites(self):
+    def test_pinned_source_and_all_twenty_two_failure_sites(self):
         self.assertEqual(hashlib.sha256(Path(proxy.__file__).read_bytes()).hexdigest(), EXPECTED_PROXY_SHA256)
-        self.assertEqual(len(rule_catalog()), 21)
+        self.assertEqual(len(rule_catalog()), 22)
 
     def test_ipv4_ipv6_mapped_and_multiple_physical_xff(self):
         for value in ('203.0.113.8', '2001:db8::8', '::ffff:203.0.113.8',
@@ -90,7 +90,7 @@ class ObserverTests(unittest.TestCase):
 
     def test_admission_failure_matrix(self):
         cases = [
-            ({'X_Forwarded_Proto':'http'}, 'X_FORWARDED_PROTO_NOT_HTTPS'),
+            ({'X_Forwarded_Proto':'http'}, 'GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH'),
             ({'X_Forwarded_Port':'65536'}, 'PORT_FORMAT_OR_RANGE'),
             ({'X_Forwarded_For':'203.0.113.8,'}, 'CHAIN_EMPTY_OR_TOO_MANY_ENTRIES'),
             ({'X_Forwarded_For':'"203.0.113.8'}, 'CHAIN_QUOTE_SYNTAX'),

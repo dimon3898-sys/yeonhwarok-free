@@ -160,7 +160,7 @@ def parse_forwarding(headers, peer_ip):
     xf_host = RequestPolicy._single_header(headers, "X-Forwarded-Host")
     proto = RequestPolicy._single_header(headers, "X-Forwarded-Proto")
     raw_port = RequestPolicy._single_header(headers, "X-Forwarded-Port")
-    if proto not in {None, "https"}:
+    if proto not in {None, "https", "http"}:
         invalid_forwarding()
     port = port_number(raw_port) if raw_port is not None else None
     raw_xff = list_header(headers, "X-Forwarded-For")
@@ -187,6 +187,9 @@ def parse_forwarding(headers, peer_ip):
         forwarded_ip(envoy)
     if (xff or forwarded or envoy is not None) and not trusted_peer(peer_ip):
         invalid_forwarding()
+    if proto == "http" and not gcube_internal_http_profile(
+            RequestPolicy._single_header(headers, "Host"), peer_ip, xff, envoy):
+        invalid_forwarding()
     if forwarded:
         if forwarded[0].get("proto") not in {None, "https"}:
             invalid_forwarding()
@@ -197,6 +200,27 @@ def parse_forwarding(headers, peer_ip):
             invalid_forwarding()
         proto = proto or forwarded_proto
     return xf_host, proto, port, xff, forwarded, envoy is not None
+
+
+def gcube_internal_http_profile(host, peer_ip, xff, envoy):
+    """Only the captured service-host/sidecar shape may carry upstream HTTP.
+
+    This describes an internal hop, never attests browser TLS. No new peer
+    networks are trusted, and XFF/Envoy values never authenticate an owner.
+    All addresses have already passed the strict syntax parser above.
+    """
+    if not trusted_peer(peer_ip):
+        return False
+    try:
+        service = urlsplit(provider_origin(host))
+        if not service.hostname.endswith('.service.gcube.ai') or len(xff) != 2 or envoy is None:
+            return False
+        first, second, external = (ipaddress.ip_address(value) for value in (*xff, envoy))
+        return (all(value.version == 4 for value in (first, second, external))
+                and first.is_global and second.is_private and external.is_private
+                and not any(value.is_unspecified or value.is_multicast for value in (first, second, external)))
+    except (SecurityError, ValueError, TypeError):
+        return False
 
 
 def request_envelope(headers, *, origin=None, port=8000, peer_ip=None):
@@ -243,6 +267,7 @@ def request_envelope(headers, *, origin=None, port=8000, peer_ip=None):
                        "forwarded_host": urlsplit(provider_origin(xf_host)).netloc if xf_host else None,
                        "forwarded_proto": proto, "forwarded_port": xf_port,
                        "xff_entry_count": len(xff), "envoy_external_address_present": envoy,
+                       "forwarded_proto_is_browser_tls_proof": False,
                        "effective_origin": candidate}
 
 

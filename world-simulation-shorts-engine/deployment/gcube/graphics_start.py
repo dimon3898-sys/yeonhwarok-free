@@ -1,6 +1,6 @@
 """Bounded startup profile selection; mocked tests do not certify a GPU driver.
 
-Only an unspecified GPU profile can try EGL and then Vulkan. Each attempt uses
+Only an unspecified GPU profile can try Vulkan and then GL-EGL. Each attempt uses
 the existing hardware/WebGL probe; CPU fallback always requires explicit mode.
 The caller must carry the selected ``gpu_profile`` into the backend environment.
 """
@@ -47,7 +47,7 @@ def select_graphics_profile(environ, *, runner=None, probe=None):
         raise GPUError(str(error)) from None
     profiles = (initial_profile,)
     if mode == 'gpu-required' and 'WORLD_ENGINE_GPU_PROFILE' not in env:
-        profiles = ('egl', 'vulkan')
+        profiles = ('vulkan', 'egl')
     runtime_probe = probe_gpu_runtime if probe is None else probe
     attempts, detailed_attempts, original_error = [], [], None
     for index, profile in enumerate(profiles):

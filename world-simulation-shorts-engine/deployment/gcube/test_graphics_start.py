@@ -6,7 +6,7 @@ from deployment.gcube.gpu import GPUError
 from deployment.gcube.graphics_start import select_graphics_profile
 
 
-def report(profile='egl', mode='gpu-required'):
+def report(profile='vulkan', mode='gpu-required'):
     cpu = mode == 'cpu'
     return {
         'schema_version': 1,
@@ -32,12 +32,12 @@ class ProfileSelection(unittest.TestCase):
     def test_both_backend_failures_keep_distinct_safe_stages_and_renderers(self):
         def probe(**kwargs):
             profile = kwargs['environ']['WORLD_ENGINE_GPU_PROFILE']
-            reason = 'WEBGL2_CONTEXT_UNAVAILABLE' if profile == 'egl' else 'SOFTWARE_RENDERER_REJECTED'
-            failed_stage = 'D' if profile == 'egl' else 'E'
+            reason = 'WEBGL2_CONTEXT_UNAVAILABLE' if profile == 'vulkan' else 'SOFTWARE_RENDERER_REJECTED'
+            failed_stage = 'D' if profile == 'vulkan' else 'E'
             raise GPUError('GPU_WEBGL_UNVERIFIED', diagnostics={
                 'render_mode':'gpu-required', 'gpu_profile':profile, 'reason_code':reason,
-                'failed_stage':failed_stage, 'webgl':{'renderer':None if profile == 'egl' else 'llvmpipe',
-                    'context_available':profile != 'egl'},
+                'failed_stage':failed_stage, 'webgl':{'renderer':None if profile == 'vulkan' else 'llvmpipe',
+                    'context_available':profile != 'vulkan'},
                 'stages':[{'id':failed_stage,'status':'FAIL','reason_code':reason}],
                 'stderr':'do-not-reflect'})
         with self.assertRaises(GPUError) as raised:
@@ -51,20 +51,20 @@ class ProfileSelection(unittest.TestCase):
     def test_success_keeps_failed_backend_evidence_and_selected_verified_backend(self):
         def probe(**kwargs):
             profile = kwargs['environ']['WORLD_ENGINE_GPU_PROFILE']
-            if profile == 'egl':
+            if profile == 'vulkan':
                 raise GPUError('GPU_WEBGL_UNVERIFIED', diagnostics={
-                    'render_mode':'gpu-required', 'gpu_profile':'egl', 'failed_stage':'D',
+                    'render_mode':'gpu-required', 'gpu_profile':'vulkan', 'failed_stage':'D',
                     'reason_code':'WEBGL2_CONTEXT_UNAVAILABLE'})
-            current = report('vulkan')
-            current['diagnostics'] = {'render_mode':'gpu-required', 'gpu_profile':'vulkan',
+            current = report('egl')
+            current['diagnostics'] = {'render_mode':'gpu-required', 'gpu_profile':'egl',
                                      'reason_code':'VERIFIED', 'failed_stage':None,
                                      'webgl':current['webgl']}
             return current
         selected = select_graphics_profile({}, probe=probe)
-        self.assertEqual(selected['diagnostics']['gpu_profile'], 'vulkan')
+        self.assertEqual(selected['diagnostics']['gpu_profile'], 'egl')
         self.assertEqual([attempt['status'] for attempt in selected['diagnostics']['profile_attempts']], ['failed','verified'])
 
-    def test_default_egl_success_preserves_report_runner_and_private_environment(self):
+    def test_default_vulkan_success_preserves_report_runner_and_private_environment(self):
         source_report = report()
         source_env = {'PRIVATE_TOKEN': 'private-value', 'PATH': '/usr/bin'}
         original_env = dict(source_env)
@@ -75,15 +75,15 @@ class ProfileSelection(unittest.TestCase):
         selected = select_graphics_profile(source_env, runner=runner, probe=probe)
         self.assertEqual(source_env, original_env)
         self.assertIs(calls[0]['runner'], runner)
-        self.assertEqual(calls[0]['environ'], {**source_env, 'WORLD_ENGINE_GPU_PROFILE': 'egl'})
+        self.assertEqual(calls[0]['environ'], {**source_env, 'WORLD_ENGINE_GPU_PROFILE': 'vulkan'})
         self.assertIsNot(calls[0]['environ'], source_env)
         self.assertEqual({key: selected[key] for key in source_report}, source_report)
         self.assertNotIn('safe_profile_attempts', source_report)
-        self.assertEqual(selected['safe_profile_attempts'], [{'profile': 'egl', 'status': 'verified'}])
+        self.assertEqual(selected['safe_profile_attempts'], [{'profile': 'vulkan', 'status': 'verified'}])
         self.assertNotIn('PRIVATE_TOKEN', str(selected['safe_profile_attempts']))
         self.assertNotIn('private-value', str(selected['safe_profile_attempts']))
 
-    def test_each_retryable_error_can_select_vulkan_without_mutating_base_environment(self):
+    def test_each_retryable_error_can_select_egl_without_mutating_base_environment(self):
         for code in ('GPU_BROWSER_PROBE_FAILED', 'GPU_WEBGL_UNVERIFIED'):
             with self.subTest(code=code):
                 calls, source_env = [], {'PATH': '/usr/bin'}
@@ -93,17 +93,17 @@ class ProfileSelection(unittest.TestCase):
                     if len(calls) == 1:
                         attempt['PRIVATE_TOKEN'] = 'mutation-must-not-propagate'
                         raise GPUError(code)
-                    return report('vulkan')
+                    return report('egl')
                 selected = select_graphics_profile(source_env, probe=probe)
                 self.assertEqual(calls, [
-                    {'PATH': '/usr/bin', 'WORLD_ENGINE_GPU_PROFILE': 'egl'},
                     {'PATH': '/usr/bin', 'WORLD_ENGINE_GPU_PROFILE': 'vulkan'},
+                    {'PATH': '/usr/bin', 'WORLD_ENGINE_GPU_PROFILE': 'egl'},
                 ])
                 self.assertEqual(source_env, {'PATH': '/usr/bin'})
-                self.assertEqual(selected['gpu_profile'], 'vulkan')
+                self.assertEqual(selected['gpu_profile'], 'egl')
                 self.assertEqual(selected['safe_profile_attempts'], [
-                    {'profile': 'egl', 'status': 'failed', 'error_code': code},
-                    {'profile': 'vulkan', 'status': 'verified'},
+                    {'profile': 'vulkan', 'status': 'failed', 'error_code': code},
+                    {'profile': 'egl', 'status': 'verified'},
                 ])
 
     def test_both_failures_raise_original_fixed_error_with_only_two_attempts(self):
@@ -117,8 +117,8 @@ class ProfileSelection(unittest.TestCase):
                 with self.assertRaises(GPUError) as raised:
                     select_graphics_profile({}, probe=probe)
                 self.assertIs(raised.exception, first)
-                self.assertEqual(calls, ['egl', 'vulkan'])
-                self.assertEqual([item['backend'] for item in raised.exception.diagnostics['profile_attempts']], ['egl', 'vulkan'])
+                self.assertEqual(calls, ['vulkan', 'egl'])
+                self.assertEqual([item['backend'] for item in raised.exception.diagnostics['profile_attempts']], ['vulkan', 'egl'])
                 self.assertEqual([item['error_code'] for item in raised.exception.diagnostics['profile_attempts']],
                                  ['GPU_BROWSER_PROBE_FAILED', second_code])
 
@@ -135,7 +135,7 @@ class ProfileSelection(unittest.TestCase):
                 self.assertEqual(len(calls), 1)
 
     def test_explicit_profile_is_honored_with_one_attempt(self):
-        for profile in ('egl', 'vulkan'):
+        for profile in ('vulkan', 'egl'):
             for fails in (False, True):
                 with self.subTest(profile=profile, fails=fails):
                     calls = []
@@ -156,7 +156,7 @@ class ProfileSelection(unittest.TestCase):
         calls = []
         def probe(**kwargs):
             calls.append(kwargs)
-            return report(mode='cpu')
+            return report('egl', mode='cpu')
         selected = select_graphics_profile({'WORLD_ENGINE_RENDER_MODE': 'cpu'}, probe=probe)
         self.assertFalse(selected['gpu_rendering_verified'])
         self.assertEqual(len(calls), 1)
@@ -207,7 +207,7 @@ class ProfileSelection(unittest.TestCase):
                 calls = []
                 def probe(**kwargs):
                     calls.append(kwargs)
-                    result = report(mode='cpu')
+                    result = report('egl', mode='cpu')
                     result[field] = value
                     return result
                 with self.assertRaisesRegex(GPUError, 'CPU_FALLBACK_UNVERIFIED'):
@@ -223,7 +223,7 @@ class ProfileSelection(unittest.TestCase):
     def test_default_probe_calls_existing_runtime_probe_with_selected_environment(self):
         with patch('deployment.gcube.graphics_start.probe_gpu_runtime', return_value=report()) as probe:
             selected = select_graphics_profile({})
-            probe.assert_called_once_with(environ={'WORLD_ENGINE_GPU_PROFILE': 'egl'}, runner=None)
+            probe.assert_called_once_with(environ={'WORLD_ENGINE_GPU_PROFILE': 'vulkan'}, runner=None)
         self.assertTrue(selected['gpu_rendering_verified'])
 
 

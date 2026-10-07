@@ -1,0 +1,14 @@
+# Immutable production v005 base; renderer/assets/ENTRYPOINT/CMD preserved.
+# Trusted internal HTTP, HTTPS-only public login, and Vulkan-first GPU admission.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:aca64542277a971c6ce1c616308d8a263f7aca8ff94874971e298c88a4e38567
+# The production base already includes EGL/Vulkan and Chromium dependencies.
+# Check actual dpkg state; install only missing packages, never a kernel driver.
+RUN set -eu; missing=""; \
+    for package in libegl1 libvulkan1 libx11-6 libxext6; do \
+      if ! dpkg-query -W -f='${Status}' "$package" 2>/dev/null | grep -qx 'install ok installed'; then missing="$missing $package"; fi; \
+    done; \
+    if [ -n "$missing" ]; then apt-get update; apt-get install -y --no-install-recommends $missing; rm -rf /var/lib/apt/lists/*; fi; \
+    dpkg-query -W -f='${Package} ${Status} ${Version}\n' libegl1 libvulkan1 libx11-6 libxext6
+COPY world-simulation-shorts-engine/deployment/gcube/graphics_start.py world-simulation-shorts-engine/deployment/gcube/test_graphics_start.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+COPY world-simulation-shorts-engine/deployment/gcube/proxy.py world-simulation-shorts-engine/deployment/gcube/server.py world-simulation-shorts-engine/deployment/gcube/test_internal_http.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+COPY world-simulation-shorts-engine/deployment/gcube/fixtures/gcube_v007_internal_http.json /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/fixtures/

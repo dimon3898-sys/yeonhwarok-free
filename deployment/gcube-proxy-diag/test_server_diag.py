@@ -69,7 +69,7 @@ class ServerTests(unittest.TestCase):
                                          {'X-Forwarded-Proto':'http', 'Authorization':'Bearer secret-sentinel'})
         self.assertEqual(status,403); self.assertNotIn('Set-Cookie',values)
         self.assertIsNone(self.app.origin)
-        self.assertEqual(json.loads(body)['validation']['FAILED_VALIDATION_RULE'],'X_FORWARDED_PROTO_NOT_HTTPS')
+        self.assertEqual(json.loads(body)['validation']['FAILED_VALIDATION_RULE'],'GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH')
         self.assertNotIn('secret-sentinel', json.dumps(self.records))
         self.assertNotIn(self.owner, json.dumps(self.records))
 
@@ -145,7 +145,7 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(status,400); self.assertNotIn('Set-Cookie',fields)
             report = json.loads(body)
             self.assertEqual(report['validation']['FAILED_VALIDATION_RULE'],rule)
-            self.assertEqual(report['proxy_validation']['FAILED_VALIDATION_RULE'],'X_FORWARDED_PROTO_NOT_HTTPS')
+            self.assertEqual(report['proxy_validation']['FAILED_VALIDATION_RULE'],'GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH')
             self.assertTrue(report['headers']['Host']['present']); self.assertFalse(report['engine_ready'])
             self.assertEqual(report, self.records[-1])
             for secret in ('secret-fragment','secret-sentinel','owner-secret'):
@@ -154,7 +154,7 @@ class ServerTests(unittest.TestCase):
     def test_target_pass_does_not_mask_original_forwarding_rejection(self):
         status,_,body=self.request('GET','/diag.json?probe=1',headers={'X-Forwarded-Proto':'http'})
         self.assertEqual(status,403); report=json.loads(body)
-        self.assertEqual(report['validation']['FAILED_VALIDATION_RULE'],'X_FORWARDED_PROTO_NOT_HTTPS')
+        self.assertEqual(report['validation']['FAILED_VALIDATION_RULE'],'GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH')
         self.assertTrue(report['target']['query_present']); self.assertEqual(report['target']['status'],'PASS')
         self.assertIsNone(self.app.origin)
 
@@ -164,7 +164,7 @@ class ServerTests(unittest.TestCase):
         report=json.loads(body)
         self.assertEqual(status,400); self.assertNotIn('Set-Cookie',fields)
         self.assertEqual(report['validation']['FAILED_VALIDATION_RULE'],'TARGET_HAS_QUERY')
-        self.assertEqual(report['proxy_validation']['FAILED_VALIDATION_RULE'],'X_FORWARDED_PROTO_NOT_HTTPS')
+        self.assertEqual(report['proxy_validation']['FAILED_VALIDATION_RULE'],'GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH')
         self.assertNotIn('secret-query',json.dumps(self.records)); self.assertIsNone(self.app.origin)
 
     def test_absolute_admission_is_not_run_when_proxy_context_is_rejected(self):
@@ -173,7 +173,7 @@ class ServerTests(unittest.TestCase):
         report=json.loads(body)
         self.assertEqual(status,403);self.assertNotIn('Set-Cookie',fields)
         self.assertEqual(report['target']['status'],'NOT_RUN')
-        self.assertEqual(report['validation']['FAILED_VALIDATION_RULE'],'X_FORWARDED_PROTO_NOT_HTTPS')
+        self.assertEqual(report['validation']['FAILED_VALIDATION_RULE'],'GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH')
 
     def test_parser_exception_is_structured_and_does_not_echo_exception(self):
         with patch('target.urlsplit',side_effect=ValueError('secret-parser-input')):

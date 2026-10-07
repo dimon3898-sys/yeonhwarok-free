@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 from deployment.gcube import proxy
 from deployment.security import SecurityError
 
-EXPECTED_PROXY_SHA256 = "b5e66d4ceee91c25eab4daa8a24339a67c89592ae25ba2dacdc68c6bdb2ede07"
+EXPECTED_PROXY_SHA256 = "634679f2dc4b836c521d9d46d4cbaacacbe0c844ddd557d90afa5e6ca879f9d8"
 FIELDS = ("Host", "Origin", "X-Forwarded-Host", "X-Forwarded-Proto",
           "X-Forwarded-Port", "X-Forwarded-For", "Forwarded", "X-Envoy-External-Address")
 KNOWN_RELATED = frozenset(("x-envoy-external-address", "x-envoy-original-path",
@@ -31,8 +31,8 @@ RULES = {
                         "FORWARDED_VALUE_TOKEN_SYNTAX"),
     "port_number": ("PORT_FORMAT_OR_RANGE",),
     "forwarded_ip": ("IP_NODE_FORMAT",),
-    "parse_forwarding": ("X_FORWARDED_PROTO_NOT_HTTPS", "FORWARDED_PARAMETER_SYNTAX_OR_DUPLICATE",
-        "FORWARDED_PROTO_VALUE", "FORWARDED_PEER_NOT_TRUSTED", "FORWARDED_FIRST_PROTO_NOT_HTTPS",
+    "parse_forwarding": ("X_FORWARDED_PROTO_VALUE_NOT_SUPPORTED", "FORWARDED_PARAMETER_SYNTAX_OR_DUPLICATE",
+        "FORWARDED_PROTO_VALUE", "FORWARDED_PEER_NOT_TRUSTED", "GCUBE_INTERNAL_HTTP_PROFILE_MISMATCH", "FORWARDED_FIRST_PROTO_NOT_HTTPS",
         "FORWARDED_FOR_XFF_DISAGREE", "FORWARDED_PROTO_HEADERS_DISAGREE"),
     "request_envelope": ("FORWARDED_HOST_HEADERS_DISAGREE", "HOST_FORWARDED_AUTHORITY_DISAGREE",
         "X_FORWARDED_PORT_AUTHORITY_DISAGREE", "PORT_RECONSTRUCTION_PEER_OR_PROTO",
@@ -59,6 +59,18 @@ def rule_catalog():
     return result
 
 
+def xff_callsite_lines():
+    # Python 3.12 inlines comprehensions. Derive the XFF call location from
+    # the same hash-pinned AST instead of a stale hard-coded source line.
+    for fn in ast.parse(Path(proxy.__file__).read_bytes()).body:
+        if isinstance(fn, ast.FunctionDef) and fn.name == 'parse_forwarding':
+            for node in ast.walk(fn):
+                if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'xff' for t in node.targets):
+                    return {call.lineno for call in ast.walk(node) if isinstance(call, ast.Call)
+                            and isinstance(call.func, ast.Name) and call.func.id == 'forwarded_ip'}
+    raise RuntimeError('VALIDATOR_XFF_MAP_CHANGED')
+
+
 def failure_rule(error, catalog):
     frames = []
     tb = error.__traceback__
@@ -76,7 +88,7 @@ def failure_rule(error, catalog):
                     # Python 3.12 inlines list comprehensions; the pinned source
                     # call site distinguishes XFF from Envoy on both versions.
                     result["header_family"] = "XFF" if any(f.f_code.co_name == "<listcomp>" or
-                        f.f_code.co_name == "parse_forwarding" and n == 167 for f, n in frames) else "X_ENVOY_EXTERNAL_ADDRESS"
+                        f.f_code.co_name == "parse_forwarding" and n in xff_callsite_lines() for f, n in frames) else "X_ENVOY_EXTERNAL_ADDRESS"
             return result
         if filename.name == "security.py" and frame.f_code.co_name == "_single_header":
             name = frame.f_locals.get("name")

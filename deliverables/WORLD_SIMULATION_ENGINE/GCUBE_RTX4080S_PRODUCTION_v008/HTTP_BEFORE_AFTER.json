@@ -1,0 +1,42 @@
+[
+  {
+    "implementation": "before",
+    "steps": [
+      {
+        "method": "GET",
+        "path": "/auth/login",
+        "http_status": 403,
+        "cookie_issued": false,
+        "origin_bound": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "http_status": 403,
+        "cookie_issued": false,
+        "origin_bound": false
+      }
+    ],
+    "fixture_source": "User-reported capture structure; substituted host/IPs; HTTPS Origin is an explicitly tested auth condition, not captured TLS evidence"
+  },
+  {
+    "implementation": "after",
+    "steps": [
+      {
+        "method": "GET",
+        "path": "/auth/login",
+        "http_status": 200,
+        "cookie_issued": false,
+        "origin_bound": false
+      },
+      {
+        "method": "POST",
+        "path": "/auth/login",
+        "http_status": 200,
+        "cookie_issued": true,
+        "origin_bound": true
+      }
+    ],
+    "fixture_source": "User-reported capture structure; substituted host/IPs; HTTPS Origin is an explicitly tested auth condition, not captured TLS evidence"
+  }
+]

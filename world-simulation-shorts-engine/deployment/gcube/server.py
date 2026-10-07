@@ -32,6 +32,27 @@ from engine.storage import EngineError
 
 LOGIN_HTML = '''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>World Engine · 로그인</title><style>body{font-family:system-ui;background:#0b1520;color:#eff5fa;max-width:28rem;margin:8vh auto;padding:1.5rem}input,button{box-sizing:border-box;width:100%;font:inherit;padding:.9rem;margin:.5rem 0;border-radius:.5rem}button{background:#a4d8ee;color:#10202b;border:0}p{line-height:1.7}</style><h1>World Engine</h1><p>비밀번호를 입력해 주세요.</p><form id="owner-login-form" action="/auth/login" method="post"><label for="owner-password">비밀번호</label><input id="owner-password" name="password" type="password" autocomplete="current-password" required maxlength="512"><button id="owner-login-submit" type="submit">로그인</button></form></html>'''
 
+# The upstream protocol no longer attests browser TLS. Keep the public form
+# disabled until the browser itself confirms HTTPS; never submit a password on
+# an HTTP address. Existing explicitly local development retains its own form.
+SECURE_LOGIN_JS = ''''use strict';
+const form=document.getElementById('owner-login-form');
+const fields=document.getElementById('owner-login-fields');
+const notice=document.getElementById('owner-https-required');
+const secure=()=>window.location.protocol==='https:' && window.isSecureContext===true;
+if(form && fields){
+  if(secure()){fields.disabled=false;if(notice)notice.hidden=true;}
+  form.addEventListener('submit',event=>{if(!secure()){event.preventDefault();fields.disabled=true;if(notice)notice.hidden=false;}});
+}
+'''
+
+
+def public_login_html(origin):
+    fields = LOGIN_HTML.replace('<label for="owner-password">', '<fieldset id="owner-login-fields" disabled><label for="owner-password">')
+    fields = fields.replace('</button></form>', '</button></fieldset></form>')
+    notice = '<p id="owner-https-required">HTTPS 주소에서만 로그인할 수 있습니다. <a href="' + html.escape(origin + '/auth/login', quote=True) + '">HTTPS로 열기</a></p>'
+    return fields.replace('</html>', notice + '<script src="/auth/secure-login.js" defer></script></html>')
+
 
 def configured_origin(value, *, port=8000, local_mode=False):
     policy = RequestPolicy([value], local_port=port, environ={})
@@ -265,7 +286,15 @@ class GcubeHandler(MobileHandler):
             if method in {"GET", "HEAD"} and path == "/api/health":
                 return self.json(self.app.runtime_health())
             if method in {"GET", "HEAD"} and path == "/auth/login":
-                return self._html(LOGIN_HTML)
+                return self._html(LOGIN_HTML if self.app.local_mode else public_login_html(self._effective_origin))
+            if method in {"GET", "HEAD"} and path == "/auth/secure-login.js":
+                body = SECURE_LOGIN_JS.encode()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/javascript; charset=utf-8')
+                self.send_header('Content-Length', str(len(body)))
+                self.end_headers()
+                if method != 'HEAD': self.wfile.write(body)
+                return
             # A restored auth.json must not grant access before the origin binds.
             if not self.app.bound_origin and path != "/auth/login":
                 if path.startswith(("/api/", "/media/", "/download/", "/auth/")) or path in {
