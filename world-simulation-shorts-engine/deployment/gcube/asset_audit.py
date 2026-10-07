@@ -26,6 +26,16 @@ def audit_assets():
                  APP_ROOT/'engine/audio.py', APP_ROOT/'engine/audio_stability.py',
                  APP_ROOT/'tools/scene_frame_contract.mjs', APP_ROOT/'tools/render_production_stable_scene.mjs'):
         paths[file] = 'runtime_dependency'
+    speech = APP_ROOT.parent/'tts-offline-profile'
+    if speech.is_dir():
+        source = json.loads((speech/'SOURCE_PACKAGES.json').read_text())
+        for relative in source['calibrated_files']:
+            paths[speech/relative] = 'calibrated_offline_voice'
+        for relative in ('usr/lib/x86_64-linux-gnu/espeak-ng-data/phondata',
+                         'usr/lib/x86_64-linux-gnu/espeak-ng-data/phonindex', 'SOURCE_PACKAGES.json'):
+            paths[speech/relative] = 'calibrated_offline_voice'
+        for file in (speech/'corresponding-source').iterdir():
+            paths[file] = 'bundled_GPL_corresponding_source'
     records = []
     for file, category in sorted(paths.items()):
         present = file.is_file()
