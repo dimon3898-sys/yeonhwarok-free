@@ -10,7 +10,6 @@ import secrets
 import sys
 import tempfile
 import threading
-from urllib.parse import urlsplit
 
 for candidate in (Path(__file__).resolve().parents[2] / "world-simulation-shorts-engine",
                   Path("/opt/world-engine/world-simulation-shorts-engine")):
@@ -21,6 +20,7 @@ for candidate in (Path(__file__).resolve().parents[2] / "world-simulation-shorts
 from deployment.gcube.server import GcubePolicy
 from deployment.security import OwnerSessions, RateLimiter, SecurityError, content_length
 from observer import Observer
+from target import admit, classify, routing_rule
 
 
 class Application:
@@ -75,6 +75,54 @@ class Handler(BaseHTTPRequestHandler):
 
     def log_message(self, *args): pass
 
+    def parse_request(self):
+        # BaseHTTPRequestHandler collapses leading '//'. Preserve the actual
+        # target for classification rather than admitting its normalized path.
+        line = self.raw_requestline.decode('iso-8859-1').rstrip('\r\n')
+        _, separator, rest = line.partition(' ')
+        self.raw_target = rest.rpartition(' ')[0] if separator and ' ' in rest else rest
+        valid = super().parse_request()
+        if valid: self.path = self.raw_target
+        return valid
+
+    def safe_observation(self, method, target, target_rule=None):
+        app = self.server.app
+        headers = getattr(self, 'headers', None)
+        if headers is not None:
+            effective, error, report = app.observer.observe(app.policy, headers,
+                method=method, peer_ip=self.client_address[0])
+        else:
+            effective, error = None, None
+            report = {'diagnostic_mode': 'PROXY_ONLY', 'engine_ready': False,
+                      'gpu': 'NOT_RUN', 'rendering': 'DISABLED',
+                      'validation': {'status': 'NOT_RUN', 'FAILED_VALIDATION_RULE': None}}
+        report['proxy_validation'] = dict(report['validation'])
+        report['target'] = {**target, 'status': 'FAIL' if target_rule else 'PASS',
+                            'FAILED_VALIDATION_RULE': target_rule}
+        if target_rule:
+            report['validation'] = {'status': 'FAIL', 'error_code': 'INVALID_TARGET',
+                                    'FAILED_VALIDATION_RULE': target_rule}
+        return effective, error, report
+
+    def record_diagnosis(self, report):
+        app = self.server.app
+        if app.record and app.rate.allow(('diagnostics', self.client_address[0]), count=12):
+            app.record(report)
+
+    def send_error(self, code, message=None, explain=None):
+        # stdlib error HTML can echo a request line/version containing secrets.
+        # Do not expose its message/explanation, even for pre-dispatch failures.
+        raw = getattr(self, 'raw_target', None)
+        if raw is None:
+            line = getattr(self, 'raw_requestline', b'').decode('iso-8859-1').rstrip('\r\n')
+            _, separator, rest = line.partition(' ')
+            raw = rest.rpartition(' ')[0] if separator and ' ' in rest else rest
+        _, target, rule = classify(raw)
+        with self.server.app.lock:
+            _, _, report = self.safe_observation('GET', target, rule or 'TARGET_HTTP_PARSE_FAILED')
+            self.record_diagnosis(report)
+        self.reply(code, report)
+
     def reply(self, status, value, *, page=False, cookie=None):
         nonce = secrets.token_hex(16)
         if page:
@@ -117,24 +165,36 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self): self.dispatch("GET")
     def do_HEAD(self): self.dispatch("HEAD")
     def do_POST(self): self.dispatch("POST")
-    def do_PUT(self): self.reply(405, {"error": "DIAGNOSTIC_ONLY"})
-    def do_DELETE(self): self.reply(405, {"error": "DIAGNOSTIC_ONLY"})
+    def do_PUT(self): self.dispatch("PUT")
+    def do_DELETE(self): self.dispatch("DELETE")
+    def do_PATCH(self): self.dispatch("PATCH")
+    def do_OPTIONS(self): self.dispatch("OPTIONS")
 
     def dispatch(self, method):
         app = self.server.app
         try:
-            parsed = urlsplit(self.path)
-            if len(self.path) > 4096 or parsed.scheme or parsed.netloc or parsed.query or parsed.fragment:
-                return self.reply(400, {"error": "INVALID_TARGET"})
-            path = parsed.path
-            if method in {"GET", "HEAD"} and path in {"/healthz", "/readyz"}:
+            parsed, target, rule = classify(self.path)
+            if not rule: rule = routing_rule(parsed, target, method=method)
+            # Liveness is not proxy/auth/GPU readiness. Its narrowly fixed
+            # origin-form, query-free path preserves existing probe behavior.
+            path = parsed.path if parsed else None
+            if not rule and target['form'] == 'ORIGIN_FORM' and not target['query_present'] and method in {"GET", "HEAD"} and path in {"/healthz", "/readyz"}:
                 return self.reply(200 if path == "/healthz" else 503, {"ok": True, "diagnostic_mode": "PROXY_ONLY",
                     "engine_ready": False, "authentication_required": True, "gpu": "NOT_RUN", "rendering": "DISABLED"})
             with app.lock:
-                effective, error, report = app.observer.observe(app.policy, self.headers, method=method, peer_ip=self.client_address[0])
+                effective, error, report = self.safe_observation(method, target, rule)
+                if not rule and error and target['form'] == 'ABSOLUTE_FORM':
+                    # Authority admission cannot run without a verified envelope.
+                    report['target']['status'] = 'NOT_RUN'
+                if not rule and not error:
+                    rule = admit(parsed, target, method=method, effective=effective)
+                    if rule:
+                        report['target'].update(status='FAIL', FAILED_VALIDATION_RULE=rule)
+                        report['validation'] = {'status': 'FAIL', 'error_code': 'INVALID_TARGET', 'FAILED_VALIDATION_RULE': rule}
+                self.record_diagnosis(report)
+                if rule:
+                    return self.reply(400, report, page=method == 'GET' and path in {'/', '/auth/login'})
                 if error:
-                    if app.rate.allow(("diagnostics", self.client_address[0]), count=12) and app.record:
-                        app.record(report)
                     return self.reply(error.status, report, page=method == "GET" and path in {"/", "/auth/login"})
                 if method == "GET" and (path == "/auth/login" or
                         path == "/" and not app.sessions.claims(self.token())):
@@ -171,7 +231,6 @@ class Handler(BaseHTTPRequestHandler):
                     return self.reply(401, {"error": "AUTH_REQUIRED", "diagnostic_mode": "PROXY_ONLY"})
                 if method not in {"GET", "HEAD"} or path not in {"/", "/diag.json", "/auth/session"}:
                     return self.reply(405, {"error": "DIAGNOSTIC_ONLY", "gpu": "NOT_RUN", "rendering": "DISABLED"})
-                if app.record: app.record(report)
                 return self.reply(200, report, page=path == "/")
         except SecurityError as error:
             return self.reply(error.status, {"error": error.code})

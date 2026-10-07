@@ -23,7 +23,7 @@ jobs:
     timeout-minutes: 25
     env:
       IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
-      RELEASE_TAG: gcube-v006-diag
+      RELEASE_TAG: gcube-v007-diag
     steps:
       - name: Checkout diagnostic overlay only
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -53,7 +53,7 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.description=Proxy-only diagnosis; engine/GPU/rendering disabled; unchanged v005 validator
+            org.opencontainers.image.description=Target and proxy diagnosis; engine/GPU/rendering disabled; unchanged v005 validator
       - name: Exact v005 proxy, security and regression tests in the fresh image
         shell: bash
         run: |

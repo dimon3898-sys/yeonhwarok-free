@@ -1,0 +1,266 @@
+[
+  {
+    "case": "root_plain",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 200,
+      "error": null,
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 200,
+      "error": null,
+      "records": 1,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "login_plain",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 200,
+      "error": null,
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 200,
+      "error": null,
+      "records": 1,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "root_query",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 200,
+      "error": null,
+      "records": 1,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "login_query",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 200,
+      "error": null,
+      "records": 1,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "absolute_matching",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 200,
+      "error": null,
+      "records": 1,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "fragment",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 1,
+      "failed_rule": "TARGET_HAS_FRAGMENT",
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "oversize",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 1,
+      "failed_rule": "TARGET_TOO_LONG",
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "proxy_failure_query",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_TARGET",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 403,
+      "error": "INVALID_FORWARDED_HEADERS",
+      "records": 1,
+      "failed_rule": "X_FORWARDED_PROTO_NOT_HTTPS",
+      "proxy_rule": "X_FORWARDED_PROTO_NOT_HTTPS",
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "wrong_owner",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 401,
+      "error": "LOGIN_FAILED",
+      "records": 0,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 401,
+      "error": "LOGIN_FAILED",
+      "records": 1,
+      "failed_rule": null,
+      "proxy_rule": null,
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "forged_origin",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 403,
+      "error": "INVALID_ORIGIN",
+      "records": 1,
+      "failed_rule": "ORIGIN_EFFECTIVE_OR_BOUND_AUTHORITY_MISMATCH",
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 403,
+      "error": "INVALID_ORIGIN",
+      "records": 1,
+      "failed_rule": "ORIGIN_EFFECTIVE_OR_BOUND_AUTHORITY_MISMATCH",
+      "proxy_rule": "ORIGIN_EFFECTIVE_OR_BOUND_AUTHORITY_MISMATCH",
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  },
+  {
+    "case": "forged_forwarding",
+    "fixture_source": "SYNTHETIC_NOT_ACTUAL_GCUBE",
+    "before": {
+      "http_status": 400,
+      "error": "INVALID_HOST",
+      "records": 1,
+      "failed_rule": "PUBLIC_OR_INTERNAL_HOST_NOT_ALLOWED",
+      "proxy_rule": null,
+      "target_report_present": false,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    },
+    "after": {
+      "http_status": 400,
+      "error": "INVALID_HOST",
+      "records": 1,
+      "failed_rule": "PUBLIC_OR_INTERNAL_HOST_NOT_ALLOWED",
+      "proxy_rule": "PUBLIC_OR_INTERNAL_HOST_NOT_ALLOWED",
+      "target_report_present": true,
+      "auth_cookie_issued": false,
+      "origin_bound": false
+    }
+  }
+]

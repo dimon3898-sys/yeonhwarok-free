@@ -50,6 +50,16 @@ def main():
     assert json.loads(body)['engine_ready'] is False
     assert json.loads(body)['gpu']=='NOT_RUN'
     assert call('GET','/readyz')[0]==503
+    assert call('GET','/?password=query-secret-sentinel')[0]==200
+    assert call('GET','/auth/login?next=https://attacker.example')[0]==200
+    assert call('GET','https://e.gcube.ai:24999/auth/login?probe=1')[0]==200
+    status,_,body=call('GET','https://attacker.example/diag.json')
+    assert status==400 and json.loads(body)['validation']['FAILED_VALIDATION_RULE']=='TARGET_AUTHORITY_MISMATCH'
+    status,_,body=call('GET','/diag.json#fragment-secret-sentinel',changes={'X-Forwarded-Proto':'http'})
+    report=json.loads(body)
+    assert status==400 and report['validation']['FAILED_VALIDATION_RULE']=='TARGET_HAS_FRAGMENT'
+    assert report['proxy_validation']['FAILED_VALIDATION_RULE']=='X_FORWARDED_PROTO_NOT_HTTPS'
+    assert b'fragment-secret-sentinel' not in body
     assert call('GET','/diag.json')[0]==401
     for password in (None,'wrong'):
         assert call('POST','/auth/login',{'password':password})[0]==401
@@ -62,6 +72,9 @@ def main():
     assert status==200 and report['validation']['status']=='PASS'
     assert report['headers']['X-Forwarded-For']['values'][0]['entry_count']==2
     assert report['engine_ready'] is False and report['rendering']=='DISABLED'
+    status,_,body=call('GET','/diag.json?token=query-secret-sentinel')
+    assert status==200 and json.loads(body)['target']['query_present']
+    assert b'query-secret-sentinel' not in body
     assert call('GET','/')[0]==200
     attacks=[({'X-Forwarded-Proto':'http'},'X_FORWARDED_PROTO_NOT_HTTPS'),
              ({'X-Forwarded-Proto':'https, http'},'SINGLE_HEADER_WHITESPACE_OR_COMMA'),
@@ -77,6 +90,10 @@ def main():
         assert call('GET',route)[0]==405
     subprocess.run(['docker','exec',name,'python','-c',
         "from pathlib import Path; assert any(r.split()[1]=='00000000:1F40' and r.split()[3]=='0A' for r in Path('/proc/net/tcp').read_text().splitlines()[1:])"],check=True)
+    logs=subprocess.check_output(['docker','logs',name],stderr=subprocess.STDOUT)
+    for sentinel in (owner.encode(), b'query-secret-sentinel', b'fragment-secret-sentinel'):
+        assert sentinel not in logs
+    assert b'TARGET_HAS_FRAGMENT' in logs and b'X_FORWARDED_PROTO_NOT_HTTPS' in logs
     while time.monotonic()-live_at<61:
         assert subprocess.check_output(['docker','inspect','--format','{{.State.Running}}',name],text=True).strip()=='true'
         assert call('GET','/auth/session')[0]==200
