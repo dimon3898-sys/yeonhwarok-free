@@ -201,14 +201,30 @@ class NativePersonalStorage:
     def _probe(self):
         folder = self.root / (".storage-probe-" + uuid.uuid4().hex)
         self._owned_dir(folder)
-        folder_identity = self._identity(folder)
+        # Keep the owned objects alive until cleanup. Inode numbers may be
+        # reused immediately after unlink on overlay/ext4, so dev+ino alone
+        # cannot identify a replaced, already-closed probe file safely.
+        pins = []
+        def pin_identity(path):
+            fd = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            try:
+                value = os.fstat(fd)
+                identity = (value.st_dev, value.st_ino)
+                if self._identity(path) != identity:
+                    raise StorageError("STORAGE_PROBE_CHANGED", "검수 대상이 변경되어 검사를 중단했습니다.")
+            except BaseException:
+                os.close(fd)
+                raise
+            pins.append(fd)
+            return identity
+        folder_identity = pin_identity(folder)
         files = {}
         checks = {"posix_mode_0600": False, "local_cross_process_flock_exclusion": False,
                   "atomic_replace": False, "directory_fsync": False}
         try:
             lock = folder / "lock"
             self._create_file(lock, b"owned-lock-probe\n")
-            files[lock] = self._identity(lock)
+            files[lock] = pin_identity(lock)
             checks["posix_mode_0600"] = stat.S_IMODE(lock.lstat().st_mode) == 0o600
             fd = os.open(lock, os.O_RDWR | getattr(os, "O_NOFOLLOW", 0))
             try:
@@ -229,9 +245,9 @@ class NativePersonalStorage:
                 os.close(fd)
             current, pending = folder / "current", folder / "pending"
             self._create_file(current, b"before-atomic-replace\n")
-            files[current] = self._identity(current)
+            files[current] = pin_identity(current)
             self._create_file(pending, b"after-atomic-replace\n")
-            files[pending] = self._identity(pending)
+            files[pending] = pin_identity(pending)
             if self._identity(current) != files[current] or self._identity(pending) != files[pending]:
                 raise StorageError("STORAGE_PROBE_CHANGED", "검수 대상이 변경되어 atomic replace를 중단했습니다.")
             os.replace(pending, current)  # Both paths were exclusively created by this probe.
@@ -244,19 +260,24 @@ class NativePersonalStorage:
             checks["directory_fsync"] = True
             return checks
         finally:
-            # Remove only exact objects created in this unique, private probe.
-            if self._identity(folder) != folder_identity or folder.is_symlink():
-                raise StorageError("STORAGE_PROBE_CHANGED", "검수 폴더가 변경되어 자동 정리를 중단했습니다.")
-            present = set(folder.iterdir())
-            if present - set(files):
-                raise StorageError("STORAGE_PROBE_CHANGED", "검수 폴더에 다른 파일이 있어 자동 정리를 중단했습니다.")
-            for path, identity in files.items():
-                if path.exists() or path.is_symlink():
-                    if self._identity(path) != identity:
-                        raise StorageError("STORAGE_PROBE_CHANGED", "검수 파일이 변경되어 자동 정리를 중단했습니다.")
-                    path.unlink()
-            folder.rmdir()
-            self._fsync_directory(self.root)
+            try:
+                # Remove only exact objects created in this unique, private probe.
+                if self._identity(folder) != folder_identity or folder.is_symlink():
+                    raise StorageError("STORAGE_PROBE_CHANGED", "검수 폴더가 변경되어 자동 정리를 중단했습니다.")
+                present = set(folder.iterdir())
+                if present - set(files):
+                    raise StorageError("STORAGE_PROBE_CHANGED", "검수 폴더에 다른 파일이 있어 자동 정리를 중단했습니다.")
+                for path, identity in files.items():
+                    if path.exists() or path.is_symlink():
+                        if self._identity(path) != identity:
+                            raise StorageError("STORAGE_PROBE_CHANGED", "검수 파일이 변경되어 자동 정리를 중단했습니다.")
+                        path.unlink()
+                folder.rmdir()
+                self._fsync_directory(self.root)
+
+            finally:
+                for fd in reversed(pins):
+                    os.close(fd)
 
     @staticmethod
     def _valid_code(value):

@@ -310,6 +310,32 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(len(foreign_paths), 1)
         self.assertEqual(foreign_paths[0].read_bytes(), b"FOREIGN_REPLACED_TARGET")
 
+    def test_unlinked_probe_inode_stays_pinned_and_foreign_replacement_survives(self):
+        original, observations, foreign_paths = NativePersonalStorage._create_file, [], []
+        def replace_target(instance, path, value):
+            result = original(instance, path, value)
+            if path.name == "pending":
+                current = path.parent / "current"
+                before = current.stat()
+                current.unlink()
+                held = False
+                for entry in Path("/proc/self/fd").iterdir():
+                    try:
+                        info = os.fstat(int(entry.name))
+                    except OSError:
+                        continue
+                    held |= (info.st_dev, info.st_ino) == (before.st_dev, before.st_ino)
+                observations.append(held)
+                current.write_bytes(b"FOREIGN_PINNED_REPLACEMENT")
+                foreign_paths.append(current)
+            return result
+        with patch.object(NativePersonalStorage, "_create_file", new=replace_target):
+            with self.assertRaises(StorageError) as error:
+                self.storage().prepare()
+        self.assertEqual(error.exception.code, "STORAGE_PROBE_CHANGED")
+        self.assertEqual(observations, [True])
+        self.assertEqual(foreign_paths[0].read_bytes(), b"FOREIGN_PINNED_REPLACEMENT")
+
     def test_new_only_ownership_targets_uid1000_without_recursive_chown(self):
         value = NativePersonalStorage(self.base)
         with patch.object(module.os, "fstat", return_value=SimpleNamespace(st_uid=0, st_gid=0)), \
