@@ -7,6 +7,7 @@ Normal requests call the original planner directly.
 """
 from copy import deepcopy
 import math
+import os
 from types import FunctionType
 from pathlib import Path
 from . import planner
@@ -21,6 +22,19 @@ def configure_qa_schema():
     # and quality-promotion hashes remain intact.
     visibility.TOOL = Path(__file__).resolve().parents[1] / 'tools/readable_semantic_preflight.mjs'
     schema.SCHEMA_PATH = Path(__file__).resolve().parents[1] / 'data/readable_scene_plan.schema.json'
+    if os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012':
+        visibility.TOOL = Path(__file__).resolve().parents[1] / 'tools/direction_semantic_preflight.mjs'
+        schema.SCHEMA_PATH = Path(__file__).resolve().parents[1] / 'data/direction_scene_plan.schema.json'
+
+
+def directed_plan(plan, raw):
+    if (os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012'
+            and raw.get('production_preset') != 'LEGACY'):
+        from .direction import apply_direction
+        from .schema import validate_plan
+        plan = apply_direction(plan)
+        plan['gate'] = validate_plan(plan)
+    return plan
 
 
 def generate_deployment_plan(raw):
@@ -31,7 +45,7 @@ def generate_deployment_plan(raw):
     if not qa:
         # The actual-output quality candidate is previewed in bounded QA first.
         # Existing non-QA production requests keep their certified exact plan.
-        return planner.generate_plan(raw)
+        return directed_plan(planner.generate_plan(raw), raw)
     try:
         duration = float(raw.get('duration'))
     except (TypeError, ValueError):
@@ -56,6 +70,8 @@ def generate_deployment_plan(raw):
         planner._generate_legacy_plan.__code__, namespace, '_generate_legacy_plan')
     generate = FunctionType(planner.generate_plan.__code__, namespace, 'generate_plan')
     plan = generate(deepcopy(raw))
+    if os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012' and raw.get('production_preset') != 'LEGACY':
+        return directed_plan(plan, raw)
     if plan.get('story', {}).get('domain') == 'shipping':
         # A compressed HORIZON_REVEAL crosses the native camera angular gate.
         # Use an existing geographic preset in QA only, preserving the original

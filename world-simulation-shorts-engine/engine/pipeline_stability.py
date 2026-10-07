@@ -39,9 +39,23 @@ def render_project(*args, **kwargs):
     if len(args)>1 and any(scene.get('visual_readability') for scene in args[1].get('scenes', [])):
         from .readability_backend import ReadabilityBackend
         namespace['CPULocalBackend'] = ReadabilityBackend
+    if len(args)>1 and any(scene.get('direction') for scene in args[1].get('scenes', [])):
+        from .direction_backend import DirectionBackend
+        from .direction import direction_qc
+        report = direction_qc(args[1])
+        if diagnostic:
+            diagnostic.write('direction-plan.json', dict(qc=report,
+                scenes=[dict(scene_id=s['scene_id'], direction=s.get('direction')) for s in args[1]['scenes']]))
+        if not report['passed']:
+            raise RuntimeError('DIRECTION_PREFLIGHT_FAILED')
+        namespace['CPULocalBackend'] = DirectionBackend
     if diagnostic:
         from .gpu_preflight import collect_all
-        collect_all(args[0], args[1], diagnostic)
+        preflight = collect_all(args[0], args[1], diagnostic)
+        if any(s.get('direction') for s in args[1].get('scenes', [])):
+            preflight['direction'] = dict(qc=report,
+                scenes=[dict(scene_id=s['scene_id'], beats=s['direction']['beats']) for s in args[1]['scenes']])
+            diagnostic.write('preflight.json', preflight)
         backend = namespace['CPULocalBackend']
         namespace['CPULocalBackend'] = lambda: backend(diagnostic=diagnostic)
         def recorded_audio(*values, **options):

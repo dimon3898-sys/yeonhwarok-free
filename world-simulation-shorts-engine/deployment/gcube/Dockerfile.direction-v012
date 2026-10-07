@@ -1,0 +1,8 @@
+# Immutable verified runtime; only new presentation version and its selection seams.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:730da5b4b784dfeed43b9d9953c071914c04bca612fd114b82a7232a6cb212a5
+ENV WORLD_ENGINE_DIRECTION_VERSION=v012
+COPY world-simulation-shorts-engine/engine/direction.py world-simulation-shorts-engine/engine/direction_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/direction_visual_adapter.js world-simulation-shorts-engine/web/render_direction_earth.html world-simulation-shorts-engine/web/render_direction_flat.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/direction_scene_plan.schema.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/tools/direction_semantic_preflight.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/render_production_stable_scene.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/direction_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
