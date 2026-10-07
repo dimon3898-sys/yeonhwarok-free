@@ -58,11 +58,30 @@ jobs:
           print('::notice title=Container pipeline result::'+json.dumps(summary,ensure_ascii=False))
           assert report['passed'],report['qc_failures']
           PY
+      - name: Measure optional offline TTS budget on the installed provider
+        shell: bash
+        run: |
+          docker run --rm -i --user 1000:1000 --entrypoint python world-engine-v010-check:local - <<'PY'
+          import json,subprocess,tempfile
+          from pathlib import Path
+          from engine.audio import ESpeakProvider,_stereo
+          from engine.planner import _narration
+          from engine.gis import resolve_location
+          provider=ESpeakProvider()
+          with tempfile.TemporaryDirectory() as folder:
+              path=Path(folder)/'narration.wav'
+              info=provider.synthesize(_narration('variable',resolve_location('London'),'aviation',False,20/6),path,language='ko',speed=155)
+              seconds=len(_stereo(path))/48000
+          version=subprocess.check_output([provider.executable,'--version'],text=True).split('Data at',1)[0].strip()
+          data_version=subprocess.check_output(['dpkg-query','-W','-f=${Version}','espeak-ng-data'],text=True).strip()
+          print('::notice title=Offline TTS actual budget::'+json.dumps(dict(version=version,data_version=data_version,seconds=seconds,strict_scene_limit=20/6-.08,headroom90_limit=(20/6-.08)*.9,scene_guard_passed=seconds<=20/6-.08)))
+          PY
       - name: Collect regression import failures before running the full suite
         shell: bash
         run: |
           docker run --rm --user 0:0 \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
             --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
             --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
@@ -74,6 +93,7 @@ jobs:
           set -euo pipefail
           docker run --rm --user 0:0 \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
             --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
             --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
