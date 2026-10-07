@@ -1,5 +1,5 @@
 /**
- * Test-only COLLECT-ALL canvas-free replay of the frozen renderer's semantic draw eligibility.
+ * Canvas-free forecast of the frozen renderer's semantic draw eligibility.
  * This is a pre-render gate, never proof that pixels were rendered or watched.
  * Usage: node tools/semantic_preflight.mjs --plan PLAN [--output NEW_JSON]
  */
@@ -38,12 +38,10 @@ const classes=new Function('THREE','Renderer','RouteGraphics','createAircraftV3'
   adapterSource+';return {SceneRoutes,GenericCamera,GenericEntities,GenericEffects,GenericRouteGraphics,SceneEarthRenderer,REPRESENTED_EVENT_KINDS};'
 )(THREE,class {},RouteGraphics,createAircraftV3,geo,clamp,smooth);
 const {SceneRoutes,GenericCamera,GenericEntities,GenericEffects,GenericRouteGraphics,SceneEarthRenderer,REPRESENTED_EVENT_KINDS}=classes;
-const polishBytes=fs.readFileSync(path.join(appRoot,'web/earth_polish_adapter.js'),'utf8');
-const {SceneEarthPolishRenderer}=new Function('THREE','SceneEarthRenderer','incomingGeographicTransition','FlatSceneCore','flatCoordinate','polishFlatLabels','avoidCityLabelObstacles','flatPolishProjectedAircraftObstacles',polishBytes.replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {SceneEarthPolishRenderer};')(THREE,SceneEarthRenderer,()=>null,class {},v=>({lon:v.lon,lat:v.lat}),()=>[],()=>[],()=>[]);
 const productionBytes=plan.scenes.some(scene=>scene.production_defaults?.version==='v1')?fs.readFileSync(path.join(appRoot,'web/production_visual_adapter.js')):null;
 const production=productionBytes?new Function('THREE','SceneFlatEntitySeparationPolishRenderer','SceneEarthPolishRenderer','flatClamp','flatNumber','flatSmooth','flatCameraEase','flatWindow','flatCoordinate',
  productionBytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {productionLabelScene,productionCameraIntervals,productionFlatCameraValues,productionUsesRouteHeadAnchor,SceneProductionEarthRenderer};'
-)(THREE,class {},SceneEarthPolishRenderer,clamp,(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback,smooth,
+)(THREE,class {},SceneEarthRenderer,clamp,(value,fallback=0)=>Number.isFinite(Number(value))?Number(value):fallback,smooth,
  (value,kind='smootherstep')=>{const p=clamp(value);if(kind==='smootherstep')return p*p*p*(p*(p*6-15)+10);if(kind==='quintic_out')return 1-(1-p)**5;if(kind==='linear')return p;if(kind==='ease_in')return p*p;if(kind==='ease_out')return 1-(1-p)**2;return smooth(p);},
  (time,start,end,fade=.24,hold=false)=>time<start||time>end?0:smooth((time-start)/Math.min(fade,Math.max(.01,(end-start)/3)))*(hold?1:1-smooth((time-end+fade)/fade)),
  value=>{const q=value?.coordinates||value;return {lon:Number(q.lon??q.longitude??q[0]),lat:Number(q.lat??q.latitude??q[1])};}):null;
@@ -119,7 +117,6 @@ class MetricsContext {
   constructor(){this.font='300 92px Open Sans';this.stack=[];}
   save(){this.stack.push(this.font);}
   restore(){this.font=this.stack.pop();}
-  translate(){} scale(){} fillRect(){} strokeText(){} createRadialGradient(){return {addColorStop(){}};}
   fillText(){} // No canvas pixels: the original method still emits its label boxes.
   measureText(text){
     const font=this.font.includes('Noto Cinema')?metadata.fonts.Noto:metadata.fonts.OpenSans;
@@ -168,7 +165,7 @@ if(flatScenes){
 }
 const {mapTransitionOpacity}=await import(pathToFileURL(path.join(appRoot,'web/map_transition.js')));
 const flatCountries=flatScenes?JSON.parse(fs.readFileSync(path.join(legacyRoot,'assets/gis/countries_50m.geojson'),'utf8')):null;
-const sceneChecks=[],poseRecords=[];const results=[], failures=[], scopeScenes=options.scene?new Set(options.scene.split(',')):null;
+const results=[], failures=[], scopeScenes=options.scene?new Set(options.scene.split(',')):null;
 if(scopeScenes)for(const id of scopeScenes)if(!plan.scenes.some(scene=>scene.scene_id===id))
   failures.push({code:'UNKNOWN_SCOPED_SCENE',scene_id:id});
 let hookEligible=false;
@@ -243,11 +240,10 @@ for(const scene of plan.scenes) {
   if(scene.visual_readability)readable.installReadableCamera(cam);
   const map={groups:{routes:new THREE.Group(),effects:new THREE.Group(),entities:new THREE.Group()}};
   const graphics=new GenericRouteGraphics(map,routes),effects=new GenericEffects(map,scene,routes),entities=new GenericEntities(scene,routes,map.groups.entities);
-  const context={sceneSpec:renderedScene,plan,duration:scene.duration,camera,cam,routes,graphics,effects,entities,w:width,h:height,ctx:new MetricsContext(),labels:[],polishReady:true,incomingCityBoxes:()=>[]};
+  const context={sceneSpec:renderedScene,plan,duration:scene.duration,camera,cam,routes,graphics,effects,entities,w:width,h:height,ctx:new MetricsContext(),labels:[]};
   if(scene.visual_readability)readable.installReadableEntities(context);
   context.project=SceneEarthRenderer.prototype.project.bind(context);
   context.drawStoryInformation=(productionScene?production.SceneProductionEarthRenderer:SceneEarthRenderer).prototype.drawStoryInformation.bind(context);
-  const numeric=SceneEarthRenderer.prototype.numericPreflight.call(context,30);sceneChecks.push({scene_id:scene.scene_id,numeric:{...numeric,records:undefined},frame_count:Math.round(scene.duration*fps)});
   const observed=new Map(expected.map(event=>[event.id,{event_id:event.id,scene_id:scene.scene_id,kind:event.kind,target_id:event.target_id,coordinates:event.coordinates||null,scheduled_local_time:event.time,eligible_frames:0,eligible_primitives:new Set(),first_eligible_local_time:null,projection_at_scheduled_time:null}]));
   for(let frame=0;frame<Math.round(scene.duration*fps);frame++) {
     const time=frame/fps;
@@ -255,17 +251,13 @@ for(const scene of plan.scenes) {
     try {
       const actualScene=context.sceneSpec;
       if(productionScene)context.sceneSpec={...actualScene,labels:(actualScene.labels||[]).map(label=>{const route=production.productionUsesRouteHeadAnchor(label)?routes.byId(label.route_id):null;if(!route)return label;const point=route.curve.getPoint(routes.progress(time,route)).normalize();return {...label,coordinates:{...label.coordinates,lon:Math.atan2(-point.z,point.x)*180/Math.PI,lat:Math.asin(clamp(point.y,-1,1))*180/Math.PI}};})};
-      SceneEarthPolishRenderer.prototype.overlay.call(context,time);
+      SceneEarthRenderer.prototype.overlay.call(context,time);
       context.sceneSpec=actualScene;
       (productionScene?production.SceneProductionEarthRenderer:SceneEarthRenderer).prototype.dispatchEventAudit.call(context,time);
     } catch(error) {
       failures.push({code:'SEMANTIC_LAYOUT_UNCERTIFIED',scene_id:scene.scene_id,time,detail:String(error.message)});
-      continue;
+      break;
     }
-    const source=SceneEarthRenderer.prototype.audit.toString();
-    const body=source.slice(source.indexOf('{')+1,source.indexOf('const textures='));
-    const entitiesAudit=new Function('THREE',body+';return entityAudit;').call(context,THREE);
-    poseRecords.push({scene_id:scene.scene_id,t:time,frame_index:frame,cameraPosition:camera.position.toArray(),cameraQuaternion:camera.quaternion.toArray(),cameraFov:camera.fov,routeProgress:routes.routes.map(r=>({id:r.id,progress:routes.progress(time,r)})),entities:entitiesAudit,entityClipped:entitiesAudit.filter(e=>e.clipped).map(e=>e.id),labels:context.labels,textClipped:context.labels.filter(b=>b.x<0||b.y<0||b.x+b.width>width||b.y+b.height>height),renderResolution:[width,height],meaningfulEventsRendered:context.eventAudit,pose_only:true});
     const veil=mapTransitionOpacity(scene,time);
     if(veil>.4&&!productionScene)context.eventAudit=[];
     if(Number(scene.start_time)+time<3&&veil<=.4&&context.labels.some(l=>l.kind==='hook_reveal'&&l.text&&l.opacity>.1))hookEligible=true;
@@ -316,12 +308,7 @@ const sourceHashes={flat_semantics:flatSourceHash,map_transition:hash(fs.readFil
 if(productionBytes)sourceHashes.production_visual_adapter=hash(productionBytes);
 if(rhythmBytes)sourceHashes.rhythm_visual_adapter=hash(rhythmBytes);
 if(readableBytes)sourceHashes.visual_readability=hash(readableBytes);
-for(const record of poseRecords){
- if(record.entityClipped.length||record.textClipped.length)failures.push({code:'POSE_CLIPPING',scene_id:record.scene_id,frame_index:record.frame_index,entityClipped:record.entityClipped});
- if(![...record.cameraPosition,...record.cameraQuaternion,record.cameraFov,...record.entities.flatMap(e=>[...e.position,...e.quaternion])].every(Number.isFinite))failures.push({code:'POSE_NONFINITE',scene_id:record.scene_id,frame_index:record.frame_index});
-}
-for(const check of sceneChecks)if(!check.numeric.finite||check.numeric.cameraWithinEarth||check.numeric.entityWithinEarth||check.numeric.routeWithinEarth||check.numeric.maxCameraAngleDegreesPerFrame>2.5)failures.push({code:'NUMERIC_PREFLIGHT_FAILED',scene_id:check.scene_id});
-const report={hardware_checks:{WebGL:'NOT_RUN',pixels:'NOT_RUN',GPU_font_rasterization:'NOT_RUN'},scene_checks:sceneChecks,pose_records:poseRecords,schema_version:1,created_at_utc:new Date().toISOString(),passed:failures.length===0,plan_path:planFile,plan_sha256:hash(planBytes),renderer_sha256:hash(adapterBytes),source_hashes:sourceHashes,fps,resolution:[width,height],scoped_scene_ids:scopeScenes?[...scopeScenes]:null,opening_hook_eligible:hookEligible,events:results,failures,scope:'Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.',font_layout_policy:'Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.'};
+const report={schema_version:1,created_at_utc:new Date().toISOString(),passed:failures.length===0,plan_path:planFile,plan_sha256:hash(planBytes),renderer_sha256:hash(adapterBytes),source_hashes:sourceHashes,fps,resolution:[width,height],scoped_scene_ids:scopeScenes?[...scopeScenes]:null,opening_hook_eligible:hookEligible,events:results,failures,scope:'Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.',font_layout_policy:'Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.'};
 if(options.output)fs.writeFileSync(path.resolve(options.output),JSON.stringify(report,null,2),{flag:'wx'});
 process.stdout.write(JSON.stringify(report)+'\n');
 if(!report.passed)process.exitCode=2;

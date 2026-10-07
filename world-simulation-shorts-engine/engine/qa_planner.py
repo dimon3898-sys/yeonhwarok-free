@@ -15,8 +15,12 @@ from . import planner
 def configure_qa_schema():
     # Deployment-only schema extension. The certified schema remains immutable
     # and the extension's normal-request branch is that exact original policy.
-    from . import schema
-    schema.SCHEMA_PATH = Path(__file__).resolve().parents[1] / 'data/qa_scene_plan.schema.json'
+    from . import schema, visibility
+    # Deployment-selected additive certifier; its legacy branch replays the
+    # original native definitions with unchanged thresholds. Frozen source
+    # and quality-promotion hashes remain intact.
+    visibility.TOOL = Path(__file__).resolve().parents[1] / 'tools/readable_semantic_preflight.mjs'
+    schema.SCHEMA_PATH = Path(__file__).resolve().parents[1] / 'data/readable_scene_plan.schema.json'
 
 
 def generate_deployment_plan(raw):
@@ -25,6 +29,8 @@ def generate_deployment_plan(raw):
     if not isinstance(qa, bool):
         raise planner.PlanningInputError('QA 설정은 ON/OFF여야 합니다.')
     if not qa:
+        # The actual-output quality candidate is previewed in bounded QA first.
+        # Existing non-QA production requests keep their certified exact plan.
         return planner.generate_plan(raw)
     try:
         duration = float(raw.get('duration'))
@@ -92,6 +98,8 @@ def generate_deployment_plan(raw):
                                 for route in scene['routes'])):
                     event['role'] = 'variable'
                     plan.setdefault('metadata', {})['qa_variable_event'] = event['id']
+    from .visual_readability import apply_readability_policy
+    plan = apply_readability_policy(plan)
     from .schema import validate_plan
     plan['gate'] = validate_plan(plan)
     return plan

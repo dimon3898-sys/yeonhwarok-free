@@ -30,7 +30,8 @@ const journal=options['diagnostic-dir']?new SceneJournal(options['diagnostic-dir
 if(journal)journal.write('scene-input.json',inputScene);
 const frames=Math.round(duration*fps);if(Math.abs(frames/fps-duration)>.5/fps+1e-8)throw Error('Duration is not aligned to frame grid');
 const isFlat=new URL(url).pathname.endsWith('render_production_flat.html');
-const sourceFiles=[['flat_renderer',path.join(root,'web/flat_renderer.js')],['flat_semantics',path.join(root,'web/flat_semantics.js')],['render_html',path.join(root,isFlat?'web/render_production_flat.html':'web/render_production_earth.html')],['render_tool',fileURLToPath(import.meta.url)],['korean_font',path.join(root,'web/fonts/NotoSansCJKkr-Regular.otf')],...['assets/v3/earth/earth-day-8k.jpg','assets/v3/fonts/OpenSans-Light.ttf','assets/gis/earth-topology.png','assets/gis/countries_50m.geojson','assets/gis/coastlines_50m.geojson'].map(p=>[p,path.join(legacy,p)])];
+const isReadable=new URL(url).pathname.endsWith('render_readable_earth.html');
+const sourceFiles=[['flat_renderer',path.join(root,'web/flat_renderer.js')],['flat_semantics',path.join(root,'web/flat_semantics.js')],['render_html',path.join(root,isFlat?'web/render_production_flat.html':isReadable?'web/render_readable_earth.html':'web/render_production_earth.html')],['render_tool',fileURLToPath(import.meta.url)],['korean_font',path.join(root,'web/fonts/NotoSansCJKkr-Regular.otf')],...['assets/v3/earth/earth-day-8k.jpg','assets/v3/fonts/OpenSans-Light.ttf','assets/gis/earth-topology.png','assets/gis/countries_50m.geojson','assets/gis/coastlines_50m.geojson'].map(p=>[p,path.join(legacy,p)])];
 const flatSourceManifest=path.join(root,'assets/flat/SOURCES.json');
 if(existsSync(flatSourceManifest)){
  sourceFiles.push(['flat_source_manifest',flatSourceManifest]);
@@ -44,6 +45,7 @@ sourceFiles.push(['earth_adapter',path.join(root,'web/earth_adapter.js')]);
 if(!isFlat)for(const name of ['src/renderer_v3.js','src/engine_v3.js','src/core_v1_preserved.js','assets/v3/earth/earth-night-8k.jpg','assets/v3/earth/earth-clouds-8k.jpg'])sourceFiles.push([name,path.join(legacy,name)]);
 if(options['scene-json'])sourceFiles.push(['scene_json',path.resolve(options['scene-json'])]);
 sourceFiles.push(['frame_contract',path.join(root,'tools/scene_frame_contract.mjs')]);
+if(isReadable)sourceFiles.push(['visual_readability',path.join(root,'web/readability_visual_adapter.js')]);
 const sourceHashes={};for(const [key,file] of sourceFiles){
  try{sourceHashes[key]=createHash('sha256').update(await readFile(file)).digest('hex');}
  catch(error){try{journal?.failure({code:'ASSET_MISSING',scene_id:inputScene?.scene_id,frame_index:null,failed_invariants:['REQUIRED_SOURCE_UNREADABLE']});}catch{}console.error('WORLD_ENGINE_RENDER_FAILURE '+JSON.stringify({code:'ASSET_MISSING',frame_index:null,failed_invariants:['REQUIRED_SOURCE_UNREADABLE']}));throw error;}

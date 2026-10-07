@@ -36,6 +36,9 @@ def render_project(*args, **kwargs):
     namespace['_concat'] = checked_concat
     namespace['create_audio'] = create_audio
     namespace['finish_video'] = finish_video
+    if len(args)>1 and any(scene.get('visual_readability') for scene in args[1].get('scenes', [])):
+        from .readability_backend import ReadabilityBackend
+        namespace['CPULocalBackend'] = ReadabilityBackend
     if diagnostic:
         from .gpu_preflight import collect_all
         collect_all(args[0], args[1], diagnostic)

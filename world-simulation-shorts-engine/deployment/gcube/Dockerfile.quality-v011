@@ -1,0 +1,7 @@
+# Additive actual-output quality candidate. Preserve the verified diagnostic,
+# GPU-required, proxy, JPEG, audio, FFmpeg, asset and checkpoint base by digest.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:a44ecb0ae6aa41cc0f7608084dab8412e6950b3a560f394b5d1a795a3480675d
+COPY world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/visual_readability.py world-simulation-shorts-engine/engine/readability_backend.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/readability_visual_adapter.js world-simulation-shorts-engine/web/render_readable_earth.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/readable_scene_plan.schema.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/tools/readable_semantic_preflight.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/render_production_stable_scene.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
