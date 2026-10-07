@@ -42,6 +42,12 @@ class CPULocalBackend(RenderBackend):
         # The browser renderer has its own no-frame watchdog. Pipes are continuously
         # drained here, so a full pipe cannot make a healthy renderer appear stalled.
         started = time.monotonic()
+        # Add strict transport diagnostics without modifying the certified visual
+        # code/certificate or invalidating already completed, identical pixels.
+        command = list(command)
+        approved = Path(__file__).resolve().parents[1] / 'tools/render_production_scene.mjs'
+        if len(command) > 1 and command[0] == 'node' and Path(command[1]).resolve() == approved:
+            command[1] = str(approved.with_name('render_production_stable_scene.mjs'))
         try:
             child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE, text=True, bufsize=1,

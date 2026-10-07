@@ -739,7 +739,7 @@ def worker(ticket_path, state_root):
         store.set_status(pid, version, status='rendering', progress=event,
                          job_id=ticket['job_id'], error=None)
     try:
-        from engine.rendering import render_project
+        from engine.pipeline_stability import render_project
         result = render_project(store.version_path(pid, version), plan, ticket['internal_url'], progress,
                                 scene_filter=selected_scenes)
         from deployment.resume_evidence import finalize_resume_evidence

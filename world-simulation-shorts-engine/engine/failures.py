@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import json
 from pathlib import Path
 import re
 import traceback
@@ -32,6 +33,22 @@ class RenderProcessError(RuntimeError):
         self.diagnostics = dict(command_category=category, return_code=returncode,
                                 duration_seconds=round(duration, 3),
                                 stdout_tail=safe_tail(stdout), stderr_tail=safe_tail(stderr))
+        for line in stderr:
+            if not str(line).startswith('WORLD_ENGINE_RENDER_FAILURE '):
+                continue
+            try:
+                raw = json.loads(str(line).split(' ', 1)[1])
+                if raw.get('code') not in {'FRAME_AUDIT_FAILED', 'SCENE_FRAME_INVALID', 'FFMPEG_PIPE_FAILED', 'SCENE_RENDER_FAILED', 'ASSET_MISSING'}:
+                    continue
+                rules = raw.get('failed_invariants', [])
+                if not isinstance(rules, list) or any(not isinstance(rule, str) or not re.fullmatch(r'[A-Z][A-Z0-9_]{1,60}', rule) for rule in rules):
+                    continue
+                index = raw.get('frame_index')
+                if index is not None and (type(index) is not int or not 0 <= index <= 108000):
+                    continue
+                self.diagnostics['root_cause'] = dict(code=raw['code'], frame_index=index, failed_invariants=rules[:12])
+            except (ValueError, TypeError, AttributeError):
+                continue
         super().__init__(self.code)
 
 
@@ -41,6 +58,14 @@ def failure_record(error, *, stage=None, scene_id=None):
         code = ('STORAGE_WRITE_FAILED' if isinstance(error, PermissionError) else
                 'ASSET_NOT_FOUND' if isinstance(error, FileNotFoundError) else
                 'SCENE_PREP_FAILED' if stage == 'scene_start' else 'WORKER_FAILED')
+        # Recognize only fixed pipeline error prefixes; never surface raw text.
+        prefix = str(error).split(':', 1)[0]
+        allowed = {'CONCAT_INPUT_INVALID': 'CONCAT_FAILED', 'CONCAT_INPUT_INCOMPATIBLE': 'CONCAT_FAILED',
+                   'SCENE_ASSEMBLY_FAILED': 'CONCAT_FAILED', 'ASSEMBLY_METADATA_FAILED': 'CONCAT_FAILED',
+                   'AUDIO_PIPELINE_FAILED': 'AUDIO_FAILED', 'FINAL_QC_FAILED': 'QC_FAILED',
+                   'TTS_PROVIDER_UNAVAILABLE': 'TTS_PROVIDER_UNAVAILABLE',
+                   'NARRATION_EXCEEDS_SCENE': 'NARRATION_EXCEEDS_SCENE'}
+        code = allowed.get(prefix, code)
     messages = {'SCENE_RENDERER_EXIT': '장면 렌더러가 오류로 종료되었습니다.',
                 'SCENE_RENDERER_START_FAILED': '장면 렌더러 프로세스를 시작하지 못했습니다.',
                 'STORAGE_WRITE_FAILED': '작업 저장 공간에 쓸 수 없습니다.',

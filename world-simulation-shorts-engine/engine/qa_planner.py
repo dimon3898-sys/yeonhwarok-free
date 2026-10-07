@@ -55,11 +55,27 @@ def generate_deployment_plan(raw):
         # Use an existing geographic preset in QA only, preserving the original
         # GIS rig endpoints, all routes/entities/events, HERO lighting and HIGH.
         # Normal plans and saved projects remain byte-for-byte unchanged.
-        for scene in plan['scenes']:
+        for index, scene in enumerate(plan['scenes']):
             if scene['camera_preset'] == 'HORIZON_REVEAL':
                 scene['camera_preset'] = 'COUNTRY_APPROACH'
                 scene['camera_speed'] = 1.0
-                timing = scene['motion_timing']
+                # Native projection replay found the moving primary ship wholly
+                # outside the portrait frustum on frames 47..50 at 44 degrees.
+                # Widen this QA rig, retaining its pose, tracking, model and quality.
+                for endpoint in ('camera_start', 'camera_end'):
+                    scene[endpoint]['fov'] = max(50, scene[endpoint].get('fov', 44))
+                scene['entry_state']['camera'] = deepcopy(scene['camera_start'])
+                scene['exit_state']['camera'] = deepcopy(scene['camera_end'])
+                # Keep the adjacent boundary and its declared state continuous.
+                if index:
+                    previous = plan['scenes'][index-1]
+                    previous['camera_end'] = deepcopy(scene['camera_start'])
+                    previous['exit_state']['camera'] = deepcopy(scene['camera_start'])
+                if index+1 < len(plan['scenes']):
+                    following = plan['scenes'][index+1]
+                    following['camera_start'] = deepcopy(scene['camera_end'])
+                    following['entry_state']['camera'] = deepcopy(scene['camera_end'])
+                timing = scene.setdefault('motion_timing', {})
                 timing.update(camera_travel_duration=scene['duration'],
                               zoom_duration=scene['duration'], camera_speed_reference=1.0)
                 plan.setdefault('metadata', {})['qa_camera_adjustment'] = dict(

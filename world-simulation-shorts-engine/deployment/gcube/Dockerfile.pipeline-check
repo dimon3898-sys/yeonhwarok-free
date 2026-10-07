@@ -1,0 +1,8 @@
+# Validation candidate only. Publication remains blocked until the actual S002
+# draw invariant is identified. Retain every v009 layer and approved asset.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5f8250473de90076bfb7d2a357881523a1e4555ff3a5b970bb8e598fd4acfb9a
+COPY world-simulation-shorts-engine/engine/backends.py world-simulation-shorts-engine/engine/failures.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py world-simulation-shorts-engine/engine/audio_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/web/plan_presentation.js /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/tools/render_production_stable_scene.mjs world-simulation-shorts-engine/tools/scene_frame_contract.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/check_jpeg_pipe.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/asset_audit.py world-simulation-shorts-engine/deployment/gcube/pipeline_media_preflight.py world-simulation-shorts-engine/deployment/gcube/gateway_preflight.py world-simulation-shorts-engine/deployment/gcube/pipeline_retry_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

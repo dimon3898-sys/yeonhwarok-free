@@ -1,0 +1,87 @@
+name: Validate full v010 pipeline candidate (never publish)
+on:
+  push:
+    branches: [fix/v010-pipeline-preflight]
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: gcube-pipeline-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - name: Build complete validation candidate without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.pipeline-check
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: world-engine-v010-check:local
+      - name: Required packages, readonly assets, UID1000 write paths and real synthetic media pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --entrypoint python world-engine-v010-check:local - <<'PY'
+          import os,json,subprocess
+          from pathlib import Path
+          for name in ('libegl1','libvulkan1','libx11-6','libxext6'):
+              assert subprocess.check_output(['dpkg-query','-W','-f=${Status}',name],text=True)=='install ok installed'
+          for command in (['node','--version'],['chromium','--version'],['ffmpeg','-version']):subprocess.run(command,check=True,capture_output=True)
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.asset_audit import audit_assets
+          from deployment.gcube.pipeline_media_preflight import run
+          audit=audit_assets();assert audit['passed']
+          for name in ('tmp','cache','frames','outputs','checkpoints'):
+              p=Path('/data')/name;p.mkdir(parents=True,exist_ok=True);q=p/'write-test';q.write_text('ok');q.unlink()
+          report=run('/data/synthetic-pipeline')
+          from deployment.gcube.pipeline_retry_preflight import run as retry
+          assert retry('/data/synthetic-pipeline')['passed']
+          summary={key:value for key,value in report.items() if key not in ('assets','qc_warnings')}
+          summary['asset_count']=len(audit['assets'])
+          print('::notice title=Container pipeline result::'+json.dumps(summary,ensure_ascii=False))
+          assert report['passed'],report['qc_failures']
+          PY
+      - name: All existing regressions and new native collect-all/security/media contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 0:0 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python world-engine-v010-check:local -c \
+            'import pathlib,unittest; [p.mkdir(parents=True,exist_ok=True) for p in [pathlib.Path("/run/world-engine/cache"),pathlib.Path("/run/world-engine/audio")]]; suite=unittest.defaultTestLoader.discover("tests"); result=unittest.TextTestRunner(verbosity=1).run(suite); print("::notice title=Core regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))); raise SystemExit(not result.wasSuccessful())'
+          docker run --rm --user 0:0 --entrypoint python world-engine-v010-check:local -c \
+            'import unittest; suite=unittest.defaultTestLoader.discover("deployment/gcube",pattern="test_*.py"); result=unittest.TextTestRunner(verbosity=1).run(suite); print("::notice title=Proxy GPU regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))); raise SystemExit(not result.wasSuccessful())'
+          docker run --rm --user 1000:1000 --workdir /tmp/proxy-diag \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python world-engine-v010-check:local /tmp/proxy-diag/run_checks.py test_observer test_server_diag
+      - name: Gateway owner-login and 61-second foreground persistence without GPU admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 1000:1000 --entrypoint python world-engine-v010-check:local -m deployment.gcube.gateway_preflight
+      - name: Actual production entrypoint fails closed without physical NVIDIA
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name v010-gpu-required \
+            --env WORLD_ENGINE_OWNER_CODE="$(python -c 'import secrets;print(secrets.token_urlsafe(32))')" \
+            --env WORLD_ENGINE_STORAGE_MODE=ephemeral \
+            --env WORLD_ENGINE_STORAGE_PATH=/data world-engine-v010-check:local >/dev/null
+          trap 'docker rm --force v010-gpu-required >/dev/null 2>&1 || true' EXIT
+          docker exec v010-gpu-required python -c \
+            'import json,time,urllib.request; time.sleep(5); p=urllib.request.build_opener(urllib.request.ProxyHandler({})); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["ok"] is True and value["engine_ready"] is False; assert value["error_code"]=="GPU_HARDWARE_UNAVAILABLE"; time.sleep(61); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["engine_ready"] is False; print("::notice title=Production boot::PASS fail-closed; no GPU fallback; persisted 61 seconds")'
