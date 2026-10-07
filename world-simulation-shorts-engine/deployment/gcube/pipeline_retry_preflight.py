@@ -15,8 +15,10 @@ from engine.backends import CPULocalBackend
 from engine.failures import RenderProcessError
 from engine.pipeline_stability import render_project
 from engine.storage import ProjectStore
+from engine.qa_planner import configure_qa_schema
 
 def run(media):
+    configure_qa_schema()
     media=Path(media);source_plan=json.loads((media/'plan.json').read_text());poses=json.loads((media/'poses.json').read_text())['pose_records']
     calls=[];partial=[];fail=True
     with tempfile.TemporaryDirectory(prefix='real-mp4-retry-') as folder:
