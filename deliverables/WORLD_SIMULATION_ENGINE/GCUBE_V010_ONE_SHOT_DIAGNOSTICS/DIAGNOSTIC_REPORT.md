@@ -1,9 +1,9 @@
 # RTX4080S one-shot diagnostic preparation — verified release
 
-Published image: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v010-diag`  
-Digest: `sha256:a44ecb0ae6aa41cc0f7608084dab8412e6950b3a560f394b5d1a795a3480675d`  
-Code revision: `a3f46ae9905b6b02814cddc2c3a5e261357d8258`  
-Code branch: `fix/v010-one-shot-diagnostics`  
+Published image: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v010-diag`
+Digest: `sha256:a44ecb0ae6aa41cc0f7608084dab8412e6950b3a560f394b5d1a795a3480675d`
+Code revision: `a3f46ae9905b6b02814cddc2c3a5e261357d8258`
+Code branch: `fix/v010-one-shot-diagnostics`
 Official build/public-pull proof: [run 37626881896](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37626881896/job/112810826204).
 
 ## Result and limits
@@ -26,7 +26,7 @@ Each success/failure exports `WORLD_ENGINE_GPU_DIAGNOSTIC_<job-id>.zip` through 
 
 Export is restricted to named job artifacts and safe GPU/runtime fields. Credential keys/configured values/runtime owner-code values are removed. Raw headers, authentication files, cookies, sessions, full environments, subprocess input and complete command lines are excluded. Python diagnostics and redundant native journals are re-redacted when packaging. Measurements are actual elapsed time/child CPU+RSS/device memory samples/encoder lifetime/final MP4 size+duration; unavailable values are not invented. Device-memory peak is the maximum observed nvidia-smi sample, not an isolated or continuous process-VRAM measurement.
 
-A completely unwritable device or deletion of the entire ephemeral container can prevent final assembly; no implementation can retain that data after deletion. Download the ZIP while the stopped/failed renderer's server remains accessible. Do not repeatedly retry before interpreting its exact failed invariant.
+A completely unwritable device or deletion of the entire ephemeral container can prevent final assembly; no implementation can retain that data after deletion. Download the ZIP while the Workload is still running after renderer failure, before stopping it. Do not repeatedly retry before interpreting its exact failed invariant.
 
 ## Preservation and next step
 
