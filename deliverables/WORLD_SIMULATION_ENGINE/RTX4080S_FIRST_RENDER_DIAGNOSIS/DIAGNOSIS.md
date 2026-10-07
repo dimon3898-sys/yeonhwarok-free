@@ -100,3 +100,14 @@ v009는 확인된 이미지 자산 결함과 진단/QA/표시 개선만 포함�
 ## 최종 회귀 결과
 
 현재 코드의 core 429개 PASS(406.998초), gcube 205개 중 204개 PASS/1개 SKIP, v007 진단 31개 PASS. 총 665개 실행, 664 PASS/1 SKIP. [최종 container CI](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37601321302)에서 build, packages, UID 권한, source preparation, foreground boot, health/login, fail-closed GPU diagnostics, proxy/security/v007/new QA tests, 61초 이상 persistence가 통과했다. 실제 GPU frame/video 생성은 하지 않았다.
+
+## 게시 완료
+
+`ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v009` 게시 완료. [운영 이미지 publish + 익명 Docker pull](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37601972433) PASS.
+
+독립 익명 registry 검증에서 release tag와 revision tag가 같은 digest, v001~v008 및 diag 태그 불변, v008 base layer 전체 동일, 추가 7개 layer의 접근·바이트·SHA, 복원 PNG의 읽기 권한, port 8000/entrypoint/secret 부재/CPU fallback 부재를 확인했다. `PUBLIC_IMAGE_PROOF.json`에 결과를 저장했다.
+
+게시 이미지 revision: `373ea3c288c539532b186d46759387da8f4a58b7`.
+Digest: `sha256:5f8250473de90076bfb7d2a357881523a1e4555ff3a5b970bb8e598fd4acfb9a`.
+
+이후 문서 증거 commit은 운영 이미지 소스 revision과 구분한다. 실제 gcube 원격 job 파일이나 새 GPU 렌더를 확인한 것으로 표시하지 않는다.
