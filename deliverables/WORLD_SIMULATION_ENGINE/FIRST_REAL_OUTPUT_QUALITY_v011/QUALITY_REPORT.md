@@ -107,3 +107,28 @@ TTS OFF, Subtitle OFF, BGM ON, SFX ON으로 한 번 수행한다. 원본 MP4와 
 최종 지구 크기, 선박 크기, SFX 체감 싱크를 확인한다. Diagnostic ZIP과 완성 MP4를
 다운로드한 뒤 workload를 중지한다. 이 작업에서 실제 gcube workload를 실행하거나
 75/80초 영상을 생성하지 않았다.
+
+## 최종 게시 및 검증 결과
+
+새 public image: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v011-quality`
+
+Digest: `sha256:730da5b4b784dfeed43b9d9953c071914c04bca612fd114b82a7232a6cb212a5`
+
+Code revision: `a1c43c03b7d3caaf3a34ecda021ac9c30fa5bac7`
+
+[최종 Docker 검증·게시·익명 pull 기록](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37691273088/job/113031768691)
+
+컨테이너 전체 **734 PASS / 0 FAIL / 0 SKIP**: core 497(기존 482 + 신규 15),
+proxy/security/GPU logic 206, 진단 31. 로컬에서 권한 때문에 SKIP한
+UID1000 descriptor 검사도 최종 이미지 root 실행에서 통과했다. 실제 이미지 내부
+필수 자산 61개 검사, 부팅·health·owner login·Secure cookie·61초 유지, 실제
+entrypoint의 GPU 없는 환경 차단, anonymous Docker pull 및 OCI revision 검사 PASS.
+
+HIGH synthetic media fixture는 실제 360 JPEG, 5 Scene MP4, concat, BGM/SFX,
+QC, checkpoint/retry를 통과했다. 실측 fixture 전체 시간은 46.868초다.
+지도 렌더 속도나 RTX4080S GPU 성능이라고 보고하지 않는다. 선택형 subtitle 경로는
+PASS, QA에서 너무 긴 TTS는 기존 정책에 따라 명시적으로 거부되며 기능은 보존된다.
+
+실제 AFTER GPU 그림·모바일 체감·전체 지도 화질은 아직 **미검증**이다. 이번 작업에서
+RTX4080S를 켜지 않았다. 기존 저장 프로젝트를 retry하여 이 새 품질안을 적용하지 말고,
+승인된 다음 GPU 검사에서는 같은 주제의 **새 12초 QA 계획**을 생성한다.
