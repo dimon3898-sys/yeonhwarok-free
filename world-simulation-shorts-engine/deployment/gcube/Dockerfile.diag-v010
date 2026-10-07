@@ -1,0 +1,16 @@
+# User-authorized one-shot diagnostic operating image. Real S002 invariant is
+# unknown; persist actual draw predicates before exit. Preserve every v009 layer.
+FROM python:3.12-slim-bookworm AS calibrated_tts
+COPY world-simulation-shorts-engine/deployment/gcube/prepare_tts_provider.py /prepare.py
+COPY world-simulation-shorts-engine/deployment/gcube/tts_provider_packages.json /packages.json
+RUN python /prepare.py /packages.json /provider
+
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5f8250473de90076bfb7d2a357881523a1e4555ff3a5b970bb8e598fd4acfb9a
+COPY --from=calibrated_tts /provider /opt/world-engine/tts-offline-profile
+COPY --chmod=755 world-simulation-shorts-engine/deployment/gcube/espeak_profile.sh /usr/local/bin/espeak-ng
+COPY world-simulation-shorts-engine/engine/gpu_bundle.py world-simulation-shorts-engine/engine/gpu_preflight.py world-simulation-shorts-engine/engine/backends.py world-simulation-shorts-engine/engine/failures.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py world-simulation-shorts-engine/engine/audio_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/web/app.js world-simulation-shorts-engine/web/plan_presentation.js /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/tools/scene_diagnostic_journal.mjs world-simulation-shorts-engine/tools/render_production_stable_scene.mjs world-simulation-shorts-engine/tools/scene_frame_contract.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/check_jpeg_pipe.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/asset_audit.py world-simulation-shorts-engine/deployment/gcube/pipeline_media_preflight.py world-simulation-shorts-engine/deployment/gcube/gateway_preflight.py world-simulation-shorts-engine/deployment/gcube/pipeline_retry_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+COPY world-simulation-shorts-engine/deployment/gcube/storage.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/storage.py

@@ -10,7 +10,7 @@ export function failureSummary(error) {
   if (!error || typeof error !== 'object') return String(error || '');
   const parts = [error.scene_id, error.failed_stage, error.code, error.message];
   const root = error.diagnostics?.root_cause;
-  if (root) parts.push(root.code, ...(root.failed_invariants || []), Number.isInteger(root.frame_index) ? `frame ${root.frame_index}` : null);
+  if (root) parts.push(`PRIMARY_ERROR ${root.code}`, ...(root.failed_invariants || []).map(rule => `FAILED_INVARIANT ${rule}`), Number.isInteger(root.frame_index) ? `frame ${root.frame_index}` : null);
   if (Number.isInteger(error.diagnostics?.return_code)) parts.push(`exit ${error.diagnostics.return_code}`);
   return parts.filter(Boolean).join(' · ');
 }

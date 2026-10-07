@@ -23,7 +23,7 @@ def audit_assets():
     for file in (V3_ROOT/'node_modules/three/build/three.module.js',
                  V3_ROOT/'node_modules/playwright/package.json',
                  APP_ROOT/'engine/rhythm_sound.py', APP_ROOT/'engine/sfx_library.py',
-                 APP_ROOT/'engine/audio.py', APP_ROOT/'engine/audio_stability.py',
+                 APP_ROOT/'engine/audio.py', APP_ROOT/'engine/audio_stability.py', APP_ROOT/'engine/gpu_bundle.py', APP_ROOT/'engine/gpu_preflight.py', APP_ROOT/'tools/scene_diagnostic_journal.mjs',
                  APP_ROOT/'tools/scene_frame_contract.mjs', APP_ROOT/'tools/render_production_stable_scene.mjs'):
         paths[file] = 'runtime_dependency'
     speech = APP_ROOT.parent/'tts-offline-profile'

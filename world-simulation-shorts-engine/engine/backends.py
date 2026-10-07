@@ -38,6 +38,9 @@ class RenderBackend(ABC):
 class CPULocalBackend(RenderBackend):
     name = "CPU_LOCAL"
 
+    def __init__(self, diagnostic=None):
+        self.diagnostic = diagnostic
+
     def run(self, command: list[str], cwd: Path, progress: Callable[[dict], None]) -> dict:
         # The browser renderer has its own no-frame watchdog. Pipes are continuously
         # drained here, so a full pipe cannot make a healthy renderer appear stalled.
@@ -48,6 +51,12 @@ class CPULocalBackend(RenderBackend):
         approved = Path(__file__).resolve().parents[1] / 'tools/render_production_scene.mjs'
         if len(command) > 1 and command[0] == 'node' and Path(command[1]).resolve() == approved:
             command[1] = str(approved.with_name('render_production_stable_scene.mjs'))
+        diagnostic = self.diagnostic
+        sid = diagnostic.begin_scene(command) if diagnostic else None
+        if diagnostic and len(command) > 1 and Path(command[1]).name == 'render_production_stable_scene.mjs':
+            command.extend(['--diagnostic-dir', str(diagnostic.root)])
+            if diagnostic.state_root and (diagnostic.state_root/'owner-code.txt').is_file():
+                command.extend(['--diagnostic-redact-file', str(diagnostic.state_root/'owner-code.txt')])
         try:
             child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE, text=True, bufsize=1,
@@ -70,6 +79,9 @@ class CPULocalBackend(RenderBackend):
                 for line in stream:
                     if stopping.is_set():
                         break
+                    if diagnostic:
+                        try: diagnostic.log(name, line)
+                        except OSError: enqueue((name, 'DIAGNOSTIC_LOG_WRITE_FAILED'))
                     enqueue((name, line))
             finally:
                 enqueue((name, None))
@@ -84,7 +96,7 @@ class CPULocalBackend(RenderBackend):
                 if line is None:
                     finished.add(name)
                     continue
-                tails[name].append(line.rstrip()[:8192])
+                tails[name].append((diagnostic.redactor.text(line) if diagnostic else line).rstrip()[:8192])
                 tails[name] = tails[name][-25:]
                 if name == 'stdout' and line.startswith("{"):
                     try:
@@ -96,6 +108,8 @@ class CPULocalBackend(RenderBackend):
                 elif name == 'stdout' and line.startswith("FRAME "):
                     progress({"stage": "scene_render", "message": line.strip()})
             code = child.wait()
+            if diagnostic:
+                diagnostic.end_scene(sid, code=code, seconds=time.monotonic()-started)
             if code:
                 raise RenderProcessError(returncode=code, duration=time.monotonic()-started,
                                          stdout=tails['stdout'], stderr=tails['stderr'])

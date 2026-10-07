@@ -38,7 +38,7 @@ class RenderProcessError(RuntimeError):
                 continue
             try:
                 raw = json.loads(str(line).split(' ', 1)[1])
-                if raw.get('code') not in {'FRAME_AUDIT_FAILED', 'SCENE_FRAME_INVALID', 'FFMPEG_PIPE_FAILED', 'SCENE_RENDER_FAILED', 'ASSET_MISSING'}:
+                if raw.get('code') not in {'FRAME_AUDIT_FAILED', 'SCENE_FRAME_INVALID', 'FFMPEG_PIPE_FAILED', 'SCENE_RENDER_FAILED', 'ASSET_MISSING', 'RENDERER_SIGNAL'}:
                     continue
                 rules = raw.get('failed_invariants', [])
                 if not isinstance(rules, list) or any(not isinstance(rule, str) or not re.fullmatch(r'[A-Z][A-Z0-9_]{1,60}', rule) for rule in rules):

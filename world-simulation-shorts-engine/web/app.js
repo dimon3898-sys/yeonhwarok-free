@@ -234,7 +234,7 @@ async function pollStatus(repeat = true) {
     // The selected historical plan must never be replaced by a current job response.
     if (state.historical && payload.version && payload.version !== state.version) return;
     state.status = payload; renderStatus(payload);
-    const active = ACTIVE_STATUSES.has(statusValue(payload));
+    const active = ACTIVE_STATUSES.has(statusValue(payload)) || payload.diagnostic_pending === true;
     if (repeat || active) state.pollTimer = window.setTimeout(() => pollStatus(active), active ? 2200 : 7000);
   } catch (error) {
     if (generation !== state.generation) return;
@@ -254,7 +254,7 @@ function renderStatus(payload) {
   $('progress-panel').hidden = !(active || failed);
   $('progress-panel').classList.toggle('progress-panel-failed', failed);
   if (active || failed) {
-    $('progress-title').textContent = failed ? '작업을 이어서 진행할 수 있습니다.' : '영상 생성 중';
+    $('progress-title').textContent = failed ? '작업 중단 · 진단 자료 확인' : '영상 생성 중';
     const raw = progress.percent ?? progress.percentage ?? (typeof payload.progress === 'number' ? payload.progress : undefined) ?? (typeof job.progress === 'number' ? job.progress : undefined);
     const percent = raw == null ? null : Math.min(100, Math.max(0, Number(raw)));
     $('progress-percent').textContent = percent == null ? '' : `${Math.round(percent)}%`;
@@ -282,8 +282,8 @@ function renderStatus(payload) {
       $('progress-detail').textContent = detail || (progress.cached_scenes ? `완료된 장면 ${progress.cached_scenes}개를 재사용하고 있습니다.` : '완료된 단계는 자동으로 저장됩니다.');
       if (diagnostics) { diagnostics.hidden = true; diagnostics.open = false; diagnostics.querySelector('pre').textContent = ''; }
     }
-    $('resume-render').hidden = !failed || state.historical;
-    if (failed) $('progress-recovery').textContent = '완료된 장면과 이전 버전은 보존되어 있습니다.';
+    $('resume-render').hidden = !failed || state.historical || payload.diagnostic_pending === true;
+    if (failed) $('progress-recovery').textContent = '진단 ZIP을 다운로드한 뒤 gcube Workload를 중지하세요. 원인 확인 전 재시도하지 마세요. 완료된 장면은 보존됩니다.';
   }
   const outputs = payload.outputs || job.outputs;
   renderOutputs(outputs, payload);
@@ -312,6 +312,7 @@ function friendlyFile(filename, key) {
   if (/scene_plan_readable/.test(name)) return '장면 기획';
   if (/scene_plan.*\.json/.test(name)) return 'Scene 설계 파일';
   if (/script.*\.txt/.test(name)) return '대본';
+  if (/world_engine_gpu_diagnostic_.*\.zip$/.test(name)) return '진단 ZIP 다운로드';
   if (/\.zip$/.test(name)) return '전체 결과물 ZIP';
   return filename;
 }
@@ -321,9 +322,19 @@ function renderOutputs(outputs, payload) {
   $('output-panel').hidden = !list.length;
   if (!list.length) return;
   const passed = payload.qc?.passed ?? payload.result?.qc?.passed ?? payload.qc_passed;
-  $('output-title').textContent = !video ? '기획 기록' : passed === false || statusValue(payload) === 'qc_failed' ? '검수가 필요한 영상' : '생성된 영상';
+  $('output-title').textContent = !video ? (list.some(item => item.diagnostic) ? '진단 자료' : '기획 기록') : passed === false || statusValue(payload) === 'qc_failed' ? '검수가 필요한 영상' : '생성된 영상';
   $('output-version').textContent = state.version;
   clear($('downloads'));
+  let timing = $('diagnostic-timing');
+  const diagnostic = list.find(item => item.diagnostic_metrics)?.diagnostic_metrics;
+  if (diagnostic) {
+    if (!timing) { timing = node('p'); timing.id = 'diagnostic-timing'; $('downloads').before(timing); }
+    const parts = [];
+    if (Number.isFinite(diagnostic.total_seconds)) parts.push(`실측 작업 ${diagnostic.total_seconds.toFixed(1)}초`);
+    if (diagnostic.gpu_model) parts.push(diagnostic.gpu_model);
+    if (Number.isFinite(diagnostic.gpu_memory_peak_mib)) parts.push(`GPU 메모리 최대 ${diagnostic.gpu_memory_peak_mib} MiB`);
+    timing.textContent = parts.join(' · '); timing.hidden = false;
+  } else if (timing) timing.hidden = true;
   for (const output of list) {
     const filename = fileOf(output);
     const fallback = `/download/${encodeURIComponent(projectId())}/${encodeURIComponent(state.version)}/${filename.split('/').map(encodeURIComponent).join('/')}`;
@@ -340,7 +351,7 @@ function renderOutputs(outputs, payload) {
     if ($('result-video').dataset.source !== src) { $('result-video').src = src; $('result-video').dataset.source = src; }
   }
   const preview = state.plan?.options?.quality === 'FAST';
-  $('output-notice').textContent = !video ? '기획을 승인한 뒤 영상 생성을 시작할 수 있습니다.' : passed === false ? '품질 검수에서 확인이 필요한 항목이 있습니다. 수정한 뒤 다시 검사해 주세요.' : preview ? 'FAST · 540×960 프리뷰입니다. 업로드용 영상은 HIGH 또는 CINEMA를 선택하세요.' : 'MP4를 내려받아 휴대폰에 저장할 수 있습니다.';
+  $('output-notice').textContent = !video ? (list.some(item => item.diagnostic) ? '진단 ZIP을 다운로드한 뒤 gcube Workload를 중지하세요.' : '기획을 승인한 뒤 영상 생성을 시작할 수 있습니다.') : passed === false ? '품질 검수에서 확인이 필요한 항목이 있습니다. 수정한 뒤 다시 검사해 주세요.' : preview ? 'FAST · 540×960 프리뷰입니다. 업로드용 영상은 HIGH 또는 CINEMA를 선택하세요.' : 'MP4를 내려받아 휴대폰에 저장할 수 있습니다.';
 }
 
 async function startRender() {

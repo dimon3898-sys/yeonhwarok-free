@@ -18,8 +18,10 @@ export function auditFailures(audit,browserErrors=[]){
  if(audit.fontReady!==true)failed.push('FONT_NOT_READY');
  const finite=(v,n)=>Array.isArray(v)&&v.length===n&&v.every(Number.isFinite);
  if(!finite(audit.cameraPosition,3)||!finite(audit.cameraQuaternion,4)||!Number.isFinite(audit.cameraFov)||audit.cameraFov<=0||audit.cameraFov>=180)failed.push('CAMERA_NONFINITE');
- if((audit.entities||[]).some(e=>!finite(e.position,3)||!finite(e.quaternion,4)))failed.push('ENTITY_NONFINITE');
- if((audit.routeProgress||[]).some(r=>!Number.isFinite(r.progress)||r.progress<0||r.progress>1))failed.push('ROUTE_PROGRESS_INVALID');
+ if(!Array.isArray(audit.entities))failed.push('ENTITY_DATA_INVALID');
+ else if(audit.entities.some(e=>!finite(e?.position,3)||!finite(e?.quaternion,4)))failed.push('ENTITY_NONFINITE');
+ if(!Array.isArray(audit.routeProgress))failed.push('ROUTE_PROGRESS_INVALID');
+ else if(audit.routeProgress.some(r=>!Number.isFinite(r?.progress)||r.progress<0||r.progress>1))failed.push('ROUTE_PROGRESS_INVALID');
  return failed;
 }
 

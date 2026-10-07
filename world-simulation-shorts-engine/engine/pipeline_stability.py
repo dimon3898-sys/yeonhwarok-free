@@ -28,6 +28,7 @@ def checked_concat(scenes, destination, settings):
 
 
 def render_project(*args, **kwargs):
+    diagnostic = kwargs.pop('diagnostic', None)
     original = rendering.render_project
     if not isinstance(original, FunctionType):
         return original(*args, **kwargs)  # Existing injected unit test backend.
@@ -35,6 +36,16 @@ def render_project(*args, **kwargs):
     namespace['_concat'] = checked_concat
     namespace['create_audio'] = create_audio
     namespace['finish_video'] = finish_video
+    if diagnostic:
+        from .gpu_preflight import collect_all
+        collect_all(args[0], args[1], diagnostic)
+        backend = namespace['CPULocalBackend']
+        namespace['CPULocalBackend'] = lambda: backend(diagnostic=diagnostic)
+        def recorded_audio(*values, **options):
+            result = create_audio(*values, **options)
+            diagnostic.write('audio-diagnostics.json', result)
+            return result
+        namespace['create_audio'] = recorded_audio
     run = FunctionType(original.__code__, namespace, original.__name__, original.__defaults__, original.__closure__)
     run.__kwdefaults__ = original.__kwdefaults__
     return run(*args, **kwargs)

@@ -179,9 +179,20 @@ class DurableJobs:
                         if 'subprocess' in evidence:
                             public['diagnostics'] = evidence['subprocess']
                         self.app.store.set_status(ticket['project_id'], ticket['version'], status='failed',
-                                                  error=public, failed_at=evidence['created_at'])
+                                                  error=public, failed_at=evidence['created_at'], diagnostic_pending=True)
                     ticket['error_code'] = self.app.store.status(ticket['project_id'], ticket['version'])['error']['code']
             finally:
+                # The gateway survives a killed worker and packages its fsynced
+                # journals before exposing the terminal state to the owner.
+                try:
+                    from engine.gpu_bundle import recover_bundle
+                    current = self.app.store.status(ticket['project_id'], ticket['version'])
+                    recover_bundle(self.app.store.version_path(ticket['project_id'], ticket['version']),
+                                   jid, current['status'], current.get('error'))
+                except Exception as packaging_error:
+                    print('DIAGNOSTIC_RECOVERY_FAILED '+type(packaging_error).__name__, file=sys.stderr, flush=True)
+                state = self.app.store.status(ticket['project_id'], ticket['version'])
+                self.app.store.set_status(ticket['project_id'], ticket['version'], status=state['status'], diagnostic_pending=False)
                 with self.condition:
                     if cancel.is_set():
                         ticket['status'] = 'interrupted' if self.stopping else 'cancelled'
@@ -287,6 +298,10 @@ class MobileApplication(Application):
         self.rate = RateLimiter()
         super().__init__(self.state_root / 'projects', internal_url)
         self.scheduler = DurableJobs(self, runner)
+
+    def outputs(self, pid, version):
+        from engine.gpu_bundle import diagnostic_outputs
+        return super().outputs(pid, version) + diagnostic_outputs(self.store.version_path(pid, version), pid, version)
 
     def start_render(self, pid, version):
         return self.scheduler.submit(pid, version)
@@ -715,10 +730,15 @@ def worker(ticket_path, state_root):
         raise KeyboardInterrupt('owned worker interrupted')
     signal.signal(signal.SIGTERM, interrupted)
     last_progress = {}
+    bundle = None
+    result = None
+    failure = None
     def progress(event):
         event = {'stage': event} if isinstance(event, str) else dict(event)
         stage = event.get('stage', '')
         last_progress.update(stage=stage, scene_id=event.get('scene_id'))
+        if bundle:
+            bundle.event(event)
         names = {'asset_resolution': 'GIS·자산 검수', 'narration_preflight': '음성·사운드 검수',
                  'scene_start': '장면 준비', 'scene_render': '장면 렌더링', 'scene_complete': '장면 저장',
                  'scene_cache': '완료 장면 재사용', 'scene_assembly': '장면 결합', 'audio': '오디오 합성',
@@ -739,29 +759,54 @@ def worker(ticket_path, state_root):
         store.set_status(pid, version, status='rendering', progress=event,
                          job_id=ticket['job_id'], error=None)
     try:
+        from engine.gpu_bundle import DiagnosticBundle
+        bundle = DiagnosticBundle(store.version_path(pid, version), ticket['job_id'], plan, state_root=root)
+        bundle.start_samples()
         from engine.pipeline_stability import render_project
-        result = render_project(store.version_path(pid, version), plan, ticket['internal_url'], progress,
-                                scene_filter=selected_scenes)
+        with bundle.record_processes():
+            result = render_project(store.version_path(pid, version), plan, ticket['internal_url'], progress,
+                                    scene_filter=selected_scenes, diagnostic=bundle)
         from deployment.resume_evidence import finalize_resume_evidence
         resume_evidence = finalize_resume_evidence(root, store.version_path(pid, version),
                                                   expected_plan_hash=ticket['plan_hash'], result=result)
-        store.set_status(pid, version, status='complete', result=result, error=None,
+        store.set_status(pid, version, status='complete', result=result, error=None, diagnostic_pending=True,
                          resume_evidence=resume_evidence,
                          progress={'stage': '최종 MP4 준비 완료', 'completed': len(plan['scenes']), 'total': len(plan['scenes'])})
     except KeyboardInterrupt:
-        store.set_status(pid, version, status='interrupted', error=None,
+        failure = dict(code='WORKER_INTERRUPTED', failed_stage=last_progress.get('stage'), scene_id=last_progress.get('scene_id'))
+        store.set_status(pid, version, status='interrupted', error=None, diagnostic_pending=True,
                          progress={'stage': '완료 Scene 보존 · 이어서 생성 가능'})
         return 130
     except Exception as error:
         record = failure_record(error, stage=last_progress.get('stage'), scene_id=last_progress.get('scene_id'))
+        failure = record
+        if bundle:
+            try: bundle.write('python-exception.json', dict(error_type=type(error).__name__,message=str(error),trace=record.get('trace')))
+            except OSError: pass
         record.update(created_at=now(), job_id=ticket['job_id'])
         private_json(root / 'jobs' / (ticket['job_id'] + '.failure.json'),
                      record)
         public = {key: record[key] for key in ('code', 'message', 'failed_stage', 'scene_id')}
         if 'subprocess' in record:
             public['diagnostics'] = record['subprocess']
-        store.set_status(pid, version, status='failed', failed_at=record['created_at'], error=public)
+        store.set_status(pid, version, status='failed', failed_at=record['created_at'], error=public, diagnostic_pending=True)
         return 1
+    finally:
+        if bundle:
+            bundle.stop_samples()
+            try:
+                bundle.finish(status='FAILED' if failure else 'SUCCESS', error=failure, result=result)
+            except Exception as zip_error:
+                # A ZIP failure never replaces the original render failure.
+                print('DIAGNOSTIC_PACKAGING_FAILED '+type(zip_error).__name__, file=sys.stderr, flush=True)
+                try:
+                    if bundle.reserve.exists(): bundle.reserve.unlink()
+                    bundle.write('packaging-error.json', dict(code='DIAGNOSTIC_PACKAGING_FAILED', error_type=type(zip_error).__name__))
+                    bundle.package()
+                except Exception:
+                    pass
+        state = store.status(pid, version)
+        store.set_status(pid, version, status=state['status'], diagnostic_pending=False)
     return 0
 
 
