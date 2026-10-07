@@ -43,6 +43,22 @@ class PipelinePreflightTests(unittest.TestCase):
    node("""import fs from 'node:fs';import assert from 'node:assert/strict';import {validateJpeg} from './tools/scene_frame_contract.mjs';
    const b=fs.readFileSync(%s),o={width:1080,height:1920,decoded:[1080,1920],frameIndex:0,expectedIndex:0};assert.equal(validateJpeg(b,o),b);
    for(const [buffer,opts] of [[Buffer.alloc(0),o],[b.subarray(0,b.length-2),o],[b,{...o,decodeError:true}],[b,{...o,decoded:[1,2]}],[b,{...o,expectedIndex:1}]])assert.throws(()=>validateJpeg(buffer,opts),e=>e.code==='SCENE_FRAME_INVALID');"""%json.dumps(str(file)))
+ def test_real_browser_jpeg_decode_keeps_csp_without_fetch_or_webgl(self):
+  with tempfile.TemporaryDirectory() as folder:
+   frame=Path(folder)/'csp.jpg';Image.new('RGB',(1080,1920),(30,60,90)).save(frame,quality=99)
+   code="""import assert from 'node:assert/strict';import fs from 'node:fs';import {createRequire} from 'node:module';import path from 'node:path';
+   const require=createRequire(path.resolve('../cinematic-world-map/package.json')),{chromium}=require('playwright');
+   const source=fs.readFileSync('./tools/render_production_stable_scene.mjs','utf8');
+   // Test only JPEG decoding. Never construct WebGL or render a map with CPU.
+   const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-gpu']});
+   try{const page=await browser.newPage();await page.route('http://jpeg.test/**',route=>route.fulfill({status:200,contentType:'text/html',headers:{'Content-Security-Policy':"default-src 'self'; connect-src 'self'; img-src 'self' data:"},body:'<!doctype html><body>JPEG decoding only</body>'}));await page.goto('http://jpeg.test/');
+   const uri='data:image/jpeg;base64,'+fs.readFileSync(FRAME_PATH).toString('base64');
+   const old=await page.evaluate(async uri=>{try{await(await fetch(uri)).blob();return true;}catch{return false;}},uri);assert.equal(old,false);
+   const block=source.split('let decoded=null,decodeError=false;')[1].split('return {jpeg,audit,decoded,decodeError};')[0];
+   const decode=new Function('return async function(uri){const jpeg=uri.split(",")[1];let decoded=null,decodeError=false;'+block+'return {decoded,decodeError};}')();
+   assert.deepEqual(await page.evaluate(decode,uri),{decoded:[1080,1920],decodeError:false});assert.ok(!block.includes('fetch('));
+   }finally{await browser.close();}""".replace('FRAME_PATH',json.dumps(str(frame)))
+   node(code)
  def test_early_encoder_exit_is_observed_not_unhandled_or_hung(self):
   node("""import assert from 'node:assert/strict';import {FFmpegPipe} from './tools/scene_frame_contract.mjs';
   const pipe=new FFmpegPipe(['-e','process.exit(9)'],{executable:process.execPath});await pipe.closed;
@@ -59,7 +75,7 @@ class PipelinePreflightTests(unittest.TestCase):
  def test_approved_visual_and_gpu_paths_stay_immutable_and_encoder_lazy(self):
   old=(APP_ROOT/'tools/render_production_scene.mjs').read_text();stable=(APP_ROOT/'tools/render_production_stable_scene.mjs').read_text()
   self.assertIn('if(errors.length||result.audit.webglError',old);self.assertLess(stable.index('const failures=auditFailures'),stable.index('new FFmpegPipe'));self.assertLess(stable.index('validateJpeg(buffer'),stable.index('new FFmpegPipe'))
-  launch='headless:true,args:';self.assertEqual(old.split(launch)[1].split('});')[0],stable.split(launch)[1].split('});')[0]);self.assertIn('createImageBitmap(blob)',stable)
+  launch='headless:true,args:';self.assertEqual(old.split(launch)[1].split('});')[0],stable.split(launch)[1].split('});')[0])
  def test_concat_rejects_empty_before_ffmpeg(self):
   with tempfile.TemporaryDirectory() as folder:
    with self.assertRaisesRegex(RuntimeError,'CONCAT_INPUT_INVALID'):_concat([],Path(folder)/'output.mp4',dict(output_width=1080,output_height=1920))

@@ -66,7 +66,7 @@ try{
    window.renderFrame(t,samples);const audit=window.app.audit(t);
    const uri=window.app.canvas.toDataURL('image/jpeg',.99),jpeg=uri.split(',')[1];
    let decoded=null,decodeError=false;
-   try{const blob=await (await fetch(uri)).blob(),image=await createImageBitmap(blob);decoded=[image.width,image.height];image.close();}catch{decodeError=true;}
+   try{const bytes=Uint8Array.from(atob(jpeg),character=>character.charCodeAt(0)),image=await createImageBitmap(new Blob([bytes],{type:'image/jpeg'}));decoded=[image.width,image.height];image.close();}catch{decodeError=true;}
    return {jpeg,audit,decoded,decodeError};
   },{t,samples});
   failedAudit=auditFailureSnapshot(result.audit);

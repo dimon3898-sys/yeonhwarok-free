@@ -108,6 +108,7 @@ jobs:
           set -euo pipefail
           docker run --rm --user 0:0 \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/fixtures,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/fixtures,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
             --entrypoint python world-engine-v010-check:local -c \
             'import unittest; suite=unittest.defaultTestLoader.discover("deployment/gcube",pattern="test_*.py"); result=unittest.TextTestRunner(verbosity=1).run(suite); print("::notice title=Proxy GPU regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))+", failed_tests="+str([t.id() for t,_ in result.failures+result.errors])); raise SystemExit(not result.wasSuccessful())'
       - name: Independent v007 diagnostic regressions
