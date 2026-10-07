@@ -18,9 +18,12 @@ def audit_assets():
     for folder in (APP_ROOT/'web', V3_ROOT/'src'):
         for file in folder.glob('*.js'):
             paths[file] = 'renderer_shader_or_model_source'
+    for file in (APP_ROOT/'web').glob('render*.html'):
+        paths[file] = 'renderer_entry_page'
     for file in (V3_ROOT/'node_modules/three/build/three.module.js',
                  V3_ROOT/'node_modules/playwright/package.json',
                  APP_ROOT/'engine/rhythm_sound.py', APP_ROOT/'engine/sfx_library.py',
+                 APP_ROOT/'engine/audio.py', APP_ROOT/'engine/audio_stability.py',
                  APP_ROOT/'tools/scene_frame_contract.mjs', APP_ROOT/'tools/render_production_stable_scene.mjs'):
         paths[file] = 'runtime_dependency'
     records = []
