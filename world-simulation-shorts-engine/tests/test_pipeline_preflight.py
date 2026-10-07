@@ -59,6 +59,17 @@ class PipelinePreflightTests(unittest.TestCase):
    assert.deepEqual(await page.evaluate(decode,uri),{decoded:[1080,1920],decodeError:false});assert.ok(!block.includes('fetch('));
    }finally{await browser.close();}""".replace('FRAME_PATH',json.dumps(str(frame)))
    node(code)
+ def test_native_audit_still_observes_jpeg_readback_gl_error(self):
+  node("""import assert from 'node:assert/strict';import fs from 'node:fs';import {auditFailures} from './tools/scene_frame_contract.mjs';
+  const source=fs.readFileSync('./tools/render_production_stable_scene.mjs','utf8');
+  const body=source.split('const result=await page.evaluate(async ({t,samples})=>{')[1].split('},{t,samples});')[0];
+  let injectedError=0;
+  const good={textClipped:[],entityClipped:[],missingTextures:[],routeDiscontinuities:[],routeInsideEarth:false,fontReady:true,cameraPosition:[1,2,3],cameraQuaternion:[0,0,0,1],cameraFov:44,entities:[],routeProgress:[]};
+  // Inject a readback GL error. This is not a WebGL/GPU draw success claim.
+  globalThis.window={renderFrame(){},app:{canvas:{toDataURL(){injectedError=1286;return 'data:image/jpeg;base64,AQ==';}},audit(){return {...good,webglError:injectedError};}}};
+  const evaluate=new Function('return async function({t,samples}){'+body+'}')();
+  const result=await evaluate({t:0,samples:1});assert.equal(result.audit.webglError,1286);assert.ok(auditFailures(result.audit,[]).includes('WEBGL_ERROR'));
+  assert.ok(body.indexOf('toDataURL')<body.indexOf('window.app.audit'));""")
  def test_early_encoder_exit_is_observed_not_unhandled_or_hung(self):
   node("""import assert from 'node:assert/strict';import {FFmpegPipe} from './tools/scene_frame_contract.mjs';
   const pipe=new FFmpegPipe(['-e','process.exit(9)'],{executable:process.execPath});await pipe.closed;

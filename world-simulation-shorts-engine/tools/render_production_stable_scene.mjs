@@ -63,8 +63,10 @@ try{
  for(let i=0;i<frames;i++){
   frameIndex=i;const t=start+i/fps;
   const result=await page.evaluate(async ({t,samples})=>{
-   window.renderFrame(t,samples);const audit=window.app.audit(t);
+   window.renderFrame(t,samples);
    const uri=window.app.canvas.toDataURL('image/jpeg',.99),jpeg=uri.split(',')[1];
+   // Keep the approved post-readback audit: readPixels/export may set GL errors.
+   const audit=window.app.audit(t);
    let decoded=null,decodeError=false;
    try{const bytes=Uint8Array.from(atob(jpeg),character=>character.charCodeAt(0)),image=await createImageBitmap(new Blob([bytes],{type:'image/jpeg'}));decoded=[image.width,image.height];image.close();}catch{decodeError=true;}
    return {jpeg,audit,decoded,decodeError};
