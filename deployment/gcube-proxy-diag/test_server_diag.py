@@ -47,6 +47,9 @@ class ServerTests(unittest.TestCase):
         self.cookie = values['Set-Cookie'].split(';',1)[0]
 
     def test_owner_missing_wrong_correct_and_read_only_routes(self):
+        status, fields, body = self.request('GET', '/')
+        self.assertEqual(status, 200); self.assertIn('text/html', fields['Content-Type'])
+        self.assertIn(b'/auth/login', body)
         self.assertEqual(self.request('GET','/diag.json')[0],401)
         for owner in (None, 'wrong'):
             self.assertEqual(self.request('POST','/auth/login',{'password':owner})[0],401)

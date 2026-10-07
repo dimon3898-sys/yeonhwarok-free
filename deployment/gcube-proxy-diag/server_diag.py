@@ -136,7 +136,8 @@ class Handler(BaseHTTPRequestHandler):
                     if app.rate.allow(("diagnostics", self.client_address[0]), count=12) and app.record:
                         app.record(report)
                     return self.reply(error.status, report, page=method == "GET" and path in {"/", "/auth/login"})
-                if path == "/auth/login" and method == "GET":
+                if method == "GET" and (path == "/auth/login" or
+                        path == "/" and not app.sessions.claims(self.token())):
                     # The same strict proxy policy must pass before login is available.
                     body = ("<!doctype html><html lang=ko><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
                         "<h1>Proxy 진단 전용</h1><p>GPU와 렌더는 실행하지 않습니다.</p>"
