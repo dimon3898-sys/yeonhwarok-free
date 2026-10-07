@@ -5,6 +5,7 @@ from email.message import Message
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 for root in (Path(__file__).resolve().parents[2] / 'world-simulation-shorts-engine',
              Path('/opt/world-engine/world-simulation-shorts-engine')):
@@ -144,6 +145,14 @@ class ObserverTests(unittest.TestCase):
         self.assertEqual(value['kind'], 'IPV4_MAPPED_IPV6'); self.assertTrue(value['quoted'])
         self.assertTrue(value['has_port']); self.assertTrue(value['port_valid'])
         self.assertEqual(self.observer.ip_structure('fe80::1%eth0')['kind'], 'INVALID_OR_NON_IP')
+
+    def test_masked_policy_addresses_expose_mapping_disagreement_without_trusting_peer(self):
+        with patch.object(proxy, 'pod_addresses', return_value=frozenset({'10.42.0.9','127.0.0.1','::1'})):
+            report = self.rule(headers(), 'FORWARDED_PEER_NOT_TRUSTED', peer='::ffff:10.42.0.9')
+        self.assertFalse(report['tcp_peer']['trusted_by_unchanged_v005'])
+        self.assertIn(report['tcp_peer']['address_id'],
+                      [entry['address_id'] for entry in report['trusted_peer_policy']['addresses']])
+        self.assertNotIn('10.42.0.9', json.dumps(report))
 
 
 if __name__ == '__main__': unittest.main()

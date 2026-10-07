@@ -109,6 +109,14 @@ comparison without exposing IPs or workload names. Known Envoy/Istio header
 Cookie, Authorization, body, query, token, session and unknown values are never
 captured or printed. Rate limiting bounds rejection logging.
 
+The unchanged validator's resolved Pod-address allowlist is also projected as
+masked types/keyed IDs, never raw addresses. This distinguishes an unmatched
+upstream proxy from representation mismatches. A controlled mapped non-loopback
+Pod-IP case demonstrates that normalized IDs can match while v005's raw exact
+address comparison rejects the peer. This is an observed policy edge case,
+**not evidence that actual gcube sends a mapped Pod peer**; the real first rule
+and peer format remain unknown until capture.
+
 The source hash and AST map fail closed if the validator changes. This observes
 the exact first exception; it does not rewrite headers, return true, broaden
 trust, admit software renderers or switch to CPU.

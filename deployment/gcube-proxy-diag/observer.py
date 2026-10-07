@@ -228,6 +228,9 @@ class Observer:
         peer = self.ip_structure(peer_ip or "")
         peer["trusted_by_unchanged_v005"] = proxy.trusted_peer(peer_ip)
         return {"headers": captured, "tcp_peer": peer,
+                "trusted_peer_policy": {"kind": "LOOPBACK_OR_EXACT_RESOLVED_POD_ADDRESS",
+                    "addresses": [self.ip_structure(value) for value in sorted(proxy.pod_addresses())[:64]],
+                    "address_count": len(proxy.pod_addresses())},
                 "known_envoy_istio_header_names": sorted({name.lower() for name in headers.keys()} & KNOWN_RELATED)}
 
     def observe(self, policy, headers, *, method, peer_ip):
