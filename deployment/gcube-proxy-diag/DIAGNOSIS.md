@@ -136,3 +136,20 @@ it is not added to the deployed image, and the base ignore file is unchanged.
 Local regression was also verified under UID/GID 1000 (231 tests, one skip).
 CI failure reports contain only test IDs, exception classes and source line
 locations; exception values and request/auth data are omitted.
+
+The expanded fresh-image suite additionally identified missing certification
+data (also deliberately excluded by the base build) and legacy upload fixtures
+which create temporary files inside root-owned source directories. The legacy
+suite alone uses root and read-only mounts of the original test/certification
+files. The diagnostic tests and deployed/HTTP-tested server still run as UID
+1000; no deployed directory permission or engine source is changed.
+
+The existing NativePersonalStorage foreign-replacement fixture also failed on
+Docker overlayfs, while passing in the local UID1000 run: its check depends on
+device/inode identity, which can be reused immediately after unlink/recreate.
+The fresh-image legacy suite uses disposable tmpfs for its test fixtures to
+avoid that inode-reuse ambiguity. **This is a test filesystem profile, not a
+claim that the existing storage replacement check was fixed on overlayfs.**
+The diagnostic server does not invoke NativePersonalStorage, accept uploads,
+open projects or access existing storage. This pre-existing production storage
+edge case is recorded and left unchanged under the user's scope restriction.

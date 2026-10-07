@@ -63,7 +63,13 @@ jobs:
           # The approved base deliberately excludes the repository tests/ tree.
           # Mount that test tree read-only for verification; do not change the
           # runtime image, core code, dependency set, or old publishing workflow.
-          docker run --rm --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+          # Legacy upload fixtures create files beside root-owned application
+          # source, and certification checks read an intentionally excluded plan.
+          # Run only that legacy suite as root with disposable tmpfs fixtures.
+          # The deployed image, diagnostic suite and HTTP boot remain UID 1000.
+          docker run --rm --user 0:0 --tmpfs /tmp:rw,nosuid,nodev,size=512m,mode=1777 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
             --entrypoint python "${IMAGE}:${RELEASE_TAG}" \
             /opt/world-engine/proxy-diag/run_checks.py tests.test_mobile_deployment_security tests.test_codespaces_origin \
             deployment.gcube.test_storage deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
