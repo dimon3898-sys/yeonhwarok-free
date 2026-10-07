@@ -7,7 +7,7 @@ import tempfile
 from unittest.mock import patch
 
 from engine.backends import CPULocalBackend
-from engine.failures import safe_tail
+from engine.failures import failure_record, safe_tail
 from engine.planner import generate_plan
 from engine.rendering import render_project
 from engine.storage import ProjectStore
@@ -59,8 +59,24 @@ def main():
                         return_code=result.returncode, stderr_tail=safe_tail(result.stderr.splitlines()),
                         browser_launched=False, ffmpeg_launched=False, video_created=False)
         print(json.dumps(evidence, ensure_ascii=False))
+        notice(evidence)
         return 0 if evidence['passed'] else 1
 
 
+def notice(evidence):
+    """Expose safe preparation evidence when anonymous Actions logs are unavailable."""
+    value = json.dumps(evidence, ensure_ascii=False)
+    value = value.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+    print('::notice title=Preparation-only result::' + value, flush=True)
+
+
 if __name__ == '__main__':
-    raise SystemExit(main())
+    try:
+        status = main()
+    except Exception as error:
+        evidence = failure_record(error, stage='preparation_preflight', scene_id='S001')
+        evidence.update(passed=False, browser_launched=False, ffmpeg_launched=False,
+                        scope='CI preparation helper; not actual gcube failure')
+        notice(evidence)
+        status = 1
+    raise SystemExit(status)
