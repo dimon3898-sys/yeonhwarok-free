@@ -345,6 +345,9 @@ jobs:
             --env-file "$smoke_directory/test.env" "${IMAGE}:${RELEASE_TAG}" >/dev/null
           python world-simulation-shorts-engine/deployment/gcube/container_proxy_smoke.py \
             "$smoke_directory/test.env" "$smoke_name" 18010 captured-http
+          # The already booted container has real runtime links/UID permissions.
+          # Execute only source preparation; no browser, shader draw or movie.
+          docker exec --user 1000:1000 "$smoke_name" python deployment/gcube/preparation_preflight.py
       - name: Report bounded startup diagnostics after a failure
         if: failure()
         shell: bash
