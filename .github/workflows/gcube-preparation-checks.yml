@@ -297,6 +297,9 @@ jobs:
               if (value.get('engine_ready') is not True or value.get('render_mode') != 'cpu'
                       or value.get('gpu_rendering_verified') is not False):
                   raise RuntimeError('Ready engine lost its explicit CPU profile')
+          # Run in the actual initialized runtime/UID, without any browser/movie.
+          subprocess.run(['docker','exec','--user','1000:1000',prefix+'-root',
+                          'python','-m','deployment.gcube.preparation_preflight'],check=True)
           print('Fresh Chromium WebGL2 CPU draw, owner-gated GPU diagnostic routes, root/UID1000 image boot, 0.0.0.0:8000, owner login, Pod-IP health, sustained foreground lifetime, and three fail-closed startup diagnostics passed; no render was requested')
           PY
       - name: Full proxy/security regressions and v007 target diagnostics in the operating image
@@ -345,9 +348,6 @@ jobs:
             --env-file "$smoke_directory/test.env" "${IMAGE}:${RELEASE_TAG}" >/dev/null
           python world-simulation-shorts-engine/deployment/gcube/container_proxy_smoke.py \
             "$smoke_directory/test.env" "$smoke_name" 18010 captured-http
-          # The already booted container has real runtime links/UID permissions.
-          # Execute only source preparation; no browser, shader draw or movie.
-          docker exec --user 1000:1000 "$smoke_name" python -m deployment.gcube.preparation_preflight
       - name: Report bounded startup diagnostics after a failure
         if: failure()
         shell: bash

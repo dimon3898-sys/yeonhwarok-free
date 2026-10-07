@@ -51,12 +51,16 @@ def main():
         if 'chromium.launch' in prefix or "spawn('ffmpeg'" in prefix:
             raise RuntimeError('PREPARATION_BOUNDARY_UNSAFE')
         prefix = prefix.replace('fileURLToPath(import.meta.url)', json.dumps(str(tool)))
+        # These keys are fixed renderer asset names, never external inputs or URLs.
+        prefix = prefix.replace('const sourceHashes={};',
+            'console.log(JSON.stringify({missing_source_assets:sourceFiles.filter(([key,file])=>!existsSync(file)).map(([key,file])=>({key,basename:path.basename(file)}))}));const sourceHashes={};')
         prefix = 'process.argv.splice(1,0,' + json.dumps(str(tool)) + ');\n' + prefix
         result = subprocess.run(['node','--input-type=module','-e',prefix,'--',*command[2:]],
                                 cwd=Path(__file__).resolve().parents[2],capture_output=True,text=True,timeout=90)
         evidence = dict(scope='Reconstructed Suez20 preparation/source hashing only; not actual gcube job or rendered pixels',
                         passed=result.returncode == 0, scene_id='S001', tool=tool.name,
                         return_code=result.returncode, stderr_tail=safe_tail(result.stderr.splitlines()),
+                        stdout_tail=safe_tail(result.stdout.splitlines()),
                         browser_launched=False, ffmpeg_launched=False, video_created=False)
         print(json.dumps(evidence, ensure_ascii=False))
         notice(evidence)
