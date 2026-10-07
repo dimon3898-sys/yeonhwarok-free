@@ -1,0 +1,54 @@
+{
+  "recorded_at_utc": "2026-10-07T02:39:01.077332+00:00",
+  "observations": "Fresh current official repository sources, visually inspected published screenshots; no live account access.",
+  "sources": [
+    {
+      "id": "tier1_t4",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/platform-guide/img/openwebui-comfyui/opencomfy_06.png",
+      "sha256": "6edddc20fbe0f41e9b1801c1d8c9e1d7009672caf3d989a23d7bf7cf771e2fb2",
+      "bytes": 129918,
+      "visual_service_url": "https://3f2de722.service.gcube.ai:24999",
+      "visual_container_port": 8080
+    },
+    {
+      "id": "ollama",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/platform-guide/img/ollama-api/사용자_가이드_chatbox_08.jpg",
+      "sha256": "74fb3e6c796aac7bd9873b4a3d3e9222482300d95cfacebc0d73b1efc9abf11a",
+      "bytes": 175410,
+      "visual_service_url": "https://903053f5.service.gcube.ai:24999",
+      "visual_container_port": 11434
+    },
+    {
+      "id": "deploy",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/workload/img/deploy-workload/002_deploy-workload.png",
+      "sha256": "6a841ab16ed7a3bbe46a2083eff5c84f883dc1dd724ce013a9cec527495ef331",
+      "bytes": 53683,
+      "visual_service_url": "https://e27414c4.service.gcube.ai:24999",
+      "visual_container_port": 8888
+    },
+    {
+      "id": "openclaw",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/platform-guide/img/open-claw/013_웹대시보드접속.png",
+      "sha256": "51a6b1a4cffa8415af4bf5f0fe3af2c72fc1b9337d387cec072fcd32dfbe8469",
+      "bytes": 326493,
+      "visual_service_url": "https://42f59795.service.gcube.ai:24999",
+      "visual_container_port": 18789
+    },
+    {
+      "id": "ollama_text",
+      "url": "https://raw.githubusercontent.com/Data-Alliance/gai-platform-docs/master/docs/user-guide/platform-guide/ollama-api.ko.md",
+      "sha256": "fdd9c984f3d422c2439ec53229bae2ba42016d5079dab2558f6f7c649238e18d",
+      "line": 235,
+      "quote": "서비스 URL은 ... `https://xxxxxxxx.gcube.ai` 형태입니다.",
+      "note": "Simplified legacy textualshape; current screenshot explicitly shows service namespace + externalport."
+    }
+  ],
+  "review": {
+    "accepted_authority_examples": 6,
+    "rejected_authority_examples": 19,
+    "pending_and_bound_post_envelope_checks": 14,
+    "result": "PASS",
+    "code_review": "Only provider Host admission uses existing strict _authority and optional exact service namespace; Origin and forwarded checks, owner authentication, and pinning unchanged.",
+    "limitation": "Official images demonstrate issued 8hex service labels and port24999 but do not establish mandatory label-length or fixed externalport contract."
+  }
+}
