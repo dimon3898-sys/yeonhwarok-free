@@ -28,7 +28,7 @@ permissions:
 
 concurrency:
   group: gcube-preparation-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   validate:
@@ -347,7 +347,7 @@ jobs:
             "$smoke_directory/test.env" "$smoke_name" 18010 captured-http
           # The already booted container has real runtime links/UID permissions.
           # Execute only source preparation; no browser, shader draw or movie.
-          docker exec --user 1000:1000 "$smoke_name" python deployment/gcube/preparation_preflight.py
+          docker exec --user 1000:1000 "$smoke_name" python -m deployment.gcube.preparation_preflight
       - name: Report bounded startup diagnostics after a failure
         if: failure()
         shell: bash
