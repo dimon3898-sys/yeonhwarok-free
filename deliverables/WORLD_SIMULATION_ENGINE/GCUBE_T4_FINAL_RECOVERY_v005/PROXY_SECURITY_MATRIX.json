@@ -1,0 +1,69 @@
+{
+  "tests": [
+    {
+      "case": "A",
+      "contract": "Official gcube HTTPS + single valid XFF",
+      "status": "PASS"
+    },
+    {
+      "case": "B",
+      "contract": "Comma-separated multiple valid XFF entries",
+      "status": "PASS"
+    },
+    {
+      "case": "C",
+      "contract": "Dynamic external numeric service port",
+      "status": "PASS"
+    },
+    {
+      "case": "D",
+      "contract": "Same-Pod internal Host and external forwarded Host",
+      "status": "PASS"
+    },
+    {
+      "case": "E",
+      "contract": "Forged forwarded authority rejected",
+      "status": "PASS"
+    },
+    {
+      "case": "F",
+      "contract": "Non-gcube public Host rejected",
+      "status": "PASS"
+    },
+    {
+      "case": "G",
+      "contract": "Malformed XFF/Forwarded rejected",
+      "status": "PASS"
+    },
+    {
+      "case": "H",
+      "contract": "Forged/missing mutation Origin rejected",
+      "status": "PASS"
+    },
+    {
+      "case": "I",
+      "contract": "Absent owner code rejected",
+      "status": "PASS"
+    },
+    {
+      "case": "J",
+      "contract": "Incorrect owner code rejected",
+      "status": "PASS"
+    },
+    {
+      "case": "K",
+      "contract": "Correct owner code authenticates and pins origin",
+      "status": "PASS"
+    }
+  ],
+  "local_regression": {
+    "tests": 231,
+    "passed": 230,
+    "skipped": 1,
+    "failed": 0
+  },
+  "real_t4_validation": false,
+  "actual_video_render": false,
+  "proxy_trust": "loopback/exact Pod TCP peer only; XFF never authenticates",
+  "actual_t4_raw_headers_available": false
+}
