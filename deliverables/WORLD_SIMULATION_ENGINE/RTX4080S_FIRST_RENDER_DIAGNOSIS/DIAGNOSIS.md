@@ -1,10 +1,28 @@
-# RTX4080S 첫 렌더 중단 — 증거와 수정 범위
+# RTX4080S 첫 렌더 중단 — 확인된 이미지 결함과 검증
 
-## 결론
+## 확인된 원인
 
-**실제 gcube 중단 예외·exit code는 미확보다. 원인 해결이나 RTX4080S 재렌더 성공을 주장하지 않는다.** 현재 환경에는 해당 서비스 URL, 승인된 gcube/SSH 접근, 실제 20초 작업의 Scene JSON·job failure 파일이 없다. 기존 운영 v008을 재배포하거나 GPU를 시작하지 않았다. 원인이 확인되기 전에는 v009 운영 이미지를 게시하지 않는다.
+**게시된 v008 기반 컨테이너에서 Scene 1 준비의 ENOENT / Node exit 1을 재현했다.** 승인된 지형 자산 `natural-earth-1-east-asia-expanded`가 `web/flat_assets/cache/` 아래에 있어 최초 Docker build의 `**/cache/**` 제외 규칙에 걸렸다. `tools/render_production_scene.mjs`는 Earth 장면에서도 FLAT SOURCES 전체의 source hash를 계산하므로, 이 자산 누락으로 Chromium launch 전에 첫 Scene에서 종료된다.
 
-게시된 v008의 익명 manifest/config/COPY layer 확인을 다시 수행했다. `V008_IMAGE_IDENTITY.json`은 이미지 식별 기록이며 실제 원격 job 증거가 아니다.
+누락 파일:
+`web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.png`
+
+보존한 원본 SHA-256:
+`23c9ed6b954528fb98267d103f6e066e650461a7a817304b6cc2d4aa3d55a522`
+
+크기: 17,800,192 bytes. Public Domain의 기존 승인된 Natural Earth 자산이다. 새 지형이나 저품질 대체 이미지를 만들지 않았다.
+
+## 같은 입력으로 수정 전 → 수정 후
+
+원본 v008의 immutable base digest 위에 동일한 준비 검사·진단 코드만 올려 시험했다. 실제 entrypoint가 저장 경로와 cache 링크를 초기화한 뒤 UID1000에서 수에즈 20초 HIGH/FAST_PLUS 입력을 재구성하고, 승인·디렉터리·Scene 1 명령·Node source hash까지 실행했다. Chromium/FFmpeg/영상 렌더는 실행하지 않았다.
+
+- 수정 전: missing source asset = natural-earth-1-east-asia-expanded, ENOENT, exit 1. [CI before](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37600213639).
+- 수정 후: 동일 자산의 바이트·SHA를 복원, missing source assets = [], exit 0, preparation PASS. [CI after](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37600574405).
+- 수정: 해당 파일만 읽기 가능한 권한으로 COPY; build에서 크기와 SHA를 검사. 미래 전체 build의 ignore에도 이 정적 자산만 정확하게 예외 처리한다. 일반 render cache·project·output·secret 제외는 유지한다.
+
+`IMAGE_PREPARATION_BEFORE.json`, `IMAGE_PREPARATION_AFTER.json`은 이 컨테이너 실행 결과다. Node 렌더러 소스와 Chromium flags를 변경하지 않았다.
+
+**원격 작업의 원본 exception/job id/실제 Scene JSON은 미확보다.** 해당 gcube/SSH 접근 권한이나 정확한 서비스 URL이 현재 환경에 없다. 따라서 로컬에서 확인한 게시 이미지의 확정 결함과, 직접 읽지 못한 원격 job 기록을 구분한다. gcube Workload를 시작·교체·삭제하지 않았다.
 
 ## UI 상태가 의미하는 범위
 
@@ -24,7 +42,7 @@
 
 v008의 renderer stderr/stdout은 합쳐진 tail 문자열이었다. worker는 예외 type/message 일부를 private failure 파일에 남기지만 UI는 항상 WORKER_FAILED로 바꾸었다. outer worker의 stdout/stderr는 DEVNULL로 버리고 exit code도 지웠다. traceback 위치·실패 stage가 없어 첫 실패의 원인 위치를 안정적으로 확인할 수 없었다.
 
-수정은 GPU나 그래픽과 분리했다.
+확인된 이미지 자산 복원과 함께 다음 진단 결함도 수정했다. GPU나 그래픽과 분리된 변경이다.
 
 - stdout/stderr를 동시에 drain하고 각각의 bounded tail, return code, duration, command category를 수집한다.
 - command, environment, 요청 본문은 저장하지 않는다. URL/query, credentials 및 전체 내부 경로는 마스킹한다.
@@ -58,14 +76,27 @@ Probe는 작은 WebGL2 draw/readPixels이고 production은 asset·shader·4K sce
 
 ## 별도 QA 및 문구 표시 수정
 
-QA ON은 10~15초, 기본 12초를 허용한다. 일반 입력은 원래 20~3600초 정책을 유지한다. 승인된 planner/schema/promotion 파일을 덮어쓰지 않는다. 새로운 deployment QA adapter는 같은 planner 함수 코드에 per-call request validator를 적용하고, 별도 additive QA schema를 선택한다. 정상 요청의 schema 조건은 원본과 동일하다. QA에도 GIS/semantic/retention/approval gate가 적용된다.
+QA ON은 12~15초, 기본 12초를 허용한다. 일반 입력은 원래 20~3600초 정책을 유지한다. 승인된 planner/schema/promotion 파일을 덮어쓰지 않는다. 새로운 deployment QA adapter는 같은 planner 함수 코드에 per-call request validator를 적용하고, 별도 additive QA schema를 선택한다. 정상 요청의 schema 조건은 원본과 동일하다. QA에도 GIS/semantic/retention/approval gate가 적용된다.
 
 짧은 shipping QA에서는 실제 시작하는 R_CAPE route event가 새 변수 역할을 갖는다. Scene/route/좌표를 삭제하거나 카메라 이동을 사건으로 계산하지 않는다.
 
 Scene 설명은 의미 있는 사건의 간결한 표시명을 사용한다. 내부 거리 계산/provenance 문장은 Scene JSON에 그대로 보존한다. UI 변경은 새 버전의 코드를 사용해야 적용된다.
 
-## 게시 보류
 
-수정은 별도 Git branch에서 검증한다. CI-only Dockerfile/workflow는 v008 runtime 위에 확인된 진단·QA·표시 수정만 올려 container boot/login/health/persistence를 검증하며 registry write/push 권한과 단계가 없다. gcube-v009 또는 다른 운영/진단 태그를 게시하지 않는다. main의 기존 운영 배포를 변경하지 않는다.
+## 별도 QA 카메라 검사
 
-다음에 필요한 증거는 원래 실패 job의 `.failure.json`, job ticket/status, 실제 `scene_plan.json`, Node `.checkpoint.json`에 남은 exception/exit/frame 기록이다. 현재 원격 파일에 접근하지 못했으며 ephemeral 컨테이너가 이미 삭제됐다면 복구를 보장할 수 없다. 해당 증거 없이 특정 renderer 문제를 수정하거나 GPU 재시도를 권하지 않는다.
+재구성한 원래 20초 계획의 Scene 4 HORIZON_REVEAL에서 native camera angular gate(2.5도/프레임)를 넘는 별도 수치 위험을 발견했다. 이는 Scene 1 ENOENT와 별개다. `NUMERIC_PREPARATION.json`은 원래 입력의 결과이며 원격 Scene JSON의 측정값이 아니다. 기존 20초 계획과 renderer는 변경하지 않았다.
+
+새 12초 shipping QA는 해당 장면에서 이미 존재하는 COUNTRY_APPROACH 프리셋을 선택하고, 카메라 travel/zoom에 Scene 전체 시간을 확보한다. 좌표·rig 시작/종료점·routes/entities/events/HERO lighting/HIGH/FAST_PLUS는 보존한다. 정상 production 입력에는 적용하지 않는다. 기존 프로젝트의 Scene JSON도 변경하지 않는다.
+
+수정된 12초 QA의 모든 5 Scene이 보존된 numericPreflight의 카메라·entity·route 안전 조건과 semantic visibility gate를 통과했다. Scene 4 최대 각도는 2.485582781도/프레임이다. GPU 없는 canvas-free 검사이므로 실제 texture/shader/frame/MP4 성공을 의미하지 않는다. `QA12_NUMERIC_VERIFIED.json`과 테스트에 측정 범위를 기록했다.
+
+## 공개와 실제 GPU 검증의 구분
+
+v009는 확인된 이미지 자산 결함과 진단/QA/표시 개선만 포함하는 v008의 추가 layer로 준비한다. GPU runtime, proxy/security, renderer, 기존 assets와 기존 태그는 유지한다. 새 게시 태그를 덮어쓰지 못하는 guard 및 익명 Docker pull 검증을 유지한다.
+
+실제 RTX4080S 12초 QA는 이 작업에서 실행하지 않았다. 기존 실패한 20초 계획의 HORIZON 카메라 위험까지 해결됐다고 주장하지 않는다. 다음 실환경 검증은 새로운 12초 QA 계획으로 수행해야 하며, GPU 검증·Scene 1 준비·각 Scene 실제 frame·MP4/QC/download를 별도로 확인해야 한다.
+
+## 최종 회귀 결과
+
+현재 코드의 core 429개 PASS(406.998초), gcube 205개 중 204개 PASS/1개 SKIP, v007 진단 31개 PASS. 총 665개 실행, 664 PASS/1 SKIP. [최종 container CI](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37601321302)에서 build, packages, UID 권한, source preparation, foreground boot, health/login, fail-closed GPU diagnostics, proxy/security/v007/new QA tests, 61초 이상 persistence가 통과했다. 실제 GPU frame/video 생성은 하지 않았다.
