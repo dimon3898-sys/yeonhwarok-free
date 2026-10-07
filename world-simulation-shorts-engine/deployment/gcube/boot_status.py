@@ -129,6 +129,30 @@ def gpu_diagnostic_html(diagnostic):
     if diagnostic.get("gpu_profile"):
         rows.append("<tr><th>Backend</th><td>" + escape(diagnostic["gpu_profile"]) + "</td></tr>")
     webgl = diagnostic.get("webgl", {})
+    backend_results = {"egl": "NOT_RUN", "vulkan": "NOT_RUN"}
+    for attempt in diagnostic.get("profile_attempts", []):
+        backend = attempt.get("backend")
+        observed = attempt.get("diagnostics", {})
+        observed_gl = observed.get("webgl", {})
+        stages = {stage.get("id"): stage.get("status") for stage in observed.get("stages", [])}
+        if backend in backend_results and diagnostic.get("render_mode") == "gpu-required":
+            passed = (attempt.get("status") == "verified" and stages.get("E") == "PASS" and stages.get("F") == "PASS"
+                      and observed_gl.get("draw_passed") is True and observed_gl.get("software_renderer") is False)
+            backend_results[backend] = "PASS" if passed else "FAIL"
+    if (not diagnostic.get("profile_attempts") and diagnostic.get("gpu_profile") in backend_results
+            and diagnostic.get("render_mode") == "gpu-required"):
+        observed_stages = {stage.get("id"): stage.get("status") for stage in diagnostic.get("stages", [])}
+        backend_results[diagnostic["gpu_profile"]] = ("PASS" if
+            diagnostic.get("reason_code") == "VERIFIED" and webgl.get("draw_passed") is True
+            and webgl.get("software_renderer") is False and observed_stages.get("E") == "PASS"
+            and observed_stages.get("F") == "PASS" else "FAIL")
+    for backend in ("egl", "vulkan"):
+        rows.append("<tr><th>" + backend.upper() + " GPU backend</th><td>" + backend_results[backend] + "</td></tr>")
+    context = webgl.get("context_available") is True
+    stages = {stage.get("id"): stage.get("status") for stage in diagnostic.get("stages", [])}
+    context_status = "PASS" if context else "NOT_RUN" if stages.get("D") == "NOT_RUN" else "FAIL"
+    rows.append("<tr><th>WebGL context</th><td>" + context_status + "</td></tr>")
+    rows.append("<tr><th>WebGL2 context</th><td>" + ("PASS" if context and webgl.get("webgl2") is True else context_status if not context else "FAIL") + "</td></tr>")
     renderer = webgl.get("unmasked_renderer") or webgl.get("renderer") or "확인하지 못함"
     vendor = webgl.get("unmasked_vendor") or webgl.get("vendor") or "확인하지 못함"
     rows.extend(("<tr><th>WebGL renderer</th><td>" + escape(renderer) + "</td></tr>",
@@ -155,6 +179,8 @@ def gpu_diagnostic_html(diagnostic):
     if failed in {"C", "D", "E", "F"} and libraries and not (
             libraries.get("nvidia_egl") is True or libraries.get("nvidia_vulkan") is True):
         detail += "<p>NVIDIA GPU는 표시되더라도 그래픽 드라이버 전달이 없으면 WebGL을 검증할 수 없습니다. gcube의 NVIDIA graphics runtime 전달을 확인해야 합니다.</p>"
+        if any("T4" in device.get("name", "").split() for device in devices):
+            detail += "<p>Tier1 T4에서도 NVIDIA graphics runtime 전달 실패</p>"
     elif failed:
         detail += "<p>위 단계에서 실제 GPU 렌더 증명을 완료하지 못했습니다. 표시된 진단 코드와 renderer를 확인하세요.</p>"
     attempts = diagnostic.get("profile_attempts", [])
@@ -172,6 +198,18 @@ def gpu_diagnostic_html(diagnostic):
                        ": " + escape(observed.get("reason_code") or attempt.get("status", "")) +
                        " · renderer: " + escape(identity) + "</p>")
     return "<section aria-label='GPU 진단'><h2>GPU / WebGL 진단</h2>" + detail + "<table>" + "".join(rows) + "</table></section>"
+
+
+def proxy_diagnostic_html(summary):
+    """Only the strict parser's bounded allowlist; no raw request header dump."""
+    if not summary or summary.get("status") != "PASS":
+        return "<p>Proxy 진단: " + html.escape(str((summary or {}).get("error_code", "NOT_RUN"))) + "</p>"
+    labels = {"normalized_host": "Normalized Host", "forwarded_host": "Forwarded Host",
+              "forwarded_proto": "Forwarded Proto", "forwarded_port": "Forwarded Port",
+              "xff_entry_count": "XFF entry count", "envoy_external_address_present": "Envoy external address present"}
+    rows = ["<tr><th>" + label + "</th><td>" + html.escape(str(summary.get(key)), quote=True) + "</td></tr>"
+            for key, label in labels.items()]
+    return "<section><h2>Proxy 진단</h2><table>" + "".join(rows) + "</table></section>"
 
 
 class _BoundedServer(ThreadingMixIn, HTTPServer):
@@ -255,6 +293,8 @@ class _Handler(BaseHTTPRequestHandler):
     def _read_only(self):
         phase, code = self.server.owner.snapshot()
         diagnostic = self.server.owner.gpu_diagnostics
+        from deployment.gcube.proxy import safe_proxy_summary
+        proxy = safe_proxy_summary(self.headers, peer_ip=self.client_address[0]) if diagnostic else None
         # URLs and all reverse-proxy headers are deliberately not reflected.
         # This server has no authentication, state changes, assets, or engine API.
         path = self.path.partition("?")[0]
@@ -263,6 +303,7 @@ class _Handler(BaseHTTPRequestHandler):
                       "engine_ready": False, "phase": phase, "error_code": code}
             if diagnostic:
                 record["gpu_diagnostics"] = diagnostic
+                record["proxy"] = proxy
             self._json(200, record)
         elif path == "/readyz":
             self._json(503, {"ok": False, "engine_ready": False, "phase": phase,
@@ -273,6 +314,7 @@ class _Handler(BaseHTTPRequestHandler):
                 detail = "<p class=code>오류 코드: " + code + "</p>"
                 if diagnostic:
                     detail += gpu_diagnostic_html(diagnostic)
+                    detail += proxy_diagnostic_html(proxy)
             else:
                 title, description = "World Engine 준비 중", "저장소와 실행환경을 확인하고 있습니다. 아직 로그인과 영상 생성을 시작할 수 없습니다. 잠시 후 새로고침하세요."
                 detail = ""

@@ -235,6 +235,39 @@ class BootStatusTests(unittest.TestCase):
         self.status.set_phase("checking")
         self.assertIsNone(self.status.gpu_diagnostics)
 
+    def test_t4_missing_graphics_is_readable_through_full_istio_envelope(self):
+        from deployment.gcube.test_proxy import envelope
+        diagnostic = {"render_mode": "gpu-required", "gpu_profile": "egl", "failed_stage": "D",
+                      "reason_code": "DRIVER_GRAPHICS_MISSING",
+                      "nvidia_devices": [{"name": "NVIDIA Tesla T4", "driver_version": "535.104.05"}],
+                      "webgl": {"context_available": False},
+                      "runtime": {"libraries": {"nvidia_egl": False, "nvidia_vulkan": False}},
+                      "stages": [{"id": key, "status": "PASS" if key in "ABC" else "FAIL" if key == "D" else "NOT_RUN"} for key in "ABCDEF"],
+                      "profile_attempts": [{"backend": "egl", "status": "failed"}, {"backend": "vulkan", "status": "failed"}]}
+        self.status.set_phase("blocked", "GPU_WEBGL_UNVERIFIED", gpu_diagnostics=diagnostic)
+        status, _, body = self.call("GET", "/", headers=envelope(Host="localhost:8000"))
+        self.assertEqual(status, 200)
+        text = body.decode()
+        for value in ("Tier1 T4에서도 NVIDIA graphics runtime 전달 실패", "EGL GPU backend", "VULKAN GPU backend",
+                      "WebGL2 context", "Normalized Host", "XFF entry count", "GPU_WEBGL_UNVERIFIED"):
+            self.assertIn(value, text)
+        self.assertNotIn("203.0.113.8", text)
+        record = json.loads(self.call("GET", "/api/health", headers=envelope())[2])
+        self.assertFalse(record["engine_ready"])
+        self.assertEqual(record["proxy"]["status"], "PASS")
+        self.assertEqual(record["proxy"]["xff_entry_count"], 3)
+        self.assertEqual(self.call("POST", "/api/projects", "{}", envelope())[0], 405)
+
+    def test_software_backend_never_claims_egl_or_vulkan_gpu_pass(self):
+        from deployment.gcube.boot_status import gpu_diagnostic_html, safe_gpu_diagnostics
+        diagnostic = safe_gpu_diagnostics({"render_mode": "cpu", "gpu_profile": "egl", "reason_code": "VERIFIED",
+            "webgl": {"renderer": "ANGLE (Google, SwiftShader Device)", "context_available": True,
+                      "context_version": 2, "draw_passed": True},
+            "profile_attempts": [{"backend": "egl", "status": "verified"}]})
+        text = gpu_diagnostic_html(diagnostic)
+        self.assertNotIn("EGL GPU backend</th><td>PASS", text)
+        self.assertNotIn("VULKAN GPU backend</th><td>PASS", text)
+
 
 if __name__ == "__main__":
     unittest.main()

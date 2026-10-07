@@ -26,28 +26,11 @@ from deployment.mobile_server import (APP_ROOT, BoundedHTTPServer, InternalHandl
                                       MobileApplication, MobileHandler, checked_state_root)
 from deployment.security import RequestPolicy, SecurityError, _authority, content_length, private_json
 from deployment.gcube.diagnostics import DiagnosticsError, build_mobile_diagnostics
-from deployment.gcube.boot_status import gpu_diagnostic_html, safe_gpu_diagnostics
+from deployment.gcube.boot_status import gpu_diagnostic_html, proxy_diagnostic_html, safe_gpu_diagnostics
+from deployment.gcube.proxy import internal_probe_headers, provider_origin, request_envelope
 from engine.storage import EngineError
 
-PROVIDER_HOST = re.compile(r"([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)\.(?:service\.)?gcube\.ai")
-RESERVED = {"www", "api", "console", "docs", "app", "auth", "accounts", "login", "status", "support", "service"}
 LOGIN_HTML = '''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>World Engine · 로그인</title><style>body{font-family:system-ui;background:#0b1520;color:#eff5fa;max-width:28rem;margin:8vh auto;padding:1.5rem}input,button{box-sizing:border-box;width:100%;font:inherit;padding:.9rem;margin:.5rem 0;border-radius:.5rem}button{background:#a4d8ee;color:#10202b;border:0}p{line-height:1.7}</style><h1>World Engine</h1><p>비밀번호를 입력해 주세요.</p><form id="owner-login-form" action="/auth/login" method="post"><label for="owner-password">비밀번호</label><input id="owner-password" name="password" type="password" autocomplete="current-password" required maxlength="512"><button id="owner-login-submit" type="submit">로그인</button></form></html>'''
-
-
-def provider_origin(host):
-    # gcube's issued HTTPS service authority includes a service namespace and
-    # an allocated external port, independently of the container's port 8000.
-    # Reuse the existing strict parser; nondefault ports remain in the origin
-    # pinned only after owner authentication. No forwarding/origin rule changes.
-    try:
-        authority = _authority(host, "https")
-        hostname = urlsplit("//" + authority).hostname
-    except (ValueError, TypeError):
-        raise SecurityError("INVALID_HOST", "허용되지 않은 주소입니다.", 400) from None
-    match = PROVIDER_HOST.fullmatch(hostname or "")
-    if not match or match[1] in RESERVED:
-        raise SecurityError("INVALID_HOST", "허용되지 않은 주소입니다.", 400)
-    return "https://" + authority
 
 
 def configured_origin(value, *, port=8000, local_mode=False):
@@ -70,7 +53,7 @@ class GcubePolicy:
             self._bound.local_hosts = {urlsplit(origin).netloc} if origin.startswith("http://") else set()
 
     def check_request(self, headers, *, method="GET", peer_ip=None):
-        if self._bound:
+        if self.local_mode and self._bound:
             effective = self._bound.check_request(headers, method=method, peer_ip=peer_ip)
             if effective != self.origin:
                 raise SecurityError("INVALID_ORIGIN", "같은 사이트의 요청만 허용됩니다.", 403)
@@ -78,18 +61,23 @@ class GcubePolicy:
             if origin is not None and origin != effective:
                 raise SecurityError("INVALID_ORIGIN", "같은 사이트의 요청만 허용됩니다.", 403)
             return effective
-        host = RequestPolicy._single_header(headers, "Host")
-        forwarded = RequestPolicy._single_header(headers, "X-Forwarded-Host")
-        proto = RequestPolicy._single_header(headers, "X-Forwarded-Proto")
         origin = RequestPolicy._single_header(headers, "Origin")
-        candidate = provider_origin(host)
-        if (forwarded is not None and forwarded != host) or proto not in {None, "https"}:
-            raise SecurityError("INVALID_FORWARDED_HEADERS", "프록시 주소 헤더를 확인해 주세요.", 403)
+        candidate, _ = request_envelope(headers, origin=self.origin, port=self.port, peer_ip=peer_ip)
         if origin is not None and origin != candidate:
             raise SecurityError("INVALID_ORIGIN", "같은 사이트의 요청만 허용됩니다.", 403)
         if method not in {"GET", "HEAD", "OPTIONS"} and origin != candidate:
             raise SecurityError("INVALID_ORIGIN", "같은 사이트의 요청만 허용됩니다.", 403)
         return candidate
+
+    def diagnostics(self, headers, *, peer_ip=None):
+        effective = self.check_request(headers, peer_ip=peer_ip)
+        if self.local_mode:
+            return {"status": "PASS", "normalized_host": urlsplit(effective).netloc,
+                    "forwarded_host": None, "forwarded_proto": None, "forwarded_port": None,
+                    "xff_entry_count": 0, "envoy_external_address_present": False,
+                    "effective_origin": effective}
+        _, summary = request_envelope(headers, origin=self.origin, port=self.port, peer_ip=peer_ip)
+        return {"status": "PASS", **summary}
 
 
 class GcubeApplication(MobileApplication):
@@ -211,6 +199,8 @@ class GcubeApplication(MobileApplication):
         message = (models + " WebGL VERIFIED · World Engine READY" if verified else
                    "CPU 비교 모드 · NVIDIA WebGL 검증 아님" if mode == "cpu" else
                    "NVIDIA WebGL 진단 증명 미확인")
+        if verified and any("T4" in device.get("name", "").split() for device in devices):
+            message = "NVIDIA T4 WEBGL VERIFIED · WORLD ENGINE READY"
         return {"engine_ready": True, "gpu_rendering_verified": verified,
                 "render_mode": mode, "message": message, "diagnostics": diagnostic}
 
@@ -228,6 +218,9 @@ class GcubeHandler(MobileHandler):
             if method in {"GET", "HEAD"} and path in {"/healthz", "/readyz", "/api/health"}:
                 origin = RequestPolicy._single_header(self.headers, "Origin")
                 host = RequestPolicy._single_header(self.headers, "Host")
+                forwarded_present = any(self.headers.get_all(name, []) for name in (
+                    "Forwarded", "X-Forwarded-Host", "X-Forwarded-Proto", "X-Forwarded-Port",
+                    "X-Forwarded-For", "X-Envoy-External-Address"))
                 probe = path in {"/healthz", "/readyz"}
                 if path == "/api/health" and host:
                     try:
@@ -251,19 +244,22 @@ class GcubeHandler(MobileHandler):
                                             for name in ("X-Forwarded-Host", "X-Forwarded-Proto")))
                     if host == bound or local_health:
                         probe = False
-                if probe and origin is None:
+                internal_probe = forwarded_present and internal_probe_headers(
+                    self.headers, peer_ip=self.client_address[0], port=self.app.public_port)
+                if probe and origin is None and (not forwarded_present or internal_probe):
                     return self.json({"ok": True, "engine_ready": True, "phase": "ready",
                                       "authentication_required": True})
             # Container liveness is a read-only exception on the loopback peer.
             # It cannot bind an origin, authenticate, or reach any other route.
             if method in {"GET", "HEAD"} and path == "/api/health" and self.client_address[0] in {"127.0.0.1", "::1"}:
                 host = RequestPolicy._single_header(self.headers, "Host")
-                if host in {f"127.0.0.1:{self.app.public_port}", f"localhost:{self.app.public_port}"}:
-                    for name in ("Origin", "X-Forwarded-Host", "X-Forwarded-Proto"):
-                        if RequestPolicy._single_header(self.headers, name) is not None:
-                            raise SecurityError("INVALID_FORWARDED_HEADERS", "요청 주소 헤더를 확인해 주세요.", 403)
+                if (host in {f"127.0.0.1:{self.app.public_port}", f"localhost:{self.app.public_port}"}
+                        and origin is None and not forwarded_present):
                     return self.json(self.app.runtime_health())
             self._effective_origin = self.app.policy.check_request(self.headers, method=method, peer_ip=self.client_address[0])
+            if method in {"GET", "HEAD"} and path in {"/healthz", "/readyz"}:
+                return self.json({"ok": True, "engine_ready": True, "phase": "ready",
+                                  "authentication_required": True})
             if not self.app.bound_origin and method not in {"GET", "HEAD", "OPTIONS"} and path != "/auth/login":
                 raise SecurityError("ORIGIN_UNBOUND", "먼저 소유자 로그인을 완료해 주세요.", 403)
             if method in {"GET", "HEAD"} and path == "/api/health":
@@ -280,12 +276,19 @@ class GcubeHandler(MobileHandler):
                 self.send_header("Content-Length", "0")
                 self.end_headers()
                 return
+            if path in {"/api/gcube/proxy", "/gcube/proxy.json"}:
+                if not self.app.sessions.claims(self._token()):
+                    raise SecurityError("AUTH_REQUIRED", "소유자 로그인이 필요합니다.", 401)
+                if method not in {"GET", "HEAD"}:
+                    raise SecurityError("METHOD_NOT_ALLOWED", "읽기 전용 요청입니다.", 405)
+                return self.json(self.app.policy.diagnostics(self.headers, peer_ip=self.client_address[0]))
             if path in {"/api/gcube/gpu", "/gcube/gpu", "/gcube/gpu.json"}:
                 if not self.app.sessions.claims(self._token()):
                     raise SecurityError("AUTH_REQUIRED", "소유자 로그인이 필요합니다.", 401)
                 if method not in {"GET", "HEAD"}:
                     raise SecurityError("METHOD_NOT_ALLOWED", "읽기 전용 요청입니다.", 405)
                 record = self.app.gpu_diagnostics()
+                record["proxy"] = self.app.policy.diagnostics(self.headers, peer_ip=self.client_address[0])
                 if path != "/gcube/gpu":
                     return self.json(record)
                 body = ("<!doctype html><html lang=ko><meta charset=utf-8>"
@@ -296,7 +299,7 @@ class GcubeHandler(MobileHandler):
                         "h2{font-size:1.1rem}table{width:100%;border-collapse:collapse;font-size:.85rem}"
                         "th,td{padding:.45rem .25rem;text-align:left;border-bottom:1px solid #344352;overflow-wrap:anywhere}"
                         "th{width:48%}a{color:#b7d9f1}</style><main><h1>" + html.escape(record["message"]) +
-                        "</h1>" + gpu_diagnostic_html(record["diagnostics"]) +
+                        "</h1>" + gpu_diagnostic_html(record["diagnostics"]) + proxy_diagnostic_html(record["proxy"]) +
                         "<p>GPU 속도 향상과 실제 영상 렌더 시간은 별도 실측이 필요합니다.</p>"
                         "<p>검증 실패 시 gcube Workload를 중지하세요. 브라우저 종료만으로 과금이 멈추지 않습니다.</p>"
                         "<p><a href='/'>World Engine으로 돌아가기</a> · <a href='/gcube/gpu.json'>진단 JSON</a></p></main></html>")

@@ -229,8 +229,8 @@ class GatewayTests(unittest.TestCase):
             {"Host": "attacker.example"}, {"Host": "x.gcube.ai.evil.example"},
             {"Host": "console.gcube.ai", "X-Forwarded-Host": "console.gcube.ai"},
             {"Host": "gcube.ai"}, {"Host": "world.sub.gcube.ai"},
-            {"Host": "controlled-workload.gcube.ai:443"},
-            {"Host": f"127.0.0.1:{self.port}"},
+            {"Host": "controlled-workload.gcube.ai:444"},
+            {"Host": "127.0.0.1:9000"},
             {"X-Forwarded-Host": "another-workload.gcube.ai"},
             {"X-Forwarded-Host": "controlled-workload.gcube.ai, attacker.example"},
             {"X-Forwarded-Proto": "https,http"}, {"X-Forwarded-Proto": "http"},
@@ -431,7 +431,7 @@ class GatewayTests(unittest.TestCase):
     def test_kubelet_and_istio_health_never_bind_an_origin(self):
         for host in ("10.42.0.12:8000", "[fd00::5324]:8000", "localhost:8000"):
             for path in ("/api/health", "/healthz", "/readyz"):
-                headers = {"Host": host, "X-Forwarded-Host": "internal-service:8000",
+                headers = {"Host": host, "X-Forwarded-Host": f"internal-service:{self.port}",
                            "X-Forwarded-Proto": "http", "User-Agent": "kube-probe/1.30"}
                 with self.subTest(host=host, path=path):
                     status, _, body = self.call("GET", path, headers=headers)
@@ -459,7 +459,8 @@ class GatewayTests(unittest.TestCase):
             self.assertIn(status, {400, 403})
 
     def test_readiness_head_does_not_open_project_data(self):
-        status, headers, body = self.call("HEAD", "/readyz", headers={"Host": "10.42.0.12:8000"})
+        status, headers, body = self.call("HEAD", "/readyz", headers={"Host": "10.42.0.12:8000",
+            "X-Forwarded-Host": None, "X-Forwarded-Proto": None})
         self.assertEqual(status, 200)
         self.assertEqual(body, b"")
         self.assertGreater(int(headers["Content-Length"]), 0)

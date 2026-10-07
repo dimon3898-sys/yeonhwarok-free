@@ -37,7 +37,7 @@ jobs:
     timeout-minutes: 45
     env:
       IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
-      RELEASE_TAG: gcube-v004
+      RELEASE_TAG: gcube-v005
     steps:
       - name: Checkout approved sources
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -279,7 +279,33 @@ jobs:
             -m unittest deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
             deployment.gcube.test_chromium_wrapper deployment.gcube.test_graphics_runtime \
             deployment.gcube.test_gpu_access deployment.gcube.test_boot_status \
-            deployment.gcube.test_server deployment.gcube.test_start
+            deployment.gcube.test_server deployment.gcube.test_proxy deployment.gcube.test_start
+      - name: Verify fresh-image Istio HTTPS proxy login and 60-second server lifetime
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_name="world-gcube-proxy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          smoke_directory="${RUNNER_TEMP}/gcube-proxy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cleanup() {
+            docker rm --force "$smoke_name" >/dev/null 2>&1 || true
+            rm -f "$smoke_directory/test.env"
+            rmdir "$smoke_directory" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          umask 077
+          mkdir "$smoke_directory"
+          python - "$smoke_directory/test.env" <<'PY'
+          import pathlib, secrets, sys
+          owner = secrets.token_urlsafe(32)
+          print('::add-mask::' + owner)
+          pathlib.Path(sys.argv[1]).write_text('WORLD_ENGINE_OWNER_CODE=' + owner + '\nWORLD_ENGINE_RENDER_MODE=cpu\nWORLD_ENGINE_STORAGE_MODE=ephemeral\nWORLD_ENGINE_STORAGE_PATH=/data\n')
+          PY
+          # A temporary same-Pod TCP relay reproduces Envoy's loopback peer;
+          # the public gateway never trusts the Docker host bridge address.
+          docker run --detach --name "$smoke_name" --publish 127.0.0.1:18010:18011 \
+            --env-file "$smoke_directory/test.env" "${IMAGE}:${RELEASE_TAG}" >/dev/null
+          python world-simulation-shorts-engine/deployment/gcube/container_proxy_smoke.py \
+            "$smoke_directory/test.env" "$smoke_name" 18010
       - name: Report bounded startup diagnostics after a failure
         if: failure()
         shell: bash
@@ -304,3 +330,13 @@ jobs:
           docker push "${IMAGE}:${RELEASE_TAG}"
           docker push "${IMAGE}:${RELEASE_TAG}-sha-${GITHUB_SHA}"
           echo 'Publication preserves existing package visibility; anonymous pulls require a public package.'
+      - name: Verify anonymous public pull of the published v005 image
+        shell: bash
+        run: |
+          set -euo pipefail
+          anonymous_directory="${RUNNER_TEMP}/gcube-public-pull-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          umask 077
+          mkdir "$anonymous_directory"
+          trap 'rm -f "$anonymous_directory/config.json"; rmdir "$anonymous_directory"' EXIT
+          printf '{"auths":{}}\n' > "$anonymous_directory/config.json"
+          docker --config "$anonymous_directory" pull "${IMAGE}:${RELEASE_TAG}"
