@@ -31,10 +31,11 @@ class PipelinePreflightTests(unittest.TestCase):
      self.assertEqual(next(r for r in report['pose_records'] if r['scene_id']=='S002')['routeProgress'][0]['progress'],0.11821892)
     self.assertEqual(report['hardware_checks']['WebGL'],'NOT_RUN')
  def test_empty_errors_still_names_each_failed_invariant(self):
-  node("""import assert from 'node:assert/strict';import {auditFailures} from './tools/scene_frame_contract.mjs';
+  node("""import assert from 'node:assert/strict';import {auditFailures,auditFailureSnapshot} from './tools/scene_frame_contract.mjs';
   const good={webglError:0,textClipped:[],entityClipped:[],missingTextures:[],routeDiscontinuities:[],routeInsideEarth:false,fontReady:true,cameraPosition:[1,2,3],cameraQuaternion:[0,0,0,1],cameraFov:44,entities:[],routeProgress:[]};assert.deepEqual(auditFailures(good,[]),[]);
   for(const [field,value,rule] of [['webglError',1282,'WEBGL_ERROR'],['entityClipped',['ship_reference'],'ENTITY_CLIPPED'],['textClipped',[{}],'TEXT_CLIPPED'],['fontReady',false,'FONT_NOT_READY'],['missingTextures',['uDay'],'TEXTURE_MISSING'],['routeInsideEarth',true,'ROUTE_INSIDE_EARTH']])assert.ok(auditFailures({...good,[field]:value},[]).includes(rule));
-  for(const value of [NaN,Infinity,null])assert.ok(auditFailures({...good,cameraPosition:[value,0,0]},[]).includes('CAMERA_NONFINITE'));assert.ok(auditFailures({},[]).length>0);""")
+  for(const value of [NaN,Infinity,null])assert.ok(auditFailures({...good,cameraPosition:[value,0,0]},[]).includes('CAMERA_NONFINITE'));assert.ok(auditFailures({},[]).length>0);
+  const snapshot=auditFailureSnapshot({...good,webglError:1282,textClipped:[{text:'must_not_leak'}],secret:'must_not_leak'});assert.equal(snapshot.webglError,1282);assert.equal(snapshot.textClippedCount,1);assert.ok(!JSON.stringify(snapshot).includes('must_not_leak'));""")
  def test_jpeg_guard_rejects_empty_truncated_decode_size_and_sequence(self):
   with tempfile.TemporaryDirectory() as folder:
    file=Path(folder)/'frame.jpg';Image.new('RGB',(1080,1920),(30,60,90)).save(file,quality=99)

@@ -23,6 +23,18 @@ export function auditFailures(audit,browserErrors=[]){
  return failed;
 }
 
+// Preserve the actual failing gate values without labels, URLs or source text.
+// This private checkpoint projection prevents another truncated-audit blind spot.
+export function auditFailureSnapshot(audit){
+ if(!audit||typeof audit!=='object')return null;
+ const result={webglError:Number.isInteger(audit.webglError)?audit.webglError:null,
+  fontReady:typeof audit.fontReady==='boolean'?audit.fontReady:null,
+  routeInsideEarth:typeof audit.routeInsideEarth==='boolean'?audit.routeInsideEarth:null};
+ for(const name of ['textClipped','entityClipped','missingTextures','routeDiscontinuities'])
+  result[name+'Count']=Array.isArray(audit[name])?audit[name].length:null;
+ return result;
+}
+
 export function validateJpeg(buffer,{width,height,decoded,decodeError=false,frameIndex,expectedIndex}){
  let rule=null;
  if(!Buffer.isBuffer(buffer)||buffer.length<4)rule='JPEG_EMPTY';

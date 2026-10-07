@@ -5,7 +5,7 @@ import {mkdir,writeFile,readFile,rename} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {once} from 'node:events';
-import {auditFailures,validateJpeg,FrameFailure,FFmpegPipe,encoderArguments} from './scene_frame_contract.mjs';
+import {auditFailures,auditFailureSnapshot,validateJpeg,FrameFailure,FFmpegPipe,encoderArguments} from './scene_frame_contract.mjs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -43,7 +43,7 @@ const sourceHashes={};for(const [key,file] of sourceFiles){
  try{sourceHashes[key]=createHash('sha256').update(await readFile(file)).digest('hex');}
  catch(error){console.error('WORLD_ENGINE_RENDER_FAILURE '+JSON.stringify({code:'ASSET_MISSING',frame_index:null,failed_invariants:['REQUIRED_SOURCE_UNREADABLE']}));throw error;}
 }
-const started=Date.now();let browser,ff,watchdog,complete=false,lastProgress=Date.now(),completedFrames=0,sceneId=null,frameIndex=null,pipe=null;const audits=[],errors=[];
+const started=Date.now();let browser,ff,watchdog,complete=false,lastProgress=Date.now(),completedFrames=0,sceneId=null,frameIndex=null,pipe=null,failedAudit=null;const audits=[],errors=[];
 const initial={complete:false,status:'INITIALIZING',completedFrames:0,requestedFrames:frames,nextStart:start,output:destination,quality,sourceHashes};await writeFile(checkpointPath,JSON.stringify(initial,null,2),{flag:'wx'});
 async function checkpoint(status,extra={}){const value={...initial,status,completedFrames,requestedFrames:frames,nextStart:start+completedFrames/fps,elapsedSeconds:(Date.now()-started)/1000,...extra};const temp=checkpointPath+'.tmp';await writeFile(temp,JSON.stringify(value,null,2));await rename(temp,checkpointPath);}
 try{
@@ -69,6 +69,7 @@ try{
    try{const blob=await (await fetch(uri)).blob(),image=await createImageBitmap(blob);decoded=[image.width,image.height];image.close();}catch{decodeError=true;}
    return {jpeg,audit,decoded,decodeError};
   },{t,samples});
+  failedAudit=auditFailureSnapshot(result.audit);
   const separation=result.audit.entitySeparation;
   if(isFlat&&(!separation||separation.version!=='v1'||separation.pairs.some(pair=>pair.minimumAlpha>.015&&pair.actualProjectedBoxesOverlap)))throw new FrameFailure('FRAME_AUDIT_FAILED',{failed_invariants:['ENTITY_SEPARATION_FAILED']});
   if(result.audit.productionDefaults?.version!=='v1')throw new FrameFailure('FRAME_AUDIT_FAILED',{failed_invariants:['PRODUCTION_RENDERER_REQUIRED']});
@@ -78,7 +79,7 @@ try{
   validateJpeg(buffer,{width:internalWidth,height:internalHeight,decoded:result.decoded,decodeError:result.decodeError,frameIndex:i,expectedIndex:completedFrames});
   // No encoder receives an empty/invalid stream after a first-frame audit failure.
   if(!pipe){pipe=new FFmpegPipe(encoderOptions);ff=pipe.child;}
-  audits.push(result.audit);await pipe.write(buffer);completedFrames=i+1;lastProgress=Date.now();
+  audits.push(result.audit);await pipe.write(buffer);completedFrames=i+1;lastProgress=Date.now();failedAudit=null;
   if(i%5===0||i===frames-1)await checkpoint('RENDERING');
   console.log(JSON.stringify({stage:'scene_render',scene_id:scene.id,completed_frames:completedFrames,total_frames:frames,time:t,elapsed_seconds:(lastProgress-started)/1000}));
  }
@@ -90,5 +91,5 @@ try{
  const cause={code:error.code||'SCENE_RENDER_FAILED',scene_id:sceneId,frame_index:frameIndex,failed_invariants:error.details?.failed_invariants||[],encoder_return_code:pipe?.result?.code??null};
  console.error('WORLD_ENGINE_RENDER_FAILURE '+JSON.stringify(cause));
  if(error.code==='FFMPEG_PIPE_FAILED')for(const line of (pipe?.stderr||[]))console.error(line);
- await checkpoint('FAILED',{error:String(error?.stack||error),root_cause:cause,browserErrors:errors,complete:false});if(audits.length&&!existsSync(auditPath))await writeFile(auditPath,JSON.stringify(audits,null,2),{flag:'wx'});throw error;
+ await checkpoint('FAILED',{error:String(error?.stack||error),root_cause:cause,failed_audit:failedAudit,browserErrors:errors,complete:false});if(audits.length&&!existsSync(auditPath))await writeFile(auditPath,JSON.stringify(audits,null,2),{flag:'wx'});throw error;
 }finally{if(watchdog)clearInterval(watchdog);if(pipe)await pipe.abort();if(browser)await browser.close().catch(()=>{});if(!complete)console.error('Completed frames and partial output preserved; retry uses a new output version.');}
