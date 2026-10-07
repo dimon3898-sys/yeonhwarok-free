@@ -1,0 +1,358 @@
+name: Validate RTX4080S preparation fixes (never publish)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/rtx4080s-render-diagnostics]
+    paths:
+      - .github/workflows/gcube-preparation-checks.yml
+      - world-simulation-shorts-engine/requirements.txt
+      - world-simulation-shorts-engine/server.py
+      - world-simulation-shorts-engine/engine/**
+      - world-simulation-shorts-engine/data/**
+      - world-simulation-shorts-engine/web/**
+      - world-simulation-shorts-engine/assets/**
+      - world-simulation-shorts-engine/tools/**
+      - world-simulation-shorts-engine/deployment/**
+      - cinematic-world-map/package.json
+      - cinematic-world-map/package-lock.json
+      - cinematic-world-map/src/**
+      - cinematic-world-map/assets/**
+      - cinematic-world-map/tools/sound.py
+      - deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/PRODUCTION_RHYTHM_QC_CERTIFICATE.json
+      - deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_RHYTHM_MASTER_v001/production_rhythm_master_10_15s.mp4
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: gcube-preparation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      IMAGE: world-engine-preparation-local
+      RELEASE_TAG: preparation-check
+    steps:
+      - name: Checkout approved sources
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 1
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build the complete image for local smoke testing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.preparation-check
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: |
+            ${{ env.IMAGE }}:${{ env.RELEASE_TAG }}
+            ${{ env.IMAGE }}:${{ env.RELEASE_TAG }}-sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Verify RTX4080S runtime packages and official Chromium backend order
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import os,subprocess
+          for package in ('libegl1','libvulkan1','libx11-6','libxext6'):
+              state=subprocess.check_output(['dpkg-query','-W','-f=${Status}',package],text=True)
+              assert state=='install ok installed', package
+              print(package+': '+state)
+          from deployment.gcube.chromium_wrapper import browser_arguments
+          from deployment.gcube.graphics_start import select_graphics_profile
+          from deployment.gcube.gpu import GPUError
+          assert os.environ.get('WORLD_ENGINE_RENDER_MODE') != 'cpu'
+          assert os.environ.get('NVIDIA_DRIVER_CAPABILITIES') != 'all'
+          for profile, angle in [('vulkan','vulkan'),('egl','gl-egl')]:
+              args=browser_arguments(['--headless','--no-sandbox','--use-angle=swiftshader'],{'WORLD_ENGINE_GPU_PROFILE':profile})
+              assert '--use-gl=angle' in args and '--use-angle='+angle in args
+              assert '--disable-software-rasterizer' in args and '--use-angle=swiftshader' not in args
+          calls=[]
+          def fail(**kwargs):
+              calls.append(kwargs['environ']['WORLD_ENGINE_GPU_PROFILE'])
+              raise GPUError('GPU_WEBGL_UNVERIFIED')
+          try:select_graphics_profile({},probe=fail)
+          except GPUError:pass
+          assert calls==['vulkan','egl']
+          print('Required runtime packages installed; official Vulkan then GL-EGL; both failures stay blocked; no physical NVIDIA GPU available in CI')
+          PY
+      - name: Verify full-image foreground boot, owner login and blocked diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_prefix="world-engine-gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          smoke_directory="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          smoke_diagnostics="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.diagnostics"
+          cleanup() {
+            smoke_status=$?
+            for smoke_case in root nonroot missing-owner gpu-required missing-mount; do
+              smoke_name="${smoke_prefix}-${smoke_case}"
+              if [ "$smoke_status" -ne 0 ]; then
+                docker logs --tail 100 "$smoke_name" 2>/dev/null | python -c 'import re, sys; allowed = re.compile(r"(?:GCUBE startup blocked: [A-Za-z][A-Za-z0-9_]{0,79}|World Engine ready on8000; owner-code is private; no provider stop or GPU speedup is implied\.)"); [print(line.rstrip()) for line in sys.stdin if allowed.fullmatch(line.rstrip())]' >> "$smoke_diagnostics" || true
+              fi
+              docker rm --force "$smoke_name" >/dev/null 2>&1 || true
+            done
+            rm -f "$smoke_directory"/*.env
+            rmdir "$smoke_directory" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          umask 077
+          mkdir "$smoke_directory"
+          python - "$smoke_directory" <<'PY'
+          import os, pathlib, secrets, sys
+          folder = pathlib.Path(sys.argv[1])
+          for index, case in enumerate(('root', 'nonroot', 'missing-owner', 'gpu-required', 'missing-mount')):
+              owner = secrets.token_urlsafe(32)
+              print('::add-mask::' + owner)
+              values = {'WORLD_ENGINE_RENDER_MODE': 'gpu-required' if case == 'gpu-required' else 'cpu',
+                        'WORLD_ENGINE_STORAGE_MODE': 'required' if case == 'missing-mount' else 'ephemeral',
+                        'WORLD_ENGINE_STORAGE_PATH': '/world-storage' if case == 'missing-mount' else '/data',
+                        'WORLD_ENGINE_LOCAL_MODE': '1',
+                        'WORLD_ENGINE_PUBLIC_ORIGIN': 'http://127.0.0.1:' + str(18000 + index)}
+              if case != 'missing-owner':
+                  values['WORLD_ENGINE_OWNER_CODE'] = owner
+              path = folder / (case + '.env')
+              with path.open('x', encoding='utf-8') as stream:
+                  stream.write(''.join(key + '=' + value + '\n' for key, value in values.items()))
+              os.chmod(path, 0o600)
+          PY
+          smoke_port=18000
+          for smoke_case in root nonroot missing-owner gpu-required missing-mount; do
+            smoke_user=()
+            if [ "$smoke_case" = nonroot ]; then smoke_user=(--user 1000:1000); fi
+            docker run --detach --name "${smoke_prefix}-${smoke_case}" \
+              "${smoke_user[@]}" --publish "127.0.0.1:${smoke_port}:8000" \
+              --env-file "${smoke_directory}/${smoke_case}.env" \
+              "${IMAGE}:${RELEASE_TAG}" >/dev/null
+            smoke_port=$((smoke_port + 1))
+          done
+          python - "$smoke_directory" "$smoke_prefix" <<'PY'
+          import http.client, http.cookiejar, json, pathlib, re, subprocess, sys, time
+          from urllib.error import HTTPError
+          from urllib.request import HTTPCookieProcessor, ProxyHandler, Request, build_opener
+          folder, prefix = pathlib.Path(sys.argv[1]), sys.argv[2]
+          cases = ('root', 'nonroot', 'missing-owner', 'gpu-required', 'missing-mount')
+          expected = {'missing-owner': 'WORLD_ENGINE_OWNER_CODE_REQUIRED',
+                      'gpu-required': 'GPU_HARDWARE_UNAVAILABLE', 'missing-mount': 'STORAGE_MOUNT_REQUIRED'}
+          clients = {case: build_opener(ProxyHandler({}), HTTPCookieProcessor(http.cookiejar.CookieJar()))
+                     for case in cases}
+          endpoints = {case: 'http://127.0.0.1:' + str(18000 + index) for index, case in enumerate(cases)}
+          observed_at = {}
+          def get(case, path, headers=None, expected_status=200):
+              try:
+                  response = clients[case].open(Request(endpoints[case] + path, headers=headers or {}), timeout=5)
+              except HTTPError as error:
+                  response = error
+              with response:
+                  if response.status != expected_status:
+                      raise RuntimeError('Unexpected response status for ' + case + ' ' + path)
+                  return json.load(response)
+          def wait_for(case, ready):
+              deadline = time.monotonic() + 90
+              while time.monotonic() < deadline:
+                  try:
+                      value = get(case, '/api/health')
+                      matched = (value.get('ok') is True and value.get('authentication_required') is True
+                                 and value.get('engine_ready') is ready)
+                      if not ready:
+                          matched = matched and value.get('phase') == 'blocked' and value.get('error_code') == expected[case]
+                      if matched:
+                          observed_at[case] = time.monotonic()
+                          return value
+                  except (OSError, http.client.HTTPException, ValueError, RuntimeError):
+                      pass
+                  time.sleep(1)
+              raise RuntimeError('Image did not reach expected startup state for ' + case)
+          for case in cases:
+              health = wait_for(case, case in ('root', 'nonroot'))
+              if case in ('root', 'nonroot'):
+                  for protected_path in ('/api/projects', '/api/gcube/gpu', '/gcube/gpu.json', '/gcube/gpu'):
+                      try:
+                          clients[case].open(endpoints[case] + protected_path, timeout=5)
+                      except HTTPError as error:
+                          if error.code != 401:
+                              raise RuntimeError('Unauthenticated access was not rejected for ' + protected_path)
+                      else:
+                          raise RuntimeError('Unauthenticated protected access succeeded for ' + protected_path)
+                  owner = next(line.partition('=')[2] for line in (folder / (case + '.env')).read_text().splitlines()
+                               if line.startswith('WORLD_ENGINE_OWNER_CODE='))
+                  request = Request(endpoints[case] + '/auth/login', data=json.dumps({'password': owner}).encode(),
+                                    headers={'Origin': endpoints[case], 'Content-Type': 'application/json'}, method='POST')
+                  with clients[case].open(request, timeout=5) as response:
+                      if json.load(response).get('authenticated') is not True:
+                          raise RuntimeError('Owner login failed for ' + case)
+                  # Before owner login, numeric-host kube probes deliberately
+                  # return only liveness/readiness. Inspect the normal bound
+                  # health projection only after login with the same Origin.
+                  bound_health = get(case, '/api/health', headers={'Origin': endpoints[case]})
+                  if (bound_health.get('gpu', {}).get('render_mode') != 'cpu'
+                          or bound_health.get('gpu', {}).get('gpu_rendering_verified') is not False
+                          or bound_health.get('storage', {}).get('mode') != 'ephemeral'):
+                      raise RuntimeError('Explicit CPU profile or ephemeral storage was not verified')
+                  for diagnostics_path in ('/api/gcube/gpu', '/gcube/gpu.json'):
+                      gpu_view = get(case, diagnostics_path)
+                      if (gpu_view.get('engine_ready') is not True
+                              or gpu_view.get('gpu_rendering_verified') is not False
+                              or gpu_view.get('render_mode') != 'cpu'
+                              or 'WebGL VERIFIED' in gpu_view.get('message', '')
+                              or not isinstance(gpu_view.get('diagnostics'), dict)):
+                          raise RuntimeError('Owner GPU diagnostics incorrectly claimed NVIDIA admission')
+                      webgl = gpu_view['diagnostics'].get('webgl', {})
+                      if (webgl.get('context_available') is not True or webgl.get('context_version') != 2
+                              or webgl.get('draw_passed') is not True or webgl.get('webgl_error') != 0
+                              or webgl.get('software_renderer') is not True
+                              or not re.search(r'swiftshader|llvmpipe|softpipe|software|lavapipe',
+                                               ' '.join(str(webgl.get(key, '')) for key in
+                                                        ('vendor', 'renderer', 'unmasked_vendor', 'unmasked_renderer')), re.I)):
+                          raise RuntimeError('Fresh image Chromium/WebGL2 draw did not verify the explicit CPU test profile')
+                  with clients[case].open(endpoints[case] + '/gcube/gpu', timeout=5) as response:
+                      if response.status != 200 or 'text/html' not in response.headers.get('Content-Type', ''):
+                          raise RuntimeError('Owner GPU diagnostic page failed')
+                  projects = get(case, '/api/projects').get('projects', [])
+                  if (len(projects) != 1 or projects[0].get('status') != 'planned'
+                          or not re.fullmatch(r'project_[a-f0-9]{12}', projects[0].get('id', ''))):
+                      raise RuntimeError('Unapproved validation project was not prepared')
+                  detail = get(case, '/api/projects/' + projects[0]['id'])
+                  plan = detail.get('plan', {})
+                  if (detail.get('version') != 'v001' or plan.get('duration') != 12
+                          or len(plan.get('scenes', [])) != 5 or plan.get('gate', {}).get('passed') is not True):
+                      raise RuntimeError('Unapproved fixture did not match certified short plan')
+                  with clients[case].open(endpoints[case] + '/', timeout=5) as response:
+                      if b'/gcube/benchmark.json' not in response.read(1024 * 1024):
+                          raise RuntimeError('Mobile measurement link was missing')
+                  with clients[case].open(endpoints[case] + '/gcube/benchmark.json', timeout=5) as response:
+                      diagnostics = json.load(response)
+                      if (diagnostics.get('runtime', {}).get('render_mode') != 'cpu'
+                              or not response.headers.get('Content-Disposition', '').startswith('attachment;')):
+                          raise RuntimeError('Owner measurement download did not verify CPU runtime')
+              else:
+                  if case == 'gpu-required':
+                      gpu_failure = health.get('gpu_diagnostics', {})
+                      stages = {row.get('id'): row.get('status') for row in gpu_failure.get('stages', [])}
+                      if (gpu_failure.get('failed_stage') not in {'A', 'B'}
+                              or set(stages) != set('ABCDEF') or stages.get('B') != 'FAIL'
+                              or any(stages.get(stage) == 'PASS' for stage in 'CDEF')):
+                          raise RuntimeError('GPU-required startup did not expose the actual failed GPU stage')
+                      with clients[case].open(endpoints[case] + '/', timeout=5) as response:
+                          page = response.read(1024 * 1024).decode('utf-8')
+                          if 'GPU / WebGL 진단' not in page or 'Workload를 중지하세요' not in page:
+                              raise RuntimeError('Blocked GPU diagnostic and billing guidance were missing')
+                  ready = get(case, '/readyz', expected_status=503)
+                  if ready.get('engine_ready') is not False or ready.get('error_code') != expected[case]:
+                      raise RuntimeError('Blocked startup incorrectly claimed readiness')
+                  request = Request(endpoints[case] + '/api/projects', data=b'{}',
+                                    headers={'Content-Type': 'application/json'}, method='POST')
+                  try:
+                      clients[case].open(request, timeout=5)
+                  except HTTPError as error:
+                      if error.code != 405 or json.load(error).get('engine_ready') is not False:
+                          raise RuntimeError('Blocked startup accepted a state-changing API')
+                  else:
+                      raise RuntimeError('Blocked startup accepted a state-changing API')
+              process = subprocess.run(['docker', 'inspect', prefix + '-' + case], check=True,
+                                       capture_output=True, text=True)
+              inspected = json.loads(process.stdout)[0]
+              ip = next(network['IPAddress'] for network in inspected['NetworkSettings']['Networks'].values()
+                        if network.get('IPAddress'))
+              direct = build_opener(ProxyHandler({}))
+              for path in ('/healthz', '/api/health'):
+                  with direct.open(Request('http://' + ip + ':8000' + path,
+                                           headers={'User-Agent': 'kube-probe/1.32'}), timeout=5) as response:
+                      probe = json.load(response)
+                      if (response.status != 200 or probe.get('ok') is not True
+                              or probe.get('engine_ready') is not (case in ('root', 'nonroot'))):
+                          raise RuntimeError('Pod-IP/Istio health probe failed for ' + case)
+              bind = subprocess.run(['docker', 'exec', prefix + '-' + case, 'python', '-c',
+                                     "from pathlib import Path; rows=Path('/proc/net/tcp').read_text().splitlines()[1:]; assert any(r.split()[1]=='00000000:1F40' and r.split()[3]=='0A' for r in rows)"],
+                                    check=True, capture_output=True, text=True)
+          deadline = max(observed_at['root'] + 60, observed_at['nonroot'] + 20,
+                         *(observed_at[case] + 30 for case in expected))
+          while time.monotonic() < deadline:
+              for case in cases:
+                  process = subprocess.run(['docker', 'inspect', '--format', '{{.State.Running}}', prefix + '-' + case],
+                                           check=True, capture_output=True, text=True)
+                  if process.stdout.strip() != 'true':
+                      raise RuntimeError('Foreground startup process exited for ' + case)
+                  value = get(case, '/healthz')
+                  if value.get('ok') is not True or value.get('engine_ready') is not (case in ('root', 'nonroot')):
+                      raise RuntimeError('Liveness/readiness changed during sustained run for ' + case)
+              time.sleep(min(3, max(0, deadline - time.monotonic())))
+          for case in expected:
+              value = get(case, '/api/health')
+              if value.get('engine_ready') is not False or value.get('error_code') != expected[case]:
+                  raise RuntimeError('Blocked diagnostics changed or quietly fell back to CPU')
+          for case in ('root', 'nonroot'):
+              value = get(case, '/api/gcube/gpu')
+              if (value.get('engine_ready') is not True or value.get('render_mode') != 'cpu'
+                      or value.get('gpu_rendering_verified') is not False):
+                  raise RuntimeError('Ready engine lost its explicit CPU profile')
+          print('Fresh Chromium WebGL2 CPU draw, owner-gated GPU diagnostic routes, root/UID1000 image boot, 0.0.0.0:8000, owner login, Pod-IP health, sustained foreground lifetime, and three fail-closed startup diagnostics passed; no render was requested')
+          PY
+      - name: Full proxy/security regressions and v007 target diagnostics in the operating image
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Legacy fixtures require root-owned source-adjacent scratch files;
+          # use temporary mounts only. Production startup still drops to UID1000.
+          docker run --rm --user 0:0 --tmpfs /tmp:rw,nosuid,nodev,size=512m,mode=1777 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" /tmp/proxy-diag/run_checks.py \
+            tests.test_render_failure_diagnosis tests.test_mobile_deployment_jobs tests.test_mobile_deployment_security tests.test_codespaces_origin \
+            deployment.gcube.test_storage deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
+            deployment.gcube.test_chromium_wrapper deployment.gcube.test_graphics_runtime \
+            deployment.gcube.test_gpu_access deployment.gcube.test_boot_status deployment.gcube.test_server \
+            deployment.gcube.test_proxy deployment.gcube.test_start deployment.gcube.test_diagnostics \
+            deployment.gcube.test_validation_fixture deployment.gcube.test_internal_http
+          docker run --rm --user 1000:1000 --workdir /tmp/proxy-diag \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" /tmp/proxy-diag/run_checks.py test_observer test_server_diag
+      - name: Verify captured Istio HTTP profile, secure owner login and 61-second lifetime
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_name="world-gcube-proxy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          smoke_directory="${RUNNER_TEMP}/gcube-proxy-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          cleanup() {
+            docker rm --force "$smoke_name" >/dev/null 2>&1 || true
+            rm -f "$smoke_directory/test.env"
+            rmdir "$smoke_directory" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+          umask 077
+          mkdir "$smoke_directory"
+          python - "$smoke_directory/test.env" <<'PY'
+          import pathlib, secrets, sys
+          owner = secrets.token_urlsafe(32)
+          print('::add-mask::' + owner)
+          pathlib.Path(sys.argv[1]).write_text('WORLD_ENGINE_OWNER_CODE=' + owner + '\nWORLD_ENGINE_RENDER_MODE=cpu\nWORLD_ENGINE_STORAGE_MODE=ephemeral\nWORLD_ENGINE_STORAGE_PATH=/data\n')
+          PY
+          # A temporary same-Pod TCP relay reproduces Envoy's loopback peer;
+          # the public gateway never trusts the Docker host bridge address.
+          docker run --detach --name "$smoke_name" --publish 127.0.0.1:18010:18011 --publish 127.0.0.1:18012:8000 \
+            --env-file "$smoke_directory/test.env" "${IMAGE}:${RELEASE_TAG}" >/dev/null
+          python world-simulation-shorts-engine/deployment/gcube/container_proxy_smoke.py \
+            "$smoke_directory/test.env" "$smoke_name" 18010 captured-http
+      - name: Report bounded startup diagnostics after a failure
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker image inspect "${IMAGE}:${RELEASE_TAG}" --format '{"Id":{{json .Id}},"Size":{{json .Size}},"Architecture":{{json .Architecture}},"WorkingDir":{{json .Config.WorkingDir}},"Entrypoint":{{json .Config.Entrypoint}},"Cmd":{{json .Config.Cmd}}}' | python -c 'import sys; value = sys.stdin.read(8192).strip(); print("::notice title=Gcube image configuration::" + value.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")) if value else None' || true
+          smoke_diagnostics="${RUNNER_TEMP}/gcube-smoke-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.diagnostics"
+          if [ -f "$smoke_diagnostics" ]; then
+            head -n 100 "$smoke_diagnostics" | python -c 'import sys; [print("::notice title=Gcube startup::" + line.rstrip()) for line in sys.stdin]'
+            rm -f "$smoke_diagnostics"
+          fi

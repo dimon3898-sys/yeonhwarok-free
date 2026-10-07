@@ -160,7 +160,9 @@ class ProductionDefaults(unittest.TestCase):
                   ('만약 런던과 파리의 직접 연결이 달라진다면?',40)]
         for topic,duration in requests:
             with self.subTest(topic=topic):
-                plan=generate_plan(dict(topic=topic,duration=duration,production_preset='PRODUCTION_DEFAULT_CANDIDATE'))
+                # This regression covers the preserved v1 FAST policy. The
+                # promoted channel default is now FAST_PLUS, tested separately.
+                plan=generate_plan(dict(topic=topic,duration=duration,pace='FAST',production_preset='PRODUCTION_DEFAULT_CANDIDATE'))
                 self.assertTrue(plan['gate']['passed'],plan['gate']['errors'])
                 self.assertEqual(plan['duration'],duration)
                 self.assertTrue(plan['options']['sfx'])

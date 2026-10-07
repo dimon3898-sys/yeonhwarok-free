@@ -1,0 +1,7 @@
+# CI-only image: never pushed or offered for gcube deployment.
+# Preserve v008's installed runtime, entrypoint, renderer, GPU validation and assets.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e4e2796622a6256e204737bb56668e10f77690d5e97c87698b10d3afbd6d2bb5
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/engine/backends.py world-simulation-shorts-engine/engine/failures.py world-simulation-shorts-engine/engine/qa_planner.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/data/qa_scene_plan.schema.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/web/app.js world-simulation-shorts-engine/web/plan_presentation.js /opt/world-engine/world-simulation-shorts-engine/web/

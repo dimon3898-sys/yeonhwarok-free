@@ -1,0 +1,2519 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://world-simulation.local/schema/scene-plan/1.0",
+  "title": "World Simulation Scene Plan 1.0 — explicit bounded deployment QA",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "duration",
+    "request",
+    "options",
+    "story",
+    "scenes",
+    "required_plugins",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "version": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 1
+        },
+        {
+          "type": "string",
+          "pattern": "^v[0-9]{3,}$"
+        }
+      ]
+    },
+    "duration": {
+      "type": "number",
+      "minimum": 5
+    },
+    "request": {
+      "type": "object",
+      "required": [
+        "topic",
+        "duration"
+      ]
+    },
+    "options": {
+      "type": "object",
+      "required": [
+        "tts",
+        "subtitles",
+        "bgm",
+        "quality"
+      ],
+      "properties": {
+        "tts": {
+          "type": "boolean"
+        },
+        "subtitles": {
+          "type": "boolean"
+        },
+        "bgm": {
+          "type": "boolean"
+        },
+        "quality": {
+          "enum": [
+            "FAST",
+            "HIGH",
+            "CINEMA"
+          ]
+        },
+        "narration_file": {
+          "type": "string"
+        },
+        "narration_timing": {
+          "type": "array"
+        },
+        "tts_language": {
+          "type": "string"
+        },
+        "sfx": {
+          "type": "boolean"
+        },
+        "pace": {
+          "enum": [
+            "FAST",
+            "NORMAL",
+            "CINEMATIC",
+            "FAST_PLUS"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "story": {
+      "type": "object",
+      "required": [
+        "hook",
+        "claims",
+        "beats"
+      ],
+      "properties": {
+        "hook": {
+          "type": "string"
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "text",
+              "status",
+              "source_ids"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "FACT",
+                  "ASSUMPTION",
+                  "SIMULATION"
+                ]
+              },
+              "source_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "assumption_ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "scope": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "beats": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "conclusion": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "planner": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "scene_id",
+          "start_time",
+          "duration",
+          "scene_type",
+          "narration",
+          "location",
+          "coordinates",
+          "geographic_targets",
+          "camera_preset",
+          "camera_start",
+          "camera_end",
+          "camera_speed",
+          "camera_easing",
+          "lighting_preset",
+          "entities",
+          "entity_actions",
+          "routes",
+          "visual_events",
+          "effects",
+          "labels",
+          "sound_events",
+          "music_energy",
+          "transition_in",
+          "transition_out",
+          "source_type",
+          "fact_status",
+          "render_quality",
+          "entry_state",
+          "exit_state",
+          "directing_presets",
+          "claim_ids",
+          "year",
+          "date",
+          "era",
+          "timeline_position",
+          "motion_start"
+        ],
+        "properties": {
+          "scene_id": {
+            "type": "string"
+          },
+          "narration": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "camera_preset": {
+            "type": "string"
+          },
+          "camera_easing": {
+            "type": "string"
+          },
+          "lighting_preset": {
+            "type": "string"
+          },
+          "transition_in": {
+            "type": "string"
+          },
+          "transition_out": {
+            "type": "string"
+          },
+          "source_type": {
+            "type": "string"
+          },
+          "start_time": {
+            "type": "number",
+            "minimum": 0
+          },
+          "duration": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "scene_type": {
+            "enum": [
+              "EARTH_ESTABLISH",
+              "COUNTRY_FOCUS",
+              "CITY_FOCUS",
+              "ROUTE",
+              "ROUTE_CHASE",
+              "NETWORK",
+              "COMPARISON",
+              "TERRITORY",
+              "TIMELINE",
+              "CINEMATIC_CLIP",
+              "FINAL_OVERVIEW",
+              "FLAT_MAP"
+            ]
+          },
+          "coordinates": {
+            "type": "object",
+            "required": [
+              "lon",
+              "lat",
+              "source_id"
+            ],
+            "properties": {
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "source_id": {
+                "type": "string"
+              },
+              "location_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "geographic_targets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "camera_start": {
+            "type": "object",
+            "required": [
+              "lon",
+              "lat",
+              "height",
+              "tilt",
+              "yaw",
+              "bank",
+              "fov",
+              "target_lon",
+              "target_lat"
+            ],
+            "properties": {
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "tilt": {
+                "type": "number"
+              },
+              "yaw": {
+                "type": "number"
+              },
+              "bank": {
+                "type": "number"
+              },
+              "target_lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "target_lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0.08,
+                "maximum": 20
+              },
+              "fov": {
+                "type": "number",
+                "minimum": 20,
+                "maximum": 80
+              },
+              "location_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "camera_end": {
+            "type": "object",
+            "required": [
+              "lon",
+              "lat",
+              "height",
+              "tilt",
+              "yaw",
+              "bank",
+              "fov",
+              "target_lon",
+              "target_lat"
+            ],
+            "properties": {
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "tilt": {
+                "type": "number"
+              },
+              "yaw": {
+                "type": "number"
+              },
+              "bank": {
+                "type": "number"
+              },
+              "target_lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              },
+              "target_lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0.08,
+                "maximum": 20
+              },
+              "fov": {
+                "type": "number",
+                "minimum": 20,
+                "maximum": 80
+              },
+              "location_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          },
+          "camera_speed": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 3
+          },
+          "entities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "type",
+                "action",
+                "start_time",
+                "end_time"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "aircraft",
+                    "cargo_ship",
+                    "vehicle",
+                    "location_marker",
+                    "city",
+                    "port",
+                    "airport",
+                    "ship"
+                  ]
+                },
+                "location_id": {
+                  "type": "string"
+                },
+                "route_id": {
+                  "type": "string"
+                },
+                "action": {
+                  "type": "string"
+                },
+                "start_time": {
+                  "type": "number"
+                },
+                "end_time": {
+                  "type": "number"
+                },
+                "phase_offset": {
+                  "type": "number"
+                },
+                "opacity": {
+                  "type": "number"
+                },
+                "coordinates": {
+                  "type": "object",
+                  "required": [
+                    "lon",
+                    "lat",
+                    "source_id"
+                  ],
+                  "properties": {
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "source_id": {
+                      "type": "string"
+                    },
+                    "location_id": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "scale": {
+                  "type": "number",
+                  "minimum": 0.3,
+                  "maximum": 3
+                },
+                "visibility_role": {
+                  "enum": [
+                    "primary",
+                    "context"
+                  ]
+                },
+                "persistent": {
+                  "type": "boolean"
+                },
+                "stop_progress": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "speed_easing": {
+                  "enum": [
+                    "linear",
+                    "ease_in",
+                    "ease_out",
+                    "ease_in_out",
+                    "smoothstep"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "entity_actions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "route_id",
+                "kind",
+                "points",
+                "start_time",
+                "end_time",
+                "altitude_km",
+                "progress_start",
+                "progress_end",
+                "source_ids"
+              ],
+              "properties": {
+                "route_id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "enum": [
+                    "great_circle",
+                    "sea",
+                    "land",
+                    "custom"
+                  ]
+                },
+                "points": {
+                  "type": "array",
+                  "minItems": 2,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "lon",
+                      "lat",
+                      "source_id"
+                    ],
+                    "properties": {
+                      "lon": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                      },
+                      "lat": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "source_id": {
+                        "type": "string"
+                      },
+                      "location_id": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "start_time": {
+                  "type": "number"
+                },
+                "end_time": {
+                  "type": "number"
+                },
+                "altitude_km": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "progress_start": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "progress_end": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "source_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "color": {
+                  "type": "string"
+                },
+                "faint": {
+                  "type": "boolean"
+                },
+                "length_km": {
+                  "type": "number"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "assumption_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "speed_easing": {
+                  "enum": [
+                    "linear",
+                    "ease_in",
+                    "ease_out",
+                    "ease_in_out",
+                    "smoothstep"
+                  ]
+                },
+                "visibility_role": {
+                  "enum": [
+                    "primary",
+                    "secondary",
+                    "context"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "visual_events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind",
+                "time",
+                "duration",
+                "target_id",
+                "role",
+                "caused_by"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "duration": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "target_id": {
+                  "type": "string"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "caused_by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "meaningful": {
+                  "type": "boolean"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "string",
+                    "null"
+                  ]
+                },
+                "coordinates": {
+                  "type": "object",
+                  "required": [
+                    "lon",
+                    "lat",
+                    "source_id"
+                  ],
+                  "properties": {
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "source_id": {
+                      "type": "string"
+                    },
+                    "location_id": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "strength": {
+                  "type": "number"
+                },
+                "claim_id": {
+                  "type": "string"
+                },
+                "text": {
+                  "type": "string"
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "sfx_category": {
+                  "enum": [
+                    "CAMERA_MOVE",
+                    "FAST_ZOOM",
+                    "COUNTRY_REVEAL",
+                    "CITY_REVEAL",
+                    "ENTITY_SPAWN",
+                    "AIRCRAFT_PASS",
+                    "SHIP_PASS",
+                    "ROUTE_START",
+                    "ROUTE_PROGRESS",
+                    "ROUTE_BLOCK",
+                    "REROUTE",
+                    "RADAR",
+                    "WARNING",
+                    "IMPACT",
+                    "SHOCKWAVE",
+                    "NETWORK_EXPAND",
+                    "NEW_VARIABLE",
+                    "MID_PEAK",
+                    "FINAL_PEAK",
+                    "FINAL_REVEAL",
+                    "TRANSITION",
+                    "CAMERA_SOFT_MOVE",
+                    "CAMERA_FAST_MOVE",
+                    "ZOOM_IN",
+                    "ZOOM_OUT",
+                    "REGION_REVEAL",
+                    "ENTITY_MOVE",
+                    "ROUTE_COMPLETE",
+                    "ROUTE_REROUTE",
+                    "SCAN",
+                    "ALERT",
+                    "IMPACT_LIGHT",
+                    "IMPACT_MEDIUM",
+                    "IMPACT_HEAVY",
+                    "COUNTER_RESPONSE",
+                    "TRANSITION_LIGHT",
+                    "TRANSITION_FAST",
+                    "TRANSITION_HEAVY"
+                  ]
+                },
+                "sfx_variant": {
+                  "type": "string",
+                  "pattern": "^[A-Z][A-Z0-9_]*$"
+                },
+                "sfx_intensity": {
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "PEAK",
+                    "SUBTLE"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "effects": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "text",
+                "coordinates",
+                "start_time",
+                "end_time"
+              ],
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "coordinates": {
+                  "type": "object",
+                  "required": [
+                    "lon",
+                    "lat",
+                    "source_id"
+                  ],
+                  "properties": {
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "source_id": {
+                      "type": "string"
+                    },
+                    "location_id": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "start_time": {
+                  "type": "number"
+                },
+                "end_time": {
+                  "type": "number"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "opacity": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string",
+                  "pattern": "^#[0-9A-Fa-f]{6}$"
+                },
+                "size": {
+                  "type": "number",
+                  "minimum": 24,
+                  "maximum": 96
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "world_label",
+                    "hook_reveal"
+                  ]
+                },
+                "event_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "sound_events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "kind",
+                "time",
+                "duration",
+                "visual_event_id"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "kind": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "duration": {
+                  "type": "number"
+                },
+                "visual_event_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "gain_db": {
+                  "type": "number"
+                },
+                "sfx_category": {
+                  "enum": [
+                    "CAMERA_MOVE",
+                    "FAST_ZOOM",
+                    "COUNTRY_REVEAL",
+                    "CITY_REVEAL",
+                    "ENTITY_SPAWN",
+                    "AIRCRAFT_PASS",
+                    "SHIP_PASS",
+                    "ROUTE_START",
+                    "ROUTE_PROGRESS",
+                    "ROUTE_BLOCK",
+                    "REROUTE",
+                    "RADAR",
+                    "WARNING",
+                    "IMPACT",
+                    "SHOCKWAVE",
+                    "NETWORK_EXPAND",
+                    "NEW_VARIABLE",
+                    "MID_PEAK",
+                    "FINAL_PEAK",
+                    "FINAL_REVEAL",
+                    "TRANSITION",
+                    "CAMERA_SOFT_MOVE",
+                    "CAMERA_FAST_MOVE",
+                    "ZOOM_IN",
+                    "ZOOM_OUT",
+                    "REGION_REVEAL",
+                    "ENTITY_MOVE",
+                    "ROUTE_COMPLETE",
+                    "ROUTE_REROUTE",
+                    "SCAN",
+                    "ALERT",
+                    "IMPACT_LIGHT",
+                    "IMPACT_MEDIUM",
+                    "IMPACT_HEAVY",
+                    "COUNTER_RESPONSE",
+                    "TRANSITION_LIGHT",
+                    "TRANSITION_FAST",
+                    "TRANSITION_HEAVY"
+                  ]
+                },
+                "sfx_variant": {
+                  "type": "string",
+                  "pattern": "^[A-Z][A-Z0-9_]*$"
+                },
+                "sfx_intensity": {
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "PEAK",
+                    "SUBTLE"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "music_energy": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "fact_status": {
+            "enum": [
+              "FACT",
+              "ASSUMPTION",
+              "SIMULATION"
+            ]
+          },
+          "render_quality": {
+            "enum": [
+              "FAST",
+              "HIGH",
+              "CINEMA"
+            ]
+          },
+          "entry_state": {
+            "type": "object",
+            "required": [
+              "camera",
+              "earth_rotation",
+              "active_countries",
+              "active_routes",
+              "entities",
+              "lighting",
+              "timeline"
+            ],
+            "properties": {
+              "camera": {
+                "type": "object",
+                "required": [
+                  "lon",
+                  "lat",
+                  "height",
+                  "tilt",
+                  "yaw",
+                  "bank",
+                  "fov",
+                  "target_lon",
+                  "target_lat"
+                ],
+                "properties": {
+                  "lon": {
+                    "type": "number"
+                  },
+                  "lat": {
+                    "type": "number"
+                  },
+                  "tilt": {
+                    "type": "number"
+                  },
+                  "yaw": {
+                    "type": "number"
+                  },
+                  "bank": {
+                    "type": "number"
+                  },
+                  "target_lon": {
+                    "type": "number"
+                  },
+                  "target_lat": {
+                    "type": "number"
+                  },
+                  "height": {
+                    "type": "number",
+                    "minimum": 0.08,
+                    "maximum": 20
+                  },
+                  "fov": {
+                    "type": "number",
+                    "minimum": 20,
+                    "maximum": 80
+                  },
+                  "location_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "earth_rotation": {
+                "type": "number"
+              },
+              "active_countries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "active_routes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "entities": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "lighting": {
+                "type": "string"
+              },
+              "timeline": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          },
+          "exit_state": {
+            "type": "object",
+            "required": [
+              "camera",
+              "earth_rotation",
+              "active_countries",
+              "active_routes",
+              "entities",
+              "lighting",
+              "timeline"
+            ],
+            "properties": {
+              "camera": {
+                "type": "object",
+                "required": [
+                  "lon",
+                  "lat",
+                  "height",
+                  "tilt",
+                  "yaw",
+                  "bank",
+                  "fov",
+                  "target_lon",
+                  "target_lat"
+                ],
+                "properties": {
+                  "lon": {
+                    "type": "number"
+                  },
+                  "lat": {
+                    "type": "number"
+                  },
+                  "tilt": {
+                    "type": "number"
+                  },
+                  "yaw": {
+                    "type": "number"
+                  },
+                  "bank": {
+                    "type": "number"
+                  },
+                  "target_lon": {
+                    "type": "number"
+                  },
+                  "target_lat": {
+                    "type": "number"
+                  },
+                  "height": {
+                    "type": "number",
+                    "minimum": 0.08,
+                    "maximum": 20
+                  },
+                  "fov": {
+                    "type": "number",
+                    "minimum": 20,
+                    "maximum": 80
+                  },
+                  "location_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "earth_rotation": {
+                "type": "number"
+              },
+              "active_countries": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "active_routes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "entities": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              },
+              "lighting": {
+                "type": "string"
+              },
+              "timeline": {
+                "type": "object"
+              }
+            },
+            "additionalProperties": false
+          },
+          "directing_presets": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "claim_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "year": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "date": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "era": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timeline_position": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "motion_start": {
+            "type": "number",
+            "minimum": 0
+          },
+          "effect_strength": {
+            "type": "number"
+          },
+          "clip_path": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "narration_event_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "hook": {
+            "type": "string"
+          },
+          "cinematic_clip": {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "trim_start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "license": {
+                "type": "string"
+              },
+              "user_owned": {
+                "type": "boolean"
+              },
+              "transition": {
+                "type": "string"
+              }
+            }
+          },
+          "clip": {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "trim_start": {
+                "type": "number",
+                "minimum": 0
+              },
+              "license": {
+                "type": "string"
+              },
+              "user_owned": {
+                "type": "boolean"
+              },
+              "transition": {
+                "type": "string"
+              }
+            }
+          },
+          "render_time_offset": {
+            "type": "number",
+            "minimum": 0
+          },
+          "render_mode": {
+            "enum": [
+              "MASTER_V3_EARTH",
+              "FLAT_MAP_PREMIUM"
+            ]
+          },
+          "flat_map": {
+            "type": "object",
+            "properties": {
+              "projection": {
+                "enum": [
+                  "LOCAL_MERCATOR",
+                  "LOCAL_EQUIRECTANGULAR"
+                ]
+              },
+              "center": {
+                "type": "object",
+                "properties": {
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "lat": {
+                    "type": "number",
+                    "minimum": -80,
+                    "maximum": 80
+                  },
+                  "span_degrees": {
+                    "type": "number",
+                    "minimum": 2,
+                    "maximum": 150
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": -0.25,
+                    "maximum": 0.25
+                  },
+                  "tilt": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 0.12
+                  }
+                },
+                "additionalProperties": false
+              },
+              "span_degrees": {
+                "type": "number",
+                "minimum": 2,
+                "maximum": 150
+              },
+              "camera_start": {
+                "type": "object",
+                "properties": {
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "lat": {
+                    "type": "number",
+                    "minimum": -80,
+                    "maximum": 80
+                  },
+                  "span_degrees": {
+                    "type": "number",
+                    "minimum": 2,
+                    "maximum": 150
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": -0.25,
+                    "maximum": 0.25
+                  },
+                  "tilt": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 0.12
+                  }
+                },
+                "additionalProperties": false
+              },
+              "camera_end": {
+                "type": "object",
+                "properties": {
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "lat": {
+                    "type": "number",
+                    "minimum": -80,
+                    "maximum": 80
+                  },
+                  "span_degrees": {
+                    "type": "number",
+                    "minimum": 2,
+                    "maximum": 150
+                  },
+                  "rotation": {
+                    "type": "number",
+                    "minimum": -0.25,
+                    "maximum": 0.25
+                  },
+                  "tilt": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 0.12
+                  }
+                },
+                "additionalProperties": false
+              },
+              "country_highlights": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "country",
+                    "source_id",
+                    "start_time",
+                    "end_time"
+                  ],
+                  "properties": {
+                    "country": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{3}$"
+                    },
+                    "source_id": {
+                      "const": "natural_earth_countries"
+                    },
+                    "start_time": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "end_time": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "color": {
+                      "type": "string",
+                      "pattern": "^#[0-9A-Fa-f]{6}$"
+                    },
+                    "opacity": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 0.32
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "focus": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "target_id",
+                    "coordinates",
+                    "start_time",
+                    "end_time"
+                  ],
+                  "properties": {
+                    "target_id": {
+                      "type": "string"
+                    },
+                    "coordinates": {
+                      "type": "object",
+                      "required": [
+                        "lon",
+                        "lat",
+                        "source_id"
+                      ],
+                      "properties": {
+                        "lon": {
+                          "type": "number",
+                          "minimum": -180,
+                          "maximum": 180
+                        },
+                        "lat": {
+                          "type": "number",
+                          "minimum": -90,
+                          "maximum": 90
+                        },
+                        "source_id": {
+                          "type": "string"
+                        },
+                        "location_id": {
+                          "type": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "start_time": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "end_time": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "radius_degrees": {
+                      "type": "number",
+                      "minimum": 0.2,
+                      "maximum": 30
+                    },
+                    "strength": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 0.45
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "next_event": {
+                "type": "object",
+                "required": [
+                  "event_id",
+                  "coordinates",
+                  "event_time",
+                  "lead_time"
+                ],
+                "properties": {
+                  "event_id": {
+                    "type": "string"
+                  },
+                  "coordinates": {
+                    "type": "object",
+                    "required": [
+                      "lon",
+                      "lat",
+                      "source_id"
+                    ],
+                    "properties": {
+                      "lon": {
+                        "type": "number",
+                        "minimum": -180,
+                        "maximum": 180
+                      },
+                      "lat": {
+                        "type": "number",
+                        "minimum": -90,
+                        "maximum": 90
+                      },
+                      "source_id": {
+                        "type": "string"
+                      },
+                      "location_id": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "event_time": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "lead_time": {
+                    "type": "number",
+                    "minimum": 0.1,
+                    "maximum": 2
+                  },
+                  "strength": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 0.45
+                  }
+                },
+                "additionalProperties": false
+              },
+              "transition": {
+                "enum": [
+                  "FLAT_TO_EARTH",
+                  "EARTH_TO_FLAT",
+                  "NONE"
+                ]
+              },
+              "transition_duration": {
+                "type": "number",
+                "minimum": 0.15,
+                "maximum": 1.5
+              },
+              "terrain_texture": {
+                "type": "object",
+                "required": [
+                  "url",
+                  "bounds"
+                ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "pattern": "^/static/flat_assets/(?:cache/)?[A-Za-z0-9_-]+\\.(png|jpg|jpeg)$"
+                  },
+                  "bounds": {
+                    "type": "array",
+                    "minItems": 4,
+                    "maxItems": 4,
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "map_transition": {
+            "type": "object",
+            "properties": {
+              "duration": {
+                "type": "number",
+                "minimum": 0.15,
+                "maximum": 1.5
+              }
+            },
+            "additionalProperties": false
+          },
+          "visual_polish": {
+            "type": "object",
+            "required": [
+              "version"
+            ],
+            "properties": {
+              "version": {
+                "const": "v004"
+              },
+              "entity_separation": {
+                "const": "v1"
+              }
+            },
+            "additionalProperties": false
+          },
+          "production_defaults": {
+            "type": "object",
+            "required": [
+              "version"
+            ],
+            "properties": {
+              "version": {
+                "const": "v1"
+              },
+              "profile": {
+                "enum": [
+                  "PRODUCTION_DEFAULT",
+                  "PRODUCTION_DEFAULT_CANDIDATE"
+                ]
+              },
+              "large_titles": {
+                "type": "boolean"
+              },
+              "visual": {
+                "const": "PREMIUM_FLAT_v004"
+              },
+              "pace": {
+                "enum": [
+                  "FAST",
+                  "NORMAL",
+                  "CINEMATIC",
+                  "FAST_PLUS"
+                ]
+              },
+              "text": {
+                "const": "MINIMAL_INFORMATIONAL"
+              },
+              "sfx": {
+                "const": "EVENT_DRIVEN_VARIANTS"
+              },
+              "earth": {
+                "const": "PEAK_ONLY"
+              },
+              "retention": {
+                "type": "boolean"
+              },
+              "event_diversity": {
+                "type": "boolean"
+              }
+            },
+            "additionalProperties": false
+          },
+          "visual_mode": {
+            "enum": [
+              "FLAT_MAP",
+              "3D_EARTH",
+              "HERO",
+              "CINEMATIC_CLIP"
+            ]
+          },
+          "pace": {
+            "enum": [
+              "FAST",
+              "NORMAL",
+              "CINEMATIC",
+              "FAST_PLUS"
+            ]
+          },
+          "text_density": {
+            "enum": [
+              "NONE",
+              "MINIMAL",
+              "INFORMATIONAL"
+            ]
+          },
+          "sfx_intensity": {
+            "enum": [
+              "LOW",
+              "MEDIUM",
+              "HIGH",
+              "PEAK",
+              "SUBTLE"
+            ]
+          },
+          "motion_timing": {
+            "type": "object",
+            "required": [
+              "camera_travel_duration",
+              "focus_transition_duration",
+              "tts_playback_rate"
+            ],
+            "properties": {
+              "camera_travel_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "zoom_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "focus_transition_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "route_speed_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "entity_speed_factor": {
+                "type": "number",
+                "minimum": 0
+              },
+              "transition_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "peak_hold_duration": {
+                "type": "number",
+                "minimum": 0
+              },
+              "next_event_lead_time": {
+                "type": "number",
+                "minimum": 0
+              },
+              "dead_time_removed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "tts_playback_rate": {
+                "const": 1.0
+              },
+              "camera_speed_reference": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "focus_target": {
+            "type": "object",
+            "required": [
+              "target_id",
+              "coordinates"
+            ],
+            "properties": {
+              "target_id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [
+                  "country",
+                  "city",
+                  "entity",
+                  "route",
+                  "region"
+                ]
+              },
+              "coordinates": {
+                "type": "object",
+                "required": [
+                  "lon",
+                  "lat",
+                  "source_id"
+                ],
+                "properties": {
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "source_id": {
+                    "type": "string"
+                  },
+                  "location_id": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              },
+              "country": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              }
+            },
+            "additionalProperties": false
+          },
+          "text_events": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "event_id",
+                "text",
+                "coordinates",
+                "start_time",
+                "end_time",
+                "role"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "event_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 80
+                },
+                "coordinates": {
+                  "type": "object",
+                  "required": [
+                    "lon",
+                    "lat",
+                    "source_id"
+                  ],
+                  "properties": {
+                    "lon": {
+                      "type": "number",
+                      "minimum": -180,
+                      "maximum": 180
+                    },
+                    "lat": {
+                      "type": "number",
+                      "minimum": -90,
+                      "maximum": 90
+                    },
+                    "source_id": {
+                      "type": "string"
+                    },
+                    "location_id": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "start_time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "end_time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "role": {
+                  "enum": [
+                    "country",
+                    "city",
+                    "distance",
+                    "route",
+                    "status",
+                    "title",
+                    "question"
+                  ]
+                },
+                "priority": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10
+                },
+                "large_title_approved": {
+                  "type": "boolean"
+                },
+                "route_id": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "rhythm_micro_beats": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "time",
+                "duration",
+                "kind",
+                "music_energy"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "time": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "duration": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "kind": {
+                  "enum": [
+                    "REVEAL",
+                    "FOCUS",
+                    "MOVE",
+                    "RESPONSE",
+                    "IMPACT",
+                    "NEXT_CUE",
+                    "BUILD",
+                    "PEAK",
+                    "RELEASE",
+                    "MICRO_PAUSE"
+                  ]
+                },
+                "music_energy": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "visual_event_id": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "rhythm_visual": {
+            "type": "object",
+            "required": [
+              "version",
+              "camera",
+              "zoom",
+              "routes"
+            ],
+            "properties": {
+              "version": {
+                "const": "v1"
+              },
+              "camera": {
+                "type": "object",
+                "required": [
+                  "knots"
+                ],
+                "properties": {
+                  "knots": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 16,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "phase",
+                        "speed"
+                      ],
+                      "properties": {
+                        "phase": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "speed": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 4
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "zoom": {
+                "type": "object",
+                "required": [
+                  "knots"
+                ],
+                "properties": {
+                  "knots": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 16,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "phase",
+                        "speed"
+                      ],
+                      "properties": {
+                        "phase": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "speed": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 4
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              },
+              "routes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "route_id",
+                    "knots"
+                  ],
+                  "properties": {
+                    "route_id": {
+                      "type": "string"
+                    },
+                    "knots": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 16,
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "phase",
+                          "speed"
+                        ],
+                        "properties": {
+                          "phase": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          },
+                          "speed": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 4
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "required": [
+                "render_mode"
+              ],
+              "properties": {
+                "render_mode": {
+                  "const": "FLAT_MAP_PREMIUM"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "entities": {
+                  "maxItems": 8
+                },
+                "entity_actions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "entity_id",
+                      "action"
+                    ],
+                    "properties": {
+                      "entity_id": {
+                        "type": "string"
+                      },
+                      "action": {
+                        "enum": [
+                          "split",
+                          "merge",
+                          "converge",
+                          "diverge",
+                          "follow",
+                          "intercept",
+                          "stop",
+                          "reroute",
+                          "move",
+                          "depart",
+                          "arrive"
+                        ]
+                      },
+                      "time": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "start_time": {
+                        "type": "number",
+                        "minimum": 0
+                      },
+                      "duration": {
+                        "type": "number",
+                        "minimum": 0.1
+                      },
+                      "route_id": {
+                        "type": "string"
+                      },
+                      "target_entity_id": {
+                        "type": "string"
+                      },
+                      "stop_progress": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                      },
+                      "phase_offset": {
+                        "type": "number",
+                        "minimum": -0.2,
+                        "maximum": 0.2
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              }
+            },
+            "else": {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "flat_map"
+                    ]
+                  },
+                  {
+                    "properties": {
+                      "scene_type": {
+                        "const": "FLAT_MAP"
+                      }
+                    },
+                    "required": [
+                      "scene_type"
+                    ]
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "visual_polish"
+              ]
+            },
+            "then": {
+              "required": [
+                "render_mode"
+              ],
+              "properties": {
+                "render_mode": {
+                  "enum": [
+                    "FLAT_MAP_PREMIUM",
+                    "MASTER_V3_EARTH"
+                  ]
+                }
+              },
+              "not": {
+                "properties": {
+                  "scene_type": {
+                    "const": "CINEMATIC_CLIP"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "required": [
+                "visual_polish"
+              ],
+              "properties": {
+                "visual_polish": {
+                  "required": [
+                    "entity_separation"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "render_mode"
+              ],
+              "properties": {
+                "render_mode": {
+                  "const": "FLAT_MAP_PREMIUM"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "required_plugins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "url",
+          "author",
+          "license"
+        ]
+      }
+    },
+    "gate": {
+      "type": "object"
+    },
+    "plan_hash": {
+      "type": "string"
+    },
+    "approval": {
+      "type": "object"
+    },
+    "validation": {
+      "type": "object"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "render_base_url": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "render_context": {
+      "type": "object",
+      "required": [
+        "lighting_anchor",
+        "hero_anchor"
+      ],
+      "properties": {
+        "lighting_anchor": {
+          "type": "object"
+        },
+        "hero_anchor": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "revision": {
+      "type": "object"
+    },
+    "production_defaults": {
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "const": "v1"
+        },
+        "profile": {
+          "enum": [
+            "PRODUCTION_DEFAULT",
+            "PRODUCTION_DEFAULT_CANDIDATE"
+          ]
+        },
+        "large_titles": {
+          "type": "boolean"
+        },
+        "visual": {
+          "const": "PREMIUM_FLAT_v004"
+        },
+        "pace": {
+          "enum": [
+            "FAST",
+            "NORMAL",
+            "CINEMATIC",
+            "FAST_PLUS"
+          ]
+        },
+        "text": {
+          "const": "MINIMAL_INFORMATIONAL"
+        },
+        "sfx": {
+          "const": "EVENT_DRIVEN_VARIANTS"
+        },
+        "earth": {
+          "const": "PEAK_ONLY"
+        },
+        "retention": {
+          "type": "boolean"
+        },
+        "event_diversity": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rhythm_policy": {
+      "type": "object",
+      "required": [
+        "version",
+        "sfx_core_onset_offset_frames",
+        "micro_pauses",
+        "bgm_sidechain"
+      ],
+      "properties": {
+        "version": {
+          "const": "v1"
+        },
+        "sfx_core_onset_offset_frames": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "micro_pauses": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "time",
+              "duration",
+              "scene_id",
+              "event_id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "time": {
+                "type": "number",
+                "minimum": 0
+              },
+              "duration": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 0.3
+              },
+              "scene_id": {
+                "type": "string"
+              },
+              "event_id": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "bgm_sidechain": {
+          "type": "boolean"
+        },
+        "reference_pattern": {
+          "type": "string"
+        },
+        "sfx_library_content_sha256": {
+          "type": "string",
+          "pattern": "^[a-fA-F0-9]{64}$"
+        },
+        "preserve_authored_sfx_choices": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "request"
+        ],
+        "properties": {
+          "request": {
+            "required": [
+              "qa_mode"
+            ],
+            "properties": {
+              "qa_mode": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "duration": {
+            "minimum": 10,
+            "maximum": 15
+          }
+        }
+      },
+      "else": {
+        "if": {
+          "required": [
+            "revision"
+          ],
+          "properties": {
+            "revision": {
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "scene_delete"
+                }
+              }
+            }
+          }
+        },
+        "then": {},
+        "else": {
+          "if": {
+            "required": [
+              "metadata",
+              "scenes"
+            ],
+            "properties": {
+              "metadata": {
+                "required": [
+                  "flat_map_preview"
+                ],
+                "properties": {
+                  "flat_map_preview": {
+                    "const": true
+                  }
+                }
+              },
+              "scenes": {
+                "contains": {
+                  "required": [
+                    "render_mode"
+                  ],
+                  "properties": {
+                    "render_mode": {
+                      "const": "FLAT_MAP_PREMIUM"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "duration": {
+                "minimum": 10,
+                "maximum": 20
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "duration": {
+                "minimum": 20
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

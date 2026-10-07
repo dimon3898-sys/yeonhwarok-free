@@ -1,0 +1,88 @@
+{
+  "scope": "Reconstructed Suez20 input and deliberately failing local Python subprocess; NOT the actual gcube failure exception. No Chromium/browser/movie/GPU render.",
+  "baseline_revision": "3f4e1dafb3af30050b9765863399eaffc13bae88",
+  "actual_gcubefailure": "NOT_ACQUIRED",
+  "results": {
+    "before": {
+      "worker_exit": 1,
+      "public_error": {
+        "code": "WORKER_FAILED",
+        "message": "완료 Scene을 보존했습니다. 서버 작업 기록을 확인해 주세요."
+      },
+      "private_failure": {
+        "code": "WORKER_FAILED",
+        "error_type": "RuntimeError",
+        "message": "SCENE_RENDER_FAILED (7): preparation failed",
+        "created_at": "2026-10-07T08:54:42.550961+00:00"
+      }
+    },
+    "after": {
+      "worker_exit": 1,
+      "public_error": {
+        "code": "SCENE_RENDERER_EXIT",
+        "message": "장면 렌더러가 오류로 종료되었습니다.",
+        "failed_stage": "scene_start",
+        "scene_id": "S001",
+        "diagnostics": {
+          "command_category": "SCENE_RENDERER",
+          "return_code": 7,
+          "duration_seconds": 0.026,
+          "stdout_tail": [],
+          "stderr_tail": [
+            "preparation failed"
+          ]
+        }
+      },
+      "private_failure": {
+        "code": "SCENE_RENDERER_EXIT",
+        "message": "장면 렌더러가 오류로 종료되었습니다.",
+        "error_type": "RenderProcessError",
+        "failed_stage": "scene_start",
+        "scene_id": "S001",
+        "trace": [
+          {
+            "file": "mobile_server.py",
+            "function": "worker",
+            "line": 740
+          },
+          {
+            "file": "mock.py",
+            "function": "__call__",
+            "line": 1139
+          },
+          {
+            "file": "mock.py",
+            "function": "_mock_call",
+            "line": 1143
+          },
+          {
+            "file": "mock.py",
+            "function": "_execute_mock_call",
+            "line": 1204
+          },
+          {
+            "file": "before_after.py",
+            "function": "fail",
+            "line": 23
+          },
+          {
+            "file": "backends.py",
+            "function": "run",
+            "line": 94
+          }
+        ],
+        "subprocess": {
+          "command_category": "SCENE_RENDERER",
+          "return_code": 7,
+          "duration_seconds": 0.026,
+          "stdout_tail": [],
+          "stderr_tail": [
+            "preparation failed"
+          ]
+        },
+        "created_at": "2026-10-07T08:54:43.377993+00:00",
+        "job_id": "job_012345abcdef"
+      }
+    }
+  }
+}

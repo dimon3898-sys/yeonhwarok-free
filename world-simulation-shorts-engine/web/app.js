@@ -1,4 +1,13 @@
+import {sceneEventSummary, failureSummary} from './plan_presentation.js';
 const $ = (id) => document.getElementById(id);
+const qaOption = document.createElement('label');
+qaOption.className = 'rights-option';
+const qaInput = document.createElement('input');
+qaInput.type = 'checkbox'; qaInput.id = 'qa-mode'; qaInput.name = 'qa_mode';
+const qaText = document.createElement('span');
+qaText.textContent = '짧은 QA 테스트 · 10~15초';
+qaOption.append(qaInput, qaText);
+$('brief-form').prepend(qaOption);
 const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null };
 const ACTIVE_STATUSES = new Set(['queued', 'pending', 'running', 'rendering', 'assembling', 'audio', 'qc', 'resuming', 'processing']);
 const COMPLETE_STATUSES = new Set(['completed', 'complete', 'done', 'finished']);
@@ -113,7 +122,7 @@ function renderPlan() {
     if (peak) header.append(node('span', '핵심 장면', 'peak-chip'));
     body.append(header);
     const summary = compact(scene.summary || scene.purpose || scene.main_event || scene.description);
-    const purpose = (summary && !/^(hook|progression|variable|peak|payoff|escalation|response)\s*:/i.test(summary) ? summary : '') || (scene.visual_events || []).map((event) => compact(event.description || event.summary) || named(event.type || event.kind || event.event || event, eventNames)).filter((text) => text && !/camera|zoom|pan/i.test(text)).slice(0, 2).join(' → ') || compact(scene.narration);
+    const purpose = (summary && !/^(hook|progression|variable|peak|payoff|escalation|response)\s*:/i.test(summary) ? summary : '') || sceneEventSummary(scene, eventNames) || compact(scene.narration);
     body.append(node('p', purpose, 'scene-purpose'));
     const setting = node('div', null, 'scene-setting');
     if (scene.camera_preset) setting.append(node('span', named(scene.camera_preset, cameraNames)));
@@ -257,18 +266,18 @@ function renderStatus(payload) {
     const fallback = sceneIndex != null && sceneTotal ? `장면 ${sceneIndex}/${sceneTotal} 생성` : statusNames[status] || '작업 진행 중';
     $('progress-step').textContent = compact(progress.label || progress.message || progress.stage || job.message || job.step || payload.message, fallback);
     const error = payload.error || job.error;
-    const detail = compact(error || progress.detail || job.detail);
-    const driverLog = failed && error?.code === 'RENDER_FAILED' && /^SCENE_RENDER_FAILED\b/.test(detail);
+    const detail = error ? failureSummary(error) : compact(progress.detail || job.detail);
+    const driverLog = failed && (error?.diagnostics || (error?.code === 'RENDER_FAILED' && /^SCENE_RENDER_FAILED\b/.test(detail)));
     let diagnostics = $('progress-diagnostics');
     if (driverLog) {
-      $('progress-detail').textContent = '장면 생성이 중단되었습니다. 완료된 장면은 보존되어 있습니다. 원인을 해결한 뒤 이어서 진행할 수 있습니다.';
+      $('progress-detail').textContent = detail;
       if (!diagnostics) {
         diagnostics = node('details'); diagnostics.id = 'progress-diagnostics';
         diagnostics.append(node('summary', '기술 상세 보기'), node('pre'));
         $('progress-detail').after(diagnostics);
       }
       diagnostics.hidden = false;
-      diagnostics.querySelector('pre').textContent = detail;
+      diagnostics.querySelector('pre').textContent = error?.diagnostics ? JSON.stringify(error.diagnostics, null, 2) : detail;
     } else {
       $('progress-detail').textContent = detail || (progress.cached_scenes ? `완료된 장면 ${progress.cached_scenes}개를 재사용하고 있습니다.` : '완료된 단계는 자동으로 저장됩니다.');
       if (diagnostics) { diagnostics.hidden = true; diagnostics.open = false; diagnostics.querySelector('pre').textContent = ''; }
@@ -399,10 +408,16 @@ async function refreshLibrary() {
   }
 }
 
+$('qa-mode').addEventListener('change', () => {
+  const field = $('duration');
+  field.min = $('qa-mode').checked ? '10' : '20';
+  field.max = $('qa-mode').checked ? '15' : '3600';
+  field.value = $('qa-mode').checked ? '12' : '75';
+});
 $('brief-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('create-plan'), '기획 생성 중', async () => {
   const topic = $('topic').value.trim(); if (!topic) throw new Error('영상 주제를 입력해 주세요.');
   stopPolling(); state.generation++; state.status = null; state.version = null; state.versions = []; state.revision = null;
-  const request = { topic, duration: Number($('duration').value), style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
+  const request = { topic, duration: Number($('duration').value), qa_mode: $('qa-mode').checked, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
   const narration = $('narration-file').files[0];
   if (narration) {
     if (!$('narration-rights').checked) throw new Error('나레이션 파일의 사용권을 확인해 주세요.');

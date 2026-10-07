@@ -8,6 +8,10 @@ from typing import Callable
 import os
 import json
 import subprocess
+import queue
+import threading
+import time
+from .failures import RenderProcessError, safe_tail
 
 
 @dataclass(frozen=True)
@@ -37,28 +41,60 @@ class CPULocalBackend(RenderBackend):
     def run(self, command: list[str], cwd: Path, progress: Callable[[dict], None]) -> dict:
         # The browser renderer has its own no-frame watchdog. Pipes are continuously
         # drained here, so a full pipe cannot make a healthy renderer appear stalled.
-        child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE,
-                                 stderr=subprocess.STDOUT, text=True, bufsize=1,
-                                 start_new_session=True)
-        tail: list[str] = []
+        started = time.monotonic()
         try:
-            assert child.stdout is not None
-            for line in child.stdout:
-                tail.append(line.rstrip())
-                tail = tail[-25:]
-                if line.startswith("{"):
+            child = subprocess.Popen(command, cwd=cwd, stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE, text=True, bufsize=1,
+                                     encoding='utf-8', errors='replace', start_new_session=True)
+        except OSError as error:
+            raise RenderProcessError(returncode=None, duration=time.monotonic()-started,
+                                     stderr=[type(error).__name__]) from error
+        tails = {'stdout': [], 'stderr': []}
+        messages = queue.Queue(maxsize=64)
+        stopping = threading.Event()
+        def enqueue(value):
+            while not stopping.is_set():
+                try:
+                    messages.put(value, timeout=.1)
+                    return
+                except queue.Full:
+                    pass
+        def drain(name, stream):
+            try:
+                for line in stream:
+                    if stopping.is_set():
+                        break
+                    enqueue((name, line))
+            finally:
+                enqueue((name, None))
+        readers = [threading.Thread(target=drain, args=(name, stream), daemon=True)
+                   for name, stream in [('stdout', child.stdout), ('stderr', child.stderr)]]
+        for reader in readers:
+            reader.start()
+        try:
+            finished = set()
+            while len(finished) < 2:
+                name, line = messages.get()
+                if line is None:
+                    finished.add(name)
+                    continue
+                tails[name].append(line.rstrip()[:8192])
+                tails[name] = tails[name][-25:]
+                if name == 'stdout' and line.startswith("{"):
                     try:
                         value = json.loads(line)
                         if isinstance(value, dict):
                             progress(value)
                     except json.JSONDecodeError:
                         pass
-                elif line.startswith("FRAME "):
+                elif name == 'stdout' and line.startswith("FRAME "):
                     progress({"stage": "scene_render", "message": line.strip()})
             code = child.wait()
             if code:
-                raise RuntimeError(f"SCENE_RENDER_FAILED ({code}): " + "\n".join(tail))
-            return {"backend": self.name, "log_tail": tail, "exit_code": code}
+                raise RenderProcessError(returncode=code, duration=time.monotonic()-started,
+                                         stdout=tails['stdout'], stderr=tails['stderr'])
+            return {"backend": self.name, "log_tail": safe_tail(tails['stdout']+tails['stderr']),
+                    "exit_code": code, "duration_seconds": time.monotonic()-started}
         except BaseException:
             if child.poll() is None:
                 import signal
@@ -69,6 +105,12 @@ class CPULocalBackend(RenderBackend):
                     os.killpg(child.pid, signal.SIGKILL)
                     child.wait(timeout=10)
             raise
+        finally:
+            stopping.set()
+            for reader in readers:
+                reader.join(timeout=2)
+            for stream in (child.stdout, child.stderr):
+                stream.close()
 
 
 class GPUCloudBackend(RenderBackend):

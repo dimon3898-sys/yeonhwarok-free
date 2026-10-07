@@ -26,6 +26,7 @@ if str(APP_ROOT) not in sys.path:
     sys.path.insert(0, str(APP_ROOT))
 from server import Application, Handler
 from engine.storage import ProjectStore, EngineError, atomic_json, now, plan_hash, read_json
+from engine.failures import failure_record, RenderProcessError, safe_tail
 from deployment.security import (OwnerSessions, RateLimiter, RequestPolicy, SecurityError,
                                  content_length, ensure_access_file, owned_path, private_json)
 
@@ -161,9 +162,25 @@ class DurableJobs:
                 self.runner(ticket, plan, cancel)
                 state = self.app.store.status(ticket['project_id'], ticket['version'])
                 ticket['status'] = state['status'] if state['status'] in {'complete', 'failed'} else 'interrupted'
-            except Exception:
+            except Exception as error:
                 ticket['status'] = 'interrupted' if cancel.is_set() else 'failed'
                 ticket['error_code'] = 'WORKER_INTERRUPTED' if cancel.is_set() else 'WORKER_FAILED'
+                if not cancel.is_set():
+                    current = self.app.store.status(ticket['project_id'], ticket['version'])
+                    progress = current.get('progress', {})
+                    evidence = failure_record(error, stage=progress.get('stage'), scene_id=progress.get('scene_id'))
+                    evidence.update(created_at=now(), job_id=jid)
+                    failure = self.root / (jid + '.failure.json')
+                    if not failure.exists():
+                        private_json(failure, evidence)
+                    # A worker's specific failure must survive the outer exit-1 wrapper.
+                    if current.get('status') != 'failed' or not current.get('error'):
+                        public = {key: evidence[key] for key in ('code', 'message', 'failed_stage', 'scene_id')}
+                        if 'subprocess' in evidence:
+                            public['diagnostics'] = evidence['subprocess']
+                        self.app.store.set_status(ticket['project_id'], ticket['version'], status='failed',
+                                                  error=public, failed_at=evidence['created_at'])
+                    ticket['error_code'] = self.app.store.status(ticket['project_id'], ticket['version'])['error']['code']
             finally:
                 with self.condition:
                     if cancel.is_set():
@@ -203,15 +220,29 @@ class DurableJobs:
 
     def process_runner(self, ticket, plan, cancel):
         ticket_path = self.root / (ticket['job_id'] + '.json')
-        proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '--worker-ticket', str(ticket_path),
-                                 '--state-root', str(self.app.state_root)],
-                                cwd=APP_ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL, start_new_session=True)
+        started = time.monotonic()
+        try:
+            proc = subprocess.Popen([sys.executable, str(Path(__file__).resolve()), '--worker-ticket', str(ticket_path),
+                                     '--state-root', str(self.app.state_root)],
+                                    cwd=APP_ROOT, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, text=True, encoding='utf-8', errors='replace', start_new_session=True)
+        except OSError as error:
+            raise RenderProcessError(returncode=None, duration=time.monotonic()-started,
+                                     stderr=[type(error).__name__], category='JOB_WORKER') from error
+        tails = {'stdout': deque(maxlen=25), 'stderr': deque(maxlen=25)}
+        def drain(name, stream):
+            for line in stream:
+                tails[name].extend(safe_tail([line]))
+        readers = [threading.Thread(target=drain, args=(name, stream), daemon=True)
+                   for name, stream in [('stdout', proc.stdout), ('stderr', proc.stderr)]]
+        for reader in readers:
+            reader.start()
         deadline = time.monotonic() + self.app.maximum_job_seconds
+        timed_out = False
         try:
             while proc.poll() is None:
                 if cancel.wait(.2) or time.monotonic() >= deadline:
-                    cancel.set()
+                    timed_out = not cancel.is_set()
                     os.killpg(proc.pid, signal.SIGTERM)
                     try:
                         proc.wait(timeout=10)
@@ -219,18 +250,32 @@ class DurableJobs:
                         os.killpg(proc.pid, signal.SIGKILL)
                         proc.wait(timeout=5)
                     break
+            for reader in readers:
+                reader.join(timeout=2)
+            if timed_out:
+                error = RenderProcessError(returncode=proc.returncode, duration=time.monotonic()-started,
+                                           stdout=tails['stdout'], stderr=tails['stderr'], category='JOB_WORKER')
+                error.code = 'JOB_TIMEOUT'
+                raise error
             if proc.returncode and not cancel.is_set():
-                raise RuntimeError('WORKER_FAILED')
+                raise RenderProcessError(returncode=proc.returncode, duration=time.monotonic()-started,
+                                         stdout=tails['stdout'], stderr=tails['stderr'], category='JOB_WORKER')
         finally:
             if proc.poll() is None:
                 os.killpg(proc.pid, signal.SIGTERM)
                 proc.wait(timeout=10)
+            for reader in readers:
+                reader.join(timeout=2)
+            for stream in (proc.stdout, proc.stderr):
+                stream.close()
 
 
 class MobileApplication(Application):
     def __init__(self, state_root, internal_url, access_file, *, public_origins=(), public_port=7860,
                  maximum_duration=180, maximum_projects=30, disk_floor=2 * 1024**3,
                  maximum_job_seconds=4 * 3600, runner=None):
+        from engine.qa_planner import configure_qa_schema
+        configure_qa_schema()
         self.state_root = checked_state_root(state_root)
         self.maximum_duration, self.maximum_projects = maximum_duration, maximum_projects
         self.disk_floor, self.maximum_job_seconds = disk_floor, maximum_job_seconds
@@ -264,7 +309,7 @@ class MobileApplication(Application):
         if not isinstance(value, dict):
             raise EngineError('INVALID_JSON', '요청 객체가 필요합니다.')
         allowed = {'topic', 'duration', 'style', 'quality', 'pace', 'tts', 'subtitles', 'bgm', 'sfx',
-                   'narration_audio', 'narration_asset_id', 'narration_cues', 'narration_timing', 'tts_language', 'production_preset'}
+                   'narration_audio', 'narration_asset_id', 'narration_cues', 'narration_timing', 'tts_language', 'production_preset', 'qa_mode'}
         if set(value) - allowed:
             raise EngineError('UNSUPPORTED_INPUT', '지원하지 않는 입력 필드가 있습니다.')
         if not isinstance(value.get('topic'), str) or not 1 <= len(value['topic'].strip()) <= 2000:
@@ -275,7 +320,7 @@ class MobileApplication(Application):
             raise EngineError('INVALID_DURATION', '영상 길이를 확인해 주세요.') from None
         if not 5 <= duration <= self.maximum_duration:
             raise EngineError('DEPLOYMENT_JOB_LIMIT', '배포 서버의 영상 길이 제한을 초과했습니다.')
-        for key in ('tts', 'subtitles', 'bgm', 'sfx'):
+        for key in ('tts', 'subtitles', 'bgm', 'sfx', 'qa_mode'):
             if key in value and not isinstance(value[key], bool):
                 raise EngineError('INVALID_OPTION', 'ON/OFF 설정을 확인해 주세요.')
         if len(str(value.get('style', ''))) > 120 or value.get('quality', 'HIGH') not in {'FAST', 'HIGH', 'CINEMA'}:
@@ -452,7 +497,7 @@ class MobileHandler(Handler):
                 record = production_default_status()
                 return self.json({k: record.get(k) for k in ('active', 'preset', 'recommended')})
             if path == '/api/projects' and method == 'POST':
-                from engine.planner import generate_plan
+                from engine.qa_planner import generate_deployment_plan as generate_plan
                 request = self.app.validate_request(self.body())
                 plan = generate_plan(request)
                 self.app.check_plan_budget(plan)
@@ -647,6 +692,8 @@ class BoundedHTTPServer(ThreadingHTTPServer):
 
 
 def worker(ticket_path, state_root):
+    from engine.qa_planner import configure_qa_schema
+    configure_qa_schema()
     root = checked_state_root(state_root)
     ticket_path = Path(ticket_path).resolve()
     if ticket_path.parent != root / 'jobs' or not re.fullmatch(r'job_[a-f0-9]{12}\.json', ticket_path.name):
@@ -667,9 +714,11 @@ def worker(ticket_path, state_root):
     def interrupted(signum, frame):
         raise KeyboardInterrupt('owned worker interrupted')
     signal.signal(signal.SIGTERM, interrupted)
+    last_progress = {}
     def progress(event):
         event = {'stage': event} if isinstance(event, str) else dict(event)
         stage = event.get('stage', '')
+        last_progress.update(stage=stage, scene_id=event.get('scene_id'))
         names = {'asset_resolution': 'GIS·자산 검수', 'narration_preflight': '음성·사운드 검수',
                  'scene_start': '장면 준비', 'scene_render': '장면 렌더링', 'scene_complete': '장면 저장',
                  'scene_cache': '완료 장면 재사용', 'scene_assembly': '장면 결합', 'audio': '오디오 합성',
@@ -704,10 +753,14 @@ def worker(ticket_path, state_root):
                          progress={'stage': '완료 Scene 보존 · 이어서 생성 가능'})
         return 130
     except Exception as error:
+        record = failure_record(error, stage=last_progress.get('stage'), scene_id=last_progress.get('scene_id'))
+        record.update(created_at=now(), job_id=ticket['job_id'])
         private_json(root / 'jobs' / (ticket['job_id'] + '.failure.json'),
-                     {'code': getattr(error, 'code', 'WORKER_FAILED'), 'error_type': type(error).__name__,
-                      'message': str(error)[:4000], 'created_at': now()})
-        store.set_status(pid, version, status='failed', error={'code': 'WORKER_FAILED', 'message': '완료 Scene을 보존했습니다. 서버 작업 기록을 확인해 주세요.'})
+                     record)
+        public = {key: record[key] for key in ('code', 'message', 'failed_stage', 'scene_id')}
+        if 'subprocess' in record:
+            public['diagnostics'] = record['subprocess']
+        store.set_status(pid, version, status='failed', failed_at=record['created_at'], error=public)
         return 1
     return 0
 
