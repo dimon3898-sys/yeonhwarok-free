@@ -1,0 +1,107 @@
+[
+  {
+    "function": "list_header",
+    "line": 66,
+    "condition": "len(values) > 8 or any((not isinstance(v, str) or not v.isascii() or len(v) > 4096 or any((ord(c) < 32 and c != '\\t' or ord(c) == 127 for c in v)) for v in values))"
+  },
+  {
+    "function": "list_header",
+    "line": 69,
+    "condition": "len(value) > 4096"
+  },
+  {
+    "function": "split_quoted",
+    "line": 86,
+    "condition": "quoted or escaped"
+  },
+  {
+    "function": "split_quoted",
+    "line": 89,
+    "condition": "any((not part for part in parts)) or len(parts) > 32"
+  },
+  {
+    "function": "forwarded_value",
+    "line": 96,
+    "condition": "not value.endswith('\"') or len(value) < 2"
+  },
+  {
+    "function": "forwarded_value",
+    "line": 100,
+    "condition": "'\"' in value or '\\\\' in value"
+  },
+  {
+    "function": "forwarded_value",
+    "line": 102,
+    "condition": "not re.fullmatch(\"[!#$%&'*+.^_`|~0-9A-Za-z:-]+\", value)"
+  },
+  {
+    "function": "port_number",
+    "line": 108,
+    "condition": "not isinstance(value, str) or not re.fullmatch('[0-9]{1,5}', value) or (not 1 <= int(value) <= 65535)"
+  },
+  {
+    "function": "forwarded_ip",
+    "line": 128,
+    "condition": "ValueError/TypeError"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 164,
+    "condition": "proto not in {None, 'https'}"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 177,
+    "condition": "not separator or not re.fullmatch('[a-z][a-z0-9_-]{0,31}', key) or key in entry"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 183,
+    "condition": "entry.get('proto') not in {None, 'https', 'http'}"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 189,
+    "condition": "(xff or forwarded or envoy is not None) and (not trusted_peer(peer_ip))"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 192,
+    "condition": "forwarded[0].get('proto') not in {None, 'https'}"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 194,
+    "condition": "xff and forwarded[0].get('for') and (forwarded[0]['for'] != xff[0])"
+  },
+  {
+    "function": "parse_forwarding",
+    "line": 197,
+    "condition": "proto is not None and forwarded_proto is not None and (proto != forwarded_proto)"
+  },
+  {
+    "function": "request_envelope",
+    "line": 215,
+    "condition": "any((provider_origin(other) != candidate for other in candidates[1:]))"
+  },
+  {
+    "function": "request_envelope",
+    "line": 222,
+    "condition": "not trusted_peer(peer_ip) or proto != 'https' or actual.hostname != supplied.hostname or (actual.port not in {None, port})"
+  },
+  {
+    "function": "request_envelope",
+    "line": 229,
+    "condition": "parsed.port != port or not trusted_peer(peer_ip) or proto != 'https' or candidates"
+  },
+  {
+    "function": "request_envelope",
+    "line": 232,
+    "condition": "xf_port != (parsed.port or 443) and (not trusted_peer(peer_ip) or proto != 'https')"
+  },
+  {
+    "function": "request_envelope",
+    "line": 239,
+    "condition": "other.hostname != urlsplit(candidate).hostname or other.port not in {None, port, urlsplit(candidate).port}"
+  }
+]
