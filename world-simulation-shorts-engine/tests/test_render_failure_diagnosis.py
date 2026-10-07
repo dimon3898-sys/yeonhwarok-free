@@ -102,7 +102,7 @@ class PlanningAndWorkerTests(unittest.TestCase):
         # Certificate cache-hit metadata may change between identical invocations.
         for field in ('scenes', 'request', 'options', 'story', 'sources'):
             self.assertEqual(normal[field], self.plan[field], field)
-        for value in (9, 16, 20, float('nan'), float('inf')):
+        for value in (9, 10, 11, 16, 20, float('nan'), float('inf')):
             with self.assertRaises(PlanningInputError):
                 generate_deployment_plan({**REQUEST, 'duration': value, 'qa_mode': True})
         with self.assertRaises(PlanningInputError):
@@ -113,6 +113,38 @@ class PlanningAndWorkerTests(unittest.TestCase):
         invalid = copy.deepcopy(qa)
         invalid['scenes'][0]['coordinates']['lat'] = 800
         self.assertFalse(validate_plan(invalid)['passed'])
+
+    def test_qa12_frozen_numeric_camera_gate_and_visibility_pass(self):
+        # Reuse reviewed canvas-free context construction and the unchanged
+        # native numericPreflight. Never construct WebGL or launch Chromium.
+        source_file = ROOT/'tools/semantic_preflight.mjs'
+        source = source_file.read_text()
+        marker = '  const observed=new Map(expected.map'
+        self.assertEqual(source.count(marker), 1)
+        script = source.split(marker, 1)[0].replace(
+            'fileURLToPath(import.meta.url)', json.dumps(str(source_file)))
+        script += """
+  const numeric=SceneEarthRenderer.prototype.numericPreflight.call(context,30);
+  const passed=numeric.finite&&!numeric.cameraWithinEarth&&!numeric.routeWithinEarth&&!numeric.entityWithinEarth&&numeric.maxCameraAngleDegreesPerFrame<=2.5;
+  results.push({scene_id:scene.scene_id,passed,max_camera_angle:numeric.maxCameraAngleDegreesPerFrame});
+}
+console.log(JSON.stringify(results));
+"""
+        qa = generate_deployment_plan({**REQUEST, 'duration': 12, 'qa_mode': True})
+        with tempfile.TemporaryDirectory() as directory:
+            tool = Path(directory)/'numeric.mjs'
+            tool.write_text(script)
+            measured = {}
+            for name, plan in [('before20', self.plan), ('qa12', qa)]:
+                file = Path(directory)/(name+'.json')
+                file.write_text(json.dumps(plan))
+                run = subprocess.run(['node',str(tool),'--plan',str(file)],cwd=ROOT,
+                                     capture_output=True,text=True,timeout=60,check=True)
+                measured[name] = json.loads(run.stdout.splitlines()[-1])
+            self.assertEqual(len(measured['qa12']), 5)
+            self.assertTrue(all(row['passed'] for row in measured['qa12']), measured['qa12'])
+            # Existing 20s HORIZON risk is separate from the missing image asset.
+            self.assertFalse(next(row for row in measured['before20'] if row['scene_id']=='S004')['passed'])
 
     def test_worker_retains_scene_exit_code_and_failed_stage(self):
         with tempfile.TemporaryDirectory() as folder:

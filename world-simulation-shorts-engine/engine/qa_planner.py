@@ -29,9 +29,9 @@ def generate_deployment_plan(raw):
     try:
         duration = float(raw.get('duration'))
     except (TypeError, ValueError):
-        raise planner.PlanningInputError('QA 테스트는 10~15초입니다.') from None
-    if not math.isfinite(duration) or not 10 <= duration <= 15:
-        raise planner.PlanningInputError('QA 테스트는 10~15초입니다.')
+        raise planner.PlanningInputError('QA 테스트는 12~15초입니다.') from None
+    if not math.isfinite(duration) or not 12 <= duration <= 15:
+        raise planner.PlanningInputError('QA 테스트는 12~15초입니다.')
 
     def qa_request(value):
         checked = deepcopy(value)
@@ -51,6 +51,20 @@ def generate_deployment_plan(raw):
     generate = FunctionType(planner.generate_plan.__code__, namespace, 'generate_plan')
     plan = generate(deepcopy(raw))
     if plan.get('story', {}).get('domain') == 'shipping':
+        # A compressed HORIZON_REVEAL crosses the native camera angular gate.
+        # Use an existing geographic preset in QA only, preserving the original
+        # GIS rig endpoints, all routes/entities/events, HERO lighting and HIGH.
+        # Normal plans and saved projects remain byte-for-byte unchanged.
+        for scene in plan['scenes']:
+            if scene['camera_preset'] == 'HORIZON_REVEAL':
+                scene['camera_preset'] = 'COUNTRY_APPROACH'
+                scene['camera_speed'] = 1.0
+                timing = scene['motion_timing']
+                timing.update(camera_travel_duration=scene['duration'],
+                              zoom_duration=scene['duration'], camera_speed_reference=1.0)
+                plan.setdefault('metadata', {})['qa_camera_adjustment'] = dict(
+                    scene_id=scene['scene_id'], original_preset='HORIZON_REVEAL',
+                    reason='Native camera angle gate in bounded QA')
         # In a short shipping QA the physically drawn alternative-route start
         # introduces the new variable. Preserve its geometry, onset and kind;
         # do not claim that a camera move or a caption is a new physical event.

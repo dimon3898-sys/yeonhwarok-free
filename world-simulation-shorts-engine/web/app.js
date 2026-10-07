@@ -5,7 +5,7 @@ qaOption.className = 'rights-option';
 const qaInput = document.createElement('input');
 qaInput.type = 'checkbox'; qaInput.id = 'qa-mode'; qaInput.name = 'qa_mode';
 const qaText = document.createElement('span');
-qaText.textContent = '짧은 QA 테스트 · 10~15초';
+qaText.textContent = '짧은 QA 테스트 · 12~15초';
 qaOption.append(qaInput, qaText);
 $('brief-form').prepend(qaOption);
 const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null };
@@ -410,7 +410,7 @@ async function refreshLibrary() {
 
 $('qa-mode').addEventListener('change', () => {
   const field = $('duration');
-  field.min = $('qa-mode').checked ? '10' : '20';
+  field.min = $('qa-mode').checked ? '12' : '20';
   field.max = $('qa-mode').checked ? '15' : '3600';
   field.value = $('qa-mode').checked ? '12' : '75';
 });

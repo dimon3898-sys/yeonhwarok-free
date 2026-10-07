@@ -1,0 +1,12 @@
+# v009: restore the exact certified terrain asset and retain safe failure evidence.
+# Preserve v008's installed runtime, entrypoint, renderer, GPU validation and assets.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e4e2796622a6256e204737bb56668e10f77690d5e97c87698b10d3afbd6d2bb5
+# This is an approved immutable terrain asset, despite its historical cache name.
+# v008's base context excluded it with **/cache/**; preserve its exact bytes.
+COPY --chmod=0644 world-simulation-shorts-engine/web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.png /opt/world-engine/world-simulation-shorts-engine/web/flat_assets/cache/
+RUN python -c "import hashlib; from pathlib import Path; p=Path('web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.png'); assert p.stat().st_size == 17800192; assert hashlib.sha256(p.read_bytes()).hexdigest() == '23c9ed6b954528fb98267d103f6e066e650461a7a817304b6cc2d4aa3d55a522'"
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/engine/backends.py world-simulation-shorts-engine/engine/failures.py world-simulation-shorts-engine/engine/qa_planner.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/data/qa_scene_plan.schema.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/web/app.js world-simulation-shorts-engine/web/plan_presentation.js /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/deployment/gcube/preparation_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
