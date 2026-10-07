@@ -58,6 +58,13 @@ jobs:
           print('::notice title=Container pipeline result::'+json.dumps(summary,ensure_ascii=False))
           assert report['passed'],report['qc_failures']
           PY
+      - name: Collect regression import failures before running the full suite
+        shell: bash
+        run: |
+          docker run --rm --user 0:0 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --entrypoint python world-engine-v010-check:local -c \
+            'import unittest,json; loader=unittest.TestLoader(); suite=loader.discover("tests"); errors=[text for text in loader.errors]; print("::notice title=Regression import modules::"+json.dumps([text.split("\n",1)[0] for text in errors])); print("::notice title=Regression import types::"+json.dumps([text.splitlines()[-1].split(":",1)[0] for text in errors])); print("::notice title=Regression import count::"+str(suite.countTestCases()))'
       - name: All existing regressions and new native collect-all/security/media contracts
         shell: bash
         run: |
@@ -74,11 +81,13 @@ jobs:
             --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
             --entrypoint python world-engine-v010-check:local /tmp/proxy-diag/run_checks.py test_observer test_server_diag
       - name: Gateway owner-login and 61-second foreground persistence without GPU admission
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
           docker run --rm --user 1000:1000 --entrypoint python world-engine-v010-check:local -m deployment.gcube.gateway_preflight
       - name: Actual production entrypoint fails closed without physical NVIDIA
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
