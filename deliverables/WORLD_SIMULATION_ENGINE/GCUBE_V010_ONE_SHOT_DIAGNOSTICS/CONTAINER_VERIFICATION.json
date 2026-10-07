@@ -1,0 +1,258 @@
+{
+  "total_tests": 719,
+  "passed": 719,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "core_tests": 482,
+  "proxy_gpu_logic_tests": 206,
+  "diagnostic_tests": 31,
+  "asset_count": 59,
+  "original_assets_preserved": 56,
+  "additive_runtime_helpers": 3,
+  "synthetic_media": {
+    "passed": true,
+    "scene_jpeg_ffmpeg": "PASS",
+    "concat": "PASS",
+    "audio": "PASS",
+    "qc_failures": [],
+    "decoded_frames": 360,
+    "optional": {
+      "subtitles": {
+        "status": "PASS",
+        "captions": 5
+      },
+      "tts": {
+        "status": "EXPECTED_POLICY_REJECTION",
+        "code": "NARRATION_EXCEEDS_SCENE"
+      }
+    },
+    "scene_times": [
+      {
+        "scene_id": "S001",
+        "seconds": 4.119,
+        "frames": 72
+      },
+      {
+        "scene_id": "S002",
+        "seconds": 4.123,
+        "frames": 72
+      },
+      {
+        "scene_id": "S003",
+        "seconds": 4.111,
+        "frames": 72
+      },
+      {
+        "scene_id": "S004",
+        "seconds": 4.109,
+        "frames": 72
+      },
+      {
+        "scene_id": "S005",
+        "seconds": 4.113,
+        "frames": 72
+      }
+    ],
+    "total_seconds": 35.385,
+    "gpu_render": "NOT_RUN",
+    "scope": "Synthetic patterns at HIGH internal/output resolution; native pose/layout eligibility only. QC pipeline exercised; no post-GPU-draw, map aesthetics or production MP4 validation claim.",
+    "asset_count": 59
+  },
+  "image": {
+    "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v010-diag",
+    "digest": "sha256:a44ecb0ae6aa41cc0f7608084dab8412e6950b3a560f394b5d1a795a3480675d",
+    "config_digest": "sha256:ff11b401e50ef27ff7e143f94519afc1f84dc1f96f5d0bdcac47949a26e25607",
+    "revision": "a3f46ae9905b6b02814cddc2c3a5e261357d8258",
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "python",
+      "-m",
+      "deployment.gcube.start"
+    ],
+    "command": null,
+    "working_directory": "/opt/world-engine/world-simulation-shorts-engine",
+    "exposed_ports": [
+      "8000/tcp"
+    ],
+    "anonymous_registry_read": true,
+    "actual_gpu": "NOT_RUN"
+  },
+  "workflow_evidence": {
+    "url": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37626881896/job/112810826204",
+    "http_status": 200,
+    "body_sha256": "9721b79e831a9252a9db69f3727c6428d87610c042c01e3cf96b8c4d9844506b",
+    "at": "2026-10-07T13:25:11Z",
+    "overall_run_status": null,
+    "runs": [
+      "/dimon3898-sys/yeonhwarok-free/actions/runs/37626881896",
+      "/dimon3898-sys/yeonhwarok-free/actions/runs/37626881896/job/112810826204"
+    ],
+    "commits": [
+      "/dimon3898-sys/yeonhwarok-free/commit/a3f46ae9905b6b02814cddc2c3a5e261357d8258"
+    ],
+    "steps": [
+      {
+        "number": "1",
+        "name": "Set up job",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:14:02Z",
+        "completed-at": "2026-10-07T13:14:05Z"
+      },
+      {
+        "number": "2",
+        "name": "Checkout",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:14:05Z",
+        "completed-at": "2026-10-07T13:14:22Z"
+      },
+      {
+        "number": "3",
+        "name": "Refuse an existing release tag before building",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:14:22Z",
+        "completed-at": "2026-10-07T13:14:23Z"
+      },
+      {
+        "number": "4",
+        "name": "Set up Buildx",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:14:23Z",
+        "completed-at": "2026-10-07T13:14:37Z"
+      },
+      {
+        "number": "5",
+        "name": "Build complete diagnostic image without publishing",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:14:37Z",
+        "completed-at": "2026-10-07T13:15:28Z"
+      },
+      {
+        "number": "6",
+        "name": "Required packages, readonly assets, UID1000 write paths and real synthetic media pipeline",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:15:28Z",
+        "completed-at": "2026-10-07T13:16:14Z"
+      },
+      {
+        "number": "7",
+        "name": "Measure optional offline TTS budget on the installed provider",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:16:14Z",
+        "completed-at": "2026-10-07T13:16:15Z"
+      },
+      {
+        "number": "8",
+        "name": "Collect regression import failures before running the full suite",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:16:15Z",
+        "completed-at": "2026-10-07T13:16:16Z"
+      },
+      {
+        "number": "9",
+        "name": "All existing regressions and new native collect-all/security/media contracts",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:16:16Z",
+        "completed-at": "2026-10-07T13:20:14Z"
+      },
+      {
+        "number": "10",
+        "name": "Independent proxy security and GPU logic regressions",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:20:14Z",
+        "completed-at": "2026-10-07T13:20:43Z"
+      },
+      {
+        "number": "11",
+        "name": "Independent v007 diagnostic regressions",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:20:43Z",
+        "completed-at": "2026-10-07T13:20:53Z"
+      },
+      {
+        "number": "12",
+        "name": "Gateway owner-login and 61-second foreground persistence without GPU admission",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:20:53Z",
+        "completed-at": "2026-10-07T13:21:55Z"
+      },
+      {
+        "number": "13",
+        "name": "Actual production entrypoint fails closed without physical NVIDIA",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:21:55Z",
+        "completed-at": "2026-10-07T13:23:01Z"
+      },
+      {
+        "number": "14",
+        "name": "Login to GHCR only after all validation steps pass",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:23:01Z",
+        "completed-at": "2026-10-07T13:23:02Z"
+      },
+      {
+        "number": "15",
+        "name": "Publish new immutable diagnostic operating image",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:23:02Z",
+        "completed-at": "2026-10-07T13:23:49Z"
+      },
+      {
+        "number": "16",
+        "name": "Anonymous public pull, OCI revision and owner-login persistence on pulled image",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:23:49Z",
+        "completed-at": "2026-10-07T13:24:51Z"
+      },
+      {
+        "number": "29",
+        "name": "Post Login to GHCR only after all validation steps pass",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:24:51Z",
+        "completed-at": "2026-10-07T13:24:52Z"
+      },
+      {
+        "number": "30",
+        "name": "Post Build complete diagnostic image without publishing",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:24:52Z",
+        "completed-at": "2026-10-07T13:24:53Z"
+      },
+      {
+        "number": "31",
+        "name": "Post Set up Buildx",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:24:53Z",
+        "completed-at": "2026-10-07T13:24:57Z"
+      },
+      {
+        "number": "32",
+        "name": "Post Checkout",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:24:57Z",
+        "completed-at": "2026-10-07T13:24:57Z"
+      },
+      {
+        "number": "33",
+        "name": "Complete job",
+        "conclusion": "success",
+        "started-at": "2026-10-07T13:24:57Z",
+        "completed-at": "2026-10-07T13:24:57Z"
+      }
+    ]
+  },
+  "notices": [
+    "Anonymous pull PASS; owner login PASS; 61s persistence PASS; GPU render NOT_RUN",
+    "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:a44ecb0ae6aa41cc0f7608084dab8412e6950b3a560f394b5d1a795a3480675d",
+    "PASS fail-closed; no GPU fallback; persisted 61 seconds",
+    "tests=206, failures=0, errors=0, skipped=0, failed_tests=[]",
+    "tests=482, failures=0, errors=0, skipped=0, failed_tests=[]",
+    "{\"passed\": true, \"scene_jpeg_ffmpeg\": \"PASS\", \"concat\": \"PASS\", \"audio\": \"PASS\", \"qc_failures\": [], \"decoded_frames\": 360, \"optional\": {\"subtitles\": {\"status\": \"PASS\", \"captions\": 5}, \"tts\": {\"status\": \"EXPECTED_POLICY_REJECTION\", \"code\": \"NARRATION_EXCEEDS_SCENE\"}}, \"scene_times\": [{\"scene_id\": \"S001\", \"seconds\": 4.119, \"frames\": 72}, {\"scene_id\": \"S002\", \"seconds\": 4.123, \"frames\": 72}, {\"scene_id\": \"S003\", \"seconds\": 4.111, \"frames\": 72}, {\"scene_id\": \"S004\", \"seconds\": 4.109, \"frames\": 72}, {\"scene_id\": \"S005\", \"seconds\": 4.113, \"frames\": 72}], \"total_seconds\": 35.385, \"gpu_render\": \"NOT_RUN\", \"scope\": \"Synthetic patterns at HIGH internal/output resolution; native pose/layout eligibility only. QC pipeline exercised; no post-GPU-draw, map aesthetics or production MP4 validation claim.\", \"asset_count\": 59}"
+  ],
+  "actual_nvidia_map_draw": "NOT_RUN",
+  "gcube_workload_actions": "NONE",
+  "physical_android": "NOT_RUN",
+  "android_test": "Chromium 393x851, real loopback HTTPS and actual authenticated gateway/ZIP; not a public gcube or physical-device test"
+}
