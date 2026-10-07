@@ -86,7 +86,10 @@ export function directionLabelsAt(scene,t){
  const source=scene.labels||[],active=source.filter(l=>t>=Number(l.start_time||0)&&t<=Number(l.end_time??scene.duration));
  const rank=l=>l.event_id&&l.event_id===scene.direction.primary_event_id?120:l.role==='distance'?10:l.event_id?100:l.kind==='hook_reveal'?90:['city','country','location'].includes(l.role)?70:60;
  const primary=[...active].sort((a,b)=>rank(b)-rank(a))[0];
- return source.map(l=>({...l,opacity:l===primary?.98:Math.min(l.opacity??1,l.role==='distance'?.35:.55)}));
+ // Below .55, the approved fade/semantic-alpha contract can reveal a bound
+ // support label two frames after its core SFX. Keep it subordinate by rank
+ // and size without delaying its factual visibility receipt.
+ return source.map(l=>({...l,opacity:l===primary?.98:Math.min(l.opacity??1,.55)}));
 }
 export function directionLighting(t,scene,value){
  const global=clamp(((scene.render_time_offset??scene.start_time??0)+t)/scene.direction.total_duration);
@@ -107,6 +110,47 @@ export function installDirectionEntities(app){
   }
   update(t,camera); // Preserve original mesh grounding, alpha and frustum audit.
  };
+}
+/** Approved geographic label layout with a versioned 0.16s reveal, shared
+ * by actual drawing and native prediction. Clipping/receipt thresholds stay
+ * unchanged; a slower inherited fade must not make SFX precede information. */
+export function drawDirectionLabels(t){
+ if(this.sceneSpec.text_density==='NONE'){this.labels=[];this.eventVisibility=[];return;}
+ const flatCoordinate=value=>{const q=value?.coordinates||value;return {lon:Number(q.lon??q.longitude??q[0]),lat:Number(q.lat??q.latitude??q[1])};};
+ const incomingCityBoxes=this.incomingCityBoxes;
+ if(!incomingCityBoxes)this.incomingCityBoxes=()=>[];
+ try {
+
+  this.labels=[];const c=this.ctx,scale=this.w/1080,placed=[];
+  const handoff=this.geographicHandoff,blend=handoff?smooth(t/handoff.duration):1,incoming=this.incomingCityBoxes();
+  const candidates=[...(this.sceneSpec.labels||[])];
+  for(const e of this.sceneSpec.visual_events||[])if(['destination_preview','region_reveal','country_reveal'].includes(String(e.kind).toLowerCase())&&e.coordinates&&e.text)candidates.push({text:e.text,event_id:e.id,kind:'world_label',coordinates:e.coordinates,start_time:e.time,end_time:e.time+1.4,opacity:.96,offset_x:90,offset_y:110});
+  for(const label of candidates){
+   if(!label.text||!label.coordinates)continue;const start=Number(label.start_time||0),end=Number(label.end_time??this.duration);
+   const hold=this.sceneSpec.scene_type==='FINAL_OVERVIEW'&&end>=this.duration-1e-6,fade=Math.min(.16,Math.max(.01,(end-start)/3));
+   let opacity=t<start||t>end?0:smooth((t-start)/fade)*(hold?1:1-smooth((t-end+.4)/.4));
+   const previous=incoming.find(b=>b.text===label.text),registered=previous&&handoff&&t<handoff.duration;
+   if(registered)opacity=Math.max(opacity,previous.opacity*(1-blend));
+   if(opacity<.01)continue;const q=flatCoordinate(label.coordinates),point=new THREE.Vector3(Math.cos(q.lat*Math.PI/180)*Math.cos(q.lon*Math.PI/180),Math.sin(q.lat*Math.PI/180),-Math.cos(q.lat*Math.PI/180)*Math.sin(q.lon*Math.PI/180)).multiplyScalar(1+.003*blend),p=this.project(point);
+   if(!p.visible||p.x<this.w*.04||p.x>this.w*.96||p.y<this.h*.10||p.y>this.h*.78)continue;
+   const font=Math.max(54,Number(label.size||46))*scale,spacing=1.8*scale;c.save();c.font=`400 ${font}px 'Noto Cinema'`;
+   const width=c.measureText(label.text).width+Math.max(0,[...label.text].length-1)*spacing;
+   let x=clamp(p.x+Number(label.offset_x??100)*scale,this.w*.13+width/2,this.w*.83-width/2)-width/2,y=clamp(p.y+Number(label.offset_y??110)*scale,this.h*.15+font,this.h*.78)-font;
+   if(registered){x=previous.x+(x-previous.x)*blend;y=previous.y+(y-previous.y)*blend;}
+   let box={text:label.text,event_id:label.event_id||null,kind:label.kind||'world_label',opacity:opacity*Number(label.opacity??.96),x,y,width,height:font*1.25,font,fontFamily:'Noto Cinema',anchor:p,incomingAircraftAvoidance:registered?previous.aircraftAvoidance:null};
+   let tries=0;while(placed.some(b=>box.x<b.x+b.width+10*scale&&box.x+box.width>b.x-10*scale&&box.y<b.y+b.height+10*scale&&box.y+box.height>b.y-10*scale)&&tries++<4)box.y+=font*1.3;
+   if(box.y+box.height>this.h*.82){c.restore();continue;}
+   // A small feathered text shadow supports city names over dense amber lights.
+   // It is local to the measured name box, never a map-wide opacity veil.
+   c.save();c.translate(box.x+width/2,box.y+font*.65);c.scale((width+30*scale)/(font+20*scale),1);
+   const radius=font*.92,shade=c.createRadialGradient(0,0,0,0,0,radius),support=.28*blend;
+   shade.addColorStop(0,`rgba(3,12,22,${support})`);shade.addColorStop(.6,`rgba(3,12,22,${support*.7})`);shade.addColorStop(1,'rgba(3,12,22,0)');c.fillStyle=shade;c.fillRect(-radius,-radius,2*radius,2*radius);c.restore();
+   c.globalAlpha=box.opacity;c.fillStyle=label.color||'#f3f1e5';c.shadowColor='rgba(6,22,31,.90)';c.shadowBlur=3*scale;c.shadowOffsetY=scale;c.strokeStyle='rgba(7,25,36,.78)';c.lineWidth=1.45*scale;
+   let at=box.x;for(const ch of label.text){c.strokeText(ch,at,box.y+font);c.fillText(ch,at,box.y+font);at+=c.measureText(ch).width+spacing;}
+   c.restore();this.labels.push(box);placed.push(box);
+  }
+  this.drawStoryInformation(t);
+ }finally{if(!incomingCityBoxes)delete this.incomingCityBoxes;}
 }
 export function directionAudit(scene,t,labels=[]){
  const p=scene.direction,warnings=[];
@@ -168,8 +212,13 @@ export class SceneDirectionEarthRenderer extends SceneProductionEarthRenderer {
    try{SceneReadableEarthRenderer.prototype.drawReadableRoutes.call(this,t);}finally{ctx.stroke=stroke;}
   }
   const original=this.sceneSpec;
-  this.sceneSpec={...original,labels:directionLabelsAt(original,t)};
-  try{super.overlay(t);}finally{this.sceneSpec=original;}
+  this.sceneSpec={...original,labels:directionLabelsAt(original,t).map(label=>{
+   const anchored=label.route_id&&(['distance','route'].includes(label.role)||label.display_anchor==='route_head');
+   const route=anchored?this.routes.byId(label.route_id):null;if(!route)return label;
+   const point=route.curve.getPoint(this.routes.progress(t,route)).normalize();
+   return {...label,coordinates:{...label.coordinates,lon:Math.atan2(-point.z,point.x)*180/Math.PI,lat:Math.asin(clamp(point.y,-1,1))*180/Math.PI}};
+  })};
+  try{if(this.directionReady)drawDirectionLabels.call(this,t);else super.overlay(t);}finally{this.sceneSpec=original;}
  }
  audit(t){
   const value=super.audit(t);value.direction=directionAudit(this.sceneSpec,t,this.labels);

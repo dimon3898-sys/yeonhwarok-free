@@ -72,7 +72,14 @@ jobs:
           audit=audit_assets();assert audit['passed']
           for name in ('tmp','cache','frames','outputs','checkpoints'):
               p=Path('/data')/name;p.mkdir(parents=True,exist_ok=True);q=p/'write-test';q.write_text('ok');q.unlink()
-          report=run('/data/synthetic-pipeline')
+          try:
+              report=run('/data/synthetic-pipeline')
+          except Exception as error:
+              detail=dict(type=type(error).__name__,message=str(error)[:1500],stderr=str(getattr(error,'stderr',''))[-1500:])
+              print('::error title=Container pipeline exception::'+json.dumps(detail))
+              raise
+          if not report['passed']:
+              print('::error title=Container QC failures::'+json.dumps(dict(failures=report['qc_failures'])))
           from deployment.gcube.pipeline_retry_preflight import run as retry
           assert retry('/data/synthetic-pipeline')['passed']
           summary={key:value for key,value in report.items() if key not in ('assets','qc_warnings')}

@@ -111,7 +111,11 @@ def apply_direction(plan):
         travel = max(.35, d-lead-tail)
         if travel+lead+tail > d:
             lead = max(0, d-travel-tail)
-        end_move = round(d-tail, 6)
+        # A new information/SFX beat must land on the actual 30fps frame grid.
+        # Round travel down so the protected reading minimum is never reduced.
+        end_move = round(math.floor((d-tail)*30+1e-9)/30, 6)
+        if not early:
+            settle = round(d-end_move, 6)
         # One dominant axis. Strong geographical moves keep FOV and attitude
         # constant; height changes use a separate latter part of the same move.
         if earth:

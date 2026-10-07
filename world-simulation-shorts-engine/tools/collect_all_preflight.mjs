@@ -56,7 +56,7 @@ const rhythm=rhythmBytes?new Function('SceneProductionFlatRenderer','productionC
 const readableBytes=plan.scenes.some(scene=>scene.visual_readability||scene.direction)?fs.readFileSync(path.join(appRoot,'web/readability_visual_adapter.js')):null;
 const readable=readableBytes?new Function('THREE','SceneProductionEarthRenderer',readableBytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {installReadableCamera,installReadableEntities,readableLabelScene};')(THREE,production.SceneProductionEarthRenderer):null;
 const directionBytes=plan.scenes.some(scene=>scene.direction)?fs.readFileSync(path.join(appRoot,'web/direction_visual_adapter.js')):null;
-const direction=directionBytes?new Function('THREE','SceneProductionEarthRenderer','SceneProductionFlatRenderer','SceneReadableEarthRenderer','installReadableEntities','readableEntityScale',directionBytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {installDirectionCamera,installDirectionFlat,installDirectionEntities,directionLabelScene,directionLabelsAt,directionPhase,directionAudit};')(THREE,production.SceneProductionEarthRenderer,class {},class {},()=>{},()=>{}):null;
+const direction=directionBytes?new Function('THREE','SceneProductionEarthRenderer','SceneProductionFlatRenderer','SceneReadableEarthRenderer','installReadableEntities','readableEntityScale',directionBytes.toString().replace(/^import .*;$/gm,'').replace(/^export /gm,'')+';return {installDirectionCamera,installDirectionFlat,installDirectionEntities,directionLabelScene,directionLabelsAt,directionPhase,directionAudit,drawDirectionLabels};')(THREE,production.SceneProductionEarthRenderer,class {},class {},()=>{},()=>{}):null;
 const python=`import json,sys,subprocess,textwrap,math
 from fontTools.ttLib import TTFont
 from engine.retention import MEANINGFUL
@@ -260,7 +260,7 @@ for(const scene of plan.scenes) {
     try {
       const actualScene=context.sceneSpec;
       if(productionScene)context.sceneSpec={...actualScene,labels:(scene.direction?direction.directionLabelsAt(actualScene,time):(actualScene.labels||[])).map(label=>{const route=production.productionUsesRouteHeadAnchor(label)?routes.byId(label.route_id):null;if(!route)return label;const point=route.curve.getPoint(routes.progress(time,route)).normalize();return {...label,coordinates:{...label.coordinates,lon:Math.atan2(-point.z,point.x)*180/Math.PI,lat:Math.asin(clamp(point.y,-1,1))*180/Math.PI}};})};
-      SceneEarthPolishRenderer.prototype.overlay.call(context,time);
+      if(scene.direction)direction.drawDirectionLabels.call(context,time);else SceneEarthPolishRenderer.prototype.overlay.call(context,time);
       context.sceneSpec=actualScene;
       (productionScene?production.SceneProductionEarthRenderer:SceneEarthRenderer).prototype.dispatchEventAudit.call(context,time);
     } catch(error) {

@@ -67,6 +67,19 @@ class DirectionFixtures(unittest.TestCase):
                 events={e['id']:e for e in s['visual_events']}
                 for sound in s['sound_events']:
                     if sound.get('visual_event_id') in events:self.assertAlmostEqual(sound['time'],events[sound['visual_event_id']]['time'],places=5)
+    def test_event_sound_is_on_actual_encoder_frame_grid(self):
+        for p in self.plans.values():
+            for s in p['scenes']:
+                for sound in s['sound_events']:
+                    self.assertAlmostEqual(sound['time']*30,round(sound['time']*30),places=4)
+    def test_actual_mixed_core_onsets_match_native_visibility_receipts(self):
+        from engine.audio_stability import create_audio
+        from engine.rhythm_qc import analyze_frame_sound_sync
+        plan=self.plans['shipping'];records=self.native['shipping']['pose_records']
+        audits=[[r for r in records if r['scene_id']==s['scene_id']] for s in plan['scenes']]
+        audio=create_audio(plan,Path(self.folder.name)/'sync-audio')
+        report=analyze_frame_sound_sync(plan,audits,audio['sfx_library'],30)
+        self.assertTrue(report['passed'],report['errors'])
     def test_frozen_actual_render_resolution(self):
         for report in self.native.values():self.assertEqual(report['resolution'],[2160,3840])
     def test_no_decorative_question(self):
