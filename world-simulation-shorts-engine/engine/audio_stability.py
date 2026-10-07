@@ -4,7 +4,6 @@ The native Earth route head is visible on its scheduled frame, unlike faded
 labels. A global one-frame sound delay plus a 2ms source attack fails the strict
 one-frame PCM gate. Correct insertion timing, never loosen the QC tolerance.
 """
-from copy import deepcopy
 import json
 from pathlib import Path
 from types import FunctionType
@@ -39,6 +38,15 @@ def select_events(plan, history=None):
         event['onset_contract'] = CONTRACT
         if event['frame'] < 0:
             raise RuntimeError('AUDIO_TIMING_OUTSIDE_PROJECT')
+    # History describes the sound actually inserted, not its earlier proposal.
+    # Keep variant choices intact while correcting their recorded timestamps.
+    selected['events'].sort(key=lambda event: (event['absolute_time'], event['scene_id'], event['id']))
+    actual = {(event['scene_id'], event['id']): event for event in selected['events']}
+    for item in selected['history']:
+        event = actual.get((item.get('scene_id'), item.get('id')))
+        if event is not None:
+            item['absolute_time'] = event['absolute_time']
+    selected['onset_policy']['qa_route_head_contract'] = CONTRACT
     return selected
 
 

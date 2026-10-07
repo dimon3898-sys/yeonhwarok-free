@@ -68,6 +68,9 @@ class PipelinePreflightTests(unittest.TestCase):
   plan=generate_deployment_plan(REQUEST)
   old=select_rhythm_sound_events(plan);new=select_events(plan)
   lookup={r['id']:r for r in old['events']}
+  actual={r['id']:r for r in new['events']}
+  self.assertEqual([r['absolute_time'] for r in new['events']],sorted(r['absolute_time'] for r in new['events']))
+  for history in new['history']:self.assertEqual(history['absolute_time'],actual[history['id']]['absolute_time'])
   for record in new['events']:
    original=lookup[record['id']]
    if record['visual_kind']=='route_start':
@@ -84,4 +87,11 @@ class PipelinePreflightTests(unittest.TestCase):
    run=subprocess.run(['node',str(APP_ROOT/'tools/check_jpeg_pipe.mjs'),str(config)],cwd=APP_ROOT,capture_output=True,text=True,timeout=30)
    self.assertEqual(run.returncode,0,run.stderr)
    bad=subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','mjpeg','-framerate','30','-i','pipe:0','-an',str(root/'bad.mp4')],input=b'not JPEG',capture_output=True,timeout=15)
-   self.assertNotEqual(bad.returncode,0);self.assertIn(b'does not contain any stream',bad.stderr)
+   self.assertNotEqual(bad.returncode,0)
+   # FFmpeg versions report empty/invalid image2pipe streams differently.
+   # The contract is failure, a diagnostic, and no usable video, not wording.
+   self.assertTrue(bad.stderr)
+   from engine.qc import valid_scene_file
+   self.assertFalse(valid_scene_file(root/'bad.mp4',.1,1080,1920,30))
+   empty=subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-f','image2pipe','-vcodec','mjpeg','-framerate','30','-i','pipe:0','-an',str(root/'empty.mp4')],input=b'',capture_output=True,timeout=15)
+   self.assertNotEqual(empty.returncode,0);self.assertTrue(empty.stderr)
