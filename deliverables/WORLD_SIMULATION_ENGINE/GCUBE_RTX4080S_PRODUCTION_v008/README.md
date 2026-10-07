@@ -23,3 +23,11 @@ Existing MASTER/FLAT renderer, Scene JSON, FAST_PLUS, audio/rhythm, cache and ch
 - Keep Istio ON and 1GB shared memory. Ephemeral is for this admission-only test; results will not survive workload deletion. Existing persistent-storage mode remains available for production.
 - Open the verified HTTPS service URL. Check NVIDIA visible, nvidia-smi, selected Vulkan or EGL, WebGL2, NVIDIA renderer and GPU test frame before READY. Merely receiving /healthz is not GPU READY.
 - Do not start a 12s/75s/80s render. This stage only prepares and checks GPU admission; real RTX4080S validation is NOT_RUN until gcube is explicitly tested.
+
+## Publication and final verification
+
+The operating image is public and anonymously pulled by the successful GitHub Actions run. See CI_PROOF.json and PUBLIC_IMAGE_PROOF.json. The image revision is 3a68236c54d7f8d58efaf64989ebbc250aa2e8ec. Image source bytes for proxy/server/GPU ordering/fixtures were compared with the checkout. All previous v001–v005 and v006-diag/v007-diag digests were checked unchanged; the v005 base layers are identical. No owner code, forced all capability or automatic CPU fallback is baked in.
+
+The actual image passed dependency queries, official backend flags, root and UID1000 boot/login/health, GPU-required-without-hardware fail-closed behavior, 270 operating/diagnostic tests (1 skipped, no failures), and the captured internal-HTTP proxy/secure owner login plus at least 61 seconds foreground persistence. Explicit CPU mode was used only for isolated no-GPU CI startup tests, not a production fallback.
+
+Real RTX4080 Super WebGL2 remains NOT_RUN. The next gcube test should only inspect NVIDIA identity and a real GPU draw; no QA video is authorized yet. The supplied capture does not establish the externally accessible HTTPS service URL. The HTTPS-only login guard and Secure session cookies are retained.
