@@ -119,3 +119,15 @@ Before any future public login replace the previously exposed owner-code via
 approved secret/environment input, not chat. GPU success requires an actual
 NVIDIA WebGL2 draw/readPixels on EGL **or** Vulkan; unused backends are NOT_RUN.
 No CPU fallback, software renderer acceptance, or video render is introduced.
+
+## Completed verification
+
+- main source commit: `532bd68af7e9fa590a57f6a0743697511607584f`.
+- Published diagnostic-only image: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v007-diag`.
+- OCI digest: `sha256:5123aff4b87f2ffaeec2e29ca12f3605948658c00a5dc0d953ad1597d1f6ece6`.
+- Local diagnostic tests: 31 passed, no skips. Existing regressions: 230 passed, 1 skipped (231 run).
+- Fresh-image diagnostic/security/regression suites and real container HTTP smoke: PASS; nonroot engine identity, 0.0.0.0:8000, owner login, strict rejection, sensitive-query stdout masking, 61-second foreground life.
+- CI run: https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37584164762
+- Anonymous full pull in CI: PASS. Independent registry manifests/config/layer access: PASS; downloaded final COPY layer source matches checkout. v001–v005 and v006-diag digests preserved.
+- Protected engine/renderer/GPU files: all 134 unchanged. No real gcube request, GPU run, workload operation or video render was performed.
+- Actual gcube proxy rule, remote Pod/image assignment, external TLS topology and prior T4 GPU record remain UNKNOWN/NOT_AVAILABLE. Existing logs are the next evidence source; do not start or redeploy a stopped T4 just for this analysis.
