@@ -16,7 +16,10 @@ def run():
         thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
         origin='https://pipeline-smoke.service.gcube.ai:24999'
         def call(method,path,body=None,extra=None):
-            headers={'Host':origin[8:],'X-Forwarded-Proto':'http','X-Forwarded-For':'203.0.113.7, 10.0.0.2','X-Envoy-External-Address':'10.0.0.2'}
+            # The verified upstream profile requires a globally routable first
+            # address. TEST-NET documentation IPs deliberately are not global.
+            # This fixture address is a header only, never a network destination.
+            headers={'Host':origin[8:],'X-Forwarded-Proto':'http','X-Forwarded-For':'8.8.8.8, 10.0.0.2','X-Envoy-External-Address':'10.0.0.2'}
             if method=='POST':headers.update(Origin=origin,**{'Content-Type':'application/json'})
             headers.update(extra or {})
             connection=http.client.HTTPConnection('127.0.0.1',8000,timeout=5)
