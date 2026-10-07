@@ -125,3 +125,14 @@ Existing renderer/core/GPU/storage/UI/auth source and the old image publishing
 workflow stay byte-for-byte unchanged. This standalone workflow publishes only
 the new diagnostic tag. v001–v005 are never republished. No new T4 deployment or
 GPU/video rendering is performed by this task.
+
+## CI fixture correction before publication
+
+The first diagnostic CI build succeeded but the regression step requested two
+repository `tests.*` modules that the approved base `.dockerignore` excludes.
+The publication gate stopped before login/push, so no incomplete image was
+published. The test directory is now mounted read-only into the test container;
+it is not added to the deployed image, and the base ignore file is unchanged.
+Local regression was also verified under UID/GID 1000 (231 tests, one skip).
+CI failure reports contain only test IDs, exception classes and source line
+locations; exception values and request/auth data are omitted.

@@ -59,9 +59,13 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm --workdir /opt/world-engine/proxy-diag --entrypoint python "${IMAGE}:${RELEASE_TAG}" \
-            -m unittest test_observer test_server_diag
-          docker run --rm --entrypoint python "${IMAGE}:${RELEASE_TAG}" \
-            -m unittest tests.test_mobile_deployment_security tests.test_codespaces_origin \
+            /opt/world-engine/proxy-diag/run_checks.py test_observer test_server_diag
+          # The approved base deliberately excludes the repository tests/ tree.
+          # Mount that test tree read-only for verification; do not change the
+          # runtime image, core code, dependency set, or old publishing workflow.
+          docker run --rm --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" \
+            /opt/world-engine/proxy-diag/run_checks.py tests.test_mobile_deployment_security tests.test_codespaces_origin \
             deployment.gcube.test_storage deployment.gcube.test_gpu deployment.gcube.test_graphics_start \
             deployment.gcube.test_chromium_wrapper deployment.gcube.test_graphics_runtime \
             deployment.gcube.test_gpu_access deployment.gcube.test_boot_status deployment.gcube.test_server \
