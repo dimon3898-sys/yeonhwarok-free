@@ -24,21 +24,30 @@ sys.path.insert(0, _ENGINE_ROOT)
 
 from deployment.mobile_server import (APP_ROOT, BoundedHTTPServer, InternalHandler,
                                       MobileApplication, MobileHandler, checked_state_root)
-from deployment.security import RequestPolicy, SecurityError, content_length, private_json
+from deployment.security import RequestPolicy, SecurityError, _authority, content_length, private_json
 from deployment.gcube.diagnostics import DiagnosticsError, build_mobile_diagnostics
 from deployment.gcube.boot_status import gpu_diagnostic_html, safe_gpu_diagnostics
 from engine.storage import EngineError
 
-PROVIDER_HOST = re.compile(r"([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)\.gcube\.ai")
-RESERVED = {"www", "api", "console", "docs", "app", "auth", "accounts", "login", "status", "support"}
+PROVIDER_HOST = re.compile(r"([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)\.(?:service\.)?gcube\.ai")
+RESERVED = {"www", "api", "console", "docs", "app", "auth", "accounts", "login", "status", "support", "service"}
 LOGIN_HTML = '''<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>World Engine · 로그인</title><style>body{font-family:system-ui;background:#0b1520;color:#eff5fa;max-width:28rem;margin:8vh auto;padding:1.5rem}input,button{box-sizing:border-box;width:100%;font:inherit;padding:.9rem;margin:.5rem 0;border-radius:.5rem}button{background:#a4d8ee;color:#10202b;border:0}p{line-height:1.7}</style><h1>World Engine</h1><p>비밀번호를 입력해 주세요.</p><form id="owner-login-form" action="/auth/login" method="post"><label for="owner-password">비밀번호</label><input id="owner-password" name="password" type="password" autocomplete="current-password" required maxlength="512"><button id="owner-login-submit" type="submit">로그인</button></form></html>'''
 
 
 def provider_origin(host):
-    match = PROVIDER_HOST.fullmatch(host or "")
+    # gcube's issued HTTPS service authority includes a service namespace and
+    # an allocated external port, independently of the container's port 8000.
+    # Reuse the existing strict parser; nondefault ports remain in the origin
+    # pinned only after owner authentication. No forwarding/origin rule changes.
+    try:
+        authority = _authority(host, "https")
+        hostname = urlsplit("//" + authority).hostname
+    except (ValueError, TypeError):
+        raise SecurityError("INVALID_HOST", "허용되지 않은 주소입니다.", 400) from None
+    match = PROVIDER_HOST.fullmatch(hostname or "")
     if not match or match[1] in RESERVED:
         raise SecurityError("INVALID_HOST", "허용되지 않은 주소입니다.", 400)
-    return "https://" + host
+    return "https://" + authority
 
 
 def configured_origin(value, *, port=8000, local_mode=False):

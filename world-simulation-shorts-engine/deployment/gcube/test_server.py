@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor
+from email.message import Message
 import http.client
 import json
 from pathlib import Path
@@ -16,13 +17,14 @@ from unittest.mock import patch
 APP = Path(__file__).resolve().parents[2]
 if str(APP) not in sys.path:
     sys.path.insert(0, str(APP))
-from deployment.gcube.server import BoundedHTTPServer, GcubeApplication, GcubeHandler, GcubePolicy
+from deployment.gcube.server import BoundedHTTPServer, GcubeApplication, GcubeHandler, GcubePolicy, provider_origin
 from deployment.security import SecurityError, private_json
 from engine.storage import EngineError
 
 PASSWORD = "controlled-gcube-owner-password-2026"
 ORIGIN = "https://controlled-workload.gcube.ai"
 OTHER = "https://another-workload.gcube.ai"
+SERVICE_ORIGIN = "https://3f2de722.service.gcube.ai:24999"
 
 
 class GatewayTests(unittest.TestCase):
@@ -127,6 +129,71 @@ class GatewayTests(unittest.TestCase):
         self.assertEqual(headers["Cache-Control"], "no-store")
         self.assertNotIn("Access-Control-Allow-Origin", headers)
         self.assertEqual(self.call("GET", "/static/app.js")[0], 200)
+
+    def test_official_service_dynamic_ports_are_pending_owner_login_candidates(self):
+        for port in (24999, 31042, 65535):
+            origin = f"https://3f2de722.service.gcube.ai:{port}"
+            with self.subTest(port=port):
+                status, headers, page = self.call("GET", "/auth/login", origin=origin)
+                self.assertEqual(status, 200, page)
+                self.assertNotIn("Access-Control-Allow-Origin", headers)
+                self.assertEqual(self.call("GET", "/api/projects", origin=origin)[0], 401)
+                self.assertEqual(self.call("POST", "/auth/login", {"password": "wrong"}, origin=origin)[0], 401)
+                self.assertEqual(self.call("POST", "/api/projects", {}, origin=origin)[0], 403)
+                self.assertIsNone(self.app.bound_origin)
+                self.assertFalse(self.app.binding_path.exists())
+
+    def test_official_service_owner_login_persists_exact_dynamic_origin(self):
+        headers = self.login(origin=SERVICE_ORIGIN)
+        self.assertIn("Secure", headers["Set-Cookie"])
+        self.assertEqual(self.app.bound_origin, SERVICE_ORIGIN)
+        self.assertEqual(json.loads(self.app.binding_path.read_text())["origin"], SERVICE_ORIGIN)
+        self.assertEqual(self.call("GET", "/auth/session", origin=SERVICE_ORIGIN)[0], 200)
+        self.assertEqual(json.loads(self.call("GET", "/api/projects", origin=SERVICE_ORIGIN)[2]), {"projects": []})
+        self.assertEqual(self.call("GET", "/", origin=SERVICE_ORIGIN)[0], 200)
+        self.assertEqual(self.call("GET", "/static/app.js", origin=SERVICE_ORIGIN)[0], 200)
+        restarted = GcubeApplication(self.runtime, "http://127.0.0.1:8001", self.access, disk_floor=0)
+        try:
+            self.assertEqual(restarted.bound_origin, SERVICE_ORIGIN)
+            self.assertTrue(restarted.sessions.claims(self.cookie.split("=", 1)[1]))
+            good = {"Host": "3f2de722.service.gcube.ai:24999", "Origin": SERVICE_ORIGIN,
+                    "X-Forwarded-Host": "3f2de722.service.gcube.ai:24999", "X-Forwarded-Proto": "https"}
+            self.assertEqual(restarted.policy.check_request(good, method="POST"), SERVICE_ORIGIN)
+        finally:
+            restarted.scheduler.close()
+
+    def test_official_service_origin_and_port_checks_block_every_mutation_before_core(self):
+        self.login(origin=SERVICE_ORIGIN)
+        mutations = ("/auth/logout", "/api/projects", "/api/assets",
+                     "/api/projects/project_abcdef123456/approve", "/api/projects/project_abcdef123456/render",
+                     "/api/projects/project_abcdef123456/revise", "/api/projects/project_abcdef123456/clip",
+                     "/api/projects/project_abcdef123456/revisions/revision_001/approve",
+                     "/api/gcube/gpu")
+        envelopes = (
+            {"Origin": "https://untrusted.example"},
+            {"Origin": "https://3f2de722.service.gcube.ai:31042"},
+            {"Origin": None}, {"Origin": "null"},
+            {"X-Forwarded-Host": "3f2de722.service.gcube.ai:31042"},
+            {"Host": "3f2de722.service.gcube.ai:31042", "X-Forwarded-Host": "3f2de722.service.gcube.ai:31042",
+             "Origin": "https://3f2de722.service.gcube.ai:31042"},
+            {"Host": "another-workload.service.gcube.ai:24999", "X-Forwarded-Host": "another-workload.service.gcube.ai:24999",
+             "Origin": "https://another-workload.service.gcube.ai:24999"},
+            {"X-Forwarded-Proto": "http"},
+        )
+        binding = self.app.binding_path.read_bytes()
+        with patch("deployment.gcube.server.MobileHandler.dispatch") as core:
+            for path in mutations:
+                for envelope in envelopes:
+                    with self.subTest(path=path, envelope=envelope):
+                        status, _, body = self.call("POST", path, {}, origin=SERVICE_ORIGIN, headers=envelope)
+                        self.assertIn(status, {400, 403}, body)
+                        self.assertIn(json.loads(body)["error"]["code"],
+                                      {"INVALID_HOST", "INVALID_ORIGIN", "INVALID_FORWARDED_HEADERS"})
+            core.assert_not_called()
+        self.assertEqual(self.app.binding_path.read_bytes(), binding)
+        self.assertEqual(self.app.bound_origin, SERVICE_ORIGIN)
+        self.assertEqual(self.call("GET", "/auth/session", origin=SERVICE_ORIGIN)[0], 200)
+        self.assertEqual(json.loads(self.call("GET", "/api/projects", origin=SERVICE_ORIGIN)[2]), {"projects": []})
 
     def test_measurement_download_is_owner_only_and_read_only(self):
         self.assertEqual(self.call("GET", "/api/gcube/benchmark")[0], 401)
@@ -397,6 +464,107 @@ class GatewayTests(unittest.TestCase):
         self.assertEqual(body, b"")
         self.assertGreater(int(headers["Content-Length"]), 0)
         self.assertNotIn("Access-Control-Allow-Origin", headers)
+
+
+SERVICE_HOST = "3f2de722.service.gcube.ai"
+
+
+def envelope(host, *, origin=None):
+    return {"Host": host, "Origin": origin if origin is not None else "https://" + host,
+            "X-Forwarded-Host": host, "X-Forwarded-Proto": "https"}
+
+
+class ProviderAuthorityTests(unittest.TestCase):
+    def test_official_service_dynamic_ports_and_historical_host_shape(self):
+        for host in (SERVICE_HOST, "controlled-workload.gcube.ai"):
+            for suffix in ("", ":24999", ":31042", ":65535"):
+                authority = host + suffix
+                with self.subTest(authority=authority):
+                    expected = "https://" + authority
+                    self.assertEqual(provider_origin(authority), expected)
+                    self.assertEqual(GcubePolicy().check_request(envelope(authority), method="POST"), expected)
+
+    def test_https_default_port_is_canonicalized_without_changing_origin_policy(self):
+        origin = "https://" + SERVICE_HOST
+        headers = envelope(SERVICE_HOST + ":443", origin=origin)
+        self.assertEqual(provider_origin(SERVICE_HOST + ":443"), origin)
+        self.assertEqual(GcubePolicy().check_request(headers, method="POST"), origin)
+        self.assertEqual(GcubePolicy(origin=origin).check_request(headers, method="POST"), origin)
+        for policy in (GcubePolicy(), GcubePolicy(origin=origin)):
+            with self.assertRaises(SecurityError):
+                policy.check_request(dict(headers, Origin=origin + ":443"), method="POST")
+
+    def test_reserved_apex_suffix_spoof_and_deep_domains_fail_closed(self):
+        invalid = ("gcube.ai", "service.gcube.ai", "api.gcube.ai", "console.gcube.ai", "www.gcube.ai",
+                   "api.service.gcube.ai", "console.service.gcube.ai", "service.service.gcube.ai",
+                   "gcube.ai.evil.example", SERVICE_HOST + ".evil.example", "world.sub.gcube.ai",
+                   "world.sub.service.gcube.ai", "3f2de722.service.gcube.ai.", "gpu.other.example")
+        for host in invalid:
+            for suffix in ("", ":24999"):
+                with self.subTest(authority=host + suffix):
+                    with self.assertRaises(SecurityError) as caught:
+                        provider_origin(host + suffix)
+                    self.assertEqual(caught.exception.code, "INVALID_HOST")
+
+    def test_malformed_authorities_are_security_errors_not_parser_exceptions(self):
+        invalid = (None, 24999, "", SERVICE_HOST + ":0", SERVICE_HOST + ":65536", SERVICE_HOST + ":-1",
+                   SERVICE_HOST + ":not-a-port", SERVICE_HOST + ":", SERVICE_HOST + ":24999:1",
+                   "https://" + SERVICE_HOST + ":24999", SERVICE_HOST + ":24999/path",
+                   SERVICE_HOST + ":24999?query", SERVICE_HOST + ":24999#fragment",
+                   "owner@" + SERVICE_HOST + ":24999", SERVICE_HOST + ":24999,attacker.example",
+                   SERVICE_HOST + " :24999", SERVICE_HOST + ":24999\r\n", SERVICE_HOST + "/evil",
+                   SERVICE_HOST + "\\evil", "[::1]:24999", "127.0.0.1:24999", "-world.service.gcube.ai:24999")
+        for authority in invalid:
+            with self.subTest(authority=authority):
+                with self.assertRaises(SecurityError) as caught:
+                    provider_origin(authority)
+                self.assertEqual(caught.exception.code, "INVALID_HOST")
+
+    def test_pending_dynamic_authority_retains_https_origin_and_forwarding_checks(self):
+        headers = envelope(SERVICE_HOST + ":24999")
+        overrides = ({"Origin": None}, {"Origin": "null"}, {"Origin": "https://untrusted.example"},
+                     {"Origin": "https://" + SERVICE_HOST}, {"Origin": "https://" + SERVICE_HOST + ":31042"},
+                     {"Origin": headers["Origin"] + "/"}, {"X-Forwarded-Proto": "http"},
+                     {"X-Forwarded-Proto": "https,http"}, {"X-Forwarded-Host": SERVICE_HOST + ":31042"},
+                     {"X-Forwarded-Host": SERVICE_HOST + ":24999,attacker.example"})
+        for override in overrides:
+            with self.subTest(override=override):
+                with self.assertRaises(SecurityError):
+                    GcubePolicy().check_request(dict(headers, **override), method="POST")
+        read_only = {name: value for name, value in headers.items() if name != "Origin"}
+        self.assertEqual(GcubePolicy().check_request(read_only, method="GET"), headers["Origin"])
+
+    def test_bound_dynamic_authority_admits_only_exact_hostname_and_port(self):
+        host = SERVICE_HOST + ":24999"
+        policy = GcubePolicy(origin="https://" + host)
+        self.assertEqual(policy.check_request(envelope(host), method="POST"), "https://" + host)
+        for foreign in (SERVICE_HOST, SERVICE_HOST + ":8000", SERVICE_HOST + ":31042",
+                        "another-workload.service.gcube.ai:24999", "3f2de722.gcube.ai:24999"):
+            with self.subTest(foreign=foreign):
+                with self.assertRaises(SecurityError):
+                    policy.check_request(envelope(foreign), method="POST")
+
+    def test_duplicate_address_headers_fail_in_pending_and_bound_policy(self):
+        host = SERVICE_HOST + ":24999"
+        for policy in (GcubePolicy(), GcubePolicy(origin="https://" + host)):
+            for name in ("Host", "Origin", "X-Forwarded-Host", "X-Forwarded-Proto"):
+                headers = Message()
+                for key, value in envelope(host).items():
+                    headers[key] = value
+                headers[name] = headers[name]
+                with self.subTest(bound=bool(policy.origin), header=name):
+                    with self.assertRaises(SecurityError):
+                        policy.check_request(headers, method="POST")
+
+    def test_explicit_local_development_origin_keeps_existing_behavior(self):
+        for host in ("localhost:7860", "127.0.0.1:7860"):
+            origin = "http://" + host
+            policy = GcubePolicy(origin=origin, port=7860, local_mode=True)
+            self.assertEqual(policy.check_request({"Host": host, "Origin": origin}, method="POST"), origin)
+            for foreign in ("http://localhost:7861", "https://untrusted.example", None):
+                with self.subTest(host=host, foreign=foreign):
+                    with self.assertRaises(SecurityError):
+                        policy.check_request({"Host": host, "Origin": foreign}, method="POST")
 
 
 if __name__ == "__main__":
