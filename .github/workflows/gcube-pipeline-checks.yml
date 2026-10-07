@@ -2,6 +2,10 @@ name: Validate full v010 pipeline candidate (never publish)
 on:
   push:
     branches: [fix/v010-pipeline-preflight]
+    paths:
+      - world-simulation-shorts-engine/**
+      - deployment/gcube-proxy-diag/**
+      - .github/workflows/gcube-pipeline-checks.yml
   workflow_dispatch:
 permissions:
   contents: read
