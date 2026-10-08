@@ -42,7 +42,7 @@ def canonicalize_plan(plan,fps=None):
             for item in value:snap_tree(item)
         elif isinstance(value,dict):
             for key,item in value.items():
-                if key in temporal and isinstance(item,(int,float)) and not isinstance(item,bool):value[key]=clock.snap(item)
+                if (key in temporal or key.endswith('_duration') or key=='next_event_lead_time') and isinstance(item,(int,float)) and not isinstance(item,bool):value[key]=clock.snap(item)
                 elif key not in ('source_hashes','lighting','lighting_entry','camera_up_start','camera_up_end','information'):snap_tree(item)
     authored=plan.get('metadata',{}).get('reference_blueprint',{}).get('beats',[])
     for index,scene in enumerate(plan['scenes']):
@@ -50,7 +50,7 @@ def canonicalize_plan(plan,fps=None):
         end=cursor+count
         scene.update(scene_start_frame=cursor,scene_end_frame=end,frame_count=count)
         scene['start_time']=clock.seconds(cursor);scene['duration']=clock.seconds(count)
-        for section in ('visual_events','sound_events','text_events','labels','routes','entities','direction'):
+        for section in ('visual_events','sound_events','text_events','labels','routes','entities','direction','motion_timing','rhythm_micro_beats'):
             if section in scene:snap_tree(scene[section])
         direction=scene.get('direction',{})
         if direction:
@@ -63,3 +63,16 @@ def canonicalize_plan(plan,fps=None):
     plan['duration']=clock.seconds(cursor)
     plan['metadata']['frame_grid']=dict(version='INTEGER_FRAME_CLOCK_v014',fps=str(clock.fps),total_frames=cursor,scenes=receipts,gap=0,overlap=0)
     return plan
+
+
+def validate_frame_plan(plan):
+    receipt=plan['metadata']['frame_grid'];clock=FrameGrid(receipt['fps']);cursor=0
+    for scene,entry in zip(plan['scenes'],receipt['scenes']):
+        count=scene['frame_count']
+        if type(count) is not int or count<=0:raise ValueError('FRAME_COUNT_INVALID')
+        if scene['scene_start_frame']!=cursor or scene['scene_end_frame']!=cursor+count:raise ValueError('FRAME_BOUNDARY_INVALID')
+        if entry['scene_id']!=scene['scene_id'] or entry['start_frame']!=cursor or entry['end_frame']!=cursor+count or entry['frame_count']!=count:raise ValueError('FRAME_RECEIPT_INVALID')
+        if abs(scene['duration']*float(clock.fps)-count)>1e-7 or abs(scene['start_time']*float(clock.fps)-cursor)>1e-7:raise ValueError('FRAME_SECONDS_INVALID')
+        cursor+=count
+    if len(receipt['scenes'])!=len(plan['scenes']) or cursor!=receipt['total_frames'] or cursor!=clock.frames(plan['duration']):raise ValueError('FRAME_TOTAL_MISMATCH')
+    return dict(passed=True,total_frames=cursor,gap=0,overlap=0)

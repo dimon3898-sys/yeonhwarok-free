@@ -12,6 +12,9 @@ def collect_all(project_dir,plan,bundle):
             result=callback();passed=not isinstance(result,dict) or result.get('passed',True)
             checks.append(dict(name=name,passed=bool(passed),result=result));return result
         except Exception as error:checks.append(dict(name=name,passed=False,error_type=type(error).__name__));return None
+    if plan.get('metadata',{}).get('frame_grid'):
+        from .frame_grid import validate_frame_plan
+        run('integer_frame_contract',lambda:validate_frame_plan(plan))
     run('Scene_JSON',lambda:validate_plan(plan))
     run('licensed_assets',lambda:validate_assets(plan))
     from deployment.gcube.asset_audit import audit_assets

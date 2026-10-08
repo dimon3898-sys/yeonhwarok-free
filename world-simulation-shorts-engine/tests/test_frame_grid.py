@@ -40,3 +40,10 @@ class IntegerFrameClock(unittest.TestCase):
         with self.assertRaises(ValueError):FrameGrid().allocate(5,[3,3],[1,1])
     def test_finalizer_does_not_silently_absorb_total_mismatch(self):
         with self.assertRaises(ValueError):canonicalize_plan(dict(duration=12,scenes=[dict(scene_id='S001',duration=11)],metadata={}))
+
+    def test_frame_receipt_tampering_is_rejected(self):
+        from engine.frame_grid import validate_frame_plan
+        p=canonicalize_plan(dict(duration=12,scenes=[dict(scene_id='S001',duration=12)],metadata={}))
+        self.assertTrue(validate_frame_plan(p)['passed'])
+        p['scenes'][0]['scene_end_frame']=359
+        with self.assertRaises(ValueError):validate_frame_plan(p)
