@@ -33,7 +33,7 @@ def media(folder):
     from engine.return_wide_qc import run_qc
     from engine.qc import probe_video
     movie=folder/'synthetic.mp4'
-    subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-f','lavfi','-i','testsrc2=size=1080x1920:rate=30','-frames:v','450','-c:v','libx264','-preset','ultrafast','-crf','18','-pix_fmt','yuv420p','-color_primaries','bt709','-color_trc','bt709','-colorspace','bt709','-color_range','tv',str(movie)],check=True,capture_output=True)
+    subprocess.run(['ffmpeg','-hide_banner','-loglevel','error','-f','lavfi','-i','testsrc2=size=1080x1920:rate=30','-frames:v','450','-c:v','libx264','-preset','ultrafast','-crf','18','-pix_fmt','yuv420p','-color_primaries','bt709','-color_trc','bt709','-colorspace','bt709','-color_range','tv','-bsf:v','h264_metadata=video_full_range_flag=0:colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1',str(movie)],check=True,capture_output=True)
     assembled=folder/'assembled.mp4';concat([movie],assembled,dict(output_width=1080,output_height=1920,fps=30))
     audio=create_audio(plan,folder/'audio');output=finish_video(assembled,folder/'final',plan,audio,{'enabled':False})
     report=run_qc(Path(output['final']),plan,geometry['audits'],folder/'qc')
