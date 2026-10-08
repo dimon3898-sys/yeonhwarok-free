@@ -43,7 +43,7 @@ def compile_content(raw, blueprint):
     first_start=camera_state(locations[0],'GLOBAL_ESTABLISH');first_start['yaw']=-.26
     states=[];scenes=[];previous_exit=None
     for i in range(n):
-        start,end=bounds[i:i+2];d=end-start;q=(start+end)/2/duration
+        start,end=bounds[i:i+2];d=blueprint['beats'][i]['duration'];q=(start+end)/2/duration
         scene_type,camera,directing,role=_scene_role(q,i==n-1)
         if i==0:scene_type,camera,directing,role='EARTH_ESTABLISH','FAST_HOOK_DIVE','HOOK_REVEAL','hook'
         if duration<40 and .64<=q<=.8:scene_type,camera,directing,role='ROUTE_CHASE','HORIZON_REVEAL','PEAK_MOMENT','peak'

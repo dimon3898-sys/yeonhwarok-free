@@ -19,10 +19,13 @@ PROFILE_PATH=ROOT/'data/reference_direction_profile_v013.json'
 SOURCES=('web/reference_visual_adapter.js','web/render_reference_earth.html',
          'web/render_reference_flat.html','tools/reference_semantic_preflight.mjs',
          'web/direction_visual_adapter.js','web/production_visual_adapter.js',
-         'data/reference_direction_profile_v013.json','engine/reference_master.py','engine/reference_content.py','engine/reference_preflight.py','tools/collect_all_preflight.mjs','engine/reference_concat.py')
+         'data/reference_direction_profile_v013.json','engine/reference_master.py','engine/reference_content.py','engine/reference_preflight.py','tools/collect_all_preflight.mjs','engine/reference_concat.py','engine/frame_grid.py')
 
 
-def frame(value):return round(math.ceil(value*30-1e-4)/30,6)
+from .frame_grid import FrameGrid
+from .backends import quality_settings
+CLOCK=FrameGrid(quality_settings('HIGH')['fps'])
+def frame(value):return CLOCK.snap(value,'ceil')
 
 
 def text_read_time(text, importance=1, camera_stability=1):
@@ -88,25 +91,21 @@ def reference_blueprint(raw,reservations=None,count_override=None):
             move=max(move,frame(angle(previous,destination)*1.25/55))
         beats.append(dict(beat_id=f'B{i+1:02}',kind=kind,location_index=li,
                           minimum_hold=hold,move=frame(move),primary=text,reserved=reservations.get(i,0)))
-    required=sum(max(2.1 if b is beats[0] else 0,b['minimum_hold']+b['move']+(.1 if b is beats[0] else .6)+b['reserved']) for b in beats)
-    if required>duration:raise planner.PlanningInputError('인지 시간을 확보하려면 사건 또는 텍스트를 줄여야 합니다.',{'code':'PERCEPTION_BUDGET_EXCEEDED'})
-    remaining_frames=round((duration-required)*30)
+    minimums=[CLOCK.frames(max(2.1 if i==0 else 0,b['minimum_hold']+b['move']+(.1 if i==0 else .6)+b['reserved']),'ceil') for i,b in enumerate(beats)]
+    total=CLOCK.frames(duration)
+    if sum(minimums)>total:raise planner.PlanningInputError('인지 시간을 확보하려면 사건 또는 텍스트를 줄여야 합니다.',{'code':'PERCEPTION_BUDGET_EXCEEDED'})
     weights=[1.0 if b['kind']=='LOCATION' else 1.2 if b['kind']=='EVENT' else 1.4 if b['kind']=='ROUTE_CHANGE' else 1.7 for b in beats]
-    allocation=[math.floor(remaining_frames*w/sum(weights)) for w in weights]
-    allocation[-1]+=remaining_frames-sum(allocation)
+    windows=CLOCK.allocate(total,minimums,weights,[CLOCK.frames(3.1) if b['kind']=='ROUTE_CHANGE' else None for b in beats])
     bounds=[0.]
-    for b,extra in zip(beats,allocation):
-        b['start']=bounds[-1];b['duration']=frame(max(2.1 if b is beats[0] else 0,b['move']+(.1 if b is beats[0] else .6)+b['minimum_hold']+b['reserved'])+extra/30)
-        if b is beats[0]:b['duration']=max(2.1,b['duration'])
-        if b['kind']=='ROUTE_CHANGE':b['duration']=max(b['move']+.6+b['minimum_hold']+b['reserved'],min(b['duration'],3.1))  # Transfer excess to result; protect route recognition minimum.
-        b['end']=round(b['start']+b['duration'],6);bounds.append(b['end'])
-        b['reveal']=round(b['start']+b['move']+(.1 if b is beats[0] else .6),6)
-        b['next_move']=b['end'] if b is not beats[-1] else None
-    # Exact frame total, with the residual allocated to RESULT, not hold erosion.
-    delta=round(duration-bounds[-1],6);beats[-1]['duration']+=delta;beats[-1]['end']+=delta;bounds[-1]=duration
+    for i,(b,w) in enumerate(zip(beats,windows)):
+        b.update(w);b['start']=w['start_seconds'];b['end']=w['end_seconds']
+        b['reveal_frame']=w['start_frame']+CLOCK.frames(b['move'])+CLOCK.frames(.1 if i==0 else .6)
+        b['reveal']=CLOCK.seconds(b['reveal_frame']);b['next_move']=b['end'] if i<len(beats)-1 else None
+        bounds.append(b['end'])
+    request['duration']=CLOCK.seconds(total)
     routes=scenario['routes'];route_specs=[]
     if shipping:
-        route_specs=[(routes[0],1.3,beats[1]['reveal']),(routes[1],next(b['reveal'] for b in beats if b['kind']=='ROUTE_CHANGE')-.2,beats[-1]['start']+beats[-1]['move']+1/30)]
+        route_specs=[(routes[0],1.3,beats[1]['reveal']),(routes[1],next(b['reveal'] for b in beats if b['kind']=='ROUTE_CHANGE')-.2,beats[-1]['start']+beats[-1]['move']+CLOCK.seconds(1))]
     else:
         for i,r in enumerate(routes):
             start=1.3 if i==0 else beats[1]['reveal']+.6 if i<len(routes)-1 else beats[min(i+1,count-2)]['reveal']-.2
@@ -146,9 +145,9 @@ def reference_blueprint(raw,reservations=None,count_override=None):
                 event('route_start',start,route['points'][0],route['route_id'],'','progression')
     final=beats[-1];loc=locations[-1]
     # Endpoints really finish before arrival. The held result is a separate fact.
-    if scenario['domain']!='comparison':event('arrival',final['start']+final['move']+1/30,loc['coordinates'],loc['id'],'','progression')
-    else:event('destination_preview',final['start']+final['move']+1/30,loc['coordinates'],loc['id'],'','progression','F'+f'{len(locations):02}')
-    event('final_reveal',max(final['reveal'],frame(duration*.8)+1/30),loc['coordinates'],loc['id'],'RESULT','payoff','M01',duration-max(final['reveal'],frame(duration*.8)+1/30))
+    if scenario['domain']!='comparison':event('arrival',final['start']+final['move']+CLOCK.seconds(1),loc['coordinates'],loc['id'],'','progression')
+    else:event('destination_preview',final['start']+final['move']+CLOCK.seconds(1),loc['coordinates'],loc['id'],'','progression','F'+f'{len(locations):02}')
+    event('final_reveal',max(final['reveal'],frame(duration*.8)+CLOCK.seconds(1)),loc['coordinates'],loc['id'],'RESULT','payoff','M01',duration-max(final['reveal'],frame(duration*.8)+CLOCK.seconds(1)))
     events.sort(key=lambda e:e['time'])
     for i,e in enumerate(events):e['caused_by']=events[i-1]['id'] if i else None
     return dict(profile=profile,request=request,scenario=scenario,beats=beats,bounds=bounds,events=events,route_specs=route_specs,
@@ -184,7 +183,7 @@ def generate_reference_plan(raw,_reservations=None,_count=None,_attempt=0):
     for s,b in zip(plan['scenes'],blueprint['beats']):
         s['visual_events']=[e for e in s['visual_events'] if e['id'] in authored]
         for e in s['visual_events']:
-            a=authored[e['id']];e['time']=round(a['time']-s['start_time'],6)
+            a=authored[e['id']];e['time']=CLOCK.seconds(CLOCK.frames(a['time'])-CLOCK.frames(s['start_time']))
             if a['kind']!='final_reveal' and a.get('unit')!='km':
                 for key in ('kind','coordinates','claim_id','target_id','text','description','role'):e[key]=deepcopy(a[key])
                 for key in ('value','unit'):
@@ -195,7 +194,7 @@ def generate_reference_plan(raw,_reservations=None,_count=None,_attempt=0):
     except planner.PlanningInputError as error:
         if error.details.get('code')=='PERCEPTION_BUDGET_EXCEEDED' and _attempt<20:
             sid=error.details['scene_id'];i=next(i for i,s in enumerate(plan['scenes']) if s['scene_id']==sid)
-            reservations[i]=frame(reservations.get(i,0)+error.details['required']-error.details['available']+1/30)
+            reservations[i]=frame(reservations.get(i,0)+error.details['required']-error.details['available']+CLOCK.seconds(1))
             return generate_reference_plan(raw,reservations,_count,_attempt+1)
         raise
     from .sfx_library import prepare_production_sound_events
@@ -208,6 +207,8 @@ def generate_reference_plan(raw,_reservations=None,_count=None,_attempt=0):
     for s in plan['scenes']:s['rhythm_micro_beats']=_micro_beats(s,[])
     plan['metadata']['reference_blueprint']=dict(profile_version=VERSION,event_budget=blueprint['event_budget'],beats=blueprint['beats'])
     plan['metadata']['direction_version']=VERSION
+    from .frame_grid import canonicalize_plan
+    canonicalize_plan(plan)
     from .reference_preflight import fit_native_composition
     fit_native_composition(plan)
     plan['metadata']['direction_qc']=perceptual_qc(plan)
@@ -256,7 +257,7 @@ def author_presentation(plan,blueprint):
         if primary is None:raise RuntimeError('REFERENCE_PRIMARY_MISSING')
         # Final payoff remains a sourced route metric/new-edge result prepared by
         # the existing graphic policy; no fabricated arrival or extra headline.
-        recognition=.1 if i==0 else 1/30 if primary.get('unit')=='km' and not final else .6
+        recognition=.1 if i==0 else CLOCK.seconds(1) if primary.get('unit')=='km' and not final else .6
         authored_time=primary['time'] if not (primary.get('unit')=='km' and not final) else move+recognition
         reveal=max(move+recognition,authored_time);reveal=frame(reveal)
         old=primary['time'];shift=reveal-old
@@ -285,7 +286,7 @@ def author_presentation(plan,blueprint):
         # Actual geographically anchored labels are sequential. They remain
         # below primary emphasis after the event headline is revealed.
         location_name=loc['name'].upper()
-        s['labels']=[dict(kind='hook_reveal' if i==0 else 'world_label',text=location_name,coordinates=deepcopy(loc['coordinates']),start_time=move+.033333,end_time=d,role='city',opacity=.75,size=54)]
+        s['labels']=[dict(kind='hook_reveal' if i==0 else 'world_label',text=location_name,coordinates=deepcopy(loc['coordinates']),start_time=move+CLOCK.seconds(1),end_time=d,role='city',opacity=.75,size=54)]
         if i==0:s['labels'][0].update(event_id=primary['id'],start_time=reveal)
         s['text_events']=[]
         for e in events:
@@ -330,7 +331,7 @@ def perceptual_qc(plan):
         if p['safe_area'][0]<.05 or p['safe_area'][2]>.95:issue('TEXT_OUTSIDE_SAFE_AREA',sid)
         primary=next((e for e in s['visual_events'] if e['id']==p['primary_event_id']),None)
         cue=next((a for a in s['sound_events'] if a['visual_event_id']==p['primary_event_id']),None)
-        if primary is None or cue is None or abs(cue['time']-primary['time'])>1/30+1e-6:issue('SFX_EVENT_MISALIGNMENT',sid)
+        if primary is None or cue is None or abs(cue['time']-primary['time'])>CLOCK.seconds(1)+1e-6:issue('SFX_EVENT_MISALIGNMENT',sid)
         for t in s.get('text_events',[]):
             if t['start_time']<move:issue('TEXT_DURING_HIGH_MOTION',sid)
             if t['end_time']-t['start_time']+1e-6<text_read_time(t['text']):issue('TEXT_NOT_READABLE_LONG_ENOUGH',sid)
