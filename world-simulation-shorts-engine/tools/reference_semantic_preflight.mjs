@@ -244,6 +244,7 @@ for(const scene of plan.scenes) {
   if(productionScene){const originalValues=cam.values.bind(cam);cam.values=time=>{const {travel,zoom}=production.productionCameraIntervals(scene,3);const value=originalValues(Math.min(scene.duration,time/travel*scene.duration)),z=originalValues(Math.min(scene.duration,time/zoom*scene.duration));value.height=z.height;value.fov=z.fov;value.p=clamp(time/scene.duration);return value;};}
   if(scene.visual_readability)readable.installReadableCamera(cam);
   if(scene.direction)direction.installDirectionCamera(cam);
+  if(scene.single_event_camera){const code=fs.readFileSync(path.join(appRoot,'web/single_event_camera.js'),'utf8').replace(/^import .*;$/gm,'').replace(/^export /gm,'');const single=new Function('THREE','SceneProductionEarthRenderer',code+';return {installSingleCamera};')(THREE,class {});single.installSingleCamera(cam);}
   const map={groups:{routes:new THREE.Group(),effects:new THREE.Group(),entities:new THREE.Group()}};
   const graphics=new GenericRouteGraphics(map,routes),effects=new GenericEffects(map,scene,routes),entities=new GenericEntities(scene,routes,map.groups.entities);
   const context={sceneSpec:renderedScene,plan,duration:scene.duration,camera,cam,routes,graphics,effects,entities,w:width,h:height,ctx:new MetricsContext(),labels:[]};
@@ -267,7 +268,7 @@ for(const scene of plan.scenes) {
     }
     const veil=mapTransitionOpacity(scene,time);
     if(veil>.4&&!productionScene)context.eventAudit=[];
-    if(Number(scene.start_time)+time<3&&veil<=.4&&context.labels.some(l=>l.kind==='hook_reveal'&&l.text&&l.opacity>.1))hookEligible=true;
+    if(Number(scene.start_time)+time<3&&veil<=.4&&context.labels.some(l=>(l.kind==='hook_reveal'||(scene.single_event_camera&&l.kind==='world_label'))&&l.text&&l.opacity>.1))hookEligible=true;
     for(const event of expected) {
       const result=observed.get(event.id);
       if(result.projection_at_scheduled_time===null&&time+1e-8>=Number(event.time)&&event.coordinates) {

@@ -344,7 +344,7 @@ class MobileApplication(Application):
             raise EngineError('INVALID_OPTION', '속도 설정을 확인해 주세요.')
         if value.get('production_preset') not in {None, 'PRODUCTION_DEFAULT', 'LEGACY'}:
             raise EngineError('INVALID_OPTION', '기본 연출 설정을 확인해 주세요.')
-        if value.get('direction_profile') not in {None, 'REFERENCE_MASTER', 'FAST_PLUS_LEGACY'}:
+        if value.get('direction_profile') not in {None, 'REFERENCE_MASTER', 'FAST_PLUS_LEGACY', 'SINGLE_EVENT_CAMERA_TEST'}:
             raise EngineError('INVALID_OPTION', '연출 프로파일을 확인해 주세요.')
         value.setdefault('pace', 'FAST_PLUS')
         if 'tts_language' in value and value['tts_language'] not in {'en', 'ko', 'ja', 'zh', 'es', 'fr', 'de', 'pt'}:

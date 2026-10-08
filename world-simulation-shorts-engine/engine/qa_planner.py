@@ -17,6 +17,9 @@ def configure_qa_schema():
     # Deployment-only schema extension. The certified schema remains immutable
     # and the extension's normal-request branch is that exact original policy.
     from . import schema, visibility
+    if os.environ.get('WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST')=='1':
+        from .single_event_camera import install_validation
+        install_validation()
     # Deployment-selected additive certifier; its legacy branch replays the
     # original native definitions with unchanged thresholds. Frozen source
     # and quality-promotion hashes remain intact.
@@ -45,6 +48,9 @@ def directed_plan(plan, raw):
 def generate_deployment_plan(raw):
     configure_qa_schema()
     selected=raw.get('direction_profile')
+    if selected=='SINGLE_EVENT_CAMERA_TEST' or (os.environ.get('WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST')=='1' and raw.get('qa_mode') is True and float(raw.get('duration',0))==12):
+        from .single_event_camera import generate
+        return generate(raw)
     if selected not in {None,'REFERENCE_MASTER','FAST_PLUS_LEGACY'}:
         raise planner.PlanningInputError('지원하지 않는 연출 프로파일입니다.')
     if selected=='REFERENCE_MASTER' or (selected is None and os.environ.get('WORLD_ENGINE_DIRECTION_VERSION')=='v013' and raw.get('production_preset')!='LEGACY'):

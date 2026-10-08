@@ -66,6 +66,11 @@ def render_project(*args, **kwargs):
         if not report['passed']:
             raise RuntimeError('DIRECTION_PREFLIGHT_FAILED')
         namespace['CPULocalBackend'] = DirectionBackend
+    if len(args)>1 and args[1].get('metadata',{}).get('camera_test_preset')=='SINGLE_EVENT_CAMERA_TEST':
+        from .single_event_backend import SingleEventBackend
+        from .reference_concat import concat as reference_concat
+        namespace['CPULocalBackend']=SingleEventBackend
+        namespace['_concat']=reference_concat
     if diagnostic:
         from .gpu_preflight import collect_all
         preflight = collect_all(args[0], args[1], diagnostic)

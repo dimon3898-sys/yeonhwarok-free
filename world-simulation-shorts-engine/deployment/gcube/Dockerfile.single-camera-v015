@@ -1,0 +1,9 @@
+# Immutable validated v014 runtime; isolated single-event camera test overlay.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:948a8cc6d9d8bebc221ef1d02fbc186fb036e89f3d6d995cc0e9e497a4608577
+ENV WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=1
+COPY world-simulation-shorts-engine/engine/single_event_camera.py world-simulation-shorts-engine/engine/single_event_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/single_event_camera.js world-simulation-shorts-engine/web/render_single_event_earth.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/tools/test_single_event_camera.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/reference_semantic_preflight.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/single_camera_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/data/reference_scene_plan.schema.json /opt/world-engine/world-simulation-shorts-engine/data/
