@@ -108,8 +108,17 @@ jobs:
           os.setgroups([]);os.setgid(1000);os.setuid(1000)
           from deployment.gcube.reference_media_preflight import run
           from deployment.gcube.reference_retry_preflight import run as retry
-          report=run('/data/reference-media');assert report['passed'],report['qc_failures']
-          assert retry('/data/reference-media')['passed']
+          try:
+              report=run('/data/reference-media')
+              if not report['passed']:
+                  print('::error title=Reference synthetic QC::'+json.dumps(report['qc_failures']))
+              assert report['passed'],report['qc_failures']
+              assert retry('/data/reference-media')['passed']
+          except Exception as error:
+              import traceback
+              detail=dict(type=type(error).__name__,message=str(error)[:1500],stderr=str(getattr(error,'stderr',''))[-1500:],stack=traceback.format_exc()[-3000:])
+              print('::error title=Reference synthetic pipeline exception::'+json.dumps(detail))
+              raise
           print('::notice title=Reference media::'+json.dumps({k:v for k,v in report.items() if k not in ('assets','qc_warnings')},ensure_ascii=False))
           PY
       - name: Measure optional offline TTS budget on the installed provider
@@ -131,6 +140,7 @@ jobs:
           print('::notice title=Offline TTS actual budget::'+json.dumps(dict(version=version,data_version=data_version,seconds=seconds,strict_scene_limit=20/6-.08,headroom90_limit=(20/6-.08)*.9,scene_guard_passed=seconds<=20/6-.08)))
           PY
       - name: Collect regression import failures before running the full suite
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           docker run --rm --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
@@ -142,6 +152,7 @@ jobs:
             --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
             'import unittest,json; loader=unittest.TestLoader(); suite=loader.discover("tests"); errors=[text for text in loader.errors]; print("::notice title=Regression import modules::"+json.dumps([text.split("\n",1)[0] for text in errors])); print("::notice title=Regression import types::"+json.dumps([text.splitlines()[-1].split(":",1)[0] for text in errors])); print("::notice title=Regression import count::"+str(suite.countTestCases()))'
       - name: All existing regressions and new native collect-all/security/media contracts
+        if: ${{ !cancelled() }}
         shell: bash
         run: |
           set -euo pipefail
