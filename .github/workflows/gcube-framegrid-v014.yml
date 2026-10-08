@@ -90,7 +90,15 @@ jobs:
       - name: Exact production collect-all preflight before and after timing fix
         shell: bash
         run: |
-          docker run --rm --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.framegrid_preflight /data/framegrid-parity
+          docker run --rm -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.framegrid_preflight import run
+          run('/data/framegrid-parity')
+          PY
       - name: Common direction fixtures on the actual v013 runtime defaults
         shell: bash
         run: |

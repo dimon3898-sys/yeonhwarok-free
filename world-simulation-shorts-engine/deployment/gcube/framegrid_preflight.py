@@ -26,6 +26,7 @@ def run(folder):
     old=json.loads(Path(__file__).with_name('framegrid_v013_fixture.json').read_text())
     before=check(old,folder/'before')
     fixed=canonicalize_plan(deepcopy(old));after=check(fixed,folder/'after')
+    print('::notice title=Production parity checks::'+json.dumps(dict(before_checks=before['checks'],after_checks=after['checks'],after_scenes=[dict(scene_id=s['scene_id'],passed=s['passed']) for s in after['scenes']]),ensure_ascii=False))
     assert [s['passed'] for s in before['scenes']]==[False,False,True,False],before
     assert after['passed'],after
     assert [s['frame_count'] for s in fixed['metadata']['frame_grid']['scenes']]==[64,88,93,115]
