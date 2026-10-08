@@ -93,7 +93,8 @@ class ReferenceFixtures(unittest.TestCase):
         p=json.loads((ROOT/'data/reference_direction_profile_v013.json').read_text())
         for beat in p['beats']:
             self.assertEqual(beat['perception_hold'],beat['stationary_after_reveal'])
-            if beat['motion_overlap_after_reveal']:self.assertLess(beat['perception_hold'],beat['reveal_to_next_new_move'])
+            if beat['motion_overlap_after_reveal'] and beat['perception_hold'] is not None:self.assertLess(beat['perception_hold'],beat['reveal_to_next_new_move'])
+            if beat['settle_start'] is None:self.assertIsNone(beat['perception_hold'])
 
     def test_actual_telemetry_uses_observed_pose_and_visibility(self):
         result=subprocess.run(['node',str(ROOT/'tests/reference_telemetry.mjs')],cwd=ROOT,capture_output=True,text=True,check=True)

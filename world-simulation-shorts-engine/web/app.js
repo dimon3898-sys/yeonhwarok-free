@@ -426,6 +426,7 @@ async function refreshLibrary() {
 
 $('qa-mode').addEventListener('change', () => {
   const field = $('duration');
+  if ($('qa-mode').checked) directionSelect.value = 'REFERENCE_MASTER';
   field.min = $('qa-mode').checked ? '12' : '20';
   field.max = $('qa-mode').checked ? '15' : '3600';
   field.value = $('qa-mode').checked ? '12' : '75';
