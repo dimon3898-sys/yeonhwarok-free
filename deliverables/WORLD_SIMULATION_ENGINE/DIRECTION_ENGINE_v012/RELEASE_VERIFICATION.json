@@ -1,0 +1,228 @@
+{
+  "passed": true,
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v012-direction",
+  "registry": {
+    "image": "dimon3898-sys/world-simulation-shorts-engine:gcube-v012-direction",
+    "digest": "sha256:20f48cc67db9eecd233f788c6c04ba4cc94fc5d8ee6aa0a1f7def82d6db88ce7",
+    "config_digest": "sha256:f41ee8b272ab870a7cac7a2ef8aa6c12ccacf81c2b4f7935a02c6f439d42163a",
+    "revision": "eb4ab3cca89d8b13d65a3bc8a864e178ae5a7749",
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "python",
+      "-m",
+      "deployment.gcube.start"
+    ],
+    "command": null,
+    "working_directory": "/opt/world-engine/world-simulation-shorts-engine",
+    "exposed_ports": [
+      "8000/tcp"
+    ],
+    "anonymous_registry_read": true,
+    "actual_gpu": "NOT_RUN"
+  },
+  "workflow": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37705257707",
+  "code_revision": "eb4ab3cca89d8b13d65a3bc8a864e178ae5a7749",
+  "regression": {
+    "core": 529,
+    "proxy_gpu_logic": 206,
+    "diagnostic_v007": 31,
+    "total_pass": 766,
+    "fail": 0,
+    "skip": 0,
+    "diagnostic_count_basis": "Unchanged test_observer/test_server_diag modules: exact local discovery31 and successful container execution of same modules."
+  },
+  "media": {
+    "passed": true,
+    "scene_jpeg_ffmpeg": "PASS",
+    "concat": "PASS",
+    "audio": "PASS",
+    "qc_failures": [],
+    "decoded_frames": 360,
+    "optional": {
+      "subtitles": {
+        "status": "PASS",
+        "captions": 5
+      },
+      "tts": {
+        "status": "EXPECTED_POLICY_REJECTION",
+        "code": "NARRATION_EXCEEDS_SCENE"
+      }
+    },
+    "scene_times": [
+      {
+        "scene_id": "S001",
+        "seconds": 6.867,
+        "frames": 72
+      },
+      {
+        "scene_id": "S002",
+        "seconds": 6.927,
+        "frames": 72
+      },
+      {
+        "scene_id": "S003",
+        "seconds": 6.919,
+        "frames": 72
+      },
+      {
+        "scene_id": "S004",
+        "seconds": 6.854,
+        "frames": 72
+      },
+      {
+        "scene_id": "S005",
+        "seconds": 6.982,
+        "frames": 72
+      }
+    ],
+    "total_seconds": 58.297,
+    "gpu_render": "NOT_RUN",
+    "scope": "Synthetic patterns at HIGH internal/output resolution; native pose/layout eligibility only. QC pipeline exercised; no post-GPU-draw, map aesthetics or production MP4 validation claim.",
+    "asset_count": 64
+  },
+  "fixtures": {
+    "passed": true,
+    "fixtures": [
+      {
+        "fixture": "shipping",
+        "duration": 12.0,
+        "scenes": 5,
+        "plan_passed": true,
+        "plan_errors": [],
+        "native_passed": true,
+        "native_failures": [],
+        "angles": [
+          0.00012323949769334712,
+          1.179817560173422,
+          1.597634383586687,
+          2.2349525568331754,
+          1.264124878743672
+        ],
+        "hardware": "NOT_RUN",
+        "direction_qc": {
+          "passed": true,
+          "findings": [
+            {
+              "code": "CAMERA_MOTION_OVERLOAD",
+              "severity": "WARNING",
+              "scene_id": "S004"
+            }
+          ],
+          "rendered_pixel_checks": "NOT_RUN",
+          "pixel_rules": [
+            "LABEL_COLLISION",
+            "ENTITY_TOO_SMALL",
+            "ROUTE_LOW_CONTRAST",
+            "GEOGRAPHY_TOO_DARK",
+            "RESULT_HERO_TOO_SMALL",
+            "INFORMATION_DENSITY_HIGH"
+          ]
+        }
+      },
+      {
+        "fixture": "aviation",
+        "duration": 12.0,
+        "scenes": 5,
+        "plan_passed": true,
+        "plan_errors": [],
+        "native_passed": true,
+        "native_failures": [],
+        "angles": [
+          0.2966220296241381,
+          0.5176105195000599
+        ],
+        "hardware": "NOT_RUN",
+        "direction_qc": {
+          "passed": true,
+          "findings": [],
+          "rendered_pixel_checks": "NOT_RUN",
+          "pixel_rules": [
+            "LABEL_COLLISION",
+            "ENTITY_TOO_SMALL",
+            "ROUTE_LOW_CONTRAST",
+            "GEOGRAPHY_TOO_DARK",
+            "RESULT_HERO_TOO_SMALL",
+            "INFORMATION_DENSITY_HIGH"
+          ]
+        }
+      },
+      {
+        "fixture": "country",
+        "duration": 12.0,
+        "scenes": 5,
+        "plan_passed": true,
+        "plan_errors": [],
+        "native_passed": true,
+        "native_failures": [],
+        "angles": [
+          0.19987299303927727,
+          0.32263537237225764
+        ],
+        "hardware": "NOT_RUN",
+        "direction_qc": {
+          "passed": true,
+          "findings": [
+            {
+              "code": "TEXT_DURING_HIGH_MOTION",
+              "severity": "WARNING",
+              "scene_id": "S001",
+              "text_event_ids": [
+                "T_E001"
+              ]
+            }
+          ],
+          "rendered_pixel_checks": "NOT_RUN",
+          "pixel_rules": [
+            "LABEL_COLLISION",
+            "ENTITY_TOO_SMALL",
+            "ROUTE_LOW_CONTRAST",
+            "GEOGRAPHY_TOO_DARK",
+            "RESULT_HERO_TOO_SMALL",
+            "INFORMATION_DENSITY_HIGH"
+          ]
+        }
+      },
+      {
+        "fixture": "network",
+        "duration": 20.0,
+        "scenes": 5,
+        "plan_passed": true,
+        "plan_errors": [],
+        "native_passed": true,
+        "native_failures": [],
+        "angles": [
+          5.3753849130362796e-05,
+          1.0102255609371849,
+          1.970769966068613,
+          0.16967554077717772,
+          1.1836677475522814
+        ],
+        "hardware": "NOT_RUN",
+        "direction_qc": {
+          "passed": true,
+          "findings": [],
+          "rendered_pixel_checks": "NOT_RUN",
+          "pixel_rules": [
+            "LABEL_COLLISION",
+            "ENTITY_TOO_SMALL",
+            "ROUTE_LOW_CONTRAST",
+            "GEOGRAPHY_TOO_DARK",
+            "RESULT_HERO_TOO_SMALL",
+            "INFORMATION_DENSITY_HIGH"
+          ]
+        }
+      }
+    ],
+    "gpu_render": "NOT_RUN"
+  },
+  "boot": true,
+  "owner_login": true,
+  "persistence_seconds": 61,
+  "anonymous_pull": true,
+  "protected_sources_unchanged": 39,
+  "actual_gpu_render": "NOT_RUN",
+  "gcube_workload_actions": "NONE",
+  "actual_android_device": "NOT_RUN"
+}

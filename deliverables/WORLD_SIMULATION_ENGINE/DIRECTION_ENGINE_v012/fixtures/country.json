@@ -1,0 +1,5020 @@
+{
+  "schema_version": "1.0",
+  "project_id": "",
+  "version": 1,
+  "duration": 12.0,
+  "request": {
+    "topic": "중국 한국 일본 국가별 위치와 반응",
+    "duration": 12.0,
+    "qa_mode": true,
+    "quality": "HIGH",
+    "pace": "FAST_PLUS",
+    "tts": false,
+    "subtitle": false,
+    "bgm": true,
+    "sfx": true,
+    "subtitles": false,
+    "style": "시네마틱 세계 시뮬레이션",
+    "style_profile": "tension",
+    "production_preset": "PRODUCTION_DEFAULT"
+  },
+  "options": {
+    "tts": false,
+    "subtitles": false,
+    "bgm": true,
+    "quality": "HIGH",
+    "pace": "FAST_PLUS",
+    "sfx": true
+  },
+  "story": {
+    "hook": "중국와 일본, 어디에 있을까요?",
+    "claims": [
+      {
+        "id": "F01",
+        "text": "People's Republic of China의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F02",
+        "text": "South Korea의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F03",
+        "text": "Japan의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "FD01",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 2,040 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "FD02",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 925 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "A01",
+        "text": "입력한 국가 간 연결은 위치 비교를 위한 시각적 가정입니다. 실제 이동이나 물류 규모가 아닙니다.",
+        "status": "ASSUMPTION",
+        "source_ids": [],
+        "scope": "scenario premise"
+      },
+      {
+        "id": "M01",
+        "text": "공개 GIS의 국가 라벨 좌표와 실제 국가 형태를 비교하여 위치 관계를 시각화합니다.",
+        "status": "SIMULATION",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "assumption_ids": [
+          "A01"
+        ],
+        "scope": "visualization only"
+      }
+    ],
+    "beats": [
+      {
+        "scene_id": "S001",
+        "role": "hook",
+        "cause": null,
+        "summary": "hook: People's Republic of China"
+      },
+      {
+        "scene_id": "S002",
+        "role": "progression",
+        "cause": "S001",
+        "summary": "progression: People's Republic of China"
+      },
+      {
+        "scene_id": "S003",
+        "role": "variable",
+        "cause": "S002",
+        "summary": "variable: South Korea"
+      },
+      {
+        "scene_id": "S004",
+        "role": "peak",
+        "cause": "S003",
+        "summary": "peak: Japan"
+      },
+      {
+        "scene_id": "S005",
+        "role": "payoff",
+        "cause": "S004",
+        "summary": "payoff: Japan"
+      }
+    ],
+    "domain": "comparison",
+    "planner": "offline-capability-bounded-v1",
+    "conclusion": "공개 GIS의 국가 라벨 좌표와 실제 국가 형태를 비교하여 위치 관계를 시각화합니다.",
+    "limitations": [
+      "사실은 공개 GIS의 위치·형태·경로 자료에 한정합니다.",
+      "이동 속도·항로 선택·폐쇄의 결과는 가정 기반 시각화이며 예측이 아닙니다."
+    ],
+    "pattern": "geography-comparison"
+  },
+  "scenes": [
+    {
+      "hook": "중국와 일본, 어디에 있을까요?",
+      "scene_id": "S001",
+      "start_time": 0.0,
+      "duration": 2.4,
+      "scene_type": "EARTH_ESTABLISH",
+      "narration": "이 연결이 바뀐다면?",
+      "location": "People's Republic of China",
+      "coordinates": {
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "source_id": "natural_earth_countries",
+        "location_id": "country_chn"
+      },
+      "geographic_targets": [
+        "country_chn"
+      ],
+      "camera_preset": "FLAT_COUNTRY_FOCUS",
+      "camera_start": {
+        "height": 1.8,
+        "tilt": 0.35,
+        "yaw": -0.26,
+        "bank": 0.015,
+        "fov": 43,
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "target_lon": 106.337289,
+        "target_lat": 32.498178,
+        "location_id": "country_chn"
+      },
+      "camera_end": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "target_lon": 106.337289,
+        "target_lat": 32.498178,
+        "location_id": "country_chn"
+      },
+      "camera_speed": 0.85,
+      "camera_easing": "quintic_out",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [],
+      "entity_actions": [],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2039.9,
+          "description": "People's Republic of China → South Korea",
+          "start_time": 1.3,
+          "end_time": 2.133333,
+          "progress_start": 0.0,
+          "progress_end": 0.26252983,
+          "faint": false,
+          "visibility_role": "primary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.1,
+          "duration": 0.7,
+          "target_id": "country_chn",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "People's Republic of China의 확인된 위치 공개",
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "claim_id": "F01"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "cause",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "연결 경로 선택 공개",
+          "text": "",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "P_HOOK_QUESTION",
+          "kind": "hook_reveal",
+          "time": 0.0,
+          "duration": 1.1,
+          "target_id": "country_chn",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "role": "hook",
+          "caused_by": null,
+          "meaningful": false,
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "claim_id": "A01",
+          "description": "Source-backed map place; no generated decorative slogan"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "country_chn",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "start_time": 0.1,
+          "end_time": 2.4,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52,
+          "kind": "hook_reveal",
+          "event_id": "P_HOOK_QUESTION"
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E001",
+          "kind": "soft_pulse",
+          "time": 0.1,
+          "duration": 1.2,
+          "visual_event_id": "E001",
+          "gain_db": -15,
+          "sfx_category": "CITY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "CITY_REVEAL_01"
+        },
+        {
+          "id": "A_E002",
+          "kind": "digital_sweep",
+          "time": 1.3,
+          "duration": 1.0999999999999999,
+          "visual_event_id": "E002",
+          "gain_db": -15,
+          "sfx_category": "ROUTE_START",
+          "sfx_intensity": "MEDIUM",
+          "sfx_variant": "ROUTE_START_02"
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 1.8,
+          "tilt": 0.35,
+          "yaw": -0.26,
+          "bank": 0.015,
+          "fov": 43,
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "target_lon": 106.337289,
+          "target_lat": 32.498178,
+          "location_id": "country_chn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [],
+        "active_routes": [],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.0
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "target_lon": 106.337289,
+          "target_lat": 32.498178,
+          "location_id": "country_chn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.2
+        }
+      },
+      "directing_presets": [
+        "HOOK_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.0,
+      "motion_start": 0.0,
+      "description": "hook: People's Republic of China",
+      "role": "hook",
+      "narration_event_ids": [
+        "E001",
+        "E002"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT",
+        "large_titles": false
+      },
+      "render_mode": "FLAT_MAP_PREMIUM",
+      "flat_map": {
+        "projection": "LOCAL_MERCATOR",
+        "terrain_texture": {
+          "url": "/static/flat_assets/natural_earth_1_east_asia.png",
+          "bounds": [
+            104.0,
+            7.0,
+            152.0,
+            63.0
+          ]
+        },
+        "camera_start": {
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "span_degrees": 45.5709212,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "camera_end": {
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "span_degrees": 40.6883225,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "country_highlights": [],
+        "focus": [
+          {
+            "target_id": "country_chn",
+            "coordinates": {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            "start_time": 0.0,
+            "end_time": 2.4,
+            "radius_degrees": 7.0,
+            "strength": 0.18
+          }
+        ]
+      },
+      "visual_polish": {
+        "version": "v004",
+        "entity_separation": "v1"
+      },
+      "focus_target": {
+        "target_id": "R_01",
+        "type": "route",
+        "coordinates": {
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "source_id": "natural_earth_countries",
+          "location_id": "country_chn"
+        }
+      },
+      "visual_mode": "FLAT_MAP",
+      "sfx_intensity": "MEDIUM",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 1.6,
+        "zoom_duration": 1.466667,
+        "camera_speed_reference": 0.85,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.36,
+        "entity_speed_factor": 1.36,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 0.0,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.8,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E001",
+          "event_id": "E001",
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "start_time": 0.1,
+          "end_time": 1.0,
+          "role": "city",
+          "priority": 5,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "rhythm_visual": {
+        "version": "v1",
+        "camera": {
+          "knots": [
+            {
+              "phase": 0.0,
+              "speed": 0.65
+            },
+            {
+              "phase": 0.22,
+              "speed": 1.3
+            },
+            {
+              "phase": 0.56,
+              "speed": 1.5
+            },
+            {
+              "phase": 0.82,
+              "speed": 0.8
+            },
+            {
+              "phase": 1.0,
+              "speed": 0.5
+            }
+          ]
+        },
+        "zoom": {
+          "knots": [
+            {
+              "phase": 0.0,
+              "speed": 0.65
+            },
+            {
+              "phase": 0.22,
+              "speed": 1.3
+            },
+            {
+              "phase": 0.56,
+              "speed": 1.5
+            },
+            {
+              "phase": 0.82,
+              "speed": 0.8
+            },
+            {
+              "phase": 1.0,
+              "speed": 0.5
+            }
+          ]
+        },
+        "routes": [
+          {
+            "route_id": "R_01",
+            "knots": [
+              {
+                "phase": 0.0,
+                "speed": 0.65
+              },
+              {
+                "phase": 0.22,
+                "speed": 1.3
+              },
+              {
+                "phase": 0.56,
+                "speed": 1.5
+              },
+              {
+                "phase": 0.82,
+                "speed": 0.8
+              },
+              {
+                "phase": 1.0,
+                "speed": 0.5
+              }
+            ]
+          }
+        ]
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S001_B01",
+          "time": 0.0,
+          "duration": 0.1,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S001_B02",
+          "time": 0.1,
+          "duration": 1.2,
+          "kind": "REVEAL",
+          "music_energy": 0.56,
+          "visual_event_id": "E001"
+        },
+        {
+          "id": "S001_B03",
+          "time": 1.3,
+          "duration": 1.1,
+          "kind": "MOVE",
+          "music_energy": 0.58,
+          "visual_event_id": "E002"
+        }
+      ],
+      "direction": {
+        "version": "direction_v012",
+        "preset": "FAST_PLUS_DIRECTOR",
+        "camera_up_start": [
+          0.15113016425410875,
+          0.8434085314597127,
+          0.515579016750582
+        ],
+        "camera_up_end": [
+          0.15113016425410875,
+          0.8434085314597127,
+          0.515579016750582
+        ],
+        "camera_roll_correction": 0.0,
+        "mode": "QA",
+        "intent": "ROUTE_TRACK",
+        "initial_hold": 0.35,
+        "move_end": 1.5,
+        "settle": 0.9,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "angular_budget_deg_s": 55,
+        "primary": "PEOPLE'S REPUBLIC OF CHINA",
+        "zoom_level": "REGIONAL",
+        "primary_event_id": null,
+        "text_layers": [
+          "LOCATION",
+          "EVENT",
+          "SUPPORT"
+        ],
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 18,
+        "entity_scale_cap": 0.015,
+        "geography_floor": 0.17,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/render_direction_earth.html": "c380cb08ad625880bff09d94820d236617566edc63ad2d285230557d669b8fd4",
+          "web/render_direction_flat.html": "47703158c7ef3eef8dddd6567a69c31bf65e5ba0a31b070039bfe7600f9b74c4",
+          "tools/direction_semantic_preflight.mjs": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25"
+        },
+        "omitted_support": [],
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0.35,
+            "end": 1.5
+          },
+          {
+            "kind": "DECELERATION",
+            "start": 1.27,
+            "end": 1.5
+          },
+          {
+            "kind": "SETTLE",
+            "start": 1.5,
+            "end": 2.4
+          },
+          {
+            "kind": "INFORMATION",
+            "start": 1.5,
+            "end": 2.4,
+            "primary": "PEOPLE'S REPUBLIC OF CHINA"
+          }
+        ]
+      }
+    },
+    {
+      "hook": "",
+      "scene_id": "S002",
+      "start_time": 2.4,
+      "duration": 2.4,
+      "scene_type": "COUNTRY_FOCUS",
+      "narration": "다음 연결로 향합니다.",
+      "location": "People's Republic of China",
+      "coordinates": {
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "source_id": "natural_earth_countries",
+        "location_id": "country_chn"
+      },
+      "geographic_targets": [
+        "country_chn"
+      ],
+      "camera_preset": "FLAT_COUNTRY_FOCUS",
+      "camera_start": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "target_lon": 106.337289,
+        "target_lat": 32.498178,
+        "location_id": "country_chn"
+      },
+      "camera_end": {
+        "height": 0.5,
+        "tilt": 0.5,
+        "yaw": 0.12,
+        "bank": 0.01,
+        "fov": 42,
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "target_lon": 106.337289,
+        "target_lat": 32.498178,
+        "location_id": "country_chn"
+      },
+      "camera_speed": 0.85,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [],
+      "entity_actions": [],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2039.9,
+          "description": "People's Republic of China → South Korea",
+          "start_time": 0.0,
+          "end_time": 1.766667,
+          "progress_start": 0.26252983,
+          "progress_end": 0.8353222,
+          "faint": false,
+          "visibility_role": "primary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E003",
+          "kind": "destination_preview",
+          "time": 0.0,
+          "duration": 0.7,
+          "target_id": "country_kor",
+          "role": "hint",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "다음 연결점 South Korea 공개",
+          "text": "SOUTH KOREA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "F02"
+        },
+        {
+          "id": "E004",
+          "kind": "connection_reveal",
+          "time": 1.8,
+          "duration": 0.6,
+          "target_id": "country_kor",
+          "role": "progression",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "새 연결 관계 공개",
+          "text": "SOUTH KOREA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "country_chn",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "start_time": 0.1,
+          "end_time": 2.4,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E003",
+          "kind": "soft_pulse",
+          "time": 0.0,
+          "duration": 1.2,
+          "visual_event_id": "E003",
+          "gain_db": -15,
+          "sfx_category": "CITY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "CITY_REVEAL_02"
+        },
+        {
+          "id": "A_E004",
+          "kind": "digital_sweep",
+          "time": 1.8000000000000003,
+          "duration": 0.5999999999999996,
+          "visual_event_id": "E004",
+          "gain_db": -15,
+          "sfx_category": "NETWORK_EXPAND",
+          "sfx_intensity": "MEDIUM",
+          "sfx_variant": "NETWORK_EXPAND_02"
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "target_lon": 106.337289,
+          "target_lat": 32.498178,
+          "location_id": "country_chn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.2
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.5,
+          "tilt": 0.5,
+          "yaw": 0.12,
+          "bank": 0.01,
+          "fov": 42,
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "target_lon": 106.337289,
+          "target_lat": 32.498178,
+          "location_id": "country_chn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.4
+        }
+      },
+      "directing_presets": [
+        "COUNTRY_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.2,
+      "motion_start": 0.0,
+      "description": "progression: People's Republic of China",
+      "role": "progression",
+      "narration_event_ids": [
+        "E003",
+        "E004"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT",
+        "large_titles": false
+      },
+      "render_mode": "FLAT_MAP_PREMIUM",
+      "flat_map": {
+        "projection": "LOCAL_MERCATOR",
+        "terrain_texture": {
+          "url": "/static/flat_assets/natural_earth_1_east_asia.png",
+          "bounds": [
+            104.0,
+            7.0,
+            152.0,
+            63.0
+          ]
+        },
+        "camera_start": {
+          "lon": 117.23339650000003,
+          "lat": 32.498178,
+          "span_degrees": 45.5709212,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "camera_end": {
+          "lon": 117.23339650000003,
+          "lat": 32.498178,
+          "span_degrees": 40.6883225,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "country_highlights": [],
+        "focus": [
+          {
+            "target_id": "country_chn",
+            "coordinates": {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            "start_time": 0.0,
+            "end_time": 2.4,
+            "radius_degrees": 7.0,
+            "strength": 0.18
+          }
+        ]
+      },
+      "visual_polish": {
+        "version": "v004",
+        "entity_separation": "v1"
+      },
+      "focus_target": {
+        "target_id": "R_01",
+        "type": "route",
+        "coordinates": {
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "source_id": "natural_earth_countries",
+          "location_id": "country_chn"
+        }
+      },
+      "visual_mode": "FLAT_MAP",
+      "sfx_intensity": "MEDIUM",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 1.6,
+        "zoom_duration": 1.466667,
+        "camera_speed_reference": 0.85,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.36,
+        "entity_speed_factor": 1.36,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 0.0,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.8,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E003",
+          "event_id": "E003",
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "start_time": 0.0,
+          "end_time": 0.85,
+          "role": "city",
+          "priority": 5,
+          "large_title_approved": false
+        },
+        {
+          "id": "D_E004",
+          "event_id": "E004",
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "start_time": 1.8,
+          "end_time": 2.4,
+          "role": "status",
+          "priority": 8,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "rhythm_visual": {
+        "version": "v1",
+        "camera": {
+          "knots": [
+            {
+              "phase": 0.0,
+              "speed": 0.65
+            },
+            {
+              "phase": 0.22,
+              "speed": 1.3
+            },
+            {
+              "phase": 0.56,
+              "speed": 1.5
+            },
+            {
+              "phase": 0.82,
+              "speed": 0.8
+            },
+            {
+              "phase": 1.0,
+              "speed": 0.5
+            }
+          ]
+        },
+        "zoom": {
+          "knots": [
+            {
+              "phase": 0.0,
+              "speed": 0.65
+            },
+            {
+              "phase": 0.22,
+              "speed": 1.3
+            },
+            {
+              "phase": 0.56,
+              "speed": 1.5
+            },
+            {
+              "phase": 0.82,
+              "speed": 0.8
+            },
+            {
+              "phase": 1.0,
+              "speed": 0.5
+            }
+          ]
+        },
+        "routes": [
+          {
+            "route_id": "R_01",
+            "knots": [
+              {
+                "phase": 0.0,
+                "speed": 0.65
+              },
+              {
+                "phase": 0.22,
+                "speed": 1.3
+              },
+              {
+                "phase": 0.56,
+                "speed": 1.5
+              },
+              {
+                "phase": 0.82,
+                "speed": 0.8
+              },
+              {
+                "phase": 1.0,
+                "speed": 0.5
+              }
+            ]
+          }
+        ]
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S002_B01",
+          "time": 0.0,
+          "duration": 1.8,
+          "kind": "NEXT_CUE",
+          "music_energy": 0.64,
+          "visual_event_id": "E003"
+        },
+        {
+          "id": "S002_B02",
+          "time": 1.8,
+          "duration": 0.6,
+          "kind": "REVEAL",
+          "music_energy": 0.56,
+          "visual_event_id": "E004"
+        }
+      ],
+      "direction": {
+        "version": "direction_v012",
+        "preset": "FAST_PLUS_DIRECTOR",
+        "camera_up_start": [
+          0.15113016425410875,
+          0.8434085314597127,
+          0.515579016750582
+        ],
+        "camera_up_end": [
+          0.15113016425410875,
+          0.8434085314597127,
+          0.515579016750582
+        ],
+        "camera_roll_correction": 0.0,
+        "mode": "QA",
+        "intent": "ROUTE_TRACK",
+        "initial_hold": 0.91,
+        "move_end": 2.133333,
+        "settle": 0.91,
+        "acceleration_fraction": 0.2,
+        "settle_position": "ENTRY",
+        "angular_budget_deg_s": 55,
+        "primary": "SOUTH KOREA",
+        "zoom_level": "REGIONAL",
+        "primary_event_id": "E003",
+        "text_layers": [
+          "LOCATION",
+          "EVENT",
+          "SUPPORT"
+        ],
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 18,
+        "entity_scale_cap": 0.015,
+        "geography_floor": 0.17,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/render_direction_earth.html": "c380cb08ad625880bff09d94820d236617566edc63ad2d285230557d669b8fd4",
+          "web/render_direction_flat.html": "47703158c7ef3eef8dddd6567a69c31bf65e5ba0a31b070039bfe7600f9b74c4",
+          "tools/direction_semantic_preflight.mjs": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25"
+        },
+        "omitted_support": [],
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0.91,
+            "end": 2.133333
+          },
+          {
+            "kind": "DECELERATION",
+            "start": 1.8886664,
+            "end": 2.133333
+          },
+          {
+            "kind": "SETTLE",
+            "start": 0.0,
+            "end": 0.91
+          },
+          {
+            "kind": "INFORMATION",
+            "start": 2.133333,
+            "end": 2.4,
+            "primary": "SOUTH KOREA"
+          }
+        ]
+      }
+    },
+    {
+      "hook": "",
+      "scene_id": "S003",
+      "start_time": 4.8,
+      "duration": 2.4000000000000004,
+      "scene_type": "COUNTRY_FOCUS",
+      "narration": "다른 경로가 필요합니다.",
+      "location": "South Korea",
+      "coordinates": {
+        "lon": 128.129504,
+        "lat": 36.384924,
+        "source_id": "natural_earth_countries",
+        "location_id": "country_kor"
+      },
+      "geographic_targets": [
+        "country_kor"
+      ],
+      "camera_preset": "FLAT_COUNTRY_FOCUS",
+      "camera_start": {
+        "height": 0.5,
+        "tilt": 0.5,
+        "yaw": 0.12,
+        "bank": 0.01,
+        "fov": 42,
+        "lon": 106.337289,
+        "lat": 32.498178,
+        "target_lon": 106.337289,
+        "target_lat": 32.498178,
+        "location_id": "country_chn"
+      },
+      "camera_end": {
+        "height": 2.25,
+        "tilt": 0.3,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 62,
+        "lon": 128.129504,
+        "lat": 36.384924,
+        "target_lon": 128.129504,
+        "target_lat": 36.384924,
+        "location_id": "country_kor"
+      },
+      "camera_speed": 0.85,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [],
+      "entity_actions": [],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2039.9,
+          "description": "People's Republic of China → South Korea",
+          "start_time": 0.0,
+          "end_time": 0.533333,
+          "progress_start": 0.8353222,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "primary"
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            },
+            {
+              "lon": 138.44217,
+              "lat": 36.142538,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_jpn"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 924.56,
+          "description": "South Korea → Japan",
+          "start_time": 0.69,
+          "end_time": 1.966667,
+          "progress_start": 0.0,
+          "progress_end": 0.37254902,
+          "faint": false,
+          "visibility_role": "secondary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E005",
+          "kind": "connection_reveal",
+          "time": 0.7,
+          "duration": 0.7,
+          "target_id": "country_kor",
+          "role": "progression",
+          "caused_by": "E004",
+          "meaningful": false,
+          "description": "SOUTH KOREA",
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E006",
+          "kind": "route_start",
+          "time": 0.7,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "variable",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "THE NEXT CONNECTION",
+          "text": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E007",
+          "kind": "country_reveal",
+          "time": 1.8,
+          "duration": 0.6,
+          "target_id": "country_kor",
+          "role": "progression",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "South Korea의 위치 관계 공개",
+          "text": "SOUTH KOREA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "F02"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "country_kor",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "start_time": 0.1,
+          "end_time": 2.4000000000000004,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E005",
+          "kind": "digital_sweep",
+          "time": 0.7000000000000002,
+          "duration": 1.2,
+          "visual_event_id": "E005",
+          "gain_db": -15,
+          "sfx_category": "NETWORK_EXPAND",
+          "sfx_intensity": "HIGH",
+          "sfx_variant": "NETWORK_EXPAND_03"
+        },
+        {
+          "id": "A_E006",
+          "kind": "digital_sweep",
+          "time": 0.7000000000000002,
+          "duration": 1.2,
+          "visual_event_id": "E006",
+          "gain_db": -15,
+          "sfx_category": "ROUTE_START",
+          "sfx_intensity": "HIGH",
+          "sfx_variant": "ROUTE_START_02"
+        },
+        {
+          "id": "A_E007",
+          "kind": "soft_impact",
+          "time": 1.7999999999999998,
+          "duration": 0.6,
+          "visual_event_id": "E007",
+          "gain_db": -15,
+          "sfx_category": "COUNTRY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "COUNTRY_REVEAL_02"
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "FLAT_TO_EARTH",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.5,
+          "tilt": 0.5,
+          "yaw": 0.12,
+          "bank": 0.01,
+          "fov": 42,
+          "lon": 106.337289,
+          "lat": 32.498178,
+          "target_lon": 106.337289,
+          "target_lat": 32.498178,
+          "location_id": "country_chn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.4
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.3,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 62,
+          "lon": 128.129504,
+          "lat": 36.384924,
+          "target_lon": 128.129504,
+          "target_lat": 36.384924,
+          "location_id": "country_kor"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.6
+        }
+      },
+      "directing_presets": [
+        "COUNTRY_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.4,
+      "motion_start": 0.0,
+      "description": "variable: South Korea",
+      "role": "variable",
+      "narration_event_ids": [
+        "E005",
+        "E006",
+        "E007"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT",
+        "large_titles": false
+      },
+      "render_mode": "FLAT_MAP_PREMIUM",
+      "flat_map": {
+        "projection": "LOCAL_MERCATOR",
+        "terrain_texture": {
+          "url": "/static/flat_assets/natural_earth_1_east_asia.png",
+          "bounds": [
+            104.0,
+            7.0,
+            152.0,
+            63.0
+          ]
+        },
+        "camera_start": {
+          "lon": 128.129504,
+          "lat": 32.498178,
+          "span_degrees": 62.896200080000014,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "camera_end": {
+          "lon": 128.129504,
+          "lat": 36.384924,
+          "span_degrees": 56.15732150000001,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "country_highlights": [
+          {
+            "country": "KOR",
+            "source_id": "natural_earth_countries",
+            "start_time": 1.8,
+            "end_time": 2.4000000000000004,
+            "color": "#dba966",
+            "opacity": 0.24
+          }
+        ],
+        "focus": [
+          {
+            "target_id": "country_kor",
+            "coordinates": {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            },
+            "start_time": 0.0,
+            "end_time": 2.4000000000000004,
+            "radius_degrees": 7.0,
+            "strength": 0.18
+          }
+        ],
+        "next_event": {
+          "event_id": "E007",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "event_time": 1.8,
+          "lead_time": 0.3,
+          "strength": 0.25
+        }
+      },
+      "visual_polish": {
+        "version": "v004",
+        "entity_separation": "v1"
+      },
+      "focus_target": {
+        "target_id": "R_01",
+        "type": "route",
+        "coordinates": {
+          "lon": 128.129504,
+          "lat": 36.384924,
+          "source_id": "natural_earth_countries",
+          "location_id": "country_kor"
+        }
+      },
+      "visual_mode": "FLAT_MAP",
+      "sfx_intensity": "HIGH",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 1.6,
+        "zoom_duration": 1.466667,
+        "camera_speed_reference": 0.85,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.36,
+        "entity_speed_factor": 1.36,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 0.0,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.8,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E007",
+          "event_id": "E007",
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "start_time": 1.8,
+          "end_time": 2.4000000000000004,
+          "role": "country",
+          "priority": 5,
+          "large_title_approved": false
+        },
+        {
+          "id": "D_E005",
+          "event_id": "E005",
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "start_time": 0.7,
+          "end_time": 1.5499999999999998,
+          "role": "status",
+          "priority": 8,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "map_transition": {
+        "duration": 0.3
+      },
+      "rhythm_visual": {
+        "version": "v1",
+        "camera": {
+          "knots": [
+            {
+              "phase": 0.0,
+              "speed": 0.65
+            },
+            {
+              "phase": 0.22,
+              "speed": 1.3
+            },
+            {
+              "phase": 0.56,
+              "speed": 1.5
+            },
+            {
+              "phase": 0.82,
+              "speed": 0.8
+            },
+            {
+              "phase": 1.0,
+              "speed": 0.5
+            }
+          ]
+        },
+        "zoom": {
+          "knots": [
+            {
+              "phase": 0.0,
+              "speed": 0.65
+            },
+            {
+              "phase": 0.22,
+              "speed": 1.3
+            },
+            {
+              "phase": 0.56,
+              "speed": 1.5
+            },
+            {
+              "phase": 0.82,
+              "speed": 0.8
+            },
+            {
+              "phase": 1.0,
+              "speed": 0.5
+            }
+          ]
+        },
+        "routes": [
+          {
+            "route_id": "R_01",
+            "knots": [
+              {
+                "phase": 0.0,
+                "speed": 0.65
+              },
+              {
+                "phase": 0.22,
+                "speed": 1.3
+              },
+              {
+                "phase": 0.56,
+                "speed": 1.5
+              },
+              {
+                "phase": 0.82,
+                "speed": 0.8
+              },
+              {
+                "phase": 1.0,
+                "speed": 0.5
+              }
+            ]
+          },
+          {
+            "route_id": "R_02",
+            "knots": [
+              {
+                "phase": 0.0,
+                "speed": 0.65
+              },
+              {
+                "phase": 0.22,
+                "speed": 1.3
+              },
+              {
+                "phase": 0.56,
+                "speed": 1.5
+              },
+              {
+                "phase": 0.82,
+                "speed": 0.8
+              },
+              {
+                "phase": 1.0,
+                "speed": 0.5
+              }
+            ]
+          }
+        ]
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S003_B01",
+          "time": 0.0,
+          "duration": 0.7,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S003_B02",
+          "time": 0.7,
+          "duration": 0.8,
+          "kind": "MOVE",
+          "music_energy": 0.58,
+          "visual_event_id": "E006"
+        },
+        {
+          "id": "S003_B03",
+          "time": 1.5,
+          "duration": 0.3,
+          "kind": "NEXT_CUE",
+          "music_energy": 0.64,
+          "visual_event_id": "E007"
+        },
+        {
+          "id": "S003_B04",
+          "time": 1.8,
+          "duration": 0.6,
+          "kind": "REVEAL",
+          "music_energy": 0.56,
+          "visual_event_id": "E007"
+        }
+      ],
+      "direction": {
+        "version": "direction_v012",
+        "preset": "FAST_PLUS_DIRECTOR",
+        "camera_up_start": [
+          0.15113016425410875,
+          0.8434085314597127,
+          0.515579016750582
+        ],
+        "camera_up_end": [
+          0.18831149951925502,
+          0.786167715899413,
+          0.5886247545136966
+        ],
+        "camera_roll_correction": 0.0,
+        "mode": "QA",
+        "intent": "ROUTE_TRACK",
+        "initial_hold": 0,
+        "move_end": 1.5,
+        "settle": 0.9,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "angular_budget_deg_s": 55,
+        "primary": "SOUTH KOREA",
+        "zoom_level": "REGIONAL",
+        "primary_event_id": null,
+        "text_layers": [
+          "LOCATION",
+          "EVENT",
+          "SUPPORT"
+        ],
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 18,
+        "entity_scale_cap": 0.015,
+        "geography_floor": 0.17,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/render_direction_earth.html": "c380cb08ad625880bff09d94820d236617566edc63ad2d285230557d669b8fd4",
+          "web/render_direction_flat.html": "47703158c7ef3eef8dddd6567a69c31bf65e5ba0a31b070039bfe7600f9b74c4",
+          "tools/direction_semantic_preflight.mjs": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25"
+        },
+        "omitted_support": [],
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 1.5
+          },
+          {
+            "kind": "DECELERATION",
+            "start": 1.2000000000000002,
+            "end": 1.5
+          },
+          {
+            "kind": "SETTLE",
+            "start": 1.5,
+            "end": 2.4000000000000004
+          },
+          {
+            "kind": "INFORMATION",
+            "start": 1.5,
+            "end": 2.4000000000000004,
+            "primary": "SOUTH KOREA"
+          }
+        ]
+      }
+    },
+    {
+      "hook": "",
+      "scene_id": "S004",
+      "start_time": 7.2,
+      "duration": 2.3999999999999995,
+      "scene_type": "COUNTRY_FOCUS",
+      "narration": "전체 연결이 드러납니다.",
+      "location": "Japan",
+      "coordinates": {
+        "lon": 138.44217,
+        "lat": 36.142538,
+        "source_id": "natural_earth_countries",
+        "location_id": "country_jpn"
+      },
+      "geographic_targets": [
+        "country_jpn"
+      ],
+      "camera_preset": "COUNTRY_APPROACH",
+      "camera_start": {
+        "height": 2.25,
+        "tilt": 0.3,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 62,
+        "lon": 128.129504,
+        "lat": 36.384924,
+        "target_lon": 128.129504,
+        "target_lat": 36.384924,
+        "location_id": "country_kor"
+      },
+      "camera_end": {
+        "height": 2.25,
+        "tilt": 0.3,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 62,
+        "lon": 138.44217,
+        "lat": 36.142538,
+        "target_lon": 138.44217,
+        "target_lat": 36.142538,
+        "location_id": "country_jpn"
+      },
+      "camera_speed": 0.9,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [],
+      "entity_actions": [],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2039.9,
+          "description": "People's Republic of China → South Korea",
+          "start_time": 0.0,
+          "end_time": 2.3999999999999995,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "secondary"
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            },
+            {
+              "lon": 138.44217,
+              "lat": 36.142538,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_jpn"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 924.56,
+          "description": "South Korea → Japan",
+          "start_time": 0.0,
+          "end_time": 2.133333,
+          "progress_start": 0.37254902,
+          "progress_end": 0.89542484,
+          "faint": false,
+          "visibility_role": "primary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E008",
+          "kind": "distance_reveal",
+          "time": 1.6,
+          "duration": 0.7,
+          "target_id": "country_jpn",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "검증 좌표에서 계산한 구면 거리 공개",
+          "text": "925 km",
+          "value": 925,
+          "unit": "km",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "claim_id": "FD02"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "country_jpn",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "JAPAN",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "start_time": 0.1,
+          "end_time": 2.3999999999999995,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E008",
+          "kind": "soft_pulse",
+          "time": 1.6000000000000005,
+          "duration": 0.7999999999999989,
+          "visual_event_id": "E008",
+          "gain_db": -15,
+          "sfx_category": "ROUTE_PROGRESS",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "ROUTE_PROGRESS_02"
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "FLAT_TO_EARTH",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.3,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 62,
+          "lon": 128.129504,
+          "lat": 36.384924,
+          "target_lon": 128.129504,
+          "target_lat": 36.384924,
+          "location_id": "country_kor"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.6
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.3,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 62,
+          "lon": 138.44217,
+          "lat": 36.142538,
+          "target_lon": 138.44217,
+          "target_lat": 36.142538,
+          "location_id": "country_jpn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.8
+        }
+      },
+      "directing_presets": [
+        "COUNTRY_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.6,
+      "motion_start": 0.0,
+      "description": "peak: Japan",
+      "role": "peak",
+      "narration_event_ids": [
+        "E008"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT",
+        "large_titles": false
+      },
+      "render_mode": "MASTER_V3_EARTH",
+      "visual_polish": {
+        "version": "v004"
+      },
+      "visual_mode": "HERO",
+      "sfx_intensity": "HIGH",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 2.066667,
+        "zoom_duration": 2.066667,
+        "camera_speed_reference": 0.9,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.126,
+        "entity_speed_factor": 1.126,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 0.8,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.333333,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E008",
+          "event_id": "E008",
+          "text": "925 km",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "start_time": 1.6,
+          "end_time": 2.3,
+          "role": "distance",
+          "priority": 5,
+          "large_title_approved": false,
+          "route_id": "R_01"
+        }
+      ],
+      "text_density": "MINIMAL",
+      "focus_target": {
+        "target_id": "R_02",
+        "type": "route",
+        "coordinates": {
+          "lon": 138.44217,
+          "lat": 36.142538,
+          "source_id": "natural_earth_countries",
+          "location_id": "country_jpn"
+        }
+      },
+      "map_transition": {
+        "duration": 0.3
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S004_B01",
+          "time": 0.0,
+          "duration": 1.6,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S004_B02",
+          "time": 1.6,
+          "duration": 0.8,
+          "kind": "REVEAL",
+          "music_energy": 0.56,
+          "visual_event_id": "E008"
+        }
+      ],
+      "direction": {
+        "version": "direction_v012",
+        "preset": "FAST_PLUS_DIRECTOR",
+        "camera_up_start": [
+          0.36627038263528156,
+          0.8050499133324591,
+          0.4666268786167428
+        ],
+        "camera_up_end": [
+          0.36821254111699186,
+          0.8029637673451911,
+          0.4686882896926112
+        ],
+        "camera_roll_correction": 0.0,
+        "mode": "QA",
+        "intent": "ROUTE_TRACK",
+        "initial_hold": 0,
+        "move_end": 1.733333,
+        "settle": 0.666667,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "angular_budget_deg_s": 55,
+        "primary": "JAPAN",
+        "zoom_level": "REGIONAL",
+        "primary_event_id": null,
+        "text_layers": [
+          "LOCATION",
+          "EVENT",
+          "SUPPORT"
+        ],
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 18,
+        "entity_scale_cap": 0.015,
+        "geography_floor": 0.17,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/render_direction_earth.html": "c380cb08ad625880bff09d94820d236617566edc63ad2d285230557d669b8fd4",
+          "web/render_direction_flat.html": "47703158c7ef3eef8dddd6567a69c31bf65e5ba0a31b070039bfe7600f9b74c4",
+          "tools/direction_semantic_preflight.mjs": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25"
+        },
+        "omitted_support": [],
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 1.733333
+          },
+          {
+            "kind": "DECELERATION",
+            "start": 1.3866664000000002,
+            "end": 1.733333
+          },
+          {
+            "kind": "SETTLE",
+            "start": 1.733333,
+            "end": 2.3999999999999995
+          },
+          {
+            "kind": "INFORMATION",
+            "start": 1.733333,
+            "end": 2.3999999999999995,
+            "primary": "JAPAN"
+          }
+        ]
+      }
+    },
+    {
+      "hook": "",
+      "scene_id": "S005",
+      "start_time": 9.6,
+      "duration": 2.4000000000000004,
+      "scene_type": "FINAL_OVERVIEW",
+      "narration": "새로운 연결이 보입니다.",
+      "location": "Japan",
+      "coordinates": {
+        "lon": 138.44217,
+        "lat": 36.142538,
+        "source_id": "natural_earth_countries",
+        "location_id": "country_jpn"
+      },
+      "geographic_targets": [
+        "country_jpn"
+      ],
+      "camera_preset": "FINAL_REVEAL",
+      "camera_start": {
+        "height": 2.25,
+        "tilt": 0.3,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 62,
+        "lon": 138.44217,
+        "lat": 36.142538,
+        "target_lon": 138.44217,
+        "target_lat": 36.142538,
+        "location_id": "country_jpn"
+      },
+      "camera_end": {
+        "height": 2.0,
+        "tilt": 0.12,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 62,
+        "lon": 135.00461466666667,
+        "lat": 36.223333333333336,
+        "target_lon": 135.00461466666667,
+        "target_lat": 36.223333333333336
+      },
+      "camera_speed": 1.3,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [],
+      "entity_actions": [],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 106.337289,
+              "lat": 32.498178,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_chn"
+            },
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2039.9,
+          "description": "People's Republic of China → South Korea",
+          "start_time": 0.0,
+          "end_time": 2.4000000000000004,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "secondary"
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 128.129504,
+              "lat": 36.384924,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_kor"
+            },
+            {
+              "lon": 138.44217,
+              "lat": 36.142538,
+              "source_id": "natural_earth_countries",
+              "location_id": "country_jpn"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_countries"
+          ],
+          "color": "#b9eeff",
+          "length_km": 924.56,
+          "description": "South Korea → Japan",
+          "start_time": 0.0,
+          "end_time": 0.5,
+          "progress_start": 0.89542484,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "primary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E009",
+          "kind": "connection_reveal",
+          "time": 0.5,
+          "duration": 0.7,
+          "target_id": "country_jpn",
+          "role": "progression",
+          "caused_by": "E008",
+          "meaningful": true,
+          "description": "JAPAN",
+          "text": "",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E010",
+          "kind": "final_reveal",
+          "time": 1.333333,
+          "duration": 0.8,
+          "target_id": "R_02",
+          "role": "payoff",
+          "caused_by": "E009",
+          "meaningful": true,
+          "description": "전체 연결 구조와 가정의 한계 공개",
+          "text": "+1,115 km",
+          "value": 1115.347797,
+          "unit": "km",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "country_jpn",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "start_time": 0.1,
+          "end_time": 2.4000000000000004,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52
+        },
+        {
+          "text": "SOUTH KOREA",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "start_time": 0.1,
+          "end_time": 2.4000000000000004,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52
+        },
+        {
+          "text": "JAPAN",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "start_time": 0.1,
+          "end_time": 2.4000000000000004,
+          "role": "city",
+          "opacity": 1.0,
+          "color": "#102430",
+          "size": 52
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E009",
+          "kind": "digital_sweep",
+          "time": 0.5,
+          "duration": 1.2,
+          "visual_event_id": "E009",
+          "gain_db": -15,
+          "sfx_category": "NETWORK_EXPAND",
+          "sfx_intensity": "PEAK",
+          "sfx_variant": "NETWORK_EXPAND_03"
+        },
+        {
+          "id": "A_E010",
+          "kind": "deep_final_hit",
+          "time": 1.333333,
+          "duration": 0.65,
+          "visual_event_id": "E010",
+          "gain_db": -15,
+          "sfx_category": "FINAL_REVEAL",
+          "sfx_intensity": "PEAK",
+          "sfx_variant": "FINAL_REVEAL_01"
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.3,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 62,
+          "lon": 138.44217,
+          "lat": 36.142538,
+          "target_lon": 138.44217,
+          "target_lat": 36.142538,
+          "location_id": "country_jpn"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.8
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 2.0,
+          "tilt": 0.12,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 62,
+          "lon": 135.00461466666667,
+          "lat": 36.223333333333336,
+          "target_lon": 135.00461466666667,
+          "target_lat": 36.223333333333336
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "People's Republic of China",
+          "South Korea"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 1.0
+        }
+      },
+      "directing_presets": [
+        "FINAL_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.8,
+      "motion_start": 0.0,
+      "description": "payoff: Japan",
+      "role": "payoff",
+      "narration_event_ids": [
+        "E009",
+        "E010"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT",
+        "large_titles": false
+      },
+      "render_mode": "MASTER_V3_EARTH",
+      "visual_polish": {
+        "version": "v004"
+      },
+      "visual_mode": "HERO",
+      "sfx_intensity": "PEAK",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 2.066667,
+        "zoom_duration": 2.066667,
+        "camera_speed_reference": 1.3,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.126,
+        "entity_speed_factor": 1.126,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 0.8,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.333333,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E010",
+          "event_id": "E010",
+          "text": "+1,115 km",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "start_time": 1.333333,
+          "end_time": 2.4000000000000004,
+          "role": "distance",
+          "priority": 8,
+          "large_title_approved": false,
+          "route_id": "R_02"
+        }
+      ],
+      "text_density": "MINIMAL",
+      "focus_target": {
+        "target_id": "R_02",
+        "type": "route",
+        "coordinates": {
+          "lon": 138.44217,
+          "lat": 36.142538,
+          "source_id": "natural_earth_countries",
+          "location_id": "country_jpn"
+        }
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S005_B01",
+          "time": 0.0,
+          "duration": 0.5,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S005_B02",
+          "time": 0.5,
+          "duration": 0.666667,
+          "kind": "REVEAL",
+          "music_energy": 0.56,
+          "visual_event_id": "E009"
+        },
+        {
+          "id": "S005_B03",
+          "time": 1.166667,
+          "duration": 0.166666,
+          "kind": "MICRO_PAUSE",
+          "music_energy": 0.22,
+          "visual_event_id": "E010"
+        },
+        {
+          "id": "S005_B04",
+          "time": 1.333333,
+          "duration": 0.4,
+          "kind": "PEAK",
+          "music_energy": 0.96,
+          "visual_event_id": "E010"
+        },
+        {
+          "id": "S005_B05",
+          "time": 1.733333,
+          "duration": 0.666667,
+          "kind": "RELEASE",
+          "music_energy": 0.34,
+          "visual_event_id": "E010"
+        }
+      ],
+      "direction": {
+        "version": "direction_v012",
+        "preset": "FAST_PLUS_DIRECTOR",
+        "camera_up_start": [
+          0.36821254111699186,
+          0.8029637673451911,
+          0.4686882896926112
+        ],
+        "camera_up_end": [
+          0.36651061380757566,
+          0.804674339182097,
+          0.46708583561081096
+        ],
+        "camera_roll_correction": 0.0,
+        "mode": "QA",
+        "intent": "RESULT_HERO",
+        "initial_hold": 0,
+        "move_end": 1.333333,
+        "settle": 1.066667,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "angular_budget_deg_s": 55,
+        "primary": "+1,115 km",
+        "zoom_level": "WORLD",
+        "primary_event_id": "E010",
+        "text_layers": [
+          "LOCATION",
+          "EVENT",
+          "SUPPORT"
+        ],
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.5,
+        "entity_min_pixels_1080": 18,
+        "entity_scale_cap": 0.015,
+        "geography_floor": 0.17,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/render_direction_earth.html": "c380cb08ad625880bff09d94820d236617566edc63ad2d285230557d669b8fd4",
+          "web/render_direction_flat.html": "47703158c7ef3eef8dddd6567a69c31bf65e5ba0a31b070039bfe7600f9b74c4",
+          "tools/direction_semantic_preflight.mjs": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25"
+        },
+        "omitted_support": [],
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 1.333333
+          },
+          {
+            "kind": "DECELERATION",
+            "start": 1.0666664000000001,
+            "end": 1.333333
+          },
+          {
+            "kind": "SETTLE",
+            "start": 1.333333,
+            "end": 2.4000000000000004
+          },
+          {
+            "kind": "INFORMATION",
+            "start": 1.333333,
+            "end": 2.4000000000000004,
+            "primary": "+1,115 km"
+          }
+        ]
+      }
+    }
+  ],
+  "required_plugins": [
+    "NETWORK",
+    "GEOGRAPHY"
+  ],
+  "sources": [
+    {
+      "id": "natural_earth_places",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "2026-10-04T11:59:04.739053+00:00",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "local_path": "populated_places_source.geojson",
+      "attribution_required": false
+    },
+    {
+      "id": "ourairports",
+      "url": "https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv",
+      "author": "OurAirports / DataHub",
+      "license": "ODC-PDDL-1.0",
+      "license_url": "https://opendatacommons.org/licenses/pddl/",
+      "downloaded_at": "2026-10-04T11:59:04.745131+00:00",
+      "sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "local_path": "airport_codes_source.csv",
+      "attribution_required": false
+    },
+    {
+      "id": "natural_earth_countries",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "preserved original MASTER GIS; first acquisition in assets/SOURCES.json",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "local_path": "../../cinematic-world-map/assets/gis/countries_50m.geojson",
+      "attribution_required": false,
+      "coordinate_provenance": "LABEL_X/LABEL_Y source label points; not centroid guesses"
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "name": "searoute 1.6.0 maritime network and ports",
+      "author": "Gent Halili and searoute-py contributors",
+      "license": "Apache-2.0",
+      "license_file": "data/shipping_sources/APACHE-2.0.txt",
+      "attribution_required": true,
+      "attribution": "Maritime route geometry derived from searoute-py 1.6.0 by Gent Halili and contributors, Apache-2.0. Routes are visualization-grade and are not navigational directions.",
+      "original_url": "https://github.com/genthalili/searoute-py",
+      "download_url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "package_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "downloaded_at_utc": "2026-10-04T12:01:52.348234+00:00",
+      "package_version": "1.6.0",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_order": "longitude,latitude",
+      "coordinate_reference_system": "EPSG:4326",
+      "files": {
+        "marnet_dict.py": {
+          "path": "data/shipping_sources/marnet_dict.py",
+          "sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3"
+        },
+        "ports_dict.py": {
+          "path": "data/shipping_sources/ports_dict.py",
+          "sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b"
+        },
+        "APACHE-2.0.txt": {
+          "path": "data/shipping_sources/APACHE-2.0.txt",
+          "sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66"
+        },
+        "PACKAGE_METADATA.txt": {
+          "path": "data/shipping_sources/PACKAGE_METADATA.txt",
+          "sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c"
+        }
+      },
+      "limitations": [
+        "The source library is explicitly for maritime visualization, not vessel navigation.",
+        "Canal and river segments are generalized network geometry; do not claim survey-grade canal geometry.",
+        "Routes are graph shortest-distance alternatives, not a forecast of ship choices, traffic volume, prices, delivery delay, or closure outcome.",
+        "Fixed-speed duration estimates from the source package are deliberately not used."
+      ],
+      "id": "SEAROUTE_1_6_0",
+      "url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "local_path": "data/shipping_sources/searoute-1.6.0.tar.gz"
+    },
+    {
+      "id": "NATURAL_EARTH_PHYSICAL_POINTS_10M",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_geography_regions_points.geojson",
+      "author": "Natural Earth contributors",
+      "license": "Public Domain",
+      "sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "local_path": "data/shipping_sources/natural_earth_physical_points.geojson",
+      "downloaded_at_utc": "2026-10-04T12:03:07.469430+00:00",
+      "attribution_required": false,
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_reference_system": "EPSG:4326",
+      "coordinate_precision": "generalized cartographic point from Natural Earth, not survey-grade landmark positioning"
+    }
+  ],
+  "metadata": {
+    "camera_provenance": [
+      {
+        "time": 2.4,
+        "method": "Verified country focus coordinate; comparison has no moving entity",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "geography_focus": true,
+        "location_id": "country_chn"
+      },
+      {
+        "time": 4.8,
+        "method": "Verified country focus coordinate; comparison has no moving entity",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "geography_focus": true,
+        "location_id": "country_chn"
+      },
+      {
+        "time": 7.2,
+        "method": "Verified country focus coordinate; comparison has no moving entity",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "geography_focus": true,
+        "location_id": "country_kor"
+      },
+      {
+        "time": 9.6,
+        "method": "Verified country focus coordinate; comparison has no moving entity",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "geography_focus": true,
+        "location_id": "country_jpn"
+      },
+      {
+        "time": 12.0,
+        "method": "Sourced GIS spherical convex-hull focus and exact portrait camera-rig projection fit",
+        "source_ids": [
+          "natural_earth_countries"
+        ],
+        "network_overview": true
+      }
+    ],
+    "style_profile": "tension",
+    "story_pattern": "geography-comparison",
+    "coordinate_claim_targets": {
+      "F01": "country_chn",
+      "F02": "country_kor",
+      "F03": "country_jpn"
+    },
+    "final_overview": {
+      "method": "Sourced GIS spherical convex-hull focus and exact portrait camera-rig projection fit",
+      "focus": {
+        "lon": 122.04751987799818,
+        "lat": 35.39098623604003
+      },
+      "height": 1.85,
+      "sample_count": 65,
+      "screen_bounds": {
+        "x_min": 0.2444498904614214,
+        "x_max": 0.7550669191828693,
+        "y_min": 0.4890408334732787,
+        "y_max": 0.510954188818481
+      },
+      "source_ids": [
+        "natural_earth_countries"
+      ],
+      "route_ids": [
+        "R_01",
+        "R_02"
+      ]
+    },
+    "scene_event_window_repairs": [
+      {
+        "event_id": "E004",
+        "before_time": 4.5,
+        "after_time": 4.2,
+        "reason": "Information needs a real30fps draw/read window inside its independent Scene",
+        "planning_event_id": "E004"
+      },
+      {
+        "event_id": "E007",
+        "before_time": 6.65,
+        "after_time": 6.6,
+        "reason": "Information needs a real30fps draw/read window inside its independent Scene",
+        "planning_event_id": "E005"
+      }
+    ],
+    "semantic_visibility": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-07T23:59:43.589Z",
+      "passed": false,
+      "renderer_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+      "source_hashes": {
+        "flat_semantics": "cd023936304a4579f1fe52849c66b47c5e94d69958c714e437b371dce511eedd",
+        "map_transition": "044320a5b4f1757d0ea82f64d38a1f6880c9b9eabc518a653441cefb671df750",
+        "adapter": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "legacy_renderer": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "aircraft": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+        "OpenSans": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "Noto": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "certifier": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25",
+        "production_visual_adapter": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+        "rhythm_visual_adapter": "f0b92ebd06acd2ae675621e6564eeb3f30a75be1ee3e8e1e91024a5d7bb8383b"
+      },
+      "fps": 30,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "scoped_scene_ids": null,
+      "opening_hook_eligible": true,
+      "events": [
+        {
+          "event_id": "E001",
+          "scene_id": "S001",
+          "kind": "city_reveal",
+          "target_id": "country_chn",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "scheduled_local_time": 0.1,
+          "eligible_frames": 18,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 0.16666666666666666,
+          "projection_at_scheduled_time": {
+            "x": 0.49999999999999967,
+            "y": 0.5,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "world_label",
+          "visible_seconds": 0.6,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E002",
+          "scene_id": "S001",
+          "kind": "route_start",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "scheduled_local_time": 1.3,
+          "eligible_frames": 21,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.3,
+          "projection_at_scheduled_time": {
+            "x": 0.5,
+            "y": 0.4999999999999999,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "route_head",
+          "visible_seconds": 0.7,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E003",
+          "scene_id": "S002",
+          "kind": "destination_preview",
+          "target_id": "country_kor",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 0,
+          "eligible_frames": 0,
+          "eligible_primitives": [],
+          "first_eligible_local_time": null,
+          "projection_at_scheduled_time": {
+            "x": 0.9754679004422371,
+            "y": 0.43525425522754346,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "renderer_supported": true,
+          "visible_seconds": 0,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E004",
+          "scene_id": "S002",
+          "kind": "connection_reveal",
+          "target_id": "country_kor",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 1.8,
+          "eligible_frames": 0,
+          "eligible_primitives": [],
+          "first_eligible_local_time": null,
+          "projection_at_scheduled_time": {
+            "x": 1.034403281239333,
+            "y": 0.43199953572585237,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          },
+          "renderer_supported": true,
+          "visible_seconds": 0,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E006",
+          "scene_id": "S003",
+          "kind": "route_start",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 0.7,
+          "eligible_frames": 21,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 0.7,
+          "projection_at_scheduled_time": {
+            "x": 0.7461155537679279,
+            "y": 0.4686828795614886,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "route_head",
+          "visible_seconds": 0.7,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E007",
+          "scene_id": "S003",
+          "kind": "country_reveal",
+          "target_id": "country_kor",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 1.8,
+          "eligible_frames": 16,
+          "eligible_primitives": [
+            "country_highlight"
+          ],
+          "first_eligible_local_time": 1.8333333333333333,
+          "projection_at_scheduled_time": {
+            "x": 0.5000000000000008,
+            "y": 0.5,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "country_highlight",
+          "visible_seconds": 0.5333333333333333,
+          "onset_latency_seconds": 0.033333333333333215,
+          "allowed_onset_delay_seconds": 0.18333333333333332,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E008",
+          "scene_id": "S004",
+          "kind": "distance_reveal",
+          "target_id": "country_jpn",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "scheduled_local_time": 1.6,
+          "eligible_frames": 17,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.6666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.57118175228186,
+            "y": 0.5009538910908782,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "world_label",
+          "visible_seconds": 0.5666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        },
+        {
+          "event_id": "E009",
+          "scene_id": "S005",
+          "kind": "connection_reveal",
+          "target_id": "country_jpn",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "scheduled_local_time": 0.5,
+          "eligible_frames": 41,
+          "eligible_primitives": [
+            "network"
+          ],
+          "first_eligible_local_time": 0.5,
+          "projection_at_scheduled_time": {
+            "x": 0.6223640800058393,
+            "y": 0.5097852301303014,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "network",
+          "visible_seconds": 1.3666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E010",
+          "scene_id": "S005",
+          "kind": "final_reveal",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "scheduled_local_time": 1.6,
+          "eligible_frames": 22,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.6666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.7273087056282685,
+            "y": 0.512776402560868,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "world_label",
+          "visible_seconds": 0.7333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        }
+      ],
+      "failures": [
+        {
+          "code": "GEOGRAPHIC_EVENT_NOT_VISIBLE",
+          "event_id": "E003",
+          "scene_id": "S002",
+          "kind": "destination_preview",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "projection_at_scheduled_time": {
+            "x": 0.9754679004422371,
+            "y": 0.43525425522754346,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          }
+        },
+        {
+          "code": "MEANINGFUL_EVENT_NOT_ELIGIBLE",
+          "event_id": "E004",
+          "scene_id": "S002",
+          "kind": "connection_reveal",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "projection_at_scheduled_time": {
+            "x": 1.034403281239333,
+            "y": 0.43199953572585237,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": false
+          }
+        }
+      ],
+      "scope": "Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.",
+      "font_layout_policy": "Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.",
+      "semantic_input_sha256": "8c8f25eaa66bd7cb7900ed46dd534c8c909c3cf66dccdfb511218d1e186fa858",
+      "certified_plan_bytes_sha256": "c3050c41ea3f8ed171795393627d16096d06017910245d82a09bb4b6a2f21c81",
+      "certificate_source_fingerprint": "40e5456ec8df16492c163e2cc59fc0b214077cfc845d890f76d97b0079315a33",
+      "certificate_cache_hit": false
+    },
+    "production_final_payoff": {
+      "scene_id": "S005",
+      "event_id": "E010",
+      "kind": "verified_geometric_route_comparison",
+      "route_ids": [
+        "R_01",
+        "R_02"
+      ],
+      "difference_km": 1115.347797,
+      "source_ids": [
+        "natural_earth_countries"
+      ],
+      "interpretation": "Derived geometry under explicit scenario; not delay, economics, traffic or a new unverified sea route"
+    },
+    "production_pace_changes": [
+      {
+        "scene_id": "S001",
+        "pace": "FAST_PLUS",
+        "duration_unchanged": 2.4,
+        "route_timing_changes": [
+          {
+            "route_id": "R_01",
+            "before_end_time": 2.4,
+            "after_end_time": 2.133333
+          }
+        ],
+        "camera_travel_duration": 1.6,
+        "zoom_duration": 1.466667,
+        "narration_speed_unchanged": true,
+        "entity_display_lifetime_preserved": true,
+        "ffmpeg_speed_filter": false
+      },
+      {
+        "scene_id": "S002",
+        "pace": "FAST_PLUS",
+        "duration_unchanged": 2.4,
+        "route_timing_changes": [
+          {
+            "route_id": "R_01",
+            "before_end_time": 2.4,
+            "after_end_time": 1.766667
+          }
+        ],
+        "camera_travel_duration": 1.6,
+        "zoom_duration": 1.466667,
+        "narration_speed_unchanged": true,
+        "entity_display_lifetime_preserved": true,
+        "ffmpeg_speed_filter": false
+      },
+      {
+        "scene_id": "S003",
+        "pace": "FAST_PLUS",
+        "duration_unchanged": 2.4000000000000004,
+        "route_timing_changes": [
+          {
+            "route_id": "R_01",
+            "before_end_time": 0.69,
+            "after_end_time": 0.533333
+          },
+          {
+            "route_id": "R_02",
+            "before_end_time": 2.4,
+            "after_end_time": 1.966667
+          }
+        ],
+        "camera_travel_duration": 1.6,
+        "zoom_duration": 1.466667,
+        "narration_speed_unchanged": true,
+        "entity_display_lifetime_preserved": true,
+        "ffmpeg_speed_filter": false
+      },
+      {
+        "scene_id": "S004",
+        "pace": "FAST_PLUS",
+        "duration_unchanged": 2.3999999999999995,
+        "route_timing_changes": [
+          {
+            "route_id": "R_02",
+            "before_end_time": 2.4,
+            "after_end_time": 2.133333
+          }
+        ],
+        "camera_travel_duration": 2.066667,
+        "zoom_duration": 2.066667,
+        "narration_speed_unchanged": true,
+        "entity_display_lifetime_preserved": true,
+        "ffmpeg_speed_filter": false
+      },
+      {
+        "scene_id": "S005",
+        "pace": "FAST_PLUS",
+        "duration_unchanged": 2.4000000000000004,
+        "route_timing_changes": [
+          {
+            "route_id": "R_02",
+            "before_end_time": 0.48,
+            "after_end_time": 0.5
+          }
+        ],
+        "camera_travel_duration": 2.066667,
+        "zoom_duration": 2.066667,
+        "narration_speed_unchanged": true,
+        "entity_display_lifetime_preserved": true,
+        "ffmpeg_speed_filter": false
+      }
+    ],
+    "production_coverage": [
+      {
+        "scene_id": "S001",
+        "selection": "REGISTERED_NATIVE_TERRAIN_FLAT_v004",
+        "terrain": "/static/flat_assets/natural_earth_1_east_asia.png"
+      },
+      {
+        "scene_id": "S002",
+        "selection": "REGISTERED_NATIVE_TERRAIN_FLAT_v004",
+        "terrain": "/static/flat_assets/natural_earth_1_east_asia.png"
+      },
+      {
+        "scene_id": "S003",
+        "selection": "REGISTERED_NATIVE_TERRAIN_FLAT_v004",
+        "terrain": "/static/flat_assets/natural_earth_1_east_asia.png"
+      },
+      {
+        "scene_id": "S004",
+        "selection": "MASTER_V3_PEAK",
+        "reason": null
+      },
+      {
+        "scene_id": "S005",
+        "selection": "MASTER_V3_PEAK",
+        "reason": null
+      }
+    ],
+    "production_global_route_annotations": [],
+    "production_policy": {
+      "information_first": true,
+      "default_graphics": "PREMIUM_FLAT_v004",
+      "global_renderer_preserved": true,
+      "native_regional_coverage_validated_only": true,
+      "ratios_guideline_not_forced": true,
+      "no_global_video_speedup": true,
+      "narration_playback_rate": 1.0,
+      "large_titles_require_explicit_request": true
+    },
+    "production_visual_mix_seconds": {
+      "FLAT_MAP": 7.2,
+      "3D_EARTH": 0,
+      "HERO": 4.8,
+      "CINEMATIC_CLIP": 0
+    },
+    "dead_time_gate": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.0,
+          "meaningful_events": 2,
+          "narration_estimate_seconds": 1.5517
+        },
+        {
+          "scene_id": "S002",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.0,
+          "meaningful_events": 2,
+          "narration_estimate_seconds": 1.7241
+        },
+        {
+          "scene_id": "S003",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.3,
+          "meaningful_events": 2,
+          "narration_estimate_seconds": 1.8966
+        },
+        {
+          "scene_id": "S004",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.3,
+          "meaningful_events": 1,
+          "narration_estimate_seconds": 1.8966
+        },
+        {
+          "scene_id": "S005",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.0,
+          "meaningful_events": 2,
+          "narration_estimate_seconds": 1.8966
+        }
+      ],
+      "camera_motion_counted_as_event": false,
+      "tts_playback_rate": 1.0,
+      "automatic_remediation": "Scene-local motion timing; story gaps remain blocking until approved plan correction"
+    },
+    "rhythm_timing_changes": [
+      {
+        "scene_id": "S001",
+        "before_motion": {
+          "camera_travel_duration": 1.6,
+          "zoom_duration": 1.466667,
+          "camera_speed_reference": 0.85,
+          "focus_transition_duration": 0.14,
+          "route_speed_factor": 1.36,
+          "entity_speed_factor": 1.36,
+          "transition_duration": 0.3,
+          "peak_hold_duration": 0.0,
+          "next_event_lead_time": 0.3,
+          "dead_time_removed": 0.8,
+          "tts_playback_rate": 1.0
+        },
+        "after_motion": {
+          "camera_travel_duration": 1.6,
+          "zoom_duration": 1.466667,
+          "camera_speed_reference": 0.85,
+          "focus_transition_duration": 0.14,
+          "route_speed_factor": 1.36,
+          "entity_speed_factor": 1.36,
+          "transition_duration": 0.3,
+          "peak_hold_duration": 0.0,
+          "next_event_lead_time": 0.3,
+          "dead_time_removed": 0.8,
+          "tts_playback_rate": 1.0
+        },
+        "native_component_ramps": true
+      },
+      {
+        "scene_id": "S002",
+        "before_motion": {
+          "camera_travel_duration": 1.6,
+          "zoom_duration": 1.466667,
+          "camera_speed_reference": 0.85,
+          "focus_transition_duration": 0.14,
+          "route_speed_factor": 1.36,
+          "entity_speed_factor": 1.36,
+          "transition_duration": 0.3,
+          "peak_hold_duration": 0.0,
+          "next_event_lead_time": 0.3,
+          "dead_time_removed": 0.8,
+          "tts_playback_rate": 1.0
+        },
+        "after_motion": {
+          "camera_travel_duration": 1.6,
+          "zoom_duration": 1.466667,
+          "camera_speed_reference": 0.85,
+          "focus_transition_duration": 0.14,
+          "route_speed_factor": 1.36,
+          "entity_speed_factor": 1.36,
+          "transition_duration": 0.3,
+          "peak_hold_duration": 0.0,
+          "next_event_lead_time": 0.3,
+          "dead_time_removed": 0.8,
+          "tts_playback_rate": 1.0
+        },
+        "native_component_ramps": true
+      },
+      {
+        "scene_id": "S003",
+        "before_motion": {
+          "camera_travel_duration": 1.6,
+          "zoom_duration": 1.466667,
+          "camera_speed_reference": 0.85,
+          "focus_transition_duration": 0.14,
+          "route_speed_factor": 1.36,
+          "entity_speed_factor": 1.36,
+          "transition_duration": 0.3,
+          "peak_hold_duration": 0.0,
+          "next_event_lead_time": 0.3,
+          "dead_time_removed": 0.8,
+          "tts_playback_rate": 1.0
+        },
+        "after_motion": {
+          "camera_travel_duration": 1.6,
+          "zoom_duration": 1.466667,
+          "camera_speed_reference": 0.85,
+          "focus_transition_duration": 0.14,
+          "route_speed_factor": 1.36,
+          "entity_speed_factor": 1.36,
+          "transition_duration": 0.3,
+          "peak_hold_duration": 0.0,
+          "next_event_lead_time": 0.3,
+          "dead_time_removed": 0.8,
+          "tts_playback_rate": 1.0
+        },
+        "native_component_ramps": true
+      }
+    ],
+    "rhythm_policy_notes": {
+      "global_time_warp": false,
+      "narration_rate": 1.0,
+      "semantic_events_not_added_by_micro_beats": true,
+      "earth_pixels_deliberately_preserved": false,
+      "pause_duration_from_reference_bounded_short_energy_dips": true
+    },
+    "production_global_readability_framing": [
+      {
+        "attempt": 1,
+        "boundary_index": 3,
+        "before_height": 0.5,
+        "after_height": 0.625,
+        "reason": "Real world-attached route information needs readable global geographic framing"
+      },
+      {
+        "attempt": 1,
+        "boundary_index": 4,
+        "before_height": 0.5,
+        "after_height": 0.625,
+        "reason": "Real world-attached route information needs readable global geographic framing"
+      }
+    ],
+    "direction_version": "direction_v012",
+    "direction_qc": {
+      "passed": true,
+      "findings": [
+        {
+          "code": "TEXT_DURING_HIGH_MOTION",
+          "severity": "WARNING",
+          "scene_id": "S001",
+          "text_event_ids": [
+            "T_E001"
+          ]
+        }
+      ],
+      "rendered_pixel_checks": "NOT_RUN",
+      "pixel_rules": [
+        "LABEL_COLLISION",
+        "ENTITY_TOO_SMALL",
+        "ROUTE_LOW_CONTRAST",
+        "GEOGRAPHY_TOO_DARK",
+        "RESULT_HERO_TOO_SMALL",
+        "INFORMATION_DENSITY_HIGH"
+      ]
+    }
+  },
+  "production_defaults": {
+    "version": "v1",
+    "profile": "PRODUCTION_DEFAULT",
+    "visual": "PREMIUM_FLAT_v004",
+    "pace": "FAST_PLUS",
+    "text": "MINIMAL_INFORMATIONAL",
+    "sfx": "EVENT_DRIVEN_VARIANTS",
+    "earth": "PEAK_ONLY",
+    "retention": true,
+    "event_diversity": true,
+    "large_titles": false
+  },
+  "rhythm_policy": {
+    "version": "v1",
+    "sfx_core_onset_offset_frames": 1,
+    "micro_pauses": [
+      {
+        "id": "PAUSE_E010",
+        "time": 10.766667,
+        "duration": 0.166666,
+        "scene_id": "S005",
+        "event_id": "E010"
+      }
+    ],
+    "bgm_sidechain": true,
+    "reference_pattern": "two_uploaded_excerpt_common_patterns_20261006"
+  },
+  "gate": {
+    "passed": true,
+    "errors": [],
+    "warnings": [],
+    "retention": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "metrics": {
+        "meaningful_event_count": 9,
+        "average_event_interval": 1.3542,
+        "max_event_gap": 2.2,
+        "first_3s_events": 3,
+        "event_types": 7,
+        "max_same_kind_run": 1,
+        "peak_count": 0,
+        "camera_events_counted": false
+      },
+      "events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.1,
+          "duration": 0.7,
+          "target_id": "country_chn",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "People's Republic of China의 확인된 위치 공개",
+          "text": "PEOPLE'S REPUBLIC OF CHINA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "claim_id": "F01",
+          "absolute_time": 0.1,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.7,
+          "target_id": "R_01",
+          "role": "cause",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "연결 경로 선택 공개",
+          "text": "",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.3,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E003",
+          "kind": "destination_preview",
+          "time": 0.0,
+          "duration": 0.7,
+          "target_id": "country_kor",
+          "role": "hint",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "다음 연결점 South Korea 공개",
+          "text": "SOUTH KOREA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "F02",
+          "absolute_time": 2.4,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E004",
+          "kind": "connection_reveal",
+          "time": 1.8,
+          "duration": 0.6,
+          "target_id": "country_kor",
+          "role": "progression",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "새 연결 관계 공개",
+          "text": "SOUTH KOREA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "M01",
+          "absolute_time": 4.2,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E006",
+          "kind": "route_start",
+          "time": 0.7,
+          "duration": 0.7,
+          "target_id": "R_02",
+          "role": "variable",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "THE NEXT CONNECTION",
+          "text": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "M01",
+          "absolute_time": 5.5,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E007",
+          "kind": "country_reveal",
+          "time": 1.8,
+          "duration": 0.6,
+          "target_id": "country_kor",
+          "role": "progression",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "South Korea의 위치 관계 공개",
+          "text": "SOUTH KOREA",
+          "value": null,
+          "unit": "",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "claim_id": "F02",
+          "absolute_time": 6.6,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E008",
+          "kind": "distance_reveal",
+          "time": 1.6,
+          "duration": 0.7,
+          "target_id": "country_jpn",
+          "role": "progression",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "검증 좌표에서 계산한 구면 거리 공개",
+          "text": "925 km",
+          "value": 925,
+          "unit": "km",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "claim_id": "FD02",
+          "absolute_time": 8.8,
+          "scene_id": "S004"
+        },
+        {
+          "id": "E009",
+          "kind": "connection_reveal",
+          "time": 0.5,
+          "duration": 0.7,
+          "target_id": "country_jpn",
+          "role": "progression",
+          "caused_by": "E008",
+          "meaningful": true,
+          "description": "JAPAN",
+          "text": "",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "claim_id": "M01",
+          "absolute_time": 10.1,
+          "scene_id": "S005"
+        },
+        {
+          "id": "E010",
+          "kind": "final_reveal",
+          "time": 1.333333,
+          "duration": 0.8,
+          "target_id": "R_02",
+          "role": "payoff",
+          "caused_by": "E009",
+          "meaningful": true,
+          "description": "전체 연결 구조와 가정의 한계 공개",
+          "text": "+1,115 km",
+          "value": 1115.347797,
+          "unit": "km",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "claim_id": "M01",
+          "absolute_time": 10.933333,
+          "scene_id": "S005"
+        }
+      ]
+    },
+    "semantic_visibility": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-07T23:59:44.555Z",
+      "passed": true,
+      "renderer_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+      "source_hashes": {
+        "flat_semantics": "cd023936304a4579f1fe52849c66b47c5e94d69958c714e437b371dce511eedd",
+        "map_transition": "044320a5b4f1757d0ea82f64d38a1f6880c9b9eabc518a653441cefb671df750",
+        "adapter": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "legacy_renderer": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "aircraft": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+        "OpenSans": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "Noto": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "certifier": "ad6388a6e0a22d186637a1e066a39b2ab2cc3830b09a01f31be9278ea4b88d25",
+        "production_visual_adapter": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+        "rhythm_visual_adapter": "f0b92ebd06acd2ae675621e6564eeb3f30a75be1ee3e8e1e91024a5d7bb8383b",
+        "visual_readability": "e70d98c302b2252534ae6f02e06ffb66c85d29b21654925422f0170903475e24",
+        "direction": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38"
+      },
+      "fps": 30,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "scoped_scene_ids": null,
+      "opening_hook_eligible": true,
+      "events": [
+        {
+          "event_id": "E001",
+          "scene_id": "S001",
+          "kind": "city_reveal",
+          "target_id": "country_chn",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "scheduled_local_time": 0.1,
+          "eligible_frames": 19,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 0.16666666666666666,
+          "projection_at_scheduled_time": {
+            "x": 0.5000000000000003,
+            "y": 0.5,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "world_label",
+          "visible_seconds": 0.6333333333333333,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E002",
+          "scene_id": "S001",
+          "kind": "route_start",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": 106.337289,
+            "lat": 32.498178,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_chn"
+          },
+          "scheduled_local_time": 1.3,
+          "eligible_frames": 21,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.3,
+          "projection_at_scheduled_time": {
+            "x": 0.5000000000000003,
+            "y": 0.4999999999999999,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "route_head",
+          "visible_seconds": 0.7,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E003",
+          "scene_id": "S002",
+          "kind": "destination_preview",
+          "target_id": "country_kor",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 0,
+          "eligible_frames": 19,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 0.06666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.7364408680858823,
+            "y": 0.4386264270539427,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "world_label",
+          "visible_seconds": 0.6333333333333333,
+          "onset_latency_seconds": 0.06666666666666667,
+          "allowed_onset_delay_seconds": 0.43333333333333335,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E004",
+          "scene_id": "S002",
+          "kind": "connection_reveal",
+          "target_id": "country_kor",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 1.8,
+          "eligible_frames": 15,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.8666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.7595231054604129,
+            "y": 0.4347133617441235,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "world_label",
+          "visible_seconds": 0.5,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E006",
+          "scene_id": "S003",
+          "kind": "route_start",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 0.7,
+          "eligible_frames": 21,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 0.7,
+          "projection_at_scheduled_time": {
+            "x": 0.49989869198422926,
+            "y": 0.48951133224769894,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "route_head",
+          "visible_seconds": 0.7,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E007",
+          "scene_id": "S003",
+          "kind": "country_reveal",
+          "target_id": "country_kor",
+          "coordinates": {
+            "lon": 128.129504,
+            "lat": 36.384924,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_kor"
+          },
+          "scheduled_local_time": 1.8,
+          "eligible_frames": 16,
+          "eligible_primitives": [
+            "country_highlight"
+          ],
+          "first_eligible_local_time": 1.8333333333333333,
+          "projection_at_scheduled_time": {
+            "x": 0.4999999999999995,
+            "y": 0.49999999999999994,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "country_highlight",
+          "visible_seconds": 0.5333333333333333,
+          "onset_latency_seconds": 0.033333333333333215,
+          "allowed_onset_delay_seconds": 0.18333333333333332,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E008",
+          "scene_id": "S004",
+          "kind": "distance_reveal",
+          "target_id": "country_jpn",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "scheduled_local_time": 1.6,
+          "eligible_frames": 16,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.6666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.5021025111013981,
+            "y": 0.4990067087972646,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "world_label",
+          "visible_seconds": 0.5333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        },
+        {
+          "event_id": "E009",
+          "scene_id": "S005",
+          "kind": "connection_reveal",
+          "target_id": "country_jpn",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "scheduled_local_time": 0.5,
+          "eligible_frames": 41,
+          "eligible_primitives": [
+            "network"
+          ],
+          "first_eligible_local_time": 0.5,
+          "projection_at_scheduled_time": {
+            "x": 0.5180037737905986,
+            "y": 0.4990306983385761,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "network",
+          "visible_seconds": 1.3666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E010",
+          "scene_id": "S005",
+          "kind": "final_reveal",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 138.44217,
+            "lat": 36.142538,
+            "source_id": "natural_earth_countries",
+            "location_id": "country_jpn"
+          },
+          "scheduled_local_time": 1.333333,
+          "eligible_frames": 23,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.3666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.535422988505761,
+            "y": 0.49880912180736753,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "world_label",
+          "visible_seconds": 0.7666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.033333666666666595,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        }
+      ],
+      "failures": [],
+      "scope": "Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.",
+      "font_layout_policy": "Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.",
+      "semantic_input_sha256": "f9545bd3dd162ceabf422dbac66a5e3de3876d6771bba4607e8d448f6a8f537f",
+      "certified_plan_bytes_sha256": "1e8e6ac930877673f62e8ac5a0052c2f5b6da468082556003bb93ad49639c178",
+      "certificate_source_fingerprint": "40e5456ec8df16492c163e2cc59fc0b214077cfc845d890f76d97b0079315a33",
+      "certificate_cache_hit": false
+    },
+    "narration_alignment": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E001",
+            "E002"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E001",
+              "kind": "city_reveal",
+              "scope": "scene_context",
+              "local_time": 0.1,
+              "absolute_time": 0.1,
+              "target_id": "country_chn",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 106.337289,
+                  "lat": 32.498178,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_chn",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F01",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E002",
+              "kind": "route_start",
+              "scope": "scene_context",
+              "local_time": 1.3,
+              "absolute_time": 1.3,
+              "target_id": "R_01",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 106.337289,
+                  "lat": 32.498178,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_chn",
+                  "verified": true
+                },
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "country_chn"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S002",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E003",
+            "E004"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E003",
+              "kind": "destination_preview",
+              "scope": "scene_context",
+              "local_time": 0.0,
+              "absolute_time": 2.4,
+              "target_id": "country_kor",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F02",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E004",
+              "kind": "connection_reveal",
+              "scope": "scene_context",
+              "local_time": 1.8,
+              "absolute_time": 4.2,
+              "target_id": "country_kor",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "country_chn"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S003",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E005",
+            "E006",
+            "E007"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E005",
+              "kind": "connection_reveal",
+              "scope": "scene_context",
+              "local_time": 0.7,
+              "absolute_time": 5.5,
+              "target_id": "country_kor",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E006",
+              "kind": "route_start",
+              "scope": "scene_context",
+              "local_time": 0.7,
+              "absolute_time": 5.5,
+              "target_id": "R_02",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                },
+                {
+                  "lon": 138.44217,
+                  "lat": 36.142538,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_jpn",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E007",
+              "kind": "country_reveal",
+              "scope": "scene_context",
+              "local_time": 1.8,
+              "absolute_time": 6.6,
+              "target_id": "country_kor",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F02",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "country_kor"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S004",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E008"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E008",
+              "kind": "distance_reveal",
+              "scope": "scene_context",
+              "local_time": 1.6,
+              "absolute_time": 8.8,
+              "target_id": "country_jpn",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 138.44217,
+                  "lat": 36.142538,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_jpn",
+                  "verified": true
+                }
+              ],
+              "claim_id": "FD02",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "country_jpn"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S005",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E009",
+            "E010"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E009",
+              "kind": "connection_reveal",
+              "scope": "scene_context",
+              "local_time": 0.5,
+              "absolute_time": 10.1,
+              "target_id": "country_jpn",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 138.44217,
+                  "lat": 36.142538,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_jpn",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E010",
+              "kind": "final_reveal",
+              "scope": "scene_context",
+              "local_time": 1.333333,
+              "absolute_time": 10.933333,
+              "target_id": "R_02",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_countries"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 128.129504,
+                  "lat": 36.384924,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_kor",
+                  "verified": true
+                },
+                {
+                  "lon": 138.44217,
+                  "lat": 36.142538,
+                  "source_id": "natural_earth_countries",
+                  "location_id": "country_jpn",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_countries"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_countries"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "country_jpn"
+          ],
+          "word_alignment": false
+        }
+      ],
+      "scope": "Declared same-Scene event/GIS/claim references and measured or supplied cue intervals; not speech recognition, lexical verification, word alignment, or proof that a named word occurs at an event timestamp",
+      "lexical_content_verified": false,
+      "word_alignment": false
+    },
+    "production_validation": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "dead_time": {
+        "passed": true,
+        "errors": [],
+        "warnings": [],
+        "scenes": [
+          {
+            "scene_id": "S001",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.0,
+            "meaningful_events": 2,
+            "narration_estimate_seconds": 1.5517
+          },
+          {
+            "scene_id": "S002",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.0,
+            "meaningful_events": 2,
+            "narration_estimate_seconds": 1.7241
+          },
+          {
+            "scene_id": "S003",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.3,
+            "meaningful_events": 2,
+            "narration_estimate_seconds": 1.8966
+          },
+          {
+            "scene_id": "S004",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.3,
+            "meaningful_events": 1,
+            "narration_estimate_seconds": 1.8966
+          },
+          {
+            "scene_id": "S005",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.0,
+            "meaningful_events": 2,
+            "narration_estimate_seconds": 1.8966
+          }
+        ],
+        "camera_motion_counted_as_event": false,
+        "tts_playback_rate": 1.0,
+        "automatic_remediation": "Scene-local motion timing; story gaps remain blocking until approved plan correction"
+      }
+    },
+    "rhythm_validation": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "metrics": {
+        "micro_beats": 16,
+        "speed_ramps": 10,
+        "micro_pauses": 1,
+        "visual_events": 9,
+        "average_visual_event_interval": 1.354166625,
+        "maximum_visual_event_gap": 2.200000000000001,
+        "peaks": 1,
+        "micro_beats_counted_as_new_story_events": false,
+        "full_video_speedup": false
+      }
+    }
+  }
+}
