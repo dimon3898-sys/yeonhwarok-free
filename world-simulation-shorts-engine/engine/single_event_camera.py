@@ -33,6 +33,8 @@ def install_validation():
         if preset==PRESET:admit=validate_camera
         elif preset=='SINGLE_EVENT_RETURN_TO_WIDE_TEST':
             from .return_wide_camera import validate_camera as admit
+        elif preset=='SECOND_EVENT_ADAPTIVE_WIDE_TEST':
+            from .second_event_camera import validate_camera as admit
         else:return original(plan)
         admission=admit(plan)
         if not admission['passed']:return admission

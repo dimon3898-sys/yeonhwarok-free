@@ -2194,6 +2194,9 @@
           },
           "return_wide_camera": {
             "type": "object"
+          },
+          "second_event_camera": {
+            "type": "object"
           }
         },
         "additionalProperties": false,
@@ -2545,10 +2548,36 @@
         }
       },
       "then": {
-        "properties": {
-          "duration": {
-            "minimum": 12,
-            "maximum": 15
+        "if": {
+          "required": [
+            "metadata"
+          ],
+          "properties": {
+            "metadata": {
+              "required": [
+                "camera_test_preset"
+              ],
+              "properties": {
+                "camera_test_preset": {
+                  "const": "SECOND_EVENT_ADAPTIVE_WIDE_TEST"
+                }
+              }
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "duration": {
+              "const": 24
+            }
+          }
+        },
+        "else": {
+          "properties": {
+            "duration": {
+              "minimum": 12,
+              "maximum": 15
+            }
           }
         }
       },

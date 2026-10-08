@@ -78,6 +78,13 @@ def render_project(*args, **kwargs):
         namespace['CPULocalBackend']=ReturnWideBackend
         namespace['_concat']=reference_concat
         namespace['run_qc']=return_qc
+    if len(args)>1 and args[1].get('metadata',{}).get('camera_test_preset')=='SECOND_EVENT_ADAPTIVE_WIDE_TEST':
+        from .second_event_backend import SecondEventBackend
+        from .second_event_qc import run_qc as second_qc
+        from .reference_concat import concat as reference_concat
+        namespace['CPULocalBackend']=SecondEventBackend
+        namespace['_concat']=reference_concat
+        namespace['run_qc']=second_qc
     if diagnostic:
         from .gpu_preflight import collect_all
         preflight = collect_all(args[0], args[1], diagnostic)
