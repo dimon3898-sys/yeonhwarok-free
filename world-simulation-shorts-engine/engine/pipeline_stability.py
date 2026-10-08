@@ -43,6 +43,8 @@ def render_project(*args, **kwargs):
         from .direction_backend import DirectionBackend
         from .direction import direction_qc
         if any(s.get('direction',{}).get('version')=='reference_master_v013' for s in args[1]['scenes']):
+            from .reference_concat import concat as reference_concat
+            namespace['_concat']=reference_concat
             from .reference_backend import ReferenceBackend
             from .reference_master import perceptual_qc
             DirectionBackend=ReferenceBackend

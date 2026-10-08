@@ -19,7 +19,7 @@ PROFILE_PATH=ROOT/'data/reference_direction_profile_v013.json'
 SOURCES=('web/reference_visual_adapter.js','web/render_reference_earth.html',
          'web/render_reference_flat.html','tools/reference_semantic_preflight.mjs',
          'web/direction_visual_adapter.js','web/production_visual_adapter.js',
-         'data/reference_direction_profile_v013.json','engine/reference_master.py','engine/reference_content.py','engine/reference_preflight.py','tools/collect_all_preflight.mjs')
+         'data/reference_direction_profile_v013.json','engine/reference_master.py','engine/reference_content.py','engine/reference_preflight.py','tools/collect_all_preflight.mjs','engine/reference_concat.py')
 
 
 def frame(value):return round(math.ceil(value*30-1e-4)/30,6)
