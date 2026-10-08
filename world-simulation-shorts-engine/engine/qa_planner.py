@@ -27,8 +27,13 @@ def configure_qa_schema():
         schema.SCHEMA_PATH = Path(__file__).resolve().parents[1] / 'data/direction_scene_plan.schema.json'
 
 
+    if os.environ.get('WORLD_ENGINE_DIRECTION_VERSION')=='v013':
+        visibility.TOOL=Path(__file__).resolve().parents[1]/'tools/reference_semantic_preflight.mjs'
+        schema.SCHEMA_PATH=Path(__file__).resolve().parents[1]/'data/reference_scene_plan.schema.json'
+
+
 def directed_plan(plan, raw):
-    if (os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012'
+    if ((os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012' or raw.get('direction_profile')=='FAST_PLUS_LEGACY')
             and raw.get('production_preset') != 'LEGACY'):
         from .direction import apply_direction
         from .schema import validate_plan
@@ -39,6 +44,15 @@ def directed_plan(plan, raw):
 
 def generate_deployment_plan(raw):
     configure_qa_schema()
+    selected=raw.get('direction_profile')
+    if selected not in {None,'REFERENCE_MASTER','FAST_PLUS_LEGACY'}:
+        raise planner.PlanningInputError('지원하지 않는 연출 프로파일입니다.')
+    if selected=='REFERENCE_MASTER' or (selected is None and os.environ.get('WORLD_ENGINE_DIRECTION_VERSION')=='v013' and raw.get('production_preset')!='LEGACY'):
+        from . import schema,visibility
+        schema.SCHEMA_PATH=Path(__file__).resolve().parents[1]/'data/reference_scene_plan.schema.json'
+        visibility.TOOL=Path(__file__).resolve().parents[1]/'tools/reference_semantic_preflight.mjs'
+        from .reference_master import generate_reference_plan
+        return generate_reference_plan(raw)
     qa = raw.get('qa_mode', False)
     if not isinstance(qa, bool):
         raise planner.PlanningInputError('QA 설정은 ON/OFF여야 합니다.')
@@ -70,7 +84,7 @@ def generate_deployment_plan(raw):
         planner._generate_legacy_plan.__code__, namespace, '_generate_legacy_plan')
     generate = FunctionType(planner.generate_plan.__code__, namespace, 'generate_plan')
     plan = generate(deepcopy(raw))
-    if os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012' and raw.get('production_preset') != 'LEGACY':
+    if (os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012' or selected=='FAST_PLUS_LEGACY') and raw.get('production_preset') != 'LEGACY':
         return directed_plan(plan, raw)
     if plan.get('story', {}).get('domain') == 'shipping':
         # A compressed HORIZON_REVEAL crosses the native camera angular gate.

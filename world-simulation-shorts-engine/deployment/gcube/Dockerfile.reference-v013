@@ -1,0 +1,9 @@
+# Inherit every already-verified asset/runtime/security component by digest.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:20f48cc67db9eecd233f788c6c04ba4cc94fc5d8ee6aa0a1f7def82d6db88ce7
+ENV WORLD_ENGINE_DIRECTION_VERSION=v013
+COPY world-simulation-shorts-engine/engine/reference_master.py world-simulation-shorts-engine/engine/reference_content.py world-simulation-shorts-engine/engine/reference_preflight.py world-simulation-shorts-engine/engine/reference_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/reference_visual_adapter.js world-simulation-shorts-engine/web/render_reference_earth.html world-simulation-shorts-engine/web/render_reference_flat.html world-simulation-shorts-engine/web/app.js /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/reference_scene_plan.schema.json world-simulation-shorts-engine/data/reference_direction_profile_v013.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/tools/reference_semantic_preflight.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/render_production_stable_scene.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/deployment/gcube/reference_preflight.py world-simulation-shorts-engine/deployment/gcube/reference_media_preflight.py world-simulation-shorts-engine/deployment/gcube/reference_retry_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

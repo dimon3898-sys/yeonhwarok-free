@@ -8,6 +8,10 @@ const qaText = document.createElement('span');
 qaText.textContent = '짧은 QA 테스트 · 12~15초';
 qaOption.append(qaInput, qaText);
 $('brief-form').prepend(qaOption);
+const directionOption=document.createElement('label');directionOption.className='rights-option';
+const directionSelect=document.createElement('select');directionSelect.id='direction-profile';
+for(const [value,text] of [['REFERENCE_MASTER','REFERENCE_MASTER · 정보 인지 우선'],['FAST_PLUS_LEGACY','FAST_PLUS_LEGACY · 기존 재현']]){const option=document.createElement('option');option.value=value;option.textContent=text;directionSelect.append(option);}
+directionOption.append(document.createTextNode('연출 프로파일 '),directionSelect);qaOption.after(directionOption);
 const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null };
 const ACTIVE_STATUSES = new Set(['queued', 'pending', 'running', 'rendering', 'assembling', 'audio', 'qc', 'resuming', 'processing']);
 const COMPLETE_STATUSES = new Set(['completed', 'complete', 'done', 'finished']);
@@ -96,6 +100,7 @@ function renderPlan() {
   $('empty-state').hidden = true; $('plan-panel').hidden = false;
   const plan = state.plan;
   const scenes = scenesOf(plan);
+    directionSelect.value=scenes.some(s=>s.direction?.preset==='REFERENCE_MASTER')?'REFERENCE_MASTER':'FAST_PLUS_LEGACY';
   const total = plan.duration || plan.total_duration || plan.request?.duration || plan.scene_plan?.duration || scenes.reduce((sum, scene) => sum + Number(scene.duration || 0), 0);
   const title = plan.title || plan.story_plan?.title || state.project?.title || plan.topic || '새로운 세계 이야기';
   $('plan-title').textContent = title;
@@ -428,7 +433,7 @@ $('qa-mode').addEventListener('change', () => {
 $('brief-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('create-plan'), '기획 생성 중', async () => {
   const topic = $('topic').value.trim(); if (!topic) throw new Error('영상 주제를 입력해 주세요.');
   stopPolling(); state.generation++; state.status = null; state.version = null; state.versions = []; state.revision = null;
-  const request = { topic, duration: Number($('duration').value), qa_mode: $('qa-mode').checked, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
+  const request = { topic, duration: Number($('duration').value), qa_mode: $('qa-mode').checked, direction_profile: $('direction-profile').value, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
   const narration = $('narration-file').files[0];
   if (narration) {
     if (!$('narration-rights').checked) throw new Error('나레이션 파일의 사용권을 확인해 주세요.');

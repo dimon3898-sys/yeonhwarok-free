@@ -1,0 +1,3857 @@
+{
+  "schema_version": "1.0",
+  "project_id": "",
+  "version": 1,
+  "duration": 12.0,
+  "request": {
+    "topic": "서울 도쿄 타이베이 항공 네트워크가 연결된다면?",
+    "duration": 12.0,
+    "qa_mode": true,
+    "direction_profile": "REFERENCE_MASTER",
+    "quality": "HIGH",
+    "pace": "FAST_PLUS",
+    "tts": false,
+    "subtitles": false,
+    "bgm": true,
+    "sfx": true,
+    "style": "시네마틱 세계 시뮬레이션",
+    "style_profile": "tension",
+    "production_preset": "PRODUCTION_DEFAULT_CANDIDATE"
+  },
+  "options": {
+    "tts": false,
+    "subtitles": false,
+    "bgm": true,
+    "quality": "HIGH",
+    "pace": "FAST_PLUS",
+    "sfx": true
+  },
+  "story": {
+    "hook": "서울 → 도쿄 → 타이베이 · 하나의 여정?",
+    "claims": [
+      {
+        "id": "F01",
+        "text": "Seoul의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F02",
+        "text": "Tokyo의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F03",
+        "text": "Taipei의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "FD01",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 1,156 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "FD02",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 2,103 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "A01",
+        "text": "입력한 도시 연결과 화면의 이동 시간은 시각화를 위한 가정입니다. 실제 항공편 일정이나 성능 예측이 아닙니다.",
+        "status": "ASSUMPTION",
+        "source_ids": [],
+        "scope": "scenario premise"
+      },
+      {
+        "id": "M01",
+        "text": "검증된 위치를 연결하는 구면 경로의 공간적 차이와 연결망을 시각화합니다.",
+        "status": "SIMULATION",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "assumption_ids": [
+          "A01"
+        ],
+        "scope": "visualization only"
+      },
+      {
+        "id": "FP_CONTEXT",
+        "text": "Shanghai의 위치는 보존된 공개 GIS 좌표에서 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "MP_CONTEXT",
+        "text": "기존 연결망에서 Shanghai로 가상 연결 한 개가 추가됩니다. 실제 운항, 수요 또는 미래 결과가 아닙니다.",
+        "status": "SIMULATION",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "assumption_ids": [
+          "A01"
+        ],
+        "scope": "hypothetical final context-network extension; visualization only"
+      }
+    ],
+    "beats": [
+      {
+        "scene_id": "S001",
+        "role": "hook",
+        "cause": null,
+        "summary": "hook: Seoul"
+      },
+      {
+        "scene_id": "S002",
+        "role": "progression",
+        "cause": "S001",
+        "summary": "progression: Tokyo"
+      },
+      {
+        "scene_id": "S003",
+        "role": "peak",
+        "cause": "S002",
+        "summary": "peak: Tokyo"
+      },
+      {
+        "scene_id": "S004",
+        "role": "payoff",
+        "cause": "S003",
+        "summary": "payoff: Taipei"
+      }
+    ],
+    "domain": "aviation",
+    "planner": "offline-capability-bounded-v1",
+    "conclusion": "검증된 위치를 연결하는 구면 경로의 공간적 차이와 연결망을 시각화합니다.",
+    "limitations": [
+      "사실은 공개 GIS의 위치·형태·경로 자료에 한정합니다.",
+      "이동 속도·항로 선택·폐쇄의 결과는 가정 기반 시각화이며 예측이 아닙니다.",
+      "마지막 주변 도시 연결은 가상의 네트워크 확장입니다. 실제 항공편이나 교통량을 의미하지 않습니다."
+    ],
+    "pattern": "journey-network-reveal"
+  },
+  "scenes": [
+    {
+      "hook": "서울 → 도쿄 → 타이베이 · 하나의 여정?",
+      "scene_id": "S001",
+      "start_time": 0.0,
+      "duration": 2.133333,
+      "scene_type": "EARTH_ESTABLISH",
+      "narration": "이 연결이 바뀐다면?",
+      "location": "Seoul",
+      "coordinates": {
+        "lon": 126.997785,
+        "lat": 37.568295,
+        "source_id": "natural_earth_places",
+        "location_id": "seoul"
+      },
+      "geographic_targets": [
+        "seoul"
+      ],
+      "camera_preset": "FLAT_COUNTRY_FOCUS",
+      "camera_start": {
+        "height": 1.8,
+        "tilt": 0.35,
+        "yaw": -0.26,
+        "bank": 0.015,
+        "fov": 43,
+        "lon": 126.997785,
+        "lat": 37.568295,
+        "target_lon": 126.997785,
+        "target_lat": 37.568295,
+        "location_id": "seoul"
+      },
+      "camera_end": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": 129.13501182706653,
+        "lat": 37.35366319046162,
+        "target_lon": 129.13501182706653,
+        "target_lat": 37.35366319046162
+      },
+      "camera_speed": 0.85,
+      "camera_easing": "quintic_out",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "seoul",
+          "action": "move",
+          "start_time": 1.5,
+          "end_time": 2.133333
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 126.997785,
+              "lat": 37.568295,
+              "source_id": "natural_earth_places",
+              "location_id": "seoul"
+            },
+            {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1156.04,
+          "description": "Seoul → Tokyo",
+          "start_time": 1.3,
+          "end_time": 2.133333,
+          "progress_start": 0.0,
+          "progress_end": 0.16447364,
+          "faint": false,
+          "visibility_role": "primary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.4,
+          "duration": 1.733333,
+          "target_id": "seoul",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "SEOUL",
+          "text": "SEOUL",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "claim_id": "F01"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.8333329999999999,
+          "target_id": "R_01",
+          "role": "hint",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E003",
+          "kind": "entity_departure",
+          "time": 1.5,
+          "duration": 0.6333329999999999,
+          "target_id": "aircraft_R_01",
+          "role": "progression",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "seoul",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "kind": "hook_reveal",
+          "text": "SEOUL",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "start_time": 0.4,
+          "end_time": 2.133333,
+          "role": "city",
+          "opacity": 0.75,
+          "size": 54,
+          "event_id": "E001"
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E001",
+          "kind": "soft_pulse",
+          "time": 0.4,
+          "duration": 1.2,
+          "visual_event_id": "E001",
+          "gain_db": -12,
+          "sfx_category": "CITY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "CITY_REVEAL_01"
+        },
+        {
+          "id": "A_E002",
+          "kind": "digital_sweep",
+          "time": 1.3,
+          "duration": 0.8333329999999999,
+          "visual_event_id": "E002",
+          "gain_db": -21,
+          "sfx_category": "ROUTE_START",
+          "sfx_intensity": "MEDIUM",
+          "sfx_variant": "ROUTE_START_02"
+        },
+        {
+          "id": "A_E003",
+          "kind": "pass_by",
+          "time": 1.5,
+          "duration": 0.6333329999999999,
+          "visual_event_id": "E003",
+          "gain_db": -21,
+          "sfx_category": "AIRCRAFT_PASS",
+          "sfx_intensity": "MEDIUM",
+          "sfx_variant": "AIRCRAFT_PASS_02"
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 1.8,
+          "tilt": 0.35,
+          "yaw": -0.26,
+          "bank": 0.015,
+          "fov": 43,
+          "lon": 126.997785,
+          "lat": 37.568295,
+          "target_lon": 126.997785,
+          "target_lat": 37.568295,
+          "location_id": "seoul"
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [],
+        "active_routes": [],
+        "entities": [],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.0
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": 129.13501182706653,
+          "lat": 37.35366319046162,
+          "target_lon": 129.13501182706653,
+          "target_lat": 37.35366319046162
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.16447364
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.177778
+        }
+      },
+      "directing_presets": [
+        "HOOK_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.0,
+      "motion_start": 0.0,
+      "description": "hook: Seoul",
+      "role": "hook",
+      "narration_event_ids": [
+        "E001",
+        "E002",
+        "E003"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT_CANDIDATE",
+        "large_titles": false
+      },
+      "render_mode": "FLAT_MAP_PREMIUM",
+      "flat_map": {
+        "projection": "LOCAL_MERCATOR",
+        "terrain_texture": {
+          "url": "/static/flat_assets/natural_earth_1_east_asia.png",
+          "bounds": [
+            104.0,
+            7.0,
+            152.0,
+            63.0
+          ]
+        },
+        "camera_start": {
+          "lon": 126.997785,
+          "lat": 37.568295,
+          "span_degrees": 30.382817360000004,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "camera_end": {
+          "lon": 129.13501182706653,
+          "lat": 37.35366319046162,
+          "span_degrees": 27.1275155,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "country_highlights": [
+          {
+            "country": "KOR",
+            "source_id": "natural_earth_countries",
+            "start_time": 0.1,
+            "end_time": 2.133333,
+            "color": "#82b8cb",
+            "opacity": 0.2
+          }
+        ],
+        "focus": [
+          {
+            "target_id": "seoul",
+            "coordinates": {
+              "lon": 126.997785,
+              "lat": 37.568295,
+              "source_id": "natural_earth_places",
+              "location_id": "seoul"
+            },
+            "start_time": 0.0,
+            "end_time": 2.133333,
+            "radius_degrees": 7.0,
+            "strength": 0.18
+          }
+        ]
+      },
+      "visual_polish": {
+        "version": "v004",
+        "entity_separation": "v1"
+      },
+      "focus_target": {
+        "target_id": "R_01",
+        "type": "route",
+        "coordinates": {
+          "lon": 126.997785,
+          "lat": 37.568295,
+          "source_id": "natural_earth_places",
+          "location_id": "seoul"
+        }
+      },
+      "visual_mode": "FLAT_MAP",
+      "sfx_intensity": "MEDIUM",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 0.8,
+        "zoom_duration": 0.8,
+        "camera_speed_reference": 1.0,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.0,
+        "entity_speed_factor": 1.0,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 1.5,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.0,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [],
+      "text_density": "MINIMAL",
+      "direction": {
+        "version": "reference_master_v013",
+        "preset": "REFERENCE_MASTER",
+        "mode": "QA",
+        "initial_hold": 0.0,
+        "move_end": 0.3,
+        "settle": 1.8333329999999999,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "camera_up_start": [
+          0.366911798101127,
+          0.7926271499144135,
+          0.4869475676422994
+        ],
+        "camera_up_end": [
+          0.3652432988700838,
+          0.7947009613208551,
+          0.4848171972055112
+        ],
+        "camera_roll_correction": 0.0,
+        "angular_budget_deg_s": 55,
+        "primary": "SEOUL",
+        "primary_event_id": "E001",
+        "intent": "LOCATION",
+        "zoom_level": "REGIONAL",
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 20,
+        "entity_scale_cap": 0.025,
+        "geography_floor": 0.18,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/reference_visual_adapter.js": "ea4abe8a09bc42bfec1507f4f9d69b59100373d425d1755eb6550eeb91026315",
+          "web/render_reference_earth.html": "bc42d06973d5b41386d9ed26fd04bb97346aac1f608f75ad9f690a2742539abf",
+          "web/render_reference_flat.html": "9bac38666ec0365fa57e0a89ebd97ef86302ebbbda0a7b0ef406ea748acb46dd",
+          "tools/reference_semantic_preflight.mjs": "7389334dbc959f940c1a5cba44952a72c4b73865036e9547c9d664f409bd0758",
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/production_visual_adapter.js": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+          "data/reference_direction_profile_v013.json": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432",
+          "engine/reference_master.py": "34b9f617ff00d29381e8f8880da5a2f74086bbd68b65080e517d0e4064eb4838",
+          "engine/reference_content.py": "19a2ced767014a2e92ff77cdb15a319c89371e454c6a17777dd8fddb11f0d670",
+          "engine/reference_preflight.py": "1a5f070a4e267e24a4fbf99fe9f94344097b668dbfc10f4f66045ecdd6afe354",
+          "tools/collect_all_preflight.mjs": "3e5ac7156c7715382906118bc59e9111a8028bbff8122bde2459ffcf9e3773e2"
+        },
+        "reveal_time": 0.4,
+        "perception_hold": 1.733333,
+        "required_hold": 0.933333,
+        "next_major_move": 2.133333,
+        "primary_lock": true,
+        "information": {
+          "primary": "SEOUL",
+          "secondary": null,
+          "support": null,
+          "primary_limit": 1,
+          "secondary_limit": 1,
+          "omitted_support": false
+        },
+        "lighting_entry": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "lighting": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 0.3
+          },
+          {
+            "kind": "DECELERATE",
+            "start": 0.24,
+            "end": 0.3
+          },
+          {
+            "kind": "CAMERA_LOCK",
+            "start": 0.3,
+            "end": 2.133333
+          },
+          {
+            "kind": "REVEAL",
+            "start": 0.4,
+            "end": 0.4
+          },
+          {
+            "kind": "PERCEPTION_HOLD",
+            "start": 0.4,
+            "end": 2.133333,
+            "primary": "SEOUL"
+          }
+        ],
+        "result_min_occupancy": 0.38,
+        "reference_profile_sha256": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432"
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S001_B01",
+          "time": 0.0,
+          "duration": 0.4,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S001_B02",
+          "time": 0.4,
+          "duration": 0.9,
+          "kind": "REVEAL",
+          "music_energy": 0.56,
+          "visual_event_id": "E001"
+        },
+        {
+          "id": "S001_B03",
+          "time": 1.3,
+          "duration": 0.2,
+          "kind": "MOVE",
+          "music_energy": 0.58,
+          "visual_event_id": "E002"
+        },
+        {
+          "id": "S001_B04",
+          "time": 1.5,
+          "duration": 0.633333,
+          "kind": "MOVE",
+          "music_energy": 0.58,
+          "visual_event_id": "E003"
+        }
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S002",
+      "start_time": 2.133333,
+      "duration": 2.9333329999999997,
+      "scene_type": "ROUTE_CHASE",
+      "narration": "다음 연결로 향합니다.",
+      "location": "Tokyo",
+      "coordinates": {
+        "lon": 139.749462,
+        "lat": 35.686963,
+        "source_id": "natural_earth_places",
+        "location_id": "tokyo"
+      },
+      "geographic_targets": [
+        "tokyo"
+      ],
+      "camera_preset": "FLAT_ROUTE_FOLLOW",
+      "camera_start": {
+        "height": 0.65,
+        "tilt": 0.55,
+        "yaw": -0.205,
+        "bank": 0.025,
+        "fov": 42,
+        "lon": 129.13501182706653,
+        "lat": 37.35366319046162,
+        "target_lon": 129.13501182706653,
+        "target_lat": 37.35366319046162
+      },
+      "camera_end": {
+        "height": 2.25,
+        "tilt": 0.15,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 64,
+        "lon": 136.54011582759443,
+        "lat": 36.29834954181924,
+        "target_lon": 136.54011582759443,
+        "target_lat": 36.29834954181924
+      },
+      "camera_speed": 1.05,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "tokyo",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 2.933333
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 126.997785,
+              "lat": 37.568295,
+              "source_id": "natural_earth_places",
+              "location_id": "seoul"
+            },
+            {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1156.04,
+          "description": "Seoul → Tokyo",
+          "start_time": 0.0,
+          "end_time": 2.933333,
+          "progress_start": 0.16447364,
+          "progress_end": 0.74342102,
+          "faint": false,
+          "visibility_role": "primary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E004",
+          "kind": "destination_preview",
+          "time": 1.5,
+          "duration": 1.4333329999999997,
+          "target_id": "tokyo",
+          "role": "variable",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "TOKYO",
+          "text": "TOKYO",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "claim_id": "F02"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "tokyo",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "kind": "world_label",
+          "text": "TOKYO",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "start_time": 0.933333,
+          "end_time": 2.9333329999999997,
+          "role": "city",
+          "opacity": 0.75,
+          "size": 54
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E004",
+          "kind": "soft_pulse",
+          "time": 1.5,
+          "duration": 1.2,
+          "visual_event_id": "E004",
+          "gain_db": -12,
+          "sfx_category": "CITY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "CITY_REVEAL_02"
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "FLAT_TO_EARTH",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 0.65,
+          "tilt": 0.55,
+          "yaw": -0.205,
+          "bank": 0.025,
+          "fov": 42,
+          "lon": 129.13501182706653,
+          "lat": 37.35366319046162,
+          "target_lon": 129.13501182706653,
+          "target_lat": 37.35366319046162
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.16447364
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.177778
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.15,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 64,
+          "lon": 136.54011582759443,
+          "lat": 36.29834954181924,
+          "target_lon": 136.54011582759443,
+          "target_lat": 36.29834954181924
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.74342102
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.422222
+        }
+      },
+      "directing_presets": [
+        "ROUTE_CHASE"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.177778,
+      "motion_start": 0.0,
+      "description": "progression: Tokyo",
+      "role": "progression",
+      "narration_event_ids": [
+        "E004"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT_CANDIDATE",
+        "large_titles": false
+      },
+      "render_mode": "FLAT_MAP_PREMIUM",
+      "flat_map": {
+        "projection": "LOCAL_MERCATOR",
+        "terrain_texture": {
+          "url": "/static/flat_assets/natural_earth_1_east_asia.png",
+          "bounds": [
+            104.0,
+            7.0,
+            152.0,
+            63.0
+          ]
+        },
+        "camera_start": {
+          "lon": 129.13501182706653,
+          "lat": 37.35366319046162,
+          "span_degrees": 30.382817360000004,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "camera_end": {
+          "lon": 136.54011582759443,
+          "lat": 36.29834954181924,
+          "span_degrees": 27.1275155,
+          "tilt": 0.07,
+          "rotation": 0.0
+        },
+        "country_highlights": [
+          {
+            "country": "JPN",
+            "source_id": "natural_earth_countries",
+            "start_time": 0.0,
+            "end_time": 2.9333329999999997,
+            "color": "#dba966",
+            "opacity": 0.2
+          }
+        ],
+        "focus": [
+          {
+            "target_id": "tokyo",
+            "coordinates": {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            },
+            "start_time": 0.0,
+            "end_time": 2.9333329999999997,
+            "radius_degrees": 7.0,
+            "strength": 0.18
+          }
+        ],
+        "next_event": {
+          "event_id": "E004",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "event_time": 1.5,
+          "lead_time": 0.35,
+          "strength": 0.25
+        }
+      },
+      "visual_polish": {
+        "version": "v004",
+        "entity_separation": "v1"
+      },
+      "focus_target": {
+        "target_id": "R_01",
+        "type": "route",
+        "coordinates": {
+          "lon": 139.749462,
+          "lat": 35.686963,
+          "source_id": "natural_earth_places",
+          "location_id": "tokyo"
+        }
+      },
+      "visual_mode": "FLAT_MAP",
+      "sfx_intensity": "MEDIUM",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 0.8,
+        "zoom_duration": 0.8,
+        "camera_speed_reference": 1.0,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.0,
+        "entity_speed_factor": 1.0,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 1.5,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.0,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E004",
+          "event_id": "E004",
+          "text": "TOKYO",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "start_time": 1.5,
+          "end_time": 2.9333329999999997,
+          "role": "city",
+          "priority": 9,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "map_transition": {
+        "duration": 0.3
+      },
+      "direction": {
+        "version": "reference_master_v013",
+        "preset": "REFERENCE_MASTER",
+        "mode": "QA",
+        "initial_hold": 0.0,
+        "move_end": 0.9,
+        "settle": 2.033333,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "camera_up_start": [
+          0.3652432988700838,
+          0.7947009613208551,
+          0.4848171972055112
+        ],
+        "camera_up_end": [
+          0.3587164961771411,
+          0.8019005506830602,
+          0.477784451593603
+        ],
+        "camera_roll_correction": 0.0,
+        "angular_budget_deg_s": 55,
+        "primary": "TOKYO",
+        "primary_event_id": "E004",
+        "intent": "EVENT",
+        "zoom_level": "REGIONAL",
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 20,
+        "entity_scale_cap": 0.025,
+        "geography_floor": 0.18,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/reference_visual_adapter.js": "ea4abe8a09bc42bfec1507f4f9d69b59100373d425d1755eb6550eeb91026315",
+          "web/render_reference_earth.html": "bc42d06973d5b41386d9ed26fd04bb97346aac1f608f75ad9f690a2742539abf",
+          "web/render_reference_flat.html": "9bac38666ec0365fa57e0a89ebd97ef86302ebbbda0a7b0ef406ea748acb46dd",
+          "tools/reference_semantic_preflight.mjs": "7389334dbc959f940c1a5cba44952a72c4b73865036e9547c9d664f409bd0758",
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/production_visual_adapter.js": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+          "data/reference_direction_profile_v013.json": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432",
+          "engine/reference_master.py": "34b9f617ff00d29381e8f8880da5a2f74086bbd68b65080e517d0e4064eb4838",
+          "engine/reference_content.py": "19a2ced767014a2e92ff77cdb15a319c89371e454c6a17777dd8fddb11f0d670",
+          "engine/reference_preflight.py": "1a5f070a4e267e24a4fbf99fe9f94344097b668dbfc10f4f66045ecdd6afe354",
+          "tools/collect_all_preflight.mjs": "3e5ac7156c7715382906118bc59e9111a8028bbff8122bde2459ffcf9e3773e2"
+        },
+        "reveal_time": 1.5,
+        "perception_hold": 1.4333329999999997,
+        "required_hold": 1.233333,
+        "next_major_move": 5.066666,
+        "primary_lock": true,
+        "information": {
+          "primary": "TOKYO",
+          "secondary": null,
+          "support": null,
+          "primary_limit": 1,
+          "secondary_limit": 1,
+          "omitted_support": false
+        },
+        "lighting_entry": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "lighting": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 0.9
+          },
+          {
+            "kind": "DECELERATE",
+            "start": 0.7200000000000001,
+            "end": 0.9
+          },
+          {
+            "kind": "CAMERA_LOCK",
+            "start": 0.9,
+            "end": 2.9333329999999997
+          },
+          {
+            "kind": "REVEAL",
+            "start": 1.5,
+            "end": 1.5
+          },
+          {
+            "kind": "PERCEPTION_HOLD",
+            "start": 1.5,
+            "end": 2.9333329999999997,
+            "primary": "TOKYO"
+          }
+        ],
+        "result_min_occupancy": 0.38,
+        "reference_profile_sha256": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432"
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S002_B01",
+          "time": 0.0,
+          "duration": 1.166667,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S002_B02",
+          "time": 1.166667,
+          "duration": 0.333333,
+          "kind": "NEXT_CUE",
+          "music_energy": 0.64,
+          "visual_event_id": "E004"
+        },
+        {
+          "id": "S002_B03",
+          "time": 1.5,
+          "duration": 1.433333,
+          "kind": "NEXT_CUE",
+          "music_energy": 0.64,
+          "visual_event_id": "E004"
+        }
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S003",
+      "start_time": 5.066666,
+      "duration": 3.0999999999999996,
+      "scene_type": "NETWORK",
+      "narration": "전체 연결이 드러납니다.",
+      "location": "Tokyo",
+      "coordinates": {
+        "lon": 139.749462,
+        "lat": 35.686963,
+        "source_id": "natural_earth_places",
+        "location_id": "tokyo"
+      },
+      "geographic_targets": [
+        "tokyo"
+      ],
+      "camera_preset": "EARTH_ORBIT",
+      "camera_start": {
+        "height": 2.25,
+        "tilt": 0.15,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 64,
+        "lon": 136.54011582759443,
+        "lat": 36.29834954181924,
+        "target_lon": 136.54011582759443,
+        "target_lat": 36.29834954181924
+      },
+      "camera_end": {
+        "height": 2.25,
+        "tilt": 0.15,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 64,
+        "lon": 130.14944509380553,
+        "lat": 30.67201416637201,
+        "target_lon": 130.14944509380553,
+        "target_lat": 30.67201416637201
+      },
+      "camera_speed": 0.75,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "HERO",
+      "entities": [
+        {
+          "id": "aircraft_R_01",
+          "type": "aircraft",
+          "route_id": "R_01",
+          "location_id": "tokyo",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 1.3
+        },
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "tokyo",
+          "action": "move",
+          "start_time": 1.5,
+          "end_time": 3.1
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_01",
+          "action": "move"
+        },
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 126.997785,
+              "lat": 37.568295,
+              "source_id": "natural_earth_places",
+              "location_id": "seoul"
+            },
+            {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1156.04,
+          "description": "Seoul → Tokyo",
+          "start_time": 0.0,
+          "end_time": 1.3,
+          "progress_start": 0.74342102,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "primary"
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            },
+            {
+              "lon": 121.568333,
+              "lat": 25.035833,
+              "source_id": "natural_earth_places",
+              "location_id": "taipei"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2102.66,
+          "description": "Tokyo → Taipei",
+          "start_time": 1.3,
+          "end_time": 3.1,
+          "progress_start": 0.0,
+          "progress_end": 0.52941176,
+          "faint": false,
+          "visibility_role": "secondary"
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E005",
+          "kind": "route_start",
+          "time": 1.300001,
+          "duration": 0.9,
+          "target_id": "R_02",
+          "role": "variable",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E006",
+          "kind": "new_variable",
+          "time": 1.5,
+          "duration": 1.5999999999999996,
+          "target_id": "tokyo",
+          "role": "peak",
+          "caused_by": "E005",
+          "meaningful": true,
+          "description": "NEXT CONNECTION",
+          "text": "NEXT CONNECTION",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "claim_id": "M01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "tokyo",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "kind": "world_label",
+          "text": "TOKYO",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "start_time": 0.933333,
+          "end_time": 3.0999999999999996,
+          "role": "city",
+          "opacity": 0.75,
+          "size": 54
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E005",
+          "kind": "digital_sweep",
+          "time": 1.300001,
+          "duration": 1.2,
+          "visual_event_id": "E005",
+          "gain_db": -21,
+          "sfx_category": "ROUTE_START",
+          "sfx_intensity": "HIGH",
+          "sfx_variant": "ROUTE_START_01"
+        },
+        {
+          "id": "A_E006",
+          "kind": "subtle_impact",
+          "time": 1.5,
+          "duration": 1.2,
+          "visual_event_id": "E006",
+          "gain_db": -12,
+          "sfx_category": "MID_PEAK",
+          "sfx_intensity": "HIGH",
+          "sfx_variant": "MID_PEAK_01"
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "FLAT_TO_EARTH",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.15,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 64,
+          "lon": 136.54011582759443,
+          "lat": 36.29834954181924,
+          "target_lon": 136.54011582759443,
+          "target_lat": 36.29834954181924
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 0.74342102
+          }
+        ],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.422222
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.15,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 64,
+          "lon": 130.14944509380553,
+          "lat": 30.67201416637201,
+          "target_lon": 130.14944509380553,
+          "target_lat": 30.67201416637201
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 1.0
+          },
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.52941176
+          }
+        ],
+        "lighting": "HERO",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.680555
+        }
+      },
+      "directing_presets": [
+        "PEAK_MOMENT"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.422222,
+      "motion_start": 0.0,
+      "description": "peak: Tokyo",
+      "role": "peak",
+      "narration_event_ids": [
+        "E005",
+        "E006"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT_CANDIDATE",
+        "large_titles": false
+      },
+      "render_mode": "MASTER_V3_EARTH",
+      "visual_polish": {
+        "version": "v004"
+      },
+      "visual_mode": "HERO",
+      "sfx_intensity": "HIGH",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 0.8,
+        "zoom_duration": 0.8,
+        "camera_speed_reference": 1.0,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.0,
+        "entity_speed_factor": 1.0,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 1.5,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.0,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E006",
+          "event_id": "E006",
+          "text": "NEXT CONNECTION",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "start_time": 1.5,
+          "end_time": 3.0999999999999996,
+          "role": "city",
+          "priority": 9,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "focus_target": {
+        "target_id": "R_01",
+        "type": "route",
+        "coordinates": {
+          "lon": 139.749462,
+          "lat": 35.686963,
+          "source_id": "natural_earth_places",
+          "location_id": "tokyo"
+        }
+      },
+      "map_transition": {
+        "duration": 0.3
+      },
+      "direction": {
+        "version": "reference_master_v013",
+        "preset": "REFERENCE_MASTER",
+        "mode": "QA",
+        "initial_hold": 0.0,
+        "move_end": 0.9,
+        "settle": 2.1999999999999997,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "camera_up_start": [
+          0.4296995535688578,
+          0.8059453354039858,
+          0.4071982441063334
+        ],
+        "camera_up_end": [
+          0.3753921836437265,
+          0.8584672005140205,
+          0.3494492439551345
+        ],
+        "camera_roll_correction": 0.0,
+        "angular_budget_deg_s": 55,
+        "primary": "NEXT CONNECTION",
+        "primary_event_id": "E006",
+        "intent": "ROUTE_CHANGE",
+        "zoom_level": "REGIONAL",
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.0,
+        "entity_min_pixels_1080": 20,
+        "entity_scale_cap": 0.025,
+        "geography_floor": 0.18,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/reference_visual_adapter.js": "ea4abe8a09bc42bfec1507f4f9d69b59100373d425d1755eb6550eeb91026315",
+          "web/render_reference_earth.html": "bc42d06973d5b41386d9ed26fd04bb97346aac1f608f75ad9f690a2742539abf",
+          "web/render_reference_flat.html": "9bac38666ec0365fa57e0a89ebd97ef86302ebbbda0a7b0ef406ea748acb46dd",
+          "tools/reference_semantic_preflight.mjs": "7389334dbc959f940c1a5cba44952a72c4b73865036e9547c9d664f409bd0758",
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/production_visual_adapter.js": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+          "data/reference_direction_profile_v013.json": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432",
+          "engine/reference_master.py": "34b9f617ff00d29381e8f8880da5a2f74086bbd68b65080e517d0e4064eb4838",
+          "engine/reference_content.py": "19a2ced767014a2e92ff77cdb15a319c89371e454c6a17777dd8fddb11f0d670",
+          "engine/reference_preflight.py": "1a5f070a4e267e24a4fbf99fe9f94344097b668dbfc10f4f66045ecdd6afe354",
+          "tools/collect_all_preflight.mjs": "3e5ac7156c7715382906118bc59e9111a8028bbff8122bde2459ffcf9e3773e2"
+        },
+        "reveal_time": 1.5,
+        "perception_hold": 1.5999999999999996,
+        "required_hold": 1.466667,
+        "next_major_move": 8.166666,
+        "primary_lock": true,
+        "information": {
+          "primary": "NEXT CONNECTION",
+          "secondary": null,
+          "support": null,
+          "primary_limit": 1,
+          "secondary_limit": 1,
+          "omitted_support": false
+        },
+        "lighting_entry": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "lighting": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 0.9
+          },
+          {
+            "kind": "DECELERATE",
+            "start": 0.7200000000000001,
+            "end": 0.9
+          },
+          {
+            "kind": "CAMERA_LOCK",
+            "start": 0.9,
+            "end": 3.0999999999999996
+          },
+          {
+            "kind": "REVEAL",
+            "start": 1.5,
+            "end": 1.5
+          },
+          {
+            "kind": "PERCEPTION_HOLD",
+            "start": 1.5,
+            "end": 3.0999999999999996,
+            "primary": "NEXT CONNECTION"
+          }
+        ],
+        "result_min_occupancy": 0.38,
+        "reference_profile_sha256": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432"
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S003_B01",
+          "time": 0.0,
+          "duration": 1.300001,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S003_B02",
+          "time": 1.300001,
+          "duration": 0.199999,
+          "kind": "MOVE",
+          "music_energy": 0.58,
+          "visual_event_id": "E005"
+        },
+        {
+          "id": "S003_B03",
+          "time": 1.5,
+          "duration": 1.6,
+          "kind": "BUILD",
+          "music_energy": 0.72,
+          "visual_event_id": "E006"
+        }
+      ]
+    },
+    {
+      "hook": "",
+      "scene_id": "S004",
+      "start_time": 8.166666,
+      "duration": 3.8333340000000007,
+      "scene_type": "FINAL_OVERVIEW",
+      "narration": "새로운 연결이 보입니다.",
+      "location": "Taipei",
+      "coordinates": {
+        "lon": 121.568333,
+        "lat": 25.035833,
+        "source_id": "natural_earth_places",
+        "location_id": "taipei"
+      },
+      "geographic_targets": [
+        "taipei"
+      ],
+      "camera_preset": "FINAL_REVEAL",
+      "camera_start": {
+        "height": 2.25,
+        "tilt": 0.15,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 64,
+        "lon": 130.14944509380553,
+        "lat": 30.67201416637201,
+        "target_lon": 130.14944509380553,
+        "target_lat": 30.67201416637201
+      },
+      "camera_end": {
+        "height": 2.1,
+        "tilt": 0.15,
+        "yaw": -0.18,
+        "bank": 0,
+        "fov": 64,
+        "lon": 123.71361102345138,
+        "lat": 26.444878291593003,
+        "target_lon": 123.71361102345138,
+        "target_lat": 26.444878291593003
+      },
+      "camera_speed": 1.3,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "CINEMATIC_NIGHT",
+      "entities": [
+        {
+          "id": "aircraft_R_02",
+          "type": "aircraft",
+          "route_id": "R_02",
+          "location_id": "taipei",
+          "action": "move",
+          "start_time": 0.0,
+          "end_time": 1.6
+        }
+      ],
+      "entity_actions": [
+        {
+          "entity_id": "aircraft_R_02",
+          "action": "move"
+        }
+      ],
+      "routes": [
+        {
+          "route_id": "R_01",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 126.997785,
+              "lat": 37.568295,
+              "source_id": "natural_earth_places",
+              "location_id": "seoul"
+            },
+            {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 1156.04,
+          "description": "Seoul → Tokyo",
+          "start_time": 0.0,
+          "end_time": 3.8333340000000007,
+          "progress_start": 1.0,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "secondary"
+        },
+        {
+          "route_id": "R_02",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 139.749462,
+              "lat": 35.686963,
+              "source_id": "natural_earth_places",
+              "location_id": "tokyo"
+            },
+            {
+              "lon": 121.568333,
+              "lat": 25.035833,
+              "source_id": "natural_earth_places",
+              "location_id": "taipei"
+            }
+          ],
+          "altitude_km": 13.0,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "color": "#b9eeff",
+          "length_km": 2102.66,
+          "description": "Tokyo → Taipei",
+          "start_time": 0.0,
+          "end_time": 1.6,
+          "progress_start": 0.52941176,
+          "progress_end": 1.0,
+          "faint": false,
+          "visibility_role": "primary"
+        },
+        {
+          "route_id": "P_FINAL_SHANGHAI",
+          "kind": "great_circle",
+          "points": [
+            {
+              "lon": 121.568333,
+              "lat": 25.035833,
+              "source_id": "natural_earth_places",
+              "location_id": "taipei"
+            },
+            {
+              "lon": 121.434559,
+              "lat": 31.218398,
+              "source_id": "natural_earth_places",
+              "location_id": "shanghai"
+            }
+          ],
+          "altitude_km": 13.0,
+          "start_time": 3.033333,
+          "end_time": 3.733334,
+          "progress_start": 0.0,
+          "progress_end": 1.0,
+          "faint": true,
+          "color": "#8ebbc9",
+          "length_km": 687.595736,
+          "source_ids": [
+            "natural_earth_places"
+          ],
+          "description": "Hypothetical context connection to Shanghai; not observed traffic",
+          "assumption_ids": [
+            "A01"
+          ]
+        }
+      ],
+      "visual_events": [
+        {
+          "id": "E007",
+          "kind": "arrival",
+          "time": 1.233334,
+          "duration": 0.9,
+          "target_id": "taipei",
+          "role": "progression",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 121.568333,
+            "lat": 25.035833,
+            "source_id": "natural_earth_places",
+            "location_id": "taipei"
+          },
+          "claim_id": "M01"
+        },
+        {
+          "id": "E008",
+          "kind": "final_reveal",
+          "time": 1.8,
+          "duration": 2.033334000000001,
+          "target_id": "P_FINAL_SHANGHAI",
+          "role": "payoff",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "RESULT",
+          "text": "SHANGHAI",
+          "coordinates": {
+            "lon": 121.434559,
+            "lat": 31.218398,
+            "source_id": "natural_earth_places",
+            "location_id": "shanghai"
+          },
+          "claim_id": "MP_CONTEXT"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "taipei",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "kind": "world_label",
+          "text": "TAIPEI",
+          "coordinates": {
+            "lon": 121.568333,
+            "lat": 25.035833,
+            "source_id": "natural_earth_places",
+            "location_id": "taipei"
+          },
+          "start_time": 1.233333,
+          "end_time": 3.8333340000000007,
+          "role": "city",
+          "opacity": 0.75,
+          "size": 54
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E007",
+          "kind": "soft_impact",
+          "time": 1.233334,
+          "duration": 1.2,
+          "visual_event_id": "E007",
+          "gain_db": -21,
+          "sfx_category": "CITY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "CITY_REVEAL_01"
+        },
+        {
+          "id": "A_E008",
+          "kind": "deep_final_hit",
+          "time": 1.8,
+          "duration": 1.2,
+          "visual_event_id": "E008",
+          "gain_db": -12,
+          "sfx_category": "FINAL_REVEAL",
+          "sfx_intensity": "PEAK",
+          "sfx_variant": "FINAL_REVEAL_01"
+        }
+      ],
+      "music_energy": 0.9,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 2.25,
+          "tilt": 0.15,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 64,
+          "lon": 130.14944509380553,
+          "lat": 30.67201416637201,
+          "target_lon": 130.14944509380553,
+          "target_lat": 30.67201416637201
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_01",
+            "route_id": "R_01",
+            "progress": 1.0
+          },
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 0.52941176
+          }
+        ],
+        "lighting": "HERO",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.680555
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 2.1,
+          "tilt": 0.15,
+          "yaw": -0.18,
+          "bank": 0,
+          "fov": 64,
+          "lon": 123.71361102345138,
+          "lat": 26.444878291593003,
+          "target_lon": 123.71361102345138,
+          "target_lat": 26.444878291593003
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Japan",
+          "South Korea",
+          "Taiwan"
+        ],
+        "active_routes": [
+          "R_01",
+          "R_02",
+          "P_FINAL_SHANGHAI"
+        ],
+        "entities": [
+          {
+            "id": "aircraft_R_02",
+            "route_id": "R_02",
+            "progress": 1.0
+          }
+        ],
+        "lighting": "CINEMATIC_NIGHT",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 1.0
+        }
+      },
+      "directing_presets": [
+        "FINAL_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02",
+        "FP_CONTEXT",
+        "MP_CONTEXT"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.680555,
+      "motion_start": 0.0,
+      "description": "payoff: Taipei",
+      "role": "payoff",
+      "narration_event_ids": [
+        "E007",
+        "E008"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT_CANDIDATE",
+        "large_titles": false
+      },
+      "render_mode": "MASTER_V3_EARTH",
+      "visual_polish": {
+        "version": "v004"
+      },
+      "visual_mode": "HERO",
+      "sfx_intensity": "PEAK",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 0.8,
+        "zoom_duration": 0.8,
+        "camera_speed_reference": 1.0,
+        "focus_transition_duration": 0.14,
+        "route_speed_factor": 1.0,
+        "entity_speed_factor": 1.0,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 1.5,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.0,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E008",
+          "event_id": "E008",
+          "text": "SHANGHAI",
+          "coordinates": {
+            "lon": 121.434559,
+            "lat": 31.218398,
+            "source_id": "natural_earth_places",
+            "location_id": "shanghai"
+          },
+          "start_time": 1.8,
+          "end_time": 3.8333340000000007,
+          "role": "city",
+          "priority": 9,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "focus_target": {
+        "target_id": "R_02",
+        "type": "route",
+        "coordinates": {
+          "lon": 121.568333,
+          "lat": 25.035833,
+          "source_id": "natural_earth_places",
+          "location_id": "taipei"
+        }
+      },
+      "direction": {
+        "version": "reference_master_v013",
+        "preset": "REFERENCE_MASTER",
+        "mode": "QA",
+        "initial_hold": 0.0,
+        "move_end": 1.2,
+        "settle": 2.6333340000000005,
+        "acceleration_fraction": 0.2,
+        "settle_position": "EXIT",
+        "camera_up_start": [
+          0.3753921836437265,
+          0.8584672005140205,
+          0.3494492439551345
+        ],
+        "camera_up_end": [
+          0.34134388406296523,
+          0.8894043616462555,
+          0.304046434442875
+        ],
+        "camera_roll_correction": 0.0,
+        "angular_budget_deg_s": 55,
+        "primary": "SHANGHAI",
+        "primary_event_id": "E008",
+        "intent": "RESULT_HERO",
+        "zoom_level": "WORLD",
+        "safe_area": [
+          0.055,
+          0.075,
+          0.945,
+          0.86
+        ],
+        "route_width_1080": 3.5,
+        "entity_min_pixels_1080": 20,
+        "entity_scale_cap": 0.025,
+        "geography_floor": 0.22,
+        "total_duration": 12.0,
+        "source_hashes": {
+          "web/reference_visual_adapter.js": "ea4abe8a09bc42bfec1507f4f9d69b59100373d425d1755eb6550eeb91026315",
+          "web/render_reference_earth.html": "bc42d06973d5b41386d9ed26fd04bb97346aac1f608f75ad9f690a2742539abf",
+          "web/render_reference_flat.html": "9bac38666ec0365fa57e0a89ebd97ef86302ebbbda0a7b0ef406ea748acb46dd",
+          "tools/reference_semantic_preflight.mjs": "7389334dbc959f940c1a5cba44952a72c4b73865036e9547c9d664f409bd0758",
+          "web/direction_visual_adapter.js": "bb58fc5d87dbbc181e0173f02e7a1857cf6af8c2202b3842fb12dda437ca5a38",
+          "web/production_visual_adapter.js": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+          "data/reference_direction_profile_v013.json": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432",
+          "engine/reference_master.py": "34b9f617ff00d29381e8f8880da5a2f74086bbd68b65080e517d0e4064eb4838",
+          "engine/reference_content.py": "19a2ced767014a2e92ff77cdb15a319c89371e454c6a17777dd8fddb11f0d670",
+          "engine/reference_preflight.py": "1a5f070a4e267e24a4fbf99fe9f94344097b668dbfc10f4f66045ecdd6afe354",
+          "tools/collect_all_preflight.mjs": "3e5ac7156c7715382906118bc59e9111a8028bbff8122bde2459ffcf9e3773e2"
+        },
+        "reveal_time": 1.8,
+        "perception_hold": 2.033334000000001,
+        "required_hold": 1.766667,
+        "next_major_move": null,
+        "primary_lock": true,
+        "information": {
+          "primary": "SHANGHAI",
+          "secondary": null,
+          "support": null,
+          "primary_limit": 1,
+          "secondary_limit": 1,
+          "omitted_support": false
+        },
+        "lighting_entry": {
+          "exposure": 1.04,
+          "surface_fill": 0.18,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.75
+        },
+        "lighting": {
+          "exposure": 1.1,
+          "surface_fill": 0.22,
+          "cloud_opacity": 0.19,
+          "city_gain": 1.04,
+          "ocean_specular": 0.45,
+          "day_weight": 0.68
+        },
+        "beats": [
+          {
+            "kind": "MOVE",
+            "start": 0,
+            "end": 1.2
+          },
+          {
+            "kind": "DECELERATE",
+            "start": 0.96,
+            "end": 1.2
+          },
+          {
+            "kind": "CAMERA_LOCK",
+            "start": 1.2,
+            "end": 3.8333340000000007
+          },
+          {
+            "kind": "REVEAL",
+            "start": 1.8,
+            "end": 1.8
+          },
+          {
+            "kind": "PERCEPTION_HOLD",
+            "start": 1.8,
+            "end": 3.8333340000000007,
+            "primary": "SHANGHAI"
+          }
+        ],
+        "result_min_occupancy": 0.38,
+        "reference_profile_sha256": "ce93183dabd953fa14220276cd3b24f1ef6b2e1b6b2951fc5e3300d830816432"
+      },
+      "rhythm_micro_beats": [
+        {
+          "id": "S004_B01",
+          "time": 0.0,
+          "duration": 1.233334,
+          "kind": "FOCUS",
+          "music_energy": 0.46
+        },
+        {
+          "id": "S004_B02",
+          "time": 1.233334,
+          "duration": 0.566666,
+          "kind": "RESPONSE",
+          "music_energy": 0.62,
+          "visual_event_id": "E007"
+        },
+        {
+          "id": "S004_B03",
+          "time": 1.8,
+          "duration": 0.4,
+          "kind": "PEAK",
+          "music_energy": 0.96,
+          "visual_event_id": "E008"
+        },
+        {
+          "id": "S004_B04",
+          "time": 2.2,
+          "duration": 1.633334,
+          "kind": "RELEASE",
+          "music_energy": 0.34,
+          "visual_event_id": "E008"
+        }
+      ]
+    }
+  ],
+  "required_plugins": [
+    "AVIATION",
+    "NETWORK",
+    "GEOGRAPHY"
+  ],
+  "sources": [
+    {
+      "id": "natural_earth_places",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "2026-10-04T11:59:04.739053+00:00",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "local_path": "populated_places_source.geojson",
+      "attribution_required": false
+    },
+    {
+      "id": "ourairports",
+      "url": "https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv",
+      "author": "OurAirports / DataHub",
+      "license": "ODC-PDDL-1.0",
+      "license_url": "https://opendatacommons.org/licenses/pddl/",
+      "downloaded_at": "2026-10-04T11:59:04.745131+00:00",
+      "sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "local_path": "airport_codes_source.csv",
+      "attribution_required": false
+    },
+    {
+      "id": "natural_earth_countries",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "preserved original MASTER GIS; first acquisition in assets/SOURCES.json",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "local_path": "../../cinematic-world-map/assets/gis/countries_50m.geojson",
+      "attribution_required": false,
+      "coordinate_provenance": "LABEL_X/LABEL_Y source label points; not centroid guesses"
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "name": "searoute 1.6.0 maritime network and ports",
+      "author": "Gent Halili and searoute-py contributors",
+      "license": "Apache-2.0",
+      "license_file": "data/shipping_sources/APACHE-2.0.txt",
+      "attribution_required": true,
+      "attribution": "Maritime route geometry derived from searoute-py 1.6.0 by Gent Halili and contributors, Apache-2.0. Routes are visualization-grade and are not navigational directions.",
+      "original_url": "https://github.com/genthalili/searoute-py",
+      "download_url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "package_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "downloaded_at_utc": "2026-10-04T12:01:52.348234+00:00",
+      "package_version": "1.6.0",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_order": "longitude,latitude",
+      "coordinate_reference_system": "EPSG:4326",
+      "files": {
+        "marnet_dict.py": {
+          "path": "data/shipping_sources/marnet_dict.py",
+          "sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3"
+        },
+        "ports_dict.py": {
+          "path": "data/shipping_sources/ports_dict.py",
+          "sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b"
+        },
+        "APACHE-2.0.txt": {
+          "path": "data/shipping_sources/APACHE-2.0.txt",
+          "sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66"
+        },
+        "PACKAGE_METADATA.txt": {
+          "path": "data/shipping_sources/PACKAGE_METADATA.txt",
+          "sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c"
+        }
+      },
+      "limitations": [
+        "The source library is explicitly for maritime visualization, not vessel navigation.",
+        "Canal and river segments are generalized network geometry; do not claim survey-grade canal geometry.",
+        "Routes are graph shortest-distance alternatives, not a forecast of ship choices, traffic volume, prices, delivery delay, or closure outcome.",
+        "Fixed-speed duration estimates from the source package are deliberately not used."
+      ],
+      "id": "SEAROUTE_1_6_0",
+      "url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "local_path": "data/shipping_sources/searoute-1.6.0.tar.gz"
+    },
+    {
+      "id": "NATURAL_EARTH_PHYSICAL_POINTS_10M",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_geography_regions_points.geojson",
+      "author": "Natural Earth contributors",
+      "license": "Public Domain",
+      "sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "local_path": "data/shipping_sources/natural_earth_physical_points.geojson",
+      "downloaded_at_utc": "2026-10-04T12:03:07.469430+00:00",
+      "attribution_required": false,
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_reference_system": "EPSG:4326",
+      "coordinate_precision": "generalized cartographic point from Natural Earth, not survey-grade landmark positioning"
+    }
+  ],
+  "metadata": {
+    "camera_provenance": [
+      {
+        "time": 2.133333,
+        "route_id": "R_01",
+        "progress": 0.16447364,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 5.066666,
+        "route_id": "R_01",
+        "progress": 0.74342102,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 8.166666,
+        "route_id": "R_02",
+        "progress": 0.52941176,
+        "method": "GIS cumulative angular-length spherical interpolation; derived camera position, not a new place",
+        "source_ids": [
+          "natural_earth_places"
+        ]
+      },
+      {
+        "time": 12.0,
+        "method": "Sourced GIS spherical convex-hull focus and exact portrait camera-rig projection fit",
+        "source_ids": [
+          "natural_earth_places"
+        ],
+        "network_overview": true
+      }
+    ],
+    "style_profile": "tension",
+    "story_pattern": "journey-network-reveal",
+    "coordinate_claim_targets": {
+      "F01": "seoul",
+      "F02": "tokyo",
+      "F03": "taipei",
+      "FP_CONTEXT": "shanghai"
+    },
+    "final_overview": {
+      "method": "Sourced GIS spherical convex-hull focus and exact portrait camera-rig projection fit",
+      "focus": {
+        "lon": 130.14944509380553,
+        "lat": 30.67201416637201
+      },
+      "height": 1.85,
+      "sample_count": 33,
+      "screen_bounds": {
+        "x_min": 0.33242758235549325,
+        "x_max": 0.6678930896362862,
+        "y_min": 0.45730318509861856,
+        "y_max": 0.542615264953696
+      },
+      "source_ids": [
+        "natural_earth_places"
+      ],
+      "route_ids": [
+        "R_02"
+      ]
+    },
+    "production_final_payoff": {
+      "scene_id": "S004",
+      "event_id": "E008",
+      "route_id": "P_FINAL_SHANGHAI",
+      "context_node": "shanghai",
+      "context_coordinates": {
+        "lon": 121.434559,
+        "lat": 31.218398,
+        "source_id": "natural_earth_places",
+        "location_id": "shanghai"
+      },
+      "source_ids": [
+        "natural_earth_places"
+      ],
+      "fact_status": "SIMULATION",
+      "new_edge_onset": 3.033333,
+      "coordinate_fact_id": "FP_CONTEXT",
+      "simulation_claim_id": "MP_CONTEXT"
+    },
+    "production_pace_changes": [
+      {
+        "scene_id": "S001",
+        "reference_authored": true
+      },
+      {
+        "scene_id": "S002",
+        "reference_authored": true
+      },
+      {
+        "scene_id": "S003",
+        "reference_authored": true
+      },
+      {
+        "scene_id": "S004",
+        "reference_authored": true
+      }
+    ],
+    "production_coverage": [
+      {
+        "scene_id": "S001",
+        "selection": "REGISTERED_NATIVE_TERRAIN_FLAT_v004",
+        "terrain": "/static/flat_assets/natural_earth_1_east_asia.png"
+      },
+      {
+        "scene_id": "S002",
+        "selection": "REGISTERED_NATIVE_TERRAIN_FLAT_v004",
+        "terrain": "/static/flat_assets/natural_earth_1_east_asia.png"
+      },
+      {
+        "scene_id": "S003",
+        "selection": "MASTER_V3_PEAK",
+        "reason": null
+      },
+      {
+        "scene_id": "S004",
+        "selection": "MASTER_V3_PEAK",
+        "reason": null
+      }
+    ],
+    "production_global_route_annotations": [],
+    "production_policy": {
+      "information_first": true,
+      "default_graphics": "PREMIUM_FLAT_v004",
+      "global_renderer_preserved": true,
+      "native_regional_coverage_validated_only": true,
+      "ratios_guideline_not_forced": true,
+      "no_global_video_speedup": true,
+      "narration_playback_rate": 1.0,
+      "large_titles_require_explicit_request": true
+    },
+    "production_visual_mix_seconds": {
+      "FLAT_MAP": 5.066666,
+      "3D_EARTH": 0,
+      "HERO": 6.933334,
+      "CINEMATIC_CLIP": 0
+    },
+    "dead_time_gate": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.0,
+          "meaningful_events": 3,
+          "narration_estimate_seconds": 1.5517
+        },
+        {
+          "scene_id": "S002",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.3,
+          "meaningful_events": 1,
+          "narration_estimate_seconds": 1.7241
+        },
+        {
+          "scene_id": "S003",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.3,
+          "meaningful_events": 2,
+          "narration_estimate_seconds": 1.8966
+        },
+        {
+          "scene_id": "S004",
+          "pace": "FAST_PLUS",
+          "transition_seconds": 0.0,
+          "meaningful_events": 2,
+          "narration_estimate_seconds": 1.8966
+        }
+      ],
+      "camera_motion_counted_as_event": false,
+      "tts_playback_rate": 1.0,
+      "automatic_remediation": "Scene-local motion timing; story gaps remain blocking until approved plan correction"
+    },
+    "reference_blueprint": {
+      "profile_version": "reference_master_v013",
+      "event_budget": {
+        "core_beats": 4,
+        "semantic_events": 8,
+        "fixed_five_scenes": false,
+        "minimums_preserved": true
+      },
+      "beats": [
+        {
+          "beat_id": "B01",
+          "kind": "LOCATION",
+          "location_index": 0,
+          "minimum_hold": 0.966667,
+          "move": 0.3,
+          "primary": "SEOUL",
+          "reserved": 0,
+          "start": 0.0,
+          "duration": 2.133333,
+          "end": 2.133333,
+          "reveal": 0.4,
+          "next_move": 2.133333
+        },
+        {
+          "beat_id": "B02",
+          "kind": "EVENT",
+          "location_index": 1,
+          "minimum_hold": 1.4,
+          "move": 0.9,
+          "primary": "TOKYO",
+          "reserved": 0,
+          "start": 2.133333,
+          "duration": 2.933333,
+          "end": 5.066666,
+          "reveal": 3.633333,
+          "next_move": 5.066666
+        },
+        {
+          "beat_id": "B03",
+          "kind": "ROUTE_CHANGE",
+          "location_index": 1,
+          "minimum_hold": 1.6,
+          "move": 0.9,
+          "primary": "NEXT CONNECTION",
+          "reserved": 0,
+          "start": 5.066666,
+          "duration": 3.1,
+          "end": 8.166666,
+          "reveal": 6.566666,
+          "next_move": 8.166666
+        },
+        {
+          "beat_id": "B04",
+          "kind": "RESULT",
+          "location_index": 2,
+          "minimum_hold": 1.866667,
+          "move": 1.2,
+          "primary": "RESULT",
+          "reserved": 0,
+          "start": 8.166666,
+          "duration": 3.833334,
+          "end": 12.0,
+          "reveal": 9.966666,
+          "next_move": null
+        }
+      ]
+    },
+    "direction_version": "reference_master_v013",
+    "reference_native_qc": {
+      "passed": true,
+      "findings": [],
+      "warnings": [],
+      "metrics": [
+        {
+          "geometric_earth_occupancy": null,
+          "scene_id": "S001",
+          "move_seconds": 0.3,
+          "settle_seconds": 1.8333329999999999,
+          "reveal_to_next_major_move": 1.733333,
+          "max_visible_labels": 2,
+          "entity_min_pixels_1080": 75.9278038219627,
+          "camera_lock": "VERIFIED_GEOMETRY_ONLY",
+          "route_contrast": "NOT_RUN",
+          "luminance": "NOT_RUN",
+          "Earth_pixel_occupancy": "NOT_RUN",
+          "GPU_draw": "NOT_RUN"
+        },
+        {
+          "geometric_earth_occupancy": null,
+          "scene_id": "S002",
+          "move_seconds": 0.9,
+          "settle_seconds": 2.033333,
+          "reveal_to_next_major_move": 1.4333329999999997,
+          "max_visible_labels": 1,
+          "entity_min_pixels_1080": 74.17536054484117,
+          "camera_lock": "VERIFIED_GEOMETRY_ONLY",
+          "route_contrast": "NOT_RUN",
+          "luminance": "NOT_RUN",
+          "Earth_pixel_occupancy": "NOT_RUN",
+          "GPU_draw": "NOT_RUN"
+        },
+        {
+          "geometric_earth_occupancy": 0.3599330357142857,
+          "scene_id": "S003",
+          "move_seconds": 0.9,
+          "settle_seconds": 2.1999999999999997,
+          "reveal_to_next_major_move": 1.5999999999999996,
+          "max_visible_labels": 2,
+          "entity_min_pixels_1080": 19.999999999999993,
+          "camera_lock": "VERIFIED_GEOMETRY_ONLY",
+          "route_contrast": "NOT_RUN",
+          "luminance": "NOT_RUN",
+          "Earth_pixel_occupancy": "NOT_RUN",
+          "GPU_draw": "NOT_RUN"
+        },
+        {
+          "geometric_earth_occupancy": 0.39341517857142855,
+          "scene_id": "S004",
+          "move_seconds": 1.2,
+          "settle_seconds": 2.6333340000000005,
+          "reveal_to_next_major_move": 2.033334000000001,
+          "max_visible_labels": 2,
+          "entity_min_pixels_1080": 19.999999999999996,
+          "camera_lock": "VERIFIED_GEOMETRY_ONLY",
+          "route_contrast": "NOT_RUN",
+          "luminance": "NOT_RUN",
+          "Earth_pixel_occupancy": "NOT_RUN",
+          "GPU_draw": "NOT_RUN"
+        }
+      ],
+      "pixels": "NOT_RUN"
+    },
+    "reference_auto_corrections": [],
+    "direction_qc": {
+      "passed": true,
+      "findings": [],
+      "warnings": [],
+      "warning_count": 0,
+      "rendered_pixel_checks": "NOT_RUN",
+      "reference_qa_release_gate": "NO_READABILITY_WARNINGS",
+      "actual_checks": [
+        "camera motion",
+        "reveal-to-next interval",
+        "text duration",
+        "route contrast",
+        "entity size",
+        "Earth occupancy",
+        "luminance",
+        "SFX onset"
+      ]
+    }
+  },
+  "production_defaults": {
+    "version": "v1",
+    "profile": "PRODUCTION_DEFAULT_CANDIDATE",
+    "visual": "PREMIUM_FLAT_v004",
+    "pace": "FAST_PLUS",
+    "text": "MINIMAL_INFORMATIONAL",
+    "sfx": "EVENT_DRIVEN_VARIANTS",
+    "earth": "PEAK_ONLY",
+    "retention": true,
+    "event_diversity": true,
+    "large_titles": false
+  },
+  "rhythm_policy": {
+    "version": "v1",
+    "sfx_core_onset_offset_frames": 1,
+    "micro_pauses": [],
+    "bgm_sidechain": true,
+    "reference_pattern": "reference_master_v013"
+  },
+  "gate": {
+    "passed": true,
+    "errors": [],
+    "warnings": [],
+    "retention": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "metrics": {
+        "meaningful_event_count": 8,
+        "average_event_interval": 1.3667,
+        "max_event_gap": 2.8333,
+        "first_3s_events": 3,
+        "event_types": 7,
+        "max_same_kind_run": 1,
+        "peak_count": 1,
+        "camera_events_counted": false
+      },
+      "events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 0.4,
+          "duration": 1.733333,
+          "target_id": "seoul",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "description": "SEOUL",
+          "text": "SEOUL",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "claim_id": "F01",
+          "absolute_time": 0.4,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E002",
+          "kind": "route_start",
+          "time": 1.3,
+          "duration": 0.8333329999999999,
+          "target_id": "R_01",
+          "role": "hint",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.3,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E003",
+          "kind": "entity_departure",
+          "time": 1.5,
+          "duration": 0.6333329999999999,
+          "target_id": "aircraft_R_01",
+          "role": "progression",
+          "caused_by": "E002",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "claim_id": "M01",
+          "absolute_time": 1.5,
+          "scene_id": "S001"
+        },
+        {
+          "id": "E004",
+          "kind": "destination_preview",
+          "time": 1.5,
+          "duration": 1.4333329999999997,
+          "target_id": "tokyo",
+          "role": "variable",
+          "caused_by": "E003",
+          "meaningful": true,
+          "description": "TOKYO",
+          "text": "TOKYO",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "claim_id": "F02",
+          "absolute_time": 3.633333,
+          "scene_id": "S002"
+        },
+        {
+          "id": "E005",
+          "kind": "route_start",
+          "time": 1.300001,
+          "duration": 0.9,
+          "target_id": "R_02",
+          "role": "variable",
+          "caused_by": "E004",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "claim_id": "M01",
+          "absolute_time": 6.366667,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E006",
+          "kind": "new_variable",
+          "time": 1.5,
+          "duration": 1.5999999999999996,
+          "target_id": "tokyo",
+          "role": "peak",
+          "caused_by": "E005",
+          "meaningful": true,
+          "description": "NEXT CONNECTION",
+          "text": "NEXT CONNECTION",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "claim_id": "M01",
+          "absolute_time": 6.566666,
+          "scene_id": "S003"
+        },
+        {
+          "id": "E007",
+          "kind": "arrival",
+          "time": 1.233334,
+          "duration": 0.9,
+          "target_id": "taipei",
+          "role": "progression",
+          "caused_by": "E006",
+          "meaningful": true,
+          "description": "",
+          "text": "",
+          "coordinates": {
+            "lon": 121.568333,
+            "lat": 25.035833,
+            "source_id": "natural_earth_places",
+            "location_id": "taipei"
+          },
+          "claim_id": "M01",
+          "absolute_time": 9.4,
+          "scene_id": "S004"
+        },
+        {
+          "id": "E008",
+          "kind": "final_reveal",
+          "time": 1.8,
+          "duration": 2.033334000000001,
+          "target_id": "P_FINAL_SHANGHAI",
+          "role": "payoff",
+          "caused_by": "E007",
+          "meaningful": true,
+          "description": "RESULT",
+          "text": "SHANGHAI",
+          "coordinates": {
+            "lon": 121.434559,
+            "lat": 31.218398,
+            "source_id": "natural_earth_places",
+            "location_id": "shanghai"
+          },
+          "claim_id": "MP_CONTEXT",
+          "absolute_time": 9.966666,
+          "scene_id": "S004"
+        }
+      ]
+    },
+    "semantic_visibility": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-08T01:32:00.296Z",
+      "passed": true,
+      "renderer_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+      "source_hashes": {
+        "flat_semantics": "cd023936304a4579f1fe52849c66b47c5e94d69958c714e437b371dce511eedd",
+        "map_transition": "044320a5b4f1757d0ea82f64d38a1f6880c9b9eabc518a653441cefb671df750",
+        "adapter": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "legacy_renderer": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "aircraft": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+        "OpenSans": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "Noto": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "certifier": "7389334dbc959f940c1a5cba44952a72c4b73865036e9547c9d664f409bd0758",
+        "production_visual_adapter": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51",
+        "visual_readability": "e70d98c302b2252534ae6f02e06ffb66c85d29b21654925422f0170903475e24",
+        "direction": "ea4abe8a09bc42bfec1507f4f9d69b59100373d425d1755eb6550eeb91026315"
+      },
+      "fps": 30,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "scoped_scene_ids": null,
+      "opening_hook_eligible": true,
+      "events": [
+        {
+          "event_id": "E001",
+          "scene_id": "S001",
+          "kind": "city_reveal",
+          "target_id": "seoul",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "scheduled_local_time": 0.4,
+          "eligible_frames": 49,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 0.4666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.42099113765806084,
+            "y": 0.4955229919375121,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "world_label",
+          "visible_seconds": 1.6333333333333333,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E002",
+          "scene_id": "S001",
+          "kind": "route_start",
+          "target_id": "R_01",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "scheduled_local_time": 1.3,
+          "eligible_frames": 25,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.3,
+          "projection_at_scheduled_time": {
+            "x": 0.42099113765806084,
+            "y": 0.4955229919375121,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "route_head",
+          "visible_seconds": 0.8333333333333334,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E003",
+          "scene_id": "S001",
+          "kind": "entity_departure",
+          "target_id": "aircraft_R_01",
+          "coordinates": {
+            "lon": 126.997785,
+            "lat": 37.568295,
+            "source_id": "natural_earth_places",
+            "location_id": "seoul"
+          },
+          "scheduled_local_time": 1.5,
+          "eligible_frames": 17,
+          "eligible_primitives": [
+            "3D_entity"
+          ],
+          "first_eligible_local_time": 1.5666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.42099113765806084,
+            "y": 0.4955229919375121,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "3D_entity",
+          "visible_seconds": 0.5666666666666667,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.2733333333333333,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E004",
+          "scene_id": "S002",
+          "kind": "destination_preview",
+          "target_id": "tokyo",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "scheduled_local_time": 1.5,
+          "eligible_frames": 40,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.5666666666666667,
+          "projection_at_scheduled_time": {
+            "x": 0.6183059382052689,
+            "y": 0.515621577380355,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "renderer_supported": true,
+          "first_primitive": "world_label",
+          "visible_seconds": 1.3333333333333333,
+          "onset_latency_seconds": 0.06666666666666665,
+          "allowed_onset_delay_seconds": 0.43333333333333335,
+          "render_mode": "FLAT_MAP_PREMIUM",
+          "projection": "LOCAL_MERCATOR"
+        },
+        {
+          "event_id": "E005",
+          "scene_id": "S003",
+          "kind": "route_start",
+          "target_id": "R_02",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "scheduled_local_time": 1.300001,
+          "eligible_frames": 40,
+          "eligible_primitives": [
+            "route_head"
+          ],
+          "first_eligible_local_time": 1.3333333333333333,
+          "projection_at_scheduled_time": {
+            "x": 0.5832861636634827,
+            "y": 0.4729688192206382,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "route_head",
+          "visible_seconds": 1.3333333333333333,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.0333323333333333,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        },
+        {
+          "event_id": "E006",
+          "scene_id": "S003",
+          "kind": "new_variable",
+          "target_id": "tokyo",
+          "coordinates": {
+            "lon": 139.749462,
+            "lat": 35.686963,
+            "source_id": "natural_earth_places",
+            "location_id": "tokyo"
+          },
+          "scheduled_local_time": 1.5,
+          "eligible_frames": 45,
+          "eligible_primitives": [
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.5333333333333334,
+          "projection_at_scheduled_time": {
+            "x": 0.5832861636634827,
+            "y": 0.4729688192206382,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "world_label",
+          "visible_seconds": 1.5,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.03333333333333344,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        },
+        {
+          "event_id": "E007",
+          "scene_id": "S004",
+          "kind": "arrival",
+          "target_id": "taipei",
+          "coordinates": {
+            "lon": 121.568333,
+            "lat": 25.035833,
+            "source_id": "natural_earth_places",
+            "location_id": "taipei"
+          },
+          "scheduled_local_time": 1.233334,
+          "eligible_frames": 23,
+          "eligible_primitives": [
+            "geographic_pulse"
+          ],
+          "first_eligible_local_time": 1.2666666666666666,
+          "projection_at_scheduled_time": {
+            "x": 0.4773163826986667,
+            "y": 0.5066055656299073,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "geographic_pulse",
+          "visible_seconds": 0.7666666666666667,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.03333266666666668,
+          "allowed_onset_delay_seconds": 0.06933333333333333
+        },
+        {
+          "event_id": "E008",
+          "scene_id": "S004",
+          "kind": "final_reveal",
+          "target_id": "P_FINAL_SHANGHAI",
+          "coordinates": {
+            "lon": 121.434559,
+            "lat": 31.218398,
+            "source_id": "natural_earth_places",
+            "location_id": "shanghai"
+          },
+          "scheduled_local_time": 1.8,
+          "eligible_frames": 60,
+          "eligible_primitives": [
+            "network",
+            "world_label"
+          ],
+          "first_eligible_local_time": 1.8333333333333333,
+          "projection_at_scheduled_time": {
+            "x": 0.48512597214964265,
+            "y": 0.467712610186899,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "world_label",
+          "visible_seconds": 2,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0.033333333333333215,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        }
+      ],
+      "failures": [],
+      "scope": "Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.",
+      "font_layout_policy": "Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.",
+      "semantic_input_sha256": "3154cde0ed8c6f35f86071acc59909af401e20ce92367786fad764611a066367",
+      "certified_plan_bytes_sha256": "a3563827797409a8bdd6ed7eb60d7b839a6a14671541ce2abf9c8c4406cc960e",
+      "certificate_source_fingerprint": "9565bb188844a229908c123cec505ddc43c74c255ffe6390f5a2a4f9f71608b6",
+      "certificate_cache_hit": false
+    },
+    "narration_alignment": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E001",
+            "E002",
+            "E003"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E001",
+              "kind": "city_reveal",
+              "scope": "scene_context",
+              "local_time": 0.4,
+              "absolute_time": 0.4,
+              "target_id": "seoul",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 126.997785,
+                  "lat": 37.568295,
+                  "source_id": "natural_earth_places",
+                  "location_id": "seoul",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F01",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E002",
+              "kind": "route_start",
+              "scope": "scene_context",
+              "local_time": 1.3,
+              "absolute_time": 1.3,
+              "target_id": "R_01",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 126.997785,
+                  "lat": 37.568295,
+                  "source_id": "natural_earth_places",
+                  "location_id": "seoul",
+                  "verified": true
+                },
+                {
+                  "lon": 139.749462,
+                  "lat": 35.686963,
+                  "source_id": "natural_earth_places",
+                  "location_id": "tokyo",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E003",
+              "kind": "entity_departure",
+              "scope": "scene_context",
+              "local_time": 1.5,
+              "absolute_time": 1.5,
+              "target_id": "aircraft_R_01",
+              "target_kind": "entity",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 126.997785,
+                  "lat": 37.568295,
+                  "source_id": "natural_earth_places",
+                  "location_id": "seoul",
+                  "verified": true
+                },
+                {
+                  "lon": 139.749462,
+                  "lat": 35.686963,
+                  "source_id": "natural_earth_places",
+                  "location_id": "tokyo",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "seoul"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S002",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E004"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E004",
+              "kind": "destination_preview",
+              "scope": "scene_context",
+              "local_time": 1.5,
+              "absolute_time": 3.633333,
+              "target_id": "tokyo",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 139.749462,
+                  "lat": 35.686963,
+                  "source_id": "natural_earth_places",
+                  "location_id": "tokyo",
+                  "verified": true
+                }
+              ],
+              "claim_id": "F02",
+              "claim_status": "FACT",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "tokyo"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S003",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E005",
+            "E006"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E005",
+              "kind": "route_start",
+              "scope": "scene_context",
+              "local_time": 1.300001,
+              "absolute_time": 6.366667,
+              "target_id": "R_02",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 139.749462,
+                  "lat": 35.686963,
+                  "source_id": "natural_earth_places",
+                  "location_id": "tokyo",
+                  "verified": true
+                },
+                {
+                  "lon": 121.568333,
+                  "lat": 25.035833,
+                  "source_id": "natural_earth_places",
+                  "location_id": "taipei",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E006",
+              "kind": "new_variable",
+              "scope": "scene_context",
+              "local_time": 1.5,
+              "absolute_time": 6.566666,
+              "target_id": "tokyo",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 139.749462,
+                  "lat": 35.686963,
+                  "source_id": "natural_earth_places",
+                  "location_id": "tokyo",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "tokyo"
+          ],
+          "word_alignment": false
+        },
+        {
+          "scene_id": "S004",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E007",
+            "E008"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E007",
+              "kind": "arrival",
+              "scope": "scene_context",
+              "local_time": 1.233334,
+              "absolute_time": 9.399999999999999,
+              "target_id": "taipei",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 121.568333,
+                  "lat": 25.035833,
+                  "source_id": "natural_earth_places",
+                  "location_id": "taipei",
+                  "verified": true
+                }
+              ],
+              "claim_id": "M01",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            },
+            {
+              "event_id": "E008",
+              "kind": "final_reveal",
+              "scope": "scene_context",
+              "local_time": 1.8,
+              "absolute_time": 9.966666,
+              "target_id": "P_FINAL_SHANGHAI",
+              "target_kind": "route",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "natural_earth_places"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 121.568333,
+                  "lat": 25.035833,
+                  "source_id": "natural_earth_places",
+                  "location_id": "taipei",
+                  "verified": true
+                },
+                {
+                  "lon": 121.434559,
+                  "lat": 31.218398,
+                  "source_id": "natural_earth_places",
+                  "location_id": "shanghai",
+                  "verified": true
+                }
+              ],
+              "claim_id": "MP_CONTEXT",
+              "claim_status": "SIMULATION",
+              "claim_source_ids": [
+                "natural_earth_places"
+              ],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FP_CONTEXT",
+              "status": "FACT",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "MP_CONTEXT",
+              "status": "SIMULATION",
+              "source_ids": [
+                "natural_earth_places"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            }
+          ],
+          "geographic_targets": [
+            "taipei"
+          ],
+          "word_alignment": false
+        }
+      ],
+      "scope": "Declared same-Scene event/GIS/claim references and measured or supplied cue intervals; not speech recognition, lexical verification, word alignment, or proof that a named word occurs at an event timestamp",
+      "lexical_content_verified": false,
+      "word_alignment": false
+    },
+    "production_validation": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "dead_time": {
+        "passed": true,
+        "errors": [],
+        "warnings": [],
+        "scenes": [
+          {
+            "scene_id": "S001",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.0,
+            "meaningful_events": 3,
+            "narration_estimate_seconds": 1.5517
+          },
+          {
+            "scene_id": "S002",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.3,
+            "meaningful_events": 1,
+            "narration_estimate_seconds": 1.7241
+          },
+          {
+            "scene_id": "S003",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.3,
+            "meaningful_events": 2,
+            "narration_estimate_seconds": 1.8966
+          },
+          {
+            "scene_id": "S004",
+            "pace": "FAST_PLUS",
+            "transition_seconds": 0.0,
+            "meaningful_events": 2,
+            "narration_estimate_seconds": 1.8966
+          }
+        ],
+        "camera_motion_counted_as_event": false,
+        "tts_playback_rate": 1.0,
+        "automatic_remediation": "Scene-local motion timing; story gaps remain blocking until approved plan correction"
+      }
+    },
+    "rhythm_validation": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "metrics": {
+        "micro_beats": 14,
+        "speed_ramps": 0,
+        "micro_pauses": 0,
+        "visual_events": 8,
+        "average_visual_event_interval": 1.3666665714285713,
+        "maximum_visual_event_gap": 2.833333999999999,
+        "peaks": 2,
+        "micro_beats_counted_as_new_story_events": false,
+        "full_video_speedup": false
+      }
+    }
+  }
+}

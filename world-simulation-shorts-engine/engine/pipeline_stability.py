@@ -42,6 +42,14 @@ def render_project(*args, **kwargs):
     if len(args)>1 and any(scene.get('direction') for scene in args[1].get('scenes', [])):
         from .direction_backend import DirectionBackend
         from .direction import direction_qc
+        if any(s.get('direction',{}).get('version')=='reference_master_v013' for s in args[1]['scenes']):
+            from .reference_backend import ReferenceBackend
+            from .reference_master import perceptual_qc
+            DirectionBackend=ReferenceBackend
+            direction_qc=perceptual_qc
+            from .reference_preflight import collect,native_perceptual_qc
+            perceptual_native=native_perceptual_qc(args[1],collect(args[1]))
+            if not perceptual_native['passed']:raise RuntimeError('REFERENCE_PERCEPTUAL_PREFLIGHT_FAILED')
         report = direction_qc(args[1])
         if diagnostic:
             diagnostic.write('direction-plan.json', dict(qc=report,
@@ -54,6 +62,7 @@ def render_project(*args, **kwargs):
         preflight = collect_all(args[0], args[1], diagnostic)
         if any(s.get('direction') for s in args[1].get('scenes', [])):
             preflight['direction'] = dict(qc=report,
+                perceptual=locals().get('perceptual_native'),
                 scenes=[dict(scene_id=s['scene_id'], beats=s['direction']['beats']) for s in args[1]['scenes']])
             diagnostic.write('preflight.json', preflight)
         backend = namespace['CPULocalBackend']
