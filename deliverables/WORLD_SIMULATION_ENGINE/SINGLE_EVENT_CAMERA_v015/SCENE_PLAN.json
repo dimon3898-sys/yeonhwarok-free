@@ -1,0 +1,776 @@
+{
+  "schema_version": "1.0",
+  "project_id": "",
+  "version": 1,
+  "duration": 12.0,
+  "request": {
+    "topic": "만약 수에즈 운하가 7일 동안 막힌다면?",
+    "duration": 12,
+    "qa_mode": true,
+    "direction_profile": "SINGLE_EVENT_CAMERA_TEST",
+    "quality": "HIGH",
+    "pace": "FAST_PLUS",
+    "tts": false,
+    "subtitles": false,
+    "bgm": true,
+    "sfx": true,
+    "style": "시네마틱 세계 시뮬레이션",
+    "style_profile": "tension",
+    "production_preset": "PRODUCTION_DEFAULT_CANDIDATE"
+  },
+  "options": {
+    "tts": false,
+    "subtitles": false,
+    "bgm": true,
+    "quality": "HIGH",
+    "pace": "FAST_PLUS",
+    "sfx": true
+  },
+  "story": {
+    "hook": "",
+    "claims": [
+      {
+        "id": "F01",
+        "text": "Rotterdam의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F02",
+        "text": "Suez Canal의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "F03",
+        "text": "Singapore의 위치는 공개 GIS 원본 좌표로 확인됩니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "coordinate provenance"
+      },
+      {
+        "id": "FD01",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 15,531 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "FD02",
+        "text": "공개 좌표로 계산한 경로의 구면 길이는 약 21,991 km입니다. 실제 항공편/항해 시간은 계산하지 않습니다.",
+        "status": "FACT",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "scope": "derived geometric length; spherical Earth radius 6371.0088 km"
+      },
+      {
+        "id": "A01",
+        "text": "수에즈 경로가 7일 동안 차단된다고 가정합니다. 실제 폐쇄나 미래 예측이 아닙니다.",
+        "status": "ASSUMPTION",
+        "source_ids": [],
+        "scope": "scenario premise"
+      },
+      {
+        "id": "M01",
+        "text": "폐쇄 가정 아래 검증된 해상 그래프에서 수에즈를 제외한 희망봉 우회 경로를 비교합니다. 실제 선박 선택·가격·지연을 예측하지 않습니다.",
+        "status": "SIMULATION",
+        "source_ids": [
+          "SEAROUTE_1_6_0"
+        ],
+        "assumption_ids": [
+          "A01"
+        ],
+        "scope": "visualization only"
+      }
+    ],
+    "beats": [
+      {
+        "scene_id": "S001",
+        "role": "variable",
+        "cause": null,
+        "summary": "Suez Canal closure"
+      }
+    ],
+    "domain": "shipping",
+    "planner": "offline-capability-bounded-v1",
+    "conclusion": "폐쇄 가정 아래 검증된 해상 그래프에서 수에즈를 제외한 희망봉 우회 경로를 비교합니다. 실제 선박 선택·가격·지연을 예측하지 않습니다.",
+    "limitations": [
+      "사실은 공개 GIS의 위치·형태·경로 자료에 한정합니다.",
+      "이동 속도·항로 선택·폐쇄의 결과는 가정 기반 시각화이며 예측이 아닙니다."
+    ],
+    "pattern": "disruption-detour-network"
+  },
+  "scenes": [
+    {
+      "hook": "",
+      "scene_id": "S001",
+      "start_time": 0.0,
+      "duration": 12.0,
+      "scene_type": "CITY_FOCUS",
+      "narration": "수에즈 운하가 봉쇄된다.",
+      "location": "Suez Canal",
+      "coordinates": {
+        "lon": 32.382202,
+        "lat": 30.318359,
+        "source_id": "SEAROUTE_1_6_0",
+        "location_id": "SUEZ_CANAL"
+      },
+      "geographic_targets": [
+        "SUEZ_CANAL"
+      ],
+      "camera_preset": "COUNTRY_APPROACH",
+      "camera_start": {
+        "height": 2.5,
+        "tilt": 0.0,
+        "yaw": 0.0,
+        "bank": 0.0,
+        "fov": 64,
+        "lon": 32.382202,
+        "lat": 30.318359,
+        "target_lon": 32.382202,
+        "target_lat": 30.318359
+      },
+      "camera_end": {
+        "height": 0.2,
+        "tilt": 0.0,
+        "yaw": 0.0,
+        "bank": 0.0,
+        "fov": 48,
+        "lon": 32.382202,
+        "lat": 30.318359,
+        "target_lon": 32.382202,
+        "target_lat": 30.318359
+      },
+      "camera_speed": 1.0,
+      "camera_easing": "smootherstep",
+      "lighting_preset": "GEOGRAPHY_READABILITY",
+      "entities": [],
+      "entity_actions": [],
+      "routes": [],
+      "visual_events": [
+        {
+          "id": "E001",
+          "kind": "city_reveal",
+          "time": 2.0,
+          "duration": 10.0,
+          "target_id": "SUEZ_CANAL",
+          "coordinates": {
+            "lon": 32.382202,
+            "lat": 30.318359,
+            "source_id": "SEAROUTE_1_6_0",
+            "location_id": "SUEZ_CANAL"
+          },
+          "text": "",
+          "description": "SUEZ CANAL",
+          "role": "cause",
+          "caused_by": null,
+          "meaningful": true,
+          "claim_id": "F02"
+        },
+        {
+          "id": "E002",
+          "kind": "route_blocked",
+          "time": 6.0,
+          "duration": 6.0,
+          "target_id": "SUEZ_CANAL",
+          "role": "variable",
+          "caused_by": "E001",
+          "meaningful": true,
+          "description": "CANAL CLOSED",
+          "text": "CANAL CLOSED",
+          "coordinates": {
+            "lon": 32.382202,
+            "lat": 30.318359,
+            "source_id": "SEAROUTE_1_6_0",
+            "location_id": "SUEZ_CANAL"
+          },
+          "claim_id": "A01"
+        }
+      ],
+      "effects": [
+        {
+          "kind": "city_focus",
+          "target_id": "SUEZ_CANAL",
+          "strength": 0.35
+        }
+      ],
+      "labels": [
+        {
+          "kind": "world_label",
+          "text": "SUEZ CANAL",
+          "coordinates": {
+            "lon": 32.382202,
+            "lat": 30.318359,
+            "source_id": "SEAROUTE_1_6_0",
+            "location_id": "SUEZ_CANAL"
+          },
+          "start_time": 2.0,
+          "end_time": 12.0,
+          "role": "city",
+          "opacity": 0.75,
+          "size": 54
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "A_E001",
+          "kind": "soft_pulse",
+          "time": 2.0,
+          "duration": 1.2,
+          "visual_event_id": "E001",
+          "gain_db": -12,
+          "sfx_category": "CITY_REVEAL",
+          "sfx_intensity": "LOW",
+          "sfx_variant": "CITY_REVEAL_01"
+        },
+        {
+          "id": "A_E002",
+          "kind": "low_impact",
+          "time": 6.0,
+          "duration": 1.2,
+          "visual_event_id": "E002",
+          "gain_db": -12,
+          "sfx_category": "ROUTE_BLOCK",
+          "sfx_intensity": "HIGH",
+          "sfx_variant": "ROUTE_BLOCK_01"
+        }
+      ],
+      "music_energy": 0.6,
+      "transition_in": "camera_continuity",
+      "transition_out": "camera_continuity",
+      "source_type": "VERIFIED_GIS_WITH_EXPLICIT_SCENARIO",
+      "fact_status": "SIMULATION",
+      "render_quality": "HIGH",
+      "entry_state": {
+        "camera": {
+          "height": 2.5,
+          "tilt": 0.0,
+          "yaw": 0.0,
+          "bank": 0.0,
+          "fov": 64,
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "target_lon": 32.382202,
+          "target_lat": 30.318359
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Netherlands",
+          "Singapore"
+        ],
+        "active_routes": [],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.177778
+        }
+      },
+      "exit_state": {
+        "camera": {
+          "height": 0.2,
+          "tilt": 0.0,
+          "yaw": 0.0,
+          "bank": 0.0,
+          "fov": 48,
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "target_lon": 32.382202,
+          "target_lat": 30.318359
+        },
+        "earth_rotation": 0.0,
+        "active_countries": [
+          "Netherlands",
+          "Singapore"
+        ],
+        "active_routes": [],
+        "entities": [],
+        "lighting": "GEOGRAPHY_READABILITY",
+        "timeline": {
+          "year": null,
+          "date": null,
+          "era": "modern",
+          "timeline_position": 0.422222
+        }
+      },
+      "directing_presets": [
+        "CITY_REVEAL"
+      ],
+      "claim_ids": [
+        "A01",
+        "M01",
+        "F01",
+        "F02",
+        "F03",
+        "FD01",
+        "FD02"
+      ],
+      "year": null,
+      "date": null,
+      "era": "modern",
+      "timeline_position": 0.177778,
+      "motion_start": 0.0,
+      "description": "Suez single-event camera test",
+      "role": "progression",
+      "narration_event_ids": [
+        "E002"
+      ],
+      "production_defaults": {
+        "version": "v1",
+        "profile": "PRODUCTION_DEFAULT_CANDIDATE",
+        "large_titles": false
+      },
+      "render_mode": "MASTER_V3_EARTH",
+      "visual_polish": {
+        "version": "v004"
+      },
+      "visual_mode": "3D_EARTH",
+      "sfx_intensity": "MEDIUM",
+      "pace": "FAST_PLUS",
+      "motion_timing": {
+        "camera_travel_duration": 0.8,
+        "zoom_duration": 0.8,
+        "camera_speed_reference": 1.0,
+        "focus_transition_duration": 0.13333333333333333,
+        "route_speed_factor": 1.0,
+        "entity_speed_factor": 1.0,
+        "transition_duration": 0.3,
+        "peak_hold_duration": 1.5,
+        "next_event_lead_time": 0.3,
+        "dead_time_removed": 0.0,
+        "tts_playback_rate": 1.0
+      },
+      "text_events": [
+        {
+          "id": "T_E002",
+          "event_id": "E002",
+          "text": "CANAL CLOSED",
+          "coordinates": {
+            "lon": 32.382202,
+            "lat": 30.318359,
+            "source_id": "SEAROUTE_1_6_0",
+            "location_id": "SUEZ_CANAL"
+          },
+          "start_time": 6.0,
+          "end_time": 12.0,
+          "role": "status",
+          "priority": 9,
+          "large_title_approved": false
+        }
+      ],
+      "text_density": "MINIMAL",
+      "single_event_camera": {
+        "preset": "SINGLE_EVENT_CAMERA_TEST",
+        "version": "v015",
+        "timeline": [
+          {
+            "state": "WIDE",
+            "start_frame": 0,
+            "end_frame": 60,
+            "frame_count": 60,
+            "start_seconds": 0.0,
+            "end_seconds": 2.0
+          },
+          {
+            "state": "EVENT_LOCATION",
+            "start_frame": 60,
+            "end_frame": 90,
+            "frame_count": 30,
+            "start_seconds": 2.0,
+            "end_seconds": 3.0
+          },
+          {
+            "state": "ZOOM_IN",
+            "start_frame": 90,
+            "end_frame": 150,
+            "frame_count": 60,
+            "start_seconds": 3.0,
+            "end_seconds": 5.0
+          },
+          {
+            "state": "SETTLE",
+            "start_frame": 150,
+            "end_frame": 180,
+            "frame_count": 30,
+            "start_seconds": 5.0,
+            "end_seconds": 6.0
+          },
+          {
+            "state": "EVENT_REVEAL",
+            "start_frame": 180,
+            "end_frame": 240,
+            "frame_count": 60,
+            "start_seconds": 6.0,
+            "end_seconds": 8.0
+          },
+          {
+            "state": "EVENT_HOLD",
+            "start_frame": 240,
+            "end_frame": 360,
+            "frame_count": 120,
+            "start_seconds": 8.0,
+            "end_seconds": 12.0
+          }
+        ],
+        "end_state": "END",
+        "source_hashes": {
+          "engine/single_event_camera.py": "a75dfc846c037fb16994313d08080ac893b986ebc35f90715d83cb739fb0a0d8",
+          "web/single_event_camera.js": "483d0372c092b42c96beafbd2aabb3616eb7e7d6f8e9de4ad88cd06df59ff937",
+          "web/render_single_event_earth.html": "3adc3734678716c9ec597ceb12bfda6bfe29bc60500cfd329ff4973e3798c455",
+          "tools/collect_all_preflight.mjs": "b78530a625f3995a28682621c3380f885294def3a266bd809c1b49f13260269b"
+        }
+      },
+      "scene_start_frame": 0,
+      "scene_end_frame": 360,
+      "frame_count": 360
+    }
+  ],
+  "required_plugins": [
+    "SHIPPING",
+    "NETWORK",
+    "GEOGRAPHY"
+  ],
+  "sources": [
+    {
+      "id": "natural_earth_places",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "2026-10-04T11:59:04.739053+00:00",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "local_path": "populated_places_source.geojson",
+      "attribution_required": false
+    },
+    {
+      "id": "ourairports",
+      "url": "https://raw.githubusercontent.com/datasets/airport-codes/master/data/airport-codes.csv",
+      "author": "OurAirports / DataHub",
+      "license": "ODC-PDDL-1.0",
+      "license_url": "https://opendatacommons.org/licenses/pddl/",
+      "downloaded_at": "2026-10-04T11:59:04.745131+00:00",
+      "sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "local_path": "airport_codes_source.csv",
+      "attribution_required": false
+    },
+    {
+      "id": "natural_earth_countries",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "preserved original MASTER GIS; first acquisition in assets/SOURCES.json",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "local_path": "../../cinematic-world-map/assets/gis/countries_50m.geojson",
+      "attribution_required": false,
+      "coordinate_provenance": "LABEL_X/LABEL_Y source label points; not centroid guesses"
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "name": "searoute 1.6.0 maritime network and ports",
+      "author": "Gent Halili and searoute-py contributors",
+      "license": "Apache-2.0",
+      "license_file": "data/shipping_sources/APACHE-2.0.txt",
+      "attribution_required": true,
+      "attribution": "Maritime route geometry derived from searoute-py 1.6.0 by Gent Halili and contributors, Apache-2.0. Routes are visualization-grade and are not navigational directions.",
+      "original_url": "https://github.com/genthalili/searoute-py",
+      "download_url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "package_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "downloaded_at_utc": "2026-10-04T12:01:52.348234+00:00",
+      "package_version": "1.6.0",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_order": "longitude,latitude",
+      "coordinate_reference_system": "EPSG:4326",
+      "files": {
+        "marnet_dict.py": {
+          "path": "data/shipping_sources/marnet_dict.py",
+          "sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3"
+        },
+        "ports_dict.py": {
+          "path": "data/shipping_sources/ports_dict.py",
+          "sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b"
+        },
+        "APACHE-2.0.txt": {
+          "path": "data/shipping_sources/APACHE-2.0.txt",
+          "sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66"
+        },
+        "PACKAGE_METADATA.txt": {
+          "path": "data/shipping_sources/PACKAGE_METADATA.txt",
+          "sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c"
+        }
+      },
+      "limitations": [
+        "The source library is explicitly for maritime visualization, not vessel navigation.",
+        "Canal and river segments are generalized network geometry; do not claim survey-grade canal geometry.",
+        "Routes are graph shortest-distance alternatives, not a forecast of ship choices, traffic volume, prices, delivery delay, or closure outcome.",
+        "Fixed-speed duration estimates from the source package are deliberately not used."
+      ],
+      "id": "SEAROUTE_1_6_0",
+      "url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "local_path": "data/shipping_sources/searoute-1.6.0.tar.gz"
+    },
+    {
+      "id": "NATURAL_EARTH_PHYSICAL_POINTS_10M",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_10m_geography_regions_points.geojson",
+      "author": "Natural Earth contributors",
+      "license": "Public Domain",
+      "sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "local_path": "data/shipping_sources/natural_earth_physical_points.geojson",
+      "downloaded_at_utc": "2026-10-04T12:03:07.469430+00:00",
+      "attribution_required": false,
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_reference_system": "EPSG:4326",
+      "coordinate_precision": "generalized cartographic point from Natural Earth, not survey-grade landmark positioning"
+    }
+  ],
+  "metadata": {
+    "camera_test_preset": "SINGLE_EVENT_CAMERA_TEST",
+    "frame_grid": {
+      "version": "INTEGER_FRAME_CLOCK_v014",
+      "fps": "30",
+      "total_frames": 360,
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "start_frame": 0,
+          "end_frame": 360,
+          "frame_count": 360,
+          "start_seconds": 0.0,
+          "end_seconds": 12.0
+        }
+      ],
+      "gap": 0,
+      "overlap": 0
+    }
+  },
+  "gate": {
+    "passed": true,
+    "errors": [],
+    "warnings": [],
+    "retention": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scope": "single-event camera test admission; no production retention score"
+    },
+    "semantic_visibility": {
+      "schema_version": 1,
+      "created_at_utc": "2026-10-08T06:36:08.002Z",
+      "passed": true,
+      "renderer_sha256": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+      "source_hashes": {
+        "flat_semantics": null,
+        "map_transition": "044320a5b4f1757d0ea82f64d38a1f6880c9b9eabc518a653441cefb671df750",
+        "adapter": "c0f6c890e67ab5be7aea56739f384db01f1df962330564947dc3a1e378c172f9",
+        "legacy_renderer": "b378269674833f9a79cbbbb2d9c24b004d5ca398063ca897ec1a5359eed0d6d3",
+        "aircraft": "fe23bb1b297f0fb16bbe492fcfc5245ab9461c9991195bbd6fe7a616ab12404b",
+        "OpenSans": "cf5f5184c1441a1660aa52526328e9d5c2793e77b6d8d3a3ad654bdb07ab8424",
+        "Noto": "91a6b21a427d1a5982e19e8875bfd6af620d0a372cd84967a0c225b90f342f6c",
+        "certifier": "4bf52230fb643a16abfcc53174c643100c3d6f180895b21d89e2d0473fcbd8b5",
+        "production_visual_adapter": "841eab94e44ed043cefd4c756315bc40564d49670ea18b4df8ef029371eacc51"
+      },
+      "fps": 30,
+      "resolution": [
+        2160,
+        3840
+      ],
+      "scoped_scene_ids": null,
+      "opening_hook_eligible": true,
+      "events": [
+        {
+          "event_id": "E001",
+          "scene_id": "S001",
+          "kind": "city_reveal",
+          "target_id": "SUEZ_CANAL",
+          "coordinates": {
+            "lon": 32.382202,
+            "lat": 30.318359,
+            "source_id": "SEAROUTE_1_6_0",
+            "location_id": "SUEZ_CANAL"
+          },
+          "scheduled_local_time": 2,
+          "eligible_frames": 258,
+          "eligible_primitives": [
+            "geographic_pulse"
+          ],
+          "first_eligible_local_time": 2,
+          "projection_at_scheduled_time": {
+            "x": 0.5000000000000001,
+            "y": 0.5000000000000001,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "geographic_pulse",
+          "visible_seconds": 8.6,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.43333333333333335
+        },
+        {
+          "event_id": "E002",
+          "scene_id": "S001",
+          "kind": "route_blocked",
+          "target_id": "SUEZ_CANAL",
+          "coordinates": {
+            "lon": 32.382202,
+            "lat": 30.318359,
+            "source_id": "SEAROUTE_1_6_0",
+            "location_id": "SUEZ_CANAL"
+          },
+          "scheduled_local_time": 6,
+          "eligible_frames": 180,
+          "eligible_primitives": [
+            "route_barrier"
+          ],
+          "first_eligible_local_time": 6,
+          "projection_at_scheduled_time": {
+            "x": 0.4999999999999982,
+            "y": 0.5,
+            "earth_occluded": false,
+            "depth_visible": true,
+            "inside_event_safe_area": true
+          },
+          "first_primitive": "route_barrier",
+          "visible_seconds": 6,
+          "renderer_supported": true,
+          "onset_latency_seconds": 0,
+          "allowed_onset_delay_seconds": 0.03333333333333333
+        }
+      ],
+      "failures": [],
+      "scope": "Shared selected-renderer pose, Earth occlusion or projected-map geography, atmospheric handoff visibility, event primitive eligibility and installed-font advance layout at every 30fps pose. No canvas/WebGL, shader brightness, texture visibility, aesthetic assessment or actual rendered-pixel/QC claim.",
+      "font_layout_policy": "Installed OpenSans/Noto glyph advances; whole strings reserve3% for shaping uncertainty. Final browser font/rasterization QC remains required.",
+      "semantic_input_sha256": "aa6ccf7e0b54d38e1a21e1d2631f2e3ef53464a712713a28686e93c3221590ae",
+      "certified_plan_bytes_sha256": "fb3a3c1faa82daa7b4a33f6a2e26aef54096f16bdb455ad01d14f2fb5ce76523",
+      "certificate_source_fingerprint": "47703e585d54943e46cfa86e3969225c73d00df0a1aa726682d82e7f65af5110",
+      "certificate_cache_hit": false
+    },
+    "narration_alignment": {
+      "passed": true,
+      "errors": [],
+      "warnings": [],
+      "scenes": [
+        {
+          "scene_id": "S001",
+          "narration_present": true,
+          "narration_event_ids": [
+            "E002"
+          ],
+          "scope": "scene_context",
+          "event_bindings": [
+            {
+              "event_id": "E002",
+              "kind": "route_blocked",
+              "scope": "scene_context",
+              "local_time": 6.0,
+              "absolute_time": 6.0,
+              "target_id": "SUEZ_CANAL",
+              "target_kind": "verified_gis_location",
+              "target_scope": "declared_in_scene",
+              "target_source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "target_source_ids_known": true,
+              "planned_route_scene_ids": [],
+              "physical_activity_verified": false,
+              "gis_references": [
+                {
+                  "lon": 32.382202,
+                  "lat": 30.318359,
+                  "source_id": "SEAROUTE_1_6_0",
+                  "location_id": "SUEZ_CANAL",
+                  "verified": true
+                }
+              ],
+              "claim_id": "A01",
+              "claim_status": "ASSUMPTION",
+              "claim_source_ids": [],
+              "word_anchor": false
+            }
+          ],
+          "claim_references": [
+            {
+              "claim_id": "A01",
+              "status": "ASSUMPTION",
+              "source_ids": [],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "M01",
+              "status": "SIMULATION",
+              "source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "assumption_ids": [
+                "A01"
+              ]
+            },
+            {
+              "claim_id": "F01",
+              "status": "FACT",
+              "source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F02",
+              "status": "FACT",
+              "source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "F03",
+              "status": "FACT",
+              "source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD01",
+              "status": "FACT",
+              "source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "assumption_ids": []
+            },
+            {
+              "claim_id": "FD02",
+              "status": "FACT",
+              "source_ids": [
+                "SEAROUTE_1_6_0"
+              ],
+              "assumption_ids": []
+            }
+          ],
+          "geographic_targets": [
+            "SUEZ_CANAL"
+          ],
+          "word_alignment": false
+        }
+      ],
+      "scope": "Declared same-Scene event/GIS/claim references and measured or supplied cue intervals; not speech recognition, lexical verification, word alignment, or proof that a named word occurs at an event timestamp",
+      "lexical_content_verified": false,
+      "word_alignment": false
+    }
+  }
+}
