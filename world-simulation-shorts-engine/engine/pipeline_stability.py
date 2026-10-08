@@ -45,6 +45,13 @@ def render_project(*args, **kwargs):
         if any(s.get('direction',{}).get('version')=='reference_master_v013' for s in args[1]['scenes']):
             from .reference_concat import concat as reference_concat
             namespace['_concat']=reference_concat
+            from .reference_concat import verified_assembly
+            from pathlib import Path
+            valid_original=namespace['valid_scene_file']
+            def valid_reference_file(path,*values,**options):
+                if Path(path).name.startswith('assembled_muted') and not verified_assembly(path):return False
+                return valid_original(path,*values,**options)
+            namespace['valid_scene_file']=valid_reference_file
             from .reference_backend import ReferenceBackend
             from .reference_master import perceptual_qc
             DirectionBackend=ReferenceBackend

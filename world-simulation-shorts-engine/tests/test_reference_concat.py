@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
-from engine.reference_concat import concat
+from engine.reference_concat import concat,verified_assembly
 
 
 class FrameClockConcat(unittest.TestCase):
@@ -25,6 +25,9 @@ class FrameClockConcat(unittest.TestCase):
             self.assertEqual(report['source_frame_counts'],[64,88,93,115])
             self.assertTrue(report['packet_payloads_unchanged'])
             self.assertTrue(report['pts_sequential'])
+            self.assertTrue(verified_assembly(target))
+            target.write_bytes(target.read_bytes()+b'tampered')
+            self.assertFalse(verified_assembly(target))
             text=target.with_suffix('.concat.txt').read_text()
             self.assertEqual(text.count('duration '),4)
             self.assertIn('duration 2.133333333333333',text)

@@ -8,6 +8,7 @@ legacy concat and all encoding/QC policies are unchanged.
 from fractions import Fraction
 from pathlib import Path
 import json
+import hashlib
 import subprocess
 from .qc import probe_video
 
@@ -25,6 +26,19 @@ def parameter_set(movie):
         '-show_streams','-show_data_hash','sha256','-show_entries','stream=extradata_hash',
         '-of','json',str(movie)],capture_output=True,text=True,check=True)
     return json.loads(result.stdout)['streams'][0]['extradata_hash']
+
+
+def file_hash(movie):
+    with Path(movie).open('rb') as stream:return hashlib.file_digest(stream,'sha256').hexdigest()
+
+
+def verified_assembly(movie):
+    try:
+        movie=Path(movie);record=json.loads(movie.with_suffix('.frame-clock.json').read_text())
+        return (record['contract']=='REFERENCE_MASTER_FRAME_COUNT_CONCAT_V1' and
+                record['packet_payloads_unchanged'] is True and record['pts_sequential'] is True and
+                record['file_sha256']==file_hash(movie))
+    except (OSError,ValueError,KeyError,TypeError):return False
 
 
 def concat(scenes,destination,settings):
@@ -67,4 +81,4 @@ def concat(scenes,destination,settings):
         raise RuntimeError('CONCAT_OUTPUT_FRAME_CLOCK_INVALID')
     destination.with_suffix('.frame-clock.json').write_text(json.dumps(dict(
         contract='REFERENCE_MASTER_FRAME_COUNT_CONCAT_V1',frames=total,fps=str(fps),
-        packet_payloads_unchanged=True,parameter_sets_identical=True,pts_sequential=True,source_frame_counts=[n for _,n,_ in inputs])))
+        file_sha256=file_hash(destination),packet_payloads_unchanged=True,parameter_sets_identical=True,pts_sequential=True,source_frame_counts=[n for _,n,_ in inputs])))
