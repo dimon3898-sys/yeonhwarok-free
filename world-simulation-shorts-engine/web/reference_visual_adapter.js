@@ -207,6 +207,26 @@ function directionPixelMetrics(app,t){
   earth_screen_occupancy:body/(32*56),geography_mean_luma:body?total/body:null,
   geography_dark_fraction:body?dark/body:null,route_head_contrast:routeContrast};
 }
+/** Actual audit-time pose/visibility telemetry; never a substitute for QC. */
+export function recordReferenceMetrics(app,t,value){
+ const camera=app.camera||app.core?.camera;if(!camera)return;
+ const state=app.referenceTelemetry||(app.referenceTelemetry={previous:null,labels:new Map(),reveals:new Map()});
+ const q=camera.quaternion.clone(),pos=camera.position.clone(),span=app.core?.cam?.current?.span??pos.length(),prior=state.previous,dt=prior?t-prior.t:0;
+ value.direction.camera_motion=dt>0?{measurement:'ACTUAL_AUDIT_POSE',interval_seconds:dt,angular_deg_s:q.angleTo(prior.q)*180/Math.PI/dt,translation_units_s:pos.distanceTo(prior.pos)/dt,fov_deg_s:Math.abs((camera.fov??0)-prior.fov)/dt,zoom_log_rate_s:Math.abs(Math.log(span/prior.span))/dt,units:app.core?'registered_projection':'Earth_radius'}:{measurement:'NO_PRIOR_FRAME'};
+ if(dt>=0)state.previous={t,q,pos,span,fov:camera.fov??0};
+ for(const label of value.labels||app.labels||[]){
+  if((label.opacity??0)<=.1)continue;
+  const key=label.event_id||label.text,record=state.labels.get(key)||{event_id:label.event_id||null,text:label.text,first_visible:t,last_visible:t,observed_frames:0};
+  if(record.last_visible!==t||record.observed_frames===0)record.observed_frames++;
+  record.last_visible=t;state.labels.set(key,record);
+ }
+ for(const event of value.meaningfulEventsRendered||[])if(event.event_id&&!state.reveals.has(event.event_id))state.reveals.set(event.event_id,t);
+ value.direction.actual_text_visibility=[...state.labels.values()].map(r=>({...r,observed_seconds:r.observed_frames/30}));
+ const primary=state.reveals.get(app.sceneSpec.direction.primary_event_id);
+ value.direction.actual_primary_first_visible=primary??null;
+ value.direction.actual_primary_hold_observed=primary===undefined?null:Math.max(0,t-primary);
+ value.direction.entity_pixels=(value.entities||[]).filter(e=>e.visible&&e.screenVisible).map(e=>({id:e.id,diameter_pixels_1080:Number.isFinite(e.screenRadius)?2*e.screenRadius*1080/app.w:null,clipped:e.clipped??null}));
+}
 export class SceneDirectionEarthRenderer extends SceneProductionEarthRenderer {
  constructor(scene,plan){super(directionLabelScene(scene),plan);this.directionReady=false;}
  async init(){
@@ -246,7 +266,7 @@ export class SceneDirectionEarthRenderer extends SceneProductionEarthRenderer {
     if(m.route_head_contrast.some(r=>r.luminance_delta<.12))value.direction.warnings.push({code:'ROUTE_LOW_CONTRAST',severity:'WARNING'});
    }catch{value.direction.pixel_metrics={measurement:'UNAVAILABLE',code:'DIRECTION_PIXEL_SAMPLE_FAILED'};}
   }
-  return value;
+  recordReferenceMetrics(this,t,value);return value;
  }
 }
 export class SceneDirectionFlatRenderer extends SceneProductionFlatRenderer {
@@ -255,5 +275,5 @@ export class SceneDirectionFlatRenderer extends SceneProductionFlatRenderer {
   const overlay=this.core.overlayLabels.bind(this.core);
   this.core.overlayLabels=t=>{const original=this.core.sceneSpec;this.core.sceneSpec={...original,labels:directionLabelsAt(original,t)};try{return overlay(t);}finally{this.core.sceneSpec=original;}};
   this.frame(0);return this;}
- audit(t){const value=super.audit(t);value.direction=directionAudit(this.sceneSpec,t,value.labels||this.labels||[]);return value;}
+ audit(t){const value=super.audit(t);value.direction=directionAudit(this.sceneSpec,t,value.labels||this.labels||[]);recordReferenceMetrics(this,t,value);return value;}
 }

@@ -3,6 +3,7 @@ from copy import deepcopy
 import hashlib
 import json
 import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -88,6 +89,16 @@ class ReferenceFixtures(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             file=Path(folder)/'scene.json';file.write_text(json.dumps(s))
             with self.assertRaisesRegex(RuntimeError,'SOURCE_MISMATCH'):reference_command(['node','render_production_scene.mjs','--scene-json',str(file),'--url','http://localhost:8000/render_production_earth.html'])
+    def test_reference_hold_excludes_motion_overlap(self):
+        p=json.loads((ROOT/'data/reference_direction_profile_v013.json').read_text())
+        for beat in p['beats']:
+            self.assertEqual(beat['perception_hold'],beat['stationary_after_reveal'])
+            if beat['motion_overlap_after_reveal']:self.assertLess(beat['perception_hold'],beat['reveal_to_next_new_move'])
+
+    def test_actual_telemetry_uses_observed_pose_and_visibility(self):
+        result=subprocess.run(['node',str(ROOT/'tests/reference_telemetry.mjs')],cwd=ROOT,capture_output=True,text=True,check=True)
+        self.assertIn('PASS',result.stdout)
+
     def test_current_source_hashes_bound(self):
         for s in self.plans['shipping']['scenes']:
             for name,digest in s['direction']['source_hashes'].items():self.assertEqual(hashlib.sha256((ROOT/name).read_bytes()).hexdigest(),digest)

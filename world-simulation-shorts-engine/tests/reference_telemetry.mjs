@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import * as THREE from '../../cinematic-world-map/node_modules/three/build/three.module.js';
+const source=fs.readFileSync('web/reference_visual_adapter.js','utf8');
+const start=source.indexOf('export function recordReferenceMetrics'),end=source.indexOf('export class SceneDirectionEarthRenderer');
+const record=new Function('THREE',source.slice(start,end).replace('export function','function')+';return recordReferenceMetrics;')(THREE);
+const app={camera:new THREE.PerspectiveCamera(64,9/16,.02,30),w:2160,sceneSpec:{direction:{primary_event_id:'E001'}}};app.camera.position.set(0,0,3);
+const audit=()=>({direction:{},labels:[{event_id:'E001',text:'LOCATION',opacity:1}],meaningfulEventsRendered:[{event_id:'E001'}],entities:[]});
+const a=audit();record(app,0,a);assert.equal(a.direction.camera_motion.measurement,'NO_PRIOR_FRAME');
+app.camera.position.x=.1;app.camera.quaternion.setFromAxisAngle(new THREE.Vector3(0,1,0),.02);
+const b=audit();record(app,1/30,b);assert(Math.abs(b.direction.camera_motion.translation_units_s-3)<1e-9);assert(Math.abs(b.direction.camera_motion.angular_deg_s-.02*180/Math.PI*30)<1e-6);assert.equal(b.direction.actual_text_visibility[0].observed_frames,2);assert.equal(b.direction.actual_primary_first_visible,0);
+const c=audit();record(app,1/30,c);assert.equal(c.direction.actual_text_visibility[0].observed_frames,2);
+const d=audit();record(app,2/30,d);assert.equal(d.direction.camera_motion.angular_deg_s,0);assert.equal(d.direction.camera_motion.translation_units_s,0);console.log('PASS observed telemetry, no GPU draw claim');

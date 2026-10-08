@@ -12,7 +12,7 @@ permissions:
   packages: write
 concurrency:
   group: gcube-v013-reference-master-publication
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   publish:
     if: github.repository == 'dimon3898-sys/yeonhwarok-free'
@@ -198,6 +198,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Refuse publication of a superseded source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote origin refs/heads/fix/v013-reference-master | cut -f1)"
+          test "$latest" = "$GITHUB_SHA"
       - name: Publish new immutable quality operating image
         shell: bash
         run: |
