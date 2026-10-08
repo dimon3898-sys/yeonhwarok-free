@@ -1,0 +1,11 @@
+# Immutable GPU-validated v017 runtime. Only the versioned visual-quality
+# adapter and explicit planning/profile selection are overlaid; camera,
+# NVIDIA validation, proxy, diagnostics, encoder and audio remain inherited.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:088a6fd11b1d4677e884a50f09b84f453ca875e9637481b634de24fc269be3dc
+ENV WORLD_ENGINE_VISUAL_QUALITY_VERSION=v018
+COPY world-simulation-shorts-engine/engine/visual_quality.py world-simulation-shorts-engine/engine/visual_quality_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/visual_quality_adapter.js world-simulation-shorts-engine/web/render_visual_quality_earth.html world-simulation-shorts-engine/web/visual_quality_v018.json /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/visual_quality_v018.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/web/earth-detail/v018/ /opt/world-engine/world-simulation-shorts-engine/web/earth-detail/v018/
+COPY world-simulation-shorts-engine/tools/test_visual_quality_v018.mjs world-simulation-shorts-engine/tools/build_visual_quality_assets.py /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/visual_quality_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

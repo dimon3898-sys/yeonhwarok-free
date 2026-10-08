@@ -1,0 +1,317 @@
+name: Validate and publish frozen-camera visual-quality v018
+on:
+  push:
+    branches: [fix/v018-visual-quality]
+    paths:
+      - world-simulation-shorts-engine/**
+      - deployment/gcube-proxy-diag/**
+      - .github/workflows/gcube-visual-quality-v018.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: gcube-v018-visual-quality-publication
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
+      RELEASE_TAG: gcube-v018-visual-quality
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Refuse an existing release tag before building
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PYGUARD'
+          import json,urllib.request,urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/gcube-v018-visual-quality',method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try:
+              urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404:raise RuntimeError('RELEASE_ABSENCE_NOT_VERIFIED') from None
+              print('Immutable release tag absent; new publication permitted.')
+          else:raise RuntimeError('RELEASE_ALREADY_EXISTS_REFUSING_OVERWRITE')
+          PYGUARD
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - name: Build complete quality image without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.visual-quality-v018
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ env.IMAGE }}:${{ env.RELEASE_TAG }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Frozen camera, MASTER sources and quality texture/container contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYQUALITY'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.visual_quality_preflight import run
+          report=run('/data/visual-quality-preflight')
+          assert report['passed'],report
+          PYQUALITY
+      - name: Required packages, readonly assets, UID1000 write paths and real synthetic media pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --env WORLD_ENGINE_DIRECTION_VERSION=v012 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os,json,subprocess
+          from pathlib import Path
+          for name in ('libegl1','libvulkan1','libx11-6','libxext6'):
+              assert subprocess.check_output(['dpkg-query','-W','-f=${Status}',name],text=True)=='install ok installed'
+          for command in (['node','--version'],['chromium','--version'],['ffmpeg','-version']):subprocess.run(command,check=True,capture_output=True)
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.asset_audit import audit_assets
+          from deployment.gcube.pipeline_media_preflight import run
+          audit=audit_assets();assert audit['passed']
+          for name in ('tmp','cache','frames','outputs','checkpoints'):
+              p=Path('/data')/name;p.mkdir(parents=True,exist_ok=True);q=p/'write-test';q.write_text('ok');q.unlink()
+          try:
+              report=run('/data/synthetic-pipeline')
+          except Exception as error:
+              detail=dict(type=type(error).__name__,message=str(error)[:1500],stderr=str(getattr(error,'stderr',''))[-1500:])
+              print('::error title=Container pipeline exception::'+json.dumps(detail))
+              raise
+          if not report['passed']:
+              print('::error title=Container QC failures::'+json.dumps(dict(failures=report['qc_failures'])))
+          from deployment.gcube.pipeline_retry_preflight import run as retry
+          assert retry('/data/synthetic-pipeline')['passed']
+          summary={key:value for key,value in report.items() if key not in ('assets','qc_warnings')}
+          summary['asset_count']=len(audit['assets'])
+          print('::notice title=Container pipeline result::'+json.dumps(summary,ensure_ascii=False))
+          assert report['passed'],report['qc_failures']
+          PY
+      - name: Exact production collect-all preflight before and after timing fix
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.framegrid_preflight import run
+          run('/data/framegrid-parity')
+          PY
+      - name: Single-event camera timeline and exact production collect-all poses
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYTEST'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.single_camera_preflight import run
+          run('/data/single-camera-preflight')
+          PYTEST
+      - name: Return-wide exact 450-frame camera preflight and scoped real technical QC
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYTEST'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.return_camera_preflight import run,media
+          run('/data/return-camera-preflight')
+          media('/data/return-camera-preflight')
+          PYTEST
+      - name: Second-event exact 720-frame camera preflight, adaptive projection and scoped technical QC
+        shell: bash
+        run: |
+          docker run --rm -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYTEST'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          os.environ['WORLD_ENGINE_VISUAL_QUALITY_VERSION']='legacy'
+          from engine.qa_planner import generate_deployment_plan
+          from engine.second_event_camera import PRESET
+          default=generate_deployment_plan(dict(topic='만약 수에즈 운하가 7일 동안 막힌다면?',duration=24,qa_mode=False,quality='HIGH',tts=False,subtitles=False,bgm=True,sfx=True))
+          assert os.environ.get('WORLD_ENGINE_SECOND_EVENT_TEST')=='1'
+          assert default['metadata']['camera_test_preset']==PRESET
+          from deployment.gcube.second_camera_preflight import run,media
+          run('/data/second-camera-preflight')
+          media('/data/second-camera-preflight')
+          PYTEST
+      - name: Common direction fixtures on the actual v013 runtime defaults
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.reference_preflight
+      - name: Reference-master real synthetic media, new files and checkpoint retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os,json
+          from pathlib import Path
+          from engine.reference_master import ROOT,SOURCES
+          for name in SOURCES:
+              file=ROOT/name;assert file.is_file() and file.stat().st_size>0
+              with file.open('rb') as stream:assert stream.read(1)
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.reference_media_preflight import run
+          from deployment.gcube.reference_retry_preflight import run as retry
+          try:
+              report=run('/data/reference-media')
+              if not report['passed']:
+                  print('::error title=Reference synthetic QC::'+json.dumps(report['qc_failures']))
+              assert report['passed'],report['qc_failures']
+              assert retry('/data/reference-media')['passed']
+          except Exception as error:
+              import traceback
+              detail=dict(type=type(error).__name__,message=str(error)[:1500],stderr=str(getattr(error,'stderr',''))[-1500:],stack=traceback.format_exc()[-3000:])
+              print('::error title=Reference synthetic pipeline exception::'+json.dumps(detail))
+              raise
+          print('::notice title=Reference media::'+json.dumps({k:v for k,v in report.items() if k not in ('assets','qc_warnings')},ensure_ascii=False))
+          PY
+      - name: Measure optional offline TTS budget on the installed provider
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import json,subprocess,tempfile
+          from pathlib import Path
+          from engine.audio import ESpeakProvider,_stereo
+          from engine.planner import _narration
+          from engine.gis import resolve_location
+          provider=ESpeakProvider()
+          with tempfile.TemporaryDirectory() as folder:
+              path=Path(folder)/'narration.wav'
+              info=provider.synthesize(_narration('variable',resolve_location('London'),'aviation',False,20/6),path,language='ko',speed=155)
+              seconds=len(_stereo(path))/48000
+          version=subprocess.check_output([provider.executable,'--version'],text=True).split('Data at',1)[0].strip()
+          data_version=subprocess.check_output(['dpkg-query','-W','-f=${Version}','espeak-ng-data'],text=True).strip()
+          print('::notice title=Offline TTS actual budget::'+json.dumps(dict(version=version,data_version=data_version,seconds=seconds,strict_scene_limit=20/6-.08,headroom90_limit=(20/6-.08)*.9,scene_guard_passed=seconds<=20/6-.08)))
+          PY
+      - name: Collect regression import failures before running the full suite
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
+            'import unittest,json; loader=unittest.TestLoader(); suite=loader.discover("tests"); errors=[text for text in loader.errors]; print("::notice title=Regression import modules::"+json.dumps([text.split("\n",1)[0] for text in errors])); print("::notice title=Regression import types::"+json.dumps([text.splitlines()[-1].split(":",1)[0] for text in errors])); print("::notice title=Regression import count::"+str(suite.countTestCases()))'
+      - name: All existing regressions and new native collect-all/security/media contracts
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
+            'import pathlib,unittest; [p.mkdir(parents=True,exist_ok=True) for p in [pathlib.Path("/run/world-engine/cache"),pathlib.Path("/run/world-engine/audio")]]; suite=unittest.defaultTestLoader.discover("tests"); result=unittest.TextTestRunner(verbosity=1).run(suite); print("::notice title=Core regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))+", failed_tests="+str([t.id() for t,_ in result.failures+result.errors])); raise SystemExit(not result.wasSuccessful())'
+      - name: Independent proxy security and GPU logic regressions
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/fixtures,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/fixtures,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/test_storage.py,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/test_storage.py,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
+            'import unittest; suite=unittest.defaultTestLoader.discover("deployment/gcube",pattern="test_*.py"); result=unittest.TextTestRunner(verbosity=1).run(suite); print("::notice title=Proxy GPU regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))+", failed_tests="+str([t.id() for t,_ in result.failures+result.errors])); raise SystemExit(not result.wasSuccessful())'
+      - name: Independent v007 diagnostic regressions
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --workdir /tmp/proxy-diag \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} /tmp/proxy-diag/run_checks.py test_observer test_server_diag
+      - name: Gateway owner-login and 61-second foreground persistence without GPU admission
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
+      - name: Actual production entrypoint fails closed without physical NVIDIA
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name v018-gpu-required \
+            --env WORLD_ENGINE_OWNER_CODE="$(python -c 'import secrets;print(secrets.token_urlsafe(32))')" \
+            --env WORLD_ENGINE_STORAGE_MODE=ephemeral \
+            --env WORLD_ENGINE_STORAGE_PATH=/data ${IMAGE}:${RELEASE_TAG} >/dev/null
+          trap 'docker rm --force v018-gpu-required >/dev/null 2>&1 || true' EXIT
+          docker exec v018-gpu-required python -c \
+            'import json,time,urllib.request; time.sleep(5); p=urllib.request.build_opener(urllib.request.ProxyHandler({})); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["ok"] is True and value["engine_ready"] is False; assert value["error_code"]=="GPU_HARDWARE_UNAVAILABLE"; time.sleep(61); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["engine_ready"] is False; print("::notice title=Production boot::PASS fail-closed; no GPU fallback; persisted 61 seconds")'
+      - name: Login to GHCR only after all validation steps pass
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Refuse publication of a superseded source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote origin refs/heads/fix/v018-visual-quality | cut -f1)"
+          test "$latest" = "$GITHUB_SHA"
+      - name: Publish new immutable quality operating image
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PYFINALGUARD'
+          import json,os,urllib.request,urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try:
+              urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404:raise RuntimeError('RELEASE_ABSENCE_NOT_VERIFIED') from None
+              print('Final immutable-tag check: verified404; publication permitted.')
+          else:raise RuntimeError('RELEASE_ALREADY_EXISTS_REFUSING_OVERWRITE')
+          PYFINALGUARD
+          docker push "${IMAGE}:${RELEASE_TAG}"
+      - name: Anonymous public pull, OCI revision and owner-login persistence on pulled image
+        shell: bash
+        run: |
+          set -euo pipefail
+          anonymous="$(mktemp -d)"
+          trap 'rm -rf "$anonymous"' EXIT
+          printf '{"auths":{}}' > "$anonymous/config.json"
+          docker --config "$anonymous" pull "${IMAGE}:${RELEASE_TAG}"
+          revision="$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "${IMAGE}:${RELEASE_TAG}")"
+          test "$revision" = "$GITHUB_SHA"
+          docker run --rm --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.gateway_preflight
+          docker inspect --format '::notice title=Public image digest::{{join .RepoDigests ","}}' "${IMAGE}:${RELEASE_TAG}"
+          echo '::notice title=Quality release::Anonymous pull PASS; owner login PASS; 61s persistence PASS; GPU render NOT_RUN'

@@ -34,6 +34,12 @@ def configure_qa_schema():
         visibility.TOOL=Path(__file__).resolve().parents[1]/'tools/reference_semantic_preflight.mjs'
         schema.SCHEMA_PATH=Path(__file__).resolve().parents[1]/'data/reference_scene_plan.schema.json'
 
+    # Saved approved v018 plans must validate after a fresh gateway/worker boot,
+    # before another planning request happens to install the additive wrapper.
+    if os.environ.get('WORLD_ENGINE_VISUAL_QUALITY_VERSION') == 'v018':
+        from .visual_quality import install_validation
+        install_validation()
+
 
 def directed_plan(plan, raw):
     if ((os.environ.get('WORLD_ENGINE_DIRECTION_VERSION') == 'v012' or raw.get('direction_profile')=='FAST_PLUS_LEGACY')
@@ -53,7 +59,11 @@ def generate_deployment_plan(raw):
     # generated request is explicitly QA and names this isolated preset.
     if selected=='SECOND_EVENT_ADAPTIVE_WIDE_TEST' or (os.environ.get('WORLD_ENGINE_SECOND_EVENT_TEST')=='1' and float(raw.get('duration',0))==24 and selected in {None,'REFERENCE_MASTER'} and raw.get('production_preset')!='LEGACY'):
         from .second_event_camera import generate
-        return generate({**raw,'qa_mode':True})
+        plan = generate({**raw,'qa_mode':True})
+        if os.environ.get('WORLD_ENGINE_VISUAL_QUALITY_VERSION') == 'v018':
+            from .visual_quality import apply_quality
+            return apply_quality(plan)
+        return plan
     if selected=='SINGLE_EVENT_RETURN_TO_WIDE_TEST' or (os.environ.get('WORLD_ENGINE_RETURN_WIDE_TEST')=='1' and raw.get('qa_mode') is True and float(raw.get('duration',0))==15):
         from .return_wide_camera import generate
         return generate(raw)

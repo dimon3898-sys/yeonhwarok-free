@@ -1,0 +1,191 @@
+{
+  "version": "v018",
+  "source": {
+    "id": "natural_earth_1_native_raster",
+    "file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+    "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+    "resolution": [
+      21600,
+      10800
+    ],
+    "license": "Public domain",
+    "url": "https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-1/",
+    "kind": "Existing Natural Earth shaded relief and land cover cartography; not new DEM or satellite imagery"
+  },
+  "coast_source": {
+    "id": "natural_earth_50m_country_polygons",
+    "file": "cinematic-world-map/assets/gis/countries_50m.geojson",
+    "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+    "license": "Public domain",
+    "scale": "1:50m",
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson"
+  },
+  "plan": {
+    "file": "deliverables/WORLD_SIMULATION_ENGINE/SECOND_EVENT_CAMERA_v017/SCENE_PLAN.json",
+    "sha256": "e8a365a792bcce56c683af373c420af95ba8e7323ef141b10e58e84f8a283678",
+    "use": "Coordinates only; camera values and timing are not modified"
+  },
+  "generation": {
+    "longitude_radius_degrees": 12,
+    "latitude_radius_degrees": 14,
+    "native_texels_per_degree": 60,
+    "resampling": "NONE",
+    "global_master_textures": "UNCHANGED",
+    "terrain_dem": "Original 2048x1024 topology retained; this raster adds genuine color/shaded relief detail only",
+    "night_texture": "Original 8192x4096 night data retained; no invented higher-resolution light data",
+    "antimeridian": "Requested tile crossing +/-180 rejected with explicit split-required error",
+    "land_mask": "Polygon interior union with holes, rasterized at regional tile density; no coastline stroke"
+  },
+  "textures": [
+    {
+      "region_id": "detail_0",
+      "width": 1440,
+      "height": 1680,
+      "bounds": [
+        20.383333333333326,
+        16.316666666666663,
+        44.383333333333326,
+        44.31666666666666
+      ],
+      "center": {
+        "lon": 32.382202,
+        "lat": 30.318359
+      },
+      "source_pixel_window": [
+        12023,
+        2741,
+        13463,
+        4421
+      ],
+      "projection": "equirectangular",
+      "orientation": "north_up",
+      "resized": false,
+      "sharpened": false,
+      "id": "detail_0",
+      "file": "web/earth-detail/v018/detail_0.png",
+      "url": "/static/earth-detail/v018/detail_0.png",
+      "role": "regional_day_relief",
+      "sha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+      "bytes": 3594622,
+      "source_resolution": [
+        21600,
+        10800
+      ],
+      "source_id": "natural_earth_1_native_raster"
+    },
+    {
+      "region_id": "detail_0",
+      "width": 1440,
+      "height": 1680,
+      "bounds": [
+        20.383333333333326,
+        16.316666666666663,
+        44.383333333333326,
+        44.31666666666666
+      ],
+      "center": {
+        "lon": 32.382202,
+        "lat": 30.318359
+      },
+      "source_pixel_window": [
+        12023,
+        2741,
+        13463,
+        4421
+      ],
+      "projection": "equirectangular",
+      "orientation": "north_up",
+      "resized": false,
+      "sharpened": false,
+      "id": "detail_0_land",
+      "file": "web/earth-detail/v018/detail_0_land.png",
+      "url": "/static/earth-detail/v018/detail_0_land.png",
+      "role": "regional_land_mask",
+      "sha256": "70abef962eea585520540f5a573523845f0f968877038bc8013e93149ecd4c13",
+      "bytes": 13879,
+      "source_resolution": null,
+      "source_id": "natural_earth_50m_country_polygons",
+      "polygon_count": 71,
+      "mask_values": {
+        "ocean_or_polygon_hole": 0,
+        "land": 255
+      },
+      "geographic_detail": "Natural Earth 1:50m coastline; not survey-grade coastline"
+    },
+    {
+      "region_id": "detail_1",
+      "width": 1440,
+      "height": 1680,
+      "bounds": [
+        91.85000000000002,
+        -12.700000000000003,
+        115.85000000000002,
+        15.299999999999997
+      ],
+      "center": {
+        "lon": 103.853875,
+        "lat": 1.294979
+      },
+      "source_pixel_window": [
+        16311,
+        4482,
+        17751,
+        6162
+      ],
+      "projection": "equirectangular",
+      "orientation": "north_up",
+      "resized": false,
+      "sharpened": false,
+      "id": "detail_1",
+      "file": "web/earth-detail/v018/detail_1.png",
+      "url": "/static/earth-detail/v018/detail_1.png",
+      "role": "regional_day_relief",
+      "sha256": "673b8249fef4acb228cabd566895fd761ed1ab23b53afc08cee96b4ba1ff222f",
+      "bytes": 2654049,
+      "source_resolution": [
+        21600,
+        10800
+      ],
+      "source_id": "natural_earth_1_native_raster"
+    },
+    {
+      "region_id": "detail_1",
+      "width": 1440,
+      "height": 1680,
+      "bounds": [
+        91.85000000000002,
+        -12.700000000000003,
+        115.85000000000002,
+        15.299999999999997
+      ],
+      "center": {
+        "lon": 103.853875,
+        "lat": 1.294979
+      },
+      "source_pixel_window": [
+        16311,
+        4482,
+        17751,
+        6162
+      ],
+      "projection": "equirectangular",
+      "orientation": "north_up",
+      "resized": false,
+      "sharpened": false,
+      "id": "detail_1_land",
+      "file": "web/earth-detail/v018/detail_1_land.png",
+      "url": "/static/earth-detail/v018/detail_1_land.png",
+      "role": "regional_land_mask",
+      "sha256": "bdcbc8170861054801856c36b334be1326ab51d24fdd98a149857dfeb94be83c",
+      "bytes": 15527,
+      "source_resolution": null,
+      "source_id": "natural_earth_50m_country_polygons",
+      "polygon_count": 102,
+      "mask_values": {
+        "ocean_or_polygon_hole": 0,
+        "land": 255
+      },
+      "geographic_detail": "Natural Earth 1:50m coastline; not survey-grade coastline"
+    }
+  ]
+}

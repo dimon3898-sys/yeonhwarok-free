@@ -85,6 +85,24 @@ def render_project(*args, **kwargs):
         namespace['CPULocalBackend']=SecondEventBackend
         namespace['_concat']=reference_concat
         namespace['run_qc']=second_qc
+    if len(args)>1 and (args[1].get('metadata',{}).get('visual_quality') is not None or
+                        any('visual_quality' in scene for scene in args[1].get('scenes', []))):
+        from .visual_quality import install_validation, validate_quality, renderer_version, project_renderer_version
+        from .visual_quality_backend import VisualQualityBackend
+        install_validation()
+        quality = validate_quality(args[1])
+        if diagnostic:
+            diagnostic.write('visual-quality-sources.json', quality)
+        if not quality['passed']:
+            raise RuntimeError('VISUAL_QUALITY_PREFLIGHT_FAILED')
+        namespace['CPULocalBackend'] = VisualQualityBackend
+        namespace['renderer_version'] = renderer_version
+        namespace['project_renderer_version'] = project_renderer_version
+        original_source_report = namespace['write_source_report']
+        def quality_source_report(directory, plan, assets=None):
+            from .visual_quality import record_source_report
+            return record_source_report(directory, plan, assets, original=original_source_report)
+        namespace['write_source_report'] = quality_source_report
     if diagnostic:
         from .gpu_preflight import collect_all
         preflight = collect_all(args[0], args[1], diagnostic)
