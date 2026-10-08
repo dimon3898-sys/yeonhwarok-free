@@ -1,0 +1,9 @@
+# Immutable GPU-validated v015 runtime; isolated 15s return-to-wide QA overlay.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:c8365f4784bee20d82009607e77eb5871abe1dce7cb3698b8fb4fe0c86333f15
+ENV WORLD_ENGINE_RETURN_WIDE_TEST=1
+COPY world-simulation-shorts-engine/engine/return_wide_camera.py world-simulation-shorts-engine/engine/return_wide_qc.py world-simulation-shorts-engine/engine/return_wide_backend.py world-simulation-shorts-engine/engine/single_event_camera.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/return_wide_camera.js world-simulation-shorts-engine/web/render_return_wide_earth.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/tools/test_return_wide_camera.mjs world-simulation-shorts-engine/tools/collect_all_preflight.mjs world-simulation-shorts-engine/tools/reference_semantic_preflight.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/return_camera_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/
+COPY world-simulation-shorts-engine/data/reference_scene_plan.schema.json /opt/world-engine/world-simulation-shorts-engine/data/

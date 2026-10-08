@@ -29,12 +29,16 @@ def install_validation():
     if getattr(schema.validate_plan,'single_test_wrapper',False):return
     original=schema.validate_plan
     def checked(plan):
-        if plan.get('metadata',{}).get('camera_test_preset')!=PRESET:return original(plan)
-        admission=validate_camera(plan)
+        preset=plan.get('metadata',{}).get('camera_test_preset')
+        if preset==PRESET:admit=validate_camera
+        elif preset=='SINGLE_EVENT_RETURN_TO_WIDE_TEST':
+            from .return_wide_camera import validate_camera as admit
+        else:return original(plan)
+        admission=admit(plan)
         if not admission['passed']:return admission
         # Only narrative multi-event retention is replaced with this explicit
         # single-event test contract. GIS/schema/asset/native/GPU checks remain.
-        ns=dict(original.__globals__);ns['analyze_retention']=validate_camera
+        ns=dict(original.__globals__);ns['analyze_retention']=admit
         fn=FunctionType(original.__code__,ns,original.__name__,original.__defaults__)
         return fn(plan)
     checked.single_test_wrapper=True;schema.validate_plan=checked
