@@ -370,10 +370,36 @@ def prepare_regression_runtime():
         (Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
 
 
+def admit_proxy_inventory(value):
+    """Check frozen test bytes and IDs before the lengthy core suite starts.
+
+    The inherited image predates one storage regression. CI supplies that
+    original test file read-only; production storage/runtime remains untouched.
+    """
+    parent = json.loads(PARENT_MANIFEST.read_text())
+    prefix = 'world-simulation-shorts-engine/deployment/gcube/'
+    records = [row for row in parent['checkout_records']
+               if row['path'].startswith(prefix)
+               and re.fullmatch(r'test_[A-Za-z0-9_]+\.py', Path(row['path']).name)]
+    assert len(records) == 14, 'SELECTION_PROXY_TEST_SOURCE_INVENTORY_CHANGED'
+    for row in records:
+        path = ROOT / row['path']
+        assert path.is_file() and path.stat().st_size == row['size'] and sha(path) == row['sha256'], 'SELECTION_PROXY_TEST_SOURCE_CHANGED'
+    loader = unittest.TestLoader()
+    suite = loader.discover(str(APP / 'deployment/gcube'), pattern='test_*.py')
+    assert not loader.errors, 'SELECTION_PROXY_IMPORT_FAILURE'
+    actual = identities(suite)
+    assert actual == value['proxy_ids'], 'SELECTION_PROXY_TEST_INVENTORY_CHANGED'
+    print('::notice title=Selection proxy test admission::' + json.dumps(dict(
+        passed=True, source_files=len(records), tests=len(actual))), flush=True)
+    return suite
+
+
 def focused_regressions(value):
     """Fast diagnosis only; the full frozen union remains mandatory afterward."""
     prepare_regression_runtime()
     with environment(**LEGACY_ENV):
+        admit_proxy_inventory(value)
         loader = unittest.TestLoader()
         complete = loader.discover('tests')
         assert not loader.errors, 'SELECTION_TEST_IMPORT_FAILURE'
@@ -399,6 +425,7 @@ def focused_regressions(value):
 def regressions(value):
     prepare_regression_runtime()
     with environment(**LEGACY_ENV):
+        proxy = admit_proxy_inventory(value)
         loader = unittest.TestLoader()
         complete = loader.discover('tests')
         assert not loader.errors, 'SELECTION_TEST_IMPORT_FAILURE'
@@ -406,9 +433,6 @@ def regressions(value):
         assert identities(complete) == expected, 'SELECTION_UNREGISTERED_TEST_IDS'
         with authorized_ui_asset_view(require_container_assets=True), legacy_codespaces_fixture_view():
             core = execute_suite(complete, expected, 'core-and-public-selection')
-        loader = unittest.TestLoader()
-        proxy = loader.discover('deployment/gcube', pattern='test_*.py')
-        assert not loader.errors, 'SELECTION_PROXY_IMPORT_FAILURE'
         security = execute_suite(proxy, value['proxy_ids'], 'proxy-security-gpu-logic')
         previous = os.getcwd()
         sys.path.insert(0, '/tmp/proxy-diag')

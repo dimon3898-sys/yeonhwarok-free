@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 import unittest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from deployment.gcube import selection_preflight as selection
 from deployment.mobile_server import MobileApplication
@@ -14,6 +14,27 @@ import test_codespaces_origin
 
 
 class SelectionReleaseHarnessV022(unittest.TestCase):
+    def test_proxy_inventory_rejects_the_actual_stale_image_case_before_execution(self):
+        manifest = json.loads(selection.MANIFEST.read_text())
+        with redirect_stdout(io.StringIO()):
+            suite = selection.admit_proxy_inventory(manifest)
+        self.assertEqual(selection.identities(suite), manifest['proxy_ids'])
+        import test_storage
+        with patch.object(test_storage.StorageTests,
+                          'test_unlinked_probe_inode_stays_pinned_and_foreign_replacement_survives', None):
+            with self.assertRaisesRegex(AssertionError, 'SELECTION_PROXY_TEST_INVENTORY_CHANGED'):
+                selection.admit_proxy_inventory(manifest)
+        self.assertTrue(callable(test_storage.StorageTests.test_unlinked_probe_inode_stays_pinned_and_foreign_replacement_survives))
+
+    def test_proxy_inventory_rejects_changed_original_test_bytes(self):
+        manifest = json.loads(selection.MANIFEST.read_text())
+        real_sha = selection.sha
+        def changed_sha(path):
+            return '0' * 64 if Path(path).name == 'test_storage.py' else real_sha(path)
+        with patch.object(selection, 'sha', changed_sha):
+            with self.assertRaisesRegex(AssertionError, 'SELECTION_PROXY_TEST_SOURCE_CHANGED'):
+                selection.admit_proxy_inventory(manifest)
+
     def test_legacy_fixture_adapter_preserves_real_create_and_original_dispatch_guards(self):
         fixture = test_codespaces_origin.CodespacesHTTPTests
         previous = fixture.setUp
