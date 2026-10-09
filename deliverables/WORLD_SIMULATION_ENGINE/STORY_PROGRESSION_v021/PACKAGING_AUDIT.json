@@ -1,5 +1,5 @@
 {
-  "recorded_at_utc": "2026-10-09T04:54:07.844971+00:00",
+  "recorded_at_utc": "2026-10-09T05:11:08.318032+00:00",
   "parent_image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9d759dc334516174d395429de927092d3d5552b6734336dcd400cf2c0dcc15d9",
   "parent_runtime_revision": "3d24147ac1a7ef26a39c0866a42ce8b15f5b4711",
   "proposed_new_tag": "gcube-v021-story-progression",
@@ -60,8 +60,8 @@
   },
   "local_native_preflight": {
     "passed": true,
-    "report": "/tmp/world-story-v021/packaging-native-final/REPORT.json",
-    "selected_plan": "/tmp/world-story-v021/packaging-native-final/selected/PLAN.json",
+    "report": "/tmp/world-story-v021/packaging-native-source-final/REPORT.json",
+    "selected_plan": "/tmp/world-story-v021/packaging-native-source-final/selected/PLAN.json",
     "native_adapter_checks": 33,
     "frames": 720,
     "off_exact_v020": true,
@@ -88,7 +88,16 @@
     "final_container_asset_status": "NOT_RUN_LOCAL",
     "served_static_profile_and_assets": "PASS",
     "physical_gpu": "NOT_RUN",
-    "output_quality": "NOT_RUN"
+    "output_quality": "NOT_RUN",
+    "generic_contract_fixtures": {
+      "shifted_authored_status": true,
+      "non_suez_authored_port": true,
+      "identical_pose_lock": true,
+      "forged_lock_rejected": true
+    },
+    "inherited_v020_whole_preflight_passed": true,
+    "inherited_v019_whole_preflight_passed": true,
+    "inherited_v018_whole_preflight_passed": true
   },
   "publication_guards": {
     "strict_404_tag_guards": 2,
@@ -98,11 +107,123 @@
     "legacy_and_default_v021_gateway_61_seconds": true,
     "actual_default_entrypoint_fail_closed_no_NVIDIA_61_seconds": true
   },
-  "publication": "NOT_RUN",
+  "publication": "NOT_RUN_BY_THIS_AGENT",
   "gpu_workload": "NOT_RUN",
   "notes": [
     "Legacy story selector is explicit in every inherited stage. Whole parent preflight receives only its verified inherited79asset view after full81asset audit; no parent auditor/source files changed.",
     "The new isolated35stage executes even after earlier validation failure and emits bounded Python/Node filename+line/type/code/exit metadata, with no raw stderr/plan/environment.",
-    "Strict33checks and all microbeat frame receipts were exercised in final whole native preflight."
-  ]
+    "Strict33checks and all microbeat frame receipts were exercised in final whole native preflight.",
+    "This follow-up only ran the unchanged strict33 helper and wrote this separate /tmp audit. No tracked files, commits, pushes, Docker/GPU/workload actions or network calls were made."
+  ],
+  "audit_kind": "Fresh whole native preflight after final JavaScript generic camera-lock correction",
+  "source_final_snapshot": {
+    "repository_HEAD_at_run_start": "60aee34a4ec25cc7fa979471985ed005e880017d",
+    "repository_HEAD_at_completion": "60aee34a4ec25cc7fa979471985ed005e880017d",
+    "runtime_sources": [
+      {
+        "path": "engine/story_progression.py",
+        "sha256": "b1690114c26d2c9a8103e747945d4bfc2f67e7da690f0db63636444109ec9fa0",
+        "matches_current": true
+      },
+      {
+        "path": "engine/story_progression_backend.py",
+        "sha256": "821c13f143d8c4e94cc52a09249032f8a3a01d8c973548eca4ea61c4bf500166",
+        "matches_current": true
+      },
+      {
+        "path": "web/story_progression_adapter.js",
+        "sha256": "74c253c1aa023593182bfb08b1167443360769f6f784abf012e6794dd715573e",
+        "matches_current": true
+      },
+      {
+        "path": "web/render_story_progression_earth.html",
+        "sha256": "1c6f44df6314b2c73a0fe790a4499f816471642fa42fb99450c70ad761bb7dcb",
+        "matches_current": true
+      },
+      {
+        "path": "data/story_progression_v021.json",
+        "sha256": "b984b548c718c154a3aa75cd875ee2a2d4c79fa0973b18064d3310513768214e",
+        "matches_current": true
+      },
+      {
+        "path": "web/story_progression_v021.json",
+        "sha256": "b984b548c718c154a3aa75cd875ee2a2d4c79fa0973b18064d3310513768214e",
+        "matches_current": true
+      }
+    ],
+    "native_tool": {
+      "path": "tools/test_story_progression_v021.mjs",
+      "sha256": "6cdf77618227379b844fb13d720302f3701b74561efe976e50d895364b2db27a",
+      "strict_check_count": 33
+    },
+    "integration_files": [
+      {
+        "path": "engine/qa_planner.py",
+        "sha256": "0a335825eef734bd4c806e394dac6da6529878efeec17126986e013b6eb2492e"
+      },
+      {
+        "path": "engine/pipeline_stability.py",
+        "sha256": "8ea63fcd56e6340b7b9fe5d4d6166d258c2620c05eb0ec778d9887a5bb1509b2"
+      }
+    ],
+    "owned_packaging_files_unchanged": true,
+    "selected_source_contract_exact_current": true
+  },
+  "prior_old_native_context": {
+    "report": "/tmp/world-story-v021/packaging-native-final/REPORT.json",
+    "passed": true,
+    "native_checks": 33,
+    "source_hashes": {
+      "engine/story_progression.py": "b1690114c26d2c9a8103e747945d4bfc2f67e7da690f0db63636444109ec9fa0",
+      "engine/story_progression_backend.py": "821c13f143d8c4e94cc52a09249032f8a3a01d8c973548eca4ea61c4bf500166",
+      "web/story_progression_adapter.js": "db241169cd9a6c92ed93abb549cb6d352fcad839a798583ca02b5684363bd6fd",
+      "web/render_story_progression_earth.html": "1c6f44df6314b2c73a0fe790a4499f816471642fa42fb99450c70ad761bb7dcb",
+      "data/story_progression_v021.json": "b984b548c718c154a3aa75cd875ee2a2d4c79fa0973b18064d3310513768214e",
+      "web/story_progression_v021.json": "b984b548c718c154a3aa75cd875ee2a2d4c79fa0973b18064d3310513768214e"
+    },
+    "changed_runtime_paths": [
+      "web/story_progression_adapter.js"
+    ],
+    "scope": "Prior whole native pass predates the final generic-lock correction; retained as history, not evidence for the corrected adapter.",
+    "generic_lock_scene_fixture": "/tmp/v021_review_merged_static_locks.json",
+    "generic_lock_scene_fixture_sha256": "e46ae971c6a5ba9695cccab31372aeaf880c9e3858e95f4efbd3d04dd80bb87f"
+  },
+  "full_final_image_tests": "PASS_IN_FINAL_CI_37887130949_SOURCE_60aee34_NOT_LOCAL_DOCKER",
+  "repository_mutations_by_this_followup": "NONE",
+  "root_final_ci_validation": {
+    "workflow_url": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/37887130949",
+    "source_revision": "60aee34a4ec25cc7fa979471985ed005e880017d",
+    "all_steps_success": true,
+    "final_container_assets": 81,
+    "unique_regression_pass": 1004,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "anonymous_pull": "PASS",
+    "owner_login": "PASS",
+    "health": "PASS",
+    "legacy_and_default_v021_persistence_seconds": 61,
+    "public_image": {
+      "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v021-story-progression",
+      "digest": "sha256:2f68a880afdc56a5d3b9dc5ab52c2a87100316048d5d863e712654fee789a9dc",
+      "config_digest": "sha256:494ea00cda24f36aec80ee30561245d391bf159ac3d1d082c41dd5c5c941147a",
+      "revision": "60aee34a4ec25cc7fa979471985ed005e880017d",
+      "entrypoint": [
+        "/usr/bin/tini",
+        "-g",
+        "--",
+        "python",
+        "-m",
+        "deployment.gcube.start"
+      ],
+      "command": null,
+      "working_directory": "/opt/world-engine/world-simulation-shorts-engine",
+      "exposed_ports": [
+        "8000/tcp"
+      ],
+      "anonymous_registry_read": true,
+      "actual_gpu": "NOT_RUN"
+    },
+    "physical_gpu": "NOT_RUN"
+  }
 }
