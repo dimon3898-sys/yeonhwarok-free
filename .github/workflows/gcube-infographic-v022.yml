@@ -182,7 +182,7 @@ jobs:
           raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
           PYV020
       - name: Isolated 35-case v021 regressions with bounded failure metadata
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -266,7 +266,7 @@ jobs:
           raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
           PYV021
       - name: Isolated frozen v022 regressions and strict execution inventory
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -422,7 +422,7 @@ jobs:
           print('::notice title=Offline TTS actual budget::'+json.dumps(dict(version=version,data_version=data_version,seconds=seconds,strict_scene_limit=20/6-.08,headroom90_limit=(20/6-.08)*.9,scene_guard_passed=seconds<=20/6-.08)))
           PY
       - name: Collect regression import failures before running the full suite
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
@@ -434,7 +434,7 @@ jobs:
             --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
             'import unittest,json; loader=unittest.TestLoader(); suite=loader.discover("tests"); errors=[text for text in loader.errors]; assert not errors, "REGRESSION_IMPORT_FAILURE"; print("::notice title=Regression import modules::"+json.dumps([text.split("\n",1)[0] for text in errors])); print("::notice title=Regression import types::"+json.dumps([text.splitlines()[-1].split(":",1)[0] for text in errors])); print("::notice title=Regression import count::"+str(suite.countTestCases()))'
       - name: All existing regressions and new native collect-all/security/media contracts
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -534,7 +534,7 @@ jobs:
           raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
           PYCORE
       - name: Independent proxy security and GPU logic regressions
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -545,7 +545,7 @@ jobs:
             --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
             'import unittest,hashlib; loader=unittest.TestLoader(); suite=loader.discover("deployment/gcube",pattern="test_*.py"); flatten=lambda s:sum([flatten(t) if isinstance(t,unittest.TestSuite) else [t.id()] for t in s],[]); expected=sorted(flatten(suite)); assert not loader.errors; assert len(expected)==len(set(expected))==206; assert hashlib.sha256(("\n".join(expected)+"\n").encode()).hexdigest()=="679cd487d78bad7dd691d47489f0a0fa0a8c95cfacb5beeac435eab995890ada"; executed=[]; ExactResult=type("ExactResult",(unittest.TextTestResult,),{"startTest":lambda self,test:(executed.append(test.id()),unittest.TextTestResult.startTest(self,test))}); result=unittest.TextTestRunner(verbosity=1,resultclass=ExactResult).run(suite); print("::notice title=Proxy GPU regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))+", failed_tests="+str([t.id() for t,_ in result.failures+result.errors])); assert sorted(executed)==expected and result.testsRun==206; raise SystemExit(not result.wasSuccessful() or bool(result.skipped))'
       - name: Independent v007 diagnostic regressions
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
@@ -554,25 +554,25 @@ jobs:
             --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
             'import io,json,hashlib,unittest,run_checks; loader=unittest.TestLoader(); suite=loader.loadTestsFromNames(["test_observer","test_server_diag"]); flatten=lambda s:sum([flatten(t) if isinstance(t,unittest.TestSuite) else [t.id()] for t in s],[]); expected=sorted(flatten(suite)); assert not loader.errors; assert len(expected)==len(set(expected))==31; assert hashlib.sha256(("\n".join(expected)+"\n").encode()).hexdigest()=="dffce04b767c5ea629b2dccbfeb767a9509e9f65658f1855f248d5c8f553fdc5"; executed=[]; ExactResult=type("ExactResult",(run_checks.Result,),{"startTest":lambda self,test:(executed.append(test.id()),run_checks.Result.startTest(self,test))}); result=unittest.TextTestRunner(stream=io.StringIO(),resultclass=ExactResult).run(suite); print("::notice title=Diagnostic regressions::"+json.dumps(dict(tests=result.testsRun,skipped=len(result.skipped),failures=len(result.failures),errors=len(result.errors),failure_locations=result.safe_errors))); assert sorted(executed)==expected and result.testsRun==31; raise SystemExit(not result.wasSuccessful() or bool(result.skipped))'
       - name: Gateway owner-login and 61-second foreground persistence without GPU admission
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
           docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
       - name: Default v021 gateway owner-login and 61-second foreground persistence
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
           docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
       - name: Default v022 gateway owner-login and 61-second foreground persistence
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail
           docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
       - name: Actual production entrypoint fails closed without physical NVIDIA
-        if: ${{ !cancelled() }}
+        if: ${{ success() }}
         shell: bash
         run: |
           set -euo pipefail

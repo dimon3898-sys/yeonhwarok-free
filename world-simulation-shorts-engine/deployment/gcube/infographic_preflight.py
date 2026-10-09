@@ -347,6 +347,81 @@ def audit_backend(plan, folder):
                 transport='Unchanged CPULocalBackend and strict GPU worker; only selected URL changes')
 
 
+def _safe_canvas_diagnostic(stdout):
+    """Admit only known test-only Canvas metadata; never forward raw output."""
+    if not isinstance(stdout, str) or len(stdout) > 16384:
+        return None
+    try:
+        payload = json.loads(stdout)
+    except (ValueError, TypeError):
+        return None
+    if not isinstance(payload, dict) or payload.get('passed') is not False:
+        return None
+    record = payload.get('diagnostic')
+    if not isinstance(record, dict):
+        return None
+    phases = {'BROWSER_LAUNCH', 'PAGE_CREATE', 'PAGE_LOAD', 'BROWSER_EVALUATION',
+              'SNAPSHOT_WRITE', 'METRICS_WRITE'}
+    types = {'Error', 'TypeError', 'SyntaxError', 'ReferenceError', 'RangeError',
+             'TimeoutError', 'TargetClosedError'}
+    checks = {
+        'COUNTRY_EGY_REGISTRY_PRESENT', 'COUNTRY_EGY_REAL_POLYGON_VISIBLE',
+        'COUNTRY_SGP_REGISTRY_PRESENT', 'COUNTRY_SGP_REAL_POLYGON_VISIBLE',
+        'POLYGON_HOLE_EMPTY_REAL_PIXELS', 'MULTIPOLYGON_ISLANDS_NO_BRIDGE',
+        'ANTIMERIDIAN_FRONT_POLYGON_FILLED', 'ANTIMERIDIAN_BACKSIDE_NO_FALSE_CHORD',
+        'HORIZON_PARTIAL_POLYGON_CLIPPED', 'HORIZON_BACKSIDE_ENTIRELY_HIDDEN',
+        'LINE4PX_ACTUAL_PIXEL_WIDTH', 'FOUR_ROLES_MEASURED_WITH_ACTUAL_FONTS',
+        'LABEL_COLLISION_RESOLVED', 'CJK_ENGLISH_NUMERIC_REAL_INK',
+        'REAL_BOLD_DIFFERS_FROM_REGULAR', 'GRAPHEME_REVEAL_DOES_NOT_SPLIT_COMBINING',
+    }
+    codes = {
+        'UNCLASSIFIED', 'CHECK_FAILED', 'EXECUTABLE_MISSING',
+        'SHARED_LIBRARY_MISSING', 'SANDBOX_CONFIGURATION',
+        'CRASHPAD_DATABASE_REQUIRED', 'PERMISSION_DENIED', 'TIMEOUT',
+        'BROWSER_CLOSED_BEFORE_READY', 'ACTUAL_FONT_LOAD_FAILED',
+        'INFOGRAPHIC_GEOMETRY_SOURCE_INVALID', 'INFOGRAPHIC_GEOMETRY_COORDINATE_INVALID',
+        'INFOGRAPHIC_POLYGON_RING_INVALID', 'INFOGRAPHIC_POLYGON_AREA_INVALID',
+        'INFOGRAPHIC_POLYGON_TRIANGULATION_FAILED', 'INFOGRAPHIC_AMBIGUOUS_ANTIPODAL_LINE',
+        'INFOGRAPHIC_GRAPHEME_SEGMENTER_UNAVAILABLE', 'INFOGRAPHIC_TEXT_SOURCE_INVALID',
+        'INFOGRAPHIC_LABEL_ROLE_INVALID', 'INFOGRAPHIC_UNVERIFIED_FONT_WEIGHT',
+        'INFOGRAPHIC_TEXT_LINE_LIMIT_INVALID', 'INFOGRAPHIC_TEXT_WRAPPING_SOURCE_INVALID',
+    }
+    libraries = {
+        'libX11.so.6', 'libX11-xcb.so.1', 'libXcomposite.so.1', 'libXdamage.so.1',
+        'libXext.so.6', 'libXfixes.so.3', 'libXrandr.so.2', 'libXss.so.1',
+        'libXtst.so.6', 'libxcb.so.1', 'libatk-1.0.so.0', 'libatk-bridge-2.0.so.0',
+        'libatspi.so.0', 'libasound.so.2', 'libcairo.so.2', 'libcups.so.2',
+        'libdbus-1.so.3', 'libdrm.so.2', 'libexpat.so.1', 'libfontconfig.so.1',
+        'libfreetype.so.6', 'libgbm.so.1', 'libglib-2.0.so.0', 'libgobject-2.0.so.0',
+        'libgtk-3.so.0', 'libnspr4.so', 'libnss3.so', 'libnssutil3.so',
+        'libpango-1.0.so.0', 'libpangocairo-1.0.so.0', 'libsmime3.so', 'libvulkan.so.1',
+    }
+    signals = {'SIGABRT', 'SIGTRAP', 'SIGSEGV', 'SIGILL', 'SIGBUS', 'SIGKILL', 'SIGTERM'}
+    filenames = {'test_infographic_v022.mjs', 'infographic_adapter.js',
+                 'reference_effects_adapter.js', 'browser_evaluation'}
+    def known(name, allowed, fallback=None):
+        value = record.get(name)
+        return value if isinstance(value, str) and value in allowed else fallback
+    locations = []
+    values = record.get('locations')
+    for value in values[:8] if isinstance(values, list) else []:
+        if not isinstance(value, dict):
+            continue
+        filename, line, column = value.get('file'), value.get('line'), value.get('column')
+        if (isinstance(filename, str) and filename in filenames
+                and type(line) is int and 0 < line < 100000
+                and type(column) is int and 0 < column < 100000):
+            locations.append(dict(file=filename, line=line, column=column))
+    exitcode = record.get('process_exit_code')
+    return dict(phase=known('phase', phases, 'UNKNOWN'),
+                exception_type=known('exception_type', types, 'OTHER'),
+                code=known('code', codes, 'UNCLASSIFIED'),
+                check=known('check', checks), shared_library=known('shared_library', libraries),
+                process_signal=known('process_signal', signals),
+                process_exit_code=exitcode if type(exitcode) is int and 0 <= exitcode <= 255 else None,
+                locations=locations, raw_details='OMITTED', GPU='NOT_RUN')
+
+
 def call_native(arguments):
     result = subprocess.run(['node', 'tools/test_infographic_v022.mjs', *map(str, arguments)],
         cwd=APP_ROOT, capture_output=True, text=True, check=False, timeout=240)
@@ -360,9 +435,12 @@ def call_native(arguments):
                     locations.append(row)
         types = sorted(set(re.findall(r'\b(AssertionError|SyntaxError|TypeError|RangeError|ReferenceError|Error|URIError|EvalError)(?: \[[A-Z][A-Z0-9_]+\])?:', bounded)) & NODE_TYPES)
         codes = sorted(set(re.findall(r'\b(?:ERR_ASSERTION|INFOGRAPHIC_[A-Z0-9_]+|CANVAS_CHECK_FAILED|ACTUAL_FONT_LOAD_FAILED)\b', bounded)))[:12]
-        print('::error title=Safe infographic native failure::'+json.dumps(dict(
-            node_exit_code=result.returncode, node_locations=locations[:12],
-            node_error_types=types, node_error_codes=codes)))
+        metadata = dict(node_exit_code=result.returncode, node_locations=locations[:12],
+                        node_error_types=types, node_error_codes=codes)
+        diagnostic = _safe_canvas_diagnostic(result.stdout)
+        if diagnostic is not None:
+            metadata['canvas_diagnostic'] = diagnostic
+        print('::error title=Safe infographic native failure::'+json.dumps(metadata), flush=True)
         raise RuntimeError('INFOGRAPHIC_NATIVE_COMMAND_FAILED')
     return json.loads(result.stdout)
 
