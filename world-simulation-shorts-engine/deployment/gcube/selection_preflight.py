@@ -10,23 +10,32 @@ from contextlib import contextmanager
 from copy import deepcopy
 import hashlib
 import http.client
+import importlib
 import io
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import subprocess
 import sys
 import tempfile
 import threading
 import time
+import traceback
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 APP = Path(__file__).resolve().parents[2]
 ROOT = APP.parent
 if str(APP) not in sys.path:
     sys.path.insert(0, str(APP))
+if __name__ == '__main__':
+    # CLI and tests must share one module and the same captured real auditors.
+    canonical = 'deployment.gcube.selection_preflight'
+    sys.modules[canonical] = sys.modules[__name__]
+    setattr(importlib.import_module('deployment.gcube'), 'selection_preflight', sys.modules[__name__])
 MANIFEST = APP / 'deployment/gcube/selection_release_manifest.json'
 PARENT_MANIFEST = APP / 'deployment/gcube/infographic_release_manifest.json'
 PARENT_DIGEST = 'sha256:e5de0f00022715dd2b1653c684213cf23359f337fca160afff3215b865104fed'
@@ -275,24 +284,127 @@ def freeze(runtime_paths):
 
 def execute_suite(suite, expected, category):
     from deployment.gcube.infographic_preflight import SafeResult
+    class SelectionSafeResult(SafeResult):
+        def _record(self, test, error):
+            before = len(self.safe_failures)
+            super()._record(test, error)
+            if len(self.safe_failures) == before:
+                return
+            self.safe_failures[-1]['python_runtime_locations'] = [
+                dict(file=Path(frame.filename).name, function=frame.name, line=frame.lineno)
+                for frame in traceback.extract_tb(error[2])
+                if Path(frame.filename).suffix == '.py'
+                and Path(frame.filename).parent.name in {'engine', 'deployment', 'gcube'}][-8:]
+            code = getattr(error[1], 'code', None)
+            if isinstance(code, str) and re.fullmatch(r'[A-Z][A-Z0-9_]{0,79}', code):
+                self.safe_failures[-1]['error_code'] = code
+            errno = getattr(error[1], 'errno', None)
+            if isinstance(errno, int):
+                self.safe_failures[-1]['errno'] = errno
     assert identities(suite) == expected, 'SELECTION_TEST_SUITE_CHANGED:' + category
-    result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SafeResult).run(suite)
+    result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SelectionSafeResult).run(suite)
     report = dict(category=category, tests=result.testsRun, failures=len(result.failures),
         errors=len(result.errors), skipped=len(result.skipped), failure_locations=result.safe_failures)
-    print('::notice title=Selection regressions::' + json.dumps(report), flush=True)
+    summary = {key: value for key, value in report.items() if key != 'failure_locations'}
+    summary['safe_failure_records'] = len(result.safe_failures)
+    print('::notice title=Selection regressions::' + json.dumps(summary), flush=True)
+    for index, failure in enumerate(result.safe_failures, 1):
+        print('::notice title=Selection regression failure ' + str(index) + '::' + json.dumps(failure), flush=True)
     assert sorted(result.executed) == expected, 'SELECTION_TEST_EXECUTION_INCOMPLETE:' + category
     assert result.wasSuccessful() and not result.skipped, 'SELECTION_REGRESSION_FAILED:' + category
     return report
 
 
-def regressions(value):
+@contextmanager
+def legacy_codespaces_fixture_view():
+    """Supply added application interfaces only to the old synthetic HTTP fixture.
+
+    The seven immutable Codespaces tests retain their request guards, planner,
+    storage and worker assertions. Real applications never enter this adapter.
+    """
+    import test_codespaces_origin
+    from deployment.mobile_server import MobileApplication
+    fixture = test_codespaces_origin.CodespacesHTTPTests
+    original = fixture.setUp
+    assert fixture.__module__ == 'test_codespaces_origin', 'SELECTION_LEGACY_FIXTURE_SCOPE_CHANGED'
+    if getattr(original, '_selection_legacy_fixture_adapter', False):
+        # Core execution and its admission tests may nest the same narrow view.
+        yield fixture
+        return
+
+    def adapted_set_up(test):
+        original(test)
+        try:
+            assert type(test.app) is SimpleNamespace, 'SELECTION_LEGACY_FIXTURE_APP_CHANGED'
+            missing = ('create_project', 'check_profile_selection', 'check_revision_profile_selection')
+            assert all(not hasattr(test.app, name) for name in missing), 'SELECTION_LEGACY_FIXTURE_ALREADY_HAS_SELECTION'
+            test.app.create_project = MobileApplication.create_project.__get__(test.app, SimpleNamespace)
+            test.app.check_profile_selection = Mock()
+            test.app.check_revision_profile_selection = Mock()
+        except BaseException:
+            test.tearDown()
+            raise
+
+    adapted_set_up._selection_legacy_fixture_adapter = True
+    with patch.object(fixture, 'setUp', adapted_set_up):
+        yield fixture
+
+
+FOCUSED_ORIGINAL_IDS = {
+    'test_codespaces_origin.CodespacesHTTPTests.test_all_ten_post_endpoints_dispatch_with_exact_codespaces_origin',
+    'test_codespaces_origin.CodespacesHTTPTests.test_all_ten_post_endpoints_reject_wrong_origin_before_body_or_auth',
+    'test_direction.DirectionFixtures.test_actual_mixed_core_onsets_match_native_visibility_receipts',
+    'test_gpu_bundle.PreflightTests.test_all_five_suez_qa12_native_checks_and_repeat_audio_pass',
+    'test_infographic_integration_v022.InfographicIntegration.test_real_production_render_handoff_reuses_verified_audio_and_subtitle_checkpoints',
+}
+FOCUSED_ADDITIVE_MODULES = (
+    'test_infographic_selection_backend_v022.',
+    'test_selection_release_assets_v022.',
+    'test_selection_release_harness_v022.',
+)
+
+
+def prepare_regression_runtime():
+    # Same scratch directories as the original immutable release test harness.
+    for name in ('cache', 'audio'):
+        (Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
+
+
+def focused_regressions(value):
+    """Fast diagnosis only; the full frozen union remains mandatory afterward."""
+    prepare_regression_runtime()
     with environment(**LEGACY_ENV):
         loader = unittest.TestLoader()
         complete = loader.discover('tests')
         assert not loader.errors, 'SELECTION_TEST_IMPORT_FAILURE'
         expected = sorted(value['inherited_core_ids'] + value['new_ids'])
         assert identities(complete) == expected, 'SELECTION_UNREGISTERED_TEST_IDS'
-        with authorized_ui_asset_view(require_container_assets=True):
+        selected = {identity for identity in value['new_ids']
+                    if identity.startswith(FOCUSED_ADDITIVE_MODULES)} | FOCUSED_ORIGINAL_IDS
+        assert FOCUSED_ORIGINAL_IDS <= set(value['inherited_core_ids']), 'SELECTION_FOCUSED_ORIGINAL_IDS_CHANGED'
+
+        def subset(suite):
+            for test in suite:
+                if isinstance(test, unittest.TestSuite):
+                    yield from subset(test)
+                elif test.id() in selected:
+                    yield test
+
+        with authorized_ui_asset_view(require_container_assets=True), legacy_codespaces_fixture_view():
+            result = execute_suite(unittest.TestSuite(subset(complete)), sorted(selected), 'focused-release-diagnosis')
+    return dict(passed=True, subset_only=True, full_regression_still_required=True,
+                result=result, physical_gpu='NOT_RUN')
+
+
+def regressions(value):
+    prepare_regression_runtime()
+    with environment(**LEGACY_ENV):
+        loader = unittest.TestLoader()
+        complete = loader.discover('tests')
+        assert not loader.errors, 'SELECTION_TEST_IMPORT_FAILURE'
+        expected = sorted(value['inherited_core_ids'] + value['new_ids'])
+        assert identities(complete) == expected, 'SELECTION_UNREGISTERED_TEST_IDS'
+        with authorized_ui_asset_view(require_container_assets=True), legacy_codespaces_fixture_view():
             core = execute_suite(complete, expected, 'core-and-public-selection')
         loader = unittest.TestLoader()
         proxy = loader.discover('deployment/gcube', pattern='test_*.py')
@@ -433,6 +545,7 @@ if __name__ == '__main__':
     parser.add_argument('--smoke-only', action='store_true')
     parser.add_argument('--protected-only', action='store_true')
     parser.add_argument('--regressions-only', action='store_true')
+    parser.add_argument('--focused-only', action='store_true')
     parser.add_argument('folder', nargs='?', default='/data/selection-preflight')
     args = parser.parse_args()
     if args.freeze:
@@ -446,5 +559,8 @@ if __name__ == '__main__':
     elif args.regressions_only:
         value, _ = verify_sources()
         regressions(value)
+    elif args.focused_only:
+        value, _ = verify_sources()
+        focused_regressions(value)
     else:
         run(args.folder)

@@ -133,6 +133,7 @@ class ActualSelectionBoundary(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             access = Path(directory) / 'owner.txt'
             access.write_text('isolated-named-qa-input-test-owner-code')
+            access.chmod(0o600)
             app = MobileApplication(Path(directory) / 'state', 'http://127.0.0.1:8123', access, disk_floor=0)
             raw = dict(topic='authored QA location', direction_profile=QA_PROFILE)
             self.assertEqual(app.validate_request({**raw, 'duration': '24'})['direction_profile'], QA_PROFILE)
@@ -213,6 +214,7 @@ class ServerArtifactBoundary(unittest.TestCase):
         preserve_gateway_validation(self)
         access = Path(directory) / 'owner.txt'
         access.write_text('isolated-server-artifact-test-owner-code')
+        access.chmod(0o600)
         return MobileApplication(Path(directory) / 'state', 'http://127.0.0.1:8123', access, disk_floor=0)
 
     def test_failed_new_speech_creation_retains_prior_artifacts(self):

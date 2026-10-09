@@ -105,11 +105,32 @@ jobs:
               print('::error title=Safe selection container preflight failure::'+body,flush=True)
               raise
           PY
+      - name: Focused real-container release regressions before mandatory full union
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 0:0 \
+            --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy \
+            --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy \
+            --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.selection_preflight --focused-only
       - name: Original 1061 regressions and additive public UI API integration
         shell: bash
         run: |
           set -euo pipefail
           docker run --rm --user 0:0 \
+            --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy \
+            --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy \
+            --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
             --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
