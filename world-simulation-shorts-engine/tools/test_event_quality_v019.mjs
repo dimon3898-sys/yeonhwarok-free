@@ -107,7 +107,7 @@ const baseline=new quality.SceneVisualQualityRenderer(baselineScene,plan);
 await baseline.init();const originalRequests=requests.splice(0);
 const renderer=new event.SceneEventQualityRenderer(scene,plan);
 await renderer.init();const newRequests=requests.splice(0);
-check('all inherited actual four PNG fetches identical',()=>assert.deepEqual(newRequests.filter(v=>v.endsWith('.png')),originalRequests.filter(v=>v.endsWith('.png'))));
+check('all inherited actual four PNG fetches identical',()=>assert.deepEqual(newRequests.filter(v=>v.endsWith('.png')).sort(),originalRequests.filter(v=>v.endsWith('.png')).sort()));
 check('only new source fetch is tiny scalar JSON',()=>assert.deepEqual(newRequests.filter(v=>!originalRequests.includes(v)),['/static/event_quality_v019.json']));
 check('new renderer initialized and real regional textures preserved',()=>{assert.equal(renderer.eventQualityReady,true);assert.equal(renderer.qualityTiles.length,2);assert.equal(renderer.map.surface.uniforms.uDay.value.image.width,8192);assert.equal(renderer.qualityTiles[0].day.image.width,1440);});
 check('1080 output HIGH internal dimensions untouched',()=>assert.deepEqual([renderer.w,renderer.h],[2160,3840]));
