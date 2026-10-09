@@ -21,6 +21,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 APP = Path(__file__).resolve().parents[2]
 ROOT = APP.parent
@@ -34,6 +35,27 @@ AUTHORIZED_RUNTIME = {
     'web/app.js', 'deployment/mobile_server.py',
     'engine/public_infographic_selection.py', 'deployment/gcube/selection_preflight.py',
 }
+UI_ASSET_PATH = 'world-simulation-shorts-engine/web/app.js'
+BASE_UI_ASSET = dict(size=43729,
+    sha256='d6a25dd6c03594ac85b6bf64d3d2997ef38d83d084e97fe85bd16d02808f6050')
+_original_asset_audit = None
+_original_source_audit = None
+
+
+def _actual_asset_audit():
+    global _original_asset_audit
+    if _original_asset_audit is None:
+        from deployment.gcube.asset_audit import audit_assets
+        _original_asset_audit = audit_assets
+    return _original_asset_audit()
+
+
+def _actual_source_audit():
+    global _original_source_audit
+    if _original_source_audit is None:
+        from deployment.gcube.visual_quality_preflight import audit_frozen_sources
+        _original_source_audit = audit_frozen_sources
+    return _original_source_audit()
 
 
 def sha(path):
@@ -113,6 +135,104 @@ def verify_sources(*, checkout=False):
         selection_manifest_sha256=sha(MANIFEST), physical_gpu='NOT_RUN')
 
 
+def authorized_ui_asset_projection(audit, application_record, *, require_container_assets):
+    """Admit the sole UI file delta without changing any inherited asset identity."""
+    from deployment.gcube.infographic_preflight import NEW_AUDITED_ASSETS as INFOGRAPHIC
+    from deployment.gcube.story_progression_preflight import NEW_AUDITED_ASSETS as STORY
+    from deployment.gcube.reference_effects_preflight import (
+        NEW_AUDITED_ASSETS as EFFECTS, PARENT_CONTAINER_ASSET_IDENTITY,
+        PARENT_NATIVE_ASSET_IDENTITY)
+    assert audit['passed'], 'SELECTION_CURRENT_ASSET_AUDIT_FAILED'
+    actual = deepcopy(audit)
+    rows = actual['assets']
+    names = [row['path'] for row in rows]
+    assert len(names) == len(set(names)), 'SELECTION_ASSET_PATH_DUPLICATE'
+    expected_count = 83 if require_container_assets else 74
+    assert len(rows) == expected_count, 'SELECTION_CURRENT_ASSET_INVENTORY_CHANGED'
+    assert all(row['referenced'] and row['exists'] and row['readable'] and row['non_zero']
+               and row['size'] > 0 for row in rows), 'SELECTION_CURRENT_ASSET_UNREADABLE'
+    assert application_record['path'] == 'web/app.js', 'SELECTION_UI_ASSET_SCOPE_CHANGED'
+    selected = [row for row in rows if row['path'] == UI_ASSET_PATH]
+    assert len(selected) == 1, 'SELECTION_UI_ASSET_MISSING'
+    current = selected[0]
+    assert current['size'] == application_record['size'] and current['sha256'] == application_record['sha256'], 'SELECTION_UI_ASSET_SOURCE_CHANGED'
+    baseline = deepcopy(actual)
+    baseline_ui = next(row for row in baseline['assets'] if row['path'] == UI_ASSET_PATH)
+    baseline_ui.update(BASE_UI_ASSET)
+    excluded = INFOGRAPHIC | STORY | EFFECTS
+    parent_rows = [dict(path=row['path'], size=row['size'], sha256=row['sha256'])
+                   for row in baseline['assets'] if row['path'] not in excluded]
+    parent_rows.sort(key=lambda row: row['path'])
+    expected_parent_count = 77 if require_container_assets else 68
+    assert len(parent_rows) == expected_parent_count, 'SELECTION_PARENT_ASSET_INVENTORY_CHANGED'
+    digest = hashlib.sha256(json.dumps(parent_rows, sort_keys=True,
+                           separators=(',', ':')).encode()).hexdigest()
+    expected = PARENT_CONTAINER_ASSET_IDENTITY if require_container_assets else PARENT_NATIVE_ASSET_IDENTITY
+    assert digest == expected, 'SELECTION_UNAUTHORIZED_PARENT_ASSET_DELTA'
+    proof = dict(passed=True, actual_current_audit=actual, authorized_asset_delta=[dict(
+        path=UI_ASSET_PATH, previous_size=BASE_UI_ASSET['size'], previous_sha256=BASE_UI_ASSET['sha256'],
+        actual_size=current['size'], actual_sha256=current['sha256'])],
+        inherited_parent_identity_sha256=digest, inherited_parent_count=len(parent_rows),
+        only_authorized_ui_delta=True, physical_gpu='NOT_RUN',
+        scope='Actual current assets audited separately; only app.js identity projected for unchanged inherited release checks')
+    return baseline, proof
+
+
+@contextmanager
+def authorized_ui_asset_view(*, require_container_assets):
+    value, _ = verify_sources()
+    application_record = next(row for row in value['runtime_records'] if row['path'] == 'web/app.js')
+    from deployment.gcube import visual_quality_preflight
+    # Audit actual current bytes before constructing the narrowly scoped receipt view.
+    baseline, proof = authorized_ui_asset_projection(_actual_asset_audit(), application_record,
+                               require_container_assets=require_container_assets)
+    original_source_audit = _actual_source_audit
+    assert visual_quality_preflight.FROZEN_SOURCES[UI_ASSET_PATH] == BASE_UI_ASSET['sha256'], 'SELECTION_LEGACY_UI_SOURCE_CHANGED'
+    actual_sources = original_source_audit()
+    proof['actual_legacy_frozen_source_audit'] = deepcopy(actual_sources)
+
+    def selection_source_audit():
+        file = APP / 'web/app.js'
+        assert file.stat().st_size == application_record['size'] and sha(file) == application_record['sha256'], 'SELECTION_UI_ASSET_SOURCE_CHANGED'
+        # Execute every original hash/dimension check; authorize only the new UI hash.
+        with patch.dict(visual_quality_preflight.FROZEN_SOURCES,
+                        {UI_ASSET_PATH: application_record['sha256']}):
+            result = original_source_audit()
+        selected = [row for row in result['sources'] if row['file'] == UI_ASSET_PATH]
+        assert len(selected) == 1 and selected[0]['actual_sha256'] == application_record['sha256'], 'SELECTION_UI_SOURCE_AUDIT_CHANGED'
+        selected[0].update(legacy_expected_sha256=BASE_UI_ASSET['sha256'],
+                           actual_unchanged=False, authorized_delta=True)
+        result['selection_ui_compatibility'] = dict(authorized_asset_delta=proof['authorized_asset_delta'],
+            actual_unmodified_audit_passed=actual_sources['passed'],
+            scope='Original source checks executed with the sole explicitly authorized app.js expected hash; original dictionary restored')
+        return result
+
+    checked_sources = selection_source_audit()
+    assert checked_sources['passed'], 'SELECTION_UNAUTHORIZED_FROZEN_SOURCE_DELTA'
+    proof['authorized_legacy_frozen_source_audit'] = deepcopy(checked_sources)
+    print('::notice title=Selection authorized asset admission::' + json.dumps(dict(
+        passed=True, actual_assets=len(proof['actual_current_audit']['assets']),
+        authorized_asset_delta=proof['authorized_asset_delta'],
+        inherited_parent_count=proof['inherited_parent_count'],
+        inherited_parent_identity_sha256=proof['inherited_parent_identity_sha256'])), flush=True)
+    with patch('deployment.gcube.asset_audit.audit_assets', lambda: deepcopy(baseline)), \
+         patch.object(visual_quality_preflight, 'audit_frozen_sources', selection_source_audit):
+        yield proof
+
+
+def protected_preflight(folder, *, require_container_assets=True):
+    from deployment.gcube.infographic_preflight import run as inherited_run
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
+    with authorized_ui_asset_view(require_container_assets=require_container_assets) as proof:
+        (folder / 'SELECTION_ASSETS.json').write_text(json.dumps(proof, indent=2) + '\n')
+        original = inherited_run(folder, require_container_assets=require_container_assets)
+    assert original['passed'], 'SELECTION_PROTECTED_PREFLIGHT_FAILED'
+    result = dict(original, selection_assets=proof)
+    (folder / 'SELECTION_REPORT.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+    return result
+
+
 def freeze(runtime_paths):
     from deployment.gcube.infographic_preflight import verify_source_manifest, load_manifest
     verify_source_manifest(require_checkout=True)
@@ -172,7 +292,8 @@ def regressions(value):
         assert not loader.errors, 'SELECTION_TEST_IMPORT_FAILURE'
         expected = sorted(value['inherited_core_ids'] + value['new_ids'])
         assert identities(complete) == expected, 'SELECTION_UNREGISTERED_TEST_IDS'
-        core = execute_suite(complete, expected, 'core-and-public-selection')
+        with authorized_ui_asset_view(require_container_assets=True):
+            core = execute_suite(complete, expected, 'core-and-public-selection')
         loader = unittest.TestLoader()
         proxy = loader.discover('deployment/gcube', pattern='test_*.py')
         assert not loader.errors, 'SELECTION_PROXY_IMPORT_FAILURE'
@@ -288,8 +409,7 @@ def run(folder):
     value, source = verify_sources()
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
-    from deployment.gcube.infographic_preflight import run as inherited_run
-    protected = inherited_run(folder / 'protected-v022', require_container_assets=True)
+    protected = protected_preflight(folder / 'protected-v022', require_container_assets=True)
     assert protected['passed'], 'SELECTION_PROTECTED_PREFLIGHT_FAILED'
     tests = regressions(value)
     with environment(WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION='v022'):
@@ -322,9 +442,7 @@ if __name__ == '__main__':
     elif args.smoke_only:
         print(json.dumps(gateway_selection_smoke(args.folder)))
     elif args.protected_only:
-        verify_sources()
-        from deployment.gcube.infographic_preflight import run as inherited_run
-        inherited_run(args.folder, require_container_assets=True)
+        protected_preflight(args.folder, require_container_assets=True)
     elif args.regressions_only:
         value, _ = verify_sources()
         regressions(value)

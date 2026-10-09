@@ -82,12 +82,11 @@ jobs:
               assert os.access(account.pw_dir,os.W_OK|os.X_OK), 'SELECTION_HOME_NOT_WRITABLE'
               print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
               phase='selection-source'
-              from deployment.gcube.selection_preflight import verify_sources
-              from deployment.gcube.infographic_preflight import run
+              from deployment.gcube.selection_preflight import verify_sources, protected_preflight
               verify_sources()
               print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
               phase='original-preflight'
-              report=run('/data/selection-protected-v022',require_container_assets=True)
+              report=protected_preflight('/data/selection-protected-v022',require_container_assets=True)
               assert report['passed']
               print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
           except Exception as error:
@@ -95,7 +94,7 @@ jobs:
                            function=re.sub(r'[^A-Za-z0-9_<>]','_',frame.name)[:96],line=frame.lineno)
                       for frame in traceback.extract_tb(error.__traceback__)[-10:]]
               message=error.args[0] if error.args and type(error.args[0]) is str else ''
-              code=re.match(r'^(?:SELECTION|INFOGRAPHIC|SEMANTIC|STORY_PROGRESSION|REFERENCE_EFFECTS|EVENT_QUALITY|VISUAL_QUALITY|SHADER_CONTRACT|SOURCE|ASSET|AUDIO|CAMERA|FRAME_GRID|FRAMEGRID|REGRESSION|TEXTURE|ATLAS|PRODUCTION|GPU|QA)_[A-Z0-9_]+(?=$|[:\s])',message)
+              code=re.match(r'^(?:V[0-9]+|SELECTION|INFOGRAPHIC|SEMANTIC|STORY_PROGRESSION|REFERENCE_EFFECTS|EVENT_QUALITY|VISUAL_QUALITY|SHADER_CONTRACT|SOURCE|ASSET|AUDIO|CAMERA|FRAME_GRID|FRAMEGRID|REGRESSION|TEXTURE|ATLAS|PRODUCTION|GPU|QA)_[A-Z0-9_]+(?=$|[:\s])',message)
               metadata=dict(phase=phase,exception_type=re.sub(r'[^A-Za-z0-9_]','_',type(error).__name__)[:80],
                             traceback=frames,validator_codes=[code.group(0)] if code else [])
               returncode=getattr(error,'returncode',None)
