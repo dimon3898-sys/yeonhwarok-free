@@ -219,6 +219,34 @@ try{
  console.log(JSON.stringify(result));
 }finally{globalThis.fetch=oldFetch;globalThis.document=oldDocument;}
 
+/** Bounded test-only diagnostics. Never emit browser stderr, command, env,
+ * raw exception message, URL, filesystem path or unknown check identifier. */
+function safeCanvasFailure(error,phase){
+ const message=String(error?.message||''),types=new Set(['Error','TypeError','SyntaxError','ReferenceError','RangeError','TimeoutError','TargetClosedError']);
+ const checks=new Set(['COUNTRY_EGY_REGISTRY_PRESENT','COUNTRY_EGY_REAL_POLYGON_VISIBLE','COUNTRY_SGP_REGISTRY_PRESENT','COUNTRY_SGP_REAL_POLYGON_VISIBLE','POLYGON_HOLE_EMPTY_REAL_PIXELS','MULTIPOLYGON_ISLANDS_NO_BRIDGE','ANTIMERIDIAN_FRONT_POLYGON_FILLED','ANTIMERIDIAN_BACKSIDE_NO_FALSE_CHORD','HORIZON_PARTIAL_POLYGON_CLIPPED','HORIZON_BACKSIDE_ENTIRELY_HIDDEN','LINE4PX_ACTUAL_PIXEL_WIDTH','FOUR_ROLES_MEASURED_WITH_ACTUAL_FONTS','LABEL_COLLISION_RESOLVED','CJK_ENGLISH_NUMERIC_REAL_INK','REAL_BOLD_DIFFERS_FROM_REGULAR','GRAPHEME_REVEAL_DOES_NOT_SPLIT_COMBINING']);
+ const phases=new Set(['BROWSER_LAUNCH','PAGE_CREATE','PAGE_LOAD','BROWSER_EVALUATION','SNAPSHOT_WRITE','METRICS_WRITE']);
+ const known=new Set(['ACTUAL_FONT_LOAD_FAILED','INFOGRAPHIC_GEOMETRY_SOURCE_INVALID','INFOGRAPHIC_GEOMETRY_COORDINATE_INVALID','INFOGRAPHIC_POLYGON_RING_INVALID','INFOGRAPHIC_POLYGON_AREA_INVALID','INFOGRAPHIC_POLYGON_TRIANGULATION_FAILED','INFOGRAPHIC_AMBIGUOUS_ANTIPODAL_LINE','INFOGRAPHIC_GRAPHEME_SEGMENTER_UNAVAILABLE','INFOGRAPHIC_TEXT_SOURCE_INVALID','INFOGRAPHIC_LABEL_ROLE_INVALID','INFOGRAPHIC_UNVERIFIED_FONT_WEIGHT','INFOGRAPHIC_TEXT_LINE_LIMIT_INVALID','INFOGRAPHIC_TEXT_WRAPPING_SOURCE_INVALID']);
+ let code='UNCLASSIFIED',check=null,library=null;
+ const failed=message.match(/CANVAS_CHECK_FAILED:([A-Z0-9_]+)/);if(failed&&checks.has(failed[1])){code='CHECK_FAILED';check=failed[1];}
+ else{const candidate=[...known].find(value=>message.includes(value));if(candidate)code=candidate;
+ else if(/Executable doesn't exist|ENOENT|spawn[^\n]*not found/i.test(message))code='EXECUTABLE_MISSING';
+ else if(/error while loading shared libraries|cannot open shared object file/i.test(message))code='SHARED_LIBRARY_MISSING';
+ else if(/No usable sandbox|SUID sandbox helper|Running as root without --no-sandbox/i.test(message))code='SANDBOX_CONFIGURATION';
+ else if(/crashpad[^\n]*--database is required/i.test(message))code='CRASHPAD_DATABASE_REQUIRED';
+ else if(/Permission denied|EACCES|Access denied/i.test(message))code='PERMISSION_DENIED';
+ else if(error?.name==='TimeoutError')code='TIMEOUT';
+ else if(/Target page, context or browser has been closed/i.test(message))code='BROWSER_CLOSED_BEFORE_READY';}
+ const shared=message.match(/(?:loading shared libraries:\s*|open shared object file[^\n]*?)([A-Za-z0-9_.+-]+\.so(?:\.[0-9]+)*)/);
+ const libraries=new Set(['libX11.so.6','libX11-xcb.so.1','libXcomposite.so.1','libXdamage.so.1','libXext.so.6','libXfixes.so.3','libXrandr.so.2','libXss.so.1','libXtst.so.6','libxcb.so.1','libatk-1.0.so.0','libatk-bridge-2.0.so.0','libatspi.so.0','libasound.so.2','libcairo.so.2','libcups.so.2','libdbus-1.so.3','libdrm.so.2','libexpat.so.1','libfontconfig.so.1','libfreetype.so.6','libgbm.so.1','libglib-2.0.so.0','libgobject-2.0.so.0','libgtk-3.so.0','libnspr4.so','libnss3.so','libnssutil3.so','libpango-1.0.so.0','libpangocairo-1.0.so.0','libsmime3.so','libvulkan.so.1']);
+ if(shared&&libraries.has(shared[1]))library=shared[1];
+ const signal=message.match(/signal[=:]\s*(SIG[A-Z]+)/)?.[1],signals=new Set(['SIGABRT','SIGTRAP','SIGSEGV','SIGILL','SIGBUS','SIGKILL','SIGTERM']);
+ const exit=message.match(/exitCode[=:]\s*(\d+)/)?.[1],locations=[];
+ for(const match of String(error?.stack||'').matchAll(/(test_infographic_v022\.mjs|infographic_adapter\.js|reference_effects_adapter\.js|<anonymous>):(\d+):(\d+)/g)){
+  const line=Number(match[2]),column=Number(match[3]);if(line>0&&line<100000&&column>0&&column<100000)locations.push({file:match[1]==='<anonymous>'?'browser_evaluation':match[1],line,column});if(locations.length>=8)break;
+ }
+ return {phase:phases.has(phase)?phase:'UNKNOWN',exception_type:types.has(error?.name)?error.name:'OTHER',code,check,shared_library:library,process_signal:signals.has(signal)?signal:null,process_exit_code:exit!==undefined&&Number(exit)<=255?Number(exit):null,locations,raw_details:'OMITTED',GPU:'NOT_RUN'};
+}
+
 async function runCanvasSnapshots(outputPath){
 // Deliberately CPU Canvas2D only. This tool is not a GPU renderer or production
 // scene renderer. Artificial polygons below are topology test fixtures only.
@@ -250,12 +278,12 @@ const server=http.createServer(async(req,res)=>{
  }catch{res.writeHead(500);res.end();}
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
-let browser;
+let browser,phase='BROWSER_LAUNCH';
 try{
  browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--disable-gpu','--disable-gpu-compositing']});
- const page=await browser.newPage({viewport:{width:1080,height:1920},deviceScaleFactor:1});
- await page.goto(`http://127.0.0.1:${server.address().port}/`,{waitUntil:'networkidle'});
- const metrics=await page.evaluate(async()=>{
+ phase='PAGE_CREATE';const page=await browser.newPage({viewport:{width:1080,height:1920},deviceScaleFactor:1});
+ phase='PAGE_LOAD';await page.goto(`http://127.0.0.1:${server.address().port}/`,{waitUntil:'networkidle'});
+ phase='BROWSER_EVALUATION';const metrics=await page.evaluate(async()=>{
   const THREE=await import('/three.js');
   const strip=source=>source.replace(/^import .*;\s*$/gm,'').replace(/^export /gm,'');
   const referenceSource=await(await fetch('/reference.js')).text();
@@ -324,10 +352,13 @@ try{
   check('GRAPHEME_REVEAL_DOES_NOT_SPLIT_COMBINING',helpers.infographicGraphemes('가 e\u0301').length===3);
   return {checks,snapshots,font_face_status:[...document.fonts].map(face=>({family:face.family,weight:face.weight,status:face.status})),boldComparison,execution_scope:'Actual CPU Chromium Canvas2D pixels; not production GPU frames',gpu_result:'NOT_RUN',production_scene:false};
  });
- for(const snapshot of metrics.snapshots){const bytes=Buffer.from(snapshot.png.split(',')[1],'base64');await fsPromises.writeFile(path.join(out,`${snapshot.name}.png`),bytes);snapshot.file=`${snapshot.name}.png`;snapshot.sha256=sha(bytes);delete snapshot.png;}
+ phase='SNAPSHOT_WRITE';for(const snapshot of metrics.snapshots){const bytes=Buffer.from(snapshot.png.split(',')[1],'base64');await fsPromises.writeFile(path.join(out,`${snapshot.name}.png`),bytes);snapshot.file=`${snapshot.name}.png`;snapshot.sha256=sha(bytes);delete snapshot.png;}
  metrics.source_hashes=hashes;metrics.chromium_version=browser.version();metrics.launch_flags=['--no-sandbox','--disable-gpu','--disable-gpu-compositing'];metrics.total_pass=metrics.checks.length;metrics.fail=0;
- await fsPromises.writeFile(path.join(out,'metrics.json'),JSON.stringify(metrics,null,2)+'\n');
+ phase='METRICS_WRITE';await fsPromises.writeFile(path.join(out,'metrics.json'),JSON.stringify(metrics,null,2)+'\n');
  assert.equal(metrics.fail,0);console.log(JSON.stringify({status:'PASS',checks:metrics.total_pass,out,gpu_result:'NOT_RUN',snapshots:metrics.snapshots.length}));
+}catch(error){
+ const failure=safeCanvasFailure(error,phase);console.log(JSON.stringify({passed:false,diagnostic:failure}));
+ throw Error('INFOGRAPHIC_CANVAS_'+(failure.check||failure.code));
 }finally{if(browser)await browser.close();await new Promise(resolve=>server.close(resolve));}
 
 }

@@ -240,9 +240,10 @@ class SemanticTimelineV022(unittest.TestCase):
                 pcm[len(pcm)//2:len(pcm)//2+96]=.95
                 wavfile.write(args[1],rate,pcm)
                 return result
-        # Both fixtures are exactly the real failing 253-frame clock. The
-        # zero requested hold still protects one frame, so a two-frame EOF
-        # loss removes measured speech; silence-padding cannot pass this test.
+        # Both fixtures use the real failing 253-frame clock. The zero
+        # requested hold protects one frame, so a two-frame tail loss removes
+        # measured speech. Historical -t behavior differs by FFmpeg version;
+        # corrected output must preserve the same natural-EOF PCM on each.
         for hold,counts in ((.8,(72000,217600)),(0.,(72000,291200))):
             with self.subTest(hold=hold),tempfile.TemporaryDirectory()as directory:
                 selected=deepcopy(record);selected['after_state_hold_seconds']=hold
@@ -272,13 +273,22 @@ class SemanticTimelineV022(unittest.TestCase):
                 audio._run([*base,'-t',str(plan['duration']),str(legacy)])
                 _,expected=wavfile.read(reference);_,cut=wavfile.read(legacy)
                 self.assertEqual(len(expected),404800)
-                self.assertEqual(len(cut),401600)
+                # Pinned Bookworm FFmpeg5.1.9 already flushes this legacy
+                # command; host7.1.5 loses3200samples. Classify BEFORE from
+                # physical samples, never impose one version's historical bug.
+                self.assertGreater(len(cut),0)
+                self.assertLessEqual(len(cut),len(expected))
                 self.assertTrue(np.array_equal(actual,expected))
                 self.assertTrue(np.array_equal(cut,actual[:len(cut)]))
                 if hold==0:
                     speech_end=round(plan['metadata']['semantic_timeline']['segments'][-1]['speech_end']*SR)
-                    self.assertGreater(speech_end,len(cut))
-                    self.assertTrue(np.any(actual[len(cut):speech_end]!=0))
+                    tail_start=len(actual)-3200
+                    self.assertGreater(speech_end,tail_start)
+                    self.assertTrue(np.any(actual[tail_start:speech_end]!=0))
+                    silence_padded=np.concatenate((actual[:tail_start],np.zeros_like(actual[tail_start:])))
+                    self.assertFalse(np.array_equal(silence_padded,expected))
+                    if len(cut)<speech_end:
+                        self.assertTrue(np.any(actual[len(cut):speech_end]!=0))
                 hashes={p.name:semantic._sha(p)for p in (mixed/'mix.wav',mixed/'audio_report.json',
                     mixed/'subtitle_report.json',mixed/'semantic-audio-reuse.json')}
                 with patch.object(audio,'create_subtitles',side_effect=AssertionError('duplicate ASS')), \
