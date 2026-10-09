@@ -1,0 +1,10 @@
+# Immutable v018 regional-detail runtime. Only the versioned EVENT VIEW
+# surface/city-light response and explicit selection are overlaid. Camera,
+# regional PNGs, NVIDIA validation, proxy, encoder, audio and QC stay inherited.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:7145a2bae3a75478aa68fe3255ff5faf5abfca8aff9aa9e8c34dc9b052a5fa57
+ENV WORLD_ENGINE_EVENT_QUALITY_VERSION=v019
+COPY world-simulation-shorts-engine/engine/event_quality.py world-simulation-shorts-engine/engine/event_quality_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/event_quality_adapter.js world-simulation-shorts-engine/web/render_event_quality_earth.html world-simulation-shorts-engine/web/event_quality_v019.json /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/event_quality_v019.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/tools/test_event_quality_v019.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/event_quality_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

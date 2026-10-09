@@ -39,6 +39,9 @@ def configure_qa_schema():
     if os.environ.get('WORLD_ENGINE_VISUAL_QUALITY_VERSION') == 'v018':
         from .visual_quality import install_validation
         install_validation()
+    if os.environ.get('WORLD_ENGINE_EVENT_QUALITY_VERSION') == 'v019':
+        from .event_quality import install_validation
+        install_validation()
 
 
 def directed_plan(plan, raw):
@@ -62,7 +65,10 @@ def generate_deployment_plan(raw):
         plan = generate({**raw,'qa_mode':True})
         if os.environ.get('WORLD_ENGINE_VISUAL_QUALITY_VERSION') == 'v018':
             from .visual_quality import apply_quality
-            return apply_quality(plan)
+            plan = apply_quality(plan)
+            if os.environ.get('WORLD_ENGINE_EVENT_QUALITY_VERSION') == 'v019':
+                from .event_quality import apply_quality as apply_event_quality
+                plan = apply_event_quality(plan)
         return plan
     if selected=='SINGLE_EVENT_RETURN_TO_WIDE_TEST' or (os.environ.get('WORLD_ENGINE_RETURN_WIDE_TEST')=='1' and raw.get('qa_mode') is True and float(raw.get('duration',0))==15):
         from .return_wide_camera import generate

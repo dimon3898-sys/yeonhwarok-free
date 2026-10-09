@@ -103,6 +103,24 @@ def render_project(*args, **kwargs):
             from .visual_quality import record_source_report
             return record_source_report(directory, plan, assets, original=original_source_report)
         namespace['write_source_report'] = quality_source_report
+    if len(args)>1 and (args[1].get('metadata',{}).get('event_quality') is not None or
+                        any('event_quality' in scene for scene in args[1].get('scenes', []))):
+        from .event_quality import install_validation, validate_quality, renderer_version, project_renderer_version
+        from .event_quality_backend import EventQualityBackend
+        install_validation()
+        quality = validate_quality(args[1])
+        if diagnostic:
+            diagnostic.write('event-quality-sources.json', quality)
+        if not quality['passed']:
+            raise RuntimeError('EVENT_QUALITY_PREFLIGHT_FAILED')
+        namespace['CPULocalBackend'] = EventQualityBackend
+        namespace['renderer_version'] = renderer_version
+        namespace['project_renderer_version'] = project_renderer_version
+        original_event_source_report = namespace['write_source_report']
+        def event_source_report(directory, plan, assets=None):
+            from .event_quality import record_source_report
+            return record_source_report(directory, plan, assets, original=original_event_source_report)
+        namespace['write_source_report'] = event_source_report
     if diagnostic:
         from .gpu_preflight import collect_all
         preflight = collect_all(args[0], args[1], diagnostic)
