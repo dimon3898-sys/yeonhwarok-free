@@ -143,6 +143,28 @@ def render_project(*args, **kwargs):
             from .reference_effects import record_source_report
             return record_source_report(directory, plan, assets, original=original_effect_source_report)
         namespace['write_source_report'] = effect_source_report
+    if len(args)>1 and (args[1].get('metadata',{}).get('story_progression') is not None or
+                        any('story_progression' in scene for scene in args[1].get('scenes', []))):
+        from .story_progression import install_validation, validate_progression, renderer_version, project_renderer_version, diagnostic_record
+        from .story_progression_backend import StoryProgressionBackend
+        install_validation()
+        progression = validate_progression(args[1])
+        if not progression['passed']:
+            if diagnostic:
+                try:
+                    diagnostic.write('preflight.json', dict(passed=False,
+                        story_progression=dict(qc=progression, physical_gpu='NOT_RUN')))
+                except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                    pass  # Diagnostic storage must not replace the admission error.
+            raise RuntimeError('STORY_PROGRESSION_PREFLIGHT_FAILED')
+        namespace['CPULocalBackend'] = StoryProgressionBackend
+        namespace['renderer_version'] = renderer_version
+        namespace['project_renderer_version'] = project_renderer_version
+        original_progression_source_report = namespace['write_source_report']
+        def progression_source_report(directory, plan, assets=None):
+            from .story_progression import record_source_report
+            return record_source_report(directory, plan, assets, original=original_progression_source_report)
+        namespace['write_source_report'] = progression_source_report
     if diagnostic:
         from .gpu_preflight import collect_all
         try:
@@ -157,12 +179,25 @@ def render_project(*args, **kwargs):
                     diagnostic.write('preflight.json', existing)
                 except (OSError, ValueError, KeyError, TypeError, AttributeError):
                     pass  # Never replace the original admission failure.
+            if args[1].get('metadata', {}).get('story_progression'):
+                try:
+                    from .story_progression import diagnostic_record
+                    existing = diagnostic._existing(diagnostic.root / 'preflight.json')
+                    existing = existing if isinstance(existing, dict) else dict(passed=False)
+                    existing['story_progression'] = diagnostic_record(args[1])
+                    diagnostic.write('preflight.json', existing)
+                except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                    pass  # Preserve the original admission failure and its evidence.
             raise
         if args[1].get('metadata', {}).get('reference_effects'):
             from .reference_effects import diagnostic_record
             # preflight.json is already safely exported in both ZIP outcomes;
             # native per-frame effectLayer receipts remain in frame-audit.json.
             preflight['reference_effects'] = diagnostic_record(args[1])
+            diagnostic.write('preflight.json', preflight)
+        if args[1].get('metadata', {}).get('story_progression'):
+            from .story_progression import diagnostic_record
+            preflight['story_progression'] = diagnostic_record(args[1])
             diagnostic.write('preflight.json', preflight)
         if any(s.get('direction') for s in args[1].get('scenes', [])):
             preflight['direction'] = dict(qc=report,

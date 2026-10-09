@@ -1,0 +1,9 @@
+# Immutable public v020 runtime. The authored story layer and planner/pipeline
+# integration are the only runtime overlays; camera/material/effects stay frozen.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9d759dc334516174d395429de927092d3d5552b6734336dcd400cf2c0dcc15d9
+ENV WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021
+COPY world-simulation-shorts-engine/engine/story_progression.py world-simulation-shorts-engine/engine/story_progression_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/story_progression_adapter.js world-simulation-shorts-engine/web/render_story_progression_earth.html world-simulation-shorts-engine/web/story_progression_v021.json /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/story_progression_v021.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/tools/test_story_progression_v021.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/story_progression_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

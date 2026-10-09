@@ -45,6 +45,9 @@ def configure_qa_schema():
     if os.environ.get('WORLD_ENGINE_REFERENCE_EFFECTS_VERSION') == 'v020':
         from .reference_effects import install_validation
         install_validation()
+    if os.environ.get('WORLD_ENGINE_STORY_PROGRESSION_VERSION') == 'v021':
+        from .story_progression import install_validation
+        install_validation()
 
 
 def directed_plan(plan, raw):
@@ -75,6 +78,10 @@ def generate_deployment_plan(raw):
                 if os.environ.get('WORLD_ENGINE_REFERENCE_EFFECTS_VERSION') == 'v020':
                     from .reference_effects import apply_effects
                     plan = apply_effects(plan, enabled=raw.get('reference_effects', True))
+                    if (os.environ.get('WORLD_ENGINE_STORY_PROGRESSION_VERSION') == 'v021'
+                            and plan.get('metadata', {}).get('reference_effects') is not None):
+                        from .story_progression import apply_progression
+                        plan = apply_progression(plan, enabled=raw.get('story_progression', True))
         return plan
     if selected=='SINGLE_EVENT_RETURN_TO_WIDE_TEST' or (os.environ.get('WORLD_ENGINE_RETURN_WIDE_TEST')=='1' and raw.get('qa_mode') is True and float(raw.get('duration',0))==15):
         from .return_wide_camera import generate

@@ -1,0 +1,1467 @@
+{
+  "schema_version": 1,
+  "audited_at_utc": "2026-10-09T04:40:29.842493+00:00",
+  "repository": "/workspace/yeonhwarok-free",
+  "source_head": "f152d7605904116656710fb311c1f712417382b5",
+  "scope": "Read-only existing local GIS provenance and current 24-second v020 scene audit. No external lookup/download, invented geometry, render, GPU or workload action.",
+  "decision": {
+    "precise_suez_canal_line_available": false,
+    "precise_suez_canal_region_available": false,
+    "precise_suez_geometry_referenced_by_current_scene": false,
+    "status": "UNSUPPORTED_BY_EXISTING_LOCAL_SOURCES",
+    "supported": [
+      "Existing SUEZ_CANAL geographic waypoint marker and labels with explicit point scope.",
+      "Generalized licensed maritime routes at their documented regional visualization scale.",
+      "Existing country/coastline/raster context, preserving its original cartographic scope."
+    ],
+    "not_admissible": [
+      "Treating a Suez city, port or representative maritime waypoint as a canal line or region.",
+      "Treating six-vertex passage=suez generalized graph corridor as precise canal centerline.",
+      "Extracting Egypt national boundaries/coastline/raster appearance as invented canal boundary.",
+      "Interpolating or drawing guessed canal endpoints/region to fill the missing source."
+    ]
+  },
+  "registries": [
+    {
+      "path": "world-simulation-shorts-engine/data/locations.json",
+      "sources": [
+        "natural_earth_places",
+        "ourairports",
+        "natural_earth_countries"
+      ]
+    },
+    {
+      "path": "world-simulation-shorts-engine/data/shipping_routes.json",
+      "sources": [
+        "SEAROUTE_1_6_0",
+        "NATURAL_EARTH_PHYSICAL_POINTS_10M"
+      ]
+    },
+    {
+      "path": "cinematic-world-map/assets/SOURCES.json",
+      "use": "Country/coastline/topology inputs registered by engine/assets.py:138."
+    },
+    {
+      "path": "world-simulation-shorts-engine/assets/flat/SOURCES.json",
+      "use": "Documented geographic ROI rasters, not canal vector geometry."
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/earth-detail/v018/manifest.json",
+      "use": "Existing cartographic regional color and land-mask material; no added GIS line/region."
+    }
+  ],
+  "source_checks": [
+    {
+      "source_id": "natural_earth_places",
+      "path": "world-simulation-shorts-engine/data/populated_places_source.geojson",
+      "exists": true,
+      "expected_sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "actual_sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "ourairports",
+      "path": "world-simulation-shorts-engine/data/airport_codes_source.csv",
+      "exists": true,
+      "expected_sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "actual_sha256": "b27d7920d55aada4b67859d1cc6970510ed816233f64739d20e71bd625dee2cd",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural_earth_countries",
+      "path": "cinematic-world-map/assets/gis/countries_50m.geojson",
+      "exists": true,
+      "expected_sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "actual_sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/searoute-1.6.0.tar.gz",
+      "exists": true,
+      "expected_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "actual_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "NATURAL_EARTH_PHYSICAL_POINTS_10M",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/natural_earth_physical_points.geojson",
+      "exists": true,
+      "expected_sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "actual_sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "coastlines_50m",
+      "path": "cinematic-world-map/assets/gis/coastlines_50m.geojson",
+      "exists": true,
+      "expected_sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+      "actual_sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "countries_50m",
+      "path": "cinematic-world-map/assets/gis/countries_50m.geojson",
+      "exists": true,
+      "expected_sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "actual_sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-topology",
+      "path": "cinematic-world-map/assets/gis/earth-topology.png",
+      "exists": true,
+      "expected_sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+      "actual_sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0/marnet_dict.py",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/marnet_dict.py",
+      "exists": true,
+      "expected_sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3",
+      "actual_sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0/ports_dict.py",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/ports_dict.py",
+      "exists": true,
+      "expected_sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b",
+      "actual_sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0/APACHE-2.0.txt",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/APACHE-2.0.txt",
+      "exists": true,
+      "expected_sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66",
+      "actual_sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0/PACKAGE_METADATA.txt",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/PACKAGE_METADATA.txt",
+      "exists": true,
+      "expected_sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c",
+      "actual_sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "ROTTERDAM_SINGAPORE_SUEZ",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/normal_route.geojson",
+      "exists": true,
+      "expected_sha256": "e209ae2cbfc08a3c98da43c3e63f647a58ce117c55c12b1e0f2554b9b070a516",
+      "actual_sha256": "e209ae2cbfc08a3c98da43c3e63f647a58ce117c55c12b1e0f2554b9b070a516",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "ROTTERDAM_SINGAPORE_CAPE",
+      "path": "world-simulation-shorts-engine/data/shipping_sources/cape_route.geojson",
+      "exists": true,
+      "expected_sha256": "027aef1d831419194664738ac1f643e6ef5afe337b67b91d47d6f1daf150746e",
+      "actual_sha256": "027aef1d831419194664738ac1f643e6ef5afe337b67b91d47d6f1daf150746e",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural-earth-1-east-asia",
+      "path": "world-simulation-shorts-engine/web/flat_assets/natural_earth_1_east_asia.png",
+      "exists": true,
+      "expected_sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+      "actual_sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural-earth-1-east-asia-expanded",
+      "path": "world-simulation-shorts-engine/web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.png",
+      "exists": true,
+      "expected_sha256": "23c9ed6b954528fb98267d103f6e066e650461a7a817304b6cc2d4aa3d55a522",
+      "actual_sha256": "23c9ed6b954528fb98267d103f6e066e650461a7a817304b6cc2d4aa3d55a522",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural_earth_1_native_raster",
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+      "exists": true,
+      "expected_sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+      "actual_sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-blue-marble",
+      "path": "cinematic-world-map/assets/gis/earth-blue-marble.jpg",
+      "exists": true,
+      "expected_sha256": "228deba2e4b600146bdcb6cfa359b8ead6aacc2b1c13550a29cd82824cfa1c01",
+      "actual_sha256": "228deba2e4b600146bdcb6cfa359b8ead6aacc2b1c13550a29cd82824cfa1c01",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-lights",
+      "path": "cinematic-world-map/assets/gis/earth-lights.png",
+      "exists": true,
+      "expected_sha256": "0564fa57f5fade2f65e56d3ad59b3c6bf5e32c44f60370a3e46fd367b0cabaee",
+      "actual_sha256": "0564fa57f5fade2f65e56d3ad59b3c6bf5e32c44f60370a3e46fd367b0cabaee",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-day-8k",
+      "path": "cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+      "exists": true,
+      "expected_sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+      "actual_sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-night-4k",
+      "path": "cinematic-world-map/assets/v3/earth/earth-night-4k.jpg",
+      "exists": true,
+      "expected_sha256": "f4a3464d6a237e68681837f269a2b4b761078f5cc67197e6feca21c1f004de30",
+      "actual_sha256": "f4a3464d6a237e68681837f269a2b4b761078f5cc67197e6feca21c1f004de30",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-clouds-2k",
+      "path": "cinematic-world-map/assets/v3/earth/earth-clouds-2k.jpg",
+      "exists": true,
+      "expected_sha256": "b2d39c2a665dc74a15a01ead970159d394ba9134dc9c38ce9e86ee634d8ef68a",
+      "actual_sha256": "b2d39c2a665dc74a15a01ead970159d394ba9134dc9c38ce9e86ee634d8ef68a",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-night-8k",
+      "path": "cinematic-world-map/assets/v3/earth/earth-night-8k.jpg",
+      "exists": true,
+      "expected_sha256": "9894e83a585a22c1c425e7ca4f987a9ba625bf08ecee45d3c9dcacae3c2ad5f7",
+      "actual_sha256": "9894e83a585a22c1c425e7ca4f987a9ba625bf08ecee45d3c9dcacae3c2ad5f7",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "earth-clouds-8k",
+      "path": "cinematic-world-map/assets/v3/earth/earth-clouds-8k.jpg",
+      "exists": true,
+      "expected_sha256": "c792eca228989d36ebb45d3ea6ff1198be5e21a25d70d2fbcb2124ffd14ba7f5",
+      "actual_sha256": "c792eca228989d36ebb45d3ea6ff1198be5e21a25d70d2fbcb2124ffd14ba7f5",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural-earth-1-registration/world_file",
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tfw",
+      "exists": true,
+      "expected_sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+      "actual_sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural-earth-1-registration/projection_file",
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.prj",
+      "exists": true,
+      "expected_sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+      "actual_sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "natural-earth-1-registration/source_readme",
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.README.html",
+      "exists": true,
+      "expected_sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+      "actual_sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "detail_0",
+      "path": "world-simulation-shorts-engine/web/earth-detail/v018/detail_0.png",
+      "exists": true,
+      "expected_sha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+      "actual_sha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "detail_0_land",
+      "path": "world-simulation-shorts-engine/web/earth-detail/v018/detail_0_land.png",
+      "exists": true,
+      "expected_sha256": "70abef962eea585520540f5a573523845f0f968877038bc8013e93149ecd4c13",
+      "actual_sha256": "70abef962eea585520540f5a573523845f0f968877038bc8013e93149ecd4c13",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "detail_1",
+      "path": "world-simulation-shorts-engine/web/earth-detail/v018/detail_1.png",
+      "exists": true,
+      "expected_sha256": "673b8249fef4acb228cabd566895fd761ed1ab23b53afc08cee96b4ba1ff222f",
+      "actual_sha256": "673b8249fef4acb228cabd566895fd761ed1ab23b53afc08cee96b4ba1ff222f",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "detail_1_land",
+      "path": "world-simulation-shorts-engine/web/earth-detail/v018/detail_1_land.png",
+      "exists": true,
+      "expected_sha256": "bdcbc8170861054801856c36b334be1326ab51d24fdd98a149857dfeb94be83c",
+      "actual_sha256": "bdcbc8170861054801856c36b334be1326ab51d24fdd98a149857dfeb94be83c",
+      "matches_registered_hash": true
+    },
+    {
+      "source_id": "v018-source-plan",
+      "path": "deliverables/WORLD_SIMULATION_ENGINE/SECOND_EVENT_CAMERA_v017/SCENE_PLAN.json",
+      "exists": true,
+      "expected_sha256": "e8a365a792bcce56c683af373c420af95ba8e7323ef141b10e58e84f8a283678",
+      "actual_sha256": "e8a365a792bcce56c683af373c420af95ba8e7323ef141b10e58e84f8a283678",
+      "matches_registered_hash": true
+    }
+  ],
+  "all_checked_registered_hashes_match": true,
+  "local_geojson_inventory": [
+    {
+      "path": "world-simulation-shorts-engine/data/populated_places_source.geojson",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "feature_count": 7342,
+      "geometry_types": {
+        "Point": 7342
+      },
+      "bounds": [
+        -179.589979,
+        -90,
+        179.383304,
+        82.483323
+      ],
+      "scope": "Global populated-place point features, including Suez city; no canal extent."
+    },
+    {
+      "path": "world-simulation-shorts-engine/data/shipping_sources/normal_route.geojson",
+      "sha256": "e209ae2cbfc08a3c98da43c3e63f647a58ce117c55c12b1e0f2554b9b070a516",
+      "feature_count": 1,
+      "geometry_types": {
+        "LineString": 1
+      },
+      "bounds": [
+        -9.9844,
+        1.1,
+        103.832461,
+        52
+      ],
+      "scope": "Rotterdam-Singapore shortest network route through generalized Suez corridor; not canal centerline."
+    },
+    {
+      "path": "world-simulation-shorts-engine/data/shipping_sources/cape_route.geojson",
+      "sha256": "027aef1d831419194664738ac1f643e6ef5afe337b67b91d47d6f1daf150746e",
+      "feature_count": 1,
+      "geometry_types": {
+        "LineString": 1
+      },
+      "bounds": [
+        -18,
+        -35,
+        106.8,
+        52
+      ],
+      "scope": "Rotterdam-Singapore graph detour excluding Suez; not canal geometry."
+    },
+    {
+      "path": "world-simulation-shorts-engine/data/shipping_sources/natural_earth_physical_points.geojson",
+      "sha256": "25821b530966e62756faebf53699f12bf73550f8228aa4bbdf3e4132dd7cf806",
+      "feature_count": 235,
+      "geometry_types": {
+        "Point": 235
+      },
+      "bounds": [
+        -178.319203,
+        -78.638116,
+        179.497569,
+        83.626288
+      ],
+      "scope": "Global generalized landmark/physical-region points; no Suez canal geometry."
+    },
+    {
+      "path": "cinematic-world-map/assets/gis/coastlines_50m.geojson",
+      "sha256": "271f1c4c1908312bac6b29d158ea1356544beafc129f260005300913aa5ea283",
+      "feature_count": 1428,
+      "geometry_types": {
+        "LineString": 1427,
+        "MultiLineString": 1
+      },
+      "bounds": [
+        -180,
+        -85.192188,
+        180,
+        83.599609
+      ],
+      "scope": "Natural Earth 1:50m global coastline; sea/land coastline only."
+    },
+    {
+      "path": "cinematic-world-map/assets/gis/countries_50m.geojson",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "feature_count": 242,
+      "geometry_types": {
+        "Polygon": 123,
+        "MultiPolygon": 119
+      },
+      "bounds": [
+        -180,
+        -89.998926,
+        180,
+        83.599609
+      ],
+      "scope": "Natural Earth 1:50m admin-0 national polygons; national boundary/context only."
+    }
+  ],
+  "suez_candidates": {
+    "scene_waypoint": {
+      "source_id": "SEAROUTE_1_6_0",
+      "location": {
+        "id": "SUEZ_CANAL",
+        "name": "Suez Canal",
+        "kind": "canal",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "source_id": "SEAROUTE_1_6_0",
+        "source_record": "marnet_dict.node_list[(32.382202, 30.318359)]",
+        "aliases": [
+          "수에즈 운하",
+          "수에즈",
+          "Suez Canal",
+          "Suez"
+        ],
+        "coordinate_precision": "representative verified canal-network waypoint near Great Bitter Lake, not an entire canal geometry",
+        "fact_status": "FACT",
+        "coordinates_raw": [
+          32.382202,
+          30.318359
+        ]
+      },
+      "evidence": [
+        "world-simulation-shorts-engine/data/shipping_routes.json:165",
+        "world-simulation-shorts-engine/data/shipping_routes.json:183"
+      ]
+    },
+    "city_point": {
+      "source_id": "natural_earth_places",
+      "location": {
+        "id": "suez",
+        "name": "Suez",
+        "kind": "city",
+        "country": "Egypt",
+        "aliases": [
+          "Suez",
+          "수에즈",
+          "수에즈 운하",
+          "Suez Canal"
+        ],
+        "coordinates": {
+          "lon": 32.549941,
+          "lat": 30.004976,
+          "source_id": "natural_earth_places",
+          "location_id": "suez"
+        },
+        "feature_id": "1159149853"
+      },
+      "evidence": [
+        "world-simulation-shorts-engine/data/locations.json:178",
+        "world-simulation-shorts-engine/data/locations.json:186"
+      ]
+    },
+    "archive_generalized_passage": {
+      "source_id": "SEAROUTE_1_6_0",
+      "archive_path": "world-simulation-shorts-engine/data/shipping_sources/searoute-1.6.0.tar.gz",
+      "archive_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "member": "searoute-1.6.0/searoute/data/marnet_searoute.geojson",
+      "member_sha256": "111a82d949bb949c396a69a08828781314d3afe779c07e9754c3b2834dfca415",
+      "features": [
+        {
+          "feature_index": 22,
+          "properties": {
+            "passage": "suez"
+          },
+          "geometry": {
+            "type": "LineString",
+            "coordinates": [
+              [
+                34.5,
+                27
+              ],
+              [
+                33.233643,
+                28.444544
+              ],
+              [
+                32.6,
+                29.7
+              ],
+              [
+                32.557983,
+                30.213982
+              ],
+              [
+                32.382202,
+                30.318359
+              ],
+              [
+                32.31010400000001,
+                31.102922
+              ]
+            ]
+          },
+          "bounds": [
+            32.31010400000001,
+            27,
+            34.5,
+            31.102922
+          ]
+        }
+      ],
+      "network_segment_weights_km": [
+        203.3,
+        152.6,
+        57.3,
+        20.5,
+        87.5
+      ],
+      "network_segment_weight_sum_km": 521.2,
+      "precision_evidence": [
+        "world-simulation-shorts-engine/data/shipping_routes.json:41",
+        "world-simulation-shorts-engine/data/shipping_sources/ROUTE_VALIDATION.json:68",
+        "searoute-1.6.0/README.md:23",
+        "searoute-1.6.0/README.md:414"
+      ],
+      "interpretation": "Generalized approach/canal-corridor routing link, not authoritative canal extent, centerline or region. No canal-specific survey accuracy, endpoint definition or geometry date supplied."
+    },
+    "archive_port_points": {
+      "source_id": "SEAROUTE_1_6_0",
+      "member": "searoute-1.6.0/searoute/data/ports.geojson",
+      "member_sha256": "8398cb9554a19cf37f53f932f3842f58fbd94fce4c8e2704c3f5a4205ea5977e",
+      "features": [
+        {
+          "feature_index": 944,
+          "properties": {
+            "cty": "Egypt",
+            "name": "Suez Canal",
+            "port": "EGSCN",
+            "t": 1.0
+          },
+          "geometry": {
+            "coordinates": [
+              32.280758,
+              30.587913
+            ],
+            "type": "Point"
+          }
+        }
+      ],
+      "referenced_by_current_scene": false
+    },
+    "route_summaries": [
+      {
+        "route_id": "ROTTERDAM_SINGAPORE_SUEZ",
+        "name": "Rotterdam → Singapore via Suez Canal",
+        "type": "sea",
+        "from_location": "ROTTERDAM_PORT",
+        "to_location": "SINGAPORE_PORT",
+        "source_id": "SEAROUTE_1_6_0",
+        "coordinate_provenance": "Exact output coordinates of searoute 1.6.0; graph waypoints and published port connectors. No coordinates invented by a language model.",
+        "length_km": 15530.538971787173,
+        "restrictions": [
+          "northwest"
+        ],
+        "traversed_passages": [
+          "gibraltar",
+          "suez",
+          "babalmandab",
+          "malacca"
+        ],
+        "altitude_km": 0.12,
+        "geometry_role": "verified geographic visualization route",
+        "fact_status": "FACT",
+        "calculation": {
+          "algorithm": "Dijkstra shortest-distance graph path",
+          "include_ports": true,
+          "port_params": {
+            "country_pol": "NL",
+            "country_pod": "SG",
+            "only_terminals": true
+          },
+          "graph_edge_count": 122,
+          "port_connector_count": 2,
+          "source_route_file": "data/shipping_sources/normal_route.geojson",
+          "source_route_sha256": "e209ae2cbfc08a3c98da43c3e63f647a58ce117c55c12b1e0f2554b9b070a516"
+        },
+        "caveat": "A geographic route through the published maritime network; not a real-time shipping schedule.",
+        "point_count": 125,
+        "bounds": [
+          -9.9844,
+          1.1,
+          103.832461,
+          52
+        ],
+        "first_coordinate": [
+          4.442447,
+          51.904383
+        ],
+        "last_coordinate": [
+          103.832461,
+          1.239207
+        ],
+        "referenced_by_current_scene": false
+      },
+      {
+        "route_id": "ROTTERDAM_SINGAPORE_CAPE",
+        "name": "Rotterdam → Singapore via Cape offshore detour",
+        "type": "sea",
+        "from_location": "ROTTERDAM_PORT",
+        "to_location": "SINGAPORE_PORT",
+        "source_id": "SEAROUTE_1_6_0",
+        "coordinate_provenance": "Exact output coordinates of searoute 1.6.0; graph waypoints and published port connectors. No coordinates invented by a language model.",
+        "length_km": 21990.63187274913,
+        "restrictions": [
+          "northwest",
+          "suez"
+        ],
+        "traversed_passages": [
+          "south_africa",
+          "sunda"
+        ],
+        "altitude_km": 0.12,
+        "geometry_role": "verified geographic visualization route",
+        "fact_status": "SIMULATION",
+        "calculation": {
+          "algorithm": "Dijkstra shortest-distance graph path",
+          "include_ports": true,
+          "port_params": {
+            "country_pol": "NL",
+            "country_pod": "SG",
+            "only_terminals": true
+          },
+          "graph_edge_count": 121,
+          "port_connector_count": 2,
+          "source_route_file": "data/shipping_sources/cape_route.geojson",
+          "source_route_sha256": "027aef1d831419194664738ac1f643e6ef5afe337b67b91d47d6f1daf150746e"
+        },
+        "caveat": "A possible graph-based detour under an assumed Suez closure; not a prediction of real ship behavior.",
+        "point_count": 124,
+        "bounds": [
+          -18,
+          -35,
+          106.8,
+          52
+        ],
+        "first_coordinate": [
+          4.442447,
+          51.904383
+        ],
+        "last_coordinate": [
+          103.832461,
+          1.239207
+        ],
+        "referenced_by_current_scene": false
+      }
+    ],
+    "country_coast_context": {
+      "country_source": "natural_earth_countries",
+      "country_scope": "Egypt administrative polygon, not canal geometry; low-resolution mask does not carve narrow canal.",
+      "evidence": [
+        "world-simulation-shorts-engine/data/shipping_sources/ROUTE_VALIDATION.json:34"
+      ]
+    },
+    "regional_material_context": {
+      "source": {
+        "id": "natural_earth_1_native_raster",
+        "file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+        "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+        "resolution": [
+          21600,
+          10800
+        ],
+        "license": "Public domain",
+        "url": "https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-1/",
+        "kind": "Existing Natural Earth shaded relief and land cover cartography; not new DEM or satellite imagery"
+      },
+      "coast_source": {
+        "id": "natural_earth_50m_country_polygons",
+        "file": "cinematic-world-map/assets/gis/countries_50m.geojson",
+        "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+        "license": "Public domain",
+        "scale": "1:50m",
+        "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson"
+      },
+      "native_texels_per_degree": 60,
+      "textures": [
+        {
+          "region_id": "detail_0",
+          "width": 1440,
+          "height": 1680,
+          "bounds": [
+            20.383333333333326,
+            16.316666666666663,
+            44.383333333333326,
+            44.31666666666666
+          ],
+          "center": {
+            "lon": 32.382202,
+            "lat": 30.318359
+          }
+        },
+        {
+          "region_id": "detail_0",
+          "width": 1440,
+          "height": 1680,
+          "bounds": [
+            20.383333333333326,
+            16.316666666666663,
+            44.383333333333326,
+            44.31666666666666
+          ],
+          "center": {
+            "lon": 32.382202,
+            "lat": 30.318359
+          }
+        },
+        {
+          "region_id": "detail_1",
+          "width": 1440,
+          "height": 1680,
+          "bounds": [
+            91.85000000000002,
+            -12.700000000000003,
+            115.85000000000002,
+            15.299999999999997
+          ],
+          "center": {
+            "lon": 103.853875,
+            "lat": 1.294979
+          }
+        },
+        {
+          "region_id": "detail_1",
+          "width": 1440,
+          "height": 1680,
+          "bounds": [
+            91.85000000000002,
+            -12.700000000000003,
+            115.85000000000002,
+            15.299999999999997
+          ],
+          "center": {
+            "lon": 103.853875,
+            "lat": 1.294979
+          }
+        }
+      ],
+      "interpretation": "Contextual cartographic raster and polygon-derived land mask; no precise canal vector feature."
+    }
+  },
+  "current_v020_scene": {
+    "public_parent_image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:gcube-v020-reference-effects",
+    "public_parent_digest": "sha256:9d759dc334516174d395429de927092d3d5552b6734336dcd400cf2c0dcc15d9",
+    "public_runtime_source": "3d24147ac1a7ef26a39c0866a42ce8b15f5b4711",
+    "artifacts": [
+      {
+        "path": "/tmp/world-effects-v020/packaging-final-native/selected/PLAN.json",
+        "sha256": "8622ce413c56ea8e3befafedafe2b0db9720791155e0f47d123531405b174546"
+      },
+      {
+        "path": "/tmp/world-effects-v020/PLAN_v020.json",
+        "sha256": "b969ee33304624d28c98ed3d0a71b4918beb650515a6109690ff51a004b61f01"
+      },
+      {
+        "path": "/tmp/world-effects-v020/PLAN_OFF_v019.json",
+        "sha256": "b3a76cd3d70ea83cb172ec9f66e209a5d9fee0a616a64601f4f2365b521ed6f7"
+      }
+    ],
+    "duration_seconds": 24.0,
+    "scene_count": 1,
+    "scene_id": "S001",
+    "frame_count": 720,
+    "frame_range_exclusive": [
+      0,
+      720
+    ],
+    "coordinates": {
+      "lon": 32.382202,
+      "lat": 30.318359,
+      "source_id": "SEAROUTE_1_6_0",
+      "location_id": "SUEZ_CANAL"
+    },
+    "routes": [],
+    "entities": [],
+    "geographic_targets": [
+      "SUEZ_CANAL"
+    ],
+    "labels": [
+      {
+        "kind": "world_label",
+        "text": "SUEZ CANAL",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "start_time": 2.0,
+        "end_time": 15.0,
+        "role": "city",
+        "opacity": 0.75,
+        "size": 54
+      },
+      {
+        "kind": "world_label",
+        "text": "SINGAPORE",
+        "coordinates": {
+          "lon": 103.853875,
+          "lat": 1.294979,
+          "source_id": "natural_earth_places",
+          "location_id": "singapore"
+        },
+        "start_time": 15.0,
+        "end_time": 24.0,
+        "role": "city",
+        "opacity": 0.75,
+        "size": 54
+      }
+    ],
+    "text_events": [
+      {
+        "id": "T_E002",
+        "event_id": "E002",
+        "text": "CANAL CLOSED",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "start_time": 6.0,
+        "end_time": 11.0,
+        "role": "status",
+        "priority": 9,
+        "large_title_approved": false
+      },
+      {
+        "id": "T_E003",
+        "event_id": "E003",
+        "text": "CANAL OPEN",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "start_time": 11.0,
+        "end_time": 15.0,
+        "role": "status",
+        "priority": 9,
+        "large_title_approved": false
+      }
+    ],
+    "visual_events": [
+      {
+        "id": "E001",
+        "kind": "city_reveal",
+        "time": 2.0,
+        "duration": 10.0,
+        "target_id": "SUEZ_CANAL",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "text": "",
+        "description": "SUEZ CANAL",
+        "role": "cause",
+        "caused_by": null,
+        "meaningful": true,
+        "claim_id": "F02"
+      },
+      {
+        "id": "E002",
+        "kind": "route_blocked",
+        "time": 6.0,
+        "duration": 6.0,
+        "target_id": "SUEZ_CANAL",
+        "role": "variable",
+        "caused_by": "E001",
+        "meaningful": true,
+        "description": "CANAL CLOSED",
+        "text": "CANAL CLOSED",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "claim_id": "A01"
+      },
+      {
+        "id": "E003",
+        "kind": "milestone_reveal",
+        "time": 11.0,
+        "duration": 4.0,
+        "target_id": "SUEZ_CANAL",
+        "role": "payoff",
+        "caused_by": "E002",
+        "meaningful": false,
+        "description": "Single-event QA resolved state",
+        "text": "CANAL OPEN",
+        "coordinates": {
+          "lon": 32.382202,
+          "lat": 30.318359,
+          "source_id": "SEAROUTE_1_6_0",
+          "location_id": "SUEZ_CANAL"
+        },
+        "claim_id": "A01"
+      },
+      {
+        "id": "E004",
+        "kind": "city_reveal",
+        "time": 15.0,
+        "duration": 9.0,
+        "target_id": "singapore",
+        "coordinates": {
+          "lon": 103.853875,
+          "lat": 1.294979,
+          "source_id": "natural_earth_places",
+          "location_id": "singapore"
+        },
+        "text": "",
+        "description": "SINGAPORE",
+        "role": "transition",
+        "caused_by": "E003",
+        "meaningful": false,
+        "claim_id": "F03"
+      },
+      {
+        "id": "E005",
+        "kind": "milestone_reveal",
+        "time": 20.5,
+        "duration": 3.5,
+        "target_id": "singapore",
+        "role": "payoff",
+        "caused_by": "E004",
+        "meaningful": false,
+        "description": "Second event stable view",
+        "text": "",
+        "coordinates": {
+          "lon": 103.853875,
+          "lat": 1.294979,
+          "source_id": "natural_earth_places",
+          "location_id": "singapore"
+        },
+        "claim_id": "F03"
+      }
+    ],
+    "sound_events": [
+      {
+        "id": "A_E001",
+        "kind": "soft_pulse",
+        "time": 2.0,
+        "duration": 1.2,
+        "visual_event_id": "E001",
+        "gain_db": -12,
+        "sfx_category": "CITY_REVEAL",
+        "sfx_intensity": "LOW",
+        "sfx_variant": "CITY_REVEAL_01"
+      },
+      {
+        "id": "A_E002",
+        "kind": "low_impact",
+        "time": 6.0,
+        "duration": 1.2,
+        "visual_event_id": "E002",
+        "gain_db": -12,
+        "sfx_category": "ROUTE_BLOCK",
+        "sfx_intensity": "HIGH",
+        "sfx_variant": "ROUTE_BLOCK_01"
+      }
+    ],
+    "camera_timeline": [
+      {
+        "state": "EVENT1_WIDE",
+        "start_frame": 0,
+        "end_frame": 60,
+        "frame_count": 60,
+        "start_seconds": 0.0,
+        "end_seconds": 2.0
+      },
+      {
+        "state": "EVENT1_LOCATION",
+        "start_frame": 60,
+        "end_frame": 90,
+        "frame_count": 30,
+        "start_seconds": 2.0,
+        "end_seconds": 3.0
+      },
+      {
+        "state": "EVENT1_ZOOM_IN",
+        "start_frame": 90,
+        "end_frame": 150,
+        "frame_count": 60,
+        "start_seconds": 3.0,
+        "end_seconds": 5.0
+      },
+      {
+        "state": "EVENT1_VIEW",
+        "start_frame": 150,
+        "end_frame": 180,
+        "frame_count": 30,
+        "start_seconds": 5.0,
+        "end_seconds": 6.0
+      },
+      {
+        "state": "EVENT1_HOLD",
+        "start_frame": 180,
+        "end_frame": 330,
+        "frame_count": 150,
+        "start_seconds": 6.0,
+        "end_seconds": 11.0
+      },
+      {
+        "state": "EVENT1_RESOLVED",
+        "start_frame": 330,
+        "end_frame": 360,
+        "frame_count": 30,
+        "start_seconds": 11.0,
+        "end_seconds": 12.0
+      },
+      {
+        "state": "ZOOM_OUT",
+        "start_frame": 360,
+        "end_frame": 420,
+        "frame_count": 60,
+        "start_seconds": 12.0,
+        "end_seconds": 14.0
+      },
+      {
+        "state": "ADAPTIVE_WIDE",
+        "start_frame": 420,
+        "end_frame": 450,
+        "frame_count": 30,
+        "start_seconds": 14.0,
+        "end_seconds": 15.0
+      },
+      {
+        "state": "EVENT2_LOCATION",
+        "start_frame": 450,
+        "end_frame": 495,
+        "frame_count": 45,
+        "start_seconds": 15.0,
+        "end_seconds": 16.5
+      },
+      {
+        "state": "EVENT2_ZOOM_IN",
+        "start_frame": 495,
+        "end_frame": 585,
+        "frame_count": 90,
+        "start_seconds": 16.5,
+        "end_seconds": 19.5
+      },
+      {
+        "state": "EVENT2_VIEW",
+        "start_frame": 585,
+        "end_frame": 615,
+        "frame_count": 30,
+        "start_seconds": 19.5,
+        "end_seconds": 20.5
+      },
+      {
+        "state": "EVENT2_HOLD",
+        "start_frame": 615,
+        "end_frame": 720,
+        "frame_count": 105,
+        "start_seconds": 20.5,
+        "end_seconds": 24.0
+      }
+    ],
+    "camera_fixture": {
+      "path": "deliverables/WORLD_SIMULATION_ENGINE/EVENT_QUALITY_v019/camera-trajectory-720.json",
+      "sha256": "906304ede28a2cd85c5ea1e02da25e59a5885b820ac792816e9b7916c324c300",
+      "matches_v020_comparison_manifest": true,
+      "frames": 720,
+      "scope": "Frozen native camera-code evaluator; not recovered video/GPU output."
+    },
+    "source_contracts": [
+      {
+        "selection": "second_event_camera",
+        "version": "v017",
+        "all_source_hashes_current": true,
+        "source_hashes": [
+          {
+            "path": "engine/second_event_camera.py",
+            "sha256": "93bc4ce36e4cc6d2bb239602e986050c1a8caaa0bdd5302b966c36923419818b",
+            "matches_current": true
+          },
+          {
+            "path": "engine/adaptive_wide.py",
+            "sha256": "d86c4ae9ea6a936bafb87e0366af52a992f593494b39652469de591df5b2920a",
+            "matches_current": true
+          },
+          {
+            "path": "engine/second_event_qc.py",
+            "sha256": "f22c6569161c2681bd021a146e1cb24b795604e0fc9af91a378285bdf94202e0",
+            "matches_current": true
+          },
+          {
+            "path": "web/second_event_camera.js",
+            "sha256": "3f197ea2fc5004dad4ca8ea3a5419bc3b7606afdf74ab74282c1409fd59ba975",
+            "matches_current": true
+          },
+          {
+            "path": "web/render_second_event_earth.html",
+            "sha256": "bb179030552435c5d1f454bc2d265da3685ac45ae48dfe97fe9db0ee940a583c",
+            "matches_current": true
+          },
+          {
+            "path": "web/single_event_camera.js",
+            "sha256": "483d0372c092b42c96beafbd2aabb3616eb7e7d6f8e9de4ad88cd06df59ff937",
+            "matches_current": true
+          },
+          {
+            "path": "web/return_wide_camera.js",
+            "sha256": "13ac2b757e78e4d7416d0a48ca6f056b737e0b556a54522eb673f3417bf98c29",
+            "matches_current": true
+          },
+          {
+            "path": "tools/collect_all_preflight.mjs",
+            "sha256": "d6987afbbe1183bd958d16c748bd63b5f2df73ce0640b77cd4647c7784fa24a8",
+            "matches_current": true
+          }
+        ]
+      },
+      {
+        "selection": "visual_quality",
+        "version": "v018",
+        "all_source_hashes_current": true,
+        "source_hashes": [
+          {
+            "path": "engine/visual_quality.py",
+            "sha256": "171abfc112f510acf3b4b92e3ee2aeca4898e3a5b2142dec0ea275c5ca1caf0b",
+            "matches_current": true
+          },
+          {
+            "path": "engine/visual_quality_backend.py",
+            "sha256": "e2f269a3fb32cf007f8688f8966ec87231110aaaaecf90fb7f90accf21e19fd5",
+            "matches_current": true
+          },
+          {
+            "path": "web/visual_quality_adapter.js",
+            "sha256": "c86494cc4f300e83c8633b7788b501400589abade2ec7f8a000e67f9d640da10",
+            "matches_current": true
+          },
+          {
+            "path": "web/render_visual_quality_earth.html",
+            "sha256": "6e67c5a1a1f0b4ac6796da6e3cef890b540a4629d6ed07ad67a1d331ebf7f69e",
+            "matches_current": true
+          },
+          {
+            "path": "data/visual_quality_v018.json",
+            "sha256": "5e504ecb58db272387d8606455dd5b6d9e09d7f2270143c487817eeab709f822",
+            "matches_current": true
+          },
+          {
+            "path": "web/visual_quality_v018.json",
+            "sha256": "5e504ecb58db272387d8606455dd5b6d9e09d7f2270143c487817eeab709f822",
+            "matches_current": true
+          },
+          {
+            "path": "web/earth-detail/v018/manifest.json",
+            "sha256": "4ad2b6ec9a1a5c3d0803bbec33648eb1fe474757fdcc1b279459201113f630c6",
+            "matches_current": true
+          }
+        ]
+      },
+      {
+        "selection": "event_quality",
+        "version": "v019",
+        "all_source_hashes_current": true,
+        "source_hashes": [
+          {
+            "path": "engine/event_quality.py",
+            "sha256": "ed3a64e59656327eeb8ad661ba3b94429d0a847d16b3b759c4f316a58e6bfb05",
+            "matches_current": true
+          },
+          {
+            "path": "engine/event_quality_backend.py",
+            "sha256": "ed6698ce19bb09a5aebe254014c6acfa26953cf014965f9a2d72fae6325d058a",
+            "matches_current": true
+          },
+          {
+            "path": "web/event_quality_adapter.js",
+            "sha256": "bab46f0ed430b275193fde8e9df9e216b16a23659005bb02903c318ddce029b2",
+            "matches_current": true
+          },
+          {
+            "path": "web/render_event_quality_earth.html",
+            "sha256": "ea7b9834dd5a2ef348d6d6a58ed17605ebf407cab41cb658b0c611e9005fb56d",
+            "matches_current": true
+          },
+          {
+            "path": "data/event_quality_v019.json",
+            "sha256": "3def1eb34d8de4be8bd04cc86cdeb3198d3181dfdc786d073f1259e1a4d001fd",
+            "matches_current": true
+          },
+          {
+            "path": "web/event_quality_v019.json",
+            "sha256": "3def1eb34d8de4be8bd04cc86cdeb3198d3181dfdc786d073f1259e1a4d001fd",
+            "matches_current": true
+          }
+        ]
+      },
+      {
+        "selection": "reference_effects",
+        "version": "v020",
+        "all_source_hashes_current": true,
+        "source_hashes": [
+          {
+            "path": "engine/reference_effects.py",
+            "sha256": "0df0d207772493269f748575dfd618d52d9dd0b8a886bd05d1712fe1d7214a87",
+            "matches_current": true
+          },
+          {
+            "path": "engine/reference_effects_backend.py",
+            "sha256": "9d260626b0fc96d85fd6eac5d651391b370afd5be5c6a9a761a44dd39a202eae",
+            "matches_current": true
+          },
+          {
+            "path": "web/reference_effects_adapter.js",
+            "sha256": "cd52f405cac6e8707a1c7dc6aca46735ff32d0d2bfbb44215ccebbb0785d43e1",
+            "matches_current": true
+          },
+          {
+            "path": "web/render_reference_effects_earth.html",
+            "sha256": "31863216d72fb76c139cf49f01c99b23047e1cb9af2a2e7359b47b2f29c30e0a",
+            "matches_current": true
+          },
+          {
+            "path": "data/reference_effects_v020.json",
+            "sha256": "2df0563abca82d8f0c71311d4eeb66feb9769e810504fc9d9b2bbe26d06e168f",
+            "matches_current": true
+          },
+          {
+            "path": "web/reference_effects_v020.json",
+            "sha256": "2df0563abca82d8f0c71311d4eeb66feb9769e810504fc9d9b2bbe26d06e168f",
+            "matches_current": true
+          }
+        ]
+      }
+    ],
+    "unrelated_fields_exact_OFF_after_stripping_only_selection_and_gate": true,
+    "effect_timeline_coverage": [
+      {
+        "variant": "selected",
+        "row_count": 21,
+        "sum_frames": 720,
+        "start_frame": 0,
+        "end_frame": 720,
+        "adjacent": true,
+        "contains_geometry_references": false
+      },
+      {
+        "variant": "off",
+        "row_count": 14,
+        "sum_frames": 720,
+        "start_frame": 0,
+        "end_frame": 720,
+        "adjacent": true,
+        "contains_geometry_references": false
+      }
+    ],
+    "actual_NVIDIA_after": "NOT_RUN",
+    "physical_route_block_marker": {
+      "source": "world-simulation-shorts-engine/web/earth_adapter.js:94",
+      "box_geometry_source": "world-simulation-shorts-engine/web/earth_adapter.js:97",
+      "description": "Symbolic crossed boxes anchored at event waypoint; not sourced canal geometry."
+    },
+    "scene_generation_evidence": [
+      "world-simulation-shorts-engine/engine/single_event_camera.py:58",
+      "world-simulation-shorts-engine/engine/single_event_camera.py:59",
+      "world-simulation-shorts-engine/engine/second_event_camera.py:40"
+    ]
+  },
+  "pipeline_consistency": {
+    "frozen_camera_material_effect_sources_match": true,
+    "scene_has_no_route_or_region_geometry": true,
+    "gate_record_passed": true,
+    "precise_geometry_proven_by_existing_gate": false,
+    "preexisting_caveats": [
+      {
+        "code": "SUEZ_ALIAS_POINT_AMBIGUITY",
+        "finding": "resolve_location('Suez Canal') resolves catalog city suez first; explicit SUEZ_CANAL resolves registered maritime representative waypoint.",
+        "evidence": [
+          "world-simulation-shorts-engine/engine/gis.py:18",
+          "world-simulation-shorts-engine/data/locations.json:186"
+        ]
+      },
+      {
+        "code": "SINGAPORE_CLAIM_SOURCE_MISMATCH",
+        "finding": "E004/E005 and Singapore label/next-camera use natural_earth_places city singapore (103.853875,1.294979), but inherited F03 source_ids remain [SEAROUTE_1_6_0], whose SINGAPORE_PORT is (103.832461,1.239207).",
+        "evidence": [
+          "world-simulation-shorts-engine/engine/second_event_camera.py:40",
+          "world-simulation-shorts-engine/engine/second_event_camera.py:47",
+          "world-simulation-shorts-engine/deployment/gcube/framegrid_v013_fixture.json"
+        ]
+      },
+      {
+        "code": "INHERITED_UNUSED_STORY_REFERENCES",
+        "finding": "Single-event QA scene strips routes/entities but retains fixture Rotterdam, route-distance/detour story claims and geographic_targets=[SUEZ_CANAL], despite adding Singapore events/camera.",
+        "evidence": [
+          "world-simulation-shorts-engine/engine/single_event_camera.py:59",
+          "world-simulation-shorts-engine/engine/second_event_camera.py:47"
+        ]
+      },
+      {
+        "code": "OPTIONAL_CLAIM_BINDING_METADATA_REMOVED",
+        "finding": "Source v013 fixture includes coordinate_claim_targets; isolated single-event generator resets metadata and v020 has no binding field. Existing schema applies exact claim/source/target binding only when metadata is present; PASS does not establish event coordinate-claim source equality.",
+        "evidence": [
+          "world-simulation-shorts-engine/engine/single_event_camera.py:79",
+          "world-simulation-shorts-engine/engine/schema.py:114",
+          "world-simulation-shorts-engine/engine/schema.py:129"
+        ]
+      }
+    ],
+    "changes_made": "NONE; pre-existing caveats recorded for v021 story design without modifying frozen v020 camera/material/effect fields."
+  },
+  "registered_source_validation_summary": {
+    "declared_hash_references_checked": 32,
+    "distinct_local_files": 31,
+    "missing_files": [],
+    "hash_mismatches": [],
+    "v018_country_alias_hash_identical_to_checked_country_source": true
+  },
+  "other_registered_geometry_families": [
+    {
+      "source_id": "ourairports",
+      "path": "world-simulation-shorts-engine/data/airport_codes_source.csv",
+      "records": 86165,
+      "valid_coordinate_records": 86165,
+      "geometry_type": "Point coordinates in CSV",
+      "coordinate_order_in_csv": "latitude,longitude",
+      "bounds": [
+        -179.876999,
+        -90.0,
+        179.9757,
+        83.091029
+      ],
+      "registration_evidence": [
+        "world-simulation-shorts-engine/data/locations.json:5292",
+        "world-simulation-shorts-engine/data/airport_codes_datapackage.json:118"
+      ],
+      "scope": "Airport points; no canal shape."
+    },
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "routing_nodes": 9708,
+      "directed_adjacency_entries": 31940,
+      "maritime_geojson_features": 4109,
+      "port_geojson_point_features": 3962,
+      "scope": "Global generalized maritime routing network and port points; archived graph has some unwrapped longitudes beyond +/-180."
+    },
+    {
+      "source_id": "natural_earth_countries",
+      "egypt_bounds": [
+        24.703223,
+        21.994873,
+        36.871387,
+        31.65498
+      ],
+      "geometry_type": "Polygon",
+      "scope": "Admin-0 national extent; no canal polygon."
+    },
+    {
+      "source_id": "natural-earth-1-global-raster",
+      "original_file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+      "dimensions": [
+        21600,
+        10800
+      ],
+      "coordinate_reference_system": "EPSG:4326",
+      "degrees_per_native_pixel": 0.016666666666666666,
+      "scope": "Global cartographic shaded-relief/land-cover/water/drainage raster; not survey DEM, canal centerline or boundary.",
+      "flat_ROI_crops": [
+        {
+          "source_id": "natural-earth-1-east-asia",
+          "file": "web/flat_assets/natural_earth_1_east_asia.png",
+          "bounds": {
+            "west": 104.0,
+            "east": 152.0,
+            "south": 7.0,
+            "north": 63.0
+          },
+          "covers_suez": false
+        },
+        {
+          "source_id": "natural-earth-1-east-asia-expanded",
+          "file": "web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.png",
+          "bounds": {
+            "west": 104.00000000005679,
+            "south": -8.000000000019583,
+            "east": 152.0000000000664,
+            "north": 64.99999999999501
+          },
+          "covers_suez": false
+        }
+      ]
+    },
+    {
+      "source_id": "global_earth_backgrounds",
+      "scope": "Global imagery/topology/cloud raster backgrounds; no feature-level canal geometry.",
+      "files": [
+        {
+          "path": "cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+          "selected_for_final": true,
+          "dimensions": [
+            8192,
+            4096
+          ]
+        },
+        {
+          "path": "cinematic-world-map/assets/v3/earth/earth-night-4k.jpg",
+          "selected_for_final": false,
+          "dimensions": [
+            4096,
+            2048
+          ]
+        },
+        {
+          "path": "cinematic-world-map/assets/v3/earth/earth-clouds-2k.jpg",
+          "selected_for_final": false,
+          "dimensions": [
+            2048,
+            1024
+          ]
+        },
+        {
+          "path": "cinematic-world-map/assets/v3/earth/earth-night-8k.jpg",
+          "selected_for_final": true,
+          "dimensions": [
+            8192,
+            4096
+          ]
+        },
+        {
+          "path": "cinematic-world-map/assets/v3/earth/earth-clouds-8k.jpg",
+          "selected_for_final": true,
+          "dimensions": [
+            8192,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "ancillary_existing_files": [
+    {
+      "path": "world-simulation-shorts-engine/assets/flat/NATURAL_EARTH_PUBLIC_DOMAIN.txt",
+      "exists": true
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/flat_assets/cache/terrain_99a6ebfafb2f78a29cea244d9a20cf732c619c4c97db868bf98255f34ec26624.json",
+      "exists": true
+    }
+  ],
+  "method_limits": [
+    "Audit establishes registered local geometry availability and scene references. It does not validate any physical NVIDIA pixels, author a new canal line, or infer real shipping outcomes.",
+    "Archive passage geometry is sourced and generalized rather than arbitrary invented coordinates; its licensed provenance does not establish precision or whole-canal coverage.",
+    "Countries/coastlines and cartographic raster pixels cannot substitute for a canal feature without an authoritative geometry record.",
+    "The current scene artifacts are QA source plans with static and native admission receipts; existing uploaded BEFORE video has no v020 NVIDIA AFTER counterpart."
+  ]
+}
