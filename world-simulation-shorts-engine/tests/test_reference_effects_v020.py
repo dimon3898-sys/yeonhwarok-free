@@ -134,6 +134,9 @@ class ReferenceEffects(unittest.TestCase):
         report = json.loads(result.stdout)
         self.assertTrue(report['passed'], report)
         self.assertEqual(report['frames'], 720)
+        self.assertIs(report['request_order_regression']['completion_order_reversed'], True)
+        self.assertEqual(report['request_order_regression']['request_identity'],
+                         'SAME_URL_MULTISET_AND_COUNTS')
         for key in ('camera_trajectory', 'material', 'wide', 'overlay_off', 'sfx'):
             self.assertEqual(report[key], 'UNCHANGED', key)
         self.assertEqual(report['additional_texture_uploads'], 0)

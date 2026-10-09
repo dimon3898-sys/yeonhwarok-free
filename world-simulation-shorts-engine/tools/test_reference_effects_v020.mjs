@@ -70,7 +70,19 @@ class ParentFixture{
 }
 const camera=new Function('THREE','returnCameraValues','installReturnCamera','SceneReturnWideRenderer',strip('web/second_event_camera.js')+';return {SceneSecondEventRenderer};')(THREE,returning.returnCameraValues,returning.installReturnCamera,ParentFixture);
 const manifest=JSON.parse(read('web/earth-detail/v018/manifest.json')),assets=Object.fromEntries(manifest.textures.map(source=>[source.url,fs.readFileSync(path.join(root,source.file))]));
-const mockTHREE={...THREE,TextureLoader:class{async loadAsync(url){assert(url.startsWith('data:image/png;base64,'));const bytes=Buffer.from(url.split(',')[1],'base64');assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');const value=new THREE.Texture();value.image={width:bytes.readUInt32BE(16),height:bytes.readUInt32BE(20)};return value;}}};
+const regionalDays=manifest.textures.filter(source=>source.role==='regional_day_relief');
+const regionalMasks=manifest.textures.filter(source=>source.role==='regional_land_mask');
+assert.equal(regionalDays.length,2);assert.equal(regionalMasks.length,2);
+let delayedDecodeHash=null,releaseOnMaskURL=null,releaseDecode=null,deferredDecode=Promise.resolve();
+// Force opposite completion orders without timers: the chosen verified day
+// decode waits until the other region has progressed to requesting its mask.
+// Both regions still run through the actual asynchronous SHA/source checks.
+function delayRegionDecode(index){
+ delayedDecodeHash=regionalDays[index].sha256;
+ releaseOnMaskURL=regionalMasks.find(source=>source.region_id===regionalDays[1-index].region_id).url;
+ deferredDecode=new Promise(resolve=>{releaseDecode=resolve;});
+}
+const mockTHREE={...THREE,TextureLoader:class{async loadAsync(url){assert(url.startsWith('data:image/png;base64,'));const bytes=Buffer.from(url.split(',')[1],'base64');assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');if(createHash('sha256').update(bytes).digest('hex')===delayedDecodeHash)await deferredDecode;const value=new THREE.Texture();value.image={width:bytes.readUInt32BE(16),height:bytes.readUInt32BE(20)};return value;}}};
 const quality=new Function('THREE','SceneSecondEventRenderer',strip('web/visual_quality_adapter.js')+';return {SceneVisualQualityRenderer,digestBytes,trustedStaticURL};')(mockTHREE,camera.SceneSecondEventRenderer);
 const eventQuality=new Function('SceneVisualQualityRenderer','digestBytes','trustedStaticURL',strip('web/event_quality_adapter.js')+';return {SceneEventQualityRenderer};')(quality.SceneVisualQualityRenderer,quality.digestBytes,quality.trustedStaticURL);
 const effects=new Function('THREE','SceneEventQualityRenderer','digestBytes','trustedStaticURL','flatCoordinate','productionUsesRouteHeadAnchor',strip('web/reference_effects_adapter.js')+';return {createReferenceEffectsRenderer,SceneReferenceEffectsRenderer,validateReferenceEffectsEvents,validateReferenceEffectsProfile,characterRevealState,markerPopState};')(THREE,eventQuality.SceneEventQualityRenderer,quality.digestBytes,quality.trustedStaticURL,flat.flatCoordinate,production.productionUsesRouteHeadAnchor);
@@ -81,17 +93,36 @@ const manifestURL=JSON.parse(buffers['/static/visual_quality_v018.json']).region
 buffers[manifestURL]=fs.readFileSync(path.join(root,'web/earth-detail/v018/manifest.json'));
 const profile=effects.validateReferenceEffectsProfile(JSON.parse(buffers['/static/reference_effects_v020.json']));
 const oldFetch=globalThis.fetch,requests=[];
-globalThis.fetch=async url=>{requests.push(url);const bytes=buffers[url]||assets[url];assert(bytes,'Only deployed verified resources may be fetched');return {ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};};
+globalThis.fetch=async url=>{requests.push(url);const bytes=buffers[url]||assets[url];assert(bytes,'Only deployed verified resources may be fetched');if(url===releaseOnMaskURL)releaseDecode();return {ok:true,arrayBuffer:async()=>bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)};};
 let checks=0;const check=operation=>{operation();checks++;};
+// Promise.all keeps region results ordered, but independent verified day
+// completions may issue mask fetches in either order. Count every URL so this
+// comparison still rejects an added, missing or duplicated OFF request.
+const requestInventory=urls=>[...new Set(urls)].sort().map(url=>[url,urls.filter(value=>value===url).length]);
+const assertRequestInventory=(actual,expected)=>assert.deepEqual(requestInventory(actual),requestInventory(expected));
 try{
  const baselineScene=structuredClone(inputScene);delete baselineScene.reference_effects;
+ delayRegionDecode(0);
  const baseline=new eventQuality.SceneEventQualityRenderer(baselineScene,plan);await baseline.init();const baseRequests=requests.splice(0);
+ delayRegionDecode(1);
  const off=effects.createReferenceEffectsRenderer(baselineScene,plan);await off.init();const offRequests=requests.splice(0);
+ delayedDecodeHash=null;releaseOnMaskURL=null;
  const on=effects.createReferenceEffectsRenderer(inputScene,plan);await on.init();const onRequests=requests.splice(0);
  check(()=>assert.equal(off.constructor,eventQuality.SceneEventQualityRenderer));
- check(()=>assert.deepEqual(offRequests,baseRequests));
- check(()=>assert.deepEqual(onRequests.filter(url=>url!=='/static/reference_effects_v020.json'),baseRequests));
+ check(()=>assertRequestInventory(offRequests,baseRequests));
+ check(()=>assertRequestInventory(onRequests.filter(url=>url!=='/static/reference_effects_v020.json'),baseRequests));
  check(()=>assert.deepEqual(onRequests.filter(url=>url==='/static/reference_effects_v020.json'),['/static/reference_effects_v020.json']));
+ const maskRequests=urls=>urls.filter(url=>regionalMasks.some(source=>source.url===url));
+ const firstMask=regionalMasks.find(source=>source.region_id===regionalDays[0].region_id).url;
+ const secondMask=regionalMasks.find(source=>source.region_id===regionalDays[1].region_id).url;
+ check(()=>assert.deepEqual(maskRequests(baseRequests),[secondMask,firstMask]));
+ check(()=>assert.deepEqual(maskRequests(offRequests),[firstMask,secondMask]));
+ check(()=>{
+  assert.notDeepEqual(offRequests,baseRequests,'Regression must actually reverse asynchronous request order');
+  assert.deepEqual(requestInventory(baseRequests),requestInventory(['/static/visual_quality_v018.json',manifestURL,...manifest.textures.map(source=>source.url),'/static/event_quality_v019.json']));
+ });
+ check(()=>assert.throws(()=>assertRequestInventory([...offRequests,offRequests[0]],baseRequests),assert.AssertionError));
+ check(()=>assert.throws(()=>assertRequestInventory(offRequests.slice(1),baseRequests),assert.AssertionError));
  const receipts=new Map(),textCounts=new Map(),markerScales=new Map();let changedFrames=0;
  for(let frame=0;frame<720;frame++){
   const t=frame/30;for(const renderer of [baseline,off,on]){renderer.ctx.reset();renderer.actx.reset();renderer.frame(t);}
@@ -145,5 +176,5 @@ try{
  check(()=>{on.frame(181/30);const audit=on.audit(181/30),captured=frameEvidence({sceneId:'S001',frameIndex:181,t:181/30,audit,errors:[],renderer:{},failedInvariants:[],decoded:[1080,1920],decodeError:false});assert.deepEqual(captured.effectLayer,audit.effectLayer);assert.equal(captured.effectLayer.version,'v020');});
  const tampered=effects.createReferenceEffectsRenderer({...inputScene,reference_effects:{...inputScene.reference_effects,profile_sha256:'0'.repeat(64)}},plan);await assert.rejects(()=>tampered.init(),/SOURCE_HASH_MISMATCH/);checks++;
  const external=effects.createReferenceEffectsRenderer({...inputScene,reference_effects:{...inputScene.reference_effects,profile_url:'https://untrusted.example/profile.json'}},plan);await assert.rejects(()=>external.init(),/SOURCE_URL_INVALID/);checks++;
- console.log(JSON.stringify({passed:true,checks,frames:720,camera_trajectory:'UNCHANGED',material:'UNCHANGED',wide:'UNCHANGED',overlay_off:'UNCHANGED',sfx:'UNCHANGED',additional_texture_uploads:0,changed_overlay_frames:changedFrames,receipt_coverage:Object.fromEntries(receipts),marker_scales:Object.fromEntries(markerScales),GPU:'NOT_RUN',shader_compile:'NVIDIA_NOT_RUN',pixel_quality:'NOT_RUN',scope:'Actual inherited frame/overlay/audit methods with native camera and real shader assembly; recording Canvas2D uses fixture font metrics, not GPU raster pixels.'}));
+ console.log(JSON.stringify({passed:true,checks,frames:720,camera_trajectory:'UNCHANGED',material:'UNCHANGED',wide:'UNCHANGED',overlay_off:'UNCHANGED',sfx:'UNCHANGED',additional_texture_uploads:0,request_order_regression:{completion_order_reversed:true,request_identity:'SAME_URL_MULTISET_AND_COUNTS',baseline_masks:maskRequests(baseRequests),off_masks:maskRequests(offRequests)},changed_overlay_frames:changedFrames,receipt_coverage:Object.fromEntries(receipts),marker_scales:Object.fromEntries(markerScales),GPU:'NOT_RUN',shader_compile:'NVIDIA_NOT_RUN',pixel_quality:'NOT_RUN',scope:'Actual inherited frame/overlay/audit methods with native camera and real shader assembly; recording Canvas2D uses fixture font metrics, not GPU raster pixels.'}));
 }finally{globalThis.fetch=oldFetch;}

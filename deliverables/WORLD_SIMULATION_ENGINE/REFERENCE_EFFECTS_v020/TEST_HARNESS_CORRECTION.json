@@ -1,0 +1,52 @@
+{
+  "input_plan": "deterministic same authored 24-second v020 QA plan",
+  "input_plan_sha256": "a1c444893304cdafe7679e9e56ae6a6a6495761932aa154f59718e3be41ff7d4",
+  "before": {
+    "exit_code": 1,
+    "assertion": "ordered offRequests versus baseRequests",
+    "difference": "Only detail_0_land.png/detail_1_land.png request order reversed under deterministic verified day-decode gating",
+    "stderr_sha256": "f8b3371231fcf3b913cb8e178308ff593fcd543c24e2a5299354c698cc4d1dec"
+  },
+  "after": {
+    "exit_code": 0,
+    "checks": 24,
+    "frames": 720,
+    "request_order_regression": {
+      "completion_order_reversed": true,
+      "request_identity": "SAME_URL_MULTISET_AND_COUNTS",
+      "baseline_masks": [
+        "/static/earth-detail/v018/detail_1_land.png",
+        "/static/earth-detail/v018/detail_0_land.png"
+      ],
+      "off_masks": [
+        "/static/earth-detail/v018/detail_0_land.png",
+        "/static/earth-detail/v018/detail_1_land.png"
+      ]
+    },
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "f2d636b2729e3a0c8d13c6dde35a34aa47a757133822de0202eeec99eb570b35"
+  },
+  "runtime_changes": false,
+  "GPU": "NOT_RUN",
+  "source_condition": "web/visual_quality_adapter.js:180; Promise.all preserves tile result order but verified day completion can reverse mask requests",
+  "changed_files": [
+    "tools/test_reference_effects_v020.mjs",
+    "tests/test_reference_effects_v020.py"
+  ],
+  "retained_invariants": [
+    "exact request URL multiset and counts",
+    "verified source bytes and hashes",
+    "all 720 camera poses",
+    "all material/uniform states",
+    "OFF overlay/audit equality",
+    "rejection of added/missing/duplicate requests"
+  ],
+  "targeted_python": {
+    "tests": 1,
+    "passed": 1,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "duration_seconds": 15.383
+  }
+}
