@@ -121,9 +121,49 @@ def render_project(*args, **kwargs):
             from .event_quality import record_source_report
             return record_source_report(directory, plan, assets, original=original_event_source_report)
         namespace['write_source_report'] = event_source_report
+    if len(args)>1 and (args[1].get('metadata',{}).get('reference_effects') is not None or
+                        any('reference_effects' in scene for scene in args[1].get('scenes', []))):
+        from .reference_effects import install_validation, validate_effects, renderer_version, project_renderer_version, diagnostic_record
+        from .reference_effects_backend import ReferenceEffectsBackend
+        install_validation()
+        effects = validate_effects(args[1])
+        if not effects['passed']:
+            if diagnostic:
+                diagnostic.write('reference-effects-plan.json', dict(qc=effects))
+                diagnostic.write('preflight.json', dict(passed=False,
+                    reference_effects=dict(qc=effects, physical_gpu='NOT_RUN')))
+            raise RuntimeError('REFERENCE_EFFECTS_PREFLIGHT_FAILED')
+        if diagnostic:
+            diagnostic.write('reference-effects-plan.json', diagnostic_record(args[1]))
+        namespace['CPULocalBackend'] = ReferenceEffectsBackend
+        namespace['renderer_version'] = renderer_version
+        namespace['project_renderer_version'] = project_renderer_version
+        original_effect_source_report = namespace['write_source_report']
+        def effect_source_report(directory, plan, assets=None):
+            from .reference_effects import record_source_report
+            return record_source_report(directory, plan, assets, original=original_effect_source_report)
+        namespace['write_source_report'] = effect_source_report
     if diagnostic:
         from .gpu_preflight import collect_all
-        preflight = collect_all(args[0], args[1], diagnostic)
+        try:
+            preflight = collect_all(args[0], args[1], diagnostic)
+        except BaseException:
+            if args[1].get('metadata', {}).get('reference_effects'):
+                try:
+                    from .reference_effects import diagnostic_record
+                    existing = diagnostic._existing(diagnostic.root / 'preflight.json')
+                    existing = existing if isinstance(existing, dict) else dict(passed=False)
+                    existing['reference_effects'] = diagnostic_record(args[1])
+                    diagnostic.write('preflight.json', existing)
+                except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                    pass  # Never replace the original admission failure.
+            raise
+        if args[1].get('metadata', {}).get('reference_effects'):
+            from .reference_effects import diagnostic_record
+            # preflight.json is already safely exported in both ZIP outcomes;
+            # native per-frame effectLayer receipts remain in frame-audit.json.
+            preflight['reference_effects'] = diagnostic_record(args[1])
+            diagnostic.write('preflight.json', preflight)
         if any(s.get('direction') for s in args[1].get('scenes', [])):
             preflight['direction'] = dict(qc=report,
                 perceptual=locals().get('perceptual_native'),

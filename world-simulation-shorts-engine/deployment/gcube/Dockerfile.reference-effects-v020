@@ -1,0 +1,9 @@
+# Immutable public v019 runtime. Only the new opt-in effects extension and
+# its planner/pipeline integration are overlaid; approved parent files stay frozen.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:6bccc9c2df52052da743719269316c8cd8839502b13e408efc349c4f998d7ae4
+ENV WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=v020
+COPY world-simulation-shorts-engine/engine/reference_effects.py world-simulation-shorts-engine/engine/reference_effects_backend.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/reference_effects_adapter.js world-simulation-shorts-engine/web/render_reference_effects_earth.html world-simulation-shorts-engine/web/reference_effects_v020.json /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/data/reference_effects_v020.json /opt/world-engine/world-simulation-shorts-engine/data/
+COPY world-simulation-shorts-engine/tools/test_reference_effects_v020.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/reference_effects_preflight.py /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

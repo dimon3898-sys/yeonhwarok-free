@@ -1,0 +1,65 @@
+{
+  "version": "v020",
+  "parent_version": "v019",
+  "reference_sha256": "853ce5be22dc95c95e0c4b3eddbd603930e499bc88ee40cb4e59b50aad1187bc",
+  "reference_fps": 30,
+  "reference_content_end_frame": 575,
+  "patterns": {
+    "MARKER_POP": {
+      "pop_frames": 9,
+      "peak_offset_frames": 4,
+      "start_scale": 0.12,
+      "peak_scale": 0.95,
+      "radius_px": 10,
+      "dip_scale": 0.85,
+      "dip_offset_frames": 6
+    },
+    "TEXT_CHARACTER_REVEAL": {
+      "reveal_frames": 17
+    }
+  },
+  "limits": {
+    "max_primary": 1,
+    "max_marker_frames": 45,
+    "max_text_motion_frames": 18,
+    "max_pops_per_event": 1,
+    "max_added_sfx": 0
+  },
+  "evidence": [
+    {
+      "id": "REF_INITIAL_PIN_ENTRANCE",
+      "start_frame": 177,
+      "peak_frame": 181,
+      "settled_frame": 186,
+      "end_frame": 186,
+      "method": "native per-frame crops; growth, brief shrink, rebound to stable size; no repeated pulse or measured overshoot"
+    },
+    {
+      "id": "REF_LABEL_CHARACTER_ENTRANCE",
+      "start_frame": 289,
+      "end_frame": 306,
+      "second_start_frame": 311,
+      "second_end_frame": 328,
+      "method": "visible character-by-character scale entrance; whole label fade not established"
+    }
+  ],
+  "excluded": [
+    "Repeated pulse",
+    "New text exit fade",
+    "Full-screen flash",
+    "Transition accent",
+    "Copied pin artwork or colours",
+    "Reference-isolated SFX"
+  ],
+  "audio": {
+    "status": "UNCONFIRMED",
+    "action": "Preserve exact v019 audio; no new SFX",
+    "reason": "single mixed AAC track; syllabic voice/music peaks cannot establish isolated sound effects"
+  },
+  "design": {
+    "marker": "Neutral outlined circle using existing foreground; no reference shape or colour copied",
+    "font": "Unchanged existing Noto Cinema",
+    "texture_uploads": 0,
+    "shader_changes": false
+  }
+}

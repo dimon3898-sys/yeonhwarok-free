@@ -1,0 +1,43 @@
+{
+  "role": "Current-video visual inspection; reference comparison belongs to parent task",
+  "video": "/workspace/attachments/397d269a-43c4-45d3-a803-356c865dfa47/final (8).mp4",
+  "metadata": {"width":1080,"height":1920,"fps":30,"frames":720,"duration_seconds":24.0},
+  "method": {"decode":"CPU ffmpeg -hwaccel none; all 720 frames decoded and measured","analysis_resolution":[540,960],"dense_inspection":"every frame around all text boundaries, plus 0.1s sheets around requested 2,6,11,14,15,19.5s windows","native_inspection":"native-resolution crop of Suez marker at f180","storage":"Only scripts, metrics, selected PNGs and contact sheets; no frame archive"},
+  "text_style": {
+    "observed":"Uppercase thin sans-serif, pale gray/ivory fill, dark narrow outline and a large soft neutral/dark shadow surrounding the line",
+    "screen_size":"Approximately 44–50 native pixels of visible capital height; SUEZ CANAL about 330 native pixels wide and SINGAPORE about 310 native pixels wide",
+    "entrance":"Fill and outline become visible over about 12 frames; shadow appears strongly on first active frame. No confirmed positional or scale entrance and no letter-by-letter reveal",
+    "exit":"Fill and outline fade over approximately 10 frames, leaving diffuse shadow strongest at the final active frame; all overlay disappears at its end boundary",
+    "camera_relationship":"Line glyph size stays approximately constant on screen while globe/map scale changes. Positions move with camera/geographic framing; no separate text-slide animation detected",
+    "confidence":"high for visible style and fade boundaries; approximate size and coordinates; easing formula cannot be established from pixels alone"
+  },
+  "events": [
+    {"text":"SUEZ CANAL","cue_frame":60,"cue_seconds":2.0,"first_visible_frame":61,"first_visible_seconds":2.033333,"fully_resolved_by_frame":72,"fully_resolved_by_seconds":2.4,"fade_out_frames":[440,449],"fade_out_seconds":[14.666667,14.966667],"absent_frame":450,"absent_seconds":15.0},
+    {"text":"CANAL CLOSED","cue_frame":180,"cue_seconds":6.0,"first_visible_frame":181,"first_visible_seconds":6.033333,"fully_resolved_by_frame":192,"fully_resolved_by_seconds":6.4,"fade_out_frames":[320,329],"fade_out_seconds":[10.666667,10.966667],"absent_frame":330,"absent_seconds":11.0},
+    {"text":"CANAL OPEN","cue_frame":330,"cue_seconds":11.0,"first_visible_frame":331,"first_visible_seconds":11.033333,"fully_resolved_by_frame":342,"fully_resolved_by_seconds":11.4,"fade_out_frames":[440,449],"fade_out_seconds":[14.666667,14.966667],"absent_frame":450,"absent_seconds":15.0},
+    {"text":"SINGAPORE","cue_frame":450,"cue_seconds":15.0,"first_visible_frame":451,"first_visible_seconds":15.033333,"fully_resolved_by_frame":462,"fully_resolved_by_seconds":15.4,"fade_out_frames":[710,719],"fade_out_seconds":[23.666667,23.966667],"last_frame":719,"last_frame_state":"barely visible text; map remains"}
+  ],
+  "positions_native_approximate": [
+    {"frame":69,"text":"SUEZ CANAL","glyph_bbox":[474,1028,806,1074],"note":"Label over Arabian/Red Sea region on static initial globe"},
+    {"frame":198,"text":"SUEZ CANAL","glyph_bbox":[474,1028,806,1074],"note":"Similar screen location after close zoom"},
+    {"frame":198,"text":"CANAL CLOSED","glyph_bbox":[396,880,804,930]},
+    {"frame":420,"text":"SUEZ CANAL","glyph_bbox":[138,836,482,886],"note":"At wide view the line keeps large screen size; positioned over Arabia"},
+    {"frame":420,"text":"CANAL OPEN","glyph_bbox":[138,688,482,742],"note":"Above Suez line; both nearly left-aligned at wide view"},
+    {"frame":469,"text":"SINGAPORE","glyph_bbox":[588,1216,898,1264],"note":"Label falls southwest/below actual Southeast Asia city-light area; no leader visible"},
+    {"frame":585,"text":"SINGAPORE","glyph_bbox":[486,1028,800,1076],"note":"Close map view; no separate point icon visible"}
+  ],
+  "markers": {
+    "suez_closed_cross": {"first_frame":180,"first_seconds":6.0,"last_frame":329,"last_seconds":10.966667,"absent_frame":330,"absent_seconds":11.0,"appearance":"Faint peach/orange geographic X: one nearly vertical arm and one diagonal arm, with a pale yellow central crossing","native_center_approximate":[534,961],"native_bbox_approximate":[500,918,580,1004],"motion":"No confirmed scale change, expanding ring or cyclic pulse. Limb bbox is approximately unchanged at first and last active frame; shadow and codec changes contaminate neutral frame-difference intensity","confidence":"high for cross shape/on-off boundaries; no pulse detected"},
+    "suez_location_pin":"No conventional pin, dot+leader, or radial pulse observed at the 2s label entrance",
+    "suez_open_marker":"No green marker or other visible geometric replacement when OPEN begins",
+    "singapore_pin":"No conventional pin, ring, leader or distinct overlay glow visible at 15s or close view at 19.5s; dense anchor crop examined to final frame"
+  },
+  "other_visible_effects": {
+    "globe":"Pure black background, narrow blue/cyan atmosphere limb, cloud texture, terminator shading and tiny city lights visible in Asia framing",
+    "suez_close":"Large soft bluish-white round light patch on Mediterranean left of canal. Already visible before CLOSED; does not switch with the status cue",
+    "status_glows":"No colored status glow, route/path highlight, map-region fill or scan effect detected",
+    "uncertainty":"Very low-contrast subpixel effects cannot be ruled out. City-light flecks and Singapore brown/red shoreline colors appear part of the map imagery/rendering, not separable animated markers"
+  },
+  "content_and_outro": {"content_frames":[0,719],"outro":"No distinct outro/end-card/logo/subscribe overlay appears; map content remains to the last frame while Singapore label fades"},
+  "evidence": ["overview.jpg","dense_suez_start.jpg","dense_closed_start.jpg","dense_closed_open_swap.jpg","dense_suez_end.jpg","dense_singapore_start.jpg","singapore_close.jpg","dense_end.jpg","marker_f180_native_crop.png","suez_marker_timeline.jpg","singapore_anchor_timeline.jpg","frame_metrics.csv","dense_metrics.json","marker_metrics.json","cross_shape_metrics.json"]
+}
