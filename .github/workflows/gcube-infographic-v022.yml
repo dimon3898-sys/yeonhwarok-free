@@ -76,14 +76,29 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYQUALITY'
-          import os
+          import json, os, re, traceback
           from pathlib import Path
-          for name in ('cache','audio'):
-              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
-          os.setgroups([]);os.setgid(1000);os.setuid(1000)
-          from deployment.gcube.infographic_preflight import run
-          report=run('/data/infographic-preflight', require_container_assets=True)
-          assert report['passed'],report
+          try:
+              for name in ('cache','audio'):
+                  p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+              os.setgroups([]);os.setgid(1000);os.setuid(1000)
+              from deployment.gcube.infographic_preflight import run
+              report=run('/data/infographic-preflight', require_container_assets=True)
+              assert report['passed'],report
+          except Exception as error:
+              frames = [dict(file=re.sub(r'[^A-Za-z0-9_.<>-]', '_', Path(frame.filename).name)[:96],
+                             function=re.sub(r'[^A-Za-z0-9_<>]', '_', frame.name)[:96], line=frame.lineno)
+                        for frame in traceback.extract_tb(error.__traceback__)[-10:]]
+              message = error.args[0] if error.args and type(error.args[0]) is str else ''
+              code = re.match(r'^(?:INFOGRAPHIC|SEMANTIC|STORY_PROGRESSION|REFERENCE_EFFECTS|EVENT_QUALITY|VISUAL_QUALITY|SHADER_CONTRACT|SOURCE|ASSET|AUDIO|CAMERA|FRAME_GRID|FRAMEGRID|REGRESSION|TEXTURE|ATLAS|PRODUCTION|GPU|QA)_[A-Z0-9_]+(?=$|[:\s])', message)
+              metadata = dict(exception_type=re.sub(r'[^A-Za-z0-9_]', '_', type(error).__name__)[:80],
+                              traceback=frames, validator_codes=[code.group(0)] if code else [])
+              returncode = getattr(error, 'returncode', None)
+              if type(returncode) is int:
+                  metadata['subprocess_returncode'] = returncode
+              body = json.dumps(metadata, sort_keys=True).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print('::error title=Safe infographic container contract failure::'+body, flush=True)
+              raise SystemExit(1) from None
           PYQUALITY
       - name: Isolated 31-case v020 regressions with bounded failure metadata
         shell: bash
