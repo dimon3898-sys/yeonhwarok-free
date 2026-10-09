@@ -115,13 +115,19 @@ allocator after measurement. Actual ESpeak → original audio mixer → ASS subt
 checks are performed with the packaged provider, without substituting a silent
 WAV or synthesizing the script a second time.
 
-Final whole-pipeline admission found two additional defects in the new measured
-path. The inherited loudnorm output `-t` could stop before its delayed EOF tail
-flushed: the actual 253-frame fixture produced 401,600 samples instead of
-404,800. Only the new wrapper removes that output-time stop and trims the flushed
-output by its actual sample clock. The original overlapping PCM is bit-exact;
-the missing tail is retained without added silence. The protected audio.py is
-unchanged. Actual WAV duration/hash/sample count are persisted and validated.
+Final whole-pipeline admission found a version-dependent mastering defect in the
+new measured path. On development-host FFmpeg 7.1.5, the inherited loudnorm output
+`-t` stopped before its delayed EOF tail flushed: the actual 253-frame fixture
+produced 401,600 samples instead of 404,800. The exact pinned v021 base uses FFmpeg
+5.1.9; its legacy output already contains all 404,800 samples. Natural EOF and the
+new scoped wrapper both produce 404,800 bit-identical samples on both versions.
+The wrapper removes the output-time stop and trims the flushed output by its
+actual sample clock, preserving the existing overlapping PCM and retaining the
+host's missing tail without added silence or another speech synthesis. This
+development-host diagnosis does not establish an audio failure in a published
+image. The protected audio.py remains unchanged. Actual WAV duration, hash and
+sample count are persisted and validated; the version comparison is recorded in
+`MASTERING_TIMING_EVIDENCE/FFMPEG_VERSION_COMPARISON.json`.
 
 The new helper also persists the original `audio_report.json` and
 `subtitle_report.json` handoff before rendering. This prevents an already created

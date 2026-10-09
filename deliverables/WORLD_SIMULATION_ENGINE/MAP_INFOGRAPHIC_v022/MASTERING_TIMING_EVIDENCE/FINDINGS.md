@@ -1,8 +1,17 @@
 # Independent v022 measured audio duration diagnosis
 
-Protected engine/audio.py remains unchanged. All experiments use temporary files only.
+Protected engine/audio.py remains unchanged. All experiments use temporary files only. The truncation experiments below used development-host FFmpeg 7.1.5. Repeating the measured fixture with the exact pinned-base FFmpeg 5.1.9 shows that its legacy output already retains the full sample count. This is not evidence of an audio failure in a published image.
 
-Existing raw/voice fixture: 404800 decoded PCM samples at 48000 Hz, 8.433333333333334 s. Existing normalization second pass with output -t emits only 401600 samples, 8.366666666666667 s. Its report incorrectly describes raw mix length as final WAV duration.
+The cross-version proof is [FFMPEG_VERSION_COMPARISON.json](FFMPEG_VERSION_COMPARISON.json). All counts are decoded PCM samples at 48,000 Hz.
+
+| Environment | FFmpeg | Legacy output `-t` | Natural EOF | Scoped v022 wrapper |
+| --- | --- | ---: | ---: | ---: |
+| Development host | 7.1.5 | 401,600 | 404,800 | 404,800 |
+| Pinned v021 base | 5.1.9 | 404,800 | 404,800 | 404,800 |
+
+On both versions, the scoped wrapper is bit-identical to natural EOF, and the legacy output's overlapping samples remain bit-identical. The portable regression classifies the measured BEFORE result while requiring the exact full sample count, natural-EOF equality, retained speech tail, checkpoint reuse and tamper rejection after the fix.
+
+Development-host raw/voice fixture: 404800 decoded PCM samples at 48000 Hz, 8.433333333333334 s. On FFmpeg 7.1.5, the existing normalization second pass with output -t emits only 401600 samples, 8.366666666666667 s. Its report describes raw mix length as final WAV duration rather than measuring the physical output.
 
 Exact same measured loudnorm filter without output -t emits 404800 samples. The first 401600 samples are bit-identical to the existing output. Appending aresample=48000,atrim=end_sample=404800 also preserves all samples and is bit-identical. Output -t ends transcode before the filter tail is fully drained at EOF. A separate nonzero terminal-tone fixture reproduces the same 3200-sample loss, proving that post-padding a truncated output could hide real content loss.
 
