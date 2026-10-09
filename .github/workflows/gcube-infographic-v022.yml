@@ -76,12 +76,22 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYQUALITY'
-          import json, os, re, traceback
+          import json, os, pwd, re, tempfile, traceback
           from pathlib import Path
           try:
+              account = pwd.getpwuid(1000)
+              os.environ['HOME'] = account.pw_dir
               for name in ('cache','audio'):
                   p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
               os.setgroups([]);os.setgid(1000);os.setuid(1000)
+              assert os.getuid() == 1000 and os.environ.get('HOME') == account.pw_dir, 'INFOGRAPHIC_CANVAS_HOME_NOT_WRITABLE'
+              assert Path(account.pw_dir).is_dir() and os.access(account.pw_dir, os.W_OK | os.X_OK), 'INFOGRAPHIC_CANVAS_HOME_NOT_WRITABLE'
+              try:
+                  with tempfile.TemporaryFile(dir=account.pw_dir) as probe:
+                      probe.write(b'v022-home-probe');probe.flush()
+              except OSError:
+                  raise RuntimeError('INFOGRAPHIC_CANVAS_HOME_NOT_WRITABLE') from None
+              print('::notice title=Infographic Canvas account admission::'+json.dumps(dict(HOME_matches_account=True, writable=True)), flush=True)
               from deployment.gcube.infographic_preflight import run
               report=run('/data/infographic-preflight', require_container_assets=True)
               assert report['passed'],report
