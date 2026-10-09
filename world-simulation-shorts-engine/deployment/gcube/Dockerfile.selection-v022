@@ -1,0 +1,6 @@
+# Immutable public v022; UI/API selection only. No GPU, GIS or renderer changes.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e5de0f00022715dd2b1653c684213cf23359f337fca160afff3215b865104fed
+COPY world-simulation-shorts-engine/web/app.js /opt/world-engine/world-simulation-shorts-engine/web/app.js
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/mobile_server.py
+COPY world-simulation-shorts-engine/engine/public_infographic_selection.py /opt/world-engine/world-simulation-shorts-engine/engine/public_infographic_selection.py
+COPY world-simulation-shorts-engine/deployment/gcube/selection_preflight.py world-simulation-shorts-engine/deployment/gcube/selection_release_manifest.json /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/

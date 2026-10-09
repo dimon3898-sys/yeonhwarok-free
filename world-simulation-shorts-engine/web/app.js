@@ -1,4 +1,44 @@
 import {sceneEventSummary, failureSummary} from './plan_presentation.js';
+export function buildCreationRequest(values, scriptRecord = null) {
+  const mode = values.infographic_mode || 'NONE';
+  const topic = String(values.topic || '').trim();
+  if (!['NONE', 'QA', 'PRODUCTION'].includes(mode)) throw new Error('기획 종류를 다시 선택해 주세요.');
+  if (mode === 'PRODUCTION') {
+    if (!scriptRecord || typeof scriptRecord !== 'object' || Array.isArray(scriptRecord)) throw new Error('출처와 사건이 포함된 대본 JSON 파일을 선택해 주세요.');
+    const request = { direction_profile: 'MAP_INFOGRAPHIC_PRODUCTION_V022', script_record: scriptRecord };
+    if (topic) request.topic = topic;
+    return request;
+  }
+  if (!topic) throw new Error('영상 주제를 입력해 주세요.');
+  const shortQA = mode === 'NONE' && values.qa_mode === true;
+  const duration = mode === 'QA' ? 24 : Number(values.duration);
+  if (!Number.isFinite(duration) || !Number.isInteger(duration) || duration < (shortQA ? 12 : 20) || duration > (shortQA ? 15 : 3600)) throw new Error(shortQA ? '짧은 QA 길이는 12~15초로 입력해 주세요.' : '영상 길이는 20~3600초로 입력해 주세요.');
+  if (mode === 'NONE' && !['REFERENCE_MASTER', 'FAST_PLUS_LEGACY'].includes(values.direction_profile)) throw new Error('연출 프로파일을 다시 선택해 주세요.');
+  return { topic, duration, qa_mode: mode === 'QA' || shortQA,
+    direction_profile: mode === 'QA' ? 'MAP_INFOGRAPHIC_QA_V022' : values.direction_profile,
+    style: values.style, quality: mode === 'QA' ? 'HIGH' : values.quality,
+    pace: mode === 'QA' ? 'FAST_PLUS' : values.pace,
+    tts: mode === 'QA' ? false : values.tts === true,
+    subtitles: mode === 'QA' ? false : values.subtitles === true,
+    bgm: values.bgm === true, sfx: values.sfx === true };
+}
+
+export function infographicPlanSelection(plan, expectedMode = null) {
+  const scenes = plan?.scenes || plan?.scene_plan?.scenes || (Array.isArray(plan?.scene_plan) ? plan.scene_plan : []);
+  const metadata = plan?.metadata?.infographic;
+  const declared = ['MAP_INFOGRAPHIC_QA_V022', 'MAP_INFOGRAPHIC_PRODUCTION_V022'].includes(plan?.request?.direction_profile);
+  const present = metadata != null || (Array.isArray(scenes) && scenes.some(scene => scene?.infographic != null));
+  const mismatch = () => ({ valid: false, kind: 'MISMATCH', label: '인포그래픽 선택 오류', message: '기획의 인포그래픽 버전과 장면 구성이 일치하지 않습니다. 기획을 다시 생성하거나 저장된 기획을 확인해 주세요.' });
+  if (!present) return declared || ['QA', 'PRODUCTION'].includes(expectedMode) ? mismatch() : { valid: true, kind: 'NONE', label: '기존 지도 기획' };
+  if (metadata?.version !== 'v022' || !Array.isArray(scenes) || !scenes.length) return mismatch();
+  const family = metadata.parent_renderer_family;
+  const kind = family === 'story-progression-v021' ? 'QA' : family === 'production-earth-v1' ? 'PRODUCTION' : null;
+  if (!kind || scenes.some(scene => scene?.infographic?.version !== 'v022' || scene.infographic.parent_renderer_family !== family)) return mismatch();
+  if (['QA', 'PRODUCTION'].includes(expectedMode) && kind !== expectedMode) return mismatch();
+  if (declared && plan.request.direction_profile !== `MAP_INFOGRAPHIC_${kind}_V022`) return mismatch();
+  return { valid: true, kind, label: `INFOGRAPHIC v022 · ${kind}` };
+}
+
 const $ = (id) => document.getElementById(id);
 const qaOption = document.createElement('label');
 qaOption.className = 'rights-option';
@@ -12,7 +52,27 @@ const directionOption=document.createElement('label');directionOption.className=
 const directionSelect=document.createElement('select');directionSelect.id='direction-profile';
 for(const [value,text] of [['REFERENCE_MASTER','REFERENCE_MASTER · 정보 인지 우선'],['FAST_PLUS_LEGACY','FAST_PLUS_LEGACY · 기존 재현']]){const option=document.createElement('option');option.value=value;option.textContent=text;directionSelect.append(option);}
 directionOption.append(document.createTextNode('연출 프로파일 '),directionSelect);qaOption.after(directionOption);
-const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null };
+const infographicOption = document.createElement('div'); infographicOption.className = 'field';
+const infographicLabel = document.createElement('label'); infographicLabel.htmlFor = 'infographic-mode'; infographicLabel.textContent = '기획 종류';
+const infographicSelect = document.createElement('select'); infographicSelect.id = 'infographic-mode';
+for (const [value, text] of [['NONE', '일반 지도 기획'], ['QA', '지도 인포그래픽 QA · 24초'], ['PRODUCTION', '대본 기반 지도 인포그래픽']]) {
+  const option = document.createElement('option'); option.value = value; option.textContent = text; infographicSelect.append(option);
+}
+const infographicNote = document.createElement('p'); infographicNote.id = 'infographic-mode-note'; infographicNote.className = 'field-note';
+infographicOption.append(infographicLabel, infographicSelect, infographicNote); directionOption.after(infographicOption);
+const scriptOption = document.createElement('div'); scriptOption.className = 'field'; scriptOption.id = 'infographic-script-field'; scriptOption.hidden = true;
+const scriptLabel = document.createElement('label'); scriptLabel.htmlFor = 'infographic-script-file'; scriptLabel.textContent = '출처와 사건이 포함된 대본 JSON';
+const scriptInput = document.createElement('input'); scriptInput.type = 'file'; scriptInput.id = 'infographic-script-file'; scriptInput.accept = 'application/json,.json';
+const scriptNote = document.createElement('p'); scriptNote.className = 'field-note'; scriptNote.textContent = '직접 작성한 대본, 문장 구간, 주장·출처, 장소별 사건과 옵션을 포함한 JSON 파일을 선택하세요. 실제 음성을 합성해 영상 길이를 측정합니다.';
+scriptOption.append(scriptLabel, scriptInput, scriptNote); infographicOption.after(scriptOption);
+try {
+  const selected = localStorage.getItem('world-simulation.direction-profile');
+  if (['REFERENCE_MASTER', 'FAST_PLUS_LEGACY'].includes(selected)) directionSelect.value = selected;
+  const mode = localStorage.getItem('world-simulation.infographic-mode');
+  if (['NONE', 'QA', 'PRODUCTION'].includes(mode)) infographicSelect.value = mode;
+} catch {}
+
+const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null, expectedInfographicMode: null, selectionNotice: null };
 const ACTIVE_STATUSES = new Set(['queued', 'pending', 'running', 'rendering', 'assembling', 'audio', 'qc', 'resuming', 'processing']);
 const COMPLETE_STATUSES = new Set(['completed', 'complete', 'done', 'finished']);
 const FAILED_STATUSES = new Set(['failed', 'error', 'interrupted', 'qc_failed']);
@@ -100,12 +160,17 @@ function renderPlan() {
   $('empty-state').hidden = true; $('plan-panel').hidden = false;
   const plan = state.plan;
   const scenes = scenesOf(plan);
-    directionSelect.value=scenes.some(s=>s.direction?.preset==='REFERENCE_MASTER')?'REFERENCE_MASTER':'FAST_PLUS_LEGACY';
+  const selection = infographicPlanSelection(plan, state.expectedInfographicMode);
   const total = plan.duration || plan.total_duration || plan.request?.duration || plan.scene_plan?.duration || scenes.reduce((sum, scene) => sum + Number(scene.duration || 0), 0);
   const title = plan.title || plan.story_plan?.title || state.project?.title || plan.topic || '새로운 세계 이야기';
   $('plan-title').textContent = title;
   clear($('plan-meta'));
   for (const text of [durationLabel(total), `${scenes.length}개 장면`, `${plan.quality || plan.render_quality || plan.request?.quality || state.project?.quality || 'HIGH'} 화질`]) $('plan-meta').append(node('span', text, 'meta-chip'));
+  const badge = node('span', selection.label, `meta-chip ${selection.valid ? 'status-ready' : 'status-warning'}`); badge.id = 'infographic-plan-badge'; badge.dataset.infographicKind = selection.kind; $('plan-meta').append(badge);
+  if (!selection.valid) {
+    const noticeKey = `${state.version}:${hashOf(plan)}:${selection.kind}`;
+    if (state.selectionNotice !== noticeKey) { state.selectionNotice = noticeKey; notify(new Error(selection.message), '인포그래픽 기획을 확인해 주세요.'); }
+  } else state.selectionNotice = null;
   if (plan.production_defaults?.version === 'v1') $('plan-meta').append(node('span', `${plan.request?.pace || plan.scenes?.[0]?.pace || 'FAST'} 진행 · 지도 중심`, 'meta-chip'));
   $('plan-meta').append(node('span', state.historical ? '이전 버전' : gatePassed(plan) ? '기획 검수 완료' : '기획 확인 필요', `meta-chip ${gatePassed(plan) ? 'status-ready' : 'status-warning'}`));
   const hook = compact(plan.hook || plan.story_plan?.hook || plan.story?.hook || scenes[0]?.narration || plan.question);
@@ -198,12 +263,13 @@ function renderValidation(plan, gate) {
 function refreshApproval() {
   if (!state.plan) return;
   const active = ACTIVE_STATUSES.has(statusValue(state.status));
-  const allowed = gatePassed(state.plan) && !!hashOf(state.plan) && !active && !state.historical;
+  const selection = infographicPlanSelection(state.plan, state.expectedInfographicMode);
+  const allowed = selection.valid && gatePassed(state.plan) && !!hashOf(state.plan) && !active && !state.historical;
   $('approve-render').disabled = !allowed;
   $('approve-render').setAttribute('aria-disabled', String(!allowed));
   const approved = state.project?.approved || state.project?.approved_plan_hash === hashOf(state.plan) || state.plan.approved;
   if (!$('approve-render').classList.contains('is-busy')) $('approve-render').textContent = approved ? '영상 생성 또는 이어서 생성 →' : '기획 승인 및 영상 생성 →';
-  $('approval-note').textContent = state.historical ? '이전 버전의 기획입니다. 최신 버전을 선택하면 새 수정 작업을 시작할 수 있습니다.' : active ? '승인된 기획으로 영상을 생성하고 있습니다.' : !gatePassed(state.plan) ? '기획 검수에서 확인이 필요한 항목을 먼저 수정해 주세요.' : !hashOf(state.plan) ? '기획 승인 정보를 확인할 수 없습니다. 기획을 다시 불러와 주세요.' : '위의 기획으로 생성합니다. 이전 결과물은 덮어쓰지 않습니다.';
+  $('approval-note').textContent = !selection.valid ? selection.message : state.historical ? '이전 버전의 기획입니다. 최신 버전을 선택하면 새 수정 작업을 시작할 수 있습니다.' : active ? '승인된 기획으로 영상을 생성하고 있습니다.' : !gatePassed(state.plan) ? '기획 검수에서 확인이 필요한 항목을 먼저 수정해 주세요.' : !hashOf(state.plan) ? '기획 승인 정보를 확인할 수 없습니다. 기획을 다시 불러와 주세요.' : '위의 기획으로 생성합니다. 이전 결과물은 덮어쓰지 않습니다.';
   $('approval-bar').hidden = COMPLETE_STATUSES.has(statusValue(state.status)) && !state.historical;
 }
 
@@ -221,7 +287,7 @@ async function refreshVersions() {
 }
 
 async function loadProject(id) {
-  stopPolling(); state.generation++; state.revision = null; state.status = null; state.version = null; state.versions = [];
+  stopPolling(); state.generation++; state.revision = null; state.status = null; state.version = null; state.versions = []; state.expectedInfographicMode = null;
   $('revision-preview').hidden = true; $('progress-panel').hidden = true; $('output-panel').hidden = true;
   const payload = await api(`/api/projects/${encodeURIComponent(id)}`);
   receiveProject(payload); await refreshVersions(); await pollStatus(false);
@@ -360,9 +426,13 @@ function renderOutputs(outputs, payload) {
 }
 
 async function startRender() {
+  const selection = infographicPlanSelection(state.plan, state.expectedInfographicMode);
+  if (!selection.valid) throw new Error(selection.message);
   if (!gatePassed(state.plan) || !hashOf(state.plan) || state.historical) throw new Error('검수를 통과한 최신 기획을 승인한 뒤 진행해 주세요.');
   const approved = await post(apiPath('/approve'), { plan_hash: hashOf(state.plan), version: state.version });
   receiveProject(approved);
+  const approvedSelection = infographicPlanSelection(state.plan, state.expectedInfographicMode);
+  if (!approvedSelection.valid) throw new Error(approvedSelection.message);
   const job = await post(apiPath('/render'), { version: state.version });
   state.status = { ...job, status: job.status || 'queued' }; renderStatus(state.status); stopPolling(); await pollStatus(true);
   $('progress-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -404,7 +474,7 @@ function renderRevision(payload) {
     $('revision-diff').append(card);
   }
   if (!rows.length) $('revision-diff').append(node('p', compact(diff, payload.summary || '선택한 장면의 변경 기획이 준비되었습니다.'), 'muted'));
-  const valid = payload.plan ? gatePassed(payload.plan) : payload.retention_gate?.passed !== false;
+  const valid = payload.plan ? gatePassed(payload.plan) && infographicPlanSelection(payload.plan, state.expectedInfographicMode).valid : payload.retention_gate?.passed !== false;
   $('approve-revision').disabled = !valid || !payload.revision_id;
   if (!valid) $('revision-diff').append(node('p', '변경 기획의 검수를 통과해야 새 장면을 생성할 수 있습니다.', 'gate-message warning'));
   $('revision-preview').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -424,26 +494,50 @@ async function refreshLibrary() {
   }
 }
 
+const ordinaryControlIds = ['duration', 'quality', 'pace', 'tts', 'subtitles', 'bgm', 'sfx', 'style', 'narration-file', 'narration-rights'];
+let ordinarySettings = null;
+let ordinaryShortQA = false;
+function syncCreationMode() {
+  const mode = infographicSelect.value;
+  if (mode !== 'NONE' && !ordinarySettings) { ordinaryShortQA = qaInput.checked; ordinarySettings = Object.fromEntries(ordinaryControlIds.filter(id => !['narration-file', 'narration-rights'].includes(id)).map(id => [id, { value: $(id).value, checked: $(id).checked }])); }
+  if (mode === 'NONE' && ordinarySettings) {
+    for (const [id, saved] of Object.entries(ordinarySettings)) { $(id).value = saved.value; if (typeof saved.checked === 'boolean') $(id).checked = saved.checked; }
+    ordinarySettings = null; qaInput.checked = ordinaryShortQA;
+  }
+  for (const id of ordinaryControlIds) $(id).disabled = mode === 'PRODUCTION' || (mode === 'QA' && ['duration', 'quality', 'pace', 'tts', 'subtitles', 'narration-file', 'narration-rights'].includes(id));
+  directionSelect.disabled = mode !== 'NONE'; qaInput.disabled = mode !== 'NONE';
+  if (mode !== 'NONE') qaInput.checked = false;
+  $('duration').min = qaInput.checked ? '12' : '20'; $('duration').max = qaInput.checked ? '15' : '3600';
+  if (mode === 'QA') { $('duration').value = '24'; $('quality').value = 'HIGH'; $('pace').value = 'FAST_PLUS'; $('tts').checked = false; $('subtitles').checked = false; }
+  if (mode === 'NONE' && $('narration-file').files.length) { $('tts').checked = false; $('tts').disabled = true; }
+  scriptOption.hidden = mode !== 'PRODUCTION'; scriptInput.disabled = mode !== 'PRODUCTION'; scriptInput.required = mode === 'PRODUCTION';
+  $('topic').required = mode !== 'PRODUCTION';
+  infographicNote.textContent = mode === 'PRODUCTION' ? '길이·화질·오디오 설정은 대본 JSON의 옵션을 사용합니다. 기획 확인 후 승인해야 렌더링합니다.' : mode === 'QA' ? '24초 · HIGH · FAST PLUS · 나레이션·자막 없음. 실제 인포그래픽 버전은 생성된 기획에서 확인합니다.' : '연출 프로파일과 오디오 설정을 선택하세요. 짧은 QA는 12~15초입니다.';
+}
+directionSelect.addEventListener('change', () => { try { localStorage.setItem('world-simulation.direction-profile', directionSelect.value); } catch {} });
+infographicSelect.addEventListener('change', () => { syncCreationMode(); try { localStorage.setItem('world-simulation.infographic-mode', infographicSelect.value); } catch {} });
 $('qa-mode').addEventListener('change', () => {
-  const field = $('duration');
-  if ($('qa-mode').checked) directionSelect.value = 'REFERENCE_MASTER';
-  field.min = $('qa-mode').checked ? '12' : '20';
-  field.max = $('qa-mode').checked ? '15' : '3600';
-  field.value = $('qa-mode').checked ? '12' : '75';
+  $('duration').value = qaInput.checked ? '12' : '75'; syncCreationMode();
 });
+syncCreationMode();
 $('brief-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('create-plan'), '기획 생성 중', async () => {
-  const topic = $('topic').value.trim(); if (!topic) throw new Error('영상 주제를 입력해 주세요.');
-  stopPolling(); state.generation++; state.status = null; state.version = null; state.versions = []; state.revision = null;
-  const request = { topic, duration: Number($('duration').value), qa_mode: $('qa-mode').checked, direction_profile: $('direction-profile').value, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
-  const narration = $('narration-file').files[0];
+  const values = { topic: $('topic').value, infographic_mode: infographicSelect.value, duration: $('duration').value, qa_mode: qaInput.checked, direction_profile: directionSelect.value, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
+  let scriptRecord = null;
+  if (values.infographic_mode === 'PRODUCTION') {
+    const file = scriptInput.files[0]; if (!file) throw new Error('직접 작성한 대본 JSON 파일을 선택해 주세요.');
+    if (file.size > 61440) throw new Error('대본 JSON 파일은 60KB 이하여야 합니다.');
+    try { scriptRecord = JSON.parse(await file.text()); } catch { throw new Error('대본 파일이 올바른 JSON인지 확인해 주세요.'); }
+  }
+  const request = buildCreationRequest(values, scriptRecord);
+  const narration = values.infographic_mode === 'NONE' ? $('narration-file').files[0] : null;
   if (narration) {
     if (!$('narration-rights').checked) throw new Error('나레이션 파일의 사용권을 확인해 주세요.');
     if (!state.narrationAsset || state.narrationAsset.file !== narration) state.narrationAsset = { file: narration, asset: await uploadAsset(narration, 'narration') };
-    request.narration_audio = state.narrationAsset.asset.path;
-    request.narration_asset_id = state.narrationAsset.asset.asset_id;
-    request.tts = false;
+    request.narration_audio = state.narrationAsset.asset.path; request.narration_asset_id = state.narrationAsset.asset.asset_id; request.tts = false;
   }
+  if (new TextEncoder().encode(JSON.stringify(request)).length > 65536) throw new Error('기획 요청은 64KB 이하여야 합니다.');
   const payload = await post('/api/projects', request);
+  stopPolling(); state.generation++; state.status = null; state.version = null; state.versions = []; state.revision = null; state.expectedInfographicMode = values.infographic_mode === 'NONE' ? null : values.infographic_mode;
   $('output-panel').hidden = true; $('progress-panel').hidden = true; $('revision-preview').hidden = true;
   receiveProject(payload); await refreshVersions(); await pollStatus(false); $('plan-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }); });
@@ -453,15 +547,18 @@ $('revision-form').addEventListener('submit', (event) => { event.preventDefault(
 $('approve-revision').addEventListener('click', () => withButton($('approve-revision'), '변경 승인 중', async () => {
   const revision = state.revision; if (!revision?.revision_id) throw new Error('변경점을 먼저 확인해 주세요.');
   const payload = await post(apiPath(`/revisions/${encodeURIComponent(revision.revision_id)}/approve`), {});
-  receiveProject(payload); state.historical = false; $('revision-preview').hidden = true; state.revision = null; await refreshVersions();
+  receiveProject(payload);
+  const revisedSelection = infographicPlanSelection(state.plan, state.expectedInfographicMode);
+  if (!revisedSelection.valid) throw new Error(revisedSelection.message);
+  state.historical = false; $('revision-preview').hidden = true; state.revision = null; await refreshVersions();
   const job = await post(apiPath('/render'), { version: state.version }); state.status = { ...job, status: job.status || 'queued' }; renderStatus(state.status); stopPolling(); await pollStatus(true); $('progress-panel').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }));
 $('cancel-revision').addEventListener('click', () => { state.revision = null; $('revision-preview').hidden = true; });
-$('narration-file').addEventListener('change', () => { state.narrationAsset = null; const selected = !!$('narration-file').files.length; if (selected) $('tts').checked = false; $('tts').disabled = selected; $('narration-note').textContent = selected ? '선택한 음성을 사용하며, 자동 TTS는 끕니다.' : '파일을 선택하면 해당 음성을 나레이션으로 사용합니다.'; });
+$('narration-file').addEventListener('change', () => { state.narrationAsset = null; const selected = !!$('narration-file').files.length; if (selected) $('tts').checked = false; $('tts').disabled = selected || infographicSelect.value !== 'NONE'; $('narration-note').textContent = selected ? '선택한 음성을 사용하며, 자동 TTS는 끕니다.' : '파일을 선택하면 해당 음성을 나레이션으로 사용합니다.'; });
 $('clip-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('preview-clip'), '삽입 기획 확인 중', async () => { const file = $('clip-file').files[0]; if (!file || !$('clip-rights').checked) throw new Error('영상 파일과 사용권을 확인해 주세요.'); const asset = await uploadAsset(file, 'clip'); const payload = await post(apiPath('/clip'), { version: state.version, scene_id: $('clip-scene').value, asset_id: asset.asset_id }); $('revision-panel').hidden = false; renderRevision(payload); }); });
 $('version-select').addEventListener('change', async () => {
   const version = $('version-select').value; if (version === state.version) return;
-  try { stopPolling(); state.generation++; const payload = await api(apiPath(`/versions/${encodeURIComponent(version)}/plan`)); state.version = version; state.plan = payload.plan || payload; state.historical = version !== state.project?.current_version; state.status = null; $('output-panel').hidden = true; $('progress-panel').hidden = true; renderPlan(); await pollStatus(false); } catch (error) { notify(error); populateVersions(); }
+  try { stopPolling(); state.generation++; const payload = await api(apiPath(`/versions/${encodeURIComponent(version)}/plan`)); state.version = version; state.plan = payload.plan || payload; state.expectedInfographicMode = null; state.historical = version !== state.project?.current_version; state.status = null; $('output-panel').hidden = true; $('progress-panel').hidden = true; renderPlan(); await pollStatus(false); } catch (error) { notify(error); populateVersions(); }
 });
 $('projects-toggle').addEventListener('click', () => { const open = $('project-library').hidden; $('project-library').hidden = !open; $('projects-toggle').setAttribute('aria-expanded', String(open)); if (open) refreshLibrary().catch(notify); });
 $('projects-refresh').addEventListener('click', () => refreshLibrary().catch(notify));

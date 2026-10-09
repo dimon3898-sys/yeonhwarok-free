@@ -1,0 +1,167 @@
+name: Validate and publish infographic UI API selection v022
+on:
+  push:
+    branches: [fix/v022-ui-api-selection]
+    paths:
+      - world-simulation-shorts-engine/engine/**
+      - world-simulation-shorts-engine/web/**
+      - world-simulation-shorts-engine/tests/**
+      - world-simulation-shorts-engine/deployment/**
+      - .github/workflows/gcube-selection-v022.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: gcube-v022-selection-fix-publication
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Source-specific immutable tag and frozen source admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${#GITHUB_SHA}" = 40
+          printf 'RELEASE_TAG=gcube-v022-selection-fix-%s\n' "${GITHUB_SHA:0:12}" >> "$GITHUB_ENV"
+          python world-simulation-shorts-engine/deployment/gcube/selection_preflight.py --manifest-only --checkout
+      - name: Refuse existing immutable tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try: urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404: raise RuntimeError('SELECTION_TAG_ABSENCE_UNVERIFIED') from None
+              print('Immutable selection tag absent; build permitted.')
+          else: raise RuntimeError('SELECTION_TAG_EXISTS_REFUSING_OVERWRITE')
+          PY
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - name: Build selection overlay without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.selection-v022
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ env.IMAGE }}:${{ env.RELEASE_TAG }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Original full v022 asset native and measured media preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --user 0:0 --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import os, pwd
+          from pathlib import Path
+          account=pwd.getpwuid(1000)
+          os.environ['HOME']=account.pw_dir
+          for name in ('cache','audio'):
+              path=Path('/run/world-engine')/name;path.mkdir(parents=True,exist_ok=True);os.chown(path,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          assert os.access(account.pw_dir,os.W_OK|os.X_OK), 'SELECTION_HOME_NOT_WRITABLE'
+          from deployment.gcube.selection_preflight import verify_sources
+          from deployment.gcube.infographic_preflight import run
+          verify_sources()
+          report=run('/data/selection-protected-v022',require_container_assets=True)
+          assert report['passed']
+          PY
+      - name: Original 1061 regressions and additive public UI API integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 0:0 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.selection_preflight --regressions-only
+      - name: Container package and storage admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 1000:1000 -i --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          from deployment.gcube.selection_preflight import verify_sources
+          verify_sources()
+          packages=('libegl1','libvulkan1','libx11-6','libxext6')
+          for name in packages:
+              status=subprocess.check_output(['dpkg-query','-W','-f=${Status}',name],text=True)
+              assert status=='install ok installed', 'SELECTION_GPU_PACKAGE_MISSING'
+          for command in (['node','--version'],['ffmpeg','-version'],['ffprobe','-version']):
+              subprocess.run(command,check=True,capture_output=True)
+          for name in ('tmp','cache','frames','outputs','checkpoints'):
+              folder=Path('/data')/name;folder.mkdir(parents=True,exist_ok=True)
+              probe=folder/'selection-write-probe';probe.write_text('ok');probe.unlink()
+          print('::notice title=Selection container dependencies::'+json.dumps(dict(passed=True,packages=list(packages),physical_gpu='NOT_RUN')))
+          PY
+      - name: Public owner login new plans approval backend and 61 second persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.selection_preflight --smoke-only
+      - name: Production entrypoint fails closed without physical NVIDIA
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name selection-gpu-required \
+            --env WORLD_ENGINE_OWNER_CODE="$(python -c 'import secrets;print(secrets.token_urlsafe(32))')" \
+            --env WORLD_ENGINE_STORAGE_MODE=ephemeral --env WORLD_ENGINE_STORAGE_PATH=/data "${IMAGE}:${RELEASE_TAG}" >/dev/null
+          trap 'docker rm --force selection-gpu-required >/dev/null 2>&1 || true' EXIT
+          docker exec selection-gpu-required python -c \
+            'import json,time,urllib.request; time.sleep(5); p=urllib.request.build_opener(urllib.request.ProxyHandler({})); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["ok"] is True and value["engine_ready"] is False and value["error_code"]=="GPU_HARDWARE_UNAVAILABLE"; time.sleep(61); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["engine_ready"] is False; print("::notice title=Selection production boot::PASS fail-closed; persisted61; GPU NOT_RUN")'
+      - name: Authenticate GHCR after all checks pass
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Final source and immutable tag check then publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote origin "refs/heads/${GITHUB_REF_NAME}" | cut -f1)"
+          test "$latest" = "$GITHUB_SHA"
+          docker run --rm --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.selection_preflight --manifest-only
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try: urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404: raise RuntimeError('SELECTION_TAG_ABSENCE_UNVERIFIED') from None
+          else: raise RuntimeError('SELECTION_TAG_EXISTS_REFUSING_OVERWRITE')
+          PY
+          docker push "${IMAGE}:${RELEASE_TAG}"
+      - name: Anonymous public pull revision digest and persisted public selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          anonymous="$(mktemp -d)"
+          trap 'rm -rf "$anonymous"' EXIT
+          printf '{"auths":{}}' > "$anonymous/config.json"
+          docker --config "$anonymous" pull "${IMAGE}:${RELEASE_TAG}"
+          revision="$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "${IMAGE}:${RELEASE_TAG}")"
+          test "$revision" = "$GITHUB_SHA"
+          docker run --rm --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.selection_preflight --smoke-only
+          docker inspect --format '::notice title=Public selection image digest::{{join .RepoDigests ","}}' "${IMAGE}:${RELEASE_TAG}"
+          echo '::notice title=Selection release::Anonymous pull PASS; owner login health and61s PASS; public QA plan approval backend PASS; actual GPU NOT_RUN'

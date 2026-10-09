@@ -71,6 +71,8 @@ class DurableJobs:
         private_json(self.root / (ticket['job_id'] + '.json'), ticket)
 
     def _plan(self, ticket):
+        if hasattr(self.app, 'check_profile_selection'):
+            self.app.check_profile_selection(ticket['project_id'], ticket['version'])
         plan = self.app.store.require_approved(ticket['project_id'], ticket['version'])
         if plan_hash(plan) != ticket['plan_hash']:
             raise EngineError('PLAN_CHANGED', '승인된 계획과 작업이 일치하지 않습니다.', status=409)
@@ -112,6 +114,8 @@ class DurableJobs:
             self.thread.start()
 
     def submit(self, pid, version):
+        if hasattr(self.app, 'check_profile_selection'):
+            self.app.check_profile_selection(pid, version)
         plan = self.app.store.require_approved(pid, version)
         from engine.schema import validate_plan
         if not validate_plan(plan)['passed']:
@@ -287,6 +291,10 @@ class MobileApplication(Application):
                  maximum_job_seconds=4 * 3600, runner=None):
         from engine.qa_planner import configure_qa_schema
         configure_qa_schema()
+        # Public named profiles and saved v022 Production plans validate on a
+        # fresh boot, without requiring another planning request first.
+        from engine.infographic_contract import install_validation
+        install_validation()
         self.state_root = checked_state_root(state_root)
         self.maximum_duration, self.maximum_projects = maximum_duration, maximum_projects
         self.disk_floor, self.maximum_job_seconds = disk_floor, maximum_job_seconds
@@ -304,7 +312,67 @@ class MobileApplication(Application):
         return super().outputs(pid, version) + diagnostic_outputs(self.store.version_path(pid, version), pid, version)
 
     def start_render(self, pid, version):
+        self.check_profile_selection(pid, version)
         return self.scheduler.submit(pid, version)
+
+    def check_profile_selection(self, pid, version, plan=None):
+        from engine.public_infographic_selection import require_project_infographic_selection
+        return require_project_infographic_selection(self.store, pid, version, plan)
+
+    def check_revision_profile_selection(self, pid, rid):
+        if not re.fullmatch(r'revision_[a-z0-9]{12}', rid):
+            raise EngineError('INVALID_REVISION', '잘못된 수정 ID입니다.')
+        path = owned_path(self.store.path(pid) / 'revisions', rid + '.json')
+        if not path.is_file():
+            raise EngineError('NOT_FOUND', '수정 요청을 찾을 수 없습니다.', status=404)
+        record = read_json(path)
+        if record.get('result_version'):
+            return self.check_profile_selection(pid, record['result_version'])
+        return self.check_profile_selection(pid, record['base_version'], record['plan'])
+
+    def create_project(self, value):
+        from engine.public_infographic_selection import (PRODUCTION_PROFILE,
+            expected_creation_profile, require_infographic_selection)
+        request = self.validate_request(value)
+        expected = expected_creation_profile(request)
+        artifact_dir = None
+        persistence_started = False
+        try:
+            if expected == PRODUCTION_PROFILE:
+                from engine.infographic_planner import generate_production_infographic
+                artifact_root = self.store.root / '.infographic-production'
+                if artifact_root.is_symlink():
+                    raise EngineError('UNSAFE_ARTIFACT_DIRECTORY', '음성 보관 폴더를 확인해 주세요.')
+                artifact_root.mkdir(mode=0o700, exist_ok=True)
+                if artifact_root.resolve().parent != self.store.root:
+                    raise EngineError('UNSAFE_ARTIFACT_DIRECTORY', '음성 보관 폴더를 확인해 주세요.')
+                candidate = artifact_root / uuid.uuid4().hex
+                candidate.mkdir(mode=0o700)
+                artifact_dir = candidate
+                # Paths, provider and frame rate are owned by the server.
+                plan = generate_production_infographic(request['script_record'], artifact_dir, provider=None, fps=30)
+                if not isinstance(plan, dict) or not plan.get('scenes') or not plan.get('gate', {}).get('passed'):
+                    raise EngineError('INFOGRAPHIC_PRODUCTION_NOT_READY',
+                                      '대본·음성 측정 또는 지도 기획 검증을 완료하지 못했습니다. 대본과 음성 설정을 확인해 주세요.')
+            else:
+                from engine.qa_planner import generate_deployment_plan
+                plan = generate_deployment_plan(request)
+            self.check_plan_budget(plan)
+            effective = require_infographic_selection(plan, expected)
+            # Core storage can fail after writing a partial immutable plan. Its
+            # measured PCM must remain recoverable once persistence begins.
+            persistence_started = True
+            data = self.store.create(request, plan)
+            if effective:
+                private_json(self.store.version_path(data['project']['id'], data['version']) / 'public-selection.json',
+                             dict(version='v022', requested_profile=request.get('direction_profile'),
+                                  effective_profile=effective))
+            return data
+        finally:
+            # Successful measured speech must survive gateway restart/retry.
+            # Only this failed creation's newly allocated directory is removed.
+            if artifact_dir is not None and not persistence_started:
+                shutil.rmtree(artifact_dir, ignore_errors=True)
 
     def check_disk(self):
         if shutil.disk_usage(self.state_root).free < self.disk_floor:
@@ -323,6 +391,13 @@ class MobileApplication(Application):
     def validate_request(self, value):
         if not isinstance(value, dict):
             raise EngineError('INVALID_JSON', '요청 객체가 필요합니다.')
+        if value.get('direction_profile') == 'MAP_INFOGRAPHIC_PRODUCTION_V022':
+            from engine.public_infographic_selection import validate_public_production_request
+            request = validate_public_production_request(value)
+            self.check_disk()
+            if len(self.store.list()) >= self.maximum_projects:
+                raise EngineError('PROJECT_LIMIT', '보존 가능한 프로젝트 수 한도에 도달했습니다.', status=429)
+            return request
         allowed = {'topic', 'duration', 'style', 'quality', 'pace', 'tts', 'subtitles', 'bgm', 'sfx',
                    'narration_audio', 'narration_asset_id', 'narration_cues', 'narration_timing', 'tts_language', 'production_preset', 'qa_mode', 'direction_profile'}
         if set(value) - allowed:
@@ -333,6 +408,8 @@ class MobileApplication(Application):
             duration = float(value.get('duration', 20))
         except (ValueError, TypeError):
             raise EngineError('INVALID_DURATION', '영상 길이를 확인해 주세요.') from None
+        if value.get('direction_profile') == 'MAP_INFOGRAPHIC_QA_V022' and duration != 24:
+            raise EngineError('INVALID_DURATION', '지도 인포그래픽 QA는 24초로 생성해 주세요.')
         if not 5 <= duration <= self.maximum_duration:
             raise EngineError('DEPLOYMENT_JOB_LIMIT', '배포 서버의 영상 길이 제한을 초과했습니다.')
         for key in ('tts', 'subtitles', 'bgm', 'sfx', 'qa_mode'):
@@ -344,7 +421,7 @@ class MobileApplication(Application):
             raise EngineError('INVALID_OPTION', '속도 설정을 확인해 주세요.')
         if value.get('production_preset') not in {None, 'PRODUCTION_DEFAULT', 'LEGACY'}:
             raise EngineError('INVALID_OPTION', '기본 연출 설정을 확인해 주세요.')
-        if value.get('direction_profile') not in {None, 'REFERENCE_MASTER', 'FAST_PLUS_LEGACY', 'SINGLE_EVENT_CAMERA_TEST', 'SINGLE_EVENT_RETURN_TO_WIDE_TEST', 'SECOND_EVENT_ADAPTIVE_WIDE_TEST'}:
+        if not (value.get('direction_profile') is None or isinstance(value.get('direction_profile'), str) and value['direction_profile'] in {'REFERENCE_MASTER', 'FAST_PLUS_LEGACY', 'SINGLE_EVENT_CAMERA_TEST', 'SINGLE_EVENT_RETURN_TO_WIDE_TEST', 'SECOND_EVENT_ADAPTIVE_WIDE_TEST', 'MAP_INFOGRAPHIC_QA_V022'}):
             raise EngineError('INVALID_OPTION', '연출 프로파일을 확인해 주세요.')
         value.setdefault('pace', 'FAST_PLUS')
         if 'tts_language' in value and value['tts_language'] not in {'en', 'ko', 'ja', 'zh', 'es', 'fr', 'de', 'pt'}:
@@ -514,11 +591,7 @@ class MobileHandler(Handler):
                 record = production_default_status()
                 return self.json({k: record.get(k) for k in ('active', 'preset', 'recommended')})
             if path == '/api/projects' and method == 'POST':
-                from engine.qa_planner import generate_deployment_plan as generate_plan
-                request = self.app.validate_request(self.body())
-                plan = generate_plan(request)
-                self.app.check_plan_budget(plan)
-                return self.json(self.app.store.create(request, plan), 201)
+                return self.json(self.app.create_project(self.body()), 201)
             parts = path.strip('/').split('/')
             if method == 'POST' and len(parts) == 4 and parts[:2] == ['api', 'projects'] and parts[3] in {'approve', 'render'}:
                 data = self.body()
@@ -527,6 +600,7 @@ class MobileHandler(Handler):
                     raise EngineError('UNSUPPORTED_INPUT', '지원하지 않는 입력 필드가 있습니다.')
                 version = data.get('version') or self.app.store.get(parts[2])['version']
                 if parts[3] == 'approve':
+                    self.app.check_profile_selection(parts[2], version)
                     active = self.app.active_project_ticket(parts[2])
                     if active:
                         if active['version'] != version or active['plan_hash'] != data.get('plan_hash'):
@@ -542,6 +616,7 @@ class MobileHandler(Handler):
                     raise EngineError('UNSUPPORTED_INPUT', '지원하지 않는 입력 필드가 있습니다.')
                 if self.app.active_project_ticket(parts[2]):
                     raise EngineError('PROJECT_RENDER_ACTIVE', '현재 영상 생성이 끝난 뒤 수정을 승인해 주세요.', status=409)
+                self.app.check_revision_profile_selection(parts[2], parts[4])
                 from engine.revisions import approve_revision
                 return self.json(approve_revision(self.app.store, parts[2], parts[4]))
             if method == 'POST' and len(parts) == 4 and parts[:2] == ['api', 'projects'] and parts[3] in {'revise', 'clip'}:
@@ -711,6 +786,8 @@ class BoundedHTTPServer(ThreadingHTTPServer):
 def worker(ticket_path, state_root):
     from engine.qa_planner import configure_qa_schema
     configure_qa_schema()
+    from engine.infographic_contract import install_validation
+    install_validation()
     root = checked_state_root(state_root)
     ticket_path = Path(ticket_path).resolve()
     if ticket_path.parent != root / 'jobs' or not re.fullmatch(r'job_[a-f0-9]{12}\.json', ticket_path.name):
@@ -718,6 +795,8 @@ def worker(ticket_path, state_root):
     ticket = read_json(ticket_path)
     store = ProjectStore(root / 'projects')  # Worker does not call recover().
     pid, version = ticket['project_id'], ticket['version']
+    from engine.public_infographic_selection import require_project_infographic_selection
+    require_project_infographic_selection(store, pid, version)
     plan = store.require_approved(pid, version)
     if plan_hash(plan) != ticket['plan_hash']:
         raise EngineError('PLAN_CHANGED', '승인된 계획이 변경되었습니다.')
