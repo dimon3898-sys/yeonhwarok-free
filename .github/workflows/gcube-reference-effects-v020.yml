@@ -68,6 +68,87 @@ jobs:
           report=run('/data/reference-effects-preflight', require_container_assets=True)
           assert report['passed'],report
           PYQUALITY
+      - name: Isolated 31-case v020 regressions with bounded failure metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy -i \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYV020'
+          import hashlib, io, json, pathlib, re, traceback, unittest
+          NATIVE_TEST = 'test_reference_effects_v020.ReferenceEffects.test_actual_node_overlay_preserves_all_720_camera_material_and_off_frames'
+          NODE_FILES = {'test_reference_effects_v020.mjs', 'reference_effects_adapter.js', 'event_quality_adapter.js', 'visual_quality_adapter.js', 'scene_diagnostic_journal.mjs'}
+          NODE_TYPES = {'AssertionError', 'SyntaxError', 'TypeError', 'RangeError', 'ReferenceError', 'Error', 'URIError', 'EvalError'}
+
+          def identifiers(suite):
+              values = []
+              for test in suite:
+                  values.extend(identifiers(test) if isinstance(test, unittest.TestSuite) else [test.id()])
+              return sorted(values)
+
+          class SafeResult(unittest.TextTestResult):
+              def __init__(self, *args, **kwargs):
+                  super().__init__(*args, **kwargs)
+                  self.executed = []
+                  self.safe_failures = []
+
+              def startTest(self, test):
+                  self.executed.append(test.id())
+                  super().startTest(test)
+
+              def record_failure(self, test, error):
+                  if len(self.safe_failures) >= 25:
+                      return
+                  identity = test.id().split(' (', 1)[0]
+                  locations = [{'file': pathlib.Path(frame.filename).name, 'line': frame.lineno}
+                               for frame in traceback.extract_tb(error[2])
+                               if pathlib.Path(frame.filename).name.startswith('test_')
+                               and pathlib.Path(frame.filename).suffix == '.py'][-6:]
+                  record = dict(test_id=identity, exception_type=error[0].__name__, python_test_locations=locations)
+                  if identity == NATIVE_TEST:
+                      message = str(error[1])
+                      bounded = message[:8192] + '\n' + message[-65536:]
+                      node_locations = []
+                      for filename in sorted(NODE_FILES):
+                          for match in re.finditer(re.escape(filename) + r':(\d+)(?::\d+)?', bounded):
+                              location = dict(file=filename, line=int(match.group(1)))
+                              if location not in node_locations:
+                                  node_locations.append(location)
+                      node_types = sorted(set(re.findall(r'\b(AssertionError|SyntaxError|TypeError|RangeError|ReferenceError|Error|URIError|EvalError)(?: \[[A-Z][A-Z0-9_]+\])?:', bounded)) & NODE_TYPES)
+                      codes = sorted(set(re.findall(r'\b(?:ERR_ASSERTION|REFERENCE_EFFECTS_[A-Z0-9_]+|EVENT_QUALITY_[A-Z0-9_]+|VISUAL_QUALITY_[A-Z0-9_]+|SHADER_CONTRACT_[A-Z0-9_]+)\b', bounded)))[:12]
+                      exit_match = re.search(r'(?:^|AssertionError:\s*)(-?\d+)\s*!=\s*0(?:\s|:|$)', message[:8192])
+                      record.update(node_locations=node_locations[:12], node_error_types=node_types,
+                                    node_error_codes=codes,
+                                    node_exit_code=int(exit_match.group(1)) if exit_match else None)
+                  self.safe_failures.append(record)
+
+              def addFailure(self, test, error):
+                  self.record_failure(test, error)
+                  super().addFailure(test, error)
+
+              def addError(self, test, error):
+                  self.record_failure(test, error)
+                  super().addError(test, error)
+
+              def addSubTest(self, test, subtest, error):
+                  if error is not None:
+                      self.record_failure(test, error)
+                  super().addSubTest(test, subtest, error)
+
+          for name in ('cache', 'audio'):
+              (pathlib.Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
+          loader = unittest.TestLoader()
+          suite = loader.discover('tests', pattern='test_reference_effects_v020.py')
+          expected = identifiers(suite)
+          assert not loader.errors, 'V020_IMPORT_FAILURE'
+          assert len(expected) == len(set(expected)) == 31, 'V020_TEST_INVENTORY_CHANGED'
+          assert all(identity.startswith('test_reference_effects_v020.') for identity in expected)
+          result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SafeResult).run(suite)
+          print('::notice title=Isolated v020 regressions::' + json.dumps(dict(tests=result.testsRun, failures=len(result.failures), errors=len(result.errors), skipped=len(result.skipped))))
+          print('::notice title=Safe v020 failure metadata::' + json.dumps(result.safe_failures))
+          assert sorted(result.executed) == expected and result.testsRun == 31, 'V020_TEST_EXECUTION_INCOMPLETE'
+          raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
+          PYV020
       - name: Required packages, readonly assets, UID1000 write paths and real synthetic media pipeline
         shell: bash
         run: |
@@ -227,7 +308,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker run --rm --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+          docker run --rm --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy -i \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
             --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
@@ -235,8 +316,84 @@ jobs:
             --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
             --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
             --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
-            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
-            'import pathlib,unittest,hashlib; [p.mkdir(parents=True,exist_ok=True) for p in [pathlib.Path("/run/world-engine/cache"),pathlib.Path("/run/world-engine/audio")]]; loader=unittest.TestLoader(); suite=loader.discover("tests"); flatten=lambda s:sum([flatten(t) if isinstance(t,unittest.TestSuite) else [t.id()] for t in s],[]); expected=sorted(flatten(suite)); baseline=[i for i in expected if not i.startswith("test_reference_effects_v020.")]; added=[i for i in expected if i.startswith("test_reference_effects_v020.")]; assert not loader.errors; assert len(expected)==len(set(expected)); assert len(baseline)==701 and added; assert hashlib.sha256(("\n".join(baseline)+"\n").encode()).hexdigest()=="57aa3d46894ac5f50309dead36896f53fc5d76781b2f362ee457c3b07136ba8f"; executed=[]; ExactResult=type("ExactResult",(unittest.TextTestResult,),{"startTest":lambda self,test:(executed.append(test.id()),unittest.TextTestResult.startTest(self,test))}); result=unittest.TextTestRunner(verbosity=1,resultclass=ExactResult).run(suite); print("::notice title=Core regressions::tests="+str(result.testsRun)+", inherited=701, v020="+str(len(added))+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))+", failed_tests="+str([t.id() for t,_ in result.failures+result.errors])); assert sorted(executed)==expected and result.testsRun==len(expected); raise SystemExit(not result.wasSuccessful() or bool(result.skipped))'
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYCORE'
+          import hashlib, io, json, pathlib, re, traceback, unittest
+          NATIVE_TEST = 'test_reference_effects_v020.ReferenceEffects.test_actual_node_overlay_preserves_all_720_camera_material_and_off_frames'
+          NODE_FILES = {'test_reference_effects_v020.mjs', 'reference_effects_adapter.js', 'event_quality_adapter.js', 'visual_quality_adapter.js', 'scene_diagnostic_journal.mjs'}
+          NODE_TYPES = {'AssertionError', 'SyntaxError', 'TypeError', 'RangeError', 'ReferenceError', 'Error', 'URIError', 'EvalError'}
+
+          def identifiers(suite):
+              values = []
+              for test in suite:
+                  values.extend(identifiers(test) if isinstance(test, unittest.TestSuite) else [test.id()])
+              return sorted(values)
+
+          class SafeResult(unittest.TextTestResult):
+              def __init__(self, *args, **kwargs):
+                  super().__init__(*args, **kwargs)
+                  self.executed = []
+                  self.safe_failures = []
+
+              def startTest(self, test):
+                  self.executed.append(test.id())
+                  super().startTest(test)
+
+              def record_failure(self, test, error):
+                  if len(self.safe_failures) >= 25:
+                      return
+                  identity = test.id().split(' (', 1)[0]
+                  locations = [{'file': pathlib.Path(frame.filename).name, 'line': frame.lineno}
+                               for frame in traceback.extract_tb(error[2])
+                               if pathlib.Path(frame.filename).name.startswith('test_')
+                               and pathlib.Path(frame.filename).suffix == '.py'][-6:]
+                  record = dict(test_id=identity, exception_type=error[0].__name__, python_test_locations=locations)
+                  if identity == NATIVE_TEST:
+                      message = str(error[1])
+                      bounded = message[:8192] + '\n' + message[-65536:]
+                      node_locations = []
+                      for filename in sorted(NODE_FILES):
+                          for match in re.finditer(re.escape(filename) + r':(\d+)(?::\d+)?', bounded):
+                              location = dict(file=filename, line=int(match.group(1)))
+                              if location not in node_locations:
+                                  node_locations.append(location)
+                      node_types = sorted(set(re.findall(r'\b(AssertionError|SyntaxError|TypeError|RangeError|ReferenceError|Error|URIError|EvalError)(?: \[[A-Z][A-Z0-9_]+\])?:', bounded)) & NODE_TYPES)
+                      codes = sorted(set(re.findall(r'\b(?:ERR_ASSERTION|REFERENCE_EFFECTS_[A-Z0-9_]+|EVENT_QUALITY_[A-Z0-9_]+|VISUAL_QUALITY_[A-Z0-9_]+|SHADER_CONTRACT_[A-Z0-9_]+)\b', bounded)))[:12]
+                      exit_match = re.search(r'(?:^|AssertionError:\s*)(-?\d+)\s*!=\s*0(?:\s|:|$)', message[:8192])
+                      record.update(node_locations=node_locations[:12], node_error_types=node_types,
+                                    node_error_codes=codes,
+                                    node_exit_code=int(exit_match.group(1)) if exit_match else None)
+                  self.safe_failures.append(record)
+
+              def addFailure(self, test, error):
+                  self.record_failure(test, error)
+                  super().addFailure(test, error)
+
+              def addError(self, test, error):
+                  self.record_failure(test, error)
+                  super().addError(test, error)
+
+              def addSubTest(self, test, subtest, error):
+                  if error is not None:
+                      self.record_failure(test, error)
+                  super().addSubTest(test, subtest, error)
+
+          for name in ('cache', 'audio'):
+              (pathlib.Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
+          loader = unittest.TestLoader()
+          suite = loader.discover('tests')
+          expected = identifiers(suite)
+          baseline = [identity for identity in expected if not identity.startswith('test_reference_effects_v020.')]
+          added = [identity for identity in expected if identity.startswith('test_reference_effects_v020.')]
+          assert not loader.errors, 'REGRESSION_IMPORT_FAILURE'
+          assert len(expected) == len(set(expected)), 'REGRESSION_DUPLICATE_TEST_IDS'
+          assert len(baseline) == 701 and len(added) == 31, 'REGRESSION_TEST_INVENTORY_CHANGED'
+          assert hashlib.sha256(('\n'.join(baseline) + '\n').encode()).hexdigest() == '57aa3d46894ac5f50309dead36896f53fc5d76781b2f362ee457c3b07136ba8f', 'INHERITED_REGRESSION_IDS_CHANGED'
+          result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SafeResult).run(suite)
+          print('::notice title=Core regressions::' + json.dumps(dict(tests=result.testsRun, inherited=701, v020=len(added), failures=len(result.failures), errors=len(result.errors), skipped=len(result.skipped), failed_tests=[test.id().split(' (', 1)[0] for test, _ in result.failures + result.errors])))
+          print('::notice title=Safe v020 failure metadata::' + json.dumps(result.safe_failures))
+          assert sorted(result.executed) == expected and result.testsRun == len(expected), 'REGRESSION_EXECUTION_INCOMPLETE'
+          raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
+          PYCORE
       - name: Independent proxy security and GPU logic regressions
         if: ${{ !cancelled() }}
         shell: bash
