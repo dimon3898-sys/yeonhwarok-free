@@ -67,8 +67,10 @@ export function validateStoryProgressionSelection(scene){
    const cameraKeys=new Set(entries.map(entry=>entry.state.startsWith('EVENT1_')?'event1_camera':'event2_camera'));
    if(cameraKeys.size!==1||!cameraKeys.has(lock.camera_key))fail('CAMERA_CHANGED_DURING_EVENT_VIEW');
   }else{
-   const authored=(scene.direction?.locked_windows||[]).find(value=>value.start_frame===lock.start_frame&&value.end_frame===lock.end_frame&&value.camera_key===lock.camera_key);
-   if(!authored||!['camera_start','camera_end'].includes(lock.camera_key)||!scene.camera_start||!scene.camera_end||!same(scene.camera_start,scene.camera_end))fail('CAMERA_CHANGED_DURING_EVENT_VIEW');
+   const windows=scene.direction?.locked_windows||[];
+   const entries=lock.source_paths.map(sourcePath=>{const match=/^direction\.locked_windows\[(\d+)\]$/.exec(sourcePath);return match?windows[Number(match[1])]:null;});
+   if(entries.some(value=>!value||value.camera_key!==lock.camera_key||!Number.isInteger(value.start_frame)||!Number.isInteger(value.end_frame)||value.start_frame>=value.end_frame)||entries[0].start_frame!==lock.start_frame||entries.at(-1).end_frame!==lock.end_frame||!['camera_start','camera_end'].includes(lock.camera_key)||!scene.camera_start||!scene.camera_end||!same(scene.camera_start,scene.camera_end))fail('CAMERA_CHANGED_DURING_EVENT_VIEW');
+   for(let index=1;index<entries.length;index++)if(entries[index-1].end_frame!==entries[index].start_frame)fail('CAMERA_CHANGED_DURING_EVENT_VIEW');
   }
   const authoredStart=frameAt(text.start_time,fps),authoredEnd=frameAt(text.end_time,fps);
   if(beat.start_frame<authoredStart||beat.end_frame>authoredEnd||frameAt(event.time,fps)!==authoredStart)fail('SOURCE_TIMING_INVALID');

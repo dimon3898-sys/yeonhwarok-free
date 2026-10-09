@@ -377,6 +377,25 @@ class StoryProgression(unittest.TestCase):
             self.assertEqual(story.compile_microbeats(scene), [])
 
     def test_reveal_outside_declared_lock_or_corrupt_camera_lock_fails(self):
+        contiguous = self.generic_scene()
+        contiguous['direction']['locked_windows'] = [
+            dict(start_frame=0, end_frame=210, camera_key='camera_start'),
+            dict(start_frame=210, end_frame=720, camera_key='camera_start')]
+        original = deepcopy(contiguous)
+        beats = story.compile_microbeats(contiguous)
+        self.assertEqual(contiguous, original)
+        self.assertEqual([(b['start_frame'], b['end_frame']) for b in beats],
+                         [(120, 137), (137, 161), (161, 178), (178, 300)])
+        # A status crosses the authoring-window boundary without a camera
+        # change. Both source references must survive the merged lock, and
+        # its event state must not be truncated at frame 210.
+        expected_lock = dict(start_frame=0, end_frame=720, camera_key='camera_start',
+                             source_paths=['direction.locked_windows[0]', 'direction.locked_windows[1]'])
+        self.assertTrue(all(b['camera_lock_ref'] == expected_lock for b in beats))
+        contiguous['story_progression'] = story._selection(contiguous, 30)
+        result = story.progression_qc(contiguous)
+        self.assertTrue(result['passed'], result)
+        self.assertEqual(result['errors'], [])
         cases = [dict(start_frame=130, end_frame=720, camera_key='FIXED'),
                  dict(start_frame=True, end_frame=720, camera_key='FIXED'),
                  dict(start_frame=0, end_frame=720, camera_key=''),

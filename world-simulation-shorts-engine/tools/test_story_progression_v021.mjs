@@ -196,7 +196,15 @@ try{
  const genericLock=structuredClone(port);delete genericLock.second_event_camera;
  genericLock.camera_end=structuredClone(genericLock.camera_start);genericLock.direction={locked_windows:[{start_frame:150,end_frame:360,camera_key:'camera_start'}]};
  for(const beat of genericLock.story_progression.microbeats)beat.camera_lock_ref={start_frame:150,end_frame:360,camera_key:'camera_start',source_paths:['direction.locked_windows[0]']};
- check(()=>assert.equal(story.validateStoryProgressionSelection(genericLock).total,720));
+ check(()=>{
+  assert.equal(story.validateStoryProgressionSelection(genericLock).total,720);
+  const merged=structuredClone(genericLock);merged.direction.locked_windows=[{start_frame:0,end_frame:210,camera_key:'camera_start'},{start_frame:210,end_frame:720,camera_key:'camera_start'}];
+  for(const beat of merged.story_progression.microbeats)beat.camera_lock_ref={start_frame:0,end_frame:720,camera_key:'camera_start',source_paths:['direction.locked_windows[0]','direction.locked_windows[1]']};
+  assert.equal(story.validateStoryProgressionSelection(merged).total,720);
+  const gap=structuredClone(merged);gap.direction.locked_windows[1].start_frame=211;assert.throws(()=>story.validateStoryProgressionSelection(gap),/CAMERA_CHANGED/);
+  const wrongKey=structuredClone(merged);wrongKey.direction.locked_windows[1].camera_key='camera_end';assert.throws(()=>story.validateStoryProgressionSelection(wrongKey),/CAMERA_CHANGED/);
+  const path=structuredClone(merged);path.story_progression.microbeats[0].camera_lock_ref.source_paths[1]='direction.locked_windows[99]';assert.throws(()=>story.validateStoryProgressionSelection(path),/CAMERA_CHANGED/);
+ });
  check(()=>{const bad=structuredClone(genericLock);bad.camera_end.lon+=1;assert.throws(()=>story.validateStoryProgressionSelection(bad),/CAMERA_CHANGED/);});
  console.log(JSON.stringify({passed:true,checks,frames:720,camera_trajectory:'UNCHANGED',material:'UNCHANGED',wide:'UNCHANGED',overlay_off:'UNCHANGED',audio:'UNCHANGED',source_scene_immutable:true,boundary_draw:'NONE',additional_texture_uploads:0,added_sfx:0,primary_effect_peak:primaryPeak,changed_overlay_frames:changedFrames,microbeat_receipt_coverage:Object.fromEntries(receipts),halo_frames:Object.fromEntries(haloFrames),generic_contract_fixtures:{shifted_authored_status:true,non_suez_authored_port:true,identical_pose_lock:true,forged_lock_rejected:true},request_order_regression:{completion_order_reversed:true,request_identity:'SAME_URL_MULTISET_AND_COUNTS',baseline_masks:maskRequests(baseRequests),off_masks:maskRequests(offRequests)},GPU:'NOT_RUN',shader_compile:'NVIDIA_NOT_RUN',pixel_quality:'NOT_RUN',scope:'Actual inherited frame/overlay/audit methods with native camera and real shader assembly; recording Canvas2D uses fixture font metrics, not NVIDIA GPU raster pixels; generic source-binding cases are validator contracts.'}));
 }finally{globalThis.fetch=oldFetch;}
