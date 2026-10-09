@@ -165,11 +165,61 @@ def render_project(*args, **kwargs):
             from .story_progression import record_source_report
             return record_source_report(directory, plan, assets, original=original_progression_source_report)
         namespace['write_source_report'] = progression_source_report
+    infographic_selected = (len(args) > 1 and any(
+        scene.get('infographic') for scene in args[1].get('scenes', [])))
+    if infographic_selected:
+        from .infographic_contract import (install_validation, validate_infographic,
+            renderer_version, project_renderer_version, diagnostic_record)
+        from .infographic_backend import InfographicBackend
+        from .infographic_qc import run_qc as infographic_qc
+        install_validation()
+        infographic = validate_infographic(args[1])
+        if not infographic['passed']:
+            if diagnostic:
+                try:
+                    diagnostic.write('preflight.json', dict(passed=False,
+                        map_infographic=dict(qc=infographic, physical_gpu='NOT_RUN')))
+                except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                    pass
+            raise RuntimeError('INFOGRAPHIC_PREFLIGHT_FAILED')
+        namespace['CPULocalBackend'] = InfographicBackend
+        namespace['run_qc'] = infographic_qc
+        namespace['renderer_version'] = renderer_version
+        namespace['project_renderer_version'] = project_renderer_version
+        original_infographic_source_report = namespace['write_source_report']
+        def infographic_source_report(directory, plan, assets=None):
+            from .infographic_contract import record_source_report
+            return record_source_report(directory, plan, assets,
+                                        original=original_infographic_source_report)
+        namespace['write_source_report'] = infographic_source_report
+        timeline = args[1].get('metadata', {}).get('semantic_timeline')
+        if timeline:
+            from .semantic_timeline import prepare_production_audio
+            from pathlib import Path
+            timeline_directory = args[1]['metadata']['semantic_timeline_directory']
+            def measured_audio(plan, directory):
+                return prepare_production_audio(plan, timeline, timeline_directory, directory)['audio']
+            namespace['create_audio'] = measured_audio
+            # Existing COLLECT_ALL audio and the renderer consume this same
+            # checkpoint. They never synthesize the already measured script.
+            audio_directory = Path(args[0]) / 'audio'
+            # The new helper admits an existing checkpoint only when its
+            # measured voice, mastered PCM and ASS still match this plan.
+            measured_audio(args[1], audio_directory)
     if diagnostic:
         from .gpu_preflight import collect_all
         try:
             preflight = collect_all(args[0], args[1], diagnostic)
         except BaseException:
+            if infographic_selected:
+                try:
+                    from .infographic_contract import diagnostic_record
+                    existing = diagnostic._existing(diagnostic.root / 'preflight.json')
+                    existing = existing if isinstance(existing, dict) else dict(passed=False)
+                    existing['map_infographic'] = diagnostic_record(args[1])
+                    diagnostic.write('preflight.json', existing)
+                except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                    pass
             if args[1].get('metadata', {}).get('reference_effects'):
                 try:
                     from .reference_effects import diagnostic_record
@@ -189,6 +239,10 @@ def render_project(*args, **kwargs):
                 except (OSError, ValueError, KeyError, TypeError, AttributeError):
                     pass  # Preserve the original admission failure and its evidence.
             raise
+        if infographic_selected:
+            from .infographic_contract import diagnostic_record
+            preflight['map_infographic'] = diagnostic_record(args[1])
+            diagnostic.write('preflight.json', preflight)
         if args[1].get('metadata', {}).get('reference_effects'):
             from .reference_effects import diagnostic_record
             # preflight.json is already safely exported in both ZIP outcomes;
@@ -206,8 +260,9 @@ def render_project(*args, **kwargs):
             diagnostic.write('preflight.json', preflight)
         backend = namespace['CPULocalBackend']
         namespace['CPULocalBackend'] = lambda: backend(diagnostic=diagnostic)
+        selected_audio = namespace['create_audio']
         def recorded_audio(*values, **options):
-            result = create_audio(*values, **options)
+            result = selected_audio(*values, **options)
             diagnostic.write('audio-diagnostics.json', result)
             return result
         namespace['create_audio'] = recorded_audio

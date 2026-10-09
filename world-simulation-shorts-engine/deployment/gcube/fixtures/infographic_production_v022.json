@@ -1,0 +1,208 @@
+{
+  "text": "Suez Canal is shown. Singapore is shown. Seoul is shown.",
+  "segments": [
+    {
+      "id": "N1",
+      "start_char": 0,
+      "end_char": 20,
+      "claim_ids": [
+        "F1"
+      ],
+      "source_ids": [
+        "SEAROUTE_1_6_0"
+      ],
+      "target_ids": [
+        "SUEZ_CANAL"
+      ],
+      "event_ids": [
+        "E1"
+      ]
+    },
+    {
+      "id": "N2",
+      "start_char": 21,
+      "end_char": 40,
+      "claim_ids": [
+        "F2"
+      ],
+      "source_ids": [
+        "SEAROUTE_1_6_0"
+      ],
+      "target_ids": [
+        "SINGAPORE_PORT"
+      ],
+      "event_ids": [
+        "E2"
+      ]
+    },
+    {
+      "id": "N3",
+      "start_char": 41,
+      "end_char": 56,
+      "claim_ids": [
+        "F3"
+      ],
+      "source_ids": [
+        "natural_earth_places"
+      ],
+      "target_ids": [
+        "seoul"
+      ],
+      "event_ids": [
+        "E3"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "F1",
+      "text": "Suez Canal verified geographic location",
+      "status": "FACT",
+      "source_ids": [
+        "SEAROUTE_1_6_0"
+      ],
+      "scope": "coordinate provenance"
+    },
+    {
+      "id": "F2",
+      "text": "Singapore verified geographic location",
+      "status": "FACT",
+      "source_ids": [
+        "SEAROUTE_1_6_0"
+      ],
+      "scope": "coordinate provenance"
+    },
+    {
+      "id": "F3",
+      "text": "Seoul verified geographic location",
+      "status": "FACT",
+      "source_ids": [
+        "natural_earth_places"
+      ],
+      "scope": "coordinate provenance"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "SEAROUTE_1_6_0",
+      "name": "searoute 1.6.0 maritime network and ports",
+      "author": "Gent Halili and searoute-py contributors",
+      "license": "Apache-2.0",
+      "license_file": "data/shipping_sources/APACHE-2.0.txt",
+      "attribution_required": true,
+      "attribution": "Maritime route geometry derived from searoute-py 1.6.0 by Gent Halili and contributors, Apache-2.0. Routes are visualization-grade and are not navigational directions.",
+      "original_url": "https://github.com/genthalili/searoute-py",
+      "download_url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "package_sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "downloaded_at_utc": "2026-10-04T12:01:52.348234+00:00",
+      "package_version": "1.6.0",
+      "source_type": "VERIFIED_GIS_DATA",
+      "coordinate_order": "longitude,latitude",
+      "coordinate_reference_system": "EPSG:4326",
+      "files": {
+        "marnet_dict.py": {
+          "path": "data/shipping_sources/marnet_dict.py",
+          "sha256": "3622fff283e71b940ba5d58280b07c5cb2e95959ffb48f647b39b500b6c50ea3"
+        },
+        "ports_dict.py": {
+          "path": "data/shipping_sources/ports_dict.py",
+          "sha256": "58a4cafe52a4852fed5fb268327078e722b0b9a4f532e1c0d5b0b7fff330ee5b"
+        },
+        "APACHE-2.0.txt": {
+          "path": "data/shipping_sources/APACHE-2.0.txt",
+          "sha256": "6f5395173360b84e9e4cfe8b70773419a92ca25684501666982ef927ca20ac66"
+        },
+        "PACKAGE_METADATA.txt": {
+          "path": "data/shipping_sources/PACKAGE_METADATA.txt",
+          "sha256": "fbe2079b197b051309be7c47333fe161ee4d58032f83b921d6bd8e2b2705e09c"
+        }
+      },
+      "limitations": [
+        "The source library is explicitly for maritime visualization, not vessel navigation.",
+        "Canal and river segments are generalized network geometry; do not claim survey-grade canal geometry.",
+        "Routes are graph shortest-distance alternatives, not a forecast of ship choices, traffic volume, prices, delivery delay, or closure outcome.",
+        "Fixed-speed duration estimates from the source package are deliberately not used."
+      ],
+      "id": "SEAROUTE_1_6_0",
+      "url": "https://files.pythonhosted.org/packages/7d/f7/51b077d65b4cfc21fdb4ac9fa61692cf5b652a983586abad586c830e0f81/searoute-1.6.0.tar.gz",
+      "sha256": "a2f9827b0aa0f1216f4696aa9cd9d358e9950cba496e8445dc2a3d5691862697",
+      "local_path": "data/shipping_sources/searoute-1.6.0.tar.gz"
+    },
+    {
+      "id": "natural_earth_places",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_populated_places_simple.geojson",
+      "author": "Natural Earth",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "downloaded_at": "2026-10-04T11:59:04.739053+00:00",
+      "sha256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+      "local_path": "populated_places_source.geojson",
+      "attribution_required": false
+    }
+  ],
+  "events": [
+    {
+      "id": "E1",
+      "semantic_segment_ref": "N1",
+      "claim_id": "F1",
+      "target_geometry_refs": [
+        "CANAL_SUEZ_RIVER_NE10M"
+      ],
+      "location_point_ref": "LOCATION_SUEZ_CANAL",
+      "state_before": "CONTEXT",
+      "state_after": "LOCATION",
+      "primary_role": "LOCATION_LABEL",
+      "evidence_type": "sourced_fact",
+      "watermark": null,
+      "text": {
+        "event_title": null,
+        "location_label": "SUEZ CANAL",
+        "support_data": null
+      },
+      "visual_kind": "region_reveal"
+    },
+    {
+      "id": "E2",
+      "semantic_segment_ref": "N2",
+      "claim_id": "F2",
+      "target_geometry_refs": [],
+      "location_point_ref": "LOCATION_SINGAPORE_PORT",
+      "state_before": "CONTEXT",
+      "state_after": "LOCATION",
+      "primary_role": "LOCATION_LABEL",
+      "evidence_type": "sourced_fact",
+      "watermark": null,
+      "text": {
+        "event_title": null,
+        "location_label": "SINGAPORE",
+        "support_data": null
+      },
+      "visual_kind": "region_reveal"
+    },
+    {
+      "id": "E3",
+      "semantic_segment_ref": "N3",
+      "claim_id": "F3",
+      "target_geometry_refs": [],
+      "location_point_ref": "LOCATION_SEOUL",
+      "state_before": "CONTEXT",
+      "state_after": "LOCATION",
+      "primary_role": "LOCATION_LABEL",
+      "evidence_type": "sourced_fact",
+      "watermark": null,
+      "text": {
+        "event_title": null,
+        "location_label": "SEOUL",
+        "support_data": null
+      },
+      "visual_kind": "region_reveal"
+    }
+  ],
+  "options": {
+    "bgm": false,
+    "sfx": false,
+    "subtitles": true
+  },
+  "domain": "geography",
+  "topic": "Verified authored location fixture"
+}

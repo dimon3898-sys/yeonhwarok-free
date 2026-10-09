@@ -1,0 +1,11 @@
+# Immutable public v021 runtime; explicit v022 overlays only.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:2f68a880afdc56a5d3b9dc5ab52c2a87100316048d5d863e712654fee789a9dc
+ENV WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022
+COPY world-simulation-shorts-engine/engine/infographic_contract.py world-simulation-shorts-engine/engine/infographic_planner.py world-simulation-shorts-engine/engine/infographic_backend.py world-simulation-shorts-engine/engine/semantic_timeline.py world-simulation-shorts-engine/engine/infographic_framing.py world-simulation-shorts-engine/engine/infographic_qc.py world-simulation-shorts-engine/engine/qa_planner.py world-simulation-shorts-engine/engine/pipeline_stability.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/web/infographic_adapter.js world-simulation-shorts-engine/web/render_infographic_earth.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/web/fonts/NotoSansCJKkr-Bold.otf world-simulation-shorts-engine/web/fonts/BOLD_SOURCE_v022.json /opt/world-engine/world-simulation-shorts-engine/web/fonts/
+COPY world-simulation-shorts-engine/data/infographic/v022 /opt/world-engine/world-simulation-shorts-engine/data/infographic/v022/
+COPY world-simulation-shorts-engine/web/infographic/v022 /opt/world-engine/world-simulation-shorts-engine/web/infographic/v022/
+COPY world-simulation-shorts-engine/tools/test_infographic_v022.mjs world-simulation-shorts-engine/tools/build_infographic_assets.py /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/infographic_preflight.py world-simulation-shorts-engine/deployment/gcube/infographic_release_manifest.json /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+COPY world-simulation-shorts-engine/deployment/gcube/fixtures/infographic_production_v022.json /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/fixtures/

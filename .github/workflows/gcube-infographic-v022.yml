@@ -1,0 +1,617 @@
+name: Validate and publish map infographic v022
+on:
+  push:
+    branches: [fix/v022-map-infographic]
+    paths:
+      - world-simulation-shorts-engine/engine/**
+      - world-simulation-shorts-engine/data/**
+      - world-simulation-shorts-engine/web/**
+      - world-simulation-shorts-engine/tools/**
+      - world-simulation-shorts-engine/tests/**
+      - world-simulation-shorts-engine/deployment/**
+      - world-simulation-shorts-engine/server.py
+      - world-simulation-shorts-engine/requirements.txt
+      - deployment/gcube-proxy-diag/**
+      - .github/workflows/gcube-infographic-v022.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: gcube-v022-map-infographic-publication
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Select a source-specific immutable v022 tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${#GITHUB_SHA}" = 40
+          printf 'RELEASE_TAG=gcube-v022-map-infographic-%s\n' "${GITHUB_SHA:0:12}" >> "$GITHUB_ENV"
+      - name: Verify frozen source and asset manifest before build
+        shell: bash
+        run: |
+          set -euo pipefail
+          python world-simulation-shorts-engine/deployment/gcube/infographic_preflight.py --manifest-only --checkout
+      - name: Refuse an existing release tag before building
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PYGUARD'
+          import json,os,urllib.request,urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try:
+              urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404:raise RuntimeError('RELEASE_ABSENCE_NOT_VERIFIED') from None
+              print('Immutable release tag absent; new publication permitted.')
+          else:raise RuntimeError('RELEASE_ALREADY_EXISTS_REFUSING_OVERWRITE')
+          PYGUARD
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+      - name: Build complete infographic image without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.infographic-v022
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ env.IMAGE }}:${{ env.RELEASE_TAG }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Whole v021 baseline and OFF/ON infographic container contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYQUALITY'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.infographic_preflight import run
+          report=run('/data/infographic-preflight', require_container_assets=True)
+          assert report['passed'],report
+          PYQUALITY
+      - name: Isolated 31-case v020 regressions with bounded failure metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy -i \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYV020'
+          import hashlib, io, json, pathlib, re, traceback, unittest
+          NATIVE_TEST = 'test_reference_effects_v020.ReferenceEffects.test_actual_node_overlay_preserves_all_720_camera_material_and_off_frames'
+          NODE_FILES = {'test_reference_effects_v020.mjs', 'reference_effects_adapter.js', 'event_quality_adapter.js', 'visual_quality_adapter.js', 'scene_diagnostic_journal.mjs'}
+          NODE_TYPES = {'AssertionError', 'SyntaxError', 'TypeError', 'RangeError', 'ReferenceError', 'Error', 'URIError', 'EvalError'}
+
+          def identifiers(suite):
+              values = []
+              for test in suite:
+                  values.extend(identifiers(test) if isinstance(test, unittest.TestSuite) else [test.id()])
+              return sorted(values)
+
+          class SafeResult(unittest.TextTestResult):
+              def __init__(self, *args, **kwargs):
+                  super().__init__(*args, **kwargs)
+                  self.executed = []
+                  self.safe_failures = []
+
+              def startTest(self, test):
+                  self.executed.append(test.id())
+                  super().startTest(test)
+
+              def record_failure(self, test, error):
+                  if len(self.safe_failures) >= 25:
+                      return
+                  identity = test.id().split(' (', 1)[0]
+                  locations = [{'file': pathlib.Path(frame.filename).name, 'line': frame.lineno}
+                               for frame in traceback.extract_tb(error[2])
+                               if pathlib.Path(frame.filename).name.startswith('test_')
+                               and pathlib.Path(frame.filename).suffix == '.py'][-6:]
+                  record = dict(test_id=identity, exception_type=error[0].__name__, python_test_locations=locations)
+                  if identity == NATIVE_TEST:
+                      message = str(error[1])
+                      bounded = message[:8192] + '\n' + message[-65536:]
+                      node_locations = []
+                      for filename in sorted(NODE_FILES):
+                          for match in re.finditer(re.escape(filename) + r':(\d+)(?::\d+)?', bounded):
+                              location = dict(file=filename, line=int(match.group(1)))
+                              if location not in node_locations:
+                                  node_locations.append(location)
+                      node_types = sorted(set(re.findall(r'\b(AssertionError|SyntaxError|TypeError|RangeError|ReferenceError|Error|URIError|EvalError)(?: \[[A-Z][A-Z0-9_]+\])?:', bounded)) & NODE_TYPES)
+                      codes = sorted(set(re.findall(r'\b(?:ERR_ASSERTION|REFERENCE_EFFECTS_[A-Z0-9_]+|EVENT_QUALITY_[A-Z0-9_]+|VISUAL_QUALITY_[A-Z0-9_]+|SHADER_CONTRACT_[A-Z0-9_]+)\b', bounded)))[:12]
+                      exit_match = re.search(r'(?:^|AssertionError:\s*)(-?\d+)\s*!=\s*0(?:\s|:|$)', message[:8192])
+                      record.update(node_locations=node_locations[:12], node_error_types=node_types,
+                                    node_error_codes=codes,
+                                    node_exit_code=int(exit_match.group(1)) if exit_match else None)
+                  self.safe_failures.append(record)
+
+              def addFailure(self, test, error):
+                  self.record_failure(test, error)
+                  super().addFailure(test, error)
+
+              def addError(self, test, error):
+                  self.record_failure(test, error)
+                  super().addError(test, error)
+
+              def addSubTest(self, test, subtest, error):
+                  if error is not None:
+                      self.record_failure(test, error)
+                  super().addSubTest(test, subtest, error)
+
+          for name in ('cache', 'audio'):
+              (pathlib.Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
+          loader = unittest.TestLoader()
+          suite = loader.discover('tests', pattern='test_reference_effects_v020.py')
+          expected = identifiers(suite)
+          assert not loader.errors, 'V020_IMPORT_FAILURE'
+          assert len(expected) == len(set(expected)) == 31, 'V020_TEST_INVENTORY_CHANGED'
+          assert all(identity.startswith('test_reference_effects_v020.') for identity in expected)
+          result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SafeResult).run(suite)
+          print('::notice title=Isolated v020 regressions::' + json.dumps(dict(tests=result.testsRun, failures=len(result.failures), errors=len(result.errors), skipped=len(result.skipped))))
+          print('::notice title=Safe v020 failure metadata::' + json.dumps(result.safe_failures))
+          assert sorted(result.executed) == expected and result.testsRun == 31, 'V020_TEST_EXECUTION_INCOMPLETE'
+          raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
+          PYV020
+      - name: Isolated 35-case v021 regressions with bounded failure metadata
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy -i \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYV021'
+          import hashlib, io, json, pathlib, re, traceback, unittest
+          V021_TEST_COUNT = 35
+          NATIVE_TEST = 'test_story_progression_v021.StoryProgression.test_native_all_720_frames_freeze_camera_material_and_off_canvas'
+          NODE_FILES = {'test_story_progression_v021.mjs', 'story_progression_adapter.js', 'test_story_progression_v021.mjs', 'reference_effects_adapter.js', 'event_quality_adapter.js', 'visual_quality_adapter.js', 'scene_diagnostic_journal.mjs'}
+          NODE_TYPES = {'AssertionError', 'SyntaxError', 'TypeError', 'RangeError', 'ReferenceError', 'Error', 'URIError', 'EvalError'}
+
+          def identifiers(suite):
+              values = []
+              for test in suite:
+                  values.extend(identifiers(test) if isinstance(test, unittest.TestSuite) else [test.id()])
+              return sorted(values)
+
+          class SafeResult(unittest.TextTestResult):
+              def __init__(self, *args, **kwargs):
+                  super().__init__(*args, **kwargs)
+                  self.executed = []
+                  self.safe_failures = []
+
+              def startTest(self, test):
+                  self.executed.append(test.id())
+                  super().startTest(test)
+
+              def record_failure(self, test, error):
+                  if len(self.safe_failures) >= 25:
+                      return
+                  identity = test.id().split(' (', 1)[0]
+                  locations = [{'file': pathlib.Path(frame.filename).name, 'line': frame.lineno}
+                               for frame in traceback.extract_tb(error[2])
+                               if pathlib.Path(frame.filename).name.startswith('test_')
+                               and pathlib.Path(frame.filename).suffix == '.py'][-6:]
+                  record = dict(test_id=identity, exception_type=error[0].__name__, python_test_locations=locations)
+                  if identity.startswith('test_story_progression_v021.'):
+                      message = str(error[1])
+                      bounded = message[:8192] + '\n' + message[-65536:]
+                      node_locations = []
+                      for filename in sorted(NODE_FILES):
+                          for match in re.finditer(re.escape(filename) + r':(\d+)(?::\d+)?', bounded):
+                              location = dict(file=filename, line=int(match.group(1)))
+                              if location not in node_locations:
+                                  node_locations.append(location)
+                      node_types = sorted(set(re.findall(r'\b(AssertionError|SyntaxError|TypeError|RangeError|ReferenceError|Error|URIError|EvalError)(?: \[[A-Z][A-Z0-9_]+\])?:', bounded)) & NODE_TYPES)
+                      codes = sorted(set(re.findall(r'\b(?:ERR_ASSERTION|STORY_PROGRESSION_[A-Z0-9_]+|REFERENCE_EFFECTS_[A-Z0-9_]+|EVENT_QUALITY_[A-Z0-9_]+|VISUAL_QUALITY_[A-Z0-9_]+|SHADER_CONTRACT_[A-Z0-9_]+)\b', bounded)))[:12]
+                      exit_match = re.search(r'(?:^|AssertionError:\s*)(-?\d+)\s*!=\s*0(?:\s|:|$)', message[:8192])
+                      record.update(node_locations=node_locations[:12], node_error_types=node_types,
+                                    node_error_codes=codes,
+                                    node_exit_code=int(exit_match.group(1)) if exit_match else None)
+                  self.safe_failures.append(record)
+
+              def addFailure(self, test, error):
+                  self.record_failure(test, error)
+                  super().addFailure(test, error)
+
+              def addError(self, test, error):
+                  self.record_failure(test, error)
+                  super().addError(test, error)
+
+              def addSubTest(self, test, subtest, error):
+                  if error is not None:
+                      self.record_failure(test, error)
+                  super().addSubTest(test, subtest, error)
+
+          for name in ('cache', 'audio'):
+              (pathlib.Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
+          loader = unittest.TestLoader()
+          suite = loader.discover('tests', pattern='test_story_progression_v021.py')
+          expected = identifiers(suite)
+          assert not loader.errors, 'V021_IMPORT_FAILURE'
+          assert len(expected) == len(set(expected)) == V021_TEST_COUNT, 'V021_TEST_INVENTORY_CHANGED'
+          assert all(identity.startswith('test_story_progression_v021.') for identity in expected)
+          assert hashlib.sha256(('\n'.join(expected) + '\n').encode()).hexdigest() == '92d35ed1fad74495bac2f2686836e85ab718df81f2ad242faee70352f4cd6f46', 'V021_REGRESSION_IDS_CHANGED'
+          result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SafeResult).run(suite)
+          print('::notice title=Isolated v021 regressions::' + json.dumps(dict(tests=result.testsRun, failures=len(result.failures), errors=len(result.errors), skipped=len(result.skipped))))
+          print('::notice title=Safe v021 failure metadata::' + json.dumps(result.safe_failures))
+          assert sorted(result.executed) == expected and result.testsRun == V021_TEST_COUNT, 'V021_TEST_EXECUTION_INCOMPLETE'
+          raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
+          PYV021
+      - name: Isolated frozen v022 regressions and strict execution inventory
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy --user 0:0 -i \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYV022'
+          from pathlib import Path
+          for name in ('cache', 'audio'):
+              (Path('/run/world-engine')/name).mkdir(parents=True, exist_ok=True)
+          from deployment.gcube.infographic_preflight import run_isolated_tests
+          run_isolated_tests()
+          PYV022
+      - name: Required packages, readonly assets, UID1000 write paths and real synthetic media pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --env WORLD_ENGINE_DIRECTION_VERSION=v012 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os,json,subprocess
+          from pathlib import Path
+          for name in ('libegl1','libvulkan1','libx11-6','libxext6'):
+              assert subprocess.check_output(['dpkg-query','-W','-f=${Status}',name],text=True)=='install ok installed'
+          for command in (['node','--version'],['chromium','--version'],['ffmpeg','-version']):subprocess.run(command,check=True,capture_output=True)
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.asset_audit import audit_assets
+          from deployment.gcube.pipeline_media_preflight import run
+          audit=audit_assets();assert audit['passed']
+          for name in ('tmp','cache','frames','outputs','checkpoints'):
+              p=Path('/data')/name;p.mkdir(parents=True,exist_ok=True);q=p/'write-test';q.write_text('ok');q.unlink()
+          try:
+              report=run('/data/synthetic-pipeline')
+          except Exception as error:
+              detail=dict(type=type(error).__name__,message=str(error)[:1500],stderr=str(getattr(error,'stderr',''))[-1500:])
+              print('::error title=Container pipeline exception::'+json.dumps(detail))
+              raise
+          if not report['passed']:
+              print('::error title=Container QC failures::'+json.dumps(dict(failures=report['qc_failures'])))
+          from deployment.gcube.pipeline_retry_preflight import run as retry
+          assert retry('/data/synthetic-pipeline')['passed']
+          summary={key:value for key,value in report.items() if key not in ('assets','qc_warnings')}
+          summary['asset_count']=len(audit['assets'])
+          print('::notice title=Container pipeline result::'+json.dumps(summary,ensure_ascii=False))
+          assert report['passed'],report['qc_failures']
+          PY
+      - name: Exact production collect-all preflight before and after timing fix
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.framegrid_preflight import run
+          run('/data/framegrid-parity')
+          PY
+      - name: Single-event camera timeline and exact production collect-all poses
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYTEST'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.single_camera_preflight import run
+          run('/data/single-camera-preflight')
+          PYTEST
+      - name: Return-wide exact 450-frame camera preflight and scoped real technical QC
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYTEST'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.return_camera_preflight import run,media
+          run('/data/return-camera-preflight')
+          media('/data/return-camera-preflight')
+          PYTEST
+      - name: Second-event exact 720-frame camera preflight, adaptive projection and scoped technical QC
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYTEST'
+          import os
+          from pathlib import Path
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          os.environ['WORLD_ENGINE_EVENT_QUALITY_VERSION']='legacy'
+          os.environ['WORLD_ENGINE_VISUAL_QUALITY_VERSION']='legacy'
+          from engine.qa_planner import generate_deployment_plan
+          from engine.second_event_camera import PRESET
+          default=generate_deployment_plan(dict(topic='만약 수에즈 운하가 7일 동안 막힌다면?',duration=24,qa_mode=False,quality='HIGH',tts=False,subtitles=False,bgm=True,sfx=True))
+          assert os.environ.get('WORLD_ENGINE_SECOND_EVENT_TEST')=='1'
+          assert default['metadata']['camera_test_preset']==PRESET
+          from deployment.gcube.second_camera_preflight import run,media
+          run('/data/second-camera-preflight')
+          media('/data/second-camera-preflight')
+          PYTEST
+      - name: Common direction fixtures on the actual v013 runtime defaults
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.reference_preflight
+      - name: Reference-master real synthetic media, new files and checkpoint retry
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --user 0:0 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import os,json
+          from pathlib import Path
+          from engine.reference_master import ROOT,SOURCES
+          for name in SOURCES:
+              file=ROOT/name;assert file.is_file() and file.stat().st_size>0
+              with file.open('rb') as stream:assert stream.read(1)
+          for name in ('cache','audio'):
+              p=Path('/run/world-engine')/name;p.mkdir(parents=True,exist_ok=True);os.chown(p,1000,1000)
+          os.setgroups([]);os.setgid(1000);os.setuid(1000)
+          from deployment.gcube.reference_media_preflight import run
+          from deployment.gcube.reference_retry_preflight import run as retry
+          try:
+              report=run('/data/reference-media')
+              if not report['passed']:
+                  print('::error title=Reference synthetic QC::'+json.dumps(report['qc_failures']))
+              assert report['passed'],report['qc_failures']
+              assert retry('/data/reference-media')['passed']
+          except Exception as error:
+              import traceback
+              detail=dict(type=type(error).__name__,message=str(error)[:1500],stderr=str(getattr(error,'stderr',''))[-1500:],stack=traceback.format_exc()[-3000:])
+              print('::error title=Reference synthetic pipeline exception::'+json.dumps(detail))
+              raise
+          print('::notice title=Reference media::'+json.dumps({k:v for k,v in report.items() if k not in ('assets','qc_warnings')},ensure_ascii=False))
+          PY
+      - name: Measure optional offline TTS budget on the installed provider
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 -i --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PY'
+          import json,subprocess,tempfile
+          from pathlib import Path
+          from engine.audio import ESpeakProvider,_stereo
+          from engine.planner import _narration
+          from engine.gis import resolve_location
+          provider=ESpeakProvider()
+          with tempfile.TemporaryDirectory() as folder:
+              path=Path(folder)/'narration.wav'
+              info=provider.synthesize(_narration('variable',resolve_location('London'),'aviation',False,20/6),path,language='ko',speed=155)
+              seconds=len(_stereo(path))/48000
+          version=subprocess.check_output([provider.executable,'--version'],text=True).split('Data at',1)[0].strip()
+          data_version=subprocess.check_output(['dpkg-query','-W','-f=${Version}','espeak-ng-data'],text=True).strip()
+          print('::notice title=Offline TTS actual budget::'+json.dumps(dict(version=version,data_version=data_version,seconds=seconds,strict_scene_limit=20/6-.08,headroom90_limit=(20/6-.08)*.9,scene_guard_passed=seconds<=20/6-.08)))
+          PY
+      - name: Collect regression import failures before running the full suite
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
+            'import unittest,json; loader=unittest.TestLoader(); suite=loader.discover("tests"); errors=[text for text in loader.errors]; assert not errors, "REGRESSION_IMPORT_FAILURE"; print("::notice title=Regression import modules::"+json.dumps([text.split("\n",1)[0] for text in errors])); print("::notice title=Regression import types::"+json.dumps([text.splitlines()[-1].split(":",1)[0] for text in errors])); print("::notice title=Regression import count::"+str(suite.countTestCases()))'
+      - name: All existing regressions and new native collect-all/security/media contracts
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy -i \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} - <<'PYCORE'
+          import hashlib, io, json, pathlib, re, traceback, unittest
+          V021_TEST_COUNT = 35
+          NATIVE_TEST = 'test_reference_effects_v020.ReferenceEffects.test_actual_node_overlay_preserves_all_720_camera_material_and_off_frames'
+          NODE_FILES = {'test_infographic_v022.mjs', 'infographic_adapter.js', 'test_story_progression_v021.mjs', 'story_progression_adapter.js', 'test_reference_effects_v020.mjs', 'reference_effects_adapter.js', 'event_quality_adapter.js', 'visual_quality_adapter.js', 'scene_diagnostic_journal.mjs'}
+          NODE_TYPES = {'AssertionError', 'SyntaxError', 'TypeError', 'RangeError', 'ReferenceError', 'Error', 'URIError', 'EvalError'}
+
+          def identifiers(suite):
+              values = []
+              for test in suite:
+                  values.extend(identifiers(test) if isinstance(test, unittest.TestSuite) else [test.id()])
+              return sorted(values)
+
+          class SafeResult(unittest.TextTestResult):
+              def __init__(self, *args, **kwargs):
+                  super().__init__(*args, **kwargs)
+                  self.executed = []
+                  self.safe_failures = []
+
+              def startTest(self, test):
+                  self.executed.append(test.id())
+                  super().startTest(test)
+
+              def record_failure(self, test, error):
+                  if len(self.safe_failures) >= 25:
+                      return
+                  identity = test.id().split(' (', 1)[0]
+                  locations = [{'file': pathlib.Path(frame.filename).name, 'line': frame.lineno}
+                               for frame in traceback.extract_tb(error[2])
+                               if pathlib.Path(frame.filename).name.startswith('test_')
+                               and pathlib.Path(frame.filename).suffix == '.py'][-6:]
+                  record = dict(test_id=identity, exception_type=error[0].__name__, python_test_locations=locations)
+                  if identity == NATIVE_TEST or identity.startswith('test_story_progression_v021.') or identity in v022:
+                      message = str(error[1])
+                      bounded = message[:8192] + '\n' + message[-65536:]
+                      node_locations = []
+                      for filename in sorted(NODE_FILES):
+                          for match in re.finditer(re.escape(filename) + r':(\d+)(?::\d+)?', bounded):
+                              location = dict(file=filename, line=int(match.group(1)))
+                              if location not in node_locations:
+                                  node_locations.append(location)
+                      node_types = sorted(set(re.findall(r'\b(AssertionError|SyntaxError|TypeError|RangeError|ReferenceError|Error|URIError|EvalError)(?: \[[A-Z][A-Z0-9_]+\])?:', bounded)) & NODE_TYPES)
+                      codes = sorted(set(re.findall(r'\b(?:ERR_ASSERTION|INFOGRAPHIC_[A-Z0-9_]+|SEMANTIC_TIMELINE_[A-Z0-9_]+|INFOGRAPHIC_FRAMING_[A-Z0-9_]+|STORY_PROGRESSION_[A-Z0-9_]+|REFERENCE_EFFECTS_[A-Z0-9_]+|EVENT_QUALITY_[A-Z0-9_]+|VISUAL_QUALITY_[A-Z0-9_]+|SHADER_CONTRACT_[A-Z0-9_]+)\b', bounded)))[:12]
+                      exit_match = re.search(r'(?:^|AssertionError:\s*)(-?\d+)\s*!=\s*0(?:\s|:|$)', message[:8192])
+                      record.update(node_locations=node_locations[:12], node_error_types=node_types,
+                                    node_error_codes=codes,
+                                    node_exit_code=int(exit_match.group(1)) if exit_match else None)
+                  self.safe_failures.append(record)
+
+              def addFailure(self, test, error):
+                  self.record_failure(test, error)
+                  super().addFailure(test, error)
+
+              def addError(self, test, error):
+                  self.record_failure(test, error)
+                  super().addError(test, error)
+
+              def addSubTest(self, test, subtest, error):
+                  if error is not None:
+                      self.record_failure(test, error)
+                  super().addSubTest(test, subtest, error)
+
+          for name in ('cache', 'audio'):
+              (pathlib.Path('/run/world-engine') / name).mkdir(parents=True, exist_ok=True)
+          loader = unittest.TestLoader()
+          suite = loader.discover('tests')
+          expected = identifiers(suite)
+          from deployment.gcube.infographic_preflight import verify_test_inventory
+          inventory = verify_test_inventory(expected)
+          parent_core = inventory['inherited_ids']
+          v022 = inventory['new_ids']
+          baseline = [identity for identity in parent_core if not identity.startswith('test_story_progression_v021.')]
+          original = [identity for identity in baseline if not identity.startswith('test_reference_effects_v020.')]
+          v020 = [identity for identity in baseline if identity.startswith('test_reference_effects_v020.')]
+          added = [identity for identity in parent_core if identity.startswith('test_story_progression_v021.')]
+          assert not loader.errors, 'REGRESSION_IMPORT_FAILURE'
+          assert len(expected) == len(set(expected)), 'REGRESSION_DUPLICATE_TEST_IDS'
+          assert len(original) == 701 and len(v020) == 31 and len(baseline) == 732 and len(added) == V021_TEST_COUNT, 'REGRESSION_TEST_INVENTORY_CHANGED'
+          assert hashlib.sha256(('\n'.join(original) + '\n').encode()).hexdigest() == '57aa3d46894ac5f50309dead36896f53fc5d76781b2f362ee457c3b07136ba8f', 'INHERITED_REGRESSION_IDS_CHANGED'
+          assert hashlib.sha256(('\n'.join(baseline) + '\n').encode()).hexdigest() == 'b4f2e47600984e208f0652827308385137b4c4fd863321b606242cfa0b81b9ad', 'V020_INHERITED_REGRESSION_IDS_CHANGED'
+          assert hashlib.sha256(('\n'.join(added) + '\n').encode()).hexdigest() == '92d35ed1fad74495bac2f2686836e85ab718df81f2ad242faee70352f4cd6f46', 'V021_REGRESSION_IDS_CHANGED'
+          result = unittest.TextTestRunner(stream=io.StringIO(), verbosity=1, resultclass=SafeResult).run(suite)
+          print('::notice title=Core regressions::' + json.dumps(dict(tests=result.testsRun, inherited=767, v020=len(v020), v021=len(added), v022=len(v022), unique_release_tests=len(expected)+206+31, failures=len(result.failures), errors=len(result.errors), skipped=len(result.skipped), failed_tests=[test.id().split(' (', 1)[0] for test, _ in result.failures + result.errors])))
+          print('::notice title=Safe v020/v021/v022 failure metadata::' + json.dumps(result.safe_failures))
+          assert sorted(result.executed) == expected and result.testsRun == len(expected), 'REGRESSION_EXECUTION_INCOMPLETE'
+          raise SystemExit(not result.wasSuccessful() or bool(result.skipped))
+          PYCORE
+      - name: Independent proxy security and GPU logic regressions
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 0:0 --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/fixtures,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/fixtures,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/test_storage.py,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/test_storage.py,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
+            'import unittest,hashlib; loader=unittest.TestLoader(); suite=loader.discover("deployment/gcube",pattern="test_*.py"); flatten=lambda s:sum([flatten(t) if isinstance(t,unittest.TestSuite) else [t.id()] for t in s],[]); expected=sorted(flatten(suite)); assert not loader.errors; assert len(expected)==len(set(expected))==206; assert hashlib.sha256(("\n".join(expected)+"\n").encode()).hexdigest()=="679cd487d78bad7dd691d47489f0a0fa0a8c95cfacb5beeac435eab995890ada"; executed=[]; ExactResult=type("ExactResult",(unittest.TextTestResult,),{"startTest":lambda self,test:(executed.append(test.id()),unittest.TextTestResult.startTest(self,test))}); result=unittest.TextTestRunner(verbosity=1,resultclass=ExactResult).run(suite); print("::notice title=Proxy GPU regressions::tests="+str(result.testsRun)+", failures="+str(len(result.failures))+", errors="+str(len(result.errors))+", skipped="+str(len(result.skipped))+", failed_tests="+str([t.id() for t,_ in result.failures+result.errors])); assert sorted(executed)==expected and result.testsRun==206; raise SystemExit(not result.wasSuccessful() or bool(result.skipped))'
+      - name: Independent v007 diagnostic regressions
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --workdir /tmp/proxy-diag \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python ${IMAGE}:${RELEASE_TAG} -c \
+            'import io,json,hashlib,unittest,run_checks; loader=unittest.TestLoader(); suite=loader.loadTestsFromNames(["test_observer","test_server_diag"]); flatten=lambda s:sum([flatten(t) if isinstance(t,unittest.TestSuite) else [t.id()] for t in s],[]); expected=sorted(flatten(suite)); assert not loader.errors; assert len(expected)==len(set(expected))==31; assert hashlib.sha256(("\n".join(expected)+"\n").encode()).hexdigest()=="dffce04b767c5ea629b2dccbfeb767a9509e9f65658f1855f248d5c8f553fdc5"; executed=[]; ExactResult=type("ExactResult",(run_checks.Result,),{"startTest":lambda self,test:(executed.append(test.id()),run_checks.Result.startTest(self,test))}); result=unittest.TextTestRunner(stream=io.StringIO(),resultclass=ExactResult).run(suite); print("::notice title=Diagnostic regressions::"+json.dumps(dict(tests=result.testsRun,skipped=len(result.skipped),failures=len(result.failures),errors=len(result.errors),failure_locations=result.safe_errors))); assert sorted(executed)==expected and result.testsRun==31; raise SystemExit(not result.wasSuccessful() or bool(result.skipped))'
+      - name: Gateway owner-login and 61-second foreground persistence without GPU admission
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
+      - name: Default v021 gateway owner-login and 61-second foreground persistence
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
+      - name: Default v022 gateway owner-login and 61-second foreground persistence
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 --user 1000:1000 --entrypoint python ${IMAGE}:${RELEASE_TAG} -m deployment.gcube.gateway_preflight
+      - name: Actual production entrypoint fails closed without physical NVIDIA
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name v022-gpu-required \
+            --env WORLD_ENGINE_OWNER_CODE="$(python -c 'import secrets;print(secrets.token_urlsafe(32))')" \
+            --env WORLD_ENGINE_STORAGE_MODE=ephemeral \
+            --env WORLD_ENGINE_STORAGE_PATH=/data ${IMAGE}:${RELEASE_TAG} >/dev/null
+          trap 'docker rm --force v022-gpu-required >/dev/null 2>&1 || true' EXIT
+          docker exec v022-gpu-required python -c \
+            'import json,time,urllib.request; time.sleep(5); p=urllib.request.build_opener(urllib.request.ProxyHandler({})); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["ok"] is True and value["engine_ready"] is False; assert value["error_code"]=="GPU_HARDWARE_UNAVAILABLE"; time.sleep(61); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["engine_ready"] is False; print("::notice title=Production boot::PASS fail-closed; no GPU fallback; persisted 61 seconds")'
+      - name: Login to GHCR only after all validation steps pass
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Refuse publication of a superseded source revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote origin refs/heads/fix/v022-map-infographic | cut -f1)"
+          test "$latest" = "$GITHUB_SHA"
+      - name: Publish new immutable source-specific infographic image
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PYFINALGUARD'
+          import json,os,urllib.request,urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try:
+              urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404:raise RuntimeError('RELEASE_ABSENCE_NOT_VERIFIED') from None
+              print('Final immutable-tag check: verified404; publication permitted.')
+          else:raise RuntimeError('RELEASE_ALREADY_EXISTS_REFUSING_OVERWRITE')
+          PYFINALGUARD
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.infographic_preflight --manifest-only
+          latest="$(git ls-remote origin refs/heads/fix/v022-map-infographic | cut -f1)"
+          test "$latest" = "$GITHUB_SHA"
+          docker push "${IMAGE}:${RELEASE_TAG}"
+      - name: Anonymous public pull, OCI revision and owner-login persistence on pulled image
+        shell: bash
+        run: |
+          set -euo pipefail
+          anonymous="$(mktemp -d)"
+          trap 'rm -rf "$anonymous"' EXIT
+          printf '{"auths":{}}' > "$anonymous/config.json"
+          docker --config "$anonymous" pull "${IMAGE}:${RELEASE_TAG}"
+          revision="$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "${IMAGE}:${RELEASE_TAG}")"
+          test "$revision" = "$GITHUB_SHA"
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.gateway_preflight
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=v020 --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.gateway_preflight
+          docker run --rm --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=v022 --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=v021 --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.gateway_preflight
+          docker inspect --format '::notice title=Public image digest::{{join .RepoDigests ","}}' "${IMAGE}:${RELEASE_TAG}"
+          echo '::notice title=Map-infographic release::Anonymous pull PASS; legacy, default-v021 and default-v022 owner login PASS; each 61s persistence PASS; GPU render NOT_RUN'

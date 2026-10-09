@@ -48,6 +48,9 @@ def configure_qa_schema():
     if os.environ.get('WORLD_ENGINE_STORY_PROGRESSION_VERSION') == 'v021':
         from .story_progression import install_validation
         install_validation()
+    if os.environ.get('WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION') == 'v022':
+        from .infographic_contract import install_validation
+        install_validation()
 
 
 def directed_plan(plan, raw):
@@ -63,6 +66,15 @@ def directed_plan(plan, raw):
 def generate_deployment_plan(raw):
     configure_qa_schema()
     selected=raw.get('direction_profile')
+    # A named new profile owns geometry/state/text only. Explicit old profiles
+    # keep their original generator and immutable 720-frame camera contract.
+    if selected == 'MAP_INFOGRAPHIC_QA_V022' or (
+            os.environ.get('WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION') == 'v022'
+            and float(raw.get('duration', 0)) == 24
+            and selected in {None, 'REFERENCE_MASTER'}
+            and raw.get('production_preset') != 'LEGACY'):
+        from .infographic_planner import generate_infographic_qa
+        return generate_infographic_qa(raw)
     # This deployment's exact 24-second test can use the unchanged production
     # duration control (QA checkbox off, whose old UI range is 12..15). The
     # generated request is explicitly QA and names this isolated preset.
