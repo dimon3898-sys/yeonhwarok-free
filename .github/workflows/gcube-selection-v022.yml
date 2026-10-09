@@ -68,19 +68,43 @@ jobs:
         run: |
           set -euo pipefail
           docker run --rm -i --user 0:0 --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
-          import os, pwd
+          import json, os, pwd, re, traceback
           from pathlib import Path
-          account=pwd.getpwuid(1000)
-          os.environ['HOME']=account.pw_dir
-          for name in ('cache','audio'):
-              path=Path('/run/world-engine')/name;path.mkdir(parents=True,exist_ok=True);os.chown(path,1000,1000)
-          os.setgroups([]);os.setgid(1000);os.setuid(1000)
-          assert os.access(account.pw_dir,os.W_OK|os.X_OK), 'SELECTION_HOME_NOT_WRITABLE'
-          from deployment.gcube.selection_preflight import verify_sources
-          from deployment.gcube.infographic_preflight import run
-          verify_sources()
-          report=run('/data/selection-protected-v022',require_container_assets=True)
-          assert report['passed']
+          phase='account'
+          try:
+              account=pwd.getpwuid(1000)
+              os.environ['HOME']=account.pw_dir
+              phase='runtime-directory'
+              for name in ('cache','audio'):
+                  path=Path('/run/world-engine')/name;path.mkdir(parents=True,exist_ok=True);os.chown(path,1000,1000)
+              phase='uid-home'
+              os.setgroups([]);os.setgid(1000);os.setuid(1000)
+              assert os.access(account.pw_dir,os.W_OK|os.X_OK), 'SELECTION_HOME_NOT_WRITABLE'
+              print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
+              phase='selection-source'
+              from deployment.gcube.selection_preflight import verify_sources
+              from deployment.gcube.infographic_preflight import run
+              verify_sources()
+              print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
+              phase='original-preflight'
+              report=run('/data/selection-protected-v022',require_container_assets=True)
+              assert report['passed']
+              print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
+          except Exception as error:
+              frames=[dict(file=re.sub(r'[^A-Za-z0-9_.<>-]','_',Path(frame.filename).name)[:96],
+                           function=re.sub(r'[^A-Za-z0-9_<>]','_',frame.name)[:96],line=frame.lineno)
+                      for frame in traceback.extract_tb(error.__traceback__)[-10:]]
+              message=error.args[0] if error.args and type(error.args[0]) is str else ''
+              code=re.match(r'^(?:SELECTION|INFOGRAPHIC|SEMANTIC|STORY_PROGRESSION|REFERENCE_EFFECTS|EVENT_QUALITY|VISUAL_QUALITY|SHADER_CONTRACT|SOURCE|ASSET|AUDIO|CAMERA|FRAME_GRID|FRAMEGRID|REGRESSION|TEXTURE|ATLAS|PRODUCTION|GPU|QA)_[A-Z0-9_]+(?=$|[:\s])',message)
+              metadata=dict(phase=phase,exception_type=re.sub(r'[^A-Za-z0-9_]','_',type(error).__name__)[:80],
+                            traceback=frames,validator_codes=[code.group(0)] if code else [])
+              returncode=getattr(error,'returncode',None)
+              if type(returncode) is int:metadata['subprocess_returncode']=returncode
+              errno=getattr(error,'errno',None)
+              if type(errno) is int:metadata['errno']=errno
+              body=json.dumps(metadata,sort_keys=True).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+              print('::error title=Safe selection container preflight failure::'+body,flush=True)
+              raise
           PY
       - name: Original 1061 regressions and additive public UI API integration
         shell: bash
