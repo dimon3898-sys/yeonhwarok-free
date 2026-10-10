@@ -28,7 +28,7 @@ async function start(proof) {
         $('diagnostic').href = '/download/' + job + '/diagnostic';
         $('result').hidden = false; $('png').hidden = !(proof && value.status === 'PASS');
         if (!$('png').hidden) $('png').href = '/download/' + job + '/png';
-        $('status').textContent = value.status === 'PASS' ? (proof ? 'PNG ready. GPU visual approval: USER PENDING.' : 'GPU / WebGL2 capability PASS.') : 'FAIL: ' + (value.diagnostic?.error_code || value.diagnostic?.capability_result?.failures?.join(', ') || 'GPU_REQUIRED');
+        $('status').textContent = value.status === 'PASS' ? (proof ? 'PNG ready. GPU visual approval: USER PENDING.' : 'GPU / WebGL2 capability PASS.') : 'FAIL: ' + (value.diagnostic?.error_code || value.diagnostic?.capability_result?.failures?.join(', ') || 'GPU_REQUIRED') + (value.diagnostic?.failed_stage ? ' · ' + value.diagnostic.failed_stage : '') + ' · Download Diagnostic for Vulkan/EGL details.';
         break;
       }
       await new Promise(resolve => setTimeout(resolve, 1000));

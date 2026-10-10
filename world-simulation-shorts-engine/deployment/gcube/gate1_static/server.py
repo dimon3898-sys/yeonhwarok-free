@@ -13,9 +13,13 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 from urllib.parse import urlsplit
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+sys.path.insert(1, str(HERE.parent))
+from bootstrap import environment_evidence, prepare_user_environment, redact, worker_environment, LIMIT
 
 
 def verify_bundle(bundle):
@@ -54,48 +58,105 @@ class ProofService:
         preferred = os.environ.get('WORLD_ENGINE_GPU_PROFILE', 'vulkan')
         if preferred not in {'vulkan', 'egl'}:
             raise ValueError('GPU_PROFILE_INVALID')
-        env = os.environ.copy()
+        env = worker_environment(os.environ)
         # The browser subprocess never receives the owner code or sessions.
         env.pop('WORLD_ENGINE_OWNER_CODE', None)
         env['WORLD_ENGINE_RENDER_MODE'] = 'gpu-required'
         env['STATIC_PROOF_BUNDLE'] = str(self.bundle)
+        runtime = {'result': 'NOT_RUN'}
+        runtime_error = None
+        from gpu_runtime_facts import graphics_runtime_inventory
         try:
             from graphics_runtime import prepare_graphics_runtime
-            updates, _ = prepare_graphics_runtime(env)
+            updates, runtime = prepare_graphics_runtime(env)
             env.update(updates)
-        except ImportError:
-            raise ValueError('GPU_RUNTIME_HELPER_MISSING') from None
+        except Exception as error:
+            runtime_error = {'name': type(error).__name__, 'message': redact(error), 'stack': redact(traceback.format_exc())}
+            runtime = {'status': 'FAIL', 'error': runtime_error}
         profiles = [preferred] + (['egl'] if preferred == 'vulkan' else [])
         selected = None
-        diagnostic = None
+        attempts = {}
         for profile in profiles:
             env['WORLD_ENGINE_GPU_PROFILE'] = profile
+            attempt_output = output / profile
+            attempt_output.mkdir(mode=0o700)
+            context = {'environment': environment_evidence(env), 'graphics_runtime': runtime,
+                       'inventory': graphics_runtime_inventory(env)}
+            context_file = attempt_output / 'context.json'
+            context_file.write_text(json.dumps(context))
+            env['GATE1_ATTEMPT_CONTEXT'] = str(context_file)
             emit({'stage': 'GPU_CAPABILITY_' + profile.upper(), 'result': 'IN_PROGRESS'})
-            code = self.child('probe', output, env, emit)
-            diagnostic = json.loads((output / 'diagnostic.json').read_text())
+            if runtime_error:
+                diagnostic = {**context, 'backend': profile, 'error_code': 'GRAPHICS_RUNTIME_PREPARATION_FAILED',
+                              'failed_stage': 'GRAPHICS_RUNTIME', 'error': runtime_error,
+                              'capability_result': {'result': 'FAIL'}, 'worker_process': {'result': 'NOT_RUN'},
+                              'stages': [{'name': name, 'result': 'PASS' if name in {'START', 'ENVIRONMENT'} else 'FAIL' if name in {'GRAPHICS_RUNTIME', 'RESULT'} else 'NOT_RUN'}
+                                         for name in ['START', 'ENVIRONMENT', 'GRAPHICS_RUNTIME', 'BROWSER_LAUNCH', 'PAGE_CREATE', 'PAGE_LOAD', 'WEBGL2_CREATE', 'GPU_IDENTITY', 'READPIXELS', 'RESULT']]}
+                (attempt_output / 'diagnostic.json').write_text(json.dumps(diagnostic))
+                attempts[profile] = diagnostic
+                emit({'stage': 'GRAPHICS_RUNTIME_PREPARATION_FAILED', 'result': 'FAIL'})
+                continue
+            process = self.child('probe', attempt_output, env, emit)
+            diagnostic = self.read_attempt(attempt_output, profile, context, process)
+            attempts[profile] = diagnostic
+            code = process['exit_code']
             if code == 0 and diagnostic.get('capability_result', {}).get('result') == 'PASS':
                 selected = profile
                 break
         if selected is None:
-            return False, diagnostic or {'error_code': 'GPU_REQUIRED'}
+            return False, {'schema_version': 2, 'purpose': 'GATE1_STATIC_PROOF', 'attempts': attempts,
+                           'error_code': diagnostic['error_code'], 'failed_stage': diagnostic.get('failed_stage'),
+                           'capability_result': {'result': 'FAIL'}, 'peak_memory': 'UNKNOWN',
+                           'gpu_visual_quality': 'NOT_RUN'}
+        diagnostic = {**diagnostic, 'attempts': attempts}
         if mode == 'probe':
             return True, diagnostic
         env['WORLD_ENGINE_GPU_PROFILE'] = selected
         emit({'stage': 'ONE_FRAME_' + selected.upper(), 'result': 'IN_PROGRESS'})
-        code = self.child('proof', output, env, emit)
-        diagnostic = json.loads((output / 'diagnostic.json').read_text())
+        process = self.child('proof', output, env, emit)
+        diagnostic = {**self.read_attempt(output, selected, context, process), 'attempts': attempts}
         png = output / 'SUEZ_STATIC_PROOF_RTX4080S.png'
-        ok = code == 0 and diagnostic.get('capability_result', {}).get('result') == 'PASS' and diagnostic.get('frame_count') == 1 and png.is_file()
+        ok = process['exit_code'] == 0 and diagnostic.get('capability_result', {}).get('result') == 'PASS' and diagnostic.get('frame_count') == 1 and png.is_file()
         return ok, diagnostic
+
+    @staticmethod
+    def read_attempt(output, profile, context, process):
+        filename = output / 'diagnostic.json'
+        if filename.is_file():
+            diagnostic = json.loads(filename.read_text())
+        else:
+            diagnostic = {'error_code': 'WORKER_TIMEOUT' if process['timed_out'] else 'WORKER_PROCESS_FAILED',
+                          'failed_stage': 'WORKER', 'capability_result': {'result': 'FAIL'}}
+        diagnostic.update(backend=profile, worker_process=process, **context)
+        browser = output / 'chromium-process.json'
+        diagnostic['chromium_process'] = json.loads(browser.read_text()) if browser.is_file() else {'exit_code': 'UNKNOWN', 'signal': 'UNKNOWN'}
+        for stream in ('stdout', 'stderr'):
+            filename = output / ('chromium.' + stream + '.log')
+            diagnostic['chromium_' + stream] = redact(filename.read_text(errors='replace')) if filename.is_file() else ''
+        return diagnostic
 
     @staticmethod
     def child(mode, output, env, emit):
         # Each child has its own process group and a deadline. A watchdog also
         # kills Chromium descendants when a child exits or stops emitting.
         process = subprocess.Popen(['node', str(HERE / 'worker.mjs'), mode, str(output)],
-                                   env=env, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                   env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                    text=True, start_new_session=True)
         timed_out = threading.Event()
+        stderr = []
+
+        def read_stderr():
+            size = 0
+            for line in process.stderr:
+                if size < LIMIT:
+                    value = redact(line, env)[:LIMIT - size]
+                    stderr.append(value)
+                    size += len(value)
+
+        reader = threading.Thread(target=read_stderr, daemon=True)
+        reader.start()
+        stdout = []
+        size = 0
 
         def terminate():
             timed_out.set()
@@ -108,6 +169,10 @@ class ProofService:
         timer.start()
         try:
             for line in process.stdout:
+                if size < LIMIT:
+                    value = redact(line, env)[:LIMIT - size]
+                    stdout.append(value)
+                    size += len(value)
                 try:
                     row = json.loads(line)
                     if isinstance(row, dict) and isinstance(row.get('stage'), str):
@@ -115,9 +180,10 @@ class ProofService:
                 except ValueError:
                     pass
             code = process.wait(timeout=5)
-            if timed_out.is_set():
-                raise ValueError('STATIC_PROOF_TIMEOUT')
-            return code
+            reader.join(timeout=3)
+            return {'exit_code': code if code >= 0 else None, 'signal': -code if code < 0 else None,
+                    'timed_out': timed_out.is_set(), 'stdout': ''.join(stdout), 'stderr': ''.join(stderr),
+                    'capture_limit_bytes': LIMIT}
         finally:
             timer.cancel()
             try:
@@ -126,6 +192,8 @@ class ProofService:
                 pass
             process.stdout.close()
             process.wait(timeout=5)
+            reader.join(timeout=3)
+            process.stderr.close()
 
     def start_job(self, mode):
         with self.lock:
@@ -154,8 +222,10 @@ class ProofService:
                 with self.lock:
                     job['diagnostic'] = diagnostic
                     job['status'] = 'PASS' if ok else 'FAIL'
-            except Exception:
-                diagnostic = {'error_code': 'STATIC_PROOF_WORKER_FAILED', 'capability_result': {'result': 'FAIL'}, 'peak_memory': 'UNKNOWN'}
+            except Exception as error:
+                diagnostic = {'error_code': 'STATIC_PROOF_WORKER_FAILED', 'failed_stage': 'SERVER_BOOTSTRAP',
+                              'error': {'name': type(error).__name__, 'message': redact(error), 'stack': redact(traceback.format_exc())},
+                              'capability_result': {'result': 'FAIL'}, 'peak_memory': 'UNKNOWN'}
                 (output / 'diagnostic.json').write_text(json.dumps(diagnostic))
                 with self.lock:
                     job.update(status='FAIL', diagnostic=diagnostic)
@@ -283,6 +353,8 @@ def make_handler(service):
 
 
 def main():
+    import pwd
+    account = pwd.getpwnam('engine')
     password = os.environ.get('WORLD_ENGINE_OWNER_CODE', '')
     if len(password) < 12:
         sys.exit('WORLD_ENGINE_OWNER_CODE_REQUIRED_MIN_12')
@@ -291,14 +363,13 @@ def main():
     # Same audited provider-device group preservation as the existing image.
     if os.getuid() == 0:
         from gpu_access import collect_device_groups
-        import pwd
-        account = pwd.getpwnam('engine')
         runtime = Path('/run/world-engine')
         runtime.mkdir(exist_ok=True, mode=0o700)
         os.chown(runtime, account.pw_uid, account.pw_gid)
         os.setgroups(collect_device_groups())
         os.setgid(account.pw_gid)
         os.setuid(account.pw_uid)
+    os.environ.update(prepare_user_environment(account, '/run/world-engine'))
     service = ProofService(os.environ.get('STATIC_PROOF_BUNDLE', str(HERE / 'bundle')),
                            os.environ.get('STATIC_PROOF_STATE', '/tmp/gate1-static-output'), password)
     port = int(os.environ.get('PORT', '8000'))

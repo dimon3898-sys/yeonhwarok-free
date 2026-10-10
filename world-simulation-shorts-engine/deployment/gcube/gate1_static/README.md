@@ -56,3 +56,26 @@ NVIDIA quality/performance is NOT RUN until the user runs gCube.
 
 The original software PNG, iteration montage and report are never overwritten.
 Legacy regression is not invoked by this release.
+
+## GPU bootstrap diagnostic release
+
+Renderer, scene, GIS, terrain, shader, theme, layout and original proof bytes are
+frozen. This release only changes process bootstrap and diagnostic transport.
+The engine UID uses its account HOME, private 0700 XDG cache/config/runtime
+directories and `/usr/bin/chromium`, with the existing hardware argument wrapper.
+
+First run only `CHECK GPU / WEBGL2`. Vulkan and EGL failures are independently
+saved under `attempts.vulkan` / `attempts.egl`, with execution identity, directory
+permissions, device/library inventory, loader preparation, explicit stage status,
+bounded Chromium/worker stdout and stderr, browser exit code/signal and redacted
+Playwright exception message/stack. Browser details remain in the authenticated
+Diagnostic download. Owner codes and other secret environment variables are not
+forwarded to the worker; secret values and credential URLs are redacted from logs.
+Captures are limited to 64 KiB per stream/error; abrupt SIGKILL may leave the
+Chromium exit status UNKNOWN, while the worker termination signal is retained.
+
+HOME parity corrects an observed bootstrap difference; it does not prove the
+previous actual RTX failure was caused by HOME. NVIDIA success and quality remain
+NOT RUN until the user checks the deployed workload. Software CI probes only
+WebGL transport/clear/readback, run as UID 1000, and never render a proof image.
+No full legacy regression is part of this release.

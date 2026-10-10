@@ -61,9 +61,9 @@ def package(proof, output):
     for source in sorted((proof / 'licenses').glob('*')):
         if source.is_file():
             put('licenses/' + source.name, source.read_bytes())
-    for name in ['server.py', 'worker.mjs', 'capability.mjs', 'index.html', 'ui.js', 'ui.css', 'README.md']:
+    for name in ['server.py', 'worker.mjs', 'capability.mjs', 'diagnostic.mjs', 'bootstrap.py', 'browser_capture.py', 'index.html', 'ui.js', 'ui.css', 'README.md']:
         shutil.copyfile(HERE / name, output / name)
-    for name in ['chromium_wrapper.py', 'graphics_runtime.py', 'gpu_access.py']:
+    for name in ['chromium_wrapper.py', 'graphics_runtime.py', 'gpu_access.py', 'gpu_runtime_facts.py']:
         shutil.copyfile(HERE.parent / name, output / name)
     (output / 'chromium_wrapper.py').chmod(0o755)
     identity = {**plan['provenance'], 'compiledPlanHash': sha(plan_bytes), 'seed': plan['seed'],
@@ -91,13 +91,13 @@ CMD []
     manifest = {'version': 1, 'release_source_hash': release_hash, 'source_identity': identity,
                 'shader_version': identity['shaderVersion'], 'theme_version': identity['themeVersion'],
                 'files': files, 'routes': routes, 'release_files': release_files,
-                'base': BASE, 'tag': 'gcube-map-renderer-v1-gate1-static-' + release_hash[:12],
+                'base': BASE, 'tag': 'gcube-map-renderer-v1-gate1-bootstrap-' + release_hash[:12],
                 'policy': {'frame_count': 1, 'gpu_required': True, 'software_fallback': False, 'user_visual_approval': True,
                            'video': False, 'audio': False, 'animation': False, 'gate2': False}}
     (bundle / 'manifest.json').write_text(json.dumps(manifest, indent=2))
     # Readability inside the provider's UID 1000 runtime; original files untouched.
     for file in output.rglob('*'):
-        file.chmod(0o755 if file.is_dir() or file.name == 'chromium_wrapper.py' else 0o644)
+        file.chmod(0o755 if file.is_dir() or file.name in {'chromium_wrapper.py', 'browser_capture.py'} else 0o644)
     report('FROZEN_RELEASE_BUNDLE')
     print(json.dumps({'tag': manifest['tag'], 'source_hash': release_hash, 'bundle_bytes': sum(r['bytes'] for r in release_files)}), flush=True)
     return manifest

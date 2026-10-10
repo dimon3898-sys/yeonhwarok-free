@@ -98,6 +98,24 @@ try:
     assert code == 200 and 'attachment;' in headers['Content-Disposition']
     diagnostic = json.loads(body)
     assert diagnostic['capability_result']['result'] == 'FAIL'
+    assert set(diagnostic['attempts']) == {'vulkan', 'egl'}
+    for backend, attempt in diagnostic['attempts'].items():
+        assert attempt['backend'] == backend
+        assert attempt['error_code'] != 'STATIC_PROOF_FAILED'
+        assert attempt['failed_stage']
+        assert attempt['environment']['uid'] == 1000
+        assert attempt['environment']['directories']['HOME']['path'] == '/home/engine'
+        assert all(row['accessible'] for row in attempt['environment']['directories'].values())
+        assert attempt['environment']['directories']['XDG_RUNTIME_DIR']['mode'] == '0o700'
+        assert attempt['environment']['chromium_real_executable'] == '/usr/bin/chromium'
+        assert 'libraries' in attempt['inventory'] and 'devices' in attempt['inventory']
+        assert 'egl' in attempt['graphics_runtime'] and 'vulkan' in attempt['graphics_runtime']
+        assert 'stderr' in attempt['worker_process'] and 'stdout' in attempt['worker_process']
+        assert 'exit_code' in attempt['chromium_process'] and 'signal' in attempt['chromium_process']
+        assert 'chromium_stderr' in attempt and 'chromium_stdout' in attempt
+        assert [row['name'] for row in attempt['stages']] == ['START', 'ENVIRONMENT', 'GRAPHICS_RUNTIME', 'BROWSER_LAUNCH', 'PAGE_CREATE', 'PAGE_LOAD', 'WEBGL2_CREATE', 'GPU_IDENTITY', 'READPIXELS', 'RESULT']
+        assert all(row['result'] != 'PASS' for row in attempt['stages'] if row['name'] == 'RESULT')
+    report('CONTAINER_BACKEND_DIAGNOSTICS_AND_BOOTSTRAP_ENVIRONMENT')
     (evidence / 'container-no-gpu.diagnostic.json').write_bytes(body)
     report('CONTAINER_FAILURE_DIAGNOSTIC_DOWNLOAD')
     time.sleep(2)
