@@ -1,0 +1,275 @@
+name: Validate and publish reviewed terrain infographic visual target v024
+on:
+  push:
+    branches: [fix/v024-visual-target]
+    paths:
+      - world-simulation-shorts-engine/engine/**
+      - world-simulation-shorts-engine/web/**
+      - world-simulation-shorts-engine/tests/**
+      - world-simulation-shorts-engine/deployment/**
+      - .github/workflows/gcube-terrain-v024.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: gcube-v024-visual-target-publication
+  cancel-in-progress: true
+jobs:
+  publish:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Source-specific immutable tag and frozen source admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${#GITHUB_SHA}" = 40
+          printf 'RELEASE_TAG=gcube-v024-visual-target-%s\n' "${GITHUB_SHA:0:12}" >> "$GITHUB_ENV"
+          python world-simulation-shorts-engine/deployment/gcube/terrain_preflight.py --manifest-only --checkout
+      - name: Refuse existing immutable tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try: urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404: raise RuntimeError('SELECTION_TAG_ABSENCE_UNVERIFIED') from None
+              print('Immutable selection tag absent; build permitted.')
+          else: raise RuntimeError('SELECTION_TAG_EXISTS_REFUSING_OVERWRITE')
+          PY
+      - name: Original privileged 206 proxy and 31 diagnostic tests before candidate build
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --user 0:0 \
+            --env WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE=OFF \
+            --env WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE=V022_LEGACY \
+            --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy \
+            --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy \
+            --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 \
+            --mount "type=bind,source=${PWD},target=/opt/world-engine,readonly" \
+            --workdir /opt/world-engine/world-simulation-shorts-engine \
+            --entrypoint python "${IMAGE}@sha256:60108bcc6f5c097eafb5003d78050ec97996702eda8458ec85a2adb208551bb6" - <<'PY'
+          import json, os, sys, unittest
+          from deployment.gcube import terrain_preflight as terrain
+          from deployment.gcube import selection_preflight as selection
+          assert os.geteuid() == 0, 'TERRAIN_PREBUILD_ROOT_REQUIRED'
+          value, source = terrain.verify_sources(checkout=True)
+          with selection.environment(**selection.LEGACY_ENV, **terrain.LEGACY_ENV,
+                                     WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE='V022_LEGACY'), terrain.parent_admission_view():
+              proxy = selection.admit_proxy_inventory(json.loads(terrain.physical_bytes(terrain.SELECTION_MANIFEST)))
+              security = selection.execute_suite(proxy, value['proxy_ids'], 'prebuild-unchanged-proxy-security-gpu-logic')
+              directory = terrain.ROOT / 'deployment/gcube-proxy-diag'
+              assert directory.is_dir(), 'TERRAIN_PREBUILD_DIAGNOSTIC_SOURCE_MISSING'
+              before = os.getcwd()
+              sys.path.insert(0, str(directory))
+              try:
+                  os.chdir(directory)
+                  suite = unittest.TestLoader().loadTestsFromNames(['test_observer', 'test_server_diag'])
+                  diagnostic = selection.execute_suite(suite, value['diagnostic_ids'], 'prebuild-unchanged-independent-diagnostic')
+              finally:
+                  os.chdir(before)
+                  sys.path.remove(str(directory))
+          after, final = terrain.verify_sources(checkout=True)
+          assert final['manifest_sha256'] == source['manifest_sha256'], 'TERRAIN_PREBUILD_SOURCE_CHANGED'
+          assert security['tests'] == 206 and diagnostic['tests'] == 31, 'TERRAIN_PREBUILD_TEST_TOTAL_INVALID'
+          terrain.notice('Privileged pre-build parent regression', dict(passed=True, tests=237,
+              failures=0, errors=0, skipped=0, groups=[{key: row[key] for key in ('category','tests','failures','errors','skipped')}
+                                                   for row in (security, diagnostic)],
+              exact_published_parent=terrain.PARENT_DIGEST, source_manifest_sha256=source['manifest_sha256'],
+              physical_gpu='NOT_RUN'))
+          PY
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
+        with:
+          driver: docker
+      - name: Build approved visual target overlay without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        with:
+          context: .
+          file: world-simulation-shorts-engine/deployment/gcube/Dockerfile.terrain-v024
+          platforms: linux/amd64
+          load: true
+          push: false
+          tags: ${{ env.IMAGE }}:${{ env.RELEASE_TAG }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+      - name: Original full v023 assets native measured media preflight with exact selector admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm -i --user 0:0 --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import json, os, pwd, re, traceback
+          from pathlib import Path
+          phase='account'
+          try:
+              account=pwd.getpwuid(1000)
+              os.environ['HOME']=account.pw_dir
+              phase='runtime-directory'
+              for name in ('cache','audio'):
+                  path=Path('/run/world-engine')/name;path.mkdir(parents=True,exist_ok=True);os.chown(path,1000,1000)
+              phase='uid-home'
+              os.setgroups([]);os.setgid(1000);os.setuid(1000)
+              assert os.access(account.pw_dir,os.W_OK|os.X_OK), 'SELECTION_HOME_NOT_WRITABLE'
+              print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
+              phase='selection-source'
+              from deployment.gcube.terrain_preflight import verify_sources, protected_preflight
+              verify_sources()
+              print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
+              phase='original-preflight'
+              report=protected_preflight('/data/terrain-protected-v023',container=True)
+              assert report['passed']
+              print('::notice title=Selection preflight phase::'+json.dumps(dict(phase=phase,passed=True)),flush=True)
+          except Exception as error:
+              frames=[dict(file=re.sub(r'[^A-Za-z0-9_.<>-]','_',Path(frame.filename).name)[:96],
+                           function=re.sub(r'[^A-Za-z0-9_<>]','_',frame.name)[:96],line=frame.lineno)
+                      for frame in traceback.extract_tb(error.__traceback__)[-10:]]
+              message=error.args[0] if error.args and type(error.args[0]) is str else ''
+              code=re.match(r'^(?:V[0-9]+|TERRAIN|BOLD|SELECTION|INFOGRAPHIC|SEMANTIC|STORY_PROGRESSION|REFERENCE_EFFECTS|EVENT_QUALITY|VISUAL_QUALITY|SHADER_CONTRACT|SOURCE|ASSET|AUDIO|CAMERA|FRAME_GRID|FRAMEGRID|REGRESSION|TEXTURE|ATLAS|PRODUCTION|GPU|QA)_[A-Z0-9_]+(?=$|[:\s])',message)
+              metadata=dict(phase=phase,exception_type=re.sub(r'[^A-Za-z0-9_]','_',type(error).__name__)[:80],
+                            traceback=frames,validator_codes=[code.group(0)] if code else [])
+              returncode=getattr(error,'returncode',None)
+              if type(returncode) is int:metadata['subprocess_returncode']=returncode
+              errno=getattr(error,'errno',None)
+              if type(errno) is int:metadata['errno']=errno
+              body=json.dumps(metadata,sort_keys=True).replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+              print('::error title=Safe selection container preflight failure::'+body,flush=True)
+              raise
+          PY
+      - name: Focused real-container release regressions before mandatory full union
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 0:0 \
+            --env WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE=OFF \
+            --env WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE=V022_LEGACY \
+            --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy \
+            --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy \
+            --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/.github/workflows/gcube-terrain-v024.yml,target=/opt/world-engine/.github/workflows/gcube-terrain-v024.yml,readonly" \
+            --mount "type=bind,source=${PWD}/.github/workflows/gcube-bold-v023.yml,target=/opt/world-engine/.github/workflows/gcube-bold-v023.yml,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/Dockerfile.terrain-v024,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/Dockerfile.terrain-v024,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/Dockerfile.bold-v023,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/Dockerfile.bold-v023,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/test_storage.py,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/test_storage.py,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --focused-only
+      - name: Original 1200 regressions and additive reviewed visual target integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 0:0 \
+            --env WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE=OFF \
+            --env WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE=V022_LEGACY \
+            --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy \
+            --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy \
+            --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
+            --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/tests,target=/opt/world-engine/world-simulation-shorts-engine/tests,readonly" \
+            --mount "type=bind,source=${PWD}/.github/workflows/gcube-terrain-v024.yml,target=/opt/world-engine/.github/workflows/gcube-terrain-v024.yml,readonly" \
+            --mount "type=bind,source=${PWD}/.github/workflows/gcube-bold-v023.yml,target=/opt/world-engine/.github/workflows/gcube-bold-v023.yml,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/Dockerfile.terrain-v024,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/Dockerfile.terrain-v024,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/Dockerfile.bold-v023,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/Dockerfile.bold-v023,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/deployment/gcube/test_storage.py,target=/opt/world-engine/world-simulation-shorts-engine/deployment/gcube/test_storage.py,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,target=/opt/world-engine/world-simulation-shorts-engine/library/uploads/asset_ee0d2ae58134/source.mp4,readonly" \
+            --mount "type=bind,source=${PWD}/.devcontainer/devcontainer.json,target=/opt/world-engine/.devcontainer/devcontainer.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PREMIUM_FLAT_MAP_15S_v004/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,target=/opt/world-engine/world-simulation-shorts-engine/docs/evidence/shipping75_label_progression_20261004T203922Z/production_plan_before_exact.json,readonly" \
+            --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
+            --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --regressions-only
+      - name: Actual approved CPU Canvas 1080x1920 visual target pixel QC
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --pixels-only
+      - name: Container package and storage admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 1000:1000 -i --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          from deployment.gcube.terrain_preflight import verify_sources
+          verify_sources()
+          packages=('libegl1','libvulkan1','libx11-6','libxext6')
+          for name in packages:
+              status=subprocess.check_output(['dpkg-query','-W','-f=${Status}',name],text=True)
+              assert status=='install ok installed', 'SELECTION_GPU_PACKAGE_MISSING'
+          for command in (['node','--version'],['ffmpeg','-version'],['ffprobe','-version']):
+              subprocess.run(command,check=True,capture_output=True)
+          for name in ('tmp','cache','frames','outputs','checkpoints'):
+              folder=Path('/data')/name;folder.mkdir(parents=True,exist_ok=True)
+              probe=folder/'selection-write-probe';probe.write_text('ok');probe.unlink()
+          print('::notice title=Selection container dependencies::'+json.dumps(dict(passed=True,packages=list(packages),physical_gpu='NOT_RUN')))
+          PY
+      - name: Public owner login v024 QA Production BOLD OFF approval backend and 61 second persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --smoke-only
+      - name: Production entrypoint fails closed without physical NVIDIA
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --detach --name terrain-gpu-required \
+            --env WORLD_ENGINE_OWNER_CODE="$(python -c 'import secrets;print(secrets.token_urlsafe(32))')" \
+            --env WORLD_ENGINE_STORAGE_MODE=ephemeral --env WORLD_ENGINE_STORAGE_PATH=/data "${IMAGE}:${RELEASE_TAG}" >/dev/null
+          trap 'docker rm --force terrain-gpu-required >/dev/null 2>&1 || true' EXIT
+          docker exec terrain-gpu-required python -c \
+            'import json,time,urllib.request; time.sleep(5); p=urllib.request.build_opener(urllib.request.ProxyHandler({})); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["ok"] is True and value["engine_ready"] is False and value["error_code"]=="GPU_HARDWARE_UNAVAILABLE"; time.sleep(61); value=json.load(p.open("http://127.0.0.1:8000/healthz")); assert value["engine_ready"] is False; print("::notice title=Terrain production boot::PASS fail-closed; persisted61; GPU NOT_RUN")'
+      - name: Authenticate GHCR after all checks pass
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Final source and immutable tag check then publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest="$(git ls-remote origin "refs/heads/${GITHUB_REF_NAME}" | cut -f1)"
+          test "$latest" = "$GITHUB_SHA"
+          docker run --rm --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --manifest-only
+          python - <<'PY'
+          import json, os, urllib.request, urllib.error
+          image='dimon3898-sys/world-simulation-shorts-engine'
+          grant=json.load(urllib.request.urlopen('https://ghcr.io/token?service=ghcr.io&scope=repository:'+image+':pull',timeout=30))
+          request=urllib.request.Request('https://ghcr.io/v2/'+image+'/manifests/'+os.environ['RELEASE_TAG'],method='HEAD',headers={'Authorization':'Bearer '+grant['token'],'Accept':'application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.v2+json'})
+          try: urllib.request.urlopen(request,timeout=30)
+          except urllib.error.HTTPError as error:
+              if error.code!=404: raise RuntimeError('SELECTION_TAG_ABSENCE_UNVERIFIED') from None
+          else: raise RuntimeError('SELECTION_TAG_EXISTS_REFUSING_OVERWRITE')
+          PY
+          docker push "${IMAGE}:${RELEASE_TAG}"
+      - name: Anonymous public pull revision digest and persisted public selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          anonymous="$(mktemp -d)"
+          trap 'rm -rf "$anonymous"' EXIT
+          printf '{"auths":{}}' > "$anonymous/config.json"
+          docker --config "$anonymous" pull "${IMAGE}:${RELEASE_TAG}"
+          revision="$(docker inspect --format '{{index .Config.Labels "org.opencontainers.image.revision"}}' "${IMAGE}:${RELEASE_TAG}")"
+          test "$revision" = "$GITHUB_SHA"
+          docker run --rm --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --smoke-only
+          docker inspect --format '::notice title=Public terrain image digest::{{join .RepoDigests ","}}' "${IMAGE}:${RELEASE_TAG}"
+          echo '::notice title=Terrain release::Anonymous pull PASS; owner login health and61s PASS; public v024 QA Production BOLD and OFF plan approval backend PASS; actual GPU NOT_RUN'

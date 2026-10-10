@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="/v3/">
+<title>World Simulation scene renderer</title>
+<style>@font-face{font-family:'Open Sans';src:url('/v3/assets/v3/fonts/OpenSans-Light.ttf') format('truetype');font-weight:300;font-display:block}@font-face{font-family:'Noto Cinema';src:url('/static/fonts/NotoSansCJKkr-Regular.otf') format('opentype');font-weight:400;font-display:block}@font-face{font-family:'Noto Cinema';src:url('/static/fonts/NotoSansCJKkr-Bold.otf') format('opentype');font-weight:700;font-display:block}html,body{margin:0;padding:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js"}}</script></head><body>
+<script type="module">
+import {createTerrainInfographicRenderer} from '/static/terrain_infographic_adapter.js';
+try {
+ const query=new URLSearchParams(location.search),supplied=window.SCENE_CONFIG;
+ let plan=supplied?.plan;
+ if(!plan){const response=await fetch(`/api/projects/${encodeURIComponent(query.get('project')||'')}/versions/${encodeURIComponent(query.get('version')||'v001')}/plan`);if(!response.ok)throw Error(`Scene plan request ${response.status}`);plan=await response.json();}
+ if(plan.plan)plan=plan.plan;if(plan.scene_plan)plan=plan.scene_plan;
+ const scene=supplied?.scene||(plan.scenes||[]).find(value=>value.scene_id===query.get('scene'));
+ if(!scene)throw Error('A verified Scene JSON is required');
+ if(scene.terrain_infographic?.version!=='v024'||scene.terrain_infographic.profile_id!=='VISUAL_TARGET_MAP_V024')throw Error('VISUAL TARGET MAP v024 must be explicitly selected');
+ if(scene.bold_infographic?.version!=='v023'||scene.bold_infographic.profile_id!=='BOLD_INFOGRAPHIC_V023')throw Error('Inherited native region selection v023 must be explicitly selected');
+ if(scene.infographic?.version!=='v022')throw Error('Inherited map infographic v022 must be explicitly selected');
+ if(scene.production_defaults?.version!=='v1')throw Error('Production Default v1 must be explicitly selected');
+ if(scene.visual_polish?.version!=='v004')throw Error('Visual polish must be explicitly selected');
+ if(scene.infographic.parent_renderer_family==='story-progression-v021'){
+  if(scene.second_event_camera?.preset!=='SECOND_EVENT_ADAPTIVE_WIDE_TEST'||scene.story_progression?.version!=='v021')throw Error('Verified v021 QA parent required');
+ }else if(scene.infographic.parent_renderer_family!=='production-earth-v1')throw Error('Explicit inherited renderer family required');
+ const app=createTerrainInfographicRenderer(scene,plan);await app.init();
+ window.app=app;window.renderFrame=(time,samples=1)=>app.frame(time,samples);window.ready=true;
+}catch(error){window.renderError=String(error?.stack||error);console.error(window.renderError);}
+</script></body></html>

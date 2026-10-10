@@ -52,7 +52,8 @@ def require_infographic_selection(plan, expected_profile=None):
     declared = request.get('direction_profile')
     expected_profile = expected_profile or (declared if isinstance(declared, str) and declared in PUBLIC_PROFILES else None)
     present = ('infographic' in metadata or any('infographic' in s for s in scenes)
-               or 'bold_infographic' in metadata or any('bold_infographic' in s for s in scenes))
+               or 'bold_infographic' in metadata or any('bold_infographic' in s for s in scenes)
+               or 'terrain_infographic' in metadata or any('terrain_infographic' in s for s in scenes))
     if not present and expected_profile is None:
         return None
     selected = metadata.get('infographic')
@@ -67,6 +68,13 @@ def require_infographic_selection(plan, expected_profile=None):
         mismatch()
     from .infographic_contract import validate_infographic
     checked = validate_infographic(plan)
+    if checked['passed'] and ('terrain_infographic' in metadata
+                              or any('terrain_infographic' in scene for scene in scenes)):
+        from .terrain_infographic import install_runtime, validate_terrain_infographic
+        if not validate_terrain_infographic(plan)['passed']:
+            raise EngineError('TERRAIN_INFOGRAPHIC_PLAN_INVALID',
+                              '지형 인포그래픽의 실제 지역·소스 검증을 통과하지 못했습니다.', status=409)
+        install_runtime()
     if checked['passed'] and ('bold_infographic' in metadata
                               or any('bold_infographic' in scene for scene in scenes)):
         from .bold_infographic import install_runtime, validate_bold_infographic
@@ -111,7 +119,7 @@ def require_project_infographic_selection(store, pid, version, plan=None):
             expected = receipt['effective_profile']
             visual = receipt.get('visual_profile')
             if visual is not None:
-                if visual != 'BOLD_INFOGRAPHIC_V023' or expected_visual not in {None, visual}:
+                if visual not in {'BOLD_INFOGRAPHIC_V023', 'VISUAL_TARGET_MAP_V024'} or expected_visual not in {None, visual}:
                     raise ValueError('invalid visual selection receipt')
                 expected_visual = visual
         if original_path.exists():
@@ -123,7 +131,7 @@ def require_project_infographic_selection(store, pid, version, plan=None):
                 expected = profile
             if isinstance(original, dict) and 'infographic_visual_profile' in original:
                 visual = original['infographic_visual_profile']
-                if visual not in {'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'} or expected_visual not in {None, visual}:
+                if visual not in {'BOLD_INFOGRAPHIC_V023', 'VISUAL_TARGET_MAP_V024', 'V022_LEGACY'} or expected_visual not in {None, visual}:
                     raise ValueError('visual selection receipt conflict')
                 expected_visual = visual
     except (OSError, ValueError, TypeError):
@@ -131,8 +139,12 @@ def require_project_infographic_selection(store, pid, version, plan=None):
                           '저장된 연출 선택과 기획이 일치하지 않습니다.', status=409) from None
     actual = require_infographic_selection(plan, expected)
     bold = plan.get('metadata', {}).get('bold_infographic') is not None
-    if expected_visual is not None and bold != (expected_visual == 'BOLD_INFOGRAPHIC_V023'):
-        raise EngineError('BOLD_INFOGRAPHIC_SELECTION_MISMATCH',
+    terrain = plan.get('metadata', {}).get('terrain_infographic') is not None
+    selected_visual = 'VISUAL_TARGET_MAP_V024' if terrain else 'BOLD_INFOGRAPHIC_V023' if bold else 'V022_LEGACY'
+    if expected_visual is not None and selected_visual != expected_visual:
+        raise EngineError('TERRAIN_INFOGRAPHIC_SELECTION_MISMATCH'
+                          if expected_visual == 'VISUAL_TARGET_MAP_V024'
+                          else 'BOLD_INFOGRAPHIC_SELECTION_MISMATCH',
                           '저장된 지도 표현과 실제 기획이 일치하지 않습니다.', status=409)
     return actual
 

@@ -3,7 +3,7 @@ export function buildCreationRequest(values, scriptRecord = null) {
   const mode = values.infographic_mode || 'NONE';
   const topic = String(values.topic || '').trim();
   const visualProfile = values.infographic_visual_profile || 'AUTO';
-  if (!['AUTO', 'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'].includes(visualProfile)) throw new Error('지도 시각 스타일을 다시 선택해 주세요.');
+  if (!['AUTO', 'VISUAL_TARGET_MAP_V024', 'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'].includes(visualProfile)) throw new Error('지도 시각 스타일을 다시 선택해 주세요.');
   const withVisualProfile = request => visualProfile === 'AUTO' ? request : { ...request, infographic_visual_profile: visualProfile };
   if (!['NONE', 'QA', 'PRODUCTION'].includes(mode)) throw new Error('기획 종류를 다시 선택해 주세요.');
   if (mode === 'PRODUCTION') {
@@ -30,7 +30,7 @@ export function infographicPlanSelection(plan, expectedMode = null) {
   const scenes = plan?.scenes || plan?.scene_plan?.scenes || (Array.isArray(plan?.scene_plan) ? plan.scene_plan : []);
   const metadata = plan?.metadata?.infographic;
   const declared = ['MAP_INFOGRAPHIC_QA_V022', 'MAP_INFOGRAPHIC_PRODUCTION_V022'].includes(plan?.request?.direction_profile);
-  const present = metadata != null || plan?.metadata?.bold_infographic !== undefined || (Array.isArray(scenes) && scenes.some(scene => scene?.infographic != null || scene?.bold_infographic !== undefined));
+  const present = metadata != null || plan?.metadata?.bold_infographic !== undefined || Object.hasOwn(plan?.metadata || {}, 'terrain_infographic') || (Array.isArray(scenes) && scenes.some(scene => scene?.infographic != null || scene?.bold_infographic !== undefined || Object.hasOwn(scene || {}, 'terrain_infographic')));
   const mismatch = () => ({ valid: false, kind: 'MISMATCH', label: '인포그래픽 선택 오류', message: '기획의 인포그래픽 버전과 장면 구성이 일치하지 않습니다. 기획을 다시 생성하거나 저장된 기획을 확인해 주세요.' });
   if (!present) return declared || ['QA', 'PRODUCTION'].includes(expectedMode) ? mismatch() : { valid: true, kind: 'NONE', label: '기존 지도 기획' };
   if (metadata?.version !== 'v022' || !Array.isArray(scenes) || !scenes.length) return mismatch();
@@ -41,9 +41,16 @@ export function infographicPlanSelection(plan, expectedMode = null) {
   if (declared && plan.request.direction_profile !== `MAP_INFOGRAPHIC_${kind}_V022`) return mismatch();
   const bold = plan?.metadata?.bold_infographic;
   const boldPresent = Object.hasOwn(plan.metadata || {}, 'bold_infographic') || scenes.some(scene => Object.hasOwn(scene || {}, 'bold_infographic'));
+  const terrain = plan?.metadata?.terrain_infographic;
+  const terrainPresent = Object.hasOwn(plan.metadata || {}, 'terrain_infographic') || scenes.some(scene => Object.hasOwn(scene || {}, 'terrain_infographic'));
+  if (terrainPresent && !boldPresent) return mismatch();
   if (boldPresent) {
     const pinned = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
     if (bold?.version !== 'v023' || bold.profile_id !== 'BOLD_INFOGRAPHIC_V023' || !pinned(bold.profile_sha256) || !pinned(bold.registry_sha256) || scenes.some(scene => scene?.bold_infographic?.version !== 'v023' || scene.bold_infographic.profile_id !== bold.profile_id || scene.bold_infographic.profile_sha256 !== bold.profile_sha256 || scene.bold_infographic.registry_sha256 !== bold.registry_sha256)) return mismatch();
+    if (terrainPresent) {
+      if (terrain?.version !== 'v024' || terrain.profile_id !== 'VISUAL_TARGET_MAP_V024' || !pinned(terrain.profile_sha256) || terrain.registry_sha256 !== bold.registry_sha256 || scenes.some(scene => scene?.terrain_infographic?.version !== 'v024' || scene.terrain_infographic.profile_id !== terrain.profile_id || scene.terrain_infographic.profile_sha256 !== terrain.profile_sha256 || scene.terrain_infographic.registry_sha256 !== terrain.registry_sha256)) return mismatch();
+      return { valid: true, kind, label: `INFOGRAPHIC v024 · TERRAIN INFOGRAPHIC · ${kind}` };
+    }
     return { valid: true, kind, label: `INFOGRAPHIC v023 · BOLD INFOGRAPHIC · ${kind}` };
   }
   return { valid: true, kind, label: `INFOGRAPHIC v022 · ${kind}` };
@@ -73,7 +80,7 @@ infographicOption.append(infographicLabel, infographicSelect, infographicNote); 
 const visualOption = document.createElement('div'); visualOption.className = 'field';
 const visualLabel = document.createElement('label'); visualLabel.htmlFor = 'infographic-visual-profile'; visualLabel.textContent = '지도 시각 스타일';
 const visualSelect = document.createElement('select'); visualSelect.id = 'infographic-visual-profile';
-for (const [value, text] of [['AUTO', '새 이미지 기본 스타일'], ['BOLD_INFOGRAPHIC_V023', 'BOLD INFOGRAPHIC v023'], ['V022_LEGACY', '기존 v022 스타일 · BOLD OFF']]) { const option = document.createElement('option'); option.value = value; option.textContent = text; visualSelect.append(option); }
+for (const [value, text] of [['AUTO', '새 이미지 기본 스타일'], ['VISUAL_TARGET_MAP_V024', 'TERRAIN INFOGRAPHIC v024'], ['BOLD_INFOGRAPHIC_V023', 'BOLD INFOGRAPHIC v023'], ['V022_LEGACY', '기존 v022 스타일 · BOLD OFF']]) { const option = document.createElement('option'); option.value = value; option.textContent = text; visualSelect.append(option); }
 visualOption.append(visualLabel, visualSelect); infographicOption.after(visualOption);
 const scriptOption = document.createElement('div'); scriptOption.className = 'field'; scriptOption.id = 'infographic-script-field'; scriptOption.hidden = true;
 const scriptLabel = document.createElement('label'); scriptLabel.htmlFor = 'infographic-script-file'; scriptLabel.textContent = '출처와 사건이 포함된 대본 JSON';
@@ -86,7 +93,7 @@ try {
   const mode = localStorage.getItem('world-simulation.infographic-mode');
   if (['NONE', 'QA', 'PRODUCTION'].includes(mode)) infographicSelect.value = mode;
   const visual = localStorage.getItem('world-simulation.infographic-visual-profile');
-  if (['AUTO', 'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'].includes(visual)) visualSelect.value = visual;
+  if (['AUTO', 'VISUAL_TARGET_MAP_V024', 'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'].includes(visual)) visualSelect.value = visual;
 } catch {}
 
 const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null, expectedInfographicMode: null, selectionNotice: null };

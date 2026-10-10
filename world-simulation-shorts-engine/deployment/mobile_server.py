@@ -360,15 +360,23 @@ class MobileApplication(Application):
             else:
                 from engine.qa_planner import generate_deployment_plan
                 plan = generate_deployment_plan(planning_request)
-            visual = request.get('infographic_visual_profile',
-                                os.environ.get('WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE', 'V022_LEGACY'))
-            if visual == 'BOLD_INFOGRAPHIC_V023':
+            default_visual = os.environ.get('WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE', 'V022_LEGACY')
+            if os.environ.get('WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE') == 'VISUAL_TARGET_MAP_V024':
+                default_visual = 'VISUAL_TARGET_MAP_V024'
+            visual = request.get('infographic_visual_profile', default_visual)
+            if visual in {'BOLD_INFOGRAPHIC_V023', 'VISUAL_TARGET_MAP_V024'}:
                 if plan.get('metadata', {}).get('infographic', {}).get('version') == 'v022':
                     from engine.bold_infographic import prepare_bold_infographic
                     plan = prepare_bold_infographic(plan)
+                    if visual == 'VISUAL_TARGET_MAP_V024':
+                        from engine.terrain_infographic import prepare_terrain_infographic
+                        plan = prepare_terrain_infographic(plan)
                 elif 'infographic_visual_profile' in request:
-                    raise EngineError('BOLD_INFOGRAPHIC_REQUIRES_V022',
-                                      'BOLD 지도 표현은 지도 인포그래픽 기획에서 선택해 주세요.')
+                    raise EngineError('TERRAIN_INFOGRAPHIC_REQUIRES_V022'
+                                      if visual == 'VISUAL_TARGET_MAP_V024' else 'BOLD_INFOGRAPHIC_REQUIRES_V022',
+                                      '지형 지도 표현은 지도 인포그래픽 기획에서 선택해 주세요.'
+                                      if visual == 'VISUAL_TARGET_MAP_V024'
+                                      else 'BOLD 지도 표현은 지도 인포그래픽 기획에서 선택해 주세요.')
             self.check_plan_budget(plan)
             effective = require_infographic_selection(plan, expected)
             # Core storage can fail after writing a partial immutable plan. Its
@@ -379,7 +387,9 @@ class MobileApplication(Application):
                 private_json(self.store.version_path(data['project']['id'], data['version']) / 'public-selection.json',
                              dict(version='v022', requested_profile=request.get('direction_profile'),
                                   effective_profile=effective,
-                                  **({'visual_profile': 'BOLD_INFOGRAPHIC_V023'}
+                                  **({'visual_profile': ('VISUAL_TARGET_MAP_V024'
+                                                        if plan.get('metadata', {}).get('terrain_infographic')
+                                                        else 'BOLD_INFOGRAPHIC_V023')}
                                      if plan.get('metadata', {}).get('bold_infographic') else {})))
             return data
         finally:
@@ -407,7 +417,7 @@ class MobileApplication(Application):
             raise EngineError('INVALID_JSON', '요청 객체가 필요합니다.')
         visual = value.get('infographic_visual_profile')
         if 'infographic_visual_profile' in value and (not isinstance(visual, str)
-                or visual not in {'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'}):
+                or visual not in {'BOLD_INFOGRAPHIC_V023', 'VISUAL_TARGET_MAP_V024', 'V022_LEGACY'}):
             raise EngineError('INVALID_OPTION', '지도 표현 프로파일을 확인해 주세요.')
         value = {key: item for key, item in value.items() if key != 'infographic_visual_profile'}
         if value.get('direction_profile') == 'MAP_INFOGRAPHIC_PRODUCTION_V022':

@@ -1,0 +1,11 @@
+# The reviewed v024 visual layer extends the exact published v023 image.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:60108bcc6f5c097eafb5003d78050ec97996702eda8458ec85a2adb208551bb6
+COPY world-simulation-shorts-engine/web/app.js /opt/world-engine/world-simulation-shorts-engine/web/app.js
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/mobile_server.py
+COPY world-simulation-shorts-engine/engine/public_infographic_selection.py world-simulation-shorts-engine/engine/terrain_infographic.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/data/infographic/v024/ /opt/world-engine/world-simulation-shorts-engine/data/infographic/v024/
+COPY world-simulation-shorts-engine/web/infographic/v024/ /opt/world-engine/world-simulation-shorts-engine/web/infographic/v024/
+COPY world-simulation-shorts-engine/web/terrain_infographic_adapter.js world-simulation-shorts-engine/web/render_terrain_infographic_earth.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/tools/terrain_canvas_preview_v024.mjs world-simulation-shorts-engine/tools/terrain_pixel_metrics_v024.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/terrain_preflight.py world-simulation-shorts-engine/deployment/gcube/terrain_release_manifest.json /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+ENV WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE=VISUAL_TARGET_MAP_V024
