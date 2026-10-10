@@ -12,6 +12,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 import hashlib
 import http.client
+import importlib
 import io
 import json
 import os
@@ -29,6 +30,12 @@ APP = Path(__file__).resolve().parents[2]
 ROOT = APP.parent
 if str(APP) not in sys.path:
     sys.path.insert(0, str(APP))
+if __name__ == '__main__':
+    # CLI and canonical imports must share the captured real auditors, including
+    # nested release tests inside the scoped parent asset projection.
+    canonical = 'deployment.gcube.bold_preflight'
+    sys.modules[canonical] = sys.modules[__name__]
+    setattr(importlib.import_module('deployment.gcube'), 'bold_preflight', sys.modules[__name__])
 MANIFEST = APP / 'deployment/gcube/bold_release_manifest.json'
 PARENT_MANIFEST = APP / 'deployment/gcube/selection_release_manifest.json'
 INFOGRAPHIC_MANIFEST = APP / 'deployment/gcube/infographic_release_manifest.json'
