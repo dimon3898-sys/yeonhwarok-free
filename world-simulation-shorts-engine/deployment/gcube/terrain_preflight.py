@@ -365,6 +365,7 @@ def pixel_preflight(folder):
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=True)
     from deployment.gcube import selection_preflight as selection
+    from engine.bold_infographic import prepare_bold_infographic
     from engine.terrain_infographic import prepare_terrain_infographic, validate_terrain_infographic
     from engine.qa_planner import generate_deployment_plan
     request = dict(topic='만약 수에즈 운하가 7일 동안 막힌다면?', duration=24, quality='HIGH',
@@ -372,7 +373,7 @@ def pixel_preflight(folder):
                    tts=False, subtitles=False, bgm=True, sfx=True)
     with selection.environment(WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION='v022',
                                WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE='BOLD_INFOGRAPHIC_V023', **LEGACY_ENV):
-        plan = prepare_terrain_infographic(generate_deployment_plan(request))
+        plan = prepare_terrain_infographic(prepare_bold_infographic(generate_deployment_plan(request)))
     assert validate_terrain_infographic(plan)['passed'], 'TERRAIN_PIXEL_PLAN_INVALID'
     plan_path = folder / 'actual-terrain-qa-plan.json'
     plan_path.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + '\n')

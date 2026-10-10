@@ -150,6 +150,76 @@ print(json.dumps({'cli_shared_module': True, 'nested_original_harness': 1, 'pass
         with self.assertRaisesRegex(AssertionError, 'TERRAIN_PUBLIC_NOTICE_TOO_LARGE'):
             terrain.notice('Terrain excessive proof', dict(unbounded='X' * 4000))
 
+    def test_cold_pixel_preflight_composes_native_parent_before_real_node_boundary(self):
+        # Execute the real release planner in a fresh interpreter.  The only
+        # test substitute is at the exact Node draw boundary, after the actual
+        # admitted plan is written; it never invents a pixel/result receipt.
+        script = """
+import json, subprocess, tempfile
+from pathlib import Path
+from unittest.mock import patch
+from deployment.gcube import terrain_preflight as release
+from deployment.gcube import selection_preflight as selection
+from engine import infographic_contract as parent
+from engine import terrain_infographic as child
+from engine.infographic_planner import parent_qa_plan
+
+class NodeBoundaryReached(Exception):
+    pass
+
+original_run = subprocess.run
+observed = []
+def at_actual_node_boundary(command, *args, **kwargs):
+    if isinstance(command, list) and command[:2] == ['node', 'tools/terrain_canvas_preview_v024.mjs']:
+        assert command[2] == '--plan' and command[4] == '--output' and len(command) == 6
+        assert kwargs['cwd'] == release.APP and kwargs['capture_output'] is True
+        assert kwargs['text'] is True and kwargs['timeout'] == 360
+        plan = json.loads(Path(command[3]).read_text())
+        assert child.validate_terrain_infographic(plan)['passed'] is True
+        for key, version in [('infographic', 'v022'), ('bold_infographic', 'v023'), ('terrain_infographic', 'v024')]:
+            assert plan['metadata'][key]['version'] == version
+            assert all(scene[key]['version'] == version for scene in plan['scenes'])
+        assert plan['duration'] == 24 and plan['metadata']['frame_grid']['fps'] == '30'
+        assert plan['metadata']['frame_grid']['total_frames'] == 720
+        assert sum(scene['frame_count'] for scene in plan['scenes']) == 720
+        baseline = parent_qa_plan(dict(topic='만약 수에즈 운하가 7일 동안 막힌다면?', duration=24,
+            quality='HIGH', pace='FAST_PLUS', direction_profile='REFERENCE_MASTER', qa_mode=False,
+            tts=False, subtitles=False, bgm=True, sfx=True))
+        assert len(plan['scenes']) == len(baseline['scenes'])
+        for scene, expected in zip(plan['scenes'], baseline['scenes']):
+            # Every original scene field, including camera, quality, event,
+            # marker and text timing, is compared to the actual native fixture.
+            assert all(scene[key] == value for key, value in expected.items())
+            assert parent._camera_snapshot(scene) == parent._camera_snapshot(expected)
+            assert parent._quality_snapshot(scene) == parent._quality_snapshot(expected)
+        assert not Path(command[5]).exists(), 'No Canvas execution/result is simulated'
+        observed.append(dict(node_boundary_reached=True, admitted_frames=720,
+            native_camera_and_quality='UNCHANGED', pixel_render='NOT_RUN', physical_gpu='NOT_RUN'))
+        raise NodeBoundaryReached()
+    return original_run(command, *args, **kwargs)
+
+with tempfile.TemporaryDirectory(prefix='terrain-cold-pixel-plan-') as folder:
+    with selection.environment(WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION='v022',
+            WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE='BOLD_INFOGRAPHIC_V023',
+            WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE='VISUAL_TARGET_MAP_V024'):
+        with patch.object(subprocess, 'run', at_actual_node_boundary):
+            try:
+                release.pixel_preflight(folder)
+            except NodeBoundaryReached:
+                pass
+            else:
+                raise AssertionError('ACTUAL_NODE_BOUNDARY_NOT_REACHED')
+    assert len(observed) == 1
+    assert not (Path(folder)/'TERRAIN_PIXEL_PREFLIGHT.json').exists()
+print(json.dumps(observed[0], sort_keys=True))
+"""
+        result = subprocess.run([sys.executable, '-c', script], cwd=terrain.APP,
+                                capture_output=True, text=True, timeout=240)
+        self.assertEqual(result.returncode, 0, result.stderr[-4000:])
+        self.assertEqual(json.loads(result.stdout.splitlines()[-1]), dict(
+            node_boundary_reached=True, admitted_frames=720,
+            native_camera_and_quality='UNCHANGED', pixel_render='NOT_RUN', physical_gpu='NOT_RUN'))
+
     def test_immutable_child_workflow_requires_approval_and_keeps_parent_checks(self):
         workflow = (terrain.ROOT / '.github/workflows/gcube-terrain-v024.yml').read_text()
         self.assertIn('push: false', workflow)
