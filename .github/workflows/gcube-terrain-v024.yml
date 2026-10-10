@@ -85,11 +85,17 @@ jobs:
               assert manifest_path not in required and terrain.MANIFEST.is_file() and ',' not in str(terrain.MANIFEST), 'TERRAIN_PREBUILD_MANIFEST_MOUNT_INVALID'
               assert hashlib.sha256(terrain.MANIFEST.read_bytes()).hexdigest() == source['manifest_sha256'], 'TERRAIN_PREBUILD_MANIFEST_CHANGED'
               command.extend(['--mount','type=bind,source='+str(terrain.MANIFEST)+',target=/opt/world-engine/'+manifest_path+',readonly'])
+              certified_path = 'deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json'
+              certified = repository / certified_path
+              assert certified.is_file() and ',' not in str(certified), 'TERRAIN_PREBUILD_CERTIFIED_FIXTURE_MISSING'
+              assert certified.read_bytes() == (terrain.APP/'deployment/gcube/validation_scene_plan.json').read_bytes(), 'TERRAIN_PREBUILD_CERTIFIED_FIXTURE_CHANGED'
+              command.extend(['--mount','type=bind,source='+str(certified)+',target=/opt/world-engine/'+certified_path+',readonly'])
               parent_image = 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:60108bcc6f5c097eafb5003d78050ec97996702eda8458ec85a2adb208551bb6'
               assert parent_image == 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@'+terrain.PARENT_DIGEST, 'TERRAIN_PREBUILD_PARENT_IMAGE_CHANGED'
               command.extend([parent_image,'-'])
               terrain.notice('Terrain pre-build selective source mounts', dict(passed=True, guarded_source_mounts=len(required),
-                  source_manifest_artifact_mounts=1, total_readonly_mounts=len(required)+1, source_manifest_path=manifest_path,
+                  source_manifest_artifact_mounts=1, original_certified_fixture_mounts=1,
+                  total_readonly_mounts=len(required)+2, source_manifest_path=manifest_path,
                   whole_checkout_shadow=False, source_manifest_sha256=source['manifest_sha256'],
                   exact_published_parent=terrain.PARENT_DIGEST, physical_gpu='NOT_RUN'))
               script = r'''
