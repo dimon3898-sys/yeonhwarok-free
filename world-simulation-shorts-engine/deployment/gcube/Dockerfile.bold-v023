@@ -1,0 +1,11 @@
+# Exact published v022; versioned bold overlays and the public visual selector.
+FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8c0d8b01fe7008ed58546247b31c7c8ef0bc2e368995c8c390d15a8e5bff0aa1
+COPY world-simulation-shorts-engine/web/app.js /opt/world-engine/world-simulation-shorts-engine/web/app.js
+COPY world-simulation-shorts-engine/deployment/mobile_server.py /opt/world-engine/world-simulation-shorts-engine/deployment/mobile_server.py
+COPY world-simulation-shorts-engine/engine/public_infographic_selection.py world-simulation-shorts-engine/engine/bold_infographic.py /opt/world-engine/world-simulation-shorts-engine/engine/
+COPY world-simulation-shorts-engine/data/infographic/v023/ /opt/world-engine/world-simulation-shorts-engine/data/infographic/v023/
+COPY world-simulation-shorts-engine/web/infographic/v023/ /opt/world-engine/world-simulation-shorts-engine/web/infographic/v023/
+COPY world-simulation-shorts-engine/web/bold_infographic_adapter.js world-simulation-shorts-engine/web/render_bold_infographic_earth.html /opt/world-engine/world-simulation-shorts-engine/web/
+COPY world-simulation-shorts-engine/tools/bold_canvas_preview_v023.mjs world-simulation-shorts-engine/tools/bold_pixel_metrics_v023.mjs world-simulation-shorts-engine/tools/test_bold_pixel_canvas_v023.mjs world-simulation-shorts-engine/tools/test_bold_renderer_v023.mjs /opt/world-engine/world-simulation-shorts-engine/tools/
+COPY world-simulation-shorts-engine/deployment/gcube/bold_preflight.py world-simulation-shorts-engine/deployment/gcube/bold_release_manifest.json /opt/world-engine/world-simulation-shorts-engine/deployment/gcube/
+ENV WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE=BOLD_INFOGRAPHIC_V023

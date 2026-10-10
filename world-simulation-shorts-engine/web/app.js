@@ -2,32 +2,35 @@ import {sceneEventSummary, failureSummary} from './plan_presentation.js';
 export function buildCreationRequest(values, scriptRecord = null) {
   const mode = values.infographic_mode || 'NONE';
   const topic = String(values.topic || '').trim();
+  const visualProfile = values.infographic_visual_profile || 'AUTO';
+  if (!['AUTO', 'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'].includes(visualProfile)) throw new Error('지도 시각 스타일을 다시 선택해 주세요.');
+  const withVisualProfile = request => visualProfile === 'AUTO' ? request : { ...request, infographic_visual_profile: visualProfile };
   if (!['NONE', 'QA', 'PRODUCTION'].includes(mode)) throw new Error('기획 종류를 다시 선택해 주세요.');
   if (mode === 'PRODUCTION') {
     if (!scriptRecord || typeof scriptRecord !== 'object' || Array.isArray(scriptRecord)) throw new Error('출처와 사건이 포함된 대본 JSON 파일을 선택해 주세요.');
     const request = { direction_profile: 'MAP_INFOGRAPHIC_PRODUCTION_V022', script_record: scriptRecord };
     if (topic) request.topic = topic;
-    return request;
+    return withVisualProfile(request);
   }
   if (!topic) throw new Error('영상 주제를 입력해 주세요.');
   const shortQA = mode === 'NONE' && values.qa_mode === true;
   const duration = mode === 'QA' ? 24 : Number(values.duration);
   if (!Number.isFinite(duration) || !Number.isInteger(duration) || duration < (shortQA ? 12 : 20) || duration > (shortQA ? 15 : 3600)) throw new Error(shortQA ? '짧은 QA 길이는 12~15초로 입력해 주세요.' : '영상 길이는 20~3600초로 입력해 주세요.');
   if (mode === 'NONE' && !['REFERENCE_MASTER', 'FAST_PLUS_LEGACY'].includes(values.direction_profile)) throw new Error('연출 프로파일을 다시 선택해 주세요.');
-  return { topic, duration, qa_mode: mode === 'QA' || shortQA,
+  return withVisualProfile({ topic, duration, qa_mode: mode === 'QA' || shortQA,
     direction_profile: mode === 'QA' ? 'MAP_INFOGRAPHIC_QA_V022' : values.direction_profile,
     style: values.style, quality: mode === 'QA' ? 'HIGH' : values.quality,
     pace: mode === 'QA' ? 'FAST_PLUS' : values.pace,
     tts: mode === 'QA' ? false : values.tts === true,
     subtitles: mode === 'QA' ? false : values.subtitles === true,
-    bgm: values.bgm === true, sfx: values.sfx === true };
+    bgm: values.bgm === true, sfx: values.sfx === true });
 }
 
 export function infographicPlanSelection(plan, expectedMode = null) {
   const scenes = plan?.scenes || plan?.scene_plan?.scenes || (Array.isArray(plan?.scene_plan) ? plan.scene_plan : []);
   const metadata = plan?.metadata?.infographic;
   const declared = ['MAP_INFOGRAPHIC_QA_V022', 'MAP_INFOGRAPHIC_PRODUCTION_V022'].includes(plan?.request?.direction_profile);
-  const present = metadata != null || (Array.isArray(scenes) && scenes.some(scene => scene?.infographic != null));
+  const present = metadata != null || plan?.metadata?.bold_infographic !== undefined || (Array.isArray(scenes) && scenes.some(scene => scene?.infographic != null || scene?.bold_infographic !== undefined));
   const mismatch = () => ({ valid: false, kind: 'MISMATCH', label: '인포그래픽 선택 오류', message: '기획의 인포그래픽 버전과 장면 구성이 일치하지 않습니다. 기획을 다시 생성하거나 저장된 기획을 확인해 주세요.' });
   if (!present) return declared || ['QA', 'PRODUCTION'].includes(expectedMode) ? mismatch() : { valid: true, kind: 'NONE', label: '기존 지도 기획' };
   if (metadata?.version !== 'v022' || !Array.isArray(scenes) || !scenes.length) return mismatch();
@@ -36,6 +39,13 @@ export function infographicPlanSelection(plan, expectedMode = null) {
   if (!kind || scenes.some(scene => scene?.infographic?.version !== 'v022' || scene.infographic.parent_renderer_family !== family)) return mismatch();
   if (['QA', 'PRODUCTION'].includes(expectedMode) && kind !== expectedMode) return mismatch();
   if (declared && plan.request.direction_profile !== `MAP_INFOGRAPHIC_${kind}_V022`) return mismatch();
+  const bold = plan?.metadata?.bold_infographic;
+  const boldPresent = Object.hasOwn(plan.metadata || {}, 'bold_infographic') || scenes.some(scene => Object.hasOwn(scene || {}, 'bold_infographic'));
+  if (boldPresent) {
+    const pinned = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+    if (bold?.version !== 'v023' || bold.profile_id !== 'BOLD_INFOGRAPHIC_V023' || !pinned(bold.profile_sha256) || !pinned(bold.registry_sha256) || scenes.some(scene => scene?.bold_infographic?.version !== 'v023' || scene.bold_infographic.profile_id !== bold.profile_id || scene.bold_infographic.profile_sha256 !== bold.profile_sha256 || scene.bold_infographic.registry_sha256 !== bold.registry_sha256)) return mismatch();
+    return { valid: true, kind, label: `INFOGRAPHIC v023 · BOLD INFOGRAPHIC · ${kind}` };
+  }
   return { valid: true, kind, label: `INFOGRAPHIC v022 · ${kind}` };
 }
 
@@ -60,6 +70,11 @@ for (const [value, text] of [['NONE', '일반 지도 기획'], ['QA', '지도 �
 }
 const infographicNote = document.createElement('p'); infographicNote.id = 'infographic-mode-note'; infographicNote.className = 'field-note';
 infographicOption.append(infographicLabel, infographicSelect, infographicNote); directionOption.after(infographicOption);
+const visualOption = document.createElement('div'); visualOption.className = 'field';
+const visualLabel = document.createElement('label'); visualLabel.htmlFor = 'infographic-visual-profile'; visualLabel.textContent = '지도 시각 스타일';
+const visualSelect = document.createElement('select'); visualSelect.id = 'infographic-visual-profile';
+for (const [value, text] of [['AUTO', '새 이미지 기본 스타일'], ['BOLD_INFOGRAPHIC_V023', 'BOLD INFOGRAPHIC v023'], ['V022_LEGACY', '기존 v022 스타일 · BOLD OFF']]) { const option = document.createElement('option'); option.value = value; option.textContent = text; visualSelect.append(option); }
+visualOption.append(visualLabel, visualSelect); infographicOption.after(visualOption);
 const scriptOption = document.createElement('div'); scriptOption.className = 'field'; scriptOption.id = 'infographic-script-field'; scriptOption.hidden = true;
 const scriptLabel = document.createElement('label'); scriptLabel.htmlFor = 'infographic-script-file'; scriptLabel.textContent = '출처와 사건이 포함된 대본 JSON';
 const scriptInput = document.createElement('input'); scriptInput.type = 'file'; scriptInput.id = 'infographic-script-file'; scriptInput.accept = 'application/json,.json';
@@ -70,6 +85,8 @@ try {
   if (['REFERENCE_MASTER', 'FAST_PLUS_LEGACY'].includes(selected)) directionSelect.value = selected;
   const mode = localStorage.getItem('world-simulation.infographic-mode');
   if (['NONE', 'QA', 'PRODUCTION'].includes(mode)) infographicSelect.value = mode;
+  const visual = localStorage.getItem('world-simulation.infographic-visual-profile');
+  if (['AUTO', 'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'].includes(visual)) visualSelect.value = visual;
 } catch {}
 
 const state = { project: null, plan: null, version: null, versions: [], revision: null, pollTimer: null, generation: 0, busy: false, status: null, historical: false, narrationAsset: null, expectedInfographicMode: null, selectionNotice: null };
@@ -516,12 +533,13 @@ function syncCreationMode() {
 }
 directionSelect.addEventListener('change', () => { try { localStorage.setItem('world-simulation.direction-profile', directionSelect.value); } catch {} });
 infographicSelect.addEventListener('change', () => { syncCreationMode(); try { localStorage.setItem('world-simulation.infographic-mode', infographicSelect.value); } catch {} });
+visualSelect.addEventListener('change', () => { try { localStorage.setItem('world-simulation.infographic-visual-profile', visualSelect.value); } catch {} });
 $('qa-mode').addEventListener('change', () => {
   $('duration').value = qaInput.checked ? '12' : '75'; syncCreationMode();
 });
 syncCreationMode();
 $('brief-form').addEventListener('submit', (event) => { event.preventDefault(); withButton($('create-plan'), '기획 생성 중', async () => {
-  const values = { topic: $('topic').value, infographic_mode: infographicSelect.value, duration: $('duration').value, qa_mode: qaInput.checked, direction_profile: directionSelect.value, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
+  const values = { topic: $('topic').value, infographic_mode: infographicSelect.value, infographic_visual_profile: visualSelect.value, duration: $('duration').value, qa_mode: qaInput.checked, direction_profile: directionSelect.value, style: $('style').value, quality: $('quality').value, pace: $('pace').value, tts: $('tts').checked, subtitles: $('subtitles').checked, bgm: $('bgm').checked, sfx: $('sfx').checked };
   let scriptRecord = null;
   if (values.infographic_mode === 'PRODUCTION') {
     const file = scriptInput.files[0]; if (!file) throw new Error('직접 작성한 대본 JSON 파일을 선택해 주세요.');

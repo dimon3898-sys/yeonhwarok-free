@@ -335,6 +335,9 @@ class MobileApplication(Application):
             expected_creation_profile, require_infographic_selection)
         request = self.validate_request(value)
         expected = expected_creation_profile(request)
+        # Visual selection is separate from the frozen geographic planner input.
+        planning_request = {key: item for key, item in request.items()
+                            if key != 'infographic_visual_profile'}
         artifact_dir = None
         persistence_started = False
         try:
@@ -350,13 +353,22 @@ class MobileApplication(Application):
                 candidate.mkdir(mode=0o700)
                 artifact_dir = candidate
                 # Paths, provider and frame rate are owned by the server.
-                plan = generate_production_infographic(request['script_record'], artifact_dir, provider=None, fps=30)
+                plan = generate_production_infographic(planning_request['script_record'], artifact_dir, provider=None, fps=30)
                 if not isinstance(plan, dict) or not plan.get('scenes') or not plan.get('gate', {}).get('passed'):
                     raise EngineError('INFOGRAPHIC_PRODUCTION_NOT_READY',
                                       '대본·음성 측정 또는 지도 기획 검증을 완료하지 못했습니다. 대본과 음성 설정을 확인해 주세요.')
             else:
                 from engine.qa_planner import generate_deployment_plan
-                plan = generate_deployment_plan(request)
+                plan = generate_deployment_plan(planning_request)
+            visual = request.get('infographic_visual_profile',
+                                os.environ.get('WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE', 'V022_LEGACY'))
+            if visual == 'BOLD_INFOGRAPHIC_V023':
+                if plan.get('metadata', {}).get('infographic', {}).get('version') == 'v022':
+                    from engine.bold_infographic import prepare_bold_infographic
+                    plan = prepare_bold_infographic(plan)
+                elif 'infographic_visual_profile' in request:
+                    raise EngineError('BOLD_INFOGRAPHIC_REQUIRES_V022',
+                                      'BOLD 지도 표현은 지도 인포그래픽 기획에서 선택해 주세요.')
             self.check_plan_budget(plan)
             effective = require_infographic_selection(plan, expected)
             # Core storage can fail after writing a partial immutable plan. Its
@@ -366,7 +378,9 @@ class MobileApplication(Application):
             if effective:
                 private_json(self.store.version_path(data['project']['id'], data['version']) / 'public-selection.json',
                              dict(version='v022', requested_profile=request.get('direction_profile'),
-                                  effective_profile=effective))
+                                  effective_profile=effective,
+                                  **({'visual_profile': 'BOLD_INFOGRAPHIC_V023'}
+                                     if plan.get('metadata', {}).get('bold_infographic') else {})))
             return data
         finally:
             # Successful measured speech must survive gateway restart/retry.
@@ -391,9 +405,16 @@ class MobileApplication(Application):
     def validate_request(self, value):
         if not isinstance(value, dict):
             raise EngineError('INVALID_JSON', '요청 객체가 필요합니다.')
+        visual = value.get('infographic_visual_profile')
+        if 'infographic_visual_profile' in value and (not isinstance(visual, str)
+                or visual not in {'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'}):
+            raise EngineError('INVALID_OPTION', '지도 표현 프로파일을 확인해 주세요.')
+        value = {key: item for key, item in value.items() if key != 'infographic_visual_profile'}
         if value.get('direction_profile') == 'MAP_INFOGRAPHIC_PRODUCTION_V022':
             from engine.public_infographic_selection import validate_public_production_request
             request = validate_public_production_request(value)
+            if visual is not None:
+                request['infographic_visual_profile'] = visual
             self.check_disk()
             if len(self.store.list()) >= self.maximum_projects:
                 raise EngineError('PROJECT_LIMIT', '보존 가능한 프로젝트 수 한도에 도달했습니다.', status=429)
@@ -438,6 +459,8 @@ class MobileApplication(Application):
         self.check_disk()
         if len(self.store.list()) >= self.maximum_projects:
             raise EngineError('PROJECT_LIMIT', '보존 가능한 프로젝트 수 한도에 도달했습니다.', status=429)
+        if visual is not None:
+            value['infographic_visual_profile'] = visual
         return value
 
     def asset(self, aid, kind=None):

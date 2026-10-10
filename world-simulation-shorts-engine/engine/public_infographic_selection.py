@@ -51,7 +51,8 @@ def require_infographic_selection(plan, expected_profile=None):
         mismatch()
     declared = request.get('direction_profile')
     expected_profile = expected_profile or (declared if isinstance(declared, str) and declared in PUBLIC_PROFILES else None)
-    present = 'infographic' in metadata or any('infographic' in s for s in scenes)
+    present = ('infographic' in metadata or any('infographic' in s for s in scenes)
+               or 'bold_infographic' in metadata or any('bold_infographic' in s for s in scenes))
     if not present and expected_profile is None:
         return None
     selected = metadata.get('infographic')
@@ -66,6 +67,15 @@ def require_infographic_selection(plan, expected_profile=None):
         mismatch()
     from .infographic_contract import validate_infographic
     checked = validate_infographic(plan)
+    if checked['passed'] and ('bold_infographic' in metadata
+                              or any('bold_infographic' in scene for scene in scenes)):
+        from .bold_infographic import install_runtime, validate_bold_infographic
+        if not validate_bold_infographic(plan)['passed']:
+            raise EngineError('BOLD_INFOGRAPHIC_PLAN_INVALID',
+                              'BOLD 지도 표현의 실제 지역·소스 검증을 통과하지 못했습니다.', status=409)
+        # The additive child is proven before the unchanged strict Production
+        # schema receives its original parent view. Cold workers use this gate.
+        install_runtime()
     if checked['passed'] and actual == PRODUCTION_PROFILE:
         # Metadata-only timing is insufficient after restart. Recheck the
         # persisted PCM and authored speech/Scene binding with the existing gate.
@@ -82,6 +92,7 @@ def require_project_infographic_selection(store, pid, version, plan=None):
     from .storage import read_json
     plan = store.get(pid, version)['plan'] if plan is None else plan
     expected = None
+    expected_visual = None
     receipt_path = store.version_path(pid, version) / 'public-selection.json'
     original_receipt_path = store.path(pid) / 'versions' / 'v001' / 'public-selection.json'
     original_path = store.path(pid) / 'prompt' / 'request_v001.json'
@@ -98,6 +109,11 @@ def require_project_infographic_selection(store, pid, version, plan=None):
             if expected is not None and expected != receipt['effective_profile']:
                 raise ValueError('selection receipt conflict')
             expected = receipt['effective_profile']
+            visual = receipt.get('visual_profile')
+            if visual is not None:
+                if visual != 'BOLD_INFOGRAPHIC_V023' or expected_visual not in {None, visual}:
+                    raise ValueError('invalid visual selection receipt')
+                expected_visual = visual
         if original_path.exists():
             original = read_json(original_path)
             profile = original.get('direction_profile') if isinstance(original, dict) else None
@@ -105,10 +121,20 @@ def require_project_infographic_selection(store, pid, version, plan=None):
                 if expected is not None and expected != profile:
                     raise ValueError('selection receipt conflict')
                 expected = profile
+            if isinstance(original, dict) and 'infographic_visual_profile' in original:
+                visual = original['infographic_visual_profile']
+                if visual not in {'BOLD_INFOGRAPHIC_V023', 'V022_LEGACY'} or expected_visual not in {None, visual}:
+                    raise ValueError('visual selection receipt conflict')
+                expected_visual = visual
     except (OSError, ValueError, TypeError):
         raise EngineError('INFOGRAPHIC_SELECTION_MISMATCH',
                           '저장된 연출 선택과 기획이 일치하지 않습니다.', status=409) from None
-    return require_infographic_selection(plan, expected)
+    actual = require_infographic_selection(plan, expected)
+    bold = plan.get('metadata', {}).get('bold_infographic') is not None
+    if expected_visual is not None and bold != (expected_visual == 'BOLD_INFOGRAPHIC_V023'):
+        raise EngineError('BOLD_INFOGRAPHIC_SELECTION_MISMATCH',
+                          '저장된 지도 표현과 실제 기획이 일치하지 않습니다.', status=409)
+    return actual
 
 
 def _reject_script():
