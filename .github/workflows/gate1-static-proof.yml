@@ -1,0 +1,118 @@
+name: Gate 1 immutable static proof release
+
+on:
+  push:
+    branches: ['release/map-renderer-v1-gate1-static-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: gate1-static-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
+      APP: world-simulation-shorts-engine
+      RELEASE: world-simulation-shorts-engine/deployment/gcube/gate1_static
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Install exact resource manager for packaging
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          cd cinematic-world-map
+          timeout 180 npm ci --strict-ssl=true --ignore-scripts
+      - name: Freeze existing proof sources without rendering
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          timeout 60 python "$RELEASE/package_release.py" --proof "$RELEASE/frozen" --output /tmp/gate1-static-context
+          tag=$(python -c 'import json; print(json.load(open("/tmp/gate1-static-context/bundle/manifest.json"))["tag"])')
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+          echo "STAGE SOURCE_FROZEN PASS"
+      - name: Authenticate registry using Actions package permission
+        env:
+          PUBLISH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$PUBLISH_TOKEN" | timeout 30 docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+      - name: Enforce new immutable tag
+        run: |
+          set -euo pipefail
+          if timeout 30 docker manifest inspect "$IMAGE:$TAG" >/dev/null 2>&1; then
+            echo 'Immutable tag already exists. Refusing overwrite.'
+            exit 1
+          fi
+      - name: Build dedicated container
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          echo "STAGE CONTAINER_BUILD START $(date -u +%FT%TZ)"
+          timeout 660 docker build --progress=plain -t "$IMAGE:$TAG" /tmp/gate1-static-context
+          echo "STAGE CONTAINER_BUILD PASS $(date -u +%FT%TZ)"
+      - name: Focused contracts and desktop/mobile download
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gate1-release-evidence
+          export STATIC_PROOF_TEST_BUNDLE=/opt/gate1-static/bundle
+          export STATIC_PROOF_TEST_BASELINE=/work/$RELEASE/frozen
+          export STATIC_PROOF_TEST_EVIDENCE_ROOT=/work/$RELEASE/frozen
+          export STATIC_PROOF_PLAYWRIGHT_PACKAGE=/opt/world-engine/cinematic-world-map/package.json
+          common=(--rm --entrypoint python -v "$GITHUB_WORKSPACE:/work:ro" -e STATIC_PROOF_TEST_BUNDLE -e STATIC_PROOF_TEST_BASELINE -e STATIC_PROOF_TEST_EVIDENCE_ROOT -e STATIC_PROOF_PLAYWRIGHT_PACKAGE)
+          timeout 60 docker run "${common[@]}" "$IMAGE:$TAG" "/work/$RELEASE/test_release.py" 2>&1 | tee /tmp/gate1-release-evidence/contracts.log
+          timeout 80 docker run "${common[@]}" "$IMAGE:$TAG" "/work/$RELEASE/browser_fixture.py" 2>&1 | tee /tmp/gate1-release-evidence/browser-download.log
+          timeout 30 docker run --rm --entrypoint node -v "$GITHUB_WORKSPACE:/work:ro" "$IMAGE:$TAG" "/work/$RELEASE/test_capability.mjs" | tee /tmp/gate1-release-evidence/capabilities.log
+      - name: Same factory software validation (not GPU approval)
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          timeout 180 docker run --rm --entrypoint node -v /tmp/gate1-release-evidence:/evidence "$IMAGE:$TAG" /opt/gate1-static/worker.mjs validate-software /evidence/software-validation
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/gate1-release-evidence/software-validation')
+          d=json.loads((p/'diagnostic.json').read_text())
+          assert d['runtime_profile']=='SOFTWARE_TEST_ONLY'
+          assert d['frame_count']==1 and d['same_renderer_factory'] is True
+          assert d['output_resolution']==[1080,1920]
+          assert d['renderer_source_hash']=='17d843163cf6648d8f6cc3199240c2962f69398c39f673354e5e7e802ad17d38'
+          assert d['peak_memory']=='UNKNOWN'
+          print('STAGE SAME_RENDERER_PATH SOFTWARE_TEST_ONLY PASS; NVIDIA NOT RUN')
+          PY
+      - name: Real container boot/login/health/no GPU rejection
+        timeout-minutes: 9
+        run: |
+          set -euo pipefail
+          timeout 480 python "$RELEASE/container_preflight.py" "$IMAGE:$TAG" /tmp/gate1-release-evidence
+      - name: Push only validated immutable image
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          timeout 240 docker push "$IMAGE:$TAG" | tee /tmp/gate1-release-evidence/push.log
+      - name: Anonymous public pull and digest verification
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gate1-anonymous
+          printf '{"auths":{}}\n' > /tmp/gate1-anonymous/config.json
+          timeout 180 docker --config /tmp/gate1-anonymous pull "$IMAGE:$TAG" | tee /tmp/gate1-release-evidence/public-pull.log
+          digest=$(docker image inspect "$IMAGE:$TAG" --format '{{index .RepoDigests 0}}')
+          echo "$digest" | tee /tmp/gate1-release-evidence/DIGEST.txt
+          cp /tmp/gate1-static-context/bundle/manifest.json /tmp/gate1-release-evidence/source-manifest.json
+          echo "STAGE PUBLIC_PULL PASS; GPU VISUAL QUALITY NOT RUN"
+      - name: Preserve failure and release evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gate1-static-release-evidence
+          path: /tmp/gate1-release-evidence
+          if-no-files-found: warn
