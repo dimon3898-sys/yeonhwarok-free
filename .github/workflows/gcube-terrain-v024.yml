@@ -52,16 +52,42 @@ jobs:
         run: |
           set -euo pipefail
           trap 'terrain_prebuild_exit=$?; printf "::error title=Terrain pre-build container exit::return_code=%s\n" "$terrain_prebuild_exit"' ERR
-          docker run --rm -i --user 0:0 \
-            --env WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE=OFF \
-            --env WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE=V022_LEGACY \
-            --env WORLD_ENGINE_MAP_INFOGRAPHIC_VERSION=legacy --env WORLD_ENGINE_STORY_PROGRESSION_VERSION=legacy \
-            --env WORLD_ENGINE_REFERENCE_EFFECTS_VERSION=legacy --env WORLD_ENGINE_EVENT_QUALITY_VERSION=legacy \
-            --env WORLD_ENGINE_VISUAL_QUALITY_VERSION=legacy --env WORLD_ENGINE_DIRECTION_VERSION=legacy \
-            --env WORLD_ENGINE_SECOND_EVENT_TEST=0 --env WORLD_ENGINE_SINGLE_EVENT_CAMERA_TEST=0 --env WORLD_ENGINE_RETURN_WIDE_TEST=0 \
-            --mount "type=bind,source=${PWD},target=/opt/world-engine,readonly" \
-            --workdir /opt/world-engine/world-simulation-shorts-engine \
-            --entrypoint python "${IMAGE}@sha256:60108bcc6f5c097eafb5003d78050ec97996702eda8458ec85a2adb208551bb6" - <<'PY'
+          python - <<'PY'
+          import json, os, re, subprocess, sys, traceback
+          from pathlib import Path
+          host_phase = 'imports'
+          try:
+              repository = Path.cwd()
+              sys.path.insert(0, str(repository / 'world-simulation-shorts-engine'))
+              from deployment.gcube import terrain_preflight as terrain
+              from deployment.gcube import selection_preflight as selection
+              host_phase = 'source-before'
+              value, source = terrain.verify_sources(checkout=True)
+              parent, selected, protected = terrain.admit_parent_sources(value['parent_deltas'])
+              required = set()
+              for document in (value, parent, selected, protected):
+                  for field in ('runtime_records', 'frozen_parent_records', 'parent_deltas'):
+                      required.update('world-simulation-shorts-engine/'+row['path'] for row in document.get(field, []))
+                  required.update(row['path'] for row in document.get('checkout_records', []))
+              assert required and all(not Path(path).is_absolute() and '..' not in Path(path).parts
+                                      for path in required), 'TERRAIN_PREBUILD_SOURCE_PATH_INVALID'
+              command = ['docker','run','--rm','-i','--user','0:0',
+                         '--workdir','/opt/world-engine/world-simulation-shorts-engine','--entrypoint','python']
+              legacy = {**selection.LEGACY_ENV, **terrain.LEGACY_ENV,
+                        'WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE':'V022_LEGACY'}
+              for key, val in sorted(legacy.items()):
+                  command.extend(['--env', key+'='+str(val)])
+              for path in sorted(required):
+                  actual = repository / path
+                  assert actual.is_file() and ',' not in str(actual), 'TERRAIN_PREBUILD_SOURCE_MOUNT_INVALID'
+                  command.extend(['--mount','type=bind,source='+str(actual)+',target=/opt/world-engine/'+path+',readonly'])
+              parent_image = 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:60108bcc6f5c097eafb5003d78050ec97996702eda8458ec85a2adb208551bb6'
+              assert parent_image == 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@'+terrain.PARENT_DIGEST, 'TERRAIN_PREBUILD_PARENT_IMAGE_CHANGED'
+              command.extend([parent_image,'-'])
+              terrain.notice('Terrain pre-build selective source mounts', dict(passed=True, guarded_source_mounts=len(required),
+                  whole_checkout_shadow=False, source_manifest_sha256=source['manifest_sha256'],
+                  exact_published_parent=terrain.PARENT_DIGEST, physical_gpu='NOT_RUN'))
+              script = r'''
           import json, os, re, sys, traceback, unittest
           from pathlib import Path
           phase = 'imports'
@@ -115,6 +141,27 @@ jobs:
               safe['python_runtime_locations'] = [dict(file=Path(frame.filename).name, function=frame.name, line=frame.lineno)
                                                   for frame in traceback.extract_tb(error.__traceback__)[-8:]]
               print('::error title=Terrain pre-build failure::'+json.dumps(safe), flush=True)
+              raise SystemExit(1) from None
+              '''
+              host_phase = 'launch-privileged-parent'
+              completed = subprocess.run(command, input=script, text=True)
+              if completed.returncode != 0:
+                  raise SystemExit(completed.returncode)
+              host_phase = 'source-after'
+              after, final = terrain.verify_sources(checkout=True)
+              assert final['manifest_sha256'] == source['manifest_sha256'], 'TERRAIN_PREBUILD_HOST_SOURCE_CHANGED'
+          except Exception as error:
+              safe = dict(phase=host_phase, execution_scope='CI_HOST', exception_type=type(error).__name__, physical_gpu='NOT_RUN')
+              if isinstance(getattr(error, 'errno', None), int):
+                  safe['errno'] = error.errno
+              validator_code = getattr(error, 'code', None)
+              if isinstance(error, AssertionError) and error.args and isinstance(error.args[0], str):
+                  validator_code = error.args[0].split(':', 1)[0]
+              if isinstance(validator_code, str) and re.fullmatch(r'(?:TERRAIN|BOLD|SELECTION|INFOGRAPHIC|GPU)_[A-Z0-9_]{1,70}', validator_code):
+                  safe['validator_code'] = validator_code
+              safe['python_runtime_locations'] = [dict(file=Path(frame.filename).name, function=frame.name, line=frame.lineno)
+                                                  for frame in traceback.extract_tb(error.__traceback__)[-8:]]
+              print('::error title=Terrain pre-build host failure::'+json.dumps(safe), flush=True)
               raise SystemExit(1) from None
           PY
       - name: Set up Buildx
