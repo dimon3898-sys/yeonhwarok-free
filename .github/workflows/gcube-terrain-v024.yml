@@ -51,6 +51,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          trap 'terrain_prebuild_exit=$?; printf "::error title=Terrain pre-build container exit::return_code=%s\n" "$terrain_prebuild_exit"' ERR
           docker run --rm -i --user 0:0 \
             --env WORLD_ENGINE_TERRAIN_INFOGRAPHIC_PROFILE=OFF \
             --env WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE=V022_LEGACY \
@@ -61,34 +62,60 @@ jobs:
             --mount "type=bind,source=${PWD},target=/opt/world-engine,readonly" \
             --workdir /opt/world-engine/world-simulation-shorts-engine \
             --entrypoint python "${IMAGE}@sha256:60108bcc6f5c097eafb5003d78050ec97996702eda8458ec85a2adb208551bb6" - <<'PY'
-          import json, os, sys, unittest
-          from deployment.gcube import terrain_preflight as terrain
-          from deployment.gcube import selection_preflight as selection
-          assert os.geteuid() == 0, 'TERRAIN_PREBUILD_ROOT_REQUIRED'
-          value, source = terrain.verify_sources(checkout=True)
-          with selection.environment(**selection.LEGACY_ENV, **terrain.LEGACY_ENV,
-                                     WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE='V022_LEGACY'), terrain.parent_admission_view():
-              proxy = selection.admit_proxy_inventory(json.loads(terrain.physical_bytes(terrain.SELECTION_MANIFEST)))
-              security = selection.execute_suite(proxy, value['proxy_ids'], 'prebuild-unchanged-proxy-security-gpu-logic')
-              directory = terrain.ROOT / 'deployment/gcube-proxy-diag'
-              assert directory.is_dir(), 'TERRAIN_PREBUILD_DIAGNOSTIC_SOURCE_MISSING'
-              before = os.getcwd()
-              sys.path.insert(0, str(directory))
-              try:
-                  os.chdir(directory)
-                  suite = unittest.TestLoader().loadTestsFromNames(['test_observer', 'test_server_diag'])
-                  diagnostic = selection.execute_suite(suite, value['diagnostic_ids'], 'prebuild-unchanged-independent-diagnostic')
-              finally:
-                  os.chdir(before)
-                  sys.path.remove(str(directory))
-          after, final = terrain.verify_sources(checkout=True)
-          assert final['manifest_sha256'] == source['manifest_sha256'], 'TERRAIN_PREBUILD_SOURCE_CHANGED'
-          assert security['tests'] == 206 and diagnostic['tests'] == 31, 'TERRAIN_PREBUILD_TEST_TOTAL_INVALID'
-          terrain.notice('Privileged pre-build parent regression', dict(passed=True, tests=237,
-              failures=0, errors=0, skipped=0, groups=[{key: row[key] for key in ('category','tests','failures','errors','skipped')}
-                                                   for row in (security, diagnostic)],
-              exact_published_parent=terrain.PARENT_DIGEST, source_manifest_sha256=source['manifest_sha256'],
-              physical_gpu='NOT_RUN'))
+          import json, os, re, sys, traceback, unittest
+          from pathlib import Path
+          phase = 'imports'
+          try:
+              from deployment.gcube import terrain_preflight as terrain
+              from deployment.gcube import selection_preflight as selection
+              phase = 'root-identity'
+              assert os.geteuid() == 0, 'TERRAIN_PREBUILD_ROOT_REQUIRED'
+              phase = 'source-before'
+              value, source = terrain.verify_sources(checkout=True)
+              phase = 'parent-admission'
+              with selection.environment(**selection.LEGACY_ENV, **terrain.LEGACY_ENV,
+                                         WORLD_ENGINE_INFOGRAPHIC_VISUAL_PROFILE='V022_LEGACY'), terrain.parent_admission_view():
+                  phase = 'proxy-inventory'
+                  proxy = selection.admit_proxy_inventory(json.loads(terrain.physical_bytes(terrain.SELECTION_MANIFEST)))
+                  phase = 'proxy-206'
+                  security = selection.execute_suite(proxy, value['proxy_ids'], 'prebuild-unchanged-proxy-security-gpu-logic')
+                  phase = 'diagnostic-source'
+                  directory = terrain.ROOT / 'deployment/gcube-proxy-diag'
+                  assert directory.is_dir(), 'TERRAIN_PREBUILD_DIAGNOSTIC_SOURCE_MISSING'
+                  before = os.getcwd()
+                  sys.path.insert(0, str(directory))
+                  try:
+                      os.chdir(directory)
+                      phase = 'diagnostic-inventory'
+                      suite = unittest.TestLoader().loadTestsFromNames(['test_observer', 'test_server_diag'])
+                      phase = 'diagnostic-31'
+                      diagnostic = selection.execute_suite(suite, value['diagnostic_ids'], 'prebuild-unchanged-independent-diagnostic')
+                  finally:
+                      os.chdir(before)
+                      sys.path.remove(str(directory))
+              phase = 'source-after'
+              after, final = terrain.verify_sources(checkout=True)
+              assert final['manifest_sha256'] == source['manifest_sha256'], 'TERRAIN_PREBUILD_SOURCE_CHANGED'
+              phase = 'exact-total'
+              assert security['tests'] == 206 and diagnostic['tests'] == 31, 'TERRAIN_PREBUILD_TEST_TOTAL_INVALID'
+              terrain.notice('Privileged pre-build parent regression', dict(passed=True, tests=237,
+                  failures=0, errors=0, skipped=0, groups=[{key: row[key] for key in ('category','tests','failures','errors','skipped')}
+                                                       for row in (security, diagnostic)],
+                  exact_published_parent=terrain.PARENT_DIGEST, source_manifest_sha256=source['manifest_sha256'],
+                  physical_gpu='NOT_RUN'))
+          except Exception as error:
+              safe = dict(phase=phase, exception_type=type(error).__name__, physical_gpu='NOT_RUN')
+              if isinstance(getattr(error, 'errno', None), int):
+                  safe['errno'] = error.errno
+              validator_code = getattr(error, 'code', None)
+              if isinstance(error, AssertionError) and error.args and isinstance(error.args[0], str):
+                  validator_code = error.args[0].split(':', 1)[0]
+              if isinstance(validator_code, str) and re.fullmatch(r'(?:TERRAIN|BOLD|SELECTION|INFOGRAPHIC|GPU)_[A-Z0-9_]{1,70}', validator_code):
+                  safe['validator_code'] = validator_code
+              safe['python_runtime_locations'] = [dict(file=Path(frame.filename).name, function=frame.name, line=frame.lineno)
+                                                  for frame in traceback.extract_tb(error.__traceback__)[-8:]]
+              print('::error title=Terrain pre-build failure::'+json.dumps(safe), flush=True)
+              raise SystemExit(1) from None
           PY
       - name: Set up Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f
