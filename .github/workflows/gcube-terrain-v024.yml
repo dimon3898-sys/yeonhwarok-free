@@ -191,6 +191,92 @@ jobs:
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+      - name: Actual approved CPU Canvas 1080x1920 visual target pixel QC
+        id: terrain_pixels
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "${RUNNER_TEMP}/terrain-pixel-evidence"
+          chmod 0777 "${RUNNER_TEMP}/terrain-pixel-evidence"
+          docker run --rm -i --user 1000:1000 \
+            --mount "type=bind,source=${RUNNER_TEMP}/terrain-pixel-evidence,target=/data/terrain-preflight" \
+            --entrypoint python "${IMAGE}:${RELEASE_TAG}" - <<'PY'
+          import hashlib, json, re, runpy, subprocess, sys, traceback
+          from pathlib import Path
+          from unittest.mock import patch
+          from deployment.gcube import terrain_preflight as terrain
+          folder = Path('/data/terrain-preflight')
+          observed = dict(physical_gpu='NOT_RUN', cpu_flags_and_resources='UNCHANGED', node_invocation_observed=False)
+          real_run = subprocess.run
+          value, source = terrain.verify_sources()
+          observed['source_manifest_sha256'] = source['manifest_sha256']
+          observed['approved_preview_source_pins'] = value['approved_preview']['source_records']
+          def classify(text):
+              output = dict(error_types=sorted(set(re.findall(r'\b(?:Error|AssertionError|TypeError|SyntaxError|RangeError|ReferenceError|TimeoutError)\b', text))),
+                  validator_codes=sorted(set(re.findall(r'\b(?:TERRAIN|BOLD|CPU|INFOGRAPHIC)_[A-Z0-9_]{1,70}\b', text))),
+                  errno_labels=sorted(set(re.findall(r'\b(?:EACCES|ENOENT|ENOSPC|ENOMEM|EPIPE|SIGBUS|SIGSEGV|SIGKILL)\b', text))))
+              labels = {'Target page, context or browser has been closed':'CHROMIUM_TARGET_CLOSED',
+                        'Bus error':'BUS_ERROR', 'No space left on device':'NO_SPACE_LEFT',
+                        'Failed to create shared memory':'SHARED_MEMORY_CREATION_FAILED',
+                        'Out of memory':'OUT_OF_MEMORY', 'Allocation failed':'ALLOCATION_FAILED',
+                        'Timeout':'TIMEOUT'}
+              output['observed_browser_resource_labels'] = [label for fragment,label in labels.items() if fragment in text]
+              output['file_basenames'] = sorted(set(Path(name).name for name in re.findall(r"(?:open|stat|access|mkdir)\s+['\"]([^'\"]+)['\"]", text)))[:8]
+              return output
+          def node_observer(command, *args, **kwargs):
+              result = real_run(command, *args, **kwargs)
+              if isinstance(command,(list,tuple)) and len(command)>1 and command[:2]==['node','tools/terrain_canvas_preview_v024.mjs']:
+                  observed.update(node_invocation_observed=True, node_return_code=result.returncode)
+                  if result.returncode:
+                      observed['node_failure'] = classify((result.stderr or '')+'\n'+(result.stdout or ''))
+              return result
+          phase = 'unchanged-pixels-only-cli'
+          try:
+              sys.argv = ['deployment.gcube.terrain_preflight', '--pixels-only', str(folder)]
+              with patch.object(subprocess,'run',node_observer):
+                  runpy.run_module('deployment.gcube.terrain_preflight',run_name='__main__',alter_sys=True)
+              observed['passed'] = True
+          except Exception as error:
+              observed.update(passed=False, phase=phase, exception_type=type(error).__name__)
+              if isinstance(getattr(error,'errno',None),int): observed['errno']=error.errno
+              if isinstance(error,AssertionError) and error.args and isinstance(error.args[0],str):
+                  code=error.args[0].split(':',1)[0]
+                  if re.fullmatch(r'(?:TERRAIN|BOLD|CPU|INFOGRAPHIC)_[A-Z0-9_]{1,70}',code): observed['validator_code']=code
+              observed['python_runtime_locations']=[dict(file=Path(frame.filename).name,function=frame.name,line=frame.lineno)
+                  for frame in traceback.extract_tb(error.__traceback__)[-8:]]
+              raise SystemExit(1) from None
+          finally:
+              artifacts = {}
+              admitted_ids = set(value['approved_preview']['mandatory_pixel_checks'])
+              for name in ('canvas/failure.json','canvas/metrics.json','canvas/scene-plan.json'):
+                  artifact=folder/name
+                  if artifact.is_file():
+                      raw=artifact.read_bytes();artifacts[name]=dict(sha256=hashlib.sha256(raw).hexdigest(),size=len(raw))
+                      if name.endswith(('failure.json','metrics.json')):
+                          document=json.loads(raw)
+                          if document.get('error'): observed['recorded_browser_failure']=classify(document['error'])
+                          checks=document.get('checks',document.get('partial_progress',{}).get('checks',[]))
+                          failed=[row['id'] for row in checks if row.get('passed') is False and row.get('id') in admitted_ids]
+                          observed['failed_admitted_check_count']=len(failed)
+                          observed['failed_admitted_check_ids']=sorted(failed)[:12]
+                          observed['actual_executed_source_sha256s']={key:sha for key,sha in document.get('source_sha256s',{}).items()
+                              if key in ('/terrain.js','/profile.json','/data_profile.json','/metrics.mjs','/preview-runner.mjs')}
+              observed['preserved_artifact_hashes']=artifacts
+              (folder/'CPU_DIAGNOSTIC_OBSERVER.json').write_text(json.dumps(observed,indent=2)+'\n')
+              if observed.get('passed') is False:
+                  public={key:val for key,val in observed.items() if key!='approved_preview_source_pins'}
+                  body=json.dumps(public,sort_keys=True,separators=(',',':'))
+                  assert len(body)<=3500, 'TERRAIN_PIXEL_SAFE_DIAGNOSTIC_TOO_LARGE'
+                  print('::error title=Terrain CPU pixel diagnostic::'+body,flush=True)
+          PY
+      - name: Preserve actual CPU pixel evidence including failures
+        if: ${{ always() && (steps.terrain_pixels.outcome == 'success' || steps.terrain_pixels.outcome == 'failure') }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: terrain-cpu-pixel-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/terrain-pixel-evidence
+          if-no-files-found: error
+          retention-days: 7
       - name: Original full v023 assets native measured media preflight with exact selector admission
         shell: bash
         run: |
@@ -281,11 +367,6 @@ jobs:
             --mount "type=bind,source=${PWD}/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,target=/opt/world-engine/deliverables/WORLD_SIMULATION_ENGINE/PRODUCTION_DEFAULT_INTEGRATION_v1/scene_plan.json,readonly" \
             --mount "type=bind,source=${PWD}/deployment/gcube-proxy-diag,target=/tmp/proxy-diag,readonly" \
             --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --regressions-only
-      - name: Actual approved CPU Canvas 1080x1920 visual target pixel QC
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker run --rm --user 1000:1000 --entrypoint python "${IMAGE}:${RELEASE_TAG}" -m deployment.gcube.terrain_preflight --pixels-only
       - name: Container package and storage admission
         shell: bash
         run: |
