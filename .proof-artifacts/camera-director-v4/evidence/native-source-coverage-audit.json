@@ -1,0 +1,116 @@
+{
+  "scope": "Read-only asset and source audit; no crop created/no renderer/source edits/no download/no rendering",
+  "source": {
+    "physicalPath": "/tmp/gate1b-storage-preserved/NE1_HR_LC_SR_W_DR.tif",
+    "logicalPath": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+    "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+    "expectedSha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+    "dimensions": [
+      21600,
+      10800
+    ],
+    "bands": 3,
+    "dataType": "Byte",
+    "geotransform": [
+      -180.0,
+      0.01666666666667,
+      0.0,
+      90.00000000000001,
+      0.0,
+      -0.01666666666667
+    ],
+    "bounds": [
+      -180.0,
+      -90.000000000036,
+      180.00000000007202,
+      90.00000000000001
+    ],
+    "pixelSpacingDegrees": [
+      0.01666666666667,
+      0.01666666666667
+    ]
+  },
+  "approvedContinent": {
+    "file": "/tmp/world-scale-system-v1/terrain-lod/continent-native.png",
+    "window": [
+      11247,
+      1646,
+      3003,
+      4983
+    ],
+    "bounds": [
+      7.450000000037505,
+      -20.483333333355418,
+      57.50000000004752,
+      62.56666666666119
+    ],
+    "originalComparedPixels": 14963949,
+    "differentPixels": 0,
+    "maxChannelDifference": 0
+  },
+  "approvedRegional": {
+    "file": "web/earth-detail/v018/detail_0.png",
+    "window": [
+      12023,
+      2741,
+      13463,
+      4421
+    ],
+    "bounds": [
+      20.383333333333326,
+      16.316666666666663,
+      44.383333333333326,
+      44.31666666666666
+    ],
+    "originalComparedPixels": 2419200,
+    "differentPixels": 0,
+    "maxChannelDifference": 0
+  },
+  "motionFootprint": {
+    "unionBounds": [
+      7.05021682926828,
+      -21.146376886251346,
+      57.901053170731714,
+      63.22767588625135
+    ],
+    "contextBounds": [
+      7.05021682926828,
+      -21.146376886251346,
+      57.901053170731714,
+      63.22767588625135
+    ],
+    "availableOriginalCoverage": true,
+    "minimalNativeWindowNoPadding": [
+      11223,
+      1606,
+      3052,
+      5063
+    ],
+    "nativeWindowBounds": [
+      7.050000000037414,
+      -21.150000000022217,
+      57.916666666714264,
+      63.23333333332799
+    ],
+    "dimensions": [
+      3052,
+      5063
+    ]
+  },
+  "failureMechanism": {
+    "file": "web/map_infographic_v1/renderer.mjs",
+    "code": "terrainFragment contextInside hard geometric selector",
+    "path": "outside contextTileBounds -> texture(globalTerrain,guv) instead of same NativeNE1 context source",
+    "legacyCoverageInput": "Source crop only covers previously approved CONT extent; newly computed V4 relation context exceeds its crop"
+  },
+  "scopeAssessment": {
+    "CONFIRMED": [
+      "Original NE1 raster already exists and covers all V4 motion bounds",
+      "Original NE1 SHA matches approved source identity",
+      "Both approved PNG source windows are native bit-identical RGB subsets",
+      "A broader native pixel window needs no DEM/material/lighting/shader/palette changes",
+      "Existing approved PNGs/modules can remain byte-identical"
+    ],
+    "INTERPRETATION": "Additional coverage window from unchanged admitted native source can be treated as Camera/LOD input coverage repair, not Terrain visual tuning. User locked source assets must not be overwritten; a new derivative file has a new hash and must be separately disclosed. If lock means no additional native window at all, cannot claim it is within scope."
+  }
+}

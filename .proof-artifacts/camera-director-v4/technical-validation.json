@@ -1,0 +1,709 @@
+{
+  "createdAtUTC": "2026-10-11T12:49:31.191162+00:00",
+  "selectedIteration": 2,
+  "iterationDirectory": "/tmp/world-camera-director-v4/iteration-02",
+  "visualIterations": 2,
+  "decision": "REFERENCE_CAMERA_REVEAL_PASS",
+  "counts": {
+    "PASS": 333,
+    "FAIL": 0,
+    "ERROR": 0,
+    "SKIP": 1
+  },
+  "PASS": 333,
+  "FAIL": 0,
+  "ERROR": 0,
+  "SKIP": 1,
+  "validationGroups": {
+    "sourcePreservation": {
+      "path": "/tmp/world-camera-director-v4/tests/source-preservation.json",
+      "sha256": "1160e334c88df54e17bc8463c4a151a00b38103d525467d430ff9031f515cbd2",
+      "counts": {
+        "PASS": 71,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    "pureCameraMotion": {
+      "path": "/tmp/world-camera-director-v4/tests/motion-focused.json",
+      "sha256": "9784b997b11099676e41cfbf764e9fb6650cfe39f6aa1150733a35dcd1f9b77f",
+      "counts": {
+        "PASS": 44,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    "pureRevealLayout": {
+      "path": "/tmp/world-camera-director-v4/tests/reveal-layout-focused.json",
+      "sha256": "ef92c92cbb521ef204ee07f64c676a13c71941557d8b2cf49d81b02a05e4edd1",
+      "counts": {
+        "PASS": 38,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    "actualGpuCameraMotion": {
+      "path": "/tmp/world-camera-director-v4/tests/actual-motion-audit.json",
+      "sha256": "5fabe44b280e2d964d8c7210bad13526ab8fb91f3ee827e5363f5e1ebc9561bc",
+      "counts": {
+        "PASS": 35,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    "actualGpuLayout": {
+      "path": "/tmp/world-camera-director-v4/tests/actual-layout-audit-iteration-02.json",
+      "sha256": "b618d21a239def3fc63036c4dc5e30383d47c6bc0aadeecda2ab4487f4c90b08",
+      "counts": {
+        "PASS": 41,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    "actualEncodedPixels": {
+      "path": "/tmp/world-camera-director-v4/iteration-02/encoded-pixel-qc.json",
+      "sha256": "338e3e2c68cec0b74041d9086a44d1fc54447c0c3649003d0f479e82ebfa1f66",
+      "counts": {
+        "PASS": 40,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      }
+    },
+    "actualRendererRuntime": {
+      "path": "/tmp/world-camera-director-v4/iteration-02/runtime-validation.json",
+      "sha256": "61e68a9213f8dfec695a49dff56fb611a26d4ddd51d4e7e965c092b3469d0237",
+      "counts": {
+        "PASS": 64,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 1
+      }
+    }
+  },
+  "aggregationPolicy": "Only latest final 7 focused groups; historical failures, preflights and publication safety are excluded from final counts and preserved separately.",
+  "scope": "Software WebGL2 Camera + Guided Reveal proof only",
+  "referenceVisualAudit": {
+    "path": "/tmp/world-camera-director-v4/iteration-02/actual-reference-visual-audit.json",
+    "sha256": "4aade0624ad47562d26443d54935c99f4d863dd486a0eba33bd2b6d3e37c49d9",
+    "decision": "REFERENCE_CAMERA_REVEAL_PASS",
+    "findings": [
+      {
+        "id": "GEOGRAPHIC_RECOGNITION",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "F0 Egypt shape and gold material immediately readable. Initial country label is inside actual region; no event marker/title competes."
+      },
+      {
+        "id": "CONTEXT_RELATION",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "1.07–2.70s continuous pullback reveals useful Europe/NorthAfrica/MiddleEast context with primary still identifiable; 2.70–3.50s relation hold retains country/location association. Previously visible rectangular native/global edge is absent."
+      },
+      {
+        "id": "GEOGRAPHIC_TRAVEL",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "3.50–8.17s geography pans and zooms continuously toward event/regional framing; sampled landmarks do not teleport or switch completed map shots. Pan is moderate because fixture event lies within initial primary."
+      },
+      {
+        "id": "PRIMARY_COLOR",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Primary retains gold during recognition, pullback and renewed approach; no primary material arrival reveal."
+      },
+      {
+        "id": "MOVING_PRIMARY_LABEL",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Country label is already legible in initial recognition view and persists attached during camera motion. It does not pop at a Suez-specific time or switch sides."
+      },
+      {
+        "id": "MOVING_MARKER",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Marker introduced around6.1s, while approach continues, about2.07s before regional arrival. This visibly guides event location rather than appearing after guidance has ended."
+      },
+      {
+        "id": "LOCATION_LABEL",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Location follows marker around6.4s, remains directly linked with constant candidate, no observed label-side jumps or collisions."
+      },
+      {
+        "id": "READABLE_MOTION",
+        "result": "ALIGNED",
+        "confidence": "LIKELY",
+        "evidence": "Country first has static recognition, event guide arrives during reduced projected speed, then gets increasingly slow fine approach. No repeated stop per new text. Readability is human judgment, not objective speed PASS."
+      },
+      {
+        "id": "DECELERATION",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Approach increments diminish progressively near7–8.17s before settle/lock, without visible last-position snap in the reviewed sequence."
+      },
+      {
+        "id": "EVENT_TITLE",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Title absent throughout camera movement and settle, introduced on stable final geography at9.0s. Final title style is existing approved Korean layout."
+      },
+      {
+        "id": "PERCEPTION_HOLD",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Full-title hold9.70–12.30s remains visually static and gives2.6s reading interval; unlike the reference final slow zoom, this intentionally follows user fixed-hold policy."
+      },
+      {
+        "id": "LOD_SOURCE_COVERAGE",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Actual whole-duration iteration2 decoded sequence and full-resolution02_CONTEXT show no former rectangular native/global fallback seam. Same verified native RGB source now covers entire compiled camera footprint. No new color/geographic/source jump observed in sampled movement.",
+        "coverageEvidence": {
+          "sourceOriginalSha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+          "windowDimensions": [
+            3054,
+            5065
+          ],
+          "windowBounds": [
+            7.033333333370734,
+            -21.166666666688883,
+            57.933333333380915,
+            63.249999999994664
+          ],
+          "outsideWindowFrames": [],
+          "reviewedFormerAffectedFrames": [
+            75,
+            121
+          ]
+        }
+      },
+      {
+        "id": "REFERENCE_FAMILY",
+        "result": "ALIGNED",
+        "confidence": "CONFIRMED",
+        "evidence": "Recognize→contextpullback→relationhold→geographicapproach→persistent staged geographicguide→fineapproach→stabletitle/hold follows relevant64306 motion/reveal grammar. Source-edge defect resolved. Exact reference typography/coordinates/story are not reproduced."
+      }
+    ]
+  },
+  "historicalFailures": [
+    {
+      "iteration": 1,
+      "category": "ACTUAL_VISUAL_LOD_SOURCE_COVERAGE",
+      "path": "/tmp/world-camera-director-v4/iteration-01/actual-reference-visual-audit.json",
+      "decision": "REFERENCE_CAMERA_REVEAL_NEEDS_REWORK",
+      "problem": [
+        {
+          "priority": 1,
+          "category": "LOD_SOURCE_COVERAGE",
+          "description": "Context footprint exceeds previous fixed native RGB window by~0.8degree width. This exposes hard native/global source edge during47frames near context hold.",
+          "minimumScope": "Prepare geographic LOD window from unchanged verified native source to cover compiled trajectory; preserve every native RGB sample and all visual/shader material policies. Do not move labels or camera to conceal defect."
+        }
+      ],
+      "correction": "Iteration2 geographic native window from same verified original; no resampling, changed detail, Visual Source, Camera, Reveal or Layout tuning."
+    },
+    {
+      "iteration": 1,
+      "category": "INITIAL_AUDIT_HARNESS_NUMERIC_COMPARISON",
+      "path": "/tmp/world-camera-director-v4/tests/actual-motion-audit-iteration-01-initial.json",
+      "counts": {
+        "PASS": 31,
+        "FAIL": 4,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "failedCheckIds": [
+        "ACTUAL_ALLFRAME_GEO_CAMERA_EXTENT",
+        "ACTUAL_ALLFRAME_VELOCITY_ACCELERATION",
+        "ACTUAL_MOTION_STATE_SCALE_PROGRESS",
+        "ACTUAL_REVEAL_HAS_NO_CAMERA_MUTATION"
+      ],
+      "resolution": "Audit comparison handles Node/Chromium floating-point least-significant-bit differences and JSON zero sign; renderer Camera sources and output were not changed to pass this harness."
+    }
+  ],
+  "motionPlan": {
+    "path": "/tmp/world-camera-director-v4/iteration-02/camera-plan.json",
+    "sha256": "45e945b07de0ec0415f0b92a12fac9d32b19ecedec570aa4b8603bacacaea688",
+    "timeline": [
+      {
+        "state": "PRIMARY_RECOGNITION",
+        "key": "PRIMARY_RECOGNITION",
+        "startFrame": 0,
+        "endFrame": 32,
+        "durationFrames": 32,
+        "startSeconds": 0,
+        "endSeconds": 1.0666666666666667,
+        "motion": "FIXED",
+        "scale": "REGIONAL_CONTEXT"
+      },
+      {
+        "state": "CONTEXT_EXPANSION",
+        "key": "CONTEXT_EXPANSION",
+        "startFrame": 32,
+        "endFrame": 81,
+        "durationFrames": 49,
+        "startSeconds": 1.0666666666666667,
+        "endSeconds": 2.7,
+        "motion": "PAN_AND_LOG_EXTENT",
+        "scale": "CONTEXT"
+      },
+      {
+        "state": "RELATION_HOLD",
+        "key": "RELATION_HOLD",
+        "startFrame": 81,
+        "endFrame": 105,
+        "durationFrames": 24,
+        "startSeconds": 2.7,
+        "endSeconds": 3.5,
+        "motion": "FIXED",
+        "scale": "CONTEXT"
+      },
+      {
+        "state": "EVENT_APPROACH",
+        "key": "EVENT_APPROACH",
+        "startFrame": 105,
+        "endFrame": 136,
+        "durationFrames": 31,
+        "startSeconds": 3.5,
+        "endSeconds": 4.533333333333333,
+        "motion": "ACCELERATE",
+        "scale": "CONTEXT_TO_EVENT"
+      },
+      {
+        "state": "GUIDED_REVEAL",
+        "key": "GUIDED_REVEAL",
+        "startFrame": 136,
+        "endFrame": 178,
+        "durationFrames": 42,
+        "startSeconds": 4.533333333333333,
+        "endSeconds": 5.933333333333334,
+        "motion": "TRAVEL_WITH_READABILITY_BUDGET",
+        "scale": "CONTEXT_TO_EVENT"
+      },
+      {
+        "state": "DECELERATE",
+        "key": "DECELERATE",
+        "startFrame": 178,
+        "endFrame": 215,
+        "durationFrames": 37,
+        "startSeconds": 5.933333333333334,
+        "endSeconds": 7.166666666666667,
+        "motion": "GUIDED_DECELERATION",
+        "scale": "CONTEXT_TO_EVENT"
+      },
+      {
+        "state": "EVENT_FRAMING",
+        "key": "EVENT_FRAMING",
+        "startFrame": 215,
+        "endFrame": 246,
+        "durationFrames": 31,
+        "startSeconds": 7.166666666666667,
+        "endSeconds": 8.2,
+        "motion": "FINE_APPROACH",
+        "scale": "REGIONAL"
+      },
+      {
+        "state": "SETTLE",
+        "key": "SETTLE",
+        "startFrame": 246,
+        "endFrame": 264,
+        "durationFrames": 18,
+        "startSeconds": 8.2,
+        "endSeconds": 8.8,
+        "motion": "FIXED",
+        "scale": "REGIONAL"
+      },
+      {
+        "state": "LOCK",
+        "key": "LOCK",
+        "startFrame": 264,
+        "endFrame": 270,
+        "durationFrames": 6,
+        "startSeconds": 8.8,
+        "endSeconds": 9,
+        "motion": "FIXED",
+        "scale": "REGIONAL"
+      },
+      {
+        "state": "EVENT_TITLE",
+        "key": "EVENT_TITLE",
+        "startFrame": 270,
+        "endFrame": 291,
+        "durationFrames": 21,
+        "startSeconds": 9,
+        "endSeconds": 9.7,
+        "motion": "FIXED",
+        "scale": "REGIONAL"
+      },
+      {
+        "state": "PERCEPTION_HOLD",
+        "key": "PERCEPTION_HOLD",
+        "startFrame": 291,
+        "endFrame": 369,
+        "durationFrames": 78,
+        "startSeconds": 9.7,
+        "endSeconds": 12.3,
+        "motion": "FIXED",
+        "scale": "REGIONAL"
+      },
+      {
+        "state": "NEXT",
+        "key": "NEXT",
+        "startFrame": 369,
+        "endFrame": 375,
+        "durationFrames": 6,
+        "startSeconds": 12.3,
+        "endSeconds": 12.5,
+        "motion": "FIXED",
+        "scale": "REGIONAL"
+      }
+    ],
+    "motion": {
+      "startFrame": 105,
+      "endFrame": 246,
+      "arrivalFrame": 245,
+      "startBounds": [
+        7.05021682926828,
+        -21.146376886251346,
+        57.901053170731714,
+        63.22767588625135
+      ],
+      "endBounds": [
+        23.25,
+        16.472168113664114,
+        38.15,
+        39.827831886335886
+      ],
+      "singleTrajectory": true,
+      "interpolation": "GEOGRAPHIC_CENTER_AND_LOG_EXTENT_WITH_DATA_DERIVED_C2_PAN_ZOOM_PROGRESS",
+      "phaseCurveResets": false,
+      "noCloserThanApprovedStop": true,
+      "panWeight": 0.06768694581422155,
+      "zoomWeight": 0.9323130541857785,
+      "progressBias": 0.022245396577218298,
+      "metrics": {
+        "normalizedPan": 0.09120874402305199,
+        "logSpan": 1.2562998918871875,
+        "panWeight": 0.06768694581422155,
+        "zoomWeight": 0.9323130541857785,
+        "geographicCenterDelta": [
+          -1.7756349999999976,
+          7.109350499999998
+        ],
+        "logSpanDelta": [
+          -1.227535356634321,
+          -1.2844204081702257
+        ]
+      }
+    },
+    "context": {
+      "required": true,
+      "requiredGeometryBounds": [
+        9.310254,
+        8.665625,
+        55.641016,
+        33.415674
+      ],
+      "basis": "Actual region, event and relation geometry fitted to canonical safe area",
+      "condition": "Required geometry is not contained by starting safe viewport",
+      "startExtent": [
+        23.337305,
+        15.14709461366411,
+        38.237305,
+        38.502758386335884
+      ],
+      "framedExtent": [
+        7.05021682926828,
+        -21.146376886251346,
+        57.901053170731714,
+        63.22767588625135
+      ],
+      "expansionStartFrame": 32,
+      "expansionEndFrame": 81,
+      "relationStartFrame": 81,
+      "relationEndFrame": 105
+    },
+    "admission": {
+      "status": "LOCAL_NOT_ADMITTED",
+      "requestedScale": "REGIONAL",
+      "effectiveScale": "REGIONAL",
+      "localUsed": false,
+      "localRejected": false,
+      "localPermitted": false,
+      "regionalStopBounds": [
+        23.25,
+        16.472168113664114,
+        38.15,
+        39.827831886335886
+      ],
+      "stopBounds": [
+        23.25,
+        16.472168113664114,
+        38.15,
+        39.827831886335886
+      ],
+      "safeClosestStatus": "APPROVED_REGIONAL_FALLBACK",
+      "diagnosticCategory": "DATA_ADMISSION"
+    },
+    "unchangedBetweenIterations": true
+  },
+  "revealPlan": {
+    "path": "/tmp/world-camera-director-v4/iteration-02/reveal-plan.json",
+    "sha256": "25f97daac9ccba5f9eb87e15b2ea87690bc61f476b7324f1e313ec60704b5317",
+    "schedule": {
+      "country": {
+        "frame": 0,
+        "seconds": 0.0
+      },
+      "marker": {
+        "frame": 183,
+        "seconds": 6.1
+      },
+      "location": {
+        "frame": 192,
+        "seconds": 6.4
+      },
+      "title": {
+        "frame": 270,
+        "seconds": 9.0
+      }
+    },
+    "perception": {
+      "country": {
+        "minimumFrames": 21,
+        "startFrame": 0,
+        "availableFrames": 375,
+        "minimumSeconds": 0.7
+      },
+      "marker": {
+        "minimumFrames": 8,
+        "startFrame": 183,
+        "availableFrames": 192,
+        "minimumSeconds": 0.26666666666666666
+      },
+      "location": {
+        "minimumFrames": 36,
+        "startFrame": 192,
+        "availableFrames": 183,
+        "minimumSeconds": 1.2
+      },
+      "title": {
+        "minimumFrames": 78,
+        "startFrame": 270,
+        "availableFrames": 105,
+        "minimumSeconds": 2.6
+      }
+    },
+    "unchangedBetweenIterations": true
+  },
+  "layoutContract": {
+    "path": "/tmp/world-camera-director-v4/iteration-02/layout-contract.json",
+    "sha256": "bf4fb1dc74632c5066f3da4aee828aa42dd59022d17781f89aa638a97745fd5a",
+    "unchangedBetweenIterations": true
+  },
+  "diagnosticLayers": {
+    "Camera": "/tmp/world-camera-director-v4/iteration-02/camera-plan.json",
+    "Reveal": "/tmp/world-camera-director-v4/iteration-02/reveal-plan.json",
+    "Layout": "/tmp/world-camera-director-v4/iteration-02/layout-contract.json",
+    "ActualGPUFrames": "/tmp/world-camera-director-v4/iteration-02/frame-diagnostics.jsonl",
+    "SourceData": "/tmp/world-camera-director-v4/iteration-02/input-manifest.json",
+    "ActualGPU": "/tmp/world-camera-director-v4/iteration-02/gpu-evidence.json",
+    "EncodedPixels": "/tmp/world-camera-director-v4/iteration-02/encoded-pixel-qc.json"
+  },
+  "nativeContextSource": {
+    "originalSha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+    "windowSha256": "6bafd19fd3d74d0786a52cd0f0be41863bf00b9acebf94e56edc4e2532468b4d",
+    "dimensions": [
+      3054,
+      5065
+    ],
+    "bounds": [
+      7.033333333370734,
+      -21.166666666688883,
+      57.933333333380915,
+      63.249999999994664
+    ],
+    "method": "Exact geographic native RGB window of same admitted source; no resize/resampling/color operation/new data",
+    "overlapComparisons": [
+      {
+        "label": "APPROVED_CONTEXT",
+        "oldFile": "/tmp/world-scale-system-v1/terrain-lod/continent-native.png",
+        "oldSha256": "b0abb96f673a3c9c8edcf81717873ec86c23dad7c6aec8992dddcd7217c5743a",
+        "comparedPixels": 14963949,
+        "differentPixels": 0,
+        "maxChannelDifference": 0
+      },
+      {
+        "label": "APPROVED_REGIONAL",
+        "oldFile": "/tmp/world-engine-selection-fix-checkout/world-simulation-shorts-engine/web/earth-detail/v018/detail_0.png",
+        "oldSha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+        "comparedPixels": 2419200,
+        "differentPixels": 0,
+        "maxChannelDifference": 0
+      }
+    ]
+  },
+  "visualProtection": {
+    "result": "PASS",
+    "oldSourceModules": 14,
+    "oldShaders": 14,
+    "reusedGraphicShaders": 4,
+    "approvedFinalHash": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+    "CameraRevealLayoutChangedBetweenIterations": false
+  },
+  "genericFixtures": {
+    "A": {
+      "status": "PASS",
+      "contextExpansion": false,
+      "schedule": {
+        "country": 0,
+        "marker": 56,
+        "location": 64,
+        "title": 167
+      },
+      "panWeight": 0,
+      "zoomWeight": 0
+    },
+    "B": {
+      "status": "PASS",
+      "contextExpansion": true,
+      "schedule": {
+        "country": 0,
+        "marker": 97,
+        "location": 105,
+        "title": 234
+      },
+      "panWeight": 0,
+      "zoomWeight": 1
+    },
+    "C": {
+      "status": "PASS",
+      "contextExpansion": false,
+      "schedule": {
+        "country": 0,
+        "marker": 131,
+        "location": 139,
+        "title": 218
+      },
+      "panWeight": 0.06473466636682067,
+      "zoomWeight": 0.9352653336331794
+    }
+  },
+  "suezSpecificHardcode": false,
+  "outputDirectory": "/tmp/world-camera-director-v4/iteration-02",
+  "outputHashes": {
+    "SUEZ_CAMERA_DIRECTOR_V4.mp4": "c4021dcf4f809f076e4504955b3600a002e4c991fdd5a21a9971ea0d6ad1e239",
+    "01_PRIMARY_START.png": "bcda09ae05ad96cbe55de5ca73fbcce9382c4198ed987227064248baa659dbf0",
+    "02_CONTEXT.png": "f27363af7837552954a54fa07ac8b5c2048a26f04f3799b220ca2775b70b05c5",
+    "03_EVENT_APPROACH.png": "6d1570e6c3f587761ccb55c7e9efb94ed82b649679a5970ae80d2e63c189ef32",
+    "04_MARKER_GUIDE.png": "d53fcb5b692d5bc520a666bd138ba9f0633d2b2bb43d083ae2db9573f8fb9b52",
+    "05_REGIONAL_LOCK.png": "3a25e738d2741b0b0cd0d8b96831749a7c9c0e308235eae96544231439258b9a",
+    "06_EVENT_TITLE.png": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+    "07_FINAL_HOLD.png": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673"
+  },
+  "outputMetadata": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "frames": 375,
+    "durationSeconds": 12.5,
+    "audioStreams": 0,
+    "PNG": "lossless",
+    "ffprobe": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+          "profile": "High",
+          "codec_type": "video",
+          "codec_tag_string": "avc1",
+          "codec_tag": "0x31637661",
+          "width": 1080,
+          "height": 1920,
+          "coded_width": 1088,
+          "coded_height": 1920,
+          "closed_captions": 0,
+          "film_grain": 0,
+          "has_b_frames": 2,
+          "pix_fmt": "yuv420p",
+          "level": 40,
+          "chroma_location": "left",
+          "field_order": "progressive",
+          "refs": 4,
+          "is_avc": "true",
+          "nal_length_size": "4",
+          "id": "0x1",
+          "r_frame_rate": "30/1",
+          "avg_frame_rate": "30/1",
+          "time_base": "1/15360",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 192000,
+          "duration": "12.500000",
+          "bit_rate": "9021188",
+          "bits_per_raw_sample": "8",
+          "nb_frames": "375",
+          "nb_read_frames": "375",
+          "extradata_size": 46,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0,
+            "multilayer": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "VideoHandler",
+            "vendor_id": "[0][0][0][0]",
+            "encoder": "Lavc61.19.101 libx264"
+          }
+        }
+      ],
+      "format": {
+        "filename": "/tmp/world-camera-director-v4/iteration-02/SUEZ_CAMERA_DIRECTOR_V4.mp4",
+        "nb_streams": 1,
+        "nb_programs": 0,
+        "nb_stream_groups": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "12.500000",
+        "size": "14100953",
+        "bit_rate": "9024609",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomiso2avc1mp41",
+          "encoder": "Lavf61.7.103"
+        }
+      }
+    }
+  },
+  "actualRTX4080S": "NOT_RUN",
+  "container": "NOT_RUN",
+  "next": "USER VIDEO REVIEW REQUIRED",
+  "userApproval": "PENDING",
+  "finalVisualApprovalAuthority": "USER"
+}
