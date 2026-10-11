@@ -1,0 +1,4128 @@
+{
+  "PASS": 188,
+  "FAIL": 0,
+  "ERROR": 0,
+  "SKIP": 1,
+  "scope": "Camera Director V2 focused validation only; no full legacy regressions",
+  "decision": "CONTINUOUS_CAMERA_PASS",
+  "visualIterations": 1,
+  "outputHashes": {
+    "SUEZ_CAMERA_DIRECTOR_V2.mp4": "927d6944fa21bcbd41b71c3dce2582fc8062c2047d5e3282f478b30035a69cf8",
+    "01_WIDE_START.png": "699af969d5ab0b59ccc6a5e737ef6bddfd453d11e899849a6d7e00b418717ab5",
+    "02_APPROACH.png": "e400a921da9e551e756a1655e56dc0dd263b45bc0cada9a310c917266c914472",
+    "03_DECELERATE.png": "0e4fc2bdc8878a1b84d965f61bc76480a900692782d5e2a1f7ef0effb0434275",
+    "04_REGIONAL_LOCK.png": "471355d4c8f7bab35e6c66a899f0e07432171e6667463c94c10a78b1732c6d29",
+    "05_FINAL_HOLD.png": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673"
+  },
+  "outputBytes": {
+    "SUEZ_CAMERA_DIRECTOR_V2.mp4": 10811687,
+    "01_WIDE_START.png": 3917015,
+    "02_APPROACH.png": 3979413,
+    "03_DECELERATE.png": 3284643,
+    "04_REGIONAL_LOCK.png": 3198879,
+    "05_FINAL_HOLD.png": 3237292
+  },
+  "video": {
+    "resolution": [
+      1080,
+      1920
+    ],
+    "fps": 30,
+    "frames": 384,
+    "seconds": 12.8,
+    "audio": false
+  },
+  "sourceHashes": {
+    "boundary_glow.mjs": "d899b75587404d1006da403611e44046af31c81b6857ec681ae2063ecfd3e6d0",
+    "camera_director.mjs": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+    "camera_director_v2.mjs": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+    "camera_gpu_pipeline.mjs": "824b7910662536d715e32958ebd83f87f23690418ef1e0ce5349684e4aade149",
+    "camera_gpu_pipeline_v2.mjs": "762c6e3889d3e2c11d9f98e42913d7530d99ecce70aab5c3c5153d032ece517d",
+    "glyph_atlas.mjs": "16bb30c1776a308fe4c8f7e12aa2bdcbf7b4f105e26d36b5e75fd3f83c404941",
+    "graphic_layout.mjs": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+    "korean_layout.mjs": "e2ff3851edd1238d63952491b9c8b22529d6c3020f1f228e7b13ef99b3d5223d",
+    "local_detail_admission.mjs": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+    "region_colors.mjs": "dd9e7830aca6597564aeaaf5fb7a46893abfe876116eff320a51d055cbf24d76",
+    "renderer.mjs": "751981e07190671eb89f816199c2237a1b1be305d903982e291abc4a7fdee791",
+    "scale_contract.mjs": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+    "scale_projection.mjs": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95"
+  },
+  "groups": [
+    {
+      "name": "Pure camera contract",
+      "counts": {
+        "PASS": 54,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v2/tests/focused-results.json",
+      "tests": [
+        {
+          "id": "v2.compile_deterministic_with_same_scene_seed",
+          "status": "PASS",
+          "elapsedMilliseconds": 2.413462999999979
+        },
+        {
+          "id": "v2.approved_scale_and_scene_inputs_unchanged",
+          "status": "PASS",
+          "elapsedMilliseconds": 15.466862000000049
+        },
+        {
+          "id": "v2.plan_deeply_immutable",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.5448069999999916
+        },
+        {
+          "id": "v2.canonical_vertical_silent_proof_contract",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.10455400000000736
+        },
+        {
+          "id": "v2.required_motion_and_tail_states_explicit_and_ordered",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.08228100000002314
+        },
+        {
+          "id": "v2.timeline_is_contiguous_integer_frames",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.06699599999996053
+        },
+        {
+          "id": "v2.all_frames_have_exactly_one_camera_state",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.5620910000000094
+        },
+        {
+          "id": "v2.frame_evaluation_has_no_order_or_clock_dependence",
+          "status": "PASS",
+          "elapsedMilliseconds": 16.385407999999984
+        },
+        {
+          "id": "v2.integer_frame_range_enforced",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.5840200000000095
+        },
+        {
+          "id": "v2.wrong_plan_version_rejected",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.6669469999999933
+        },
+        {
+          "id": "v2.all_frames_flat_projection_only",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.49723299999999426
+        },
+        {
+          "id": "v2.all_frame_diagnostics_finite",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.7066960000000222
+        },
+        {
+          "id": "v2.context_holds_one_wide_geographic_extent",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.30099100000001044
+        },
+        {
+          "id": "v2.context_contains_target_region_and_event_anchor",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.08092399999998179
+        },
+        {
+          "id": "v2.no_dissolve_or_completed_frame_replacement_requested",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.6273820000000114
+        },
+        {
+          "id": "v2.motion_has_one_start_and_end_without_interior_restarts",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.08847800000000916
+        },
+        {
+          "id": "v2.motion_first_last_pose_and_velocity_are_exact",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.03384199999999282
+        },
+        {
+          "id": "v2.zoom_and_pan_share_one_geographic_progress",
+          "status": "PASS",
+          "elapsedMilliseconds": 1.3435759999999846
+        },
+        {
+          "id": "v2.center_pan_is_nonzero_and_bounded_without_overshoot",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.22693700000002082
+        },
+        {
+          "id": "v2.extent_shrinks_monotonically_and_never_enters_local",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3854249999999979
+        },
+        {
+          "id": "v2.adjacent_center_and_log_extent_steps_are_bounded",
+          "status": "PASS",
+          "elapsedMilliseconds": 1.1393699999999853
+        },
+        {
+          "id": "v2.velocity_diagnostics_match_actual_geographic_motion",
+          "status": "PASS",
+          "elapsedMilliseconds": 1.035870999999986
+        },
+        {
+          "id": "v2.starts_slow_accelerates_then_decelerates",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.1872380000000362
+        },
+        {
+          "id": "v2.departure_and_arrival_discrete_acceleration_small",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.07286499999997886
+        },
+        {
+          "id": "v2.easing_is_c2_at_departure_and_arrival",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.08609599999999773
+        },
+        {
+          "id": "v2.phase_boundaries_do_not_reset_velocity_or_zoom",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.11787599999996701
+        },
+        {
+          "id": "v2.arrival_exact_stop_and_camera_drift_zero",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.5114069999999629
+        },
+        {
+          "id": "v2.anchor_stable_every_frame",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.25313399999998865
+        },
+        {
+          "id": "v2.no_information_before_lock_complete",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3300830000000019
+        },
+        {
+          "id": "v2.reveal_and_hold_tail_matches_v1_per_relative_frame",
+          "status": "PASS",
+          "elapsedMilliseconds": 4.133088999999984
+        },
+        {
+          "id": "v2.settle_lock_reveal_hold_next_durations_identical_to_v1",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.11398099999996703
+        },
+        {
+          "id": "v2.reveal_stages_timing_and_order_exact_v1_preserved",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.06887799999998379
+        },
+        {
+          "id": "v2.hold_full_reveal_at_fixed_camera_at_least_three_seconds",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.17610400000000936
+        },
+        {
+          "id": "v2.no_partial_primary_reveal_during_approach",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.07333699999998089
+        },
+        {
+          "id": "v2.country_revealed_with_location_not_camera",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.10666700000001583
+        },
+        {
+          "id": "v2.scenario_disclosure_matches_v1_all_frames",
+          "status": "PASS",
+          "elapsedMilliseconds": 2.801729000000023
+        },
+        {
+          "id": "v2.local_denial_keeps_regional_bound_and_diagnostic",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.11296700000002602
+        },
+        {
+          "id": "v2.local_requested_never_bypasses_admission",
+          "status": "PASS",
+          "elapsedMilliseconds": 3.334034000000031
+        },
+        {
+          "id": "v2.safe_closest_mismatch_rejected",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.6406189999999583
+        },
+        {
+          "id": "v2.actual_gis_region_extent_used_for_target",
+          "status": "PASS",
+          "elapsedMilliseconds": 1.1323570000000132
+        },
+        {
+          "id": "v2.event_point_does_not_generate_fake_area",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.25648700000004965
+        },
+        {
+          "id": "v2.relation_uses_actual_geometry_union",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.7877799999999979
+        },
+        {
+          "id": "v2.measured_safe_area_labels_and_marker_used",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.09242399999999407
+        },
+        {
+          "id": "v2.unfit_required_label_is_diagnostic_not_silent",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3276390000000333
+        },
+        {
+          "id": "v2.explicit_context_extent_changes_start_not_regional_stop",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3457389999999805
+        },
+        {
+          "id": "v2.geometry_and_asset_hash_bindings_preserved",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.19381000000004178
+        },
+        {
+          "id": "v2.generic_shifted_region_uses_supplied_geometry_anchor_context",
+          "status": "PASS",
+          "elapsedMilliseconds": 20.274252999999987
+        },
+        {
+          "id": "v2.source_has_no_scene_specific_coordinate_or_country_branch",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.2831249999999841
+        },
+        {
+          "id": "v2.no_random_clock_or_browser_dependency_in_pure_director",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.24804299999999557
+        },
+        {
+          "id": "v2.rejects_mismatched_geographic_anchors",
+          "status": "PASS",
+          "elapsedMilliseconds": 17.44946299999998
+        },
+        {
+          "id": "v2.rejects_globe_or_wrong_projection_inputs",
+          "status": "PASS",
+          "elapsedMilliseconds": 14.464494000000002
+        },
+        {
+          "id": "v2.rejects_noncanonical_output_and_noninteger_seed",
+          "status": "PASS",
+          "elapsedMilliseconds": 3.722081000000003
+        },
+        {
+          "id": "v2.rejects_attempt_to_change_v1_reveal_hold_tail",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3467669999999998
+        },
+        {
+          "id": "v2.permitted_settle_timing_override_preserves_lock_reveal_hold",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3421690000000126
+        }
+      ]
+    },
+    {
+      "name": "Visual and data source preservation",
+      "counts": {
+        "PASS": 45,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v2/tests/source-protection.json",
+      "tests": [
+        {
+          "id": "file-unchanged:boundary_glow.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "d899b75587404d1006da403611e44046af31c81b6857ec681ae2063ecfd3e6d0",
+            "baselineSha256": "d899b75587404d1006da403611e44046af31c81b6857ec681ae2063ecfd3e6d0"
+          }
+        },
+        {
+          "id": "file-unchanged:camera_director.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+            "baselineSha256": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9"
+          }
+        },
+        {
+          "id": "file-unchanged:camera_gpu_pipeline.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "824b7910662536d715e32958ebd83f87f23690418ef1e0ce5349684e4aade149",
+            "baselineSha256": "824b7910662536d715e32958ebd83f87f23690418ef1e0ce5349684e4aade149"
+          }
+        },
+        {
+          "id": "file-unchanged:glyph_atlas.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "16bb30c1776a308fe4c8f7e12aa2bdcbf7b4f105e26d36b5e75fd3f83c404941",
+            "baselineSha256": "16bb30c1776a308fe4c8f7e12aa2bdcbf7b4f105e26d36b5e75fd3f83c404941"
+          }
+        },
+        {
+          "id": "file-unchanged:graphic_layout.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+            "baselineSha256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41"
+          }
+        },
+        {
+          "id": "file-unchanged:korean_layout.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "e2ff3851edd1238d63952491b9c8b22529d6c3020f1f228e7b13ef99b3d5223d",
+            "baselineSha256": "e2ff3851edd1238d63952491b9c8b22529d6c3020f1f228e7b13ef99b3d5223d"
+          }
+        },
+        {
+          "id": "file-unchanged:local_detail_admission.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+            "baselineSha256": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93"
+          }
+        },
+        {
+          "id": "file-unchanged:region_colors.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "dd9e7830aca6597564aeaaf5fb7a46893abfe876116eff320a51d055cbf24d76",
+            "baselineSha256": "dd9e7830aca6597564aeaaf5fb7a46893abfe876116eff320a51d055cbf24d76"
+          }
+        },
+        {
+          "id": "file-unchanged:scale_contract.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+            "baselineSha256": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683"
+          }
+        },
+        {
+          "id": "file-unchanged:scale_projection.mjs",
+          "result": "PASS",
+          "detail": {
+            "sha256": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95",
+            "baselineSha256": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95"
+          }
+        },
+        {
+          "id": "renderer-version-unchanged",
+          "result": "PASS",
+          "detail": "Renderer, shader, theme version declarations identical"
+        },
+        {
+          "id": "shader-unchanged:fullscreenVertex",
+          "result": "PASS",
+          "detail": {
+            "sha256": "e025be017b555428b82ee4d9e244d89592a21ad1c60a43455c056f83e6c1438e",
+            "currentSha256": "e025be017b555428b82ee4d9e244d89592a21ad1c60a43455c056f83e6c1438e"
+          }
+        },
+        {
+          "id": "shader-unchanged:graphicVertex",
+          "result": "PASS",
+          "detail": {
+            "sha256": "101c40059f623d9e5d81f37d932301d74c00d0c3218753e08d2042292d88a111",
+            "currentSha256": "101c40059f623d9e5d81f37d932301d74c00d0c3218753e08d2042292d88a111"
+          }
+        },
+        {
+          "id": "shader-unchanged:geoVertex",
+          "result": "PASS",
+          "detail": {
+            "sha256": "e2a7fc15b3660682445af3357b02f6197cad7bd08361f6c1b284d17a6e71a2d3",
+            "currentSha256": "e2a7fc15b3660682445af3357b02f6197cad7bd08361f6c1b284d17a6e71a2d3"
+          }
+        },
+        {
+          "id": "shader-unchanged:flatFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "c063258507f8ee5f152182e680795faa8a9604ba7ed4240e757b68efd2d5becb",
+            "currentSha256": "c063258507f8ee5f152182e680795faa8a9604ba7ed4240e757b68efd2d5becb"
+          }
+        },
+        {
+          "id": "shader-unchanged:ribbonVertex",
+          "result": "PASS",
+          "detail": {
+            "sha256": "a9864b4d704bdf77204857673c49b50c43f797ae6dc20eb6a886754ad4feacd0",
+            "currentSha256": "a9864b4d704bdf77204857673c49b50c43f797ae6dc20eb6a886754ad4feacd0"
+          }
+        },
+        {
+          "id": "shader-unchanged:rgbaFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "80fc07a3bdd68e68c9280c9ff961f694a6e6be72f978062a9b8c40a4633c706a",
+            "currentSha256": "80fc07a3bdd68e68c9280c9ff961f694a6e6be72f978062a9b8c40a4633c706a"
+          }
+        },
+        {
+          "id": "shader-unchanged:panelFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "bb018aa2f7738387a3e4228811357232652987ccbe6e7b53f9d1038a9f9540eb",
+            "currentSha256": "bb018aa2f7738387a3e4228811357232652987ccbe6e7b53f9d1038a9f9540eb"
+          }
+        },
+        {
+          "id": "shader-unchanged:blurFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "156bfaa1e86d4eb0a58547b8eca8f8147723c6ffe4bfb596b5bed5c3a33e9ed1",
+            "currentSha256": "156bfaa1e86d4eb0a58547b8eca8f8147723c6ffe4bfb596b5bed5c3a33e9ed1"
+          }
+        },
+        {
+          "id": "shader-unchanged:compositeFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "310decd2c88bdb54bf3c1d0571d7b9107b22fcb57c0acc64d2145eb44d5a897f",
+            "currentSha256": "310decd2c88bdb54bf3c1d0571d7b9107b22fcb57c0acc64d2145eb44d5a897f"
+          }
+        },
+        {
+          "id": "shader-unchanged:markerFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "11150dac32236b3e5d4b60729d838db99fae910ef021cda7a5959b5bdd83ba8b",
+            "currentSha256": "11150dac32236b3e5d4b60729d838db99fae910ef021cda7a5959b5bdd83ba8b"
+          }
+        },
+        {
+          "id": "shader-unchanged:textFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "64e519524258c92e2d3df03862a17ed729d270d977c071c1069e5195387d9d0f",
+            "currentSha256": "64e519524258c92e2d3df03862a17ed729d270d977c071c1069e5195387d9d0f"
+          }
+        },
+        {
+          "id": "shader-unchanged:measuredPanelFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "12bc9739053aded9ef2e694166344b693201004fecfc231873e7f3c01ea32284",
+            "currentSha256": "12bc9739053aded9ef2e694166344b693201004fecfc231873e7f3c01ea32284"
+          }
+        },
+        {
+          "id": "shader-unchanged:measuredTextFragment",
+          "result": "PASS",
+          "detail": {
+            "sha256": "c7b939f9ab6aab93b2e73ca320114df1301a8e18d425031b9c8eb1c91616949f",
+            "currentSha256": "c7b939f9ab6aab93b2e73ca320114df1301a8e18d425031b9c8eb1c91616949f"
+          }
+        },
+        {
+          "id": "shader-unchanged:name",
+          "result": "PASS",
+          "detail": {
+            "sha256": "a91d7cc631cfc09574d3411e48412607961f34e727523240aca96e1023cdef2f",
+            "currentSha256": "a91d7cc631cfc09574d3411e48412607961f34e727523240aca96e1023cdef2f"
+          }
+        },
+        {
+          "id": "terrain-height-normal-material-output-functions-unchanged",
+          "result": "PASS",
+          "detail": "heightAt, footprintHeight, demWeight, demNormal, linearize, encode, lum, grade, terrainMaterial, terrainOutput are byte identical"
+        },
+        {
+          "id": "terrain-shading-after-source-unchanged",
+          "result": "PASS",
+          "detail": "All region material, sea, proxy/DEM light, baked suppression, output transfer, clipping code after source sampling is byte identical"
+        },
+        {
+          "id": "terrain-geographic-projection-unchanged",
+          "result": "PASS",
+          "detail": "All actual geo, projection basis, crop UV, geographic coverage computation before optional source block identical"
+        },
+        {
+          "id": "original-default-source-expression-preserved",
+          "result": "PASS",
+          "detail": "Exact source expression retained in context disabled or terrainLodWeight>=1 branch"
+        },
+        {
+          "id": "source-lod-before-material",
+          "result": "PASS",
+          "detail": "Both real texture sources sampled at same geographic coordinates and mixed as raw source RGB before linearization / frozen material / lighting"
+        },
+        {
+          "id": "source-lod-no-final-frame-input",
+          "result": "PASS",
+          "detail": "Only actual raster source input added to same terrain fragment"
+        },
+        {
+          "id": "renderer-section-unchanged:texture-sampler",
+          "result": "PASS",
+          "detail": {
+            "baselineSha256": "067a9008a2aafc40794678eea1e08cdbd19ed8ba6d266d18884f5969a2b008be",
+            "currentSha256": "067a9008a2aafc40794678eea1e08cdbd19ed8ba6d266d18884f5969a2b008be"
+          }
+        },
+        {
+          "id": "renderer-section-unchanged:polygon-hole-mesh",
+          "result": "PASS",
+          "detail": {
+            "baselineSha256": "f0197a0ade8c4531d1f861b0840219ea6fd999f29cb6529db041346f5c16876b",
+            "currentSha256": "f0197a0ade8c4531d1f861b0840219ea6fd999f29cb6529db041346f5c16876b"
+          }
+        },
+        {
+          "id": "renderer-section-unchanged:camera-and-style-api",
+          "result": "PASS",
+          "detail": {
+            "baselineSha256": "72ff3cbdd8f422286333fb63ed5179a591d5cb80810a03b9a3d629faefe675f5",
+            "currentSha256": "72ff3cbdd8f422286333fb63ed5179a591d5cb80810a03b9a3d629faefe675f5"
+          }
+        },
+        {
+          "id": "renderer-section-unchanged:boundary-glyph-layout-creation",
+          "result": "PASS",
+          "detail": {
+            "baselineSha256": "505637e0bc712fcf3ad46fa17fe1fff7fc46eb670d141e3eac941c793d2a4560",
+            "currentSha256": "505637e0bc712fcf3ad46fa17fe1fff7fc46eb670d141e3eac941c793d2a4560"
+          }
+        },
+        {
+          "id": "renderer-section-unchanged:reveal-implementation",
+          "result": "PASS",
+          "detail": {
+            "baselineSha256": "ac917afde0eeb868360e26d4da46a2bdd5a5feca6d7a4d9a66a62ee52d0bb197",
+            "currentSha256": "ac917afde0eeb868360e26d4da46a2bdd5a5feca6d7a4d9a66a62ee52d0bb197"
+          }
+        },
+        {
+          "id": "renderer-section-unchanged:readback-boundary-diagnostics",
+          "result": "PASS",
+          "detail": {
+            "baselineSha256": "57b4b53ae0b80da44409946032ace9efd242f28bba15d6a02973b67ed69ed999",
+            "currentSha256": "57b4b53ae0b80da44409946032ace9efd242f28bba15d6a02973b67ed69ed999"
+          }
+        },
+        {
+          "id": "gpu-render-frame-unchanged-except-data-coverage-guard",
+          "result": "PASS",
+          "detail": "DEM 2x parameters, corrected lighting uniforms, reveal, terrain/glow/boundary/marker/text render ordering unchanged"
+        },
+        {
+          "id": "original-gis-input-not-mutated",
+          "result": "PASS",
+          "detail": "Approved records iterated first and unchanged; context additions deduplicate existing IDs and normalize only extra geographic context records"
+        },
+        {
+          "id": "default-factory-path-no-context-resource",
+          "result": "PASS",
+          "detail": "Default factory has no new texture fetch and context source disabled; V1 source modules unchanged"
+        },
+        {
+          "id": "asset-preserved:terrain",
+          "result": "PASS",
+          "detail": {
+            "file": "/tmp/world-engine-selection-fix-checkout/world-simulation-shorts-engine/web/earth-detail/v018/detail_0.png",
+            "expectedSha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+            "sha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13"
+          }
+        },
+        {
+          "id": "asset-preserved:global",
+          "result": "PASS",
+          "detail": {
+            "file": "/tmp/world-engine-selection-fix-checkout/world-simulation-shorts-engine/../cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+            "expectedSha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+            "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc"
+          }
+        },
+        {
+          "id": "asset-preserved:topo",
+          "result": "PASS",
+          "detail": {
+            "file": "/tmp/world-engine-selection-fix-checkout/world-simulation-shorts-engine/../cinematic-world-map/assets/gis/earth-topology.png",
+            "expectedSha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+            "sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12"
+          }
+        },
+        {
+          "id": "asset-preserved:font",
+          "result": "PASS",
+          "detail": {
+            "file": "/tmp/world-engine-selection-fix-checkout/world-simulation-shorts-engine/web/fonts/NotoSansCJKkr-Bold.otf",
+            "expectedSha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+            "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0"
+          }
+        },
+        {
+          "id": "dem-height-bytes-preserved",
+          "result": "PASS",
+          "detail": {
+            "bytes": 207360000,
+            "sha256": "08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Actual Software WebGL2 rendering",
+      "counts": {
+        "PASS": 28,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 1
+      },
+      "evidence": "/tmp/world-camera-director-v2/iteration-01/runtime-validation.json",
+      "tests": [
+        {
+          "id": "HEIGHT_SOURCE_HASH_UNCHANGED",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CONTINENT_ASSET_terrain_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CONTINENT_ASSET_global_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CONTINENT_ASSET_topo_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CONTINENT_ASSET_font_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "REGIONAL_ASSET_terrain_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "REGIONAL_ASSET_global_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "REGIONAL_ASSET_topo_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "REGIONAL_ASSET_font_HASH",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "ACTUAL_SOFTWARE_WEBGL2",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "PREVIEW_FINAL_SAME_FACTORY",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "ONE_GEOGRAPHIC_MAP_FACTORY",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "REGIONAL_MEASURED_LAYOUT_VALID",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "ENCODER_EXIT_ZERO",
+          "result": "PASS",
+          "detail": {
+            "code": 0,
+            "signal": null
+          }
+        },
+        {
+          "id": "EXACT_FRAME_COUNT_STREAMED",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_boundary_glow.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_camera_director.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_camera_director_v2.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_camera_gpu_pipeline.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_camera_gpu_pipeline_v2.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_glyph_atlas.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_graphic_layout.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_korean_layout.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_local_detail_admission.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_region_colors.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_renderer.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_scale_contract.mjs",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "SOURCE_STABLE_scale_projection.mjs",
+          "result": "PASS",
+          "detail": null
+        }
+      ]
+    },
+    {
+      "name": "Actual per-frame diagnostics",
+      "counts": {
+        "PASS": 34,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v2/tests/runtime-focused.json",
+      "tests": [
+        {
+          "id": "runtime.exact_all_integer_frames_recorded_once",
+          "status": "PASS",
+          "elapsedMilliseconds": 1.0040270000000078
+        },
+        {
+          "id": "runtime.browser_camera_states_match_pure_plan",
+          "status": "PASS",
+          "elapsedMilliseconds": 44.71615
+        },
+        {
+          "id": "runtime.webgl2_context_and_gl_error_zero_every_frame",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.42853999999999814
+        },
+        {
+          "id": "runtime.actual_software_backend_not_nvidia",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3243310000000008
+        },
+        {
+          "id": "runtime.exactly_one_map_factory_one_geographic_camera",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.4441099999999949
+        },
+        {
+          "id": "runtime.no_finished_frame_mix_or_projection_change",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.27673200000000975
+        },
+        {
+          "id": "runtime.one_factory_source_has_no_texture_frame_compositor",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.6341639999999984
+        },
+        {
+          "id": "runtime.preview_and_final_share_actual_map_factory",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.024690999999990026
+        },
+        {
+          "id": "runtime.actual_camera_bounds_match_intended_extent_every_frame",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.8130820000000085
+        },
+        {
+          "id": "runtime.actual_camera_centers_match_intended_center_every_frame",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.4979950000000031
+        },
+        {
+          "id": "runtime.actual_camera_continues_one_flat_projection",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.20532099999999787
+        },
+        {
+          "id": "runtime_actual_marker_anchor_projects_same_geographic_coordinates",
+          "status": "PASS",
+          "elapsedMilliseconds": 4.435823999999997
+        },
+        {
+          "id": "runtime.no_local_frame_or_overshoot",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.4637250000000108
+        },
+        {
+          "id": "runtime.regional_stop_exact_and_no_postarrival_drift",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.7472659999999962
+        },
+        {
+          "id": "runtime.lod_inputs_are_actual_sources_not_final_images",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.48184899999998265
+        },
+        {
+          "id": "runtime.lod_weight_finite_and_bounded",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.7229959999999949
+        },
+        {
+          "id": "runtime.lod_progress_monotonic_without_binary_handoff",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.16495599999998944
+        },
+        {
+          "id": "runtime.source_density_computed_from_actual_extent_and_native_spacing",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.18538899999998648
+        },
+        {
+          "id": "runtime_full_regional_lod_only_with_complete_source_viewport_coverage",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.15888100000000804
+        },
+        {
+          "id": "runtime_regional_arrival_uses_exact_original_source_response",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.1379790000000014
+        },
+        {
+          "id": "runtime_actual_reveal_matches_intent_every_frame",
+          "status": "PASS",
+          "elapsedMilliseconds": 1.416041000000007
+        },
+        {
+          "id": "runtime_no_primary_marker_title_or_labels_visible_before_lock_end",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.3345510000000047
+        },
+        {
+          "id": "runtime_v1_reveal_hold_preserved_relative_camera_settle_start",
+          "status": "PASS",
+          "elapsedMilliseconds": 2.6769749999999988
+        },
+        {
+          "id": "runtime_ordered_actual_primary_marker_location_title_reveal",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.18947700000001078
+        },
+        {
+          "id": "runtime_hold_has_full_information_fixed_camera_and_layout",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.22323299999999335
+        },
+        {
+          "id": "runtime_actual_measured_regional_layout_matches_approved_static",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.38030200000000036
+        },
+        {
+          "id": "runtime_layout_algorithm_and_priority_preserved",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.029770000000013397
+        },
+        {
+          "id": "runtime_layout_collision_and_safe_area_zero",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.034585999999990236
+        },
+        {
+          "id": "runtime_actual_korean_font_glyph_metrics_preserved",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.03662199999999416
+        },
+        {
+          "id": "runtime_original_regional_geometry_meshes_preserved_with_context_additions",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.2929329999999766
+        },
+        {
+          "id": "runtime_approved_region_material_and_boundary_glow_tokens_preserved",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.043431999999995696
+        },
+        {
+          "id": "runtime_approved_dem_and_material_parameters_frozen",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.07986200000001986
+        },
+        {
+          "id": "runtime_boundary_size_interpolation_continuous_and_final_tokens_exact",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.6533100000000047
+        },
+        {
+          "id": "runtime_no_browser_page_or_shader_validation_errors",
+          "status": "PASS",
+          "elapsedMilliseconds": 0.30988300000001345
+        }
+      ]
+    },
+    {
+      "name": "Decoded delivered-video pixels",
+      "counts": {
+        "PASS": 27,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v2/iteration-01/decoded-video-qc.json",
+      "tests": [
+        {
+          "id": "EXPECTED_V2_FRAME_COUNT",
+          "result": "PASS",
+          "detail": 384
+        },
+        {
+          "id": "COMPLETE_FRAME_DIAGNOSTICS",
+          "result": "PASS",
+          "detail": 384
+        },
+        {
+          "id": "DIAGNOSTIC_FRAME_ORDER",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "ONE_VIDEO_STREAM",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "OUTPUT_1080x1920",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "OUTPUT_30FPS",
+          "result": "PASS",
+          "detail": "30/1"
+        },
+        {
+          "id": "OUTPUT_384_DECODED_FRAMES",
+          "result": "PASS",
+          "detail": "384"
+        },
+        {
+          "id": "OUTPUT_12_8_SECONDS",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "OUTPUT_SILENT",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "DECODE_BYTE_COUNT",
+          "result": "PASS",
+          "detail": 95551488
+        },
+        {
+          "id": "NO_BLACK_TRANSITION_FRAME",
+          "result": "PASS",
+          "detail": {
+            "minimumMeanLuma8bit": 126.06529998779297,
+            "frame": 256
+          }
+        },
+        {
+          "id": "NO_CONSTANT_BLANK_FRAME",
+          "result": "PASS",
+          "detail": {
+            "minimumLumaStd8bit": 57.50865936279297
+          }
+        },
+        {
+          "id": "NO_FULL_FRAME_CUT_OR_FLASH_DURING_APPROACH",
+          "result": "PASS",
+          "detail": {
+            "maxAdjacentMeanRGB8bit": 8.806090052726338,
+            "threshold": 20,
+            "limitation": "Conservative full-frame jump screen, not a perceptual proof"
+          }
+        },
+        {
+          "id": "SOURCE_LOD_ALIGNED_LUMINANCE_NO_FLASH",
+          "result": "PASS",
+          "detail": {
+            "maxAlignedMeanSignedLuma8bit": 0.24311932800679575,
+            "threshold": 5,
+            "limitation": "Encoded low-resolution geographic alignment residual"
+          }
+        },
+        {
+          "id": "GPU_ONE_MAP_FACTORY_EVERY_FRAME",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "GPU_NO_FINISHED_FRAME_MIX",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "GPU_NO_PROJECTION_CHANGE",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "GPU_GL_ERROR_ZERO",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "APPROVED_REGIONAL_FINAL_PNG_SHA256",
+          "result": "PASS",
+          "detail": {
+            "actual": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+            "expected": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673"
+          }
+        },
+        {
+          "id": "V1_FINAL_HOLD_PNG_BYTES_PRESERVED",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "APPROVED_REGIONAL_FINAL_PIXELS_EXACT",
+          "result": "PASS",
+          "detail": {
+            "changedPixels": 0,
+            "changedFraction": 0.0,
+            "maxChannelDifference": 0,
+            "meanAbsoluteChannelDifference": 0.0,
+            "perChannelMaximum": [
+              0,
+              0,
+              0
+            ],
+            "perChannelMeanAbsolute": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "changedBoundingBox": null,
+            "pixelMaximumDifferenceHistogram": {},
+            "strictProtectionWaived": false
+          }
+        },
+        {
+          "id": "CHECKPOINT_1080x1920_01_WIDE_START.png",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CHECKPOINT_1080x1920_02_APPROACH.png",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CHECKPOINT_1080x1920_03_DECELERATE.png",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CHECKPOINT_1080x1920_04_REGIONAL_LOCK.png",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "CHECKPOINT_1080x1920_05_FINAL_HOLD.png",
+          "result": "PASS",
+          "detail": null
+        },
+        {
+          "id": "ENCODED_HOLD_STATIC_NO_DRIFT",
+          "result": "PASS",
+          "detail": {
+            "maxEncodedAdjacentMeanRGB8bit": 0.0036731610082304527,
+            "threshold": 1,
+            "note": "Small encoder differences allowed; Camera diagnostics test exact lock separately"
+          }
+        }
+      ]
+    }
+  ],
+  "regionalProtection": {
+    "changedPixels": 0,
+    "changedFraction": 0.0,
+    "maxChannelDifference": 0,
+    "meanAbsoluteChannelDifference": 0.0,
+    "perChannelMaximum": [
+      0,
+      0,
+      0
+    ],
+    "perChannelMeanAbsolute": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "changedBoundingBox": null,
+    "pixelMaximumDifferenceHistogram": {},
+    "strictProtectionWaived": false
+  },
+  "pixelEvidence": {
+    "adjacentRGBMean": {
+      "min": 0.0,
+      "median": 0.015769675925925927,
+      "p95": 8.58789665316358,
+      "max": 8.806090052726338
+    },
+    "motionAdjacentRGBMean": {
+      "min": 0.00442065329218107,
+      "median": 6.104216901363169,
+      "p95": 8.754615162037036,
+      "max": 8.806090052726338
+    },
+    "geographicAlignedResidual": {
+      "method": "Area-downsampled H.264 RGB frames, inverse geographic extent warp, bilinear preceding-frame sampling, central view excluding fixed disclosure",
+      "limitations": [
+        "Lossy H.264 and area resampling contribute to residual",
+        "MSAA GIS edges contribute to residual",
+        "Scale-dependent DEM footprint changes contribute to residual",
+        "Metrics do not independently establish perceived camera quality"
+      ],
+      "motionAlignedMad": {
+        "min": 0.00430851578450755,
+        "median": 2.4783744116420667,
+        "p95": 2.6851562843866836,
+        "max": 2.7059629254242714
+      },
+      "lodAlignedMad": {
+        "min": 1.5145486328743052,
+        "median": 2.580332149610075,
+        "p95": 2.691621437922503,
+        "max": 2.7059629254242714
+      },
+      "lodSignedLuminance": {
+        "min": -0.15866094113041726,
+        "median": 0.00788547576565548,
+        "p95": 0.14036712880654398,
+        "max": 0.18212057401436504
+      },
+      "allRows": [
+        {
+          "frame": 1,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.03494629474442006,
+          "meanSignedLuma8bit": 0.00561626576911742,
+          "p95AbsLuma8bit": 0.000624600601196289,
+          "meanSignedRGB8bit": [
+            0.035382604236876024,
+            -0.006217693930633394,
+            0.03519139622640692
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 2,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0027736636412933886,
+          "meanSignedLuma8bit": -0.0004607207406582207,
+          "p95AbsLuma8bit": 0.0002288818359375,
+          "meanSignedRGB8bit": [
+            -0.0011080311170385156,
+            -3.010023101851701e-05,
+            -0.0028202997223184052
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 3,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0022419886979748636,
+          "meanSignedLuma8bit": -0.00016987872164028406,
+          "p95AbsLuma8bit": 0.00022547168591991067,
+          "meanSignedRGB8bit": [
+            0.0001619805304133994,
+            -0.00042882386328703143,
+            0.0014179923077106951
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 4,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.03434066044452948,
+          "meanSignedLuma8bit": -0.0033294491536084215,
+          "p95AbsLuma8bit": 0.0006320152282714843,
+          "meanSignedRGB8bit": [
+            -0.03454178027184087,
+            0.00937683293857282,
+            -0.037287778192276064
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 5,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.024417144673357937,
+          "meanSignedLuma8bit": 0.004797163787772678,
+          "p95AbsLuma8bit": 0.0003988355239329394,
+          "meanSignedRGB8bit": [
+            0.02412970190268227,
+            -0.0030131402573965473,
+            0.025238048135075315
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 6,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0017645767573388367,
+          "meanSignedLuma8bit": -8.405378210333118e-05,
+          "p95AbsLuma8bit": 0.00022447509765625,
+          "meanSignedRGB8bit": [
+            0.0003391771223733744,
+            -0.00029590041427261625,
+            0.0007682152073111427
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 7,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0017793476020969221,
+          "meanSignedLuma8bit": 0.00018754395860493133,
+          "p95AbsLuma8bit": 0.00022441101074218748,
+          "meanSignedRGB8bit": [
+            -0.0003105997385916649,
+            0.0004424819111214814,
+            -0.000870991687043826
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 8,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.019952757221005105,
+          "meanSignedLuma8bit": -0.0013083141660567455,
+          "p95AbsLuma8bit": 0.00034933013916015624,
+          "meanSignedRGB8bit": [
+            -0.018548530023822316,
+            0.005832636021682671,
+            -0.021279750217445527
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 9,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.017279975769358462,
+          "meanSignedLuma8bit": 0.0012082163700827544,
+          "p95AbsLuma8bit": 0.0003211439272796269,
+          "meanSignedRGB8bit": [
+            0.0159632571075242,
+            -0.004785243729453031,
+            0.01713066792697946
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 10,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.001789196654892876,
+          "meanSignedLuma8bit": -0.00014303439263472524,
+          "p95AbsLuma8bit": 0.00022402756829687857,
+          "meanSignedRGB8bit": [
+            0.0010775586169219009,
+            -0.0006798519107412672,
+            0.001580425650551704
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 11,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0017498151465452888,
+          "meanSignedLuma8bit": 0.00010835850651880553,
+          "p95AbsLuma8bit": 0.00022390720149269327,
+          "meanSignedRGB8bit": [
+            -0.0011228122942363108,
+            0.0006492332949119129,
+            -0.0016241447679716725
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 12,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.017840996087883143,
+          "meanSignedLuma8bit": 0.0008885179568589745,
+          "p95AbsLuma8bit": 0.0003339599609375,
+          "meanSignedRGB8bit": [
+            -0.0189324833229446,
+            0.008505569555381953,
+            -0.016199715161941488
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 13,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.016044567071499562,
+          "meanSignedLuma8bit": -0.0018320629924168988,
+          "p95AbsLuma8bit": 0.0003204345703125,
+          "meanSignedRGB8bit": [
+            0.017410467008747252,
+            -0.009171212838642619,
+            0.01420669174128305
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 14,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0020747004317531923,
+          "meanSignedLuma8bit": -0.00012075155451688186,
+          "p95AbsLuma8bit": 0.00022636528015136718,
+          "meanSignedRGB8bit": [
+            0.0008265135706836498,
+            -0.0005174202438767911,
+            0.0010192606478733421
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 15,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0020894633334403116,
+          "meanSignedLuma8bit": 0.00013664513880682507,
+          "p95AbsLuma8bit": 0.00022651405334472656,
+          "meanSignedRGB8bit": [
+            -0.0007979262157116565,
+            0.0005310851503920523,
+            -0.0010186682450591756
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 16,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.013534061796283156,
+          "meanSignedLuma8bit": 0.0016544569173517444,
+          "p95AbsLuma8bit": 0.0002965452229254879,
+          "meanSignedRGB8bit": [
+            -0.012552894207558821,
+            0.007516131874662726,
+            -0.01457528103711954
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 17,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.013548807685501988,
+          "meanSignedLuma8bit": -0.0014728610119890803,
+          "p95AbsLuma8bit": 0.0002964114196132869,
+          "meanSignedRGB8bit": [
+            0.012286136389552888,
+            -0.007236655644875547,
+            0.015107513972395658
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 18,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.001976246153882304,
+          "meanSignedLuma8bit": -0.00012437942485576882,
+          "p95AbsLuma8bit": 0.00022547168591991067,
+          "meanSignedRGB8bit": [
+            0.0005164000363073134,
+            -0.0004288171877179278,
+            0.0010044872587418041
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 19,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.001941788554621846,
+          "meanSignedLuma8bit": 9.07558621916728e-05,
+          "p95AbsLuma8bit": 0.00022542044408619403,
+          "meanSignedRGB8bit": [
+            -0.0005616390668786844,
+            0.00039817505247442315,
+            -0.0010334414088590898
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 20,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.01458242246935477,
+          "meanSignedLuma8bit": 0.002668939482329299,
+          "p95AbsLuma8bit": 0.0003062820434570312,
+          "meanSignedRGB8bit": [
+            -0.015521168970848053,
+            0.009657425129326465,
+            -0.012995158545189643
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 21,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.014420132664879329,
+          "meanSignedLuma8bit": -0.002524475032583499,
+          "p95AbsLuma8bit": 0.00030517578124999995,
+          "meanSignedRGB8bit": [
+            0.015180570852857116,
+            -0.009363191283886,
+            0.01308434917360589
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 22,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0019220992089105978,
+          "meanSignedLuma8bit": -6.637828123764196e-05,
+          "p95AbsLuma8bit": 0.00022538505159318446,
+          "meanSignedRGB8bit": [
+            0.0005754694258095542,
+            -0.00036974995298716054,
+            0.001048782343651855
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 23,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0019220984577782518,
+          "meanSignedLuma8bit": 6.542314877905245e-05,
+          "p95AbsLuma8bit": 0.00022538505159318446,
+          "meanSignedRGB8bit": [
+            -0.0005764075831748559,
+            0.00036863625944019604,
+            -0.0010482167837894936
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 24,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.014538138702875465,
+          "meanSignedLuma8bit": 0.0011006723419533313,
+          "p95AbsLuma8bit": 0.00030517578124999995,
+          "meanSignedRGB8bit": [
+            -0.013320803242392938,
+            0.007087867153752753,
+            -0.015741931815483355
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 25,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.01334218182729817,
+          "meanSignedLuma8bit": -0.0015468734584049883,
+          "p95AbsLuma8bit": 0.00029555206298828124,
+          "meanSignedRGB8bit": [
+            0.011636360556678962,
+            -0.00710375395477919,
+            0.01467923982968339
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 26,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018433404923549755,
+          "meanSignedLuma8bit": -4.354983175010702e-05,
+          "p95AbsLuma8bit": 0.00022460212707519527,
+          "meanSignedRGB8bit": [
+            0.0007822105145589946,
+            -0.0003992863518333447,
+            0.0010487785552058017
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 27,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018433400416693788,
+          "meanSignedLuma8bit": 4.2590283038144e-05,
+          "p95AbsLuma8bit": 0.00022460212707519527,
+          "meanSignedRGB8bit": [
+            -0.0007831582486547635,
+            0.0003981700951028429,
+            -0.0010482205722355468
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 28,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.012810457911464233,
+          "meanSignedLuma8bit": 0.0025646786519169726,
+          "p95AbsLuma8bit": 0.00029319610595703125,
+          "meanSignedRGB8bit": [
+            -0.013630926705595769,
+            0.008667994645272214,
+            -0.010204101118726504
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 29,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.012854717558056046,
+          "meanSignedLuma8bit": -0.002300573228375147,
+          "p95AbsLuma8bit": 0.00029219970703124994,
+          "meanSignedRGB8bit": [
+            0.014058233383358336,
+            -0.008388527865533887,
+            0.009835477614303414
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 30,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018679524610101886,
+          "meanSignedLuma8bit": -4.887492097638142e-05,
+          "p95AbsLuma8bit": 0.00022468738555908203,
+          "meanSignedRGB8bit": [
+            0.0007822074725513979,
+            -0.00039927785952791734,
+            0.0009749486910465071
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 31,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018433399196164685,
+          "meanSignedLuma8bit": 4.2596262139802226e-05,
+          "p95AbsLuma8bit": 0.00022460212707519527,
+          "meanSignedRGB8bit": [
+            -0.0007831612906623602,
+            0.00039817858740827025,
+            -0.0010482129249276303
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 32,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.013455252361037109,
+          "meanSignedLuma8bit": 0.0020951825930955402,
+          "p95AbsLuma8bit": 0.00029646606445312497,
+          "meanSignedRGB8bit": [
+            -0.011976963181356099,
+            0.008062533233862123,
+            -0.015579484811722208
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 33,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.013893476065141047,
+          "meanSignedLuma8bit": -0.002054585322570011,
+          "p95AbsLuma8bit": 0.00029863739013671876,
+          "meanSignedRGB8bit": [
+            0.012035077626073356,
+            -0.008093171665156893,
+            0.01627414887876735
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 34,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018728722718458542,
+          "meanSignedLuma8bit": -7.307969100671396e-05,
+          "p95AbsLuma8bit": 0.00022467308044433592,
+          "meanSignedRGB8bit": [
+            0.0007526786083382391,
+            -0.00042881558221109046,
+            0.0010192484938774005
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 35,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018433367039058421,
+          "meanSignedLuma8bit": 4.259554103595261e-05,
+          "p95AbsLuma8bit": 0.000224560546875,
+          "meanSignedRGB8bit": [
+            -0.0007831550376211035,
+            0.00039817598197951264,
+            -0.0010482155163095326
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 36,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.014233018856510283,
+          "meanSignedLuma8bit": 0.0027465345803619422,
+          "p95AbsLuma8bit": 0.00030517578124999995,
+          "meanSignedRGB8bit": [
+            -0.01527012250218217,
+            0.009701729636053426,
+            -0.013098537553733209
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 37,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.011181137593199435,
+          "meanSignedLuma8bit": -0.0021161582531116236,
+          "p95AbsLuma8bit": 0.00028100635904120284,
+          "meanSignedRGB8bit": [
+            0.01137055393728044,
+            -0.0074286411318841014,
+            0.010795375586510572
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 38,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018236488979133767,
+          "meanSignedLuma8bit": -0.0001285205364086532,
+          "p95AbsLuma8bit": 0.00022460212707519527,
+          "meanSignedRGB8bit": [
+            0.0003096574547372626,
+            -0.0003254459814281783,
+            0.0005319287345102188
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 39,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0018236478651165009,
+          "meanSignedLuma8bit": 0.00012757105331540205,
+          "p95AbsLuma8bit": 0.00022460212707519527,
+          "meanSignedRGB8bit": [
+            -0.00031058721833260636,
+            0.0003243354425753061,
+            -0.0005313408946945266
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 40,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.01339134737948345,
+          "meanSignedLuma8bit": 0.0017928510744366413,
+          "p95AbsLuma8bit": 0.00029726431254821365,
+          "meanSignedRGB8bit": [
+            -0.012744864371714388,
+            0.007973921967062578,
+            -0.016627974390305188
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 41,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.008857852719695192,
+          "meanSignedLuma8bit": -0.001552690018235097,
+          "p95AbsLuma8bit": 0.00026184997558593754,
+          "meanSignedRGB8bit": [
+            0.009066812904277181,
+            -0.005833742096067166,
+            0.009584458523861647
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 42,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0014003126962027568,
+          "meanSignedLuma8bit": -0.00033659026093332193,
+          "p95AbsLuma8bit": 0.00022233428955078125,
+          "meanSignedRGB8bit": [
+            -0.00014814086240868673,
+            -0.0005026490798877308,
+            0.0007534502541616351
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 43,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.0016759688895302462,
+          "meanSignedLuma8bit": 0.000404827362191479,
+          "p95AbsLuma8bit": 0.00022402756829687857,
+          "meanSignedRGB8bit": [
+            0.0005459302807000374,
+            0.0004424812633092879,
+            -0.00038365671750902487
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 44,
+          "state": "CONTEXT",
+          "madRGB8bit": 0.009970315584233337,
+          "meanSignedLuma8bit": 0.002060961394260372,
+          "p95AbsLuma8bit": 0.0002711669921875,
+          "meanSignedRGB8bit": [
+            -0.010042405170801324,
+            0.006940200411891209,
+            -0.010632335194070077
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 45,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.00430851578450755,
+          "meanSignedLuma8bit": -0.00031044799145022557,
+          "p95AbsLuma8bit": 0.00022953033447265623,
+          "meanSignedRGB8bit": [
+            0.0004720883329616857,
+            -0.0006355579807068257,
+            0.0006057769634853449
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 46,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.015327252140382386,
+          "meanSignedLuma8bit": 0.00020195398424409326,
+          "p95AbsLuma8bit": 0.011742942679140833,
+          "meanSignedRGB8bit": [
+            0.010119207424727548,
+            -0.0037299052599363922,
+            0.009947904815145759
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 47,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.030185990269361602,
+          "meanSignedLuma8bit": -0.0008525931736979669,
+          "p95AbsLuma8bit": 0.0812670375669164,
+          "meanSignedRGB8bit": [
+            -0.010749093240459402,
+            0.0029713551960519795,
+            -0.009590708961117361
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 48,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.08669977706678747,
+          "meanSignedLuma8bit": -0.0021161307399770717,
+          "p95AbsLuma8bit": 0.313534635213972,
+          "meanSignedRGB8bit": [
+            -0.00011426661350387809,
+            -0.0027278167065540155,
+            -0.0019515671664642063
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 49,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.22039915936135612,
+          "meanSignedLuma8bit": 0.01579980399821233,
+          "p95AbsLuma8bit": 1.1100717787199885,
+          "meanSignedRGB8bit": [
+            0.012338717455504786,
+            0.017334156464562014,
+            0.01079229866644406
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 50,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.5743095265660615,
+          "meanSignedLuma8bit": 0.24311932800679575,
+          "p95AbsLuma8bit": 1.6940975026233673,
+          "meanSignedRGB8bit": [
+            0.4609686043705764,
+            0.15022346439260365,
+            0.5218501521332566
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 51,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.4260051408268765,
+          "meanSignedLuma8bit": -0.07826923516622837,
+          "p95AbsLuma8bit": 1.5945511395836336,
+          "meanSignedRGB8bit": [
+            -0.16503094789079664,
+            -0.043135983722782836,
+            -0.17081440562480243
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 52,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.547070327549721,
+          "meanSignedLuma8bit": 0.07318971507144424,
+          "p95AbsLuma8bit": 1.851824426133197,
+          "meanSignedRGB8bit": [
+            0.16148011994056016,
+            0.036876655487051734,
+            0.1729204649271711
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 53,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.689704469376285,
+          "meanSignedLuma8bit": -0.1908816706584151,
+          "p95AbsLuma8bit": 2.098047563289711,
+          "meanSignedRGB8bit": [
+            -0.36326900269955736,
+            -0.11822664844420465,
+            -0.4029775861107211
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 54,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.8652613925549436,
+          "meanSignedLuma8bit": 0.1660811917447247,
+          "p95AbsLuma8bit": 2.5854989388935268,
+          "meanSignedRGB8bit": [
+            0.39378527372568306,
+            0.0741121926785337,
+            0.4066122208719827
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 55,
+          "state": "ACCELERATE",
+          "madRGB8bit": 0.9033755860066253,
+          "meanSignedLuma8bit": -0.04481051726888189,
+          "p95AbsLuma8bit": 3.0430831219329613,
+          "meanSignedRGB8bit": [
+            -0.12600470944548556,
+            -0.011796355054251209,
+            -0.13275848900237114
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 56,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.034146988770852,
+          "meanSignedLuma8bit": 0.04675968410103944,
+          "p95AbsLuma8bit": 3.4900035790215944,
+          "meanSignedRGB8bit": [
+            0.11447770007050705,
+            0.01876503864941499,
+            0.12466716653723052
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 57,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.1676574866771767,
+          "meanSignedLuma8bit": -0.14979922673531895,
+          "p95AbsLuma8bit": 4.024489395842329,
+          "meanSignedRGB8bit": [
+            -0.3003315719389025,
+            -0.08732225217209104,
+            -0.3254274208812851
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 58,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.3001231534304247,
+          "meanSignedLuma8bit": 0.13493495189328042,
+          "p95AbsLuma8bit": 4.454443752854912,
+          "meanSignedRGB8bit": [
+            0.30601021464575673,
+            0.0639047907216756,
+            0.33479880797022393
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 59,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.3965096470905016,
+          "meanSignedLuma8bit": -0.04193913273538045,
+          "p95AbsLuma8bit": 4.908893804164604,
+          "meanSignedRGB8bit": [
+            -0.13389504402322816,
+            -0.003989924814946253,
+            -0.14708382476998044
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 60,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.515366208089726,
+          "meanSignedLuma8bit": 0.07575005898362304,
+          "p95AbsLuma8bit": 5.405565174958808,
+          "meanSignedRGB8bit": [
+            0.1706534804679091,
+            0.03667710192352102,
+            0.18334717092026775
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 61,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.6485744593375118,
+          "meanSignedLuma8bit": -0.18117613211403472,
+          "p95AbsLuma8bit": 5.981687237085699,
+          "meanSignedRGB8bit": [
+            -0.34743234944568874,
+            -0.11247333369759163,
+            -0.37217571137622957
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 62,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.7656346226437227,
+          "meanSignedLuma8bit": 0.14109062420673468,
+          "p95AbsLuma8bit": 6.365522656860465,
+          "meanSignedRGB8bit": [
+            0.30265985612274443,
+            0.07324143238514563,
+            0.3374358220662476
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 63,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.8617221591283026,
+          "meanSignedLuma8bit": -0.03347400994854464,
+          "p95AbsLuma8bit": 6.836193944758992,
+          "meanSignedRGB8bit": [
+            -0.14029931149097816,
+            0.009861841003992403,
+            -0.14819342121354642
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 64,
+          "state": "ACCELERATE",
+          "madRGB8bit": 1.970281393708202,
+          "meanSignedLuma8bit": 0.02988185761850951,
+          "p95AbsLuma8bit": 7.2922634832968,
+          "meanSignedRGB8bit": [
+            0.14000479354415468,
+            -0.015561720700849832,
+            0.15576982210900314
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 65,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.064234609694751,
+          "meanSignedLuma8bit": -0.14028815800718827,
+          "p95AbsLuma8bit": 7.7039228941997955,
+          "meanSignedRGB8bit": [
+            -0.3158562016662823,
+            -0.06839709702884327,
+            -0.3354504949848745
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 66,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.1547366751362853,
+          "meanSignedLuma8bit": 0.13671650032271335,
+          "p95AbsLuma8bit": 7.989666031889442,
+          "meanSignedRGB8bit": [
+            0.2983343638754259,
+            0.06960724216668907,
+            0.3255888499332656
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 67,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.2376020451101377,
+          "meanSignedLuma8bit": -0.04216402199527768,
+          "p95AbsLuma8bit": 8.480363625856791,
+          "meanSignedRGB8bit": [
+            -0.13216171535106444,
+            -0.0036030059928485697,
+            -0.1591353383041009
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 68,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.3160799496588886,
+          "meanSignedLuma8bit": 0.02918488493005971,
+          "p95AbsLuma8bit": 8.809228119161038,
+          "meanSignedRGB8bit": [
+            0.09925733516444746,
+            0.0006912685502259077,
+            0.10510221893319396
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 69,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.3624277148873083,
+          "meanSignedLuma8bit": -0.145733667570292,
+          "p95AbsLuma8bit": 9.03363456022269,
+          "meanSignedRGB8bit": [
+            -0.28613722908392697,
+            -0.08698815087458582,
+            -0.31422392190506016
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 70,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.4244370909734116,
+          "meanSignedLuma8bit": 0.15275510249965563,
+          "p95AbsLuma8bit": 9.207975838594763,
+          "meanSignedRGB8bit": [
+            0.2991613366138473,
+            0.09137675702858074,
+            0.3296502175721714
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 71,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.4741094639211196,
+          "meanSignedLuma8bit": -0.05061593098619473,
+          "p95AbsLuma8bit": 9.559677891596406,
+          "meanSignedRGB8bit": [
+            -0.12085854813400787,
+            -0.021613182160575534,
+            -0.1310755647044465
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 72,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.476561328076422,
+          "meanSignedLuma8bit": 0.03964586851598326,
+          "p95AbsLuma8bit": 9.480853962439122,
+          "meanSignedRGB8bit": [
+            0.11795244586464289,
+            0.008943060774941083,
+            0.11320085123161104
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 73,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.544432314375345,
+          "meanSignedLuma8bit": -0.15205972855751235,
+          "p95AbsLuma8bit": 9.940917710260255,
+          "meanSignedRGB8bit": [
+            -0.31104538352675537,
+            -0.08649566819665887,
+            -0.33337642833066067
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 74,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.5529363501570264,
+          "meanSignedLuma8bit": 0.14375629966997855,
+          "p95AbsLuma8bit": 9.933806351618328,
+          "meanSignedRGB8bit": [
+            0.2981487511783046,
+            0.08010864287520847,
+            0.3196145953617994
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 75,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.54676975199058,
+          "meanSignedLuma8bit": -0.0433968924357405,
+          "p95AbsLuma8bit": 9.871651660746661,
+          "meanSignedRGB8bit": [
+            -0.11967664724169882,
+            -0.012186653688307863,
+            -0.12794657221991054
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 76,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.567857439079198,
+          "meanSignedLuma8bit": 0.02833254016885738,
+          "p95AbsLuma8bit": 10.14872380120384,
+          "meanSignedRGB8bit": [
+            0.11458765471148856,
+            -0.005015400375027152,
+            0.10468447542125124
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 77,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.5506560200547526,
+          "meanSignedLuma8bit": -0.14097319544701847,
+          "p95AbsLuma8bit": 9.966594954526506,
+          "meanSignedRGB8bit": [
+            -0.2796089611549439,
+            -0.08284993611455607,
+            -0.30850493069732554
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 78,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.571672923955512,
+          "meanSignedLuma8bit": 0.1554646143500844,
+          "p95AbsLuma8bit": 10.078475746176355,
+          "meanSignedRGB8bit": [
+            0.29972670053263367,
+            0.09352612606219461,
+            0.3442220561934196
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 79,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.5511633383041152,
+          "meanSignedLuma8bit": -0.049770380195952466,
+          "p95AbsLuma8bit": 10.02287766138845,
+          "meanSignedRGB8bit": [
+            -0.15000400845867148,
+            -0.00805150904695549,
+            -0.16788211533596023
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 80,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.5675224910815713,
+          "meanSignedLuma8bit": 0.03928990351505696,
+          "p95AbsLuma8bit": 10.109733604438398,
+          "meanSignedRGB8bit": [
+            0.12592921142053065,
+            0.004152680623030623,
+            0.13223484744405334
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 81,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.5985121136710987,
+          "meanSignedLuma8bit": -0.14455700847638137,
+          "p95AbsLuma8bit": 10.376583997450956,
+          "meanSignedRGB8bit": [
+            -0.29820335727791664,
+            -0.07958996655148487,
+            -0.3356818648403648
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 82,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.587668277369963,
+          "meanSignedLuma8bit": 0.13585616540237166,
+          "p95AbsLuma8bit": 10.204024511376046,
+          "meanSignedRGB8bit": [
+            0.2988872066766219,
+            0.06659607719115283,
+            0.341873003543066
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 83,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.6124631489656456,
+          "meanSignedLuma8bit": -0.03780961562713076,
+          "p95AbsLuma8bit": 10.364844281190958,
+          "meanSignedRGB8bit": [
+            -0.11760589927111029,
+            -0.0036356625905777274,
+            -0.14136254234503492
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 84,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.6085608869659462,
+          "meanSignedLuma8bit": 0.042676316659253526,
+          "p95AbsLuma8bit": 10.218593020098657,
+          "meanSignedRGB8bit": [
+            0.12641139100452267,
+            0.00919114379040671,
+            0.12780815640987697
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 85,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.6588777485153217,
+          "meanSignedLuma8bit": -0.15771024172845252,
+          "p95AbsLuma8bit": 10.658503448433056,
+          "meanSignedRGB8bit": [
+            -0.3168721857186924,
+            -0.09127426788010451,
+            -0.3471448567424897
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 86,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.6480960734891,
+          "meanSignedLuma8bit": 0.16148875745739175,
+          "p95AbsLuma8bit": 10.10478233406886,
+          "meanSignedRGB8bit": [
+            0.33239263612131037,
+            0.0911798346478042,
+            0.3547128154832628
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 87,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.631949649801431,
+          "meanSignedLuma8bit": -0.03947005671905098,
+          "p95AbsLuma8bit": 10.059698374803968,
+          "meanSignedRGB8bit": [
+            -0.12735290234161928,
+            -0.0037321721352385636,
+            -0.13470332645568003
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 88,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.62570924277412,
+          "meanSignedLuma8bit": 0.03868741005255803,
+          "p95AbsLuma8bit": 9.930726891350508,
+          "meanSignedRGB8bit": [
+            0.11765816130359365,
+            0.007384847948196151,
+            0.11622772447180246
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 89,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.629384511824174,
+          "meanSignedLuma8bit": -0.16048032147459257,
+          "p95AbsLuma8bit": 10.040174379387388,
+          "meanSignedRGB8bit": [
+            -0.3115719363827808,
+            -0.09853051056703101,
+            -0.32923970418383375
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 90,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.6478714918492554,
+          "meanSignedLuma8bit": 0.16608834207713277,
+          "p95AbsLuma8bit": 9.995615151123236,
+          "meanSignedRGB8bit": [
+            0.32401725106668056,
+            0.1000695166171163,
+            0.3550215542353861
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 91,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.60000908469654,
+          "meanSignedLuma8bit": -0.0404482147651766,
+          "p95AbsLuma8bit": 9.696596582820748,
+          "meanSignedRGB8bit": [
+            -0.10911598886027275,
+            -0.009450879893213448,
+            -0.1453031334329135
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 92,
+          "state": "ACCELERATE",
+          "madRGB8bit": 2.611231908408733,
+          "meanSignedLuma8bit": 0.03881190160736377,
+          "p95AbsLuma8bit": 9.740568974208255,
+          "meanSignedRGB8bit": [
+            0.10402961334764499,
+            0.011452156260378345,
+            0.1177925713605521
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 93,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.617267861202216,
+          "meanSignedLuma8bit": -0.1578181910383575,
+          "p95AbsLuma8bit": 9.833479461624574,
+          "meanSignedRGB8bit": [
+            -0.3030161575869229,
+            -0.09713493598668607,
+            -0.3313857301620478
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 94,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6131356359212456,
+          "meanSignedLuma8bit": 0.16461290004257512,
+          "p95AbsLuma8bit": 9.67425027200306,
+          "meanSignedRGB8bit": [
+            0.3161024710648628,
+            0.10253554717491242,
+            0.3334638691785028
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 95,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6283592781237837,
+          "meanSignedLuma8bit": -0.045144286394686324,
+          "p95AbsLuma8bit": 9.872302821470937,
+          "meanSignedRGB8bit": [
+            -0.12985489122313323,
+            -0.012651673937992972,
+            -0.11757145872847116
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 96,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.608034214138574,
+          "meanSignedLuma8bit": 0.04184040441681584,
+          "p95AbsLuma8bit": 9.839177302763844,
+          "meanSignedRGB8bit": [
+            0.11201564417560846,
+            0.015425606966604884,
+            0.0968626643014636
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 97,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6306927209792654,
+          "meanSignedLuma8bit": -0.14989823802419244,
+          "p95AbsLuma8bit": 9.865206566292537,
+          "meanSignedRGB8bit": [
+            -0.2999537014722337,
+            -0.0876083270942927,
+            -0.3250776392431779
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0
+        },
+        {
+          "frame": 98,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.5966031429359244,
+          "meanSignedLuma8bit": 0.15814959269078854,
+          "p95AbsLuma8bit": 9.591426865631037,
+          "meanSignedRGB8bit": [
+            0.3272340356445993,
+            0.0879835967573065,
+            0.3553153505806251
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1.274412706793001e-06
+        },
+        {
+          "frame": 99,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6448070721288683,
+          "meanSignedLuma8bit": -0.058359315789490766,
+          "p95AbsLuma8bit": 9.935791672665461,
+          "meanSignedRGB8bit": [
+            -0.15270316264782038,
+            -0.021182007994246174,
+            -0.14882619519500387
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1.474565036408999e-05
+        },
+        {
+          "frame": 100,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6218894384116243,
+          "meanSignedLuma8bit": 0.05020667691942508,
+          "p95AbsLuma8bit": 9.857693206843523,
+          "meanSignedRGB8bit": [
+            0.1305754242476035,
+            0.018729046131617723,
+            0.12536465278464817
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 5.925054830357478e-05
+        },
+        {
+          "frame": 101,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6260367329449767,
+          "meanSignedLuma8bit": -0.14711872783984364,
+          "p95AbsLuma8bit": 10.02711674712263,
+          "meanSignedRGB8bit": [
+            -0.30755806378260053,
+            -0.08179997262704919,
+            -0.3217249730858336
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.0001597160612647093
+        },
+        {
+          "frame": 102,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6600932085951747,
+          "meanSignedLuma8bit": 0.1672232994482859,
+          "p95AbsLuma8bit": 10.155885985468558,
+          "meanSignedRGB8bit": [
+            0.32544119810808925,
+            0.10080410243779296,
+            0.35927156048471753
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.0003483076888784295
+        },
+        {
+          "frame": 103,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.640080361911184,
+          "meanSignedLuma8bit": -0.06080832076519575,
+          "p95AbsLuma8bit": 9.83721039683715,
+          "meanSignedRGB8bit": [
+            -0.13789165964593258,
+            -0.028063613871045258,
+            -0.15819192913987432
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.0006656966624445856
+        },
+        {
+          "frame": 104,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6521337576459842,
+          "meanSignedLuma8bit": 0.04940859622728903,
+          "p95AbsLuma8bit": 10.0530549341002,
+          "meanSignedRGB8bit": [
+            0.1264715720072785,
+            0.018653484786292668,
+            0.12714359694439215
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.0011624218257614025
+        },
+        {
+          "frame": 105,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.66155786107778,
+          "meanSignedLuma8bit": -0.15866094113041726,
+          "p95AbsLuma8bit": 10.152814857696834,
+          "meanSignedRGB8bit": [
+            -0.30213326429650195,
+            -0.09963581752938097,
+            -0.3208846598887491
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.0019003220090694957
+        },
+        {
+          "frame": 106,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6681100388771584,
+          "meanSignedLuma8bit": 0.17048645854720582,
+          "p95AbsLuma8bit": 10.158165756742633,
+          "meanSignedRGB8bit": [
+            0.3346089164599003,
+            0.10165395512011129,
+            0.36905393637018596
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.0029540036720279664
+        },
+        {
+          "frame": 107,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6913519890353186,
+          "meanSignedLuma8bit": -0.062140025894630906,
+          "p95AbsLuma8bit": 10.22236544347126,
+          "meanSignedRGB8bit": [
+            -0.1489193574300466,
+            -0.027273454395020776,
+            -0.1519916332643231
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.004412295680978198
+        },
+        {
+          "frame": 108,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6475448329281472,
+          "meanSignedLuma8bit": 0.03629705006634377,
+          "p95AbsLuma8bit": 9.929620104595804,
+          "meanSignedRGB8bit": [
+            0.09363456237965616,
+            0.013328830779603302,
+            0.09498008768499432
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.006379628389178332
+        },
+        {
+          "frame": 109,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.679038508335188,
+          "meanSignedLuma8bit": -0.1564235925751653,
+          "p95AbsLuma8bit": 10.286262068096548,
+          "meanSignedRGB8bit": [
+            -0.293889717878508,
+            -0.0985144650207239,
+            -0.3252782987724763
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.008977257968439786
+        },
+        {
+          "frame": 110,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6523932561954693,
+          "meanSignedLuma8bit": 0.18212057401436504,
+          "p95AbsLuma8bit": 10.22499165364221,
+          "meanSignedRGB8bit": [
+            0.33290369577982887,
+            0.11805742423132626,
+            0.37272269364721455
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.01234423966370052
+        },
+        {
+          "frame": 111,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6600035706484273,
+          "meanSignedLuma8bit": -0.06877541716733257,
+          "p95AbsLuma8bit": 10.355199207475222,
+          "meanSignedRGB8bit": [
+            -0.14764800679871468,
+            -0.0358118695834751,
+            -0.16305819661806714
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.016638036025667102
+        },
+        {
+          "frame": 112,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6344073845017273,
+          "meanSignedLuma8bit": 0.029232213355001552,
+          "p95AbsLuma8bit": 10.135326426805044,
+          "meanSignedRGB8bit": [
+            0.08924055378472953,
+            0.003757456335402991,
+            0.10488003946382038
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.022034629230746474
+        },
+        {
+          "frame": 113,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.664942066901668,
+          "meanSignedLuma8bit": -0.14995070752469056,
+          "p95AbsLuma8bit": 10.355072491714765,
+          "meanSignedRGB8bit": [
+            -0.28790265861054026,
+            -0.09170093857470382,
+            -0.3207491833166413
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.02872799165987155
+        },
+        {
+          "frame": 114,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6641427117827483,
+          "meanSignedLuma8bit": 0.1462576616272028,
+          "p95AbsLuma8bit": 10.267065055873198,
+          "meanSignedRGB8bit": [
+            0.29798439131154636,
+            0.08235753167419523,
+            0.33246639031833314
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.036928757664653006
+        },
+        {
+          "frame": 115,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6522884350519043,
+          "meanSignedLuma8bit": -0.058438077882316954,
+          "p95AbsLuma8bit": 10.190394283251418,
+          "meanSignedRGB8bit": [
+            -0.1278345874194548,
+            -0.028531535750558373,
+            -0.15034196991885745
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.046861933932695124
+        },
+        {
+          "frame": 116,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.653103126829692,
+          "meanSignedLuma8bit": 0.0481601352405449,
+          "p95AbsLuma8bit": 10.278718522658746,
+          "meanSignedRGB8bit": [
+            0.10775782045508722,
+            0.02381132509465328,
+            0.11386375213431209
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.05876348841746638
+        },
+        {
+          "frame": 117,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6874919398457022,
+          "meanSignedLuma8bit": -0.1440922836514601,
+          "p95AbsLuma8bit": 10.642577162930895,
+          "meanSignedRGB8bit": [
+            -0.284355591603675,
+            -0.08482681162516266,
+            -0.31814611083382904
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.07287567099932465
+        },
+        {
+          "frame": 118,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.670752777943526,
+          "meanSignedLuma8bit": 0.1278700670513361,
+          "p95AbsLuma8bit": 10.339993486592686,
+          "meanSignedRGB8bit": [
+            0.29125266354301504,
+            0.05938506260331919,
+            0.3251738782298787
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.08944094557405001
+        },
+        {
+          "frame": 119,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6894413679968805,
+          "meanSignedLuma8bit": -0.030667768204970067,
+          "p95AbsLuma8bit": 10.531325094479403,
+          "meanSignedRGB8bit": [
+            -0.10822446363068472,
+            0.0024370052651040094,
+            -0.13022428535580166
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.10869445571495367
+        },
+        {
+          "frame": 120,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6672174272321727,
+          "meanSignedLuma8bit": 0.03811218175081147,
+          "p95AbsLuma8bit": 10.454947801132676,
+          "meanSignedRGB8bit": [
+            0.09241369255239608,
+            0.016454860663923154,
+            0.09274950647277329
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.1308550066646808
+        },
+        {
+          "frame": 121,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6787593768532423,
+          "meanSignedLuma8bit": -0.14136659246569994,
+          "p95AbsLuma8bit": 10.593248835020157,
+          "meanSignedRGB8bit": [
+            -0.27828982367526006,
+            -0.08424787629265426,
+            -0.303990233072484
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.15611462674189025
+        },
+        {
+          "frame": 122,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.7059629254242714,
+          "meanSignedLuma8bit": 0.13402940489842888,
+          "p95AbsLuma8bit": 10.710698844053915,
+          "meanSignedRGB8bit": [
+            0.29406154323334494,
+            0.06626255900004234,
+            0.3340850223017933
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.18462687177869028
+        },
+        {
+          "frame": 123,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6808876095421996,
+          "meanSignedLuma8bit": -0.05720033531916523,
+          "p95AbsLuma8bit": 10.416927697659318,
+          "meanSignedRGB8bit": [
+            -0.12047686718294416,
+            -0.02987612920629813,
+            -0.14154495495466582
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.21649415590380525
+        },
+        {
+          "frame": 124,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.7039048870192395,
+          "meanSignedLuma8bit": 0.029627532645694503,
+          "p95AbsLuma8bit": 10.736498852262226,
+          "meanSignedRGB8bit": [
+            0.08871932803411153,
+            0.005825859750404464,
+            0.09140095030682996
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.2517545278479464
+        },
+        {
+          "frame": 125,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6918908868096874,
+          "meanSignedLuma8bit": -0.11747014798578789,
+          "p95AbsLuma8bit": 10.722226962098047,
+          "meanSignedRGB8bit": [
+            -0.2727919108130217,
+            -0.054511245042804135,
+            -0.2837693253784758
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.2903684585649206
+        },
+        {
+          "frame": 126,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6850333551519987,
+          "meanSignedLuma8bit": 0.04342579138699008,
+          "p95AbsLuma8bit": 10.849199235700434,
+          "meanSignedRGB8bit": [
+            0.09245474967838163,
+            0.0244732763988088,
+            0.08679535076091521
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.3322063551877691
+        },
+        {
+          "frame": 127,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.697701652509464,
+          "meanSignedLuma8bit": 0.06125345457610172,
+          "p95AbsLuma8bit": 10.659091324247047,
+          "meanSignedRGB8bit": [
+            0.14194855087645372,
+            0.026069950952680467,
+            0.1721601625818642
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.3770376571130082
+        },
+        {
+          "frame": 128,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6926321037251157,
+          "meanSignedLuma8bit": -0.10544455748760692,
+          "p95AbsLuma8bit": 10.760433775636333,
+          "meanSignedRGB8bit": [
+            -0.21255247412977718,
+            -0.060555251133081696,
+            -0.23472002600050226
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.42452248843355544
+        },
+        {
+          "frame": 129,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.680900836731083,
+          "meanSignedLuma8bit": 0.10081381626821861,
+          "p95AbsLuma8bit": 10.800855483756086,
+          "meanSignedRGB8bit": [
+            0.21760252233472843,
+            0.05289206964913623,
+            0.23162204718550022
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.4691076966919506
+        },
+        {
+          "frame": 130,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.641656545570613,
+          "meanSignedLuma8bit": -0.1106913041579626,
+          "p95AbsLuma8bit": 10.566471179709886,
+          "meanSignedRGB8bit": [
+            -0.22317759591886235,
+            -0.06529225181742779,
+            -0.22917906877822883
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.5145789887468071
+        },
+        {
+          "frame": 131,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6743379239061706,
+          "meanSignedLuma8bit": -0.0037314501416644942,
+          "p95AbsLuma8bit": 10.953787860418064,
+          "meanSignedRGB8bit": [
+            -0.003666090822655941,
+            -0.0031012456374554967,
+            -0.010166597685036987
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.5607286063005605
+        },
+        {
+          "frame": 132,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6645648424616843,
+          "meanSignedLuma8bit": 0.0878751610142684,
+          "p95AbsLuma8bit": 10.723628626074863,
+          "meanSignedRGB8bit": [
+            0.19619338684291807,
+            0.04175602029289645,
+            0.22576926950116988
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.6070189296101349
+        },
+        {
+          "frame": 133,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.655024751612571,
+          "meanSignedLuma8bit": -0.10224547514406591,
+          "p95AbsLuma8bit": 10.733723509262058,
+          "meanSignedRGB8bit": [
+            -0.1983826990722168,
+            -0.06125338527104791,
+            -0.2252201132335064
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.6528706019872492
+        },
+        {
+          "frame": 134,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.620227357766721,
+          "meanSignedLuma8bit": 0.00788547576565548,
+          "p95AbsLuma8bit": 10.655978198384155,
+          "meanSignedRGB8bit": [
+            -0.006896581986054679,
+            0.012662388908640236,
+            0.0040934701998782
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.6976775434942252
+        },
+        {
+          "frame": 135,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6574662253287427,
+          "meanSignedLuma8bit": 0.028548686160200055,
+          "p95AbsLuma8bit": 10.795817304767557,
+          "meanSignedRGB8bit": [
+            0.04460499724584888,
+            0.021312935395130697,
+            0.05294532342292397
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.737992483328322
+        },
+        {
+          "frame": 136,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.626031834866027,
+          "meanSignedLuma8bit": 0.05572325723458272,
+          "p95AbsLuma8bit": 10.581490702790761,
+          "meanSignedRGB8bit": [
+            0.15286779045129956,
+            0.01582200095451944,
+            0.16492617592748113
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.7739786130290307
+        },
+        {
+          "frame": 137,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.667149590817201,
+          "meanSignedLuma8bit": -0.10523954555725992,
+          "p95AbsLuma8bit": 11.056933432580648,
+          "meanSignedRGB8bit": [
+            -0.19280453035404424,
+            -0.06517997269387421,
+            -0.2442186417358901
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.8074413691885883
+        },
+        {
+          "frame": 138,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.62961753508393,
+          "meanSignedLuma8bit": -0.017729156438422395,
+          "p95AbsLuma8bit": 10.767629246758558,
+          "meanSignedRGB8bit": [
+            -0.02021217227354945,
+            -0.01835642551398795,
+            -0.004204059355423775
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.8380218240837195
+        },
+        {
+          "frame": 139,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.585491451326703,
+          "meanSignedLuma8bit": -0.001519576231615813,
+          "p95AbsLuma8bit": 10.625584098666486,
+          "meanSignedRGB8bit": [
+            -0.013132642250521033,
+            0.0037356353980350218,
+            -0.019380926950549708
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.8654323401279139
+        },
+        {
+          "frame": 140,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.6369137213566316,
+          "meanSignedLuma8bit": 0.019885000127920625,
+          "p95AbsLuma8bit": 10.97286057971352,
+          "meanSignedRGB8bit": [
+            0.008418302417208411,
+            0.024514079812888372,
+            0.007795002103107342
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.8894750261765921
+        },
+        {
+          "frame": 141,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.580332149610075,
+          "meanSignedLuma8bit": 0.006947751200895801,
+          "p95AbsLuma8bit": 10.495364996574818,
+          "meanSignedRGB8bit": [
+            0.009525629720077852,
+            0.005650870342724454,
+            0.012203599076048734
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9074447756503722
+        },
+        {
+          "frame": 142,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.602958756292554,
+          "meanSignedLuma8bit": 0.09120766286804653,
+          "p95AbsLuma8bit": 10.577464265745824,
+          "meanSignedRGB8bit": [
+            0.21714413921534098,
+            0.03909045547442641,
+            0.23663885201600085
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9210810309616378
+        },
+        {
+          "frame": 143,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.568075188186607,
+          "meanSignedLuma8bit": -0.1045160312061582,
+          "p95AbsLuma8bit": 10.291713249239203,
+          "meanSignedRGB8bit": [
+            -0.22965046073127623,
+            -0.05325883003311508,
+            -0.24378986170366973
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9318196299731378
+        },
+        {
+          "frame": 144,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.5990963780760024,
+          "meanSignedLuma8bit": 0.09581149821043594,
+          "p95AbsLuma8bit": 10.566616186523436,
+          "meanSignedRGB8bit": [
+            0.2199794723621352,
+            0.043797568347834645,
+            0.24542716764369343
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.940029392179957
+        },
+        {
+          "frame": 145,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.570068330883502,
+          "meanSignedLuma8bit": -0.09576822082658942,
+          "p95AbsLuma8bit": 10.417773191432527,
+          "meanSignedRGB8bit": [
+            -0.2231674328375613,
+            -0.04174881341908964,
+            -0.255735086537271
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9462221828886802
+        },
+        {
+          "frame": 146,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.558793681438884,
+          "meanSignedLuma8bit": 0.09644475769035152,
+          "p95AbsLuma8bit": 10.299506559596187,
+          "meanSignedRGB8bit": [
+            0.25546913769226753,
+            0.03176877992701188,
+            0.26885024394981355
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9510576484801185
+        },
+        {
+          "frame": 147,
+          "state": "TRAVEL",
+          "madRGB8bit": 2.53178623933378,
+          "meanSignedLuma8bit": -0.04171739742962003,
+          "p95AbsLuma8bit": 10.18103395640152,
+          "meanSignedRGB8bit": [
+            -0.09672787019422807,
+            -0.01853133449845133,
+            -0.10941055115006586
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9553063064313663
+        },
+        {
+          "frame": 148,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.517383143177864,
+          "meanSignedLuma8bit": 0.055266363644884936,
+          "p95AbsLuma8bit": 10.47926270458512,
+          "meanSignedRGB8bit": [
+            0.08921431152895595,
+            0.041462898390152395,
+            0.09203789591678548
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9593295132472407
+        },
+        {
+          "frame": 149,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4581399318331,
+          "meanSignedLuma8bit": -0.140709090543544,
+          "p95AbsLuma8bit": 9.962456235964758,
+          "meanSignedRGB8bit": [
+            -0.252674453385789,
+            -0.09295378629436717,
+            -0.28407138221598166
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9631326572323216
+        },
+        {
+          "frame": 150,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.513385958530536,
+          "meanSignedLuma8bit": 0.13447659598588516,
+          "p95AbsLuma8bit": 10.451844003200346,
+          "meanSignedRGB8bit": [
+            0.27164118980491925,
+            0.07667679868605708,
+            0.30313618577688817
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9667138894252373
+        },
+        {
+          "frame": 151,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4224360350731247,
+          "meanSignedLuma8bit": -0.04587886596516649,
+          "p95AbsLuma8bit": 9.762445101207714,
+          "meanSignedRGB8bit": [
+            -0.1080977402384078,
+            -0.020299937413306504,
+            -0.11604946194576414
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9700726336090622
+        },
+        {
+          "frame": 152,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4795519202798415,
+          "meanSignedLuma8bit": 0.030951503649412855,
+          "p95AbsLuma8bit": 10.353452975717522,
+          "meanSignedRGB8bit": [
+            0.07949035041988903,
+            0.011321014572298813,
+            0.08248013196726238
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9732095889439359
+        },
+        {
+          "frame": 153,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.390270612201448,
+          "meanSignedLuma8bit": -0.0804960635069677,
+          "p95AbsLuma8bit": 9.826630155528454,
+          "meanSignedRGB8bit": [
+            -0.21026857812612426,
+            -0.026205504617495556,
+            -0.23616048330915343
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9761267164854169
+        },
+        {
+          "frame": 154,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.41492862931703,
+          "meanSignedLuma8bit": 0.10873282437323317,
+          "p95AbsLuma8bit": 9.832165675797523,
+          "meanSignedRGB8bit": [
+            0.24146897942224013,
+            0.05248459088053171,
+            0.2750628801981807
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9788272093562896
+        },
+        {
+          "frame": 155,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4032516996606215,
+          "meanSignedLuma8bit": -0.050985894550964,
+          "p95AbsLuma8bit": 10.335767435981937,
+          "meanSignedRGB8bit": [
+            -0.09166908344815725,
+            -0.03248462521653997,
+            -0.1144604356650468
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.98131544667349
+        },
+        {
+          "frame": 156,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.3801270847885863,
+          "meanSignedLuma8bit": 0.034937548889571964,
+          "p95AbsLuma8bit": 9.955199130498803,
+          "meanSignedRGB8bit": [
+            0.06630306245984786,
+            0.021453561189901073,
+            0.0761486266979372
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9835969316808735
+        },
+        {
+          "frame": 157,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4266895716896424,
+          "meanSignedLuma8bit": -0.11290742923564123,
+          "p95AbsLuma8bit": 10.442614129581395,
+          "meanSignedRGB8bit": [
+            -0.23077851870707491,
+            -0.06251282890916943,
+            -0.265024112502481
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9856782148932559
+        },
+        {
+          "frame": 158,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4031034640625957,
+          "meanSignedLuma8bit": 0.13443285632366006,
+          "p95AbsLuma8bit": 10.366118868153984,
+          "meanSignedRGB8bit": [
+            0.2755218970364504,
+            0.07620882172514164,
+            0.2957389434333714
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9875668034071949
+        },
+        {
+          "frame": 159,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4263671237087334,
+          "meanSignedLuma8bit": -0.056291015071354374,
+          "p95AbsLuma8bit": 10.588180282426455,
+          "meanSignedRGB8bit": [
+            -0.10841633625253577,
+            -0.034220505667931174,
+            -0.12142931205485998
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9892710578679609
+        },
+        {
+          "frame": 160,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.431797363836853,
+          "meanSignedLuma8bit": 0.0515840262387629,
+          "p95AbsLuma8bit": 10.739462171378754,
+          "meanSignedRGB8bit": [
+            0.09398995862139746,
+            0.03418159691188631,
+            0.09910087153009307
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9908000788894913
+        },
+        {
+          "frame": 161,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.430453335835378,
+          "meanSignedLuma8bit": -0.14163539863816565,
+          "p95AbsLuma8bit": 11.062741540857836,
+          "meanSignedRGB8bit": [
+            -0.2399151242000501,
+            -0.09856017492390892,
+            -0.2789363729592157
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9921635849933713
+        },
+        {
+          "frame": 162,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4236834585350873,
+          "meanSignedLuma8bit": 0.13202849972003966,
+          "p95AbsLuma8bit": 10.843848660736029,
+          "meanSignedRGB8bit": [
+            0.24532263894631184,
+            0.08356774001766018,
+            0.27846619140475304
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9933717843542851
+        },
+        {
+          "frame": 163,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4746787892501425,
+          "meanSignedLuma8bit": -0.0503493483172296,
+          "p95AbsLuma8bit": 11.213100390087675,
+          "meanSignedRGB8bit": [
+            -0.10137569780264075,
+            -0.028822904570217467,
+            -0.113334260606214
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9944352428038387
+        },
+        {
+          "frame": 164,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4318128827193317,
+          "meanSignedLuma8bit": 0.04045430914218429,
+          "p95AbsLuma8bit": 10.815406564529363,
+          "meanSignedRGB8bit": [
+            0.07841245347847826,
+            0.02390803532663051,
+            0.09258718375420602
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9953647506448883
+        },
+        {
+          "frame": 165,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.500904077023416,
+          "meanSignedLuma8bit": -0.11664091262169238,
+          "p95AbsLuma8bit": 11.542748708606231,
+          "meanSignedRGB8bit": [
+            -0.23828036749615047,
+            -0.0641198475808463,
+            -0.2787256440746469
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.99617119085922
+        },
+        {
+          "frame": 166,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4771969030042915,
+          "meanSignedLuma8bit": 0.13313041608525067,
+          "p95AbsLuma8bit": 11.120160504351876,
+          "meanSignedRGB8bit": [
+            0.2752136543392699,
+            0.07249081376590488,
+            0.3154371629826412
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9968654112498483
+        },
+        {
+          "frame": 167,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.460766379289848,
+          "meanSignedLuma8bit": -0.05218482768057432,
+          "p95AbsLuma8bit": 11.333988369571458,
+          "meanSignedRGB8bit": [
+            -0.09543844424964858,
+            -0.03245266331399806,
+            -0.12028351289373435
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9974581029447956
+        },
+        {
+          "frame": 168,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4976209011951735,
+          "meanSignedLuma8bit": 0.038118176014072976,
+          "p95AbsLuma8bit": 11.675860392775794,
+          "meanSignedRGB8bit": [
+            0.07018577481201133,
+            0.025002583572863526,
+            0.0736126387496867
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9979596875046793
+        },
+        {
+          "frame": 169,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4677101263363204,
+          "meanSignedLuma8bit": -0.10162411532073913,
+          "p95AbsLuma8bit": 11.31396446189055,
+          "meanSignedRGB8bit": [
+            -0.22768339010447283,
+            -0.04956125950385822,
+            -0.2461553156145264
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9983802146266981
+        },
+        {
+          "frame": 170,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4744310250398067,
+          "meanSignedLuma8bit": 0.10830958471366119,
+          "p95AbsLuma8bit": 11.230980963665488,
+          "meanSignedRGB8bit": [
+            0.24005760901099726,
+            0.052914927795403785,
+            0.2690939152167645
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.998729272130588
+        },
+        {
+          "frame": 171,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.4341960709547803,
+          "meanSignedLuma8bit": -0.06442596373495842,
+          "p95AbsLuma8bit": 11.153115373251243,
+          "meanSignedRGB8bit": [
+            -0.09870474555302934,
+            -0.049554018221068516,
+            -0.11080749305645682
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9990159095577998
+        },
+        {
+          "frame": 172,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.3964617320925226,
+          "meanSignedLuma8bit": 0.05033715823105468,
+          "p95AbsLuma8bit": 11.176265301446472,
+          "meanSignedRGB8bit": [
+            0.09100191291384689,
+            0.03304697961862175,
+            0.10186913742842874
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9992485763257961
+        },
+        {
+          "frame": 173,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.3484709872687506,
+          "meanSignedLuma8bit": -0.08589956356809329,
+          "p95AbsLuma8bit": 11.098319412052073,
+          "meanSignedRGB8bit": [
+            -0.2246684235809761,
+            -0.027784178569590565,
+            -0.25296138783665656
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9994350749684132
+        },
+        {
+          "frame": 174,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.2978419285998286,
+          "meanSignedLuma8bit": 0.09883782481368167,
+          "p95AbsLuma8bit": 10.486815630703314,
+          "meanSignedRGB8bit": [
+            0.22946543464659805,
+            0.04356076159236541,
+            0.2617564642237559
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9995825295753472
+        },
+        {
+          "frame": 175,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.309269812665141,
+          "meanSignedLuma8bit": -0.0487713734999288,
+          "p95AbsLuma8bit": 10.990086322322684,
+          "meanSignedRGB8bit": [
+            -0.0832969085258498,
+            -0.033434998489999534,
+            -0.09902686741392593
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.999697369133775
+        },
+        {
+          "frame": 176,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.240960822213135,
+          "meanSignedLuma8bit": 0.055299050937001416,
+          "p95AbsLuma8bit": 10.379322386637888,
+          "meanSignedRGB8bit": [
+            0.09419835916381507,
+            0.03911820852492925,
+            0.10104067924854483
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9997853250874249
+        },
+        {
+          "frame": 177,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.1513008097508024,
+          "meanSignedLuma8bit": -0.10687508715522895,
+          "p95AbsLuma8bit": 10.15134502791284,
+          "meanSignedRGB8bit": [
+            -0.2375580829896656,
+            -0.05275889194226151,
+            -0.25813129078283414
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9998514420766182
+        },
+        {
+          "frame": 178,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.1024688881588802,
+          "meanSignedLuma8bit": 0.11163794982731691,
+          "p95AbsLuma8bit": 9.568525193295162,
+          "meanSignedRGB8bit": [
+            0.2600330223840856,
+            0.05079160244260683,
+            0.27740685874664694
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999001005187308
+        },
+        {
+          "frame": 179,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.130278641791282,
+          "meanSignedLuma8bit": -0.051405422918700636,
+          "p95AbsLuma8bit": 9.943650523173098,
+          "meanSignedRGB8bit": [
+            -0.09141835346894231,
+            -0.03433291138608822,
+            -0.10270059207580612
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999350494420788
+        },
+        {
+          "frame": 180,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.0975533639288333,
+          "meanSignedLuma8bit": 0.02628507528883548,
+          "p95AbsLuma8bit": 9.688143002125248,
+          "meanSignedRGB8bit": [
+            0.062431407442559546,
+            0.011532512144080546,
+            0.06598483907341995
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999594478044987
+        },
+        {
+          "frame": 181,
+          "state": "DECELERATE",
+          "madRGB8bit": 2.0150517709925095,
+          "meanSignedLuma8bit": -0.08623713944655345,
+          "p95AbsLuma8bit": 9.32358438878888,
+          "meanSignedRGB8bit": [
+            -0.22433000412817827,
+            -0.029422747410010504,
+            -0.2424021000174964
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999759124153331
+        },
+        {
+          "frame": 182,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.9656863793360753,
+          "meanSignedLuma8bit": 0.10780933596227489,
+          "p95AbsLuma8bit": 8.842289856419386,
+          "meanSignedRGB8bit": [
+            0.2538147342326439,
+            0.04616463728374213,
+            0.28852319777122476
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999865705374945
+        },
+        {
+          "frame": 183,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.9308213931279559,
+          "meanSignedLuma8bit": -0.03595787517543413,
+          "p95AbsLuma8bit": 8.749583036565035,
+          "meanSignedRGB8bit": [
+            -0.06675838572321235,
+            -0.021047944924186712,
+            -0.0929577861620616
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999931152730492
+        },
+        {
+          "frame": 184,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.862809150826068,
+          "meanSignedLuma8bit": 0.04020924582695107,
+          "p95AbsLuma8bit": 8.443403683648583,
+          "meanSignedRGB8bit": [
+            0.08481801131224269,
+            0.021141939761993273,
+            0.09773159701095117
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999968619268078
+        },
+        {
+          "frame": 185,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.79480568000685,
+          "meanSignedLuma8bit": -0.09362438219336407,
+          "p95AbsLuma8bit": 7.807459996137791,
+          "meanSignedRGB8bit": [
+            -0.25324323167609014,
+            -0.02890746052549351,
+            -0.2646849774403646
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999988036907652
+        },
+        {
+          "frame": 186,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.6794584297307382,
+          "meanSignedLuma8bit": 0.10845137669316447,
+          "p95AbsLuma8bit": 7.099714577357432,
+          "meanSignedRGB8bit": [
+            0.27086584804550085,
+            0.04151934559126418,
+            0.2932224575044162
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999996651882636
+        },
+        {
+          "frame": 187,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.6642148155096055,
+          "meanSignedLuma8bit": -0.03547180523231848,
+          "p95AbsLuma8bit": 7.3397229772334915,
+          "meanSignedRGB8bit": [
+            -0.08480769372002,
+            -0.015316619224851438,
+            -0.0898510176984553
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999999526499457
+        },
+        {
+          "frame": 188,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.5145486328743052,
+          "meanSignedLuma8bit": 0.04746751333751865,
+          "p95AbsLuma8bit": 6.436762483173946,
+          "meanSignedRGB8bit": [
+            0.07969816453863364,
+            0.034133429289589214,
+            0.08464619014807398
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 0.9999999997515827
+        },
+        {
+          "frame": 189,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.4023873879989481,
+          "meanSignedLuma8bit": -0.15509463712183963,
+          "p95AbsLuma8bit": 5.85841230886263,
+          "meanSignedRGB8bit": [
+            -0.2916615671454938,
+            -0.09768498775345687,
+            -0.3216493726514582
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 190,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.3623842874143894,
+          "meanSignedLuma8bit": 0.16035814023762404,
+          "p95AbsLuma8bit": 5.524158303162758,
+          "meanSignedRGB8bit": [
+            0.31673774349139217,
+            0.09487621206670586,
+            0.3485350291031305
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 191,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.2069355569082307,
+          "meanSignedLuma8bit": -0.026834186968951144,
+          "p95AbsLuma8bit": 4.858008283625372,
+          "meanSignedRGB8bit": [
+            -0.05745019037152588,
+            -0.014674563381128962,
+            -0.05713336240694325
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 192,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.0610474520720885,
+          "meanSignedLuma8bit": 0.0019410034913735423,
+          "p95AbsLuma8bit": 4.1621284442102535,
+          "meanSignedRGB8bit": [
+            0.05311743214485866,
+            -0.017375967606479192,
+            0.04259736079682143
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 193,
+          "state": "DECELERATE",
+          "madRGB8bit": 1.0062003924652245,
+          "meanSignedLuma8bit": -0.11631628891362307,
+          "p95AbsLuma8bit": 3.840270493940459,
+          "meanSignedRGB8bit": [
+            -0.2958618823903878,
+            -0.04303277994131035,
+            -0.31355967456234707
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 194,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.9133622796689223,
+          "meanSignedLuma8bit": 0.1293172076328704,
+          "p95AbsLuma8bit": 3.320099039449217,
+          "meanSignedRGB8bit": [
+            0.2779658884714368,
+            0.06659024021062215,
+            0.3129684202937116
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 195,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.8029911312791969,
+          "meanSignedLuma8bit": -0.02950666417470814,
+          "p95AbsLuma8bit": 2.905131897087077,
+          "meanSignedRGB8bit": [
+            -0.032758564605103076,
+            -0.02576423413221703,
+            -0.057002951361518055
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 196,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.6228729013357103,
+          "meanSignedLuma8bit": 0.031661781906385,
+          "p95AbsLuma8bit": 2.2450048464920367,
+          "meanSignedRGB8bit": [
+            0.04628721545835092,
+            0.025257811870938927,
+            0.05203231093966862
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 197,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.6260881835677501,
+          "meanSignedLuma8bit": -0.16409120177168435,
+          "p95AbsLuma8bit": 2.051657471712021,
+          "meanSignedRGB8bit": [
+            -0.30638245774750816,
+            -0.10547915383488585,
+            -0.32570083700628455
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 198,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.3117340659627465,
+          "meanSignedLuma8bit": -0.0019337144436099834,
+          "p95AbsLuma8bit": 1.3599621704904215,
+          "meanSignedRGB8bit": [
+            -0.0015561069890813273,
+            -0.0019198547117422137,
+            -0.00318290869658259
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 199,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.41300265671392095,
+          "meanSignedLuma8bit": 0.1611190847768694,
+          "p95AbsLuma8bit": 1.4416309756882488,
+          "meanSignedRGB8bit": [
+            0.2898150354961115,
+            0.10848092078990315,
+            0.3035852310451161
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 200,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.3793229744913209,
+          "meanSignedLuma8bit": -0.16464883678752498,
+          "p95AbsLuma8bit": 1.3695850757075474,
+          "meanSignedRGB8bit": [
+            -0.29665186814771,
+            -0.11230168723879692,
+            -0.29449422307665174
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 201,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.21280918928746054,
+          "meanSignedLuma8bit": -0.016957571906448317,
+          "p95AbsLuma8bit": 1.0049988876813267,
+          "meanSignedRGB8bit": [
+            -0.02856411464264507,
+            -0.012241952665945048,
+            -0.02949302751714787
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 202,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.06981286789137045,
+          "meanSignedLuma8bit": 0.019034516665903913,
+          "p95AbsLuma8bit": 0.20967051983047277,
+          "meanSignedRGB8bit": [
+            0.04801915165766374,
+            0.00705538629930194,
+            0.052349483964319314
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 203,
+          "state": "DECELERATE",
+          "madRGB8bit": 0.01898474046037871,
+          "meanSignedLuma8bit": -0.004017492632723385,
+          "p95AbsLuma8bit": 0.014923205009789671,
+          "meanSignedRGB8bit": [
+            -0.007578538921717888,
+            -0.002327589095543459,
+            -0.010271517130657612
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        },
+        {
+          "frame": 204,
+          "state": "SETTLE",
+          "madRGB8bit": 0.01153155432390729,
+          "meanSignedLuma8bit": 0.0017985650519192402,
+          "p95AbsLuma8bit": 0.0007939323425292968,
+          "meanSignedRGB8bit": [
+            0.007021273040737967,
+            -0.00046724501049397985,
+            0.008864488018887019
+          ],
+          "validPixelFraction": 0.81640625,
+          "lodWeight": 1
+        }
+      ]
+    }
+  },
+  "initialHarnessReportsPreserved": [
+    "tests/focused-initial-results.json",
+    "tests/runtime-focused-initial.json"
+  ],
+  "numericCoordinateToleranceOnly": 1e-10,
+  "actualRTX": "NOT_RUN",
+  "container": "NOT_RUN",
+  "next": "USER_VIDEO_REVIEW_REQUIRED"
+}

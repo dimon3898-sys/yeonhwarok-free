@@ -1,0 +1,388 @@
+{
+  "sources": {
+    "boundary_glow.mjs": "d899b75587404d1006da403611e44046af31c81b6857ec681ae2063ecfd3e6d0",
+    "camera_director.mjs": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+    "camera_director_v2.mjs": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+    "camera_gpu_pipeline.mjs": "824b7910662536d715e32958ebd83f87f23690418ef1e0ce5349684e4aade149",
+    "camera_gpu_pipeline_v2.mjs": "762c6e3889d3e2c11d9f98e42913d7530d99ecce70aab5c3c5153d032ece517d",
+    "glyph_atlas.mjs": "16bb30c1776a308fe4c8f7e12aa2bdcbf7b4f105e26d36b5e75fd3f83c404941",
+    "graphic_layout.mjs": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+    "korean_layout.mjs": "e2ff3851edd1238d63952491b9c8b22529d6c3020f1f228e7b13ef99b3d5223d",
+    "local_detail_admission.mjs": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+    "region_colors.mjs": "dd9e7830aca6597564aeaaf5fb7a46893abfe876116eff320a51d055cbf24d76",
+    "renderer.mjs": "751981e07190671eb89f816199c2237a1b1be305d903982e291abc4a7fdee791",
+    "scale_contract.mjs": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+    "scale_projection.mjs": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95"
+  },
+  "scales": {
+    "CONTINENT": {
+      "hash": "6c65d05fcf77d875dc65de2bc47abb5c94cf14719ed3a69c70b5a634df6c9490",
+      "assets": {
+        "terrain": {
+          "url": "/scale-assets/continent-native.png",
+          "file": "/tmp/world-scale-system-v1/terrain-lod/continent-native.png",
+          "bounds": [
+            7.450000000037505,
+            -20.483333333355418,
+            57.50000000004752,
+            62.56666666666119
+          ],
+          "sha256": "b0abb96f673a3c9c8edcf81717873ec86c23dad7c6aec8992dddcd7217c5743a",
+          "license": "Public domain",
+          "classification": "BAKED HILLSHADE",
+          "source": {
+            "id": "natural_earth_1_native_raster",
+            "file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+            "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+            "resolution": [
+              21600,
+              10800
+            ],
+            "license": "Public domain",
+            "url": "https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-1/",
+            "kind": "Existing Natural Earth shaded relief and land cover cartography; not new DEM or satellite imagery"
+          },
+          "bytes": 23171678,
+          "dimensions": [
+            3003,
+            4983
+          ],
+          "pixelSpacing": [
+            0.01666666666667,
+            0.01666666666667
+          ],
+          "lodPreparation": {
+            "method": "Exact native pixel window; no resize/resampling/sharpening/newdata",
+            "window": [
+              11247,
+              1646,
+              3003,
+              4983
+            ],
+            "sourceFile": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+            "outputDataType": "Byte RGB source unchanged",
+            "sourceDimensions": [
+              21600,
+              10800
+            ]
+          }
+        },
+        "global": {
+          "url": "/v3/assets/v3/earth/earth-day-8k.jpg",
+          "file": "../cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+          "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+          "bytes": 4565076
+        },
+        "topo": {
+          "url": "/v3/assets/gis/earth-topology.png",
+          "file": "../cinematic-world-map/assets/gis/earth-topology.png",
+          "classification": "RELIEF PROXY; no new DEM",
+          "sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+          "bytes": 378243
+        },
+        "font": {
+          "url": "/static/fonts/NotoSansCJKkr-Bold.otf",
+          "file": "web/fonts/NotoSansCJKkr-Bold.otf",
+          "version": "existing pinned Noto Sans CJK KR Bold",
+          "license": "SIL OFL 1.1",
+          "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+          "bytes": 16997968
+        }
+      },
+      "framing": {
+        "projection": "REGIONAL_EQUIRECTANGULAR",
+        "bounds": [
+          7.457023519999993,
+          -20.47138446407132,
+          57.49424648,
+          62.55268346407132
+        ]
+      },
+      "theme": {
+        "primary": [
+          0.94,
+          0.57,
+          0.12
+        ],
+        "secondary": [
+          0.14,
+          0.44,
+          0.45
+        ],
+        "primaryStrength": 0.9,
+        "secondaryStrength": 0.74,
+        "secondaryLuminance": 0.36,
+        "detailContrast": 1.42,
+        "relief": 5,
+        "exposure": 1.1,
+        "primaryWidth": 3.25,
+        "secondaryWidth": 2,
+        "glowRadius": 1.105,
+        "glowGain": 0.1,
+        "visualColorProfile": "REGION_COLORS_STAGE1_V1",
+        "primaryLuminance": 0.81,
+        "visualBoundaryProfile": "BOUNDARY_GLOW_STAGE2_V1",
+        "primaryEdgeWidth": 4.225,
+        "primaryCoreColor": [
+          1,
+          0.94,
+          0.68,
+          0.86
+        ],
+        "primaryEdgeColor": [
+          0.17,
+          0.1,
+          0.03,
+          0.56
+        ],
+        "secondaryEdgeWidth": 2.8449999999999998,
+        "secondaryCoreColor": [
+          0.43,
+          0.87,
+          0.82,
+          0.68
+        ],
+        "secondaryEdgeColor": [
+          0.02,
+          0.1,
+          0.12,
+          0.5
+        ],
+        "glowWidth": 3.575,
+        "glowColor": [
+          0.88,
+          0.52,
+          0.07,
+          1
+        ]
+      }
+    },
+    "REGIONAL": {
+      "hash": "f38b6b63e7a4f00642e4d7930fe12ab849d3ecf8bc189e74f027b509e38e9020",
+      "assets": {
+        "terrain": {
+          "url": "/static/earth-detail/v018/detail_0.png",
+          "file": "web/earth-detail/v018/detail_0.png",
+          "bounds": [
+            20.383333333333326,
+            16.316666666666663,
+            44.383333333333326,
+            44.31666666666666
+          ],
+          "sha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+          "license": "Public domain",
+          "classification": "BAKED HILLSHADE",
+          "source": {
+            "id": "natural_earth_1_native_raster",
+            "file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+            "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+            "resolution": [
+              21600,
+              10800
+            ],
+            "license": "Public domain",
+            "url": "https://www.naturalearthdata.com/downloads/10m-raster-data/10m-natural-earth-1/",
+            "kind": "Existing Natural Earth shaded relief and land cover cartography; not new DEM or satellite imagery"
+          },
+          "bytes": 3594622
+        },
+        "global": {
+          "url": "/v3/assets/v3/earth/earth-day-8k.jpg",
+          "file": "../cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+          "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+          "bytes": 4565076
+        },
+        "topo": {
+          "url": "/v3/assets/gis/earth-topology.png",
+          "file": "../cinematic-world-map/assets/gis/earth-topology.png",
+          "classification": "RELIEF PROXY; no new DEM",
+          "sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+          "bytes": 378243
+        },
+        "font": {
+          "url": "/static/fonts/NotoSansCJKkr-Bold.otf",
+          "file": "web/fonts/NotoSansCJKkr-Bold.otf",
+          "version": "existing pinned Noto Sans CJK KR Bold",
+          "license": "SIL OFL 1.1",
+          "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+          "bytes": 16997968
+        }
+      },
+      "framing": {
+        "projection": "REGIONAL_EQUIRECTANGULAR",
+        "bounds": [
+          23.25,
+          16.472168113664114,
+          38.15,
+          39.827831886335886
+        ]
+      },
+      "theme": {
+        "primary": [
+          0.94,
+          0.57,
+          0.12
+        ],
+        "secondary": [
+          0.14,
+          0.44,
+          0.45
+        ],
+        "primaryStrength": 0.9,
+        "secondaryStrength": 0.74,
+        "secondaryLuminance": 0.36,
+        "detailContrast": 1.42,
+        "relief": 5,
+        "exposure": 1.1,
+        "primaryWidth": 5,
+        "secondaryWidth": 2.5,
+        "glowRadius": 1.7,
+        "glowGain": 0.1,
+        "visualColorProfile": "REGION_COLORS_STAGE1_V1",
+        "primaryLuminance": 0.81,
+        "visualBoundaryProfile": "BOUNDARY_GLOW_STAGE2_V1",
+        "primaryEdgeWidth": 6.5,
+        "primaryCoreColor": [
+          1,
+          0.94,
+          0.68,
+          0.86
+        ],
+        "primaryEdgeColor": [
+          0.17,
+          0.1,
+          0.03,
+          0.56
+        ],
+        "secondaryEdgeWidth": 3.8,
+        "secondaryCoreColor": [
+          0.43,
+          0.87,
+          0.82,
+          0.68
+        ],
+        "secondaryEdgeColor": [
+          0.02,
+          0.1,
+          0.12,
+          0.5
+        ],
+        "glowWidth": 5.5,
+        "glowColor": [
+          0.88,
+          0.52,
+          0.07,
+          1
+        ]
+      }
+    }
+  },
+  "heightSource": {
+    "version": "GLO30_LOGICAL_HEIGHT_SOURCE_V1",
+    "source": "User-provided Copernicus GLO-30 COG DSM originals",
+    "CRS": "EPSG:4326",
+    "dimensions": [
+      7200,
+      7200
+    ],
+    "footprint": [
+      31.999861111111112,
+      29.000138888888888,
+      33.99986111111111,
+      31.000138888888888
+    ],
+    "firstSample": [
+      32,
+      31
+    ],
+    "pixelSpacing": [
+      0.0002777777777777778,
+      0.0002777777777777778
+    ],
+    "orientation": "north-up row-major; row 0 north, column 0 west",
+    "unit": "m",
+    "unitEvidence": "Copernicus GLO-30 product convention; band unit is not embedded in these TIFFs",
+    "verticalDatum": "EGM2008 per product convention, not encoded in EPSG:4326",
+    "NoData": null,
+    "validSamples": 51840000,
+    "format": "little-endian IEEE754 Float32 / GPU R32F",
+    "scale": 1,
+    "offset": 0,
+    "resampling": "NONE; four bit-identical source grids stitched by geographic offsets",
+    "file": "/tmp/world-suez-dem-gate1b/height-source/height.f32",
+    "sha256": "08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8",
+    "byteLength": 207360000,
+    "originals": [
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N29_00_E032_00_DEM.tif",
+        "sha256": "9dde480c3dc61c80c578026af04ccebfed5496ae911f9aef924c72c38f4642b7",
+        "atlasOffset": [
+          0,
+          3600
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": -6.636804103851318,
+        "max": 1274.9442138671875
+      },
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N29_00_E033_00_DEM.tif",
+        "sha256": "b8db1296d52ede364adcb45285154b094731d483ae438fad1f438038730959c0",
+        "atlasOffset": [
+          3600,
+          3600
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": -5.52053165435791,
+        "max": 1629.854736328125
+      },
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N30_00_E032_00_DEM.tif",
+        "sha256": "624a6d62e87ea02b718efab427859914115f1ad82aaa40eea62705fd9dcc9f5f",
+        "atlasOffset": [
+          0,
+          0
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": -19.214750289916992,
+        "max": 750.0064697265625
+      },
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N30_00_E033_00_DEM.tif",
+        "sha256": "67f44f3a5e64ef89d234030bc9c05f2486c5db2a2beb208dda7feca24abb1df8",
+        "atlasOffset": [
+          3600,
+          0
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": 0.4859592914581299,
+        "max": 1076.7745361328125
+      }
+    ],
+    "url": "/height.f32"
+  },
+  "rendererParameters": {
+    "verticalExaggeration": 2,
+    "bakedSuppression": 0.1,
+    "correctedLight": true,
+    "shadingCorrection": "FINAL"
+  },
+  "output": [
+    1080,
+    1920
+  ],
+  "fps": 30,
+  "softwareOnly": true,
+  "actualRTX": "NOT_RUN"
+}
