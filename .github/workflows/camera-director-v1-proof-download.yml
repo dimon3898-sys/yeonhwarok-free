@@ -1,0 +1,41 @@
+name: Download Camera Director V1 proof
+
+'on':
+  push:
+    branches: ['proof-artifact-camera-director-v1-4cce8f9a6466']
+
+permissions:
+  contents: write
+
+jobs:
+  publish-existing-files:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout existing proof files only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: .proof-artifacts/camera-director-v1
+          fetch-depth: 1
+      - name: Verify original proof bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum --check .proof-artifacts/camera-director-v1/SHA256SUMS
+      - name: Preserve downloadable Actions artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Suez-Camera-Director-V1-proof
+          path: .proof-artifacts/camera-director-v1/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Publish existing MP4 and PNG Release Assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PROOF_TAG: proof-camera-director-v1-4cce8f9a6466-20261011
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 120 gh release create "$PROOF_TAG" .proof-artifacts/camera-director-v1/*.mp4 .proof-artifacts/camera-director-v1/*.png .proof-artifacts/camera-director-v1/REPORT.md .proof-artifacts/camera-director-v1/technical-validation.json .proof-artifacts/camera-director-v1/camera-plan.json .proof-artifacts/camera-director-v1/frame-diagnostics.jsonl --target "$GITHUB_SHA" --title 'Camera Director V1 — Suez silent motion proof' --notes-file .proof-artifacts/camera-director-v1/REPORT.md --prerelease --latest=false

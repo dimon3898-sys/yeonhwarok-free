@@ -1,0 +1,99 @@
+{
+  "PASS": 153,
+  "FAIL": 0,
+  "ERROR": 0,
+  "SKIP": 1,
+  "scope": "Focused Camera Director validation; no legacy regression, Container or RTX execution",
+  "groups": {
+    "pureCamera": {
+      "PASS": 71,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "softwareRuntime": {
+      "PASS": 29,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 1
+    },
+    "runtimeEvidence": {
+      "PASS": 34,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "encodedVideoAndPixels": {
+      "PASS": 19,
+      "FAIL": 0,
+      "ERROR": 0,
+      "SKIP": 0
+    }
+  },
+  "sourceProtection": {
+    "existingGLSLCount": 14,
+    "existingShadersUnchanged": true,
+    "protectedModulesUnchanged": true
+  },
+  "outputHashes": {
+    "01_WORLD.png": "51093b08a46184dadfbb245b048815df019c0469092597b6d51d758e5f5b8aed",
+    "02_CONTINENT.png": "03c8a19d3fcc322d20a71f8932f8ad7b0a4121d2c9793e47a449eaf5ee5f944f",
+    "03_REGIONAL_SETTLE.png": "471355d4c8f7bab35e6c66a899f0e07432171e6667463c94c10a78b1732c6d29",
+    "04_REVEAL.png": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+    "05_HOLD.png": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+    "SUEZ_CAMERA_DIRECTOR_V1.mp4": "8b013a54675e152bcbd4ec3e588add754b0e90d66efff53a3a920b5b6c6d8265"
+  },
+  "output": {
+    "resolution": [
+      1080,
+      1920
+    ],
+    "fps": 30,
+    "frames": 399,
+    "seconds": 13.3,
+    "audio": false,
+    "actualRenderer": "ANGLE SwiftShader WebGL2"
+  },
+  "regionalPixels": {
+    "changedPixels": 0,
+    "maxChannelDifference": 0
+  },
+  "localAdmission": {
+    "status": "LOCAL_NOT_ADMITTED",
+    "requestedScale": "REGIONAL",
+    "effectiveScale": "REGIONAL",
+    "localUsed": false,
+    "localRejected": true,
+    "safeClosestStatus": "APPROVED_REGIONAL_FALLBACK",
+    "closestExtentCertified": false,
+    "regionalStopBounds": [
+      23.25,
+      16.472168113664114,
+      38.15,
+      39.827831886335886
+    ],
+    "diagnosticCategory": "DATA_ADMISSION"
+  },
+  "numericEvidence": {
+    "crossRuntimeTolerance": 1e-10,
+    "crossRuntimeMaxDifference": 1.4210854715202004e-14,
+    "layoutTolerancePixels": 1e-10,
+    "layoutMaxDifferencePixels": 2.2737367544323206e-13
+  },
+  "limitations": [
+    "Chromium/Node transcendental math and direct/Three projection are compared with explicit 1e-10 absolute numeric tolerance; symbolic state, roles, hashes and shapes remain exact.",
+    "Initial MOTION_DEM_ADMISSION_DISSOLVE diagnostic only captures fixed from CONTINENT actual camera; actual to-MOTION camera not separately recorded.",
+    "Boundary pixel token diagnostics are intended MOTION interpolation values, not measured screen widths.",
+    "No video frames or PNG pixels decoded by this focused-evidence check; visual/no-black-frame/locked-pixel preservation is assessed separately.",
+    "Marker/Text factors are explicit appearance steps, not opacity fades; reveal-state ordering is checked."
+  ],
+  "decision": "CAMERA_DIRECTOR_PASS",
+  "userApproval": "PENDING",
+  "actualRTX": "NOT_RUN",
+  "history": {
+    "firstBootstrapAttempt": "No frame completed: new transition shader UV name conflicted with Three.js attribute; fixed without visual source changes",
+    "crossRuntimeInitialStrictChecks": "32 PASS / 2 FAIL; differences <=1.421e-14 degrees /2.274e-13 pixels. Original evidence preserved; final 1e-10 numerical tolerance only for these comparisons",
+    "completedVisualIterations": 1,
+    "timingRetunes": 0
+  }
+}
