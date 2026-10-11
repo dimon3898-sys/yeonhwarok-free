@@ -1,0 +1,41 @@
+name: Download Scale System V1 static PNGs
+
+'on':
+  push:
+    branches: ['proof-artifact-scale-system-aef3d9d15ea5']
+
+permissions:
+  contents: write
+
+jobs:
+  publish-existing-pngs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout existing PNGs only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: .proof-artifacts/scale-system
+          fetch-depth: 1
+      - name: Verify original PNG bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum --check .proof-artifacts/scale-system/SHA256SUMS
+      - name: Preserve downloadable Actions artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Scale-system-four-static-PNGs
+          path: .proof-artifacts/scale-system/*.png
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Publish existing PNG Release Assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PROOF_TAG: proof-scale-system-aef3d9d15ea5-20261011
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 120 gh release create "$PROOF_TAG" .proof-artifacts/scale-system/*.png --target "$GITHUB_SHA" --title 'Scale System V1 — four static proof PNGs' --notes-file .proof-artifacts/scale-system/REPORT.md --prerelease --latest=false
