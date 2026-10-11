@@ -1,0 +1,41 @@
+name: Download universal layout static proof PNGs
+
+'on':
+  push:
+    branches: ['proof-artifact-universal-layout-c4586a26ad06']
+
+permissions:
+  contents: write
+
+jobs:
+  publish-existing-pngs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout existing PNGs only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: .proof-artifacts/universal-layout
+          fetch-depth: 1
+      - name: Verify original PNG bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum --check .proof-artifacts/universal-layout/SHA256SUMS
+      - name: Preserve downloadable Actions artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Universal-layout-three-static-PNGs
+          path: .proof-artifacts/universal-layout/*.png
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Publish existing PNG Release Assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PROOF_TAG: proof-universal-layout-c4586a26ad06-20261011
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 120 gh release create "$PROOF_TAG" .proof-artifacts/universal-layout/*.png --target "$GITHUB_SHA" --title 'Universal Layout — three static proof PNGs' --notes-file .proof-artifacts/universal-layout/REPORT.md --prerelease --latest=false
