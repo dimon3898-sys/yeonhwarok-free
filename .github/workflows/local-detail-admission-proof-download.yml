@@ -1,0 +1,45 @@
+name: Download LOCAL Detail Admission V1 static PNGs
+
+'on':
+  push:
+    branches: ['proof-artifact-local-detail-admission-df6dc6aa9d74']
+
+permissions:
+  contents: write
+
+jobs:
+  publish-existing-pngs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout existing PNGs only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: .proof-artifacts/local-detail-admission
+          fetch-depth: 1
+      - name: Verify original PNG bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum --check .proof-artifacts/local-detail-admission/SHA256SUMS
+      - name: Preserve downloadable Actions artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Local-detail-admission-proof
+          path: |
+            .proof-artifacts/local-detail-admission/*.png
+            .proof-artifacts/local-detail-admission/REPORT.md
+            .proof-artifacts/local-detail-admission/local-admission.json
+            .proof-artifacts/local-detail-admission/technical-validation.json
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Publish existing PNG Release Assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PROOF_TAG: proof-local-detail-admission-df6dc6aa9d74-20261011
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout 120 gh release create "$PROOF_TAG" .proof-artifacts/local-detail-admission/*.png .proof-artifacts/local-detail-admission/REPORT.md .proof-artifacts/local-detail-admission/local-admission.json .proof-artifacts/local-detail-admission/technical-validation.json --target "$GITHUB_SHA" --title 'LOCAL Detail Admission V1 — safe Regional fallback and admission diagnostic' --notes-file .proof-artifacts/local-detail-admission/REPORT.md --prerelease --latest=false
