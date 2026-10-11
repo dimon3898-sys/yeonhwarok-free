@@ -1,0 +1,42 @@
+name: Download Korean layout micro proof PNG
+
+'on':
+  push:
+    branches: ['proof-artifact-korean-layout-micro-fe0bc966']
+
+permissions:
+  contents: write
+
+jobs:
+  publish-existing-png:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout existing PNG only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          sparse-checkout: .proof-artifacts/korean-layout-micro
+          fetch-depth: 1
+      - name: Verify existing PNG bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' 'fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673' '.proof-artifacts/korean-layout-micro/AFTER.png' | sha256sum --check
+      - name: Preserve downloadable Actions artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Korean-layout-micro-AFTER-PNG
+          path: .proof-artifacts/korean-layout-micro/AFTER.png
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+      - name: Publish PNG Release Asset for phone download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PROOF_TAG: proof-korean-layout-micro-fe0bc966-20261011
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' 'Existing MAP_INFOGRAPHIC_RENDERER_V1 single micro-adjustment Korean layout proof.' '1080x1920 lossless PNG. Publication copies the existing proof byte-for-byte; it does not render.' 'SHA-256: fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673' > /tmp/proof-download-notes.txt
+          timeout 120 gh release create "$PROOF_TAG" '.proof-artifacts/korean-layout-micro/AFTER.png' --target "$GITHUB_SHA" --title 'Korean Layout Micro Adjustment — AFTER.png download' --notes-file /tmp/proof-download-notes.txt --prerelease --latest=false
