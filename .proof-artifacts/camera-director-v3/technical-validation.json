@@ -1,0 +1,284 @@
+{
+  "PASS": 207,
+  "FAIL": 0,
+  "ERROR": 0,
+  "SKIP": 1,
+  "scope": "Camera Director V3 focused validation only; no full legacy regressions, container, gCube, NVIDIA, audio or next-stage execution",
+  "decision": "CAMERA_DIRECTOR_V3_PASS",
+  "visualIterations": 1,
+  "video": {
+    "frames": 384,
+    "resolution": [
+      1080,
+      1920
+    ],
+    "fps": "30/1",
+    "audioStreams": 0,
+    "duration": 12.8
+  },
+  "outputHashes": {
+    "SUEZ_CAMERA_DIRECTOR_V3.mp4": "9190d9760cec9e6d77647693ecbda3ee1744e4f02003319ee35b3591d965809f",
+    "01_FRAME0.png": "0b9c9f9985c4bc32b6a65e6c5f11bf4593e6149d2e7cd4c06f5190644273562e",
+    "02_MID_ZOOM.png": "5b9531195f168dd0b80803a23449797dbabbbdf9b63557da67ff6984bf604668",
+    "03_REGIONAL_LOCK.png": "d89376b31fc8e7836e55d7deb207aab8dd10eb652454a0bed8050b73856b7d8f",
+    "04_MARKER_REVEAL.png": "7c5b4344dc58c3d61da15dfa06a2381189e02bdf078e11465158705fc71a04ac",
+    "05_FINAL_HOLD.png": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673"
+  },
+  "outputBytes": {
+    "SUEZ_CAMERA_DIRECTOR_V3.mp4": 10836442,
+    "01_FRAME0.png": 3920072,
+    "02_MID_ZOOM.png": 3984015,
+    "03_REGIONAL_LOCK.png": 3199239,
+    "04_MARKER_REVEAL.png": 3222761,
+    "05_FINAL_HOLD.png": 3237292
+  },
+  "sourceHashes": {
+    "boundary_glow.mjs": "d899b75587404d1006da403611e44046af31c81b6857ec681ae2063ecfd3e6d0",
+    "camera_director.mjs": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+    "camera_director_v2.mjs": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+    "camera_director_v3.mjs": "35d880e74bc25938be0dc6f2d4df93ec4e0f478f8895f8aff12275e87f58428d",
+    "camera_gpu_pipeline.mjs": "824b7910662536d715e32958ebd83f87f23690418ef1e0ce5349684e4aade149",
+    "camera_gpu_pipeline_v2.mjs": "ef3b1af99a685b4c1330947334b2778c98a5e35fff0dcdd27ed627b40a517f94",
+    "glyph_atlas.mjs": "16bb30c1776a308fe4c8f7e12aa2bdcbf7b4f105e26d36b5e75fd3f83c404941",
+    "graphic_layout.mjs": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+    "korean_layout.mjs": "e2ff3851edd1238d63952491b9c8b22529d6c3020f1f228e7b13ef99b3d5223d",
+    "local_detail_admission.mjs": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+    "region_colors.mjs": "dd9e7830aca6597564aeaaf5fb7a46893abfe876116eff320a51d055cbf24d76",
+    "renderer.mjs": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+    "scale_contract.mjs": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+    "scale_projection.mjs": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95"
+  },
+  "primaryMaterial": {
+    "factor": 1,
+    "firstFrame": 0,
+    "lastFrame": 383,
+    "animated": false
+  },
+  "firstVisibleFrames": {
+    "marker": 229,
+    "location": 241,
+    "country": 256,
+    "title": 268
+  },
+  "cameraAndLod": "Every one of the 384 actual frames equals approved V2 camera trajectory, center, extent, velocity, scale, source coordinates and LOD weight",
+  "boundaryAndGlow": "Existing V2 design AND opacity timing preserved; primary material coverage is now independent of the old primary boundary/glow reveal factor",
+  "finalHold": {
+    "pixelIdenticalToApprovedV2": true,
+    "sha256": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673"
+  },
+  "frame0PixelEvidence": {
+    "samples": 39542,
+    "goldFraction": 0.9997976834757979,
+    "medianRgb": [
+      234.0,
+      185.0,
+      75.0
+    ],
+    "medianRG": 1.2622950819672132,
+    "medianGB": 2.4415584415584415
+  },
+  "frame0ProtectedPixels": {
+    "changedPixels": 45636,
+    "outsidePrimaryMarginPixels": 0,
+    "primaryMaskWithRasterizationGuard": 7
+  },
+  "validationMethodCorrection": {
+    "initialFailurePreserved": "pixel-focused-initial.json and pixel-focused-initial.log",
+    "initialMethod": "Uncompensated whole-frame RGB MAD<10 at540x960",
+    "failure": "Frame129 MAD11.2129083 included normal continuous camera motion; unsupported by same-resolution V2 baseline.",
+    "correction": "Remove planned geographic pan/zoom before luminance continuity check; preserve all original app sources and proof files. No threshold relaxation of initial metric, no re-render."
+  },
+  "supersededInitialPixelCheck": {
+    "scope": "Existing original PNG and encoded silent MP4 pixel evidence only; no rendering",
+    "source": "/tmp/world-camera-director-v3/iteration-01",
+    "baseline": "/tmp/world-camera-director-v2/iteration-01",
+    "summary": {
+      "PASS": 5,
+      "FAIL": 1,
+      "ERROR": 0,
+      "SKIP": 0
+    },
+    "tests": [
+      {
+        "id": "png.five_original_lossless_1080x1920_pngs",
+        "status": "PASS",
+        "elapsedSeconds": 0.010314579005353153
+      },
+      {
+        "id": "png.actual_primary_gold_in_first_midzoom_and_lock_frame",
+        "status": "PASS",
+        "elapsedSeconds": 2.834176727978047
+      },
+      {
+        "id": "png.frame0_secondary_neutral_terrain_boundary_text_unchanged_outside_primary",
+        "status": "PASS",
+        "elapsedSeconds": 1.2395046210149303
+      },
+      {
+        "id": "png.final_hold_exact_approved_pixels_and_sha256",
+        "status": "PASS",
+        "elapsedSeconds": 0.20838306099176407
+      },
+      {
+        "id": "video.encoded_1080x1920_30fps_384frames_no_audio",
+        "status": "PASS",
+        "elapsedSeconds": 0.19424783502472565
+      },
+      {
+        "id": "video.every_actual_encoded_motion_frame_primary_gold_without_fullframe_jump",
+        "status": "FAIL",
+        "elapsedSeconds": 4.902699144964572,
+        "error": "{'frame': 129, 'meanAbsoluteRgb': 11.21290830761317}"
+      }
+    ],
+    "evidence": {
+      "primaryGoldPixels": {
+        "01_FRAME0.png": {
+          "samples": 39542,
+          "goldFraction": 0.9997976834757979,
+          "medianRgb": [
+            234.0,
+            185.0,
+            75.0
+          ],
+          "medianRG": 1.2622950819672132,
+          "medianGB": 2.4415584415584415
+        },
+        "02_MID_ZOOM.png": {
+          "samples": 128748,
+          "goldFraction": 0.9993320284586945,
+          "medianRgb": [
+            234.0,
+            185.0,
+            75.0
+          ],
+          "medianRG": 1.2625698324022345,
+          "medianGB": 2.4415584415584415
+        },
+        "03_REGIONAL_LOCK.png": {
+          "samples": 520123,
+          "goldFraction": 0.9987560634696023,
+          "medianRgb": [
+            234.0,
+            185.0,
+            75.0
+          ],
+          "medianRG": 1.263157894736842,
+          "medianGB": 2.4415584415584415
+        }
+      },
+      "v2Frame0Primary": {
+        "samples": 39542,
+        "goldFraction": 0.0,
+        "medianRgb": [
+          215.0,
+          211.0,
+          192.0
+        ],
+        "medianRG": 1.0188679245283019,
+        "medianGB": 1.0880829015544042
+      },
+      "frame0Difference": {
+        "changedPixels": 45636,
+        "outsidePrimaryMarginPixels": 0,
+        "primaryMaskWithRasterizationGuard": 7
+      },
+      "videoContract": {
+        "frames": 384,
+        "resolution": [
+          1080,
+          1920
+        ],
+        "fps": "30/1",
+        "audioStreams": 0,
+        "duration": 12.8
+      }
+    },
+    "elapsedSeconds": 9.390594505995978,
+    "limitations": [
+      "Video hue checks use downsampled decoded pixels; full-resolution lossless PNG checks are separate.",
+      "Sparse geographically anchored hue probes plus no-LOD/camera changes substantiate temporal color presence; perceived continuity still reviewed by USER.",
+      "NVIDIA RTX4080S not run."
+    ]
+  },
+  "groups": [
+    {
+      "name": "Deterministic material/reveal contract",
+      "counts": {
+        "PASS": 28,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v3/tests/pure-focused.json"
+    },
+    {
+      "name": "Protected V2 sources, GLSL and assets",
+      "counts": {
+        "PASS": 55,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v3/tests/finalsource-validation.json"
+    },
+    {
+      "name": "Actual Software WebGL2 rendering and source freeze",
+      "counts": {
+        "PASS": 29,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 1
+      },
+      "evidence": "/tmp/world-camera-director-v3/iteration-01/runtime-validation.json"
+    },
+    {
+      "name": "Every-frame V2 camera, LOD, visual and layout comparison",
+      "counts": {
+        "PASS": 34,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v3/tests/runtime-focused.json"
+    },
+    {
+      "name": "Original PNG and encoded MP4 color/pixel evidence",
+      "counts": {
+        "PASS": 6,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v3/tests/pixel-focused.json"
+    },
+    {
+      "name": "Decoded whole-video motion/color continuity",
+      "counts": {
+        "PASS": 33,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v3/iteration-01/decoded-video-qc.json"
+    },
+    {
+      "name": "File-only publication safety",
+      "counts": {
+        "PASS": 22,
+        "FAIL": 0,
+        "ERROR": 0,
+        "SKIP": 0
+      },
+      "evidence": "/tmp/world-camera-director-v3/publication-safety.json"
+    }
+  ],
+  "runtime": "Software WebGL2 / SwiftShader; actual RTX4080S NOT RUN",
+  "limitations": [
+    "Encoded motion color measurements use geographically anchored interior probes and decoded video pixels; lossless PNG checks use full 1080x1920 pixels.",
+    "No additional visual iteration or tuning was performed.",
+    "Final approval and next-stage authorization require USER video review.",
+    "An initial test-helper browser-only import error was corrected in the helper and its original log retained; renderer execution had one iteration only.",
+    "An initial unaligned whole-frame MAD threshold confused planned pan/zoom with discontinuity. Original failure evidence is preserved; the corrected check removes geographic camera motion and uses the existing V2 aligned-luminance criterion. Renderer and proof outputs were not changed."
+  ]
+}
