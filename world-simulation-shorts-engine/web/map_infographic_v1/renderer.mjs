@@ -6,7 +6,7 @@
 import * as THREE from '/three.js';
 
 export const VERSION = 'MAP_INFOGRAPHIC_RENDERER_V1_GATE1';
-export const SHADER_VERSION = 'explicit-glsl-1';
+export const SHADER_VERSION = 'explicit-glsl-1-terrain-shading-correction';
 export const THEME_VERSION = 'terrain-material-1';
 const fullscreenVertex = `precision highp float;
 in vec3 position; in vec2 uv; out vec2 vUv;
@@ -26,7 +26,46 @@ uniform sampler2D terrain, globalTerrain, topo, regionID, coverage, roles;
 uniform vec4 bounds, tileBounds;
 uniform vec3 primaryHue, secondaryHue;
 uniform float primaryStrength, secondaryStrength, secondaryLuminance, detailContrast, reliefStrength, exposure;
-uniform int mode;
+uniform int mode, terrainTreatment;
+// Height is a MATERIAL input, not an RGB overlay. IDs/coverage stay unchanged.
+uniform sampler2D demHeight;
+uniform vec2 demFirstSample, demSpacing, demDimensions, canonicalPixelDegrees;
+uniform int demEnabled, demCorrectedLight;
+uniform float demExaggeration, demBakedSuppression;
+// Explicit controlled ablation: 0=Gate1B, 1=light, 2=material, 3=output.
+uniform int shadingStage;
+float heightAt(vec2 geo){
+ vec2 q=vec2((geo.x-demFirstSample.x)/demSpacing.x,(demFirstSample.y-geo.y)/demSpacing.y);
+ ivec2 i=ivec2(floor(q)),hi=ivec2(demDimensions)-1;vec2 f=fract(q);
+ float a=texelFetch(demHeight,clamp(i,ivec2(0),hi),0).r;
+ float b=texelFetch(demHeight,clamp(i+ivec2(1,0),ivec2(0),hi),0).r;
+ float c=texelFetch(demHeight,clamp(i+ivec2(0,1),ivec2(0),hi),0).r;
+ float d=texelFetch(demHeight,clamp(i+ivec2(1,1),ivec2(0),hi),0).r;
+ return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
+}
+float footprintHeight(vec2 geo,vec2 stepDegrees){
+ // Nine sparse height taps across the canonical output footprint. Native slopes
+ // sampled once per 1.3km output pixel would alias ~44-50 30m samples/pixel.
+ float h=0.;for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)
+  h+=heightAt(geo+vec2(float(x),float(y))*.45*stepDegrees);
+ return h/9.;
+}
+float demWeight(vec2 geo,vec2 stepDegrees){
+ if(demEnabled==0)return 0.;
+ vec2 last=demFirstSample+vec2(demSpacing.x,-demSpacing.y)*(demDimensions-1.);
+ vec2 edge=min(geo-vec2(demFirstSample.x,last.y),vec2(last.x,demFirstSample.y)-geo);
+ // Require a complete real-data neighbourhood: never invent edge heights.
+ return smoothstep(1.5,2.5,min(edge.x/stepDegrees.x,edge.y/stepDegrees.y));
+}
+vec3 demNormal(vec2 geo,vec2 stepDegrees){
+ float e=footprintHeight(geo+vec2(stepDegrees.x,0.),stepDegrees)-footprintHeight(geo-vec2(stepDegrees.x,0.),stepDegrees);
+ float n=footprintHeight(geo+vec2(0.,stepDegrees.y),stepDegrees)-footprintHeight(geo-vec2(0.,stepDegrees.y),stepDegrees);
+ // WGS84 meridian and prime-vertical radii; east/north spacing is not equal.
+ float lat=radians(geo.y),sinLat=sin(lat),den=1.-.00669437999014*sinLat*sinLat;
+ float eastMetres=6378137./sqrt(den)*cos(lat)*radians(2.*stepDegrees.x);
+ float northMetres=6378137.*(1.-.00669437999014)/pow(den,1.5)*radians(2.*stepDegrees.y);
+ return normalize(vec3(-e/eastMetres*demExaggeration,-n/northMetres*demExaggeration,1.));
+}
 vec3 linearize(vec3 c){return mix(c/12.92,pow((c+.055)/1.055,vec3(2.4)),step(vec3(.04045),c));}
 vec3 encode(vec3 c){return mix(c*12.92,1.055*pow(max(c,vec3(0.)),vec3(1./2.4))-.055,step(vec3(.0031308),c));}
 float lum(vec3 c){return dot(c,vec3(.2126,.7152,.0722));}
@@ -40,13 +79,47 @@ vec3 grade(vec3 base,vec3 hue,float strength){
  vec3 colored=tint*detail*mix(vec3(1.),variation,.24);
  return mix(base,colored,strength);
 }
+vec3 terrainMaterial(vec3 base,vec3 hue,float strength,int stage){
+ if(stage<2)return grade(base,hue,strength);
+ float y=max(lum(base),.002);
+ vec3 tint=linearize(hue);tint/=max(lum(tint),.01);
+ // Calibrate the role's color identity once at a fixed baseline reference.
+ // This keeps the accepted display palette after replacing the old output
+ // transfer. It is NOT a per-pixel tone curve: terrain Y stays independent.
+ tint=tint/(1.+.70*tint*1.15);tint/=max(lum(tint),.01);
+ // Source-only chromatic variation. Renormalize the colorant so chroma
+ // never determines surface luminance; do not invent texture or elevation.
+ vec3 residual=mix(vec3(1.),clamp(base/y,vec3(.58),vec3(1.45)),.45);
+ vec3 colorant=mix(base/y,tint*residual,strength);
+ colorant/=max(lum(colorant),.001);
+ float terrainY=.26*pow(y/.35,detailContrast);
+ return colorant*terrainY;
+}
+vec3 terrainOutput(vec3 color){
+ float y=max(lum(color),.000001);
+ // One scalar tone response: every channel receives the same Y scale.
+ float mappedY=y/(1.+.50*y);
+ vec3 chroma=color/y;
+ // Gamut compression at constant mapped luminance. A neutral-axis blend
+ // preserves the linear RGB hue direction instead of clipping channels.
+ float peak=max(chroma.r,max(chroma.g,chroma.b));
+ float allowed=.98/max(mappedY,.000001);
+ float amount=peak>1.?min(1.,max(0.,(allowed-1.)/(peak-1.))):1.;
+ return mappedY*mix(vec3(1.),chroma,amount);
+}
 void main(){
  vec2 geo=mix(bounds.xy,bounds.zw,vUv);
  vec2 guv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);
  vec2 tuv=(geo-tileBounds.xy)/(tileBounds.zw-tileBounds.xy);
  float inside=step(0.,tuv.x)*step(0.,tuv.y)*step(tuv.x,1.)*step(tuv.y,1.);
  vec3 source=linearize(mix(texture(globalTerrain,guv).rgb,texture(terrain,tuv).rgb,inside));
+ // Gate1A source ablation: diagnostic output only, before material or lighting.
+ if(mode==5){frag=vec4(encode(source),1.);return;}
  vec3 cov=texture(coverage,vUv).rgb;
+ // Preserve the baseline sea/AA path below the coverage target's half-LSB.
+ // Coverage/geometry targets themselves are unchanged. Tiny interpolation
+ // residuals at pure-sea pixel centres must not select a land correction.
+ int stage=cov.r<(.5/255.)?0:shadingStage;
  vec2 idBytes=floor(texture(regionID,vUv).rg*255.+.5);
  float id=idBytes.x+256.*idBytes.y;
  float role=texture(roles,vec2((id+.5)/256.,.5)).r*255.;
@@ -55,21 +128,63 @@ void main(){
  // Discrete IDs are NEAREST sampled. Only separate AA coverage is fractional.
  float p=role>1.5?cov.b:(cov.b>0.&&cov.b<.999?cov.b:0.);
  float s=role>.5&&role<1.5?cov.g:(cov.g>0.&&cov.g<.999?cov.g:0.);
- vec3 land=source;
- if(mode!=1)land=mix(land,grade(source,primaryHue,primaryStrength),p);
- if(mode!=1)land=mix(land,grade(source,secondaryHue,secondaryStrength)*secondaryLuminance,s);
+ // NE1 is already shaded. Recover only its existing luminance variation;
+ // do not infer heights/normals from color or synthesize new terrain detail.
+ // Applied only inside the admitted baked-hillshade tile. Sea keeps raw source.
+ vec3 surface=source;
+ vec2 demStep=max(demSpacing,canonicalPixelDegrees*.5);
+ float demAmount=demWeight(geo,demStep);
+ if(terrainTreatment==1&&inside>.5){
+  float y=max(lum(source),.002);
+  // Shadow-side only: never lift NE1's already bright desert/highlights.
+  surface*=pow(min(y/.80,1.),.50);
+  // Limit the Gate1A amplification of baked shadows. This does NOT claim to
+  // reconstruct true albedo or remove NE1's original embedded hillshade.
+  if(demAmount>0.&&demBakedSuppression>0.)surface/=pow(min(y/.80,1.),.50*demBakedSuppression*demAmount);
+ }
+ vec3 land=surface;
+ if(mode!=1&&mode!=6&&mode!=7)land=mix(land,terrainMaterial(surface,primaryHue,primaryStrength,stage),p);
+ if(mode!=1&&mode!=6&&mode!=7)land=mix(land,terrainMaterial(surface,secondaryHue,secondaryStrength,stage)*secondaryLuminance,s);
  // Existing 2K topology: RELIEF PROXY, not a new DEM. NE1 already has baked hillshade.
  vec2 dt=vec2(1./2048.,1./1024.);
  float dx=texture(topo,guv+vec2(dt.x,0.)).r-texture(topo,guv-vec2(dt.x,0.)).r;
  float dy=texture(topo,guv+vec2(0.,dt.y)).r-texture(topo,guv-vec2(0.,dt.y)).r;
  vec3 normal=normalize(vec3(-dx*reliefStrength,-dy*reliefStrength,1.));
  float light=.72+.28*max(dot(normal,normalize(vec3(-.55,.65,1.))),0.);
+ // A second unregistered, coarse proxy light would relight baked shading.
+ // Retain the original flat-surface irradiance, not a second directional light.
+ if(terrainTreatment==1&&inside>.5)light=.72+.28*dot(vec3(0.,0.,1.),normalize(vec3(-.55,.65,1.)));
+ if(demAmount>0.){
+  vec3 dn=demNormal(geo,demStep),dl=normalize(vec3(-.55,.65,1.));
+  float slopeLight=.72+.28*max(dot(dn,dl),0.);
+  if(demCorrectedLight==1){
+   dl=normalize(vec3(-.65,.70,.60));
+   // Change slope readability, retaining the Gate1A flat-surface irradiance.
+   slopeLight=(.42+.58*max(dot(dn,dl),0.))/(.42+.58*dl.z)*(.72+.28*normalize(vec3(-.55,.65,1.)).z);
+   // NE1 desert is already bright: express real slope shadows without lifting
+   // baked highlights into gamut clipping. No synthetic emboss/sharpening.
+   if(stage==0)slopeLight=min(slopeLight,.72+.28*normalize(vec3(-.55,.65,1.)).z);
+  }
+  light=mix(light,slopeLight,demAmount);
+  if(mode==10){frag=vec4(dn*.5+.5,1.);return;}
+ }
+ if(mode==9){frag=vec4(vec3(demAmount),1.);return;}
+ if(mode==10){frag=vec4(.5,.5,1.,1.);return;}
+ if(mode==7){frag=vec4(vec3(shadingStage>0?light/2.:light),1.);return;}
+ // Controlled flat-normal ablation retains exposure and the output transfer.
+ if(mode==6||mode==8)light=.72+.28*dot(vec3(0.,0.,1.),normalize(vec3(-.55,.65,1.)));
  land*=light*exposure;
  // Sea retains actual raster surface variation; receives NO country chroma.
  vec3 sea=linearize(vec3(.012,.10,.19))*(.65+2.*pow(max(lum(source),.001),.4));
  vec3 color=mix(sea,land,cov.r);
  if(mode==2){frag=vec4(color,1.);return;}
- color=color/(1.+color*.70); // stronger highlight shoulder for colored terrain.
+ vec3 originalColor=color/(1.+color*.70);
+ if(stage>=3){
+  // The correction belongs to land material only; sea remains identical.
+  vec3 corrected=terrainOutput(land);
+  vec3 originalSea=sea/(1.+sea*.70);
+  color=mix(originalSea,corrected,cov.r);
+ }else color=originalColor;
  frag=vec4(encode(clamp(color,0.,1.)),1.);
 }`;
 const ribbonVertex = `precision highp float;
@@ -162,7 +277,7 @@ function ribbon(rings){
  g.setAttribute('tangent',new THREE.Float32BufferAttribute(tan,2));g.setAttribute('side',new THREE.Float32BufferAttribute(side,1));
  g.setIndex(idx);return g;
 }
-export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920}){
+export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null}){
  console.info('GATE1: factory start');
  if(width/height!==1080/1920)throw Error('Canonical 9:16 layout required');
  const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});
@@ -201,10 +316,34 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  console.info('GATE1: terrain sources loaded');
  const anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());for(const t of [regional,global,topo])t.anisotropy=anisotropy;
  const theme=plan.theme;
+ if(!['CURRENT','BAKED_RELIEF_V1'].includes(terrainTreatment))throw Error('Unknown terrain treatment');
+ if(terrainTreatment==='BAKED_RELIEF_V1'&&plan.assets.terrain.classification!=='BAKED HILLSHADE')throw Error('Baked-relief treatment requires admitted baked hillshade');
+ let heightTexture=new THREE.DataTexture(new Float32Array([0]),1,1,THREE.RedFormat,THREE.FloatType),heightEvidence=null;
+ if(heightSource){
+  const h=heightSource;
+  if(h.CRS!=='EPSG:4326'||h.unit!=='m'||h.scale!==1||h.offset!==0||h.NoData!==null)throw Error('Height source requires admitted metre Float32 grid with no missing samples');
+  if(h.dimensions.some(v=>!Number.isInteger(v)||v<2||v>renderer.capabilities.maxTextureSize))throw Error('Height grid exceeds actual WebGL2 capability');
+  const response=await fetch(h.url);if(!response.ok)throw Error('Height source unavailable');
+  const bytes=await response.arrayBuffer();
+  if(bytes.byteLength!==h.dimensions[0]*h.dimensions[1]*4)throw Error('Height source byte length mismatch');
+  const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(v=>v.toString(16).padStart(2,'0')).join('');
+  if(digest!==h.sha256)throw Error('Height source hash mismatch');
+  const heights=new Float32Array(bytes);if(!heights.every(Number.isFinite))throw Error('Height source contains unadmitted NoData');
+  heightTexture.dispose();heightTexture=new THREE.DataTexture(heights,...h.dimensions,THREE.RedFormat,THREE.FloatType);
+  heightEvidence={...h,format:'R32F',precision:'IEEE754 Float32 metres',filter:'NEAREST / explicit manual bilinear',
+   sampling:'3x3 sparse footprint-aware height sampling (not exact area integration); geographic central derivatives across shared atlas; WGS84 east/north distances',
+   outsideCoverage:'Exact Gate1A terrain path; no invented elevation',gpuBytes:bytes.byteLength};
+ }
+ heightTexture.internalFormat='R32F';heightTexture.flipY=false;heightTexture.generateMipmaps=false;
+ heightTexture.minFilter=heightTexture.magFilter=THREE.NearestFilter;heightTexture.needsUpdate=true;ownedTextures.push(heightTexture);
  const uniforms={terrain:{value:regional},globalTerrain:{value:global},topo:{value:topo},regionID:{value:idTarget.texture},coverage:{value:covTarget.texture},roles:{value:lut},
+  demHeight:{value:heightTexture},demFirstSample:{value:new THREE.Vector2(...(heightSource?.firstSample??[0,0]))},demSpacing:{value:new THREE.Vector2(...(heightSource?.pixelSpacing??[1,1]))},
+  demDimensions:{value:new THREE.Vector2(...(heightSource?.dimensions??[1,1]))},canonicalPixelDegrees:{value:new THREE.Vector2((b[2]-b[0])/1080,(b[3]-b[1])/1920)},
+  demEnabled:{value:heightSource?1:0},demCorrectedLight:{value:0},demExaggeration:{value:1},demBakedSuppression:{value:0},
+  shadingStage:{value:0},
   bounds:{value:new THREE.Vector4(...b)},tileBounds:{value:new THREE.Vector4(...plan.assets.terrain.bounds)},
   primaryHue:{value:new THREE.Vector3(...theme.primary)},secondaryHue:{value:new THREE.Vector3(...theme.secondary)},
-  primaryStrength:{value:theme.primaryStrength},secondaryStrength:{value:theme.secondaryStrength},secondaryLuminance:{value:theme.secondaryLuminance??1},detailContrast:{value:theme.detailContrast??1},reliefStrength:{value:theme.relief},exposure:{value:theme.exposure},mode:{value:0}};
+  primaryStrength:{value:theme.primaryStrength},secondaryStrength:{value:theme.secondaryStrength},secondaryLuminance:{value:theme.secondaryLuminance??1},detailContrast:{value:theme.detailContrast??1},reliefStrength:{value:theme.relief},exposure:{value:theme.exposure},mode:{value:0},terrainTreatment:{value:terrainTreatment==='CURRENT'?0:1}};
  const terrainMaterial=mat(fullscreenVertex,terrainFragment,uniforms),terrainScene=fullScene(terrainMaterial);
  const primaryGeometry=ribbon(primaryRings),secondaryGeometry=ribbon(secondaryRings),boundaryScene=new THREE.Scene(),glowScene=new THREE.Scene();
  function line(scene,g,pixels,color){const material=mat(ribbonVertex,rgbaFragment,{resolution:{value:new THREE.Vector2(width,height)},width:{value:pixels*scale},color:{value:new THREE.Vector4(...color)}},true);scene.add(new THREE.Mesh(g,material));}
@@ -248,11 +387,22 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   unmaskedRenderer:debugExt?gl.getParameter(debugExt.UNMASKED_RENDERER_WEBGL):null,
   maxTextureSize:renderer.capabilities.maxTextureSize,anisotropy,coverageSamples:covTarget.samples,
   projection:'Regional equirectangular, standard parallel at framing center',bounds:b,
-  geometry:geometryEvidence,layout,sourceRelief:'NE1 BAKED HILLSHADE + original 2K RELIEF PROXY; no new DEM',
+  geometry:geometryEvidence,layout,terrainTreatment,heightSource:heightEvidence,sourceRelief:heightSource?'Copernicus GLO-30 real DSM height inside admitted footprint only; NE1 baked hillshade + Gate1A outside':terrainTreatment==='CURRENT'?'NE1 BAKED HILLSHADE + original 2K RELIEF PROXY; no new DEM':'NE1 BAKED HILLSHADE; source luminance curve, single baked illumination; no DEM or invented height; global proxy outside regional tile only',
   graph:['GPU region ID (NEAREST, no MSAA)','GPU role/land AA coverage (separate MSAA target)','terrain RGB linear decode -> region material -> relief/light -> sea -> output transfer',
    'primary ribbon glow target -> separable blur','GPU base + glow composite','GPU screen-space boundary core/edge','GPU marker','GPU glyph texture quads'],
   canvasUse:'glyph atlas preparation ONLY; no final-frame Canvas 2D compositing',finalApproval:'USER_PENDING',nvidia:'NOT_RUN'};
- function render({mode=0,graphics=true,boundaries=true,glow=true}={}){
+ function render({mode=0,graphics=true,boundaries=true,glow=true,dem=!!heightSource,correctedLight=false,verticalExaggeration=1,bakedSuppression=0,shadingCorrection='BASELINE'}={}){
+  if(dem&&!heightSource)throw Error('No admitted DEM source');
+  if(!Number.isFinite(verticalExaggeration)||verticalExaggeration<1||verticalExaggeration>3||!Number.isFinite(bakedSuppression)||bakedSuppression<0||bakedSuppression>1)throw Error('Invalid DEM relief parameters');
+  uniforms.demEnabled.value=dem?1:0;uniforms.demCorrectedLight.value=correctedLight?1:0;
+  uniforms.demExaggeration.value=verticalExaggeration;uniforms.demBakedSuppression.value=bakedSuppression;
+  const shadingStages={BASELINE:0,LIGHTING:1,MATERIAL:2,OUTPUT:3};
+  if(!Object.hasOwn(shadingStages,shadingCorrection))throw Error('Unknown terrain shading correction stage');
+  const stage=shadingStages[shadingCorrection];uniforms.shadingStage.value=stage;
+  evidence.shadingParameters={stage:shadingCorrection,lightingCorrection:stage>=1,materialCorrection:stage>=2,outputCorrection:stage>=3,
+   materialLuminanceGamma:theme.detailContrast,materialLuminanceAnchor:.26,sourceChromaResidual:.45,rolePaletteReferenceY:1.15,outputLuminanceShoulder:.50,outputGamutCeiling:.98,
+   lighting:'Existing normalized ambient/diffuse, positive DEM slope cap removed only for corrected stages',lightingProbeEncoding:stage>0?'light / 2':'light'};
+  evidence.demParameters={enabled:dem,verticalExaggeration,correctedLight,bakedSuppression};
   console.info(`GATE1: frame start mode=${mode} graphics=${graphics}`);
   const start=performance.now();uniforms.mode.value=mode;draw(terrainScene,fsCamera,baseTarget);
   draw(glowScene,camera,glowTarget);blur.uniforms.inputTexture.value=glowTarget.texture;blur.uniforms.direction.value.set(theme.glowRadius*scale/width,0);draw(blurScene,fsCamera,blurTarget);

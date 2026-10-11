@@ -19,6 +19,11 @@ import bootstrap
 import server
 
 
+def frozen_service(state):
+    bundle = Path(os.environ.get('STATIC_PROOF_TEST_BUNDLE', '/tmp/terrain-shading-static-release-context/bundle'))
+    return server.ProofService(bundle, state, 'release-test-owner-code')
+
+
 class Bootstrap(unittest.TestCase):
     def test_home_xdg_actual_account_ownership(self):
         with tempfile.TemporaryDirectory() as root:
@@ -97,8 +102,7 @@ class Bootstrap(unittest.TestCase):
 
     def test_backend_attempts_independent_and_runtime_inventory(self):
         with tempfile.TemporaryDirectory() as root:
-            service = object.__new__(server.ProofService)
-            service.bundle = Path(root)
+            service = frozen_service(root)
             output = Path(root, 'output'); output.mkdir()
             def child(mode, path, env, emit):
                 profile = env['WORLD_ENGINE_GPU_PROFILE']
@@ -126,7 +130,7 @@ class Bootstrap(unittest.TestCase):
 
     def test_runtime_preparation_error_saved_for_both_backends(self):
         with tempfile.TemporaryDirectory() as root:
-            service = object.__new__(server.ProofService); service.bundle = Path(root)
+            service = frozen_service(root)
             with patch('graphics_runtime.prepare_graphics_runtime', side_effect=ValueError('GPU_GRAPHICS_RUNTIME_PATH_UNWRITABLE')), patch.dict(os.environ, {'WORLD_ENGINE_GPU_PROFILE': 'vulkan'}):
                 ok, value = service.run_worker('probe', Path(root), lambda _: None)
             self.assertFalse(ok)
@@ -134,10 +138,23 @@ class Bootstrap(unittest.TestCase):
                 self.assertEqual(attempt['failed_stage'], 'GRAPHICS_RUNTIME')
                 self.assertIn('GPU_GRAPHICS_RUNTIME_PATH_UNWRITABLE', attempt['error']['message'])
                 self.assertEqual(attempt['worker_process']['result'], 'NOT_RUN')
+            # Immutable scene/data identity is knowable even when graphics
+            # preparation prevents Chromium from launching at all.
+            for record in [value, *value['attempts'].values()]:
+                self.assertEqual(record['renderer_source_hash'], 'e0108a8bf3cb3828529b9077925b9429455dbccd2c695f797f2578ac904b067d')
+                self.assertEqual(record['software_d_final_hash'], '29323353b1e76af7dfbc54407a9cdbdbb559fbfefe9ffac08d70f65f54e98a8d')
+                self.assertEqual(record['dem_hash'], '08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8')
+                self.assertEqual(len(record['dem_source_hashes']), 4)
+                self.assertEqual(record['scene_hash'], service.manifest['source_identity']['sceneHash'])
+                self.assertEqual(record['shader_version'], service.manifest['shader_version'])
+                self.assertEqual(record['theme_version'], service.manifest['theme_version'])
+                self.assertEqual(record['render_parameters']['shadingCorrection'], 'OUTPUT')
+                self.assertEqual(record['render_parameters']['verticalExaggeration'], 2)
+                self.assertEqual(record['gl_error'], 'NOT_RUN')
 
     def test_backend_failure_then_success_preserves_first_failure(self):
         with tempfile.TemporaryDirectory() as root:
-            service = object.__new__(server.ProofService); service.bundle = Path(root)
+            service = frozen_service(root)
             def child(mode, path, env, emit):
                 passed = env['WORLD_ENGINE_GPU_PROFILE'] == 'egl'
                 (path / 'diagnostic.json').write_text(json.dumps({'error_code': None if passed else 'CHROMIUM_LAUNCH_FAILED',

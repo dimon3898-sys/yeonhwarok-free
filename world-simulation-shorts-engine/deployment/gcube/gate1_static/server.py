@@ -21,6 +21,11 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(1, str(HERE.parent))
 from bootstrap import environment_evidence, prepare_user_environment, redact, worker_environment, LIMIT
 
+TERRAIN_SHADING_PURPOSE = 'GATE1_TERRAIN_SHADING_STATIC_PROOF'
+FROZEN_D_PARAMETERS = {'dem': True, 'correctedLight': True, 'verticalExaggeration': 2,
+                       'bakedSuppression': .1, 'shadingCorrection': 'OUTPUT'}
+PROBE_VALID_SECONDS = 900
+
 
 def verify_bundle(bundle):
     manifest = json.loads((bundle / 'manifest.json').read_text())
@@ -36,6 +41,17 @@ def verify_bundle(bundle):
         raise ValueError('RENDERER_SOURCE_CHANGED')
     if plan['gate'] != 1 or plan['kind'] != 'STATIC_ONLY':
         raise ValueError('STATIC_SCENE_REQUIRED')
+    if manifest.get('purpose') == TERRAIN_SHADING_PURPOSE:
+        parameters = json.loads((bundle / 'render-parameters.json').read_text())
+        height = json.loads((bundle / 'height-source.json').read_text())
+        if parameters != FROZEN_D_PARAMETERS:
+            raise ValueError('FROZEN_D_PARAMETERS_REQUIRED')
+        if height['CRS'] != 'EPSG:4326' or height['unit'] != 'm' or height['scale'] != 1 or height['offset'] != 0 or height['NoData'] is not None:
+            raise ValueError('ADMITTED_HEIGHT_SOURCE_REQUIRED')
+        routes = {row['url']: row['file'] for row in manifest['routes']}
+        row = next((row for row in manifest['files'] if row['file'] == routes.get(height['url'])), None)
+        if not row or row['sha256'] != height['sha256'] or row['bytes'] != height['byteLength'] or row['bytes'] != height['dimensions'][0] * height['dimensions'][1] * 4:
+            raise ValueError('DEM_SOURCE_INTEGRITY_FAILED')
     return manifest
 
 
@@ -43,6 +59,14 @@ class ProofService:
     def __init__(self, bundle, state, password, worker=None):
         self.bundle, self.state = Path(bundle), Path(state)
         self.manifest = verify_bundle(self.bundle)
+        plan_bytes = (self.bundle / 'compiled-plan.json').read_bytes()
+        self.plan = json.loads(plan_bytes)
+        self.compiled_plan_hash = hashlib.sha256(plan_bytes).hexdigest()
+        height_file = self.bundle / 'height-source.json'
+        parameter_file = self.bundle / 'render-parameters.json'
+        self.height_source = json.loads(height_file.read_text()) if height_file.is_file() else None
+        self.render_parameters = json.loads(parameter_file.read_text()) if parameter_file.is_file() else {}
+        self.render_parameters_hash = hashlib.sha256(parameter_file.read_bytes()).hexdigest() if parameter_file.is_file() else None
         self.password = password.encode()
         self.state.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.worker = worker or self.run_worker
@@ -51,6 +75,42 @@ class ProofService:
         self.lock = threading.Lock()
         self.busy = False
         self.login_failures = {}
+        self.png_filename = 'SUEZ_TERRAIN_SHADING_RTX4080S.png' if self.manifest.get('purpose') == TERRAIN_SHADING_PURPOSE else 'SUEZ_STATIC_PROOF_RTX4080S.png'
+
+    def source_diagnostic(self, backend=None):
+        provenance = self.plan['provenance']
+        height = self.height_source or {}
+        return {'schema_version': 2, 'purpose': self.manifest.get('purpose', 'GATE1_STATIC_PROOF'),
+                'renderer_source_hash': provenance['shaderHash'], 'renderer_version': provenance['rendererVersion'],
+                'scene_hash': provenance['sceneHash'], 'data_hash': provenance['dataHash'], 'gis_hash': provenance['gisHash'],
+                'compiled_plan_hash': self.compiled_plan_hash, 'shader_version': self.manifest['shader_version'],
+                'theme_version': self.manifest['theme_version'], 'theme_hash': provenance['themeHash'],
+                'font_version': self.plan['assets']['font']['version'], 'font_hash': provenance['fontHash'], 'seed': self.plan['seed'],
+                'dem_hash': height.get('sha256'), 'dem_coverage': height.get('footprint'),
+                'dem_source_hashes': [{'file': Path(row['file']).name, 'sha256': row['sha256']} for row in height.get('originals', [])],
+                'render_parameters': self.render_parameters, 'render_parameters_hash': self.render_parameters_hash,
+                'software_d_final_hash': self.manifest['source_identity'].get('softwareProofHash') if self.manifest.get('purpose') == TERRAIN_SHADING_PURPOSE else None,
+                'selected_gpu_backend': backend or os.environ.get('WORLD_ENGINE_GPU_PROFILE', 'vulkan'),
+                'output_resolution': [1080, 1920], 'format': 'lossless PNG', 'frame_count': 0,
+                'gpu_renderer': 'UNKNOWN', 'webgl_version': 'NOT_RUN', 'gl_error': 'NOT_RUN',
+                'render_timestamp': 'NOT_RUN', 'render_duration_ms': 'UNKNOWN', 'peak_memory': 'UNKNOWN',
+                'runtime_profile': 'GPU_REQUIRED_RTX4080S', 'gpu_visual_quality': 'NOT_RUN', 'final_approval': 'USER_PENDING'}
+
+    def probe_ready(self, session):
+        job = self.jobs.get(session.get('probe_job'))
+        if not job or job['mode'] != 'probe' or job['status'] != 'PASS' or job.get('owner') != session.get('id'):
+            return False
+        if time.time() - job.get('finished', 0) > PROBE_VALID_SECONDS:
+            return False
+        diagnostic = job.get('diagnostic', {})
+        capability = diagnostic.get('capability', {})
+        renderer = str(diagnostic.get('gpu_renderer', ''))
+        import re
+        return (diagnostic.get('capability_result', {}).get('result') == 'PASS'
+                and capability.get('webgl2') is True and capability.get('actualPixelDraw') is True
+                and capability.get('gl_error') == 0 and re.search('NVIDIA', renderer, re.I) is not None
+                and re.search(r'RTX\s*4080\s*(SUPER|S\b)', renderer, re.I) is not None
+                and re.search('SwiftShader|llvmpipe|softpipe|software|lavapipe', renderer, re.I) is None)
 
     def run_worker(self, mode, output, emit):
         if mode not in {'probe', 'proof'}:
@@ -87,7 +147,7 @@ class ProofService:
             env['GATE1_ATTEMPT_CONTEXT'] = str(context_file)
             emit({'stage': 'GPU_CAPABILITY_' + profile.upper(), 'result': 'IN_PROGRESS'})
             if runtime_error:
-                diagnostic = {**context, 'backend': profile, 'error_code': 'GRAPHICS_RUNTIME_PREPARATION_FAILED',
+                diagnostic = {**self.source_diagnostic(profile), **context, 'backend': profile, 'error_code': 'GRAPHICS_RUNTIME_PREPARATION_FAILED',
                               'failed_stage': 'GRAPHICS_RUNTIME', 'error': runtime_error,
                               'capability_result': {'result': 'FAIL'}, 'worker_process': {'result': 'NOT_RUN'},
                               'stages': [{'name': name, 'result': 'PASS' if name in {'START', 'ENVIRONMENT'} else 'FAIL' if name in {'GRAPHICS_RUNTIME', 'RESULT'} else 'NOT_RUN'}
@@ -97,14 +157,14 @@ class ProofService:
                 emit({'stage': 'GRAPHICS_RUNTIME_PREPARATION_FAILED', 'result': 'FAIL'})
                 continue
             process = self.child('probe', attempt_output, env, emit)
-            diagnostic = self.read_attempt(attempt_output, profile, context, process)
+            diagnostic = {**self.source_diagnostic(profile), **self.read_attempt(attempt_output, profile, context, process)}
             attempts[profile] = diagnostic
             code = process['exit_code']
             if code == 0 and diagnostic.get('capability_result', {}).get('result') == 'PASS':
                 selected = profile
                 break
         if selected is None:
-            return False, {'schema_version': 2, 'purpose': 'GATE1_STATIC_PROOF', 'attempts': attempts,
+            return False, {**diagnostic, 'schema_version': 2, 'purpose': self.manifest.get('purpose', 'GATE1_STATIC_PROOF'), 'attempts': attempts,
                            'error_code': diagnostic['error_code'], 'failed_stage': diagnostic.get('failed_stage'),
                            'capability_result': {'result': 'FAIL'}, 'peak_memory': 'UNKNOWN',
                            'gpu_visual_quality': 'NOT_RUN'}
@@ -114,8 +174,8 @@ class ProofService:
         env['WORLD_ENGINE_GPU_PROFILE'] = selected
         emit({'stage': 'ONE_FRAME_' + selected.upper(), 'result': 'IN_PROGRESS'})
         process = self.child('proof', output, env, emit)
-        diagnostic = {**self.read_attempt(output, selected, context, process), 'attempts': attempts}
-        png = output / 'SUEZ_STATIC_PROOF_RTX4080S.png'
+        diagnostic = {**self.source_diagnostic(selected), **self.read_attempt(output, selected, context, process), 'attempts': attempts}
+        png = output / self.png_filename
         ok = process['exit_code'] == 0 and diagnostic.get('capability_result', {}).get('result') == 'PASS' and diagnostic.get('frame_count') == 1 and png.is_file()
         return ok, diagnostic
 
@@ -195,13 +255,13 @@ class ProofService:
             reader.join(timeout=3)
             process.stderr.close()
 
-    def start_job(self, mode):
+    def start_job(self, mode, owner=None):
         with self.lock:
             if self.busy:
                 return None
             self.busy = True
             job_id = secrets.token_hex(16)
-            job = {'id': job_id, 'mode': mode, 'status': 'RUNNING', 'started': time.time(), 'events': []}
+            job = {'id': job_id, 'owner': owner, 'mode': mode, 'status': 'RUNNING', 'started': time.time(), 'events': []}
             self.jobs[job_id] = job
         output = self.state / job_id
         output.mkdir(mode=0o700)
@@ -223,13 +283,15 @@ class ProofService:
                     job['diagnostic'] = diagnostic
                     job['status'] = 'PASS' if ok else 'FAIL'
             except Exception as error:
-                diagnostic = {'error_code': 'STATIC_PROOF_WORKER_FAILED', 'failed_stage': 'SERVER_BOOTSTRAP',
+                diagnostic = {**self.source_diagnostic(), 'error_code': 'STATIC_PROOF_WORKER_FAILED', 'failed_stage': 'SERVER_BOOTSTRAP',
                               'error': {'name': type(error).__name__, 'message': redact(error), 'stack': redact(traceback.format_exc())},
                               'capability_result': {'result': 'FAIL'}, 'peak_memory': 'UNKNOWN'}
                 (output / 'diagnostic.json').write_text(json.dumps(diagnostic))
                 with self.lock:
                     job.update(status='FAIL', diagnostic=diagnostic)
             finally:
+                with self.lock:
+                    job['finished'] = time.time()
                 emit({'stage': 'FINISHED', 'result': job['status']})
                 with self.lock:
                     self.busy = False
@@ -279,26 +341,31 @@ def make_handler(service):
                 self.reply(401, {'error': 'LOGIN_REQUIRED'})
                 return
             if path == '/api/session':
-                self.reply(200, {'authenticated': True, 'csrf': session['csrf'], 'source': service.manifest['source_identity']})
+                self.reply(200, {'authenticated': True, 'csrf': session['csrf'], 'source': service.manifest['source_identity'],
+                                 'gpu_probe_ready': service.probe_ready(session), 'probe_job': session.get('probe_job'),
+                                 'purpose': service.manifest.get('purpose', 'GATE1_STATIC_PROOF'), 'png_filename': service.png_filename})
                 return
             if path.startswith('/api/jobs/'):
                 job_id = path.removeprefix('/api/jobs/')
                 with service.lock:
                     job = service.jobs.get(job_id)
-                    public = json.loads(json.dumps(job)) if job else None
+                    public = json.loads(json.dumps({key: value for key, value in job.items() if key != 'owner'})) if job and job.get('owner') == session['id'] else None
                 self.reply(200 if public else 404, public or {'error': 'JOB_NOT_FOUND'})
                 return
             parts = path.strip('/').split('/')
             if len(parts) == 3 and parts[0] == 'download' and parts[2] in {'png', 'diagnostic'}:
                 job = service.jobs.get(parts[1])
-                if not job or job['status'] == 'RUNNING':
+                if not job or job.get('owner') != session['id']:
+                    self.reply(404, {'error': 'JOB_NOT_FOUND'})
+                    return
+                if job['status'] == 'RUNNING':
                     self.reply(409, {'error': 'OUTPUT_NOT_READY'})
                     return
                 if parts[2] == 'png' and (job['status'] != 'PASS' or job['mode'] != 'proof'):
                     self.reply(409, {'error': 'GPU_PROOF_NOT_PASSED'})
                     return
-                filename = 'SUEZ_STATIC_PROOF_RTX4080S.png' if parts[2] == 'png' else 'SUEZ_STATIC_PROOF_RTX4080S.diagnostic.json'
-                file = service.state / job['id'] / ('SUEZ_STATIC_PROOF_RTX4080S.png' if parts[2] == 'png' else 'diagnostic.json')
+                filename = service.png_filename if parts[2] == 'png' else service.png_filename.removesuffix('.png') + '.diagnostic.json'
+                file = service.state / job['id'] / (service.png_filename if parts[2] == 'png' else 'diagnostic.json')
                 if not file.is_file():
                     self.reply(404, {'error': 'OUTPUT_MISSING'})
                     return
@@ -332,7 +399,7 @@ def make_handler(service):
                     self.reply(403, {'error': 'LOGIN_FAILED'})
                     return
                 token, csrf = secrets.token_urlsafe(32), secrets.token_urlsafe(24)
-                service.sessions[token] = {'csrf': csrf, 'expires': time.time() + 43200}
+                service.sessions[token] = {'id': token, 'csrf': csrf, 'expires': time.time() + 43200}
                 secure = '; Secure' if self.headers.get('X-Forwarded-Proto') == 'https' else ''
                 self.reply(200, {'authenticated': True, 'csrf': csrf}, headers={'Set-Cookie': f'proof_session={token}; HttpOnly; SameSite=Strict; Path=/{secure}'})
                 return
@@ -346,7 +413,12 @@ def make_handler(service):
             if path not in {'/api/check-gpu', '/api/generate'} or body:
                 self.reply(400, {'error': 'FIXED_STATIC_SCENE_ONLY'})
                 return
-            job_id = service.start_job('probe' if path == '/api/check-gpu' else 'proof')
+            if path == '/api/generate' and not service.probe_ready(session):
+                self.reply(403, {'error': 'GPU_PROBE_REQUIRED'})
+                return
+            job_id = service.start_job('probe' if path == '/api/check-gpu' else 'proof', session['id'])
+            if job_id and path == '/api/check-gpu':
+                session['probe_job'] = job_id
             self.reply(202 if job_id else 409, {'job': job_id} if job_id else {'error': 'PROOF_ALREADY_RUNNING'})
 
     return Handler

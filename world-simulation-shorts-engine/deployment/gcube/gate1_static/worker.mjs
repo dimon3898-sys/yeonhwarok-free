@@ -22,6 +22,12 @@ const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const manifest = JSON.parse(fs.readFileSync(path.join(bundle, 'manifest.json')));
 const planBytes = fs.readFileSync(path.join(bundle, 'compiled-plan.json'));
 const plan = JSON.parse(planBytes);
+const optionalJSON = filename => fs.existsSync(path.join(bundle, filename)) ? JSON.parse(fs.readFileSync(path.join(bundle, filename))) : null;
+const heightSource = optionalJSON('height-source.json');
+const renderParameters = optionalJSON('render-parameters.json') || {};
+const terrainShading = manifest.purpose === 'GATE1_TERRAIN_SHADING_STATIC_PROOF';
+const pngFilename = terrainShading ? 'SUEZ_TERRAIN_SHADING_RTX4080S.png' : 'SUEZ_STATIC_PROOF_RTX4080S.png';
+if (terrainShading && (!heightSource || renderParameters.dem !== true || renderParameters.correctedLight !== true || renderParameters.verticalExaggeration !== 2 || renderParameters.bakedSuppression !== .1 || renderParameters.shadingCorrection !== 'OUTPUT')) throw Error('FROZEN_D_PARAMETERS_REQUIRED');
 for (const row of manifest.files) {
   const bytes = fs.readFileSync(path.join(bundle, row.file));
   if (bytes.length !== row.bytes || sha(bytes) !== row.sha256) throw Error('FROZEN_SOURCE_INTEGRITY_FAILED');
@@ -35,9 +41,11 @@ const server = http.createServer((req, res) => {
   if (url === '/') { res.setHeader('Content-Type', 'text/html'); res.end('<!doctype html><canvas id="proof"></canvas>'); return; }
   if (url === '/favicon.ico') { res.writeHead(204); res.end(); return; }
   if (url === '/plan.json') { res.setHeader('Content-Type', 'application/json'); res.end(planBytes); return; }
+  if (url === '/height-source.json') { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(heightSource)); return; }
+  if (url === '/render-parameters.json') { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(renderParameters)); return; }
   const file = mappings.get(url);
   if (!file) { res.writeHead(404); res.end(); return; }
-  const mime = file.endsWith('.png') ? 'image/png' : file.endsWith('.jpg') ? 'image/jpeg' : file.endsWith('.otf') ? 'font/otf' : 'text/javascript';
+  const mime = file.endsWith('.png') ? 'image/png' : file.endsWith('.jpg') ? 'image/jpeg' : file.endsWith('.otf') ? 'font/otf' : file.endsWith('.f32') ? 'application/octet-stream' : file.endsWith('.json') ? 'application/json' : 'text/javascript';
   res.setHeader('Content-Type', mime);
   fs.createReadStream(path.join(bundle, file)).pipe(res);
 });
@@ -56,7 +64,13 @@ const context = process.env.GATE1_ATTEMPT_CONTEXT ? JSON.parse(fs.readFileSync(p
 const record = createDiagnostic(backend, context);
 let diagnostic = record.diagnostic;
 Object.assign(diagnostic, {renderer_source_hash: plan.provenance.shaderHash, renderer_version: plan.provenance.rendererVersion,
-  scene_hash: plan.provenance.sceneHash, data_hash: plan.provenance.dataHash, gis_hash: plan.provenance.gisHash});
+  scene_hash: plan.provenance.sceneHash, data_hash: plan.provenance.dataHash, gis_hash: plan.provenance.gisHash,
+  purpose: manifest.purpose || 'GATE1_STATIC_PROOF', compiled_plan_hash: sha(planBytes),
+  shader_version: manifest.shader_version, theme_version: manifest.theme_version, theme_hash: plan.provenance.themeHash,
+  output_resolution: [1080, 1920], selected_gpu_backend: backend, gl_error: 'NOT_RUN',
+  software_d_final_hash: terrainShading ? manifest.source_identity.softwareProofHash : null,
+  dem_hash: heightSource?.sha256 || null, dem_source_hashes: heightSource?.originals?.map(({file, sha256}) => ({file: path.basename(file), sha256})) || [],
+  dem_coverage: heightSource?.footprint || null, render_parameters: renderParameters});
 let currentStage = 'START';
 const enter = name => { currentStage = name; record.set(name, 'IN_PROGRESS'); progress(name); };
 record.set('START', 'PASS');
@@ -117,7 +131,7 @@ try {
   }));
   record.set('READPIXELS', capability.actualPixelDraw ? 'PASS' : 'FAIL', {pixel: capability.pixel, gl_error: capability.gl_error});
   const capabilityResult = admission(capability, {softwareTest});
-  diagnostic = {...diagnostic, schema_version: 2, purpose: 'GATE1_STATIC_PROOF', gpu_renderer: capability.renderer,
+  diagnostic = {...diagnostic, schema_version: 2, purpose: manifest.purpose || 'GATE1_STATIC_PROOF', gpu_renderer: capability.renderer,
     webgl_version: capability.webglVersion || 'UNKNOWN', output_resolution: [1080, 1920], format: 'lossless PNG',
     scene_hash: plan.provenance.sceneHash, gis_hash: plan.provenance.gisHash, data_hash: plan.provenance.dataHash,
     compiled_plan_hash: sha(planBytes), renderer_source_hash: plan.provenance.shaderHash,
@@ -127,6 +141,10 @@ try {
     render_timestamp: 'NOT_RUN', render_duration_ms: 'UNKNOWN', peak_memory: 'UNKNOWN', capability, capability_result: capabilityResult,
     runtime_profile: softwareTest ? 'SOFTWARE_TEST_ONLY' : 'GPU_REQUIRED_RTX4080S',
     selected_gpu_backend: process.env.WORLD_ENGINE_GPU_PROFILE || 'egl',
+    gl_error: capability.gl_error, software_d_final_hash: terrainShading ? manifest.source_identity.softwareProofHash : null,
+    dem_hash: heightSource?.sha256 || null, dem_source_hashes: heightSource?.originals?.map(({file, sha256}) => ({file: path.basename(file), sha256})) || [],
+    dem_coverage: heightSource?.footprint || null, render_parameters: renderParameters,
+    render_parameters_hash: fs.existsSync(path.join(bundle, 'render-parameters.json')) ? sha(fs.readFileSync(path.join(bundle, 'render-parameters.json'))) : null,
     final_approval: 'USER_PENDING', gpu_visual_quality: 'NOT_EVALUATED', frame_count: 0};
   if (capabilityResult.result === 'FAIL') {
     currentStage = ['GPU_IDENTITY_UNAVAILABLE', 'SOFTWARE_RENDERER_REJECTED', 'NVIDIA_RENDERER_REQUIRED', 'RTX4080S_REQUIRED'].includes(capabilityResult.failures[0]) ? 'GPU_IDENTITY' : 'READPIXELS';
@@ -140,18 +158,22 @@ try {
       const module = await import('/static/map_infographic_v1/renderer.mjs');
       if (module.createProofPreview !== module.createProofFinal) throw Error('RENDER_FACTORY_MISMATCH');
       const plan = await fetch('/plan.json').then(r => r.json());
-      const renderer = await module.createProofFinal({canvas: document.getElementById('proof'), plan, width: 1080, height: 1920});
-      try { const png = renderer.render(); return {png, evidence: renderer.evidence}; } finally { renderer.dispose(); }
+      const heightSource = await fetch('/height-source.json').then(r => r.json());
+      const renderParameters = await fetch('/render-parameters.json').then(r => r.json());
+      const renderer = await module.createProofFinal({canvas: document.getElementById('proof'), plan, width: 1080, height: 1920, heightSource});
+      try { const png = renderer.render(renderParameters); return {png, evidence: renderer.evidence}; } finally { renderer.dispose(); }
     });
     if (browserErrors.length) throw Error(browserErrors[0]);
     if (result.evidence.unmaskedRenderer !== capability.renderer) throw Error('RENDERER_IDENTITY_CHANGED');
+    if (result.evidence.glError !== 0) throw Error('GPU_FRAME_GL_ERROR');
+    if (terrainShading && (result.evidence.heightSource?.sha256 !== heightSource.sha256 || result.evidence.shadingParameters?.stage !== 'OUTPUT' || result.evidence.demParameters?.verticalExaggeration !== 2)) throw Error('FROZEN_D_RENDER_PATH_MISMATCH');
     const png = Buffer.from(result.png.split(',')[1], 'base64');
     if (!png.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])) || png.readUInt32BE(16) !== 1080 || png.readUInt32BE(20) !== 1920) throw Error('PNG_FORMAT_INVALID');
     Object.assign(diagnostic, {render_timestamp: timestamp, render_duration_ms: Date.now() - renderStart,
       renderer_frame_duration_ms: result.evidence.frameMilliseconds, png_sha256: sha(png), png_bytes: png.length,
-      frame_count: 1, same_renderer_factory: true, renderer_evidence: result.evidence});
+      frame_count: 1, same_renderer_factory: true, renderer_evidence: result.evidence, gl_error: result.evidence.glError});
     fs.mkdirSync(output, {recursive: true});
-    fs.writeFileSync(path.join(output, softwareTest ? 'SOFTWARE_TEST_ONLY.png' : 'SUEZ_STATIC_PROOF_RTX4080S.png'), png);
+    fs.writeFileSync(path.join(output, softwareTest ? 'SOFTWARE_TEST_ONLY.png' : pngFilename), png);
     progress('SINGLE_PNG', softwareTest ? 'SOFTWARE_TEST_ONLY' : 'PASS');
   }
   fs.mkdirSync(output, {recursive: true});

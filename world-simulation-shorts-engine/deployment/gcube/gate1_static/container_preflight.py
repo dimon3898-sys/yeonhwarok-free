@@ -16,6 +16,10 @@ name = 'gate1-static-preflight-' + secrets.token_hex(6)
 owner = secrets.token_urlsafe(24)
 started = time.monotonic()
 completed = 0
+RENDERER_SHA = 'e0108a8bf3cb3828529b9077925b9429455dbccd2c695f797f2578ac904b067d'
+SOFTWARE_D_SHA = '29323353b1e76af7dfbc54407a9cdbdbb559fbfefe9ffac08d70f65f54e98a8d'
+DEM_SHA = '08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8'
+PNG_NAME = 'SUEZ_TERRAIN_SHADING_RTX4080S.png'
 
 
 def report(stage, result='PASS'):
@@ -69,9 +73,44 @@ try:
     authenticated = {'Cookie': headers['Set-Cookie'].split(';')[0], 'X-Proof-CSRF': json.loads(body)['csrf']}
     report('CONTAINER_LOGIN')
     code, _, body = request('GET', '/api/session', headers=authenticated)
-    identity = json.loads(body)['source']
-    assert code == 200 and identity['shaderHash'] == '17d843163cf6648d8f6cc3199240c2962f69398c39f673354e5e7e802ad17d38'
+    session = json.loads(body)
+    identity = session['source']
+    assert code == 200 and identity['shaderHash'] == RENDERER_SHA
+    assert identity['softwareProofHash'] == SOFTWARE_D_SHA
+    assert identity['softwareDFinalHash'] == SOFTWARE_D_SHA
+    assert identity['heightSourceHash'] == DEM_SHA
+    assert len(identity['demSourceHashes']) == 4
+    assert session['png_filename'] == PNG_NAME
+    assert session['purpose'] == 'GATE1_TERRAIN_SHADING_STATIC_PROOF'
+    assert not session['gpu_probe_ready']
     report('CONTAINER_FROZEN_IDENTITY')
+    # Container startup already hashes every admitted asset. Re-read the
+    # packaged contracts and renderer bytes here, independent of UI labels.
+    source_check = '''import hashlib,json,os
+from pathlib import Path
+p=Path(os.environ['STATIC_PROOF_BUNDLE']);m=json.loads((p/'manifest.json').read_text())
+h=json.loads((p/'height-source.json').read_text());r=json.loads((p/'render-parameters.json').read_text())
+assert hashlib.sha256((p/'renderer.mjs').read_bytes()).hexdigest()==%r
+assert h['sha256']==%r and h['byteLength']==207360000 and h['dimensions']==[7200,7200]
+assert h['CRS']=='EPSG:4326' and h['scale']==1 and h['offset']==0 and h['NoData'] is None
+assert h['format']=='little-endian IEEE754 Float32 / GPU R32F'
+assert len(h['originals'])==4
+assert m['source_identity']['demSourceHashes']==[v['sha256'] for v in h['originals']]
+assert r=={'dem':True,'correctedLight':True,'verticalExaggeration':2,'bakedSuppression':0.1,'shadingCorrection':'OUTPUT'}
+route=next(v for v in m['routes'] if v['url']==h['url']);a=p/route['file']
+assert a.stat().st_size==h['byteLength']
+d=hashlib.sha256()
+with a.open('rb') as f:
+ for block in iter(lambda:f.read(1048576),b''): d.update(block)
+assert d.hexdigest()==h['sha256']
+print(json.dumps({'renderer_source_hash':%r,'dem_hash':d.hexdigest(),'render_parameters':r,'dem_original_hashes':[v['sha256'] for v in h['originals']]}))
+''' % (RENDERER_SHA, DEM_SHA, RENDERER_SHA)
+    source_result = command(['docker', 'exec', name, 'python', '-c', source_check], timeout=30)
+    (evidence / 'container-source-preservation.json').write_text(source_result)
+    report('CONTAINER_DEM_D_PARAMETERS_SOURCE_HASH_PRESERVED')
+    code, _, body = request('POST', '/api/generate', {}, authenticated)
+    assert code == 403 and json.loads(body)['error'] == 'GPU_PROBE_REQUIRED'
+    report('CONTAINER_GENERATION_REQUIRES_SUCCESSFUL_GPU_CHECK')
     assert request('POST', '/api/generate', {'mode': 'cpu'}, authenticated)[0] == 400
     report('CONTAINER_CPU_REQUEST_REJECTED')
     code, _, body = request('GET', '/')
@@ -97,8 +136,22 @@ try:
     code, headers, body = request('GET', '/download/' + job + '/diagnostic', headers=authenticated)
     assert code == 200 and 'attachment;' in headers['Content-Disposition']
     diagnostic = json.loads(body)
+    assert headers['Content-Disposition'] == 'attachment; filename="SUEZ_TERRAIN_SHADING_RTX4080S.diagnostic.json"'
     assert diagnostic['capability_result']['result'] == 'FAIL'
     assert set(diagnostic['attempts']) == {'vulkan', 'egl'}
+    for record in [diagnostic, *diagnostic['attempts'].values()]:
+        assert record['renderer_source_hash'] == RENDERER_SHA
+        assert record['software_d_final_hash'] == SOFTWARE_D_SHA
+        assert record['dem_hash'] == DEM_SHA
+        assert len(record['dem_source_hashes']) == 4
+        assert [row['sha256'] for row in record['dem_source_hashes']] == identity['demSourceHashes']
+        assert record['scene_hash'] == identity['sceneHash']
+        assert record['shader_version'] == identity['shaderVersion']
+        assert record['theme_version'] == identity['themeVersion']
+        assert record['render_parameters'] == {'dem': True, 'correctedLight': True, 'verticalExaggeration': 2,
+                                               'bakedSuppression': 0.1, 'shadingCorrection': 'OUTPUT'}
+        assert record['output_resolution'] == [1080, 1920]
+        assert record['gl_error'] == 'NOT_RUN' or isinstance(record['gl_error'], int)
     for backend, attempt in diagnostic['attempts'].items():
         assert attempt['backend'] == backend
         assert attempt['error_code'] != 'STATIC_PROOF_FAILED'
@@ -118,6 +171,10 @@ try:
     report('CONTAINER_BACKEND_DIAGNOSTICS_AND_BOOTSTRAP_ENVIRONMENT')
     (evidence / 'container-no-gpu.diagnostic.json').write_bytes(body)
     report('CONTAINER_FAILURE_DIAGNOSTIC_DOWNLOAD')
+    code, _, body = request('POST', '/api/generate', {}, authenticated)
+    assert code == 403 and json.loads(body)['error'] == 'GPU_PROBE_REQUIRED'
+    assert not json.loads(request('GET', '/api/session', headers=authenticated)[2])['gpu_probe_ready']
+    report('CONTAINER_FAILED_GPU_CHECK_CANNOT_GENERATE')
     time.sleep(2)
     assert json.loads(request('GET', '/healthz')[2])['ok']
     report('CONTAINER_HEALTH_AFTER_FAILURE')

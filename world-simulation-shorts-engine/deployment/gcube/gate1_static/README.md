@@ -1,6 +1,8 @@
-# Gate 1 RTX4080S Static Proof release
+# Gate 1 Terrain Shading RTX4080S Static Proof release
 
-This service packages the original iteration-05 compiled plan and renderer bytes.
+The terrain release packages the Software iteration-03 D-final compiled plan and
+renderer bytes, including the admitted GLO-30 originals and native Float32 atlas.
+The original Gate 1 frozen bundle remains preserved for legacy reproduction.
 It does not tune the visual pipeline. `createProofFinal` is the original factory;
 all shader, material, coverage, relief, boundary, glow, marker and glyph passes
 remain in the frozen module. Runtime hardware admission lives outside it.
@@ -9,7 +11,7 @@ The UI is served by this container, and Chromium runs on the gCube server. A pho
 downloads the server-generated PNG; its local browser GPU is not substituted for
 RTX4080S. `CHECK GPU / WEBGL2` checks identity, capabilities and an actual pixel
 clear/readback. `GENERATE STATIC PROOF` rechecks admission, then draws exactly one
-proof frame. Vulkan admission may fall back to the preserved GL-EGL hardware
+  proof frame. Vulkan admission may fall back to the preserved GL-EGL hardware
 profile. SwiftShader, software adapters, wrong GPU and insufficient capabilities
 fail explicitly. There is no CPU-success fallback in public UI/API.
 
@@ -23,8 +25,10 @@ fail explicitly. There is no CPU-success fallback in public UI/API.
 - `WORLD_ENGINE_RENDER_MODE=gpu-required`; CPU mode is refused at boot.
 - Use the provider HTTPS URL. Open it and log in with the owner code.
 - Click `CHECK GPU / WEBGL2`, confirm the server renderer is NVIDIA RTX4080 SUPER.
-- Click `GENERATE STATIC PROOF`. Download `SUEZ_STATIC_PROOF_RTX4080S.png`
-  and `SUEZ_STATIC_PROOF_RTX4080S.diagnostic.json` before stopping the workload.
+- After the check passes, click `GENERATE STATIC PROOF`. Download
+  `SUEZ_TERRAIN_SHADING_RTX4080S.png` and its diagnostic JSON before stopping the
+  workload. A successful check is session-specific and valid for 15 minutes;
+  generation independently rechecks the hardware.
 - User visual approval is still required. No next Gate is invoked.
 
 ## Paths
@@ -39,6 +43,24 @@ required filename, only after GPU admission and one-frame success.
 
 No public request can change scene, renderer, dimensions, seed, theme or mode.
 No FFmpeg/video/TTS/audio/Production modules are imported.
+
+## Frozen Software D-final
+
+Renderer SHA-256: `e0108a8bf3cb3828529b9077925b9429455dbccd2c695f797f2578ac904b067d`.
+Software D PNG SHA-256: `29323353b1e76af7dfbc54407a9cdbdbb559fbfefe9ffac08d70f65f54e98a8d`.
+Shader version: `explicit-glsl-1-terrain-shading-correction`.
+Theme version: `terrain-material-1`.
+The factory receives the same native 7200×7200 R32F elevation atlas, geographic
+descriptor and render options as D-final: DEM enabled, 2× exaggeration, corrected
+light, baked suppression 0.1 and OUTPUT shading correction. Coverage remains
+approximately 32–34°E / 29–31°N; outside it, the existing terrain path is retained.
+Four original TIFF hashes, height hash, scene hash and renderer hash are present
+in the release manifest and downloadable diagnostic. Immutable transport parts
+are concatenated without DEM conversion during packaging.
+The image uses the previously published bootstrap image pinned by digest.
+Bootstrap, browser wrapper, capability admission and diagnostics retain their
+existing behavior. Software validation is explicitly labeled SOFTWARE_TEST_ONLY.
+It cannot establish NVIDIA success or visual approval.
 
 Each Chromium worker has launch/navigation deadlines, a 150-second hard deadline,
 10-second progress heartbeat and a server watchdog at 180 seconds that reaps only
