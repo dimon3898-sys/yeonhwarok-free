@@ -7,6 +7,7 @@ JSON declarations never replace actual committed files, hashes and evidence.
 import argparse
 import datetime as dt
 import hashlib
+from functools import lru_cache
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -81,74 +82,49 @@ def records(repo, command):
     return output
 
 
-def js_tokens(source):
-    # Tokenize without executing; quoted strings/comments are not code.
-    token = re.compile(r"\s+|//[^\n]*|/\*[\s\S]*?\*/|(['\"])(?:\\.|(?!\1)[^\\])*?\1|`(?:\\.|[^`\\])*`|[A-Za-z_$][\w$]*|.", re.S)
-    tokens = [match.group() for match in token.finditer(source)
-              if not match.group().isspace() and not match.group().startswith(('//', '/*'))]
-    if any(item in ("'", '"', '`') for item in tokens):
-        raise ValueError('UNTERMINATED_JS_LITERAL')
-    return tokens
+@lru_cache(maxsize=256)
+def ast_source(source, parser_root=None):
+    """Parse source with installed pinned Playwright Babel; never execute source.
+
+    The previous approximate tokenizer misread valid regular expressions in the
+    rebuilt glyph module. Babel owns literal/comment and module syntax parsing.
+    """
+    from v4_recovery_gate import AST_PROGRAM
+    repo = Path(parser_root) if parser_root is not None else Path(__file__).absolute().parent.parent
+    parser = repo / 'cinematic-world-map/node_modules/playwright/lib/transform/babelBundle.js'
+    if not parser.is_file():
+        raise ValueError('BABEL_AST_PARSER_UNAVAILABLE')
+    package = json.loads((repo / 'cinematic-world-map/node_modules/playwright/package.json').read_text())
+    lock = json.loads((repo / 'cinematic-world-map/package-lock.json').read_text())
+    if package.get('version') != '1.62.1' or lock.get('packages', {}).get('node_modules/playwright', {}).get('version') != '1.62.1':
+        raise ValueError('BABEL_AST_PARSER_VERSION_DIFFERS')
+    if digest(parser) != '01511e45db7646e2a12890de8d7866caa0754c8799db6407a6345236f4bed0c4':
+        raise ValueError('BABEL_AST_PARSER_HASH_DIFFERS')
+    request = {'parser': str(parser), 'files': [{'path': 'gate-source.mjs',
+               'absolute': str(repo / 'gate-source.mjs'), 'source': source}]}
+    try:
+        process = subprocess.run(['node', '-e', AST_PROGRAM], input=json.dumps(request).encode(),
+                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                 check=True, timeout=120)
+        record = json.loads(process.stdout)[0]
+        if record['issues']:
+            raise ValueError(record['issues'][0]['code'])
+        return record
+    except (OSError, KeyError, TypeError, json.JSONDecodeError, subprocess.SubprocessError):
+        raise ValueError('BABEL_AST_PARSE_FAILED') from None
 
 
-def module_imports(source):
-    tokens = js_tokens(source)
-    found = []
-    for index, word in enumerate(tokens):
-        if word.startswith('`') and '${' in word and re.search(r'\b(?:import|require)\s*\(', word):
-            raise ValueError('TEMPLATE_IMPORT_UNVERIFIED')
-        if word == 'require' and tokens[index + 1:index + 2] == ['(']:
-            raise ValueError('COMMONJS_IMPORT_SYNTAX_UNSUPPORTED')
-        if word not in ('import', 'export') or index and tokens[index - 1] == '.':
-            continue
-        tail = tokens[index + 1:]
-        if not tail or tail[0] in ('.', ':') or word == 'export' and tail[0] not in ('{', '*'):
-            continue
-        if tail[0] == '(':
-            if len(tail) < 3 or tail[1][0] not in "'\"" or tail[2] != ')':
-                raise ValueError('NON_LITERAL_DYNAMIC_IMPORT_UNVERIFIED')
-            literal, clause = tail[1], []
-        elif tail[0][0] in "'\"":
-            literal, clause = tail[0], []
-        else:
-            stop = next((i for i, item in enumerate(tail) if item in (';', 'from')), None)
-            if stop is None or tail[stop] != 'from':
-                if word == 'export':
-                    continue  # export { localName } has no source module.
-                raise ValueError('STATIC_IMPORT_SYNTAX_UNSUPPORTED')
-            if len(tail) <= stop + 1 or tail[stop + 1][0] not in "'\"":
-                raise ValueError('STATIC_IMPORT_SOURCE_UNVERIFIED')
-            literal, clause = tail[stop + 1], tail[:stop]
-        if '\\' in literal or literal[-1] != literal[0]:
-            raise ValueError('ESCAPED_IMPORT_SPECIFIER_UNSUPPORTED')
-        names = []
-        if '{' in clause:
-            named = clause[clause.index('{') + 1:clause.index('}')]
-            names = [group.strip().split(' as ')[0].strip() for group in ' '.join(named).split(',') if group.strip()]
-        default = word == 'import' and bool(clause and clause[0] not in ('{', '*'))
-        found.append((literal[1:-1], names, default))
-    return found
+def module_imports(source, parser_root=None):
+    return [(row['specifier'], row['names'], row['default'])
+            for row in ast_source(source, parser_root)['imports']]
 
 
-def exports(source):
-    tokens, names, default, depth = js_tokens(source), set(), False, 0
-    for index, word in enumerate(tokens):
-        if word == 'export' and depth == 0:
-            tail = tokens[index + 1:]
-            if tail and tail[0] == 'default':
-                default = True
-            if tail and tail[0] == 'async':
-                tail = tail[1:]
-            if len(tail) >= 2 and tail[0] in ('function', 'class', 'const', 'let', 'var'):
-                names.add(tail[1])
-            if tail and tail[0] == '{':
-                if '}' not in tail:
-                    raise ValueError('EXPORT_SYNTAX_UNVERIFIED')
-                for item in ' '.join(tail[1:tail.index('}')]).split(','):
-                    if item.strip():
-                        names.add(item.strip().split(' as ')[-1].strip())
-        depth += (word == '{') - (word == '}')
-    return names, default
+def exports(source, parser_root=None):
+    record = ast_source(source, parser_root)
+    names = set(record['exports'])
+    if record['reexports']:
+        raise ValueError('REEXPORT_REQUIRES_TRANSITIVE_BINDING_REVIEW')
+    return names, record['default']
 
 
 class Gate:
@@ -307,7 +283,7 @@ class Gate:
             try:
                 if Path(path).suffix not in ('.mjs', '.js'):
                     raise ValueError('SOURCE_IMPORT_SYNTAX_UNSUPPORTED')
-                for specifier, names, default in module_imports(self.checked[path]['path'].read_text()):
+                for specifier, names, default in module_imports(self.checked[path]['path'].read_text(), self.repo):
                     key = path, specifier
                     actual.add(key)
                     if key not in declared:
@@ -324,7 +300,7 @@ class Gate:
                     elif not any(dependency.get('verified') is True and dependency.get('name') == specifier and
                                  dependency.get('artifact_path') == target for dependency in self.data.get('dependencies', [])):
                         raise ValueError('BARE_IMPORT_DEPENDENCY_TARGET_UNVERIFIED')
-                    provided, has_default = exports(self.checked[target]['path'].read_text())
+                    provided, has_default = exports(self.checked[target]['path'].read_text(), self.repo)
                     if not set(names) <= provided or default and not has_default:
                         raise ValueError('IMPORTED_BINDING_NOT_EXPORTED')
             except (OSError, UnicodeError, ValueError, TypeError) as error:
