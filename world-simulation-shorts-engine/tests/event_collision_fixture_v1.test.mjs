@@ -125,15 +125,35 @@ try {
    protectedInputsUnchanged:originalInputs===JSON.stringify({REGIONAL,CONTINENT,scene,cameraPlan,input})};
  },fixture);
  assert.match(report.renderer,/SwiftShader/);assert.equal(errors.length,0);assert.equal(report.protectedInputsUnchanged,true);
+ // This independent reference divides geographic spans before multiplying by
+ // output size; the frozen factory uses an equivalent matrix transform. Bound
+ // their arithmetic roundoff in pixel units, while retaining exact source,
+ // primitive, path vertex count, native layout/camera and pixel assertions.
+ report.independentProjectionTolerancePixels=1e-9;
+ report.maxProjectedPathDifference=0;
+ report.maxVisibleLengthDifferencePixels=0;
  for(const result of report.results){
   assert.equal(result.intentUnchanged,true);assert.equal(result.primitiveUnchanged,true);assert.equal(result.restoredByteDifference,0);
   for(const frame of result.frames){
    assert.equal(frame.outside,0);assert.equal(frame.protectedChanged,0);assert.equal(frame.nativeLayoutExact,true);assert.equal(frame.nativeCameraExact,true);
-   assert.deepEqual(frame.path,frame.expectedPath);assert.equal(frame.visibleLengthPixels,frame.expectedLengthPixels);
+   assert.equal(frame.path.length,frame.expectedPath.length,'supplied projected vertex count remains exact');
+   for(let pointIndex=0;pointIndex<frame.path.length;pointIndex++){
+    assert.equal(frame.path[pointIndex].length,2);assert.equal(frame.expectedPath[pointIndex].length,2);
+    for(let axis=0;axis<2;axis++){
+     const difference=Math.abs(frame.path[pointIndex][axis]-frame.expectedPath[pointIndex][axis]);
+     assert.ok(Number.isFinite(difference));
+     report.maxProjectedPathDifference=Math.max(report.maxProjectedPathDifference,difference);
+     assert.ok(difference<=report.independentProjectionTolerancePixels,'independent projected coordinate roundoff');
+    }
+   }
+   const lengthDifference=Math.abs(frame.visibleLengthPixels-frame.expectedLengthPixels);
+   assert.ok(Number.isFinite(lengthDifference));
+   report.maxVisibleLengthDifferencePixels=Math.max(report.maxVisibleLengthDifferencePixels,lengthDifference);
+   assert.ok(lengthDifference<=report.independentProjectionTolerancePixels,'independent projected length roundoff');
    if(frame.fraction>0){assert.ok(frame.changed>0);assert.ok(frame.markerOcclusions.length>0);}
   }
   const midpoint=result.frames.find(frame=>frame.fraction===.5);
-  assert.ok(Math.hypot(midpoint.tip[0]-report.anchor[0],midpoint.tip[1]-report.anchor[1])<1e-7,'arc-length progresses behind native Marker');
+  assert.ok(Math.hypot(midpoint.tip[0]-report.anchor[0],midpoint.tip[1]-report.anchor[1])<=report.independentProjectionTolerancePixels,'arc-length progresses behind native Marker');
   assert.equal(result.frames.at(-1).fraction,1);
  }
  for(const item of report.negative)assert.equal(item.reason,'EVENT_LINE_PROTECTED_GRAPHIC_COLLISION',item.role);
