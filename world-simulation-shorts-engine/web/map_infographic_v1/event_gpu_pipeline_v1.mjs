@@ -14,21 +14,21 @@ import {compileGeographicLinePrimitive} from './event_line_v1.mjs';
 import {createEventLinePass,validateEventLineFootprint} from './event_line_pass_v1.mjs';
 import {compileMetricAnnotation} from './event_metric_v1.mjs';
 import {createEventMetricPass} from './event_metric_pass_v1.mjs';
-import {chooseMetricPlacement} from './event_layout_adapter_v1.mjs';
+import {chooseMetricPlacement,chooseRelatedMetricPlacement} from './event_layout_adapter_v1.mjs';
+import {selectEventLineStyle} from './event_style_v1.mjs';
 
 export const EVENT_GPU_PIPELINE_V1_VERSION='EVENT_GPU_PIPELINE_V1';
 const sameBounds=(a,b)=>Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((value,index)=>value===b[index]);
 
-function lineStyle(role,theme){
+function assertLineRole(role){
  if(!['PRIMARY','SECONDARY'].includes(role))throw Error('EVENT_LINE_UNKNOWN_STYLE_ROLE');
- const prefix=role==='PRIMARY'?'primary':'secondary';
- return {width:theme[prefix+'Width'],coreColor:theme[prefix+'CoreColor'],
-  glowRadius:theme.glowRadius,glowGain:theme.glowGain,glowColor:theme.glowColor};
 }
 function metricStyle(profile,safeArea){
  if(!profile)throw Error('EVENT_EXISTING_MEASURED_LOCATION_STYLE_REQUIRED');
  const keys=['fontSize','minFontSize','fontFamily','lineHeight','outlineRadius','maxWidth','maxLines'];
  const style=Object.fromEntries(keys.filter(key=>profile[key]!==undefined).map(key=>[key,profile[key]]));
+ // An Event annotation owns its own size; native Location glyphs/tokens remain untouched.
+ style.fontSize+=Math.min(4,style.fontSize*.12);
  // Typography is inherited; a new full Metric reservation is not a Location label.
  // The unchanged glyph API adds this native padding; the unchanged layout API
  // still checks the entire measured atlas against every protected box and line.
@@ -59,7 +59,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
  if(!sameBounds(cameraPlan.intent.finalExtent,plans.REGIONAL.framing.bounds))throw Error('APPROVED_REGIONAL_FRAMING_CHANGED');
  if(scene.primary_region_id!==plans.REGIONAL.primary)throw Error('SCENE_PRIMARY_REGION_MISMATCH');
  const immutableEventPlan=eventPlan===null?null:assertEventPlan(eventPlan);
- if(immutableEventPlan?.intent.line)lineStyle(immutableEventPlan.intent.line.style_role,plans.REGIONAL.theme);
+ if(immutableEventPlan?.intent.line)assertLineRole(immutableEventPlan.intent.line.style_role);
  const wideSource=contextTerrain??plans.CONTINENT.assets.terrain;
  const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});
  if(!gl)throw Error('WEBGL2_CONTEXT_FAILED');
@@ -76,7 +76,42 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   evaluateCamera:evaluateMinimumContextCameraFrame,visualTokensForFrame});
  const debug=gl.getExtension('WEBGL_debug_renderer_info');
  const params={dem:true,verticalExaggeration:2,bakedSuppression:.1,correctedLight:true,shadingCorrection:'FINAL'};
- let linePass=null,metricPass=null,metricPrimitive=null,lastDiagnostic=null,lastPixels=null;
+ let linePass=null,metricPass=null,metricPrimitive=null,lastDiagnostic=null,lastPixels=null,eventStyleCache=null;
+
+ function actualEventStyle(primitive,protectedBoxes,camera){
+  const signature=JSON.stringify({bounds:camera.camera.flatBounds,path:primitive.screenCoordinates,protectedBoxes});
+  if(eventStyleCache?.signature===signature)return eventStyleCache.style;
+  // Read the freshly rendered native map before adding Event or native graphics.
+  // Coverage B identifies the Primary material; all sampling is screen geometry based.
+  const pixels=factory.readPixels(),coverage=factory.coverage(),glow=factory.glowPixels();
+  const at=(x,y)=>((height-1-y)*width+x)*4;
+  const points=[],seen=new Set();
+  for(let segment=0;segment<primitive.segmentLengthsPixels.length;segment++){
+   const a=primitive.screenCoordinates[segment],b=primitive.screenCoordinates[segment+1],length=primitive.segmentLengthsPixels[segment];
+   if(length===0)continue;
+   const normal=[-(b[1]-a[1])/length,(b[0]-a[0])/length];
+   const steps=Math.max(1,Math.ceil(length/3));
+   for(let step=0;step<steps;step++)for(const offset of [0,-3,3,-6,6]){
+    const fraction=(step+.5)/steps,x=Math.floor(a[0]+(b[0]-a[0])*fraction+normal[0]*offset),
+     y=Math.floor(a[1]+(b[1]-a[1])*fraction+normal[1]*offset),key=x+','+y;
+    if(x<2||y<2||x>=width-2||y>=height-2||seen.has(key))continue;
+    seen.add(key);
+    if(protectedBoxes.some(box=>x+.5>=box[0]-2&&x+.5<=box[2]+2&&y+.5>=box[1]-2&&y+.5<=box[3]+2))continue;
+    const index=at(x,y);
+    if(coverage[index+2]<254||glow[index]+glow[index+1]+glow[index+2]>3)continue;
+    // Exclude the native material edge, whose unchanged Boundary is independent.
+    if([[0,0],[-2,0],[2,0],[0,-2],[0,2]].some(([dx,dy])=>coverage[at(x+dx,y+dy)+2]<254))continue;
+    points.push({point:[x+.5,y+.5],rgb:[pixels[index]/255,pixels[index+1]/255,pixels[index+2]/255]});
+   }
+  }
+  const selected=points.filter((_,index)=>index%Math.max(1,Math.ceil(points.length/256))===0);
+  const style=selectEventLineStyle({role:immutableEventPlan.intent.line.style_role,theme:plans.REGIONAL.theme,
+   primaryMaterialColor:plans.REGIONAL.theme.primary,backgroundSamples:selected.length?selected.map(item=>item.rgb):undefined});
+  style.selection.backgroundSamplePoints=selected.map(item=>item.point);
+  style.selection.backgroundSampling='PROJECTED_EVENT_GEOMETRY_PRIMARY_COVERAGE_NATIVE_GLOW_AND_PROTECTED_GRAPHICS_EXCLUDED';
+  linePass?.dispose();linePass=createEventLinePass({renderer,width,height,style});
+  eventStyleCache={signature,style};return style;
+ }
 
  function prepareEvent(camera,layout,visual,eventFrame){
   if(!immutableEventPlan)throw Error('EVENT_PLAN_REQUIRED_WHEN_ENABLED');
@@ -89,21 +124,23 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   const project=point=>factory.screen(point);
   const controls=evaluateEventFrame(immutableEventPlan,eventFrame,{cameraState:camera,project,safeArea,
    scalePlan:plans.REGIONAL,heightSource,protectedBoxes});
-  let linePrimitive=null,lineFootprint=null,placement=null;
+  let linePrimitive=null,lineFootprint=null,placement=null,eventStyle=null,annotationStyle=null;
   if(immutableEventPlan.intent.line){
-   const style=lineStyle(immutableEventPlan.intent.line.style_role,plans.REGIONAL.theme);
    linePrimitive=compileGeographicLinePrimitive(immutableEventPlan.intent,{project});
-   lineFootprint=validateEventLineFootprint(linePrimitive,{style,safeArea,protectedGraphics});
-   if(!linePass)linePass=createEventLinePass({renderer,width,height,style});
+   eventStyle=actualEventStyle(linePrimitive,protectedBoxes,camera);
+   lineFootprint=validateEventLineFootprint(linePrimitive,{style:eventStyle,safeArea,protectedGraphics});
   }
   if(immutableEventPlan.intent.metric){
    const profile=plans.REGIONAL.layout.measured?.location;
-   if(!metricPrimitive)metricPrimitive=compileMetricAnnotation(immutableEventPlan.intent,{style:metricStyle(profile,safeArea)});
-   placement=chooseMetricPlacement({anchor:project(immutableEventPlan.intent.metric.anchor),measurement:metricPrimitive,
-    safeArea,protectedBoxes,markerSize:visual.markerSize,gap:profile.gap,lineRoi:lineFootprint?.fullRoi??null});
+   annotationStyle=metricStyle(profile,safeArea);
+   if(!metricPrimitive)metricPrimitive=compileMetricAnnotation(immutableEventPlan.intent,{style:annotationStyle});
+   const common={anchor:project(immutableEventPlan.intent.metric.anchor),measurement:metricPrimitive,safeArea,protectedBoxes};
+   placement=linePrimitive?chooseRelatedMetricPlacement({...common,linePrimitive,
+    markerOcclusions:lineFootprint.markerOcclusions,linePaddingPixels:lineFootprint.paddingPixels,gap:10})
+    :chooseMetricPlacement({...common,markerSize:visual.markerSize,gap:profile.gap});
    if(!metricPass)metricPass=createEventMetricPass({renderer,primitive:metricPrimitive,width,height,color:[1,1,1]});
   }
-  return {controls,linePrimitive,lineFootprint,placement,safeArea,protectedBoxes,protectedGraphics};
+  return {controls,linePrimitive,lineFootprint,placement,safeArea,protectedBoxes,protectedGraphics,eventStyle,metricStyle:annotationStyle};
  }
 
  function drawFrame(cameraFrame,{eventFrame=null,eventEnabled=false}={}){
@@ -139,6 +176,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
    event:{enabled:eventEnabled,cameraOwnership:'READ_ONLY',baseRenderedFresh:true,rois,
     controls:prepared?.controls??null,protectedBoxes:prepared?.protectedBoxes??[],
     protectedGraphics:prepared?.protectedGraphics??[],
+    eventStyle:prepared?.eventStyle??null,metricStyle:prepared?.metricStyle??null,
     line,metric,placement:prepared?.placement??null,lineFullRoi:prepared?.lineFootprint?.fullRoi??null}};
   return lastDiagnostic;
  }
