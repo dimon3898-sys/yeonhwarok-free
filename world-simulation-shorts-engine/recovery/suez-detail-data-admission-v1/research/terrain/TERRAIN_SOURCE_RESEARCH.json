@@ -1,0 +1,105 @@
+{
+  "schema": "TERRAIN_SOURCE_RESEARCH_V1",
+  "retrieved_utc": "2026-10-12T23:12:33.448580+00:00",
+  "scope": "RESEARCH_ONLY_NO_SOURCE_REPLACEMENT_NO_ADMISSION",
+  "required_geometry_bbox_epsg4326": [
+    32.3037758,
+    29.9303352,
+    32.5868369,
+    31.2757122
+  ],
+  "geometry_coordinate_count": 92,
+  "geometry_source_sha256": "1b8eb97b4255d6ddd23a736316f6773dbd8a9762ad78bfebb492f3e9108a437a",
+  "sources": [
+    {
+      "id": "SENTINEL2_L2A_COG",
+      "producer": "ESA / Copernicus",
+      "host": "Microsoft Planetary Computer",
+      "version": "Collection sentinel-2-l2a; source product/date/processing-baseline unknown until live STAC query",
+      "native_grid_resolution_m": {
+        "B02": 10,
+        "B03": 10,
+        "B04": 10,
+        "B08": 10,
+        "SCL": 20
+      },
+      "resolution_evidence": "pc-sentinel-template.json item_assets",
+      "license": "Copernicus Sentinel data terms, linked by official hosting collection; legal text access denied, not yet independently verified",
+      "license_reference": "https://scihub.copernicus.eu/twiki/pub/SciHubWebPortal/TermsConditions/Sentinel_Data_Terms_and_Conditions.pdf",
+      "crs": "Item-specific projected CRS/affine unknown; must inspect item proj:epsg and original COG, never infer from 10 m label",
+      "horizontal_accuracy_m": null,
+      "accuracy_note": "Grid spacing is not geolocation accuracy; product/datastrip geometry-quality metadata and independent water-edge agreement must be acquired and measured",
+      "asset_sha256": null,
+      "asset_extent": null,
+      "original_api": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/sentinel-2-l2a",
+      "status": "DATA_LIMITED_NETWORK_POLICY",
+      "acquired_suez_source_pixels": false,
+      "claims_admitted": false
+    },
+    {
+      "id": "LANDSAT_C2_L2_COG",
+      "producer": "USGS / NASA",
+      "host": "Microsoft Planetary Computer",
+      "version": "Collection landsat-c2-l2; Suez scene/Tier/product-date unknown until live STAC query",
+      "native_grid_resolution_m": {
+        "red": 30,
+        "green": 30,
+        "blue": 30
+      },
+      "resolution_evidence": "pc-landsat-template.json item_assets raster:bands",
+      "license": "USGS Public Domain linked by official collection; policy text access denied, not yet independently verified",
+      "license_reference": "https://www.usgs.gov/core-science-systems/hdds/data-policy",
+      "crs": "Item-specific projected CRS/affine unknown until item and original COG inspection",
+      "horizontal_accuracy_m": null,
+      "accuracy_note": "Require Tier/GEOMETRIC_RMSE_MODEL and product QA metadata; 30 m grid is not 30 m accuracy",
+      "asset_sha256": null,
+      "asset_extent": null,
+      "original_api": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/landsat-c2-l2",
+      "status": "DATA_LIMITED_NETWORK_POLICY",
+      "acquired_suez_source_pixels": false,
+      "claims_admitted": false
+    },
+    {
+      "id": "EARTH_SEARCH_SENTINEL2_L2A_COG",
+      "producer": "ESA / Copernicus",
+      "host": "Element 84 Earth Search / AWS Open Data",
+      "native_grid_resolution_m": null,
+      "resolution_evidence": "Live collection access denied; not measured",
+      "license": "NOT_VERIFIED",
+      "crs": null,
+      "horizontal_accuracy_m": null,
+      "asset_sha256": null,
+      "original_api": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a",
+      "status": "DATA_LIMITED_NETWORK_POLICY",
+      "acquired_suez_source_pixels": false,
+      "claims_admitted": false
+    }
+  ],
+  "candidate_prospective_recipe": [
+    "Query live collection using the supplied immutable event geometry bbox and candidate extent; do not insert country-name or coordinate branches in Admission code.",
+    "Choose verified cloud-free scenes that cover all candidate extent, including both entrances and intervening lakes; inspect exact scene dates, nodata, processing baseline, cloud/shadow QA, geometry quality and license.",
+    "Fetch original COG metadata and only native windows needed for the extent using HTTP Range through inherited proxy; persist original window provenance and complete source SHA when original required by policy.",
+    "Measure source grid affine/resolution/CRS/footprint and coastline-water agreement against acquired original vectors. Quantify independent accuracy and reject unknown bounds.",
+    "Downsample only if required for runtime; derivative must not claim improved native information. Record deterministic build recipe, input hashes and output grid.",
+    "Existing renderer visual remains locked; true-color imagery is a comparison/quality source unless a separate approved data-binding path can preserve the protected visual language.",
+    "No sharpen, superresolution, inferred geometry, tracing, forced admission, or lower thresholds. Only certify after actual pixels and GIS accuracy pass unchanged Admission."
+  ],
+  "network_policy_denial_is_not_data_unavailability": true,
+  "access_domains_to_review": [
+    "planetarycomputer.microsoft.com",
+    "sentinel2l2a01.blob.core.windows.net",
+    "landsateuwest.blob.core.windows.net",
+    "earth-search.aws.element84.com",
+    "sentinel-cogs.s3.us-west-2.amazonaws.com",
+    "dataspace.copernicus.eu",
+    "scihub.copernicus.eu",
+    "sentinel.esa.int",
+    "sentinels.copernicus.eu",
+    "www.usgs.gov"
+  ],
+  "safe_detail_extent_certified": false,
+  "synthetic_source_pixels_used": false,
+  "source_bytes_modified_or_upscaled": false,
+  "required_runtime_files_temp_only": 0,
+  "decision": "TERRAIN_DETAIL_SOURCE_IDENTIFIED_ACQUISITION_AND_QUALITY_NOT_VERIFIED"
+}

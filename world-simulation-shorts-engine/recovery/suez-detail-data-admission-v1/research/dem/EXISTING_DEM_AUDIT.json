@@ -1,0 +1,582 @@
+{
+  "schema": "DETAIL_EXISTING_DEM_AUDIT_V1",
+  "audit_time_utc": "2026-10-12T23:16:05.246568+00:00",
+  "scope": "Existing GLO-30 only; no data download or derivative generation",
+  "toolchain": {
+    "python": "3.13.5",
+    "numpy": "2.2.4",
+    "gdal": "3.10.3"
+  },
+  "inputs": [
+    {
+      "path": "recovery/v4/past-paths/tmp/world-korean-layout-micro/iteration-01/height-source.json",
+      "sha256": "71c6b06bce28fa61b1976d2d3a26367e0469d0f6d23a32ae3eeb848dcc27cb04"
+    },
+    {
+      "path": "recovery/event-data/suez-full-canal-20261012/fixture.json",
+      "sha256": "1b8eb97b4255d6ddd23a736316f6773dbd8a9762ad78bfebb492f3e9108a437a"
+    },
+    {
+      "path": "recovery/v5/inputs/scene.json",
+      "sha256": "f378ea5d97dee1a28f244767ed14b5a45c3af1db48c26a57b5533aa439d309f2"
+    },
+    {
+      "path": "recovery/v5/inputs/camera-plan.json",
+      "sha256": "d1dacc4f5aa8c1be5d8f5509904f304156334282eba14660ca496cad21a6d290"
+    }
+  ],
+  "axis": {
+    "original_coordinates": 92,
+    "original_segments": 91,
+    "geographic_bounds": [
+      32.3037758,
+      29.9303352,
+      32.5868369,
+      31.2757122
+    ],
+    "coordinates_interpolated": false,
+    "coordinates_modified": false
+  },
+  "registered_height_contract": {
+    "version": "GLO30_LOGICAL_HEIGHT_SOURCE_V1",
+    "source": "User-provided Copernicus GLO-30 COG DSM originals",
+    "CRS": "EPSG:4326",
+    "dimensions": [
+      7200,
+      7200
+    ],
+    "footprint": [
+      31.999861111111112,
+      29.000138888888888,
+      33.99986111111111,
+      31.000138888888888
+    ],
+    "firstSample": [
+      32,
+      31
+    ],
+    "pixelSpacing": [
+      0.0002777777777777778,
+      0.0002777777777777778
+    ],
+    "orientation": "north-up row-major; row 0 north, column 0 west",
+    "unit": "m",
+    "unitEvidence": "Copernicus GLO-30 product convention; band unit is not embedded in these TIFFs",
+    "verticalDatum": "EGM2008 per product convention, not encoded in EPSG:4326",
+    "NoData": null,
+    "validSamples": 51840000,
+    "format": "little-endian IEEE754 Float32 / GPU R32F",
+    "scale": 1,
+    "offset": 0,
+    "resampling": "NONE; four bit-identical source grids stitched by geographic offsets",
+    "file": "/tmp/world-suez-dem-gate1b/height-source/height.f32",
+    "sha256": "08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8",
+    "byteLength": 207360000,
+    "originals": [
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N29_00_E032_00_DEM.tif",
+        "sha256": "9dde480c3dc61c80c578026af04ccebfed5496ae911f9aef924c72c38f4642b7",
+        "atlasOffset": [
+          0,
+          3600
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": -6.636804103851318,
+        "max": 1274.9442138671875
+      },
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N29_00_E033_00_DEM.tif",
+        "sha256": "b8db1296d52ede364adcb45285154b094731d483ae438fad1f438038730959c0",
+        "atlasOffset": [
+          3600,
+          3600
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": -5.52053165435791,
+        "max": 1629.854736328125
+      },
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N30_00_E032_00_DEM.tif",
+        "sha256": "624a6d62e87ea02b718efab427859914115f1ad82aaa40eea62705fd9dcc9f5f",
+        "atlasOffset": [
+          0,
+          0
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": -19.214750289916992,
+        "max": 750.0064697265625
+      },
+      {
+        "file": "/tmp/world-suez-dem-gate1b/originals/Copernicus_DSM_COG_10_N30_00_E033_00_DEM.tif",
+        "sha256": "67f44f3a5e64ef89d234030bc9c05f2486c5db2a2beb208dda7feca24abb1df8",
+        "atlasOffset": [
+          3600,
+          0
+        ],
+        "dimensions": [
+          3600,
+          3600
+        ],
+        "min": 0.4859592914581299,
+        "max": 1076.7745361328125
+      }
+    ],
+    "url": "/height.f32"
+  },
+  "actual_native_height": {
+    "path": "web/dem/glo30/height.f32",
+    "bytes": 207360000,
+    "sha256": "08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8",
+    "dimensions": [
+      7200,
+      7200
+    ],
+    "dtype": "<f4",
+    "finite_samples": 51840000,
+    "min_meters": -19.214750289916992,
+    "max_meters": 1629.854736328125,
+    "all_samples_finite": true
+  },
+  "actual_cogs": [
+    {
+      "path": "library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N29_00_E032_00_DEM.tif",
+      "sha256": "9dde480c3dc61c80c578026af04ccebfed5496ae911f9aef924c72c38f4642b7",
+      "bytes": 34187920,
+      "dimensions": [
+        3600,
+        3600
+      ],
+      "crs": "EPSG:4326",
+      "geo_transform": [
+        31.999861111111112,
+        0.0002777777777777778,
+        0.0,
+        30.000138888888888,
+        0.0,
+        -0.0002777777777777778
+      ],
+      "band_type": "Float32",
+      "NoData": null,
+      "min_meters": -6.636804103851318,
+      "max_meters": 1274.9442138671875,
+      "atlas_native_sample_bits_equal": true
+    },
+    {
+      "path": "library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N29_00_E033_00_DEM.tif",
+      "sha256": "b8db1296d52ede364adcb45285154b094731d483ae438fad1f438038730959c0",
+      "bytes": 41373390,
+      "dimensions": [
+        3600,
+        3600
+      ],
+      "crs": "EPSG:4326",
+      "geo_transform": [
+        32.99986111111111,
+        0.0002777777777777778,
+        0.0,
+        30.000138888888888,
+        0.0,
+        -0.0002777777777777778
+      ],
+      "band_type": "Float32",
+      "NoData": null,
+      "min_meters": -5.52053165435791,
+      "max_meters": 1629.854736328125,
+      "atlas_native_sample_bits_equal": true
+    },
+    {
+      "path": "library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N30_00_E032_00_DEM.tif",
+      "sha256": "624a6d62e87ea02b718efab427859914115f1ad82aaa40eea62705fd9dcc9f5f",
+      "bytes": 46774078,
+      "dimensions": [
+        3600,
+        3600
+      ],
+      "crs": "EPSG:4326",
+      "geo_transform": [
+        31.999861111111112,
+        0.0002777777777777778,
+        0.0,
+        31.000138888888888,
+        0.0,
+        -0.0002777777777777778
+      ],
+      "band_type": "Float32",
+      "NoData": null,
+      "min_meters": -19.214750289916992,
+      "max_meters": 750.0064697265625,
+      "atlas_native_sample_bits_equal": true
+    },
+    {
+      "path": "library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N30_00_E033_00_DEM.tif",
+      "sha256": "67f44f3a5e64ef89d234030bc9c05f2486c5db2a2beb208dda7feca24abb1df8",
+      "bytes": 42775789,
+      "dimensions": [
+        3600,
+        3600
+      ],
+      "crs": "EPSG:4326",
+      "geo_transform": [
+        32.99986111111111,
+        0.0002777777777777778,
+        0.0,
+        31.000138888888888,
+        0.0,
+        -0.0002777777777777778
+      ],
+      "band_type": "Float32",
+      "NoData": null,
+      "min_meters": 0.4859592914581299,
+      "max_meters": 1076.7745361328125,
+      "atlas_native_sample_bits_equal": true
+    }
+  ],
+  "source_provenance_limitations": {
+    "source": "User-provided Copernicus GLO-30 COG DSM originals",
+    "license_record_in_registered_height_metadata": null,
+    "original_retrieval_date_in_registered_height_metadata": null,
+    "product_convention": "Copernicus GLO-30 DSM, meter units, EGM2008 vertical datum, one arc-second geographic spacing",
+    "new_source_license_verified_this_audit": false
+  },
+  "baseline": {
+    "bounds": [
+      23.25,
+      16.472168113664114,
+      38.15,
+      39.827831886335886
+    ],
+    "center": [
+      30.7,
+      28.15
+    ],
+    "width_degrees": 14.899999999999999,
+    "height_degrees": 23.35566377267177,
+    "projected_axis_length_pixels": 120.28129924695834,
+    "projected_axis_bounds_pixels": [
+      656.2468365100669,
+      703.0444502706816,
+      676.7640169127519,
+      813.6439119319892
+    ],
+    "safe_area_geometry_coverage": {
+      "width_fraction": 0.020850793092159522,
+      "height_fraction": 0.06227447165614167
+    },
+    "full_event_geometry_inside_safe_area_with_padding": true,
+    "dem_projected_pixels_per_native_sample": [
+      0.020134228187919465,
+      0.022835289055555822
+    ],
+    "dem_native_spacing_meters_at_extent_center": [
+      27.284812790671186,
+      30.78385383102791
+    ],
+    "output_ground_spacing_meters_at_extent_center": [
+      1355.1457019366685,
+      1348.0825119460533
+    ],
+    "dem_density_pass_unchanged_max_one_pixel_per_sample": true,
+    "dem_extent_coverage_fraction": 0.011494273014541503,
+    "dem_full_extent_coverage": false,
+    "dem_axis_projected_length_coverage_fraction": 0.8077575111665731,
+    "dem_unchanged_renderer_neighbourhood_guard": {
+      "source": "renderer.mjs demWeight smoothstep(1.5,2.5), demStep=max(nativeSpacing,canonicalPixelDegrees*.5)",
+      "step_degrees": [
+        0.006898148148148147,
+        0.006082204107466608
+      ],
+      "regions": {
+        "positive_weight": {
+          "bounds": [
+            32.01034722222222,
+            29.00940108393898,
+            33.989375,
+            30.9908766938388
+          ],
+          "viewport_area_fraction": 0.011268396966393803,
+          "axis_projected_length_fraction": 0.8014245587089771
+        },
+        "full_weight": {
+          "bounds": [
+            32.01724537037037,
+            29.015483288046447,
+            33.98247685185186,
+            30.984794489731332
+          ],
+          "viewport_area_fraction": 0.011121146988270849,
+          "axis_projected_length_fraction": 0.7972658998552504
+        }
+      },
+      "measurement_type": "Analytic existing shader support bounds; not a rendered pixel claim"
+    },
+    "dem_axis_original_nodes_covered": 81,
+    "dem_northernmost_axis_node_covered": false,
+    "dem_sampling_resolution_status": "SUFFICIENT",
+    "dem_full_real_relief_status": "INSUFFICIENT_SPATIAL_COVERAGE",
+    "certified_safe_detail_extent": false
+  },
+  "research_candidates": [
+    {
+      "bounds": [
+        29.88503298031474,
+        26.589810009497032,
+        35.00557971968525,
+        34.61623739050297
+      ],
+      "center": [
+        32.445306349999996,
+        30.6030237
+      ],
+      "width_degrees": 5.120546739370511,
+      "height_degrees": 8.026427381005934,
+      "projected_axis_length_pixels": 350.00000000000045,
+      "projected_axis_bounds_pixels": [
+        510.1490872400885,
+        799.0863258719056,
+        569.8509127599131,
+        1120.9136741280943
+      ],
+      "safe_area_geometry_coverage": {
+        "width_fraction": 0.06067258691039083,
+        "height_fraction": 0.1812090924865927
+      },
+      "full_event_geometry_inside_safe_area_with_padding": true,
+      "dem_projected_pixels_per_native_sample": [
+        0.05858749373253064,
+        0.06644716360300414
+      ],
+      "dem_native_spacing_meters_at_extent_center": [
+        26.638222164626136,
+        30.79518532250103
+      ],
+      "output_ground_spacing_meters_at_extent_center": [
+        454.67420549234544,
+        463.4537225168893
+      ],
+      "dem_density_pass_unchanged_max_one_pixel_per_sample": true,
+      "dem_extent_coverage_fraction": 0.09732431952838591,
+      "dem_full_extent_coverage": false,
+      "dem_axis_projected_length_coverage_fraction": 0.8077575111665735,
+      "dem_unchanged_renderer_neighbourhood_guard": {
+        "source": "renderer.mjs demWeight smoothstep(1.5,2.5), demStep=max(nativeSpacing,canonicalPixelDegrees*.5)",
+        "step_degrees": [
+          0.0023706234904493106,
+          0.0020902154638036286
+        ],
+        "regions": {
+          "positive_weight": {
+            "bounds": [
+              32.003555935235674,
+              29.003413100973486,
+              33.99616628698655,
+              30.996864676804293
+            ],
+            "viewport_area_fraction": 0.09664724021592777,
+            "axis_projected_length_fraction": 0.8055187946036323
+          },
+          "full_weight": {
+            "bounds": [
+              32.005926558726124,
+              29.005503316437288,
+              33.9937956634961,
+              30.99477446134049
+            ],
+            "viewport_area_fraction": 0.0962150814108746,
+            "axis_projected_length_fraction": 0.8040896263463447
+          }
+        },
+        "measurement_type": "Analytic existing shader support bounds; not a rendered pixel claim"
+      },
+      "dem_axis_original_nodes_covered": 81,
+      "dem_northernmost_axis_node_covered": false,
+      "dem_sampling_resolution_status": "SUFFICIENT",
+      "dem_full_real_relief_status": "INSUFFICIENT_SPATIAL_COVERAGE",
+      "certified_safe_detail_extent": false,
+      "id": "D1",
+      "requested_axis_length_pixels": 350,
+      "construction": "Full unchanged axis bounds, inherited regional aspect, safe-area-centered projection, target screen length; enlargement only if full-axis padding requires it",
+      "inherited_geographic_aspect": 0.6379608879895907
+    },
+    {
+      "bounds": [
+        30.816041478382104,
+        28.049160442407203,
+        34.07457122161789,
+        33.156886957592796
+      ],
+      "center": [
+        32.445306349999996,
+        30.6030237
+      ],
+      "width_degrees": 3.2585297432357834,
+      "height_degrees": 5.107726515185593,
+      "projected_axis_length_pixels": 550.0000000000006,
+      "projected_axis_bounds_pixels": [
+        493.0914228058533,
+        707.135654941566,
+        586.9085771941491,
+        1212.8643450584339
+      ],
+      "safe_area_geometry_coverage": {
+        "width_fraction": 0.0953426365734713,
+        "height_fraction": 0.2847571453360742
+      },
+      "full_event_geometry_inside_safe_area_with_padding": true,
+      "dem_projected_pixels_per_native_sample": [
+        0.0920660615796909,
+        0.10441697137614939
+      ],
+      "dem_native_spacing_meters_at_extent_center": [
+        26.638222164626136,
+        30.79518532250103
+      ],
+      "output_ground_spacing_meters_at_extent_center": [
+        289.33813076785657,
+        294.92509614711133
+      ],
+      "dem_density_pass_unchanged_max_one_pixel_per_sample": true,
+      "dem_extent_coverage_fraction": 0.24033148291703435,
+      "dem_full_extent_coverage": false,
+      "dem_axis_projected_length_coverage_fraction": 0.8077575111665736,
+      "dem_unchanged_renderer_neighbourhood_guard": {
+        "source": "renderer.mjs demWeight smoothstep(1.5,2.5), demStep=max(nativeSpacing,canonicalPixelDegrees*.5)",
+        "step_degrees": [
+          0.0015085785848313812,
+          0.0013301371133295815
+        ],
+        "regions": {
+          "positive_weight": {
+            "bounds": [
+              32.00226286787725,
+              29.002272983447774,
+              33.997459354344976,
+              30.998004794330004
+            ],
+            "viewport_area_fraction": 0.23924260687909313,
+            "axis_projected_length_fraction": 0.8062983409257899
+          },
+          "full_weight": {
+            "bounds": [
+              32.00377144646208,
+              29.003603120561102,
+              33.99595077576014,
+              30.996674657216676
+            ],
+            "viewport_area_fraction": 0.238562397892669,
+            "axis_projected_length_fraction": 0.8053888702166072
+          }
+        },
+        "measurement_type": "Analytic existing shader support bounds; not a rendered pixel claim"
+      },
+      "dem_axis_original_nodes_covered": 81,
+      "dem_northernmost_axis_node_covered": false,
+      "dem_sampling_resolution_status": "SUFFICIENT",
+      "dem_full_real_relief_status": "INSUFFICIENT_SPATIAL_COVERAGE",
+      "certified_safe_detail_extent": false,
+      "id": "D2",
+      "requested_axis_length_pixels": 550,
+      "construction": "Full unchanged axis bounds, inherited regional aspect, safe-area-centered projection, target screen length; enlargement only if full-axis padding requires it",
+      "inherited_geographic_aspect": 0.6379608879895907
+    },
+    {
+      "bounds": [
+        31.325186750762697,
+        28.847242710404952,
+        33.565425949237294,
+        32.35880468959505
+      ],
+      "center": [
+        32.445306349999996,
+        30.6030237
+      ],
+      "width_degrees": 2.2402391984745975,
+      "height_degrees": 3.5115619791900947,
+      "projected_axis_length_pixels": 800.0000000000013,
+      "projected_axis_bounds_pixels": [
+        471.76934226305923,
+        592.1973162786413,
+        608.2306577369442,
+        1327.8026837213588
+      ],
+      "safe_area_geometry_coverage": {
+        "width_fraction": 0.13868019865232212,
+        "height_fraction": 0.4141922113979265
+      },
+      "full_event_geometry_inside_safe_area_with_padding": true,
+      "dem_projected_pixels_per_native_sample": [
+        0.1339142713886415,
+        0.15187923109258095
+      ],
+      "dem_native_spacing_meters_at_extent_center": [
+        26.638222164626136,
+        30.79518532250103
+      ],
+      "output_ground_spacing_meters_at_extent_center": [
+        198.91996490290106,
+        202.76100360113898
+      ],
+      "dem_density_pass_unchanged_max_one_pixel_per_sample": true,
+      "dem_extent_coverage_fraction": 0.3980213095136618,
+      "dem_full_extent_coverage": false,
+      "dem_axis_projected_length_coverage_fraction": 0.8077575111665736,
+      "dem_unchanged_renderer_neighbourhood_guard": {
+        "source": "renderer.mjs demWeight smoothstep(1.5,2.5), demStep=max(nativeSpacing,canonicalPixelDegrees*.5)",
+        "step_degrees": [
+          0.0010371477770715729,
+          0.0009144692654140872
+        ],
+        "regions": {
+          "positive_weight": {
+            "bounds": [
+              32.00155572166561,
+              29.0016494816759,
+              33.998166500556614,
+              30.998628296101877
+            ],
+            "viewport_area_fraction": 0.39698988296029436,
+            "axis_projected_length_fraction": 0.8067246553207196
+          },
+          "full_weight": {
+            "bounds": [
+              32.00259286944268,
+              29.002563950941315,
+              33.997129352779545,
+              30.997713826836463
+            ],
+            "viewport_area_fraction": 0.3963632589036903,
+            "axis_projected_length_fraction": 0.8060993942081559
+          }
+        },
+        "measurement_type": "Analytic existing shader support bounds; not a rendered pixel claim"
+      },
+      "dem_axis_original_nodes_covered": 81,
+      "dem_northernmost_axis_node_covered": false,
+      "dem_sampling_resolution_status": "SUFFICIENT",
+      "dem_full_real_relief_status": "INSUFFICIENT_SPATIAL_COVERAGE",
+      "certified_safe_detail_extent": false,
+      "id": "D3",
+      "requested_axis_length_pixels": 800,
+      "construction": "Full unchanged axis bounds, inherited regional aspect, safe-area-centered projection, target screen length; enlargement only if full-axis padding requires it",
+      "inherited_geographic_aspect": 0.6379608879895907
+    }
+  ],
+  "conclusion": {
+    "native_resolution": "EXISTING_SUFFICIENT_FOR_ALL_RESEARCH_CANDIDATES",
+    "full_real_dem_spatial_coverage": "INSUFFICIENT_FOR_ALL_RESEARCH_CANDIDATES",
+    "full_detail_relief_if_mandatory": "NEW_DATA_REQUIRED",
+    "if_real_dem_is_optional": "EXISTING_PARTIAL_DEM_WITH_NATIVE_TERRAIN_FALLBACK; no DEM download required merely for sampling resolution",
+    "unchanged_admission_semantics": "LocalDetailAdmission.dem remains INSUFFICIENT; requireRealDEM=true blocks partial coverage. If requireRealDEM=false, partial DEM is explicitly optional, but terrain/GIS/event checks must all pass independently.",
+    "cannot_claim": "Unqualified DEM_EXISTING_SUFFICIENT for whole detail extent, or full real DEM coverage of entire canal",
+    "automatic_new_dem_download": false,
+    "admission_override": false
+  }
+}
