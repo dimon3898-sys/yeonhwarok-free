@@ -5,7 +5,7 @@
 
 이 문서는 Development Candidate의 내부 검증 기록이다. Public Review에는 MP4, Checkpoint PNG, `SHA256SUMS`만 제공한다. 이 문서, Source, Manifest, Diagnostic, Internal Plan은 Public Review 대상이 아니다.
 
-현재 문서는 최종 검증을 기다리는 초안이다. 아래의 `PENDING` 항목은 완료로 간주하지 않는다. 사용자 영상 승인 전 `EVENT_SYSTEM_V1_FINAL`로 승격하지 않는다.
+전체 기술 검증·영상 제작·공개 다운로드 검증을 완료했다. 사용자 영상 승인 전 `EVENT_SYSTEM_V1_FINAL`로 승격하지 않는다. 이 보고서와 Manifest를 최종 commit한 뒤 `--require-persisted`로 HEAD/index 및 모든 필수 파일을 확인한다.
 
 ## 기준점과 수정 범위
 
@@ -16,7 +16,8 @@
 | Camera V5 Final | `29b8ee294360812b55ef577b62411de58159003b` |
 | 기존 V1 Candidate | `1d5182f7effde2e776f9c9ac21b00f6d681a423a` |
 | 실제 시각 측정에 사용한 V2 Source | `b575bdaf76bcabb957500b319bba8cc4e1ea6f68` |
-| 최종 Candidate/Source/Fixture/Manifest 저장 commit | `PENDING` |
+| Candidate 저장 | `development/event-system-v1-20261012` HEAD; Manifest는 최종 `--require-persisted`로 HEAD/index와 실파일 검증 |
+| 검수 MP4/PNG/SHA256SUMS 영구 commit | `1439ab604b305e39ee18af9538b167cedddfa277` |
 
 수정은 Event Line 두께, Event Line의 자동 대비 색상·Event Glow, Metric Annotation 자신의 배치·요청 글자 크기의 세 범위로 제한했다. 기존 Event Core 전체나 Suez Data를 다시 만들거나 조사하지 않았다.
 
@@ -97,23 +98,34 @@ Sampler 수정은 palette나 score formula를 바꾸지 않았다. 중심 합성
 | Collision Synthetic Fixture | PASS | `evidence/COLLISION_SYNTHETIC_GPU.json`; 양방향 허용 mask 및 모든 금지 충돌 PASS |
 | Metric collision 0 | PASS | `evidence/METRIC_VISUAL_RELATION.json`; measured full atlas strict 검사 |
 | 64306 Event Grammar | PASS | `evidence/grammar64306/REPORT.json`; 저장 semantic 기준, 150프레임·75 Metric 프레임 순차 glyph 검사 |
-| 5초 silent V2 Candidate | PENDING | 1080×1920, 30 fps, 150 frames, audio 없음 |
-| Checkpoint PNG | PENDING | V2 검수 frame과 원본 hash 기록 |
-| Candidate Source / Fixture / Manifest 영구 저장 | PENDING | Development branch commit 및 persisted 검증 |
-| 필수 temp-only 파일 0 | PENDING | 최종 persisted manifest 검사 |
-| Secret Scan | PENDING | 저장 Candidate / source 검사 |
-| Public Review allowlist | PENDING | MP4 / PNG / SHA256SUMS만 포함 |
-| 실제 다운로드 URL HTTP 200 | PENDING | 파일별 전체 body GET |
-| 다운로드본과 원본 SHA-256 동일 | PENDING | 파일별 byte hash 비교 |
+| 5초 silent V2 Candidate | PASS | `evidence/video/REPORT.json`; 1080×1920, 30 fps, 150 frames, 5초, audio 0; strict decode PASS. 원본 RGBA150개는 ON150과 일치 |
+| Checkpoint PNG | PASS | `evidence/CHECKPOINT_SOURCE_MATCH_VIDEO.json`; 9/9 native PNG/RGBA가 영상 생성 원본 프레임과 동일 |
+| Candidate Source / Fixture / Manifest 영구 저장 | PASS | Development branch의 저장된 구현·기존 영구 Fixture·독립 Manifest; 최종 `--require-persisted`로 HEAD/index body 확인 |
+| 필수 temp-only 파일 0 | PASS | 최종 Manifest closure의 필수 temp-only 목록은 빈 배열. 다운로드 확인용 사본/Scanner는 런타임 필수 입력이 아님 |
+| Secret Scan | PASS | `evidence/SECRET_SCAN.json`; pinned Gitleaks 8.24.3, 작업 텍스트128개 및 개발 Git 변경 이력, exit0/발견0/스캔 중 변경0 |
+| Public Review allowlist | PASS | MP4 1, PNG 9, SHA256SUMS 1; 그 외 파일 0 |
+| 실제 다운로드 URL HTTP 200 | PASS | `evidence/HTTP_DOWNLOAD_VERIFY.json`; 11/11 전체 body GET HTTP 200 |
+| 다운로드본과 원본 SHA-256 동일 | PASS | 11/11 다운로드 = 원본 = commit body, bytes 동일; checksum 목록의 media 10개 모두 검증 |
 
 ## 사용자 검수 파일
 
-영상 파일명: `SUEZ_EVENT_SYSTEM_V1_CANDIDATE_V2_5S_SILENT.mp4`
+영상 파일명: `SUEZ_EVENT_SYSTEM_V1_CANDIDATE_V2_5S_SILENT.mp4`  
+SHA-256: `94d5210b792bed0324bbed10bda5bad304b43be613b13094764e6a29ecad796f` (551,691 bytes).
 
 | 파일 | 원본 SHA-256 | 실제 다운로드 URL | HTTP | 다운로드 SHA 일치 |
 |---|---|---|---|---|
-| V2 MP4 | `PENDING` | `PENDING` | `PENDING` | `PENDING` |
-| Checkpoint PNG 목록 | `PENDING` | `PENDING` | `PENDING` | `PENDING` |
-| SHA256SUMS | `PENDING` | `PENDING` | `PENDING` | `PENDING` |
+| 01_EVENT_READY_F000.png | `fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/01_EVENT_READY_F000.png) | 200 | PASS |
+| 02_LINE_REVEAL_F001.png | `fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/02_LINE_REVEAL_F001.png) | 200 | PASS |
+| 03_LINE_REVEAL_F030.png | `e69fd05cddef1960525c0f2cb6b9e66aec0d7615088bbb401a2a139fbbe41691` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/03_LINE_REVEAL_F030.png) | 200 | PASS |
+| 04_LINE_REVEAL_F059.png | `5733e7b7ece8d31e74f8cd5b834d069a3fd44a96bce7b437c02712f642f02c56` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/04_LINE_REVEAL_F059.png) | 200 | PASS |
+| 05_LINE_HOLD_F074.png | `5733e7b7ece8d31e74f8cd5b834d069a3fd44a96bce7b437c02712f642f02c56` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/05_LINE_HOLD_F074.png) | 200 | PASS |
+| 06_METRIC_REVEAL_F075.png | `5733e7b7ece8d31e74f8cd5b834d069a3fd44a96bce7b437c02712f642f02c56` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/06_METRIC_REVEAL_F075.png) | 200 | PASS |
+| 07_METRIC_REVEAL_F090.png | `2a9cb208e83a41c1057ebad160be19cfed939a6a249572d9242319f455fe812d` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/07_METRIC_REVEAL_F090.png) | 200 | PASS |
+| 08_METRIC_REVEAL_F104.png | `23113988703b43de8d3dd27f11bb8fcd84e9dc9a0bba2c4876e759cbb8a8bb5a` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/08_METRIC_REVEAL_F104.png) | 200 | PASS |
+| 09_INFORMATION_HOLD_F149.png | `23113988703b43de8d3dd27f11bb8fcd84e9dc9a0bba2c4876e759cbb8a8bb5a` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/09_INFORMATION_HOLD_F149.png) | 200 | PASS |
+| SHA256SUMS | `4bb766645073f81b897aa3adc2b3941d88ae2372d5cafbf96f1e2a82afe0b27b` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/SHA256SUMS) | 200 | PASS |
+| SUEZ_EVENT_SYSTEM_V1_CANDIDATE_V2_5S_SILENT.mp4 | `94d5210b792bed0324bbed10bda5bad304b43be613b13094764e6a29ecad796f` | [다운로드](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/1439ab604b305e39ee18af9538b167cedddfa277/world-simulation-shorts-engine/recovery/event-v1-candidate-v2/public-review/SUEZ_EVENT_SYSTEM_V1_CANDIDATE_V2_5S_SILENT.mp4) | 200 | PASS |
 
 최종 사용자 보고 뒤 `USER_VIDEO_REVIEW_REQUIRED`에서 멈춘다. 사용자 영상 승인은 아직 없으며, Event Final 승격은 하지 않았다.
+
+검증 한계: 64306은 저장된 Core의 의미 문법 감사를 기준으로 검사했고 원본 영상의 새 직접 대조는 하지 않았다. 현재 머신의 실제 검증·제작이며 별도 새 클라우드 복원 렌더를 주장하지 않는다. Secret Scan은 텍스트와 Git diff를 검사하며 바이너리 media 본문은 텍스트 탐지 대상이 아니다. 검수 URL은 media commit `1439ab6`의 고정 주소이며 이후 문서/Manifest 저장으로 media 바이트를 변경하지 않는다.

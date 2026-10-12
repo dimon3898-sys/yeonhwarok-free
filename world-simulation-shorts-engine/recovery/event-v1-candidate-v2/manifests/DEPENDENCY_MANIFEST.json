@@ -1,0 +1,518 @@
+{
+  "schema": 1,
+  "scope": "EVENT_SYSTEM_V1_CANDIDATE_V2",
+  "status": "USER_VIDEO_REVIEW_REQUIRED",
+  "baselines": {
+    "event_core": "00ad07e4a6041ea4cc6369bfce8871762f61f152",
+    "production_data": "69e6ed83",
+    "camera_v5": "29b8ee294360812b55ef577b62411de58159003b",
+    "candidate_v1": "1d5182f7effde2e776f9c9ac21b00f6d681a423a"
+  },
+  "event_final": false,
+  "user_video_approved": false,
+  "protected_changes": {
+    "camera_renderer_visual": "UNCHANGED",
+    "production_geometry_metric": "UNCHANGED",
+    "candidate_v1_artifacts": "UNCHANGED_FROM_1d5182f",
+    "event_geometry_timeline_occlusion_line_pass_metric_compiler_glyph": "UNCHANGED_FROM_1d5182f",
+    "historical_core_manifests": "UNCHANGED",
+    "authorized_changed_core_paths": [
+      "world-simulation-shorts-engine/web/map_infographic_v1/event_gpu_pipeline_v1.mjs",
+      "world-simulation-shorts-engine/web/map_infographic_v1/event_layout_adapter_v1.mjs"
+    ]
+  },
+  "required_temp_only_files": [],
+  "parent": {
+    "path": "world-simulation-shorts-engine/recovery/v5/manifests/final/DEPENDENCY_MANIFEST.json",
+    "sha256": "abc0f9df537cab33957bd6d6680d84a4b1914db82879029e8185ff690b895cdc",
+    "bytes": 3703
+  },
+  "dependencies": [
+    {
+      "name": "three",
+      "version": "0.170.0",
+      "ecosystem": "npm",
+      "lock_path": "cinematic-world-map/package-lock.json",
+      "artifact_path": "world-simulation-shorts-engine/web/vendor/three/0.170.0/three.module.js",
+      "sha256": "ce1fa418de16a19495a9f72495580e3015d7745c296d3ce0485897f902ddedfb",
+      "bytes": 1314681
+    },
+    {
+      "name": "playwright",
+      "version": "1.62.1",
+      "ecosystem": "npm",
+      "lock_path": "cinematic-world-map/package-lock.json",
+      "installed_package_path": "cinematic-world-map/node_modules/playwright/package.json"
+    },
+    {
+      "name": "playwright-core",
+      "version": "1.62.1",
+      "ecosystem": "npm",
+      "lock_path": "cinematic-world-map/package-lock.json",
+      "installed_package_path": "cinematic-world-map/node_modules/playwright-core/package.json"
+    },
+    {
+      "name": "numpy",
+      "version": "2.2.4",
+      "ecosystem": "python",
+      "lock_path": "world-simulation-shorts-engine/recovery/v4/runtime/python-requirements.lock"
+    },
+    {
+      "name": "Pillow",
+      "version": "11.1.0",
+      "ecosystem": "python",
+      "lock_path": "world-simulation-shorts-engine/recovery/v4/runtime/python-requirements.lock"
+    },
+    {
+      "name": "GDAL",
+      "version": "3.10.3",
+      "ecosystem": "python",
+      "lock_path": "world-simulation-shorts-engine/recovery/v4/runtime/python-requirements.lock"
+    }
+  ],
+  "interpreters": [
+    {
+      "name": "python",
+      "executable": "/usr/bin/python3",
+      "version": "3.13.5"
+    },
+    {
+      "name": "node",
+      "version": "24.19.0"
+    },
+    {
+      "name": "chromium",
+      "version": "154.0.8037.57"
+    },
+    {
+      "name": "ffmpeg",
+      "version": "7.1.5"
+    }
+  ],
+  "observed_toolchain": {
+    "interpreters": {
+      "node": "24.19.0",
+      "chromium": "154.0.8037.57",
+      "python": "3.13.5",
+      "ffmpeg": "7.1.5"
+    },
+    "packages": [
+      {
+        "name": "three",
+        "version": "0.170.0",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "playwright",
+        "version": "1.62.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "playwright-core",
+        "version": "1.62.1",
+        "ecosystem": "npm"
+      },
+      {
+        "name": "numpy",
+        "version": "2.2.4",
+        "ecosystem": "python"
+      },
+      {
+        "name": "Pillow",
+        "version": "11.1.0",
+        "ecosystem": "python"
+      },
+      {
+        "name": "GDAL",
+        "version": "3.10.3",
+        "ecosystem": "python"
+      }
+    ]
+  },
+  "dependency_locks": [
+    {
+      "path": "cinematic-world-map/package-lock.json",
+      "sha256": "cd6d339f66be951cf2e7a261dc4e82147031c4965febe66078489c856332e088",
+      "bytes": 2099
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/runtime/python-requirements.lock",
+      "sha256": "de855b8f5e4ec6d9d80264160d4ade42ac486795fdc013fb36ab52358d88af8d",
+      "bytes": 197
+    }
+  ],
+  "setup": [
+    "npm",
+    "--prefix",
+    "cinematic-world-map",
+    "ci",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    "--strict-ssl=true"
+  ],
+  "parser_provider": {
+    "package": "playwright",
+    "version": "1.62.1",
+    "sha256": "01511e45db7646e2a12890de8d7866caa0754c8799db6407a6345236f4bed0c4"
+  },
+  "optional_verification_tools": [
+    {
+      "name": "gitleaks",
+      "version": "8.24.3",
+      "binary_sha256": "e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad",
+      "official_release": "https://github.com/gitleaks/gitleaks/releases/tag/v8.24.3",
+      "required_for_runtime": false,
+      "required_temporary_runtime_input": false,
+      "use": "Delivery verification; use a verified installed command or an explicitly supplied binary path.",
+      "execution_evidence": "Retained redacted secret-scan report; this manifest command does not execute the scanner."
+    }
+  ],
+  "preserved_baseline_files": [
+    {
+      "path": "cinematic-world-map/assets/gis/countries_50m.geojson",
+      "sha256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "bytes": 3083490
+    },
+    {
+      "path": "cinematic-world-map/assets/gis/earth-topology.png",
+      "sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+      "bytes": 378243
+    },
+    {
+      "path": "cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+      "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+      "bytes": 4565076
+    },
+    {
+      "path": "cinematic-world-map/package-lock.json",
+      "sha256": "cd6d339f66be951cf2e7a261dc4e82147031c4965febe66078489c856332e088",
+      "bytes": 2099
+    },
+    {
+      "path": "cinematic-world-map/package.json",
+      "sha256": "b5c91a7a3bf6326ffd396dc285e14b226cb1b6f0715268b055d303dc5833e7a2",
+      "bytes": 304
+    },
+    {
+      "path": "docs/PERMANENT_GATE_POLICY.md",
+      "sha256": "0cee17c7c08681574f8f2a015588b36bf43ed1419b4a4193671f9c423598208b",
+      "bytes": 13434
+    },
+    {
+      "path": "tools/build_v5_candidate_manifests.py",
+      "sha256": "2f0c2c941e8c31de0f6959d01403cc25c0640e4bc51dc50751baa881b5a768c0",
+      "bytes": 12851
+    },
+    {
+      "path": "tools/compare_v4_png.py",
+      "sha256": "1ba86124a0bb3f9d99ba4057cd26038bca66a91fe7f9d249705feb8f2ed2b39a",
+      "bytes": 2777
+    },
+    {
+      "path": "tools/reproduce_v4_video.py",
+      "sha256": "346f2ba0943168e7efa87bc87ad86e0410bc55ae4af9062c475fd494f5fd51a3",
+      "bytes": 21314
+    },
+    {
+      "path": "tools/setup_v4_recovery.sh",
+      "sha256": "153bdb4adf7deab5b214383c6cfba781e83d602d2c4ea506b49028a28c8f4a51",
+      "bytes": 1735
+    },
+    {
+      "path": "tools/v4_recovery_gate.py",
+      "sha256": "5ed1be309c67a41efa95208004d7a99e32e78bbad41a6fe3b34aeddc6f50ffc7",
+      "bytes": 46553
+    },
+    {
+      "path": "tools/v4_recovery_plans.py",
+      "sha256": "cf600c3ca709aae0eb28dbf22f2abbd96ea7bc61b04b2903e26b1e3a668ea871",
+      "bytes": 34220
+    },
+    {
+      "path": "tools/validate_permanent_gate.py",
+      "sha256": "731f70e96308bc705a371f360fe9c6ced0f35f8b2f570f36d9f50c76ea7a4f5f",
+      "bytes": 25998
+    },
+    {
+      "path": "tools/validate_v5_candidate.py",
+      "sha256": "e1c07e171c726e03e1eed53c998f5b4f3b1087db62c51efd7ab44d4f38c189bd",
+      "bytes": 12858
+    },
+    {
+      "path": "tools/validate_v5_final.py",
+      "sha256": "5ae98172c01f5362eba947c28dd80b376d22b58355aa906aae57346e05b0a0db",
+      "bytes": 31094
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N29_00_E032_00_DEM.tif",
+      "sha256": "9dde480c3dc61c80c578026af04ccebfed5496ae911f9aef924c72c38f4642b7",
+      "bytes": 34187920
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N29_00_E033_00_DEM.tif",
+      "sha256": "b8db1296d52ede364adcb45285154b094731d483ae438fad1f438038730959c0",
+      "bytes": 41373390
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N30_00_E032_00_DEM.tif",
+      "sha256": "624a6d62e87ea02b718efab427859914115f1ad82aaa40eea62705fd9dcc9f5f",
+      "bytes": 46774078
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/dem/copernicus-glo30/originals/Copernicus_DSM_COG_10_N30_00_E033_00_DEM.tif",
+      "sha256": "67f44f3a5e64ef89d234030bc9c05f2486c5db2a2beb208dda7feca24abb1df8",
+      "bytes": 42775789
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.README.html",
+      "sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+      "bytes": 29897
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.prj",
+      "sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+      "bytes": 147
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tfw",
+      "sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+      "bytes": 173
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+      "sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+      "bytes": 699969932
+    },
+    {
+      "path": "world-simulation-shorts-engine/library/flat/terrain/ORIGINAL_SOURCE_RECORD.json",
+      "sha256": "f60c7f3f50be45c3ff32c6bf29ccb0fb537b1173c581dff227c3d8604d5b915b",
+      "bytes": 2610
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/REBUILD_REPRODUCTION.md",
+      "sha256": "c46734c264abb547a6e9371cbdd4fba6e4f8fd505bd319a9b68ae073a3493e43",
+      "bytes": 12320
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/V4-state-records/input-manifest.json",
+      "sha256": "196010df690252ea9dcfa270411fc19a8389e36092fd87fcf7611b93517d939a",
+      "bytes": 15934
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/equivalent-plans/CONTINENT-plan.json",
+      "sha256": "5820936bcec6b04a360999f93595b1d6b857827c013b8ea2ef1aeafec561332d",
+      "bytes": 7983388
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/equivalent-plans/REGIONAL-plan.json",
+      "sha256": "0b0a8677a9566655e91752e236e3bd0ff4fecfb14beca4149920011eb41ac9f9",
+      "bytes": 139217
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/review/reproduced-final-hold.png",
+      "sha256": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+      "bytes": 3237292
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/runtime/harness.mjs",
+      "sha256": "9c267834dc6d9a3bdb0118306115590608511d2a384464e19fb6bd971409b9ee",
+      "bytes": 4593
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/runtime/python-requirements.lock",
+      "sha256": "de855b8f5e4ec6d9d80264160d4ade42ac486795fdc013fb36ab52358d88af8d",
+      "bytes": 197
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/runtime/render.mjs",
+      "sha256": "97dfee2a5eb753afc71f2e6102a96d58345aaafa1fd0bf7227a2453b8654074e",
+      "bytes": 16526
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v4/runtime/serve.py",
+      "sha256": "318178764e91e2c014e0558f0587104b0df17fdd747bf586cd1d0da08769f620",
+      "bytes": 6207
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/compile_inputs.mjs",
+      "sha256": "b6dbaa29cf739252dba60e51ebad86ebdc0073ceaa4d6ad481cd0a5be01d46c6",
+      "bytes": 4335
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/evidence/final/COMPILED_REVEAL_PLAN.json",
+      "sha256": "cce6277b8cc4890bce4d223d0bfefa3950c8134af1d8f6ce023f7e2a9e02a7fe",
+      "bytes": 105305
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/evidence/final/clean-video/runtime-diagnostic.json",
+      "sha256": "8b5f94e143b073efbf171f1457abfd9c92dfe360235ff38061a8a9ab2ec1ac55",
+      "bytes": 5154367
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/evidence/runtime-diagnostic.json",
+      "sha256": "071630df2e0315de4975e71b7a1f0e5e9600972e8c3784c577443593c35d8fff",
+      "bytes": 5154515
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/harness.mjs",
+      "sha256": "1b7dd6cb60e2abed31d08ee7a8dc9fa8d9308e46569ffc37fbb35f28bde43eb2",
+      "bytes": 2589
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/index.html",
+      "sha256": "c16301f2bcc19f59babe649794749145b8dd30dabd2e496c2ab11c7d0d0f3295",
+      "bytes": 416
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/inputs/camera-plan.json",
+      "sha256": "d1dacc4f5aa8c1be5d8f5509904f304156334282eba14660ca496cad21a6d290",
+      "bytes": 153113
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/inputs/scene.json",
+      "sha256": "f378ea5d97dee1a28f244767ed14b5a45c3af1db48c26a57b5533aa439d309f2",
+      "bytes": 124778
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/render_candidate.mjs",
+      "sha256": "c08c924906b2a4b7dac065ef9a6fe8a6c06d63d865fd58ed6d6d66344913b312",
+      "bytes": 13856
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/v5/serve.py",
+      "sha256": "06790aecb376e5adfbbf3e48e6f399fb85c4fce32ae04dfaf9337ab397dc947c",
+      "bytes": 6136
+    },
+    {
+      "path": "world-simulation-shorts-engine/tests/camera_director_v5.test.mjs",
+      "sha256": "0fbb8bb2729f74b0b54f8c8ea31ba3d41b46f65734df120eb32f020481664b1b",
+      "bytes": 19725
+    },
+    {
+      "path": "world-simulation-shorts-engine/tests/fixtures/map_infographic_v1/source-scene-plan.json",
+      "sha256": "a702f337ec70f19de3c834cf3b57d71c7393a10c75a5474b42405511b1fcf72a",
+      "bytes": 822750
+    },
+    {
+      "path": "world-simulation-shorts-engine/tools/v4_recovery_terrain.py",
+      "sha256": "b4c05b678c87abe9ade6e65526fb9182e1ddb8ba63a569d9ef7efb569dc46923",
+      "bytes": 15455
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/camera-v4-assets/context-native.png",
+      "sha256": "6bafd19fd3d74d0786a52cd0f0be41863bf00b9acebf94e56edc4e2532468b4d",
+      "bytes": 23909281
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/dem/glo30/height.f32",
+      "sha256": "08a1b86fbe9c47a9495336e0e83d0bfdea014a4e5c7b36beaaa544aa283fd5a8",
+      "bytes": 207360000
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/earth-detail/v018/detail_0.png",
+      "sha256": "24771c49e24a939f4dfbaf1ed85ba2283b92b5f0ddc7f00d91fe36ad48bd9a13",
+      "bytes": 3594622
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/fonts/NotoSansCJKkr-Bold.otf",
+      "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+      "bytes": 16997968
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director.mjs",
+      "sha256": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+      "bytes": 21265
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v2.mjs",
+      "sha256": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+      "bytes": 21054
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v3.mjs",
+      "sha256": "35d880e74bc25938be0dc6f2d4df93ec4e0f478f8895f8aff12275e87f58428d",
+      "bytes": 2492
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v4.mjs",
+      "sha256": "604f89f13441ba1831da95a1eee6b5f71b19237eaec2286ab3e8ed2366721fef",
+      "bytes": 22183
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+      "sha256": "8dde7d2feb2cd85c073b0edde8eb6d03fc379afa8b462c71966d1e4c73efb8d3",
+      "bytes": 25364
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline.mjs",
+      "sha256": "824b7910662536d715e32958ebd83f87f23690418ef1e0ce5349684e4aade149",
+      "bytes": 8003
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v2.mjs",
+      "sha256": "ef3b1af99a685b4c1330947334b2778c98a5e35fff0dcdd27ed627b40a517f94",
+      "bytes": 5290
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v4.mjs",
+      "sha256": "daca475b7ccf6d6be89f00e889542acdac744a74cc76c4460c43c14182b8349b",
+      "bytes": 7660
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v5.mjs",
+      "sha256": "9990b8d0fdf481db076627fa7b45c5d99739d114be9dbc26b06169fe8c323279",
+      "bytes": 7671
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_reveal_v4.mjs",
+      "sha256": "360a0e6b6b76c5cc1dac988b05cf56e7507f13b0522bdaf2cdf420dca0bc9658",
+      "bytes": 8321
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/glyph_atlas.mjs",
+      "sha256": "34c30d6fd57e9a9821ec8058ec65285a2402f6b72a30a534773a044dbe770386",
+      "bytes": 5121
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+      "sha256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+      "bytes": 21026
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_motion_pass_v4.mjs",
+      "sha256": "7208e40a16c8a083fb8d8d9b0517091c76dd3a6525f41fb9aeaa1be7cbf0e7a4",
+      "bytes": 7187
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/local_detail_admission.mjs",
+      "sha256": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+      "bytes": 17105
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/moving_layout_v4.mjs",
+      "sha256": "6036693abe5996a7c136076376b534460a08f2ee2cc5396c1ccee2a28d07db2d",
+      "bytes": 11280
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+      "sha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+      "bytes": 53468
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+      "sha256": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+      "bytes": 19684
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_projection.mjs",
+      "sha256": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95",
+      "bytes": 14660
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/vendor/three/0.170.0/three.module.js",
+      "sha256": "ce1fa418de16a19495a9f72495580e3015d7745c296d3ce0485897f902ddedfb",
+      "bytes": 1314681
+    }
+  ]
+}
