@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "scope": "EVENT_SYSTEM_V1_CANDIDATE_V2_SOURCE_SCOPE_AUDIT",
+  "status": "PASS",
+  "audited_source_commit": "b575bdaf76bcabb957500b319bba8cc4e1ea6f68",
+  "observed_head_at_evidence_write": "13f17968ae2a2e2bc2acf5175f135a84b85f6386",
+  "audited_at_utc": "2026-10-12T20:41:53.875175+00:00",
+  "method": "Independent read-only source diff, saved report inspection, static source guard and projected screen-AABB iteration calculation. This audit did not run GPU draws, tests or renders.",
+  "baselines": {
+    "event_core": "00ad07e4a6041ea4cc6369bfce8871762f61f152",
+    "production_data": "69e6ed83acac00bfa7ab1853722f873792a813e1",
+    "camera_v5": "29b8ee294360812b55ef577b62411de58159003b",
+    "candidate_v1": "1d5182f7effde2e776f9c9ac21b00f6d681a423a"
+  },
+  "protected_scope": {
+    "camera_renderer_native_visual": {
+      "baseline": "29b8ee294360812b55ef577b62411de58159003b",
+      "original_tracked_paths_checked": 1893,
+      "changed_original_paths": []
+    },
+    "production_suez_geometry_metric_value_and_provenance": {
+      "baseline": "69e6ed83acac00bfa7ab1853722f873792a813e1",
+      "tracked_paths_checked": 76,
+      "changed_paths": []
+    },
+    "candidate_v1_artifacts": {
+      "baseline": "1d5182f7effde2e776f9c9ac21b00f6d681a423a",
+      "tracked_paths_checked": 58,
+      "changed_paths": []
+    },
+    "event_geometry_progress_occlusion_and_metric_compilation": {
+      "baseline": "1d5182f7effde2e776f9c9ac21b00f6d681a423a",
+      "checked_paths": [
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_contract_v1.mjs",
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_line_v1.mjs",
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_line_pass_v1.mjs",
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_occlusion_policy_v1.mjs",
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_timeline_v1.mjs",
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_metric_v1.mjs",
+        "world-simulation-shorts-engine/web/map_infographic_v1/event_metric_pass_v1.mjs"
+      ],
+      "changed_paths": []
+    }
+  },
+  "existing_core_source_changes": [
+    "world-simulation-shorts-engine/web/map_infographic_v1/event_gpu_pipeline_v1.mjs",
+    "world-simulation-shorts-engine/web/map_infographic_v1/event_layout_adapter_v1.mjs"
+  ],
+  "new_event_source_paths": [
+    "world-simulation-shorts-engine/web/map_infographic_v1/event_style_v1.mjs"
+  ],
+  "source_change_interpretation": {
+    "event_gpu_pipeline_v1.mjs": "Event-only automatic style sampling, modest Metric size adjustment and Event annotation placement integration. Native Camera/Renderer/graphics calls and source inputs remain unchanged.",
+    "event_layout_adapter_v1.mjs": "Adds measured near-visible-line annotation helper; original placement helper remains unchanged.",
+    "event_style_v1.mjs": "New generic Event-only palette/scoring/width/glow selection."
+  },
+  "automatic_contrast_sampler": {
+    "sample_domain": "Actual raster centers whose distance to unchanged full projected Event geometry is at most 0.5 pixel",
+    "primary_coverage_channel": "B",
+    "primary_coverage_threshold": 254,
+    "native_glow_exclusion": "Reject pixels when glow RGB byte sum exceeds 3",
+    "protected_graphics_exclusion": "Reject every protected rectangle with additional 2 pixel guard",
+    "rgba_orientation": "Top-down screen y mapped to bottom-up readback index ((height-1-y)*width+x)*4",
+    "color_space": "Read untouched native display-sRGB; decode exactly once to linear sRGB/D65 for contrast analysis.",
+    "center_shader_alpha": 0.946,
+    "native_input_mutation_found": false,
+    "palette_or_score_changed_by_sampler_fix": false,
+    "validation_reference": {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/evidence/visual-measurement-r4/REPORT.json",
+      "sha256": "d61aec44bb7d64d518586e977d1022ded562effb8a1e0e4fb5d1f220e6692d85",
+      "status": "PASS",
+      "source_commit": "b575bdaf76bcabb957500b319bba8cc4e1ea6f68",
+      "actual_primary_core_sample_count": 38,
+      "runtime_sample_count": 38,
+      "selected_name": "BRIGHT_TEAL",
+      "actual_rendered_winner": "BRIGHT_TEAL",
+      "independent_primary_only_selector_winner": "BRIGHT_TEAL",
+      "same_winner": true
+    }
+  },
+  "performance": {
+    "calculation_reference": {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate/evidence/on150-r2/REPORT.json",
+      "sha256": "1084ff7ba8b342afccb2b0f57561599a67476bfc33e0e0a4f75f4b1bef3c4a9e",
+      "camera_frame": 249,
+      "event_frame": 74
+    },
+    "projected_point_count": 92,
+    "segment_count": 91,
+    "segment_aabb_integer_loop_iterations": 1298,
+    "sampling_frequency": "Readbacks and sampling occur once for stable locked-camera bounds, projected path and protected rectangles; subsequent frames reuse cached style.",
+    "cache_signature_fields": [
+      "camera.flatBounds",
+      "primitive.screenCoordinates",
+      "protectedBoxes"
+    ],
+    "general_complexity": "Sum of expanded projected-segment AABB areas on the first uncached frame; at most 256 accepted background samples retained.",
+    "native_protection": "Geometry readiness and safe-area validation precede sampling. Line primitive, typed occlusion policy and arc-length reveal are unchanged."
+  },
+  "common_engine_source_guard": {
+    "audited_event_module_count": 10,
+    "rules": [
+      "geographic_name_or_metric_value",
+      "fixed_named_geographic_coordinate",
+      "temporary_or_absolute_runtime_reference"
+    ],
+    "findings": []
+  },
+  "manifest_and_delivery_policy": {
+    "prior_read_only_manifest_inspection": "PASS at saved source 0f568976: 220 required files, 30 source modules, 67 import edges, required_temp_only_files 0. This audit does not replace final persistence verification.",
+    "public_review_allowlist": [
+      "MP4",
+      "PNG",
+      "SHA256SUMS"
+    ],
+    "source_manifest_diagnostic_plan_publication_permitted": false,
+    "final_manifest_persistence_and_url_http_body_hash_checks": "REQUIRED_SEPARATE_DELIVERY_CHECKS"
+  },
+  "user_video_review": "USER_VIDEO_REVIEW_REQUIRED",
+  "user_video_approved": false,
+  "event_final": false
+}
