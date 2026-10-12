@@ -64,11 +64,11 @@ Metric 자신의 placement는 visible Event geometry, Marker occlusion으로 가
 | 항목 | 결과 |
 |---|---|
 | `193.30 km` 값·출처 | 변경 없음 — 소스/데이터 감사 PASS |
-| 요청 font size 및 실제 적용 size | `PENDING` |
-| 최종 Metric box / measured bounds | `PENDING` |
-| visible line과 실제 간격 | `PENDING` |
-| Metric collision | `PENDING` — 전체 Event ON 검증에서 확인 |
-| native graphic / Marker pixel·anchor 동일성 | `PENDING` — 전체 프레임 검증에서 확인 |
+| 요청 font size 및 실제 측정 | 36 → 40 px; native atlas 197×45 → 217×49, ink 178×29 → 197×33 px |
+| 최종 Metric box / measured bounds | `[673.631804, 678.544450, 217, 49]`; 기존보다 왼쪽 22.25 px, 위쪽 2 px |
+| visible line과 실제 간격 | Full atlas 중심선 거리 38 → 15.75 px; 보호 footprint 간격 32.8 → 10 px. Ink 중심선 거리 48 → 26.75 px |
+| Metric collision | 0 — 전체 ON150 및 독립 segment–box 계산 PASS; 전150프레임 placement 동일 |
+| native graphic / Marker pixel·anchor 동일성 | ON150 PASS; 보호영역·Marker·ROI 밖 변경 pixel 0, native signature와 모든 예약 동일 |
 
 ## 시각 측정 이력
 
@@ -89,14 +89,14 @@ Sampler 수정은 palette나 score formula를 바꾸지 않았다. 중심 합성
 |---|---|---|
 | 변경 범위 / country-specific hardcode 소스 감사 | PASS | `evidence/SOURCE_SCOPE_AUDIT.json`; 10 Event 모듈에서 guard finding 0 |
 | 실제 width / palette / Primary contrast 측정 | PASS | `evidence/visual-measurement-r4/REPORT.json` |
-| V5 전체 Event OFF 250 frames BIT_EXACT | PENDING | 저장 V5 전체 hash 및 독립 V5 렌더와 비교 |
-| Event ON 150 frames 보호검사 | PENDING | protected pixel, outside-ROI pixel, native signature 검증 |
-| Line geometry / progress 동일 | PENDING | 기존 V1의 전체 150프레임 path·fraction·length·direction·occlusion 비교 |
-| Marker pixel / anchor 동일 | PENDING | 모든 보호영역과 native layout 비교 |
-| Synthetic A/B | PENDING | 일반 Fixture 회귀검사 |
-| Collision Synthetic Fixture | PENDING | 허용 Marker mask / 금지 Text·Title·Safe Area·Metric 충돌 검사 |
-| Metric collision 0 | PENDING | measured reservation 검사 |
-| 64306 Event Grammar | PENDING | 저장된 semantic 기준에 따른 검사; 원본 재검색 없음 |
+| V5 전체 Event OFF 250 frames BIT_EXACT | PASS | `evidence/off250/REPORT.json`: 250/250 RGBA·PNG 일치 |
+| Event ON 150 frames 보호검사 | PASS | `evidence/on150/REPORT.json`: 모든 보호 pixel·ROI 밖 변경 0 |
+| Line geometry / progress 동일 | PASS | ON150의 모든 path·fraction·length·direction·occlusion은 V1과 exact |
+| Marker pixel / anchor 동일 | PASS | ON150 native layout/camera 및 Marker 전체 예약 pixel 동일 |
+| Synthetic A/B | PASS | `evidence/SYNTHETIC_A_B_GPU.json`; 양 Fixture 보호/ROI/hold/OFF 복원 PASS |
+| Collision Synthetic Fixture | PASS | `evidence/COLLISION_SYNTHETIC_GPU.json`; 양방향 허용 mask 및 모든 금지 충돌 PASS |
+| Metric collision 0 | PASS | `evidence/METRIC_VISUAL_RELATION.json`; measured full atlas strict 검사 |
+| 64306 Event Grammar | PASS | `evidence/grammar64306/REPORT.json`; 저장 semantic 기준, 150프레임·75 Metric 프레임 순차 glyph 검사 |
 | 5초 silent V2 Candidate | PENDING | 1080×1920, 30 fps, 150 frames, audio 없음 |
 | Checkpoint PNG | PENDING | V2 검수 frame과 원본 hash 기록 |
 | Candidate Source / Fixture / Manifest 영구 저장 | PENDING | Development branch commit 및 persisted 검증 |

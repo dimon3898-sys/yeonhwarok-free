@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "source_frame_comparison": "PRE_ENCODING_RGBA_NOT_LOSSY_H264_PIXEL_EQUIVALENCE",
+  "frames": 150,
+  "on_report": "evidence/on150/REPORT.json",
+  "video_report": "evidence/video/REPORT.json",
+  "rgba_matches": 150,
+  "video": {
+    "path": "SUEZ_EVENT_SYSTEM_V1_CANDIDATE_V2_5S_SILENT.mp4",
+    "sha256": "94d5210b792bed0324bbed10bda5bad304b43be613b13094764e6a29ecad796f",
+    "bytes": 551691,
+    "frames": 150,
+    "duration_seconds": 5,
+    "audio_streams": 0
+  },
+  "decode": {
+    "status": "PASS",
+    "command": [
+      "ffmpeg",
+      "-v",
+      "error",
+      "-xerror",
+      "-threads",
+      "2",
+      "-i",
+      "SUEZ_EVENT_SYSTEM_V1_CANDIDATE_V2_5S_SILENT.mp4",
+      "-map",
+      "0:v:0",
+      "-f",
+      "null",
+      "-"
+    ],
+    "frames": 150,
+    "audio_streams": 0
+  }
+}
