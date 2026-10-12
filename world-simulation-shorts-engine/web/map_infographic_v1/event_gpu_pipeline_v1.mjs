@@ -25,10 +25,17 @@ function lineStyle(role,theme){
  return {width:theme[prefix+'Width'],coreColor:theme[prefix+'CoreColor'],
   glowRadius:theme.glowRadius,glowGain:theme.glowGain,glowColor:theme.glowColor};
 }
-function metricStyle(profile){
+function metricStyle(profile,safeArea){
  if(!profile)throw Error('EVENT_EXISTING_MEASURED_LOCATION_STYLE_REQUIRED');
  const keys=['fontSize','minFontSize','fontFamily','lineHeight','outlineRadius','maxWidth','maxLines'];
- return Object.fromEntries(keys.filter(key=>profile[key]!==undefined).map(key=>[key,profile[key]]));
+ const style=Object.fromEntries(keys.filter(key=>profile[key]!==undefined).map(key=>[key,profile[key]]));
+ // Typography is inherited; a new full Metric reservation is not a Location label.
+ // The unchanged glyph API adds this native padding; the unchanged layout API
+ // still checks the entire measured atlas against every protected box and line.
+ const padding=Math.ceil(style.outlineRadius??0)+6;
+ style.maxWidth=safeArea[2]-safeArea[0]-2*padding;
+ if(!Number.isFinite(style.maxWidth)||style.maxWidth<=0)throw Error('EVENT_METRIC_SAFE_RESERVATION_REQUIRED');
+ return style;
 }
 function protectedRectangles(items){
  return items.map(item=>{
@@ -91,7 +98,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   }
   if(immutableEventPlan.intent.metric){
    const profile=plans.REGIONAL.layout.measured?.location;
-   if(!metricPrimitive)metricPrimitive=compileMetricAnnotation(immutableEventPlan.intent,{style:metricStyle(profile)});
+   if(!metricPrimitive)metricPrimitive=compileMetricAnnotation(immutableEventPlan.intent,{style:metricStyle(profile,safeArea)});
    placement=chooseMetricPlacement({anchor:project(immutableEventPlan.intent.metric.anchor),measurement:metricPrimitive,
     safeArea,protectedBoxes,markerSize:visual.markerSize,gap:profile.gap,lineRoi:lineFootprint?.fullRoi??null});
    if(!metricPass)metricPass=createEventMetricPass({renderer,primitive:metricPrimitive,width,height,color:[1,1,1]});
