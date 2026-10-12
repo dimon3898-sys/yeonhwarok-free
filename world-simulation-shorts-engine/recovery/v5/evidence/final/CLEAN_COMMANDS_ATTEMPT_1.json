@@ -1,0 +1,89 @@
+[
+  {
+    "phase": "TOOLCHAIN",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "-c",
+      "\nimport json,subprocess,sys,zlib\nfrom osgeo import gdal\nimport numpy,PIL\nactual={'python':'.'.join(map(str,sys.version_info[:3])),'GDAL':gdal.VersionInfo('RELEASE_NAME'),\n'numpy':numpy.__version__,'Pillow':PIL.__version__,'zlib':zlib.ZLIB_VERSION,\n'node':subprocess.check_output(['node','--version']).decode().strip(),\n'chromium':subprocess.check_output(['chromium','--version']).decode().strip(),\n'ffmpeg':subprocess.check_output(['ffmpeg','-version']).decode().splitlines()[0]}\nassert actual['python']=='3.13.5' and actual['GDAL']=='3.10.3' and actual['numpy']=='2.2.4' and actual['Pillow']=='11.1.0'\nassert actual['zlib']=='1.3.1' and actual['node']=='v24.19.0' and 'Chromium 154.0.8037.57' in actual['chromium'] and actual['ffmpeg'].startswith('ffmpeg version 7.1.5')\nprint(json.dumps(actual,sort_keys=True))\n"
+    ],
+    "cwd": "<CLEAN_CHECKOUT>",
+    "started_at": "2026-10-12T05:15:03.786184+00:00",
+    "completed_at": "2026-10-12T05:15:04.021032+00:00",
+    "exit_code": 0
+  },
+  {
+    "phase": "DEPENDENCY_SETUP",
+    "argv": [
+      "npm",
+      "--prefix",
+      "cinematic-world-map",
+      "ci",
+      "--ignore-scripts",
+      "--no-audit",
+      "--no-fund",
+      "--strict-ssl=true",
+      "--cache",
+      "<CLEAN_CHECKOUT>/.git/final-npm-cache"
+    ],
+    "cwd": "<CLEAN_CHECKOUT>",
+    "started_at": "2026-10-12T05:15:04.021585+00:00",
+    "completed_at": "2026-10-12T05:15:05.666934+00:00",
+    "exit_code": 0
+  },
+  {
+    "phase": "CANDIDATE_PREFLIGHT",
+    "argv": [
+      "/usr/bin/python3",
+      "-B",
+      "tools/validate_v5_candidate.py",
+      "--repo",
+      ".",
+      "--require-persisted"
+    ],
+    "cwd": "<CLEAN_CHECKOUT>",
+    "started_at": "2026-10-12T05:15:05.667395+00:00",
+    "completed_at": "2026-10-12T05:15:09.875064+00:00",
+    "exit_code": 0
+  },
+  {
+    "phase": "SYNTHETIC_FIXTURES",
+    "argv": [
+      "node",
+      "--test",
+      "world-simulation-shorts-engine/tests/camera_director_v5.test.mjs"
+    ],
+    "cwd": "<CLEAN_CHECKOUT>",
+    "started_at": "2026-10-12T05:15:09.875356+00:00",
+    "completed_at": "2026-10-12T05:15:10.016619+00:00",
+    "exit_code": 0
+  },
+  {
+    "phase": "INPUT_RECOMPILE",
+    "argv": [
+      "node",
+      "world-simulation-shorts-engine/recovery/v5/compile_inputs.mjs",
+      "--output-dir",
+      "<PRIVATE_OUTPUT_ROOT>/compiled-inputs"
+    ],
+    "cwd": "<CLEAN_CHECKOUT>",
+    "started_at": "2026-10-12T05:15:10.016956+00:00",
+    "completed_at": "2026-10-12T05:15:10.074490+00:00",
+    "exit_code": 0
+  },
+  {
+    "phase": "CLEAN_STATIC",
+    "argv": [
+      "node",
+      "world-simulation-shorts-engine/recovery/v5/render_candidate.mjs",
+      "--phase",
+      "checkpoints",
+      "--output-dir",
+      "<PRIVATE_OUTPUT_ROOT>/clean-static"
+    ],
+    "cwd": "<CLEAN_CHECKOUT>",
+    "started_at": "2026-10-12T05:15:10.079466+00:00",
+    "completed_at": "2026-10-12T05:15:17.042801+00:00",
+    "exit_code": 1
+  }
+]
