@@ -50,11 +50,49 @@ async function main(){
    assert.equal(on.eventPlan.totalFrames,150);assert.equal(on.eventPlan.fps,30);
    assert.equal(on.eventPlan.intent.data_mode,fixture.intent.data_mode);
    assert.deepEqual(on.eventPlan.intent.line,fixture.intent.line);assert.deepEqual(on.eventPlan.intent.metric,fixture.intent.metric);
-   for(const row of on.frames){
+   const fullText=`${fixture.intent.metric.display_value} ${fixture.intent.metric.unit}`;
+   const graphemeCount=[...new Intl.Segmenter('ko',{granularity:'grapheme'}).segment(fullText)].length;
+   const metricRows=on.frames.filter(row=>row.metric!==null),firstMetric=metricRows[0]?.metric;
+   assert.ok(firstMetric,'Native measured Metric evidence required');
+   assert.ok(firstMetric.atlasDimensions.every(value=>Number.isSafeInteger(value)&&value>0));
+   assert.equal(firstMetric.baselines.length,1,'Fixed Metric must retain a single native baseline');
+   assert.ok(firstMetric.baselines.every(value=>Number.isFinite(value)&&value>=0&&value<firstMetric.atlasDimensions[1]));
+   const metricBeat=timeline.find(beat=>beat.state==='METRIC_REVEAL');
+   assert.equal(metricRows.length,on.eventPlan.totalFrames-metricBeat.startFrame,'Complete native Metric coverage metadata required');
+   let previousAlphas=Array.from({length:graphemeCount},()=>0);
+   const nativeMeasurement={atlasDimensions:firstMetric.atlasDimensions,alphaBounds:firstMetric.alphaBounds,
+    baselines:firstMetric.baselines,anchor:firstMetric.anchor};
+   const reservation=metricRows[0].placement;
+   assert.equal(reservation.reservationSpace,'FULL_MEASURED_ATLAS');
+   assert.deepEqual(reservation.atlasDimensions,nativeMeasurement.atlasDimensions);
+   for(const [index,row]of on.frames.entries()){
+    assert.equal(row.eventFrame,index,'Evidence must cover every Event frame in order');
     const beat=timeline.find(x=>row.eventFrame>=x.startFrame&&row.eventFrame<x.endFrame);assert.equal(row.state,beat.state);checkFrame(row,fixture);
-    if(['EVENT_READY','LINE_REVEAL','LINE_HOLD'].includes(row.state))assert.equal(row.metricFraction,0,'Metric appeared before complete geographic line and hold');
+    if(['EVENT_READY','LINE_REVEAL','LINE_HOLD'].includes(row.state)){
+     assert.equal(row.metricFraction,0,'Metric appeared before complete geographic line and hold');
+     assert.equal(row.metric,null,'Native Metric pass appeared before its reveal beat');
+    }
     if(['LINE_HOLD','METRIC_REVEAL','INFORMATION_HOLD'].includes(row.state))assert.equal(row.lineFraction,1);
-    if(row.metric){assert.equal(row.metric.text,`${fixture.intent.metric.display_value} ${fixture.intent.metric.unit}`);assert.equal(row.metric.displayValue,fixture.intent.metric.display_value);}
+    if(row.eventFrame>=metricBeat.startFrame){
+     const metric=row.metric;assert.ok(metric,'Every Metric reveal/hold frame must have native glyph metadata');
+     assert.equal(metric.text,fullText);assert.equal(metric.displayValue,fixture.intent.metric.display_value);assert.equal(metric.unit,fixture.intent.metric.unit);
+     assert.equal(metric.fullReservation,true);assert.equal(metric.visibleFraction,row.metricFraction);
+     assert.equal(metric.fullCoverage,row.metricFraction===1);assert.equal(metric.drawn,row.metricFraction>0);
+     assert.deepEqual({atlasDimensions:metric.atlasDimensions,alphaBounds:metric.alphaBounds,baselines:metric.baselines,anchor:metric.anchor},nativeMeasurement,
+      'Native glyph atlas, ink bounds, baseline or anchor changed during reveal');
+     assert.deepEqual(row.placement,reservation,'Full measured reservation moved or resized during Metric reveal');
+     const alphas=metric.graphemeAlphas;
+     assert.equal(alphas.length,graphemeCount);assert.equal(metric.visibleGlyphCount,alphas.filter(alpha=>alpha>0).length);
+     assert.ok(alphas.every(alpha=>Number.isFinite(alpha)&&alpha>=0&&alpha<=1));
+     assert.ok(alphas.filter(alpha=>alpha>0&&alpha<1).length<=1,'Multiple graphemes partially revealed simultaneously');
+     for(let glyph=0;glyph<graphemeCount;glyph++){
+      assert.ok(alphas[glyph]>=previousAlphas[glyph],'Native grapheme coverage decreased');
+      if(glyph>0&&alphas[glyph]>0)assert.equal(alphas[glyph-1],1,'Later native grapheme revealed before previous coverage completed');
+     }
+     if(row.metricFraction===0)assert.ok(alphas.every(alpha=>alpha===0));
+     if(row.metricFraction===1)assert.ok(alphas.every(alpha=>alpha===1));
+     previousAlphas=[...alphas];
+    }
    }
    for(const state of ['LINE_HOLD','INFORMATION_HOLD']){
     const rows=on.frames.filter(x=>x.state===state);assert.ok(rows.length);assert.equal(new Set(rows.map(x=>x.raw_rgba_sha256)).size,1,state+' changed during hold');
@@ -62,7 +100,10 @@ async function main(){
    Object.assign(report,{reference:{source:'Saved Core README full-video semantic audit',upload_sha256:'853ce5be22dc95c95e0c4b3eddbd603930e499bc88ee40cb4e59b50aad1187bc',
     direct_video_identity_comparison:'NOT_REESTABLISHED_FROM_SAVED_SEMANTIC_AUDIT',timing:'EXPLICIT_GENERATOR_PROFILE_NOT_REFERENCE_FRAME_NUMBERS'},
     criteria:{geographic_line_first:'PASS',brief_complete_line_hold:'PASS',fixed_measured_glyph_reveal:'PASS',stable_information_hold:'PASS',
-     supplied_metric_fixed_no_count_up:'PASS',protected_camera_marker_text_layout:'PASS'},eventPlan:on.eventPlan,
+     supplied_metric_fixed_no_count_up:'PASS',sequential_native_grapheme_coverage:'PASS',fixed_native_atlas_and_baseline:'PASS',
+     stable_full_measured_reservation:'PASS',protected_camera_marker_text_layout:'PASS'},
+    native_glyph_evidence:{frames:metricRows.length,grapheme_count:graphemeCount,...nativeMeasurement,
+     reservation:reservation.box,coverage_order:'COMPLETE_PREFIX_THEN_AT_MOST_ONE_PARTIAL_GRAPHEME_THEN_UNREVEALED_SUFFIX'},eventPlan:on.eventPlan,
     on_report:{path:path.relative(repo,path.resolve(opts['on-report'])),sha256:sha(await readFile(path.resolve(opts['on-report'])))} });
   }else{
    session=await openRuntime({fixture,includeV5:opts.phase==='off'});
