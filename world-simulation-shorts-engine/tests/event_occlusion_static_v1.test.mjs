@@ -37,7 +37,7 @@ try {
   renderer.setClearColor(0x102030,1);
   const camera=new THREE.OrthographicCamera(0,width,0,height,.1,10);camera.position.z=5;camera.updateMatrixWorld();
   const nativeScene=new THREE.Scene();
-  const staticLine=new THREE.Mesh(new THREE.PlaneGeometry(600,3),new THREE.MeshBasicMaterial({color:0x58a9c1,depthTest:false,depthWrite:false}));
+  const staticLine=new THREE.Mesh(new THREE.PlaneGeometry(600,3),new THREE.MeshBasicMaterial({color:0x58a9c1,side:THREE.DoubleSide,depthTest:false,depthWrite:false}));
   staticLine.position.set(540,530,0);nativeScene.add(staticLine);
   const marker=new THREE.Group();marker.position.set(540,700,0);
   const ring=new THREE.Mesh(new THREE.RingGeometry(10,16,64),new THREE.MeshBasicMaterial({color:0xee6889,side:THREE.DoubleSide,depthTest:false,depthWrite:false}));
