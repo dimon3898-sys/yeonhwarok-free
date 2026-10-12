@@ -3,6 +3,9 @@
 set -euo pipefail
 v4_repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 v4_cache="${V4_NPM_CACHE:-$v4_repo/.git/v4-npm-cache}"
+git -C "$v4_repo" lfs version
+git -C "$v4_repo" lfs install --local
+git -C "$v4_repo" lfs pull --include="world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif,world-simulation-shorts-engine/web/dem/glo30/height.f32" --exclude=""
 node -e 'if(process.version!=="v24.19.0") throw Error("V4 requires recorded Node v24.19.0; install that version before setup")'
 chromium --version | rg -q 'Chromium 154\.0\.8037\.57'
 /usr/bin/python3 -B - <<'PY'
@@ -17,10 +20,10 @@ print('Recorded browser/raster dependency versions: PASS')
 PY
 npm --prefix "$v4_repo/cinematic-world-map" ci --ignore-scripts --no-audit --no-fund --cache "$v4_cache"
 node --input-type=module - "$v4_repo" <<'JS'
-import {createRequire} from 'node:module';
-const require = createRequire(process.argv[2] + '/cinematic-world-map/package.json');
+import {readFileSync} from 'node:fs';
+const packageRoot = process.argv[2] + '/cinematic-world-map/node_modules/';
 for (const [name, version] of [['three','0.170.0'],['playwright','1.62.1'],['playwright-core','1.62.1']]) {
-  if (require(name+'/package.json').version !== version) throw Error(name+' version mismatch');
+  if (JSON.parse(readFileSync(packageRoot+name+'/package.json','utf8')).version !== version) throw Error(name+' version mismatch');
 }
 console.log('Locked npm dependency versions: PASS');
 JS
