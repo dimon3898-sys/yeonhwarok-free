@@ -89,18 +89,18 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   for(let segment=0;segment<primitive.segmentLengthsPixels.length;segment++){
    const a=primitive.screenCoordinates[segment],b=primitive.screenCoordinates[segment+1],length=primitive.segmentLengthsPixels[segment];
    if(length===0)continue;
-   const normal=[-(b[1]-a[1])/length,(b[0]-a[0])/length];
-   const steps=Math.max(1,Math.ceil(length/3));
-   for(let step=0;step<steps;step++)for(const offset of [0,-3,3,-6,6]){
-    const fraction=(step+.5)/steps,x=Math.floor(a[0]+(b[0]-a[0])*fraction+normal[0]*offset),
-     y=Math.floor(a[1]+(b[1]-a[1])*fraction+normal[1]*offset),key=x+','+y;
+   // Rank against the actual full-core raster centers, not nearby terrain whose
+   // shading/material can differ from the geography underneath the Event line.
+   for(let y=Math.floor(Math.min(a[1],b[1])-.5);y<=Math.ceil(Math.max(a[1],b[1])+.5);y++)
+    for(let x=Math.floor(Math.min(a[0],b[0])-.5);x<=Math.ceil(Math.max(a[0],b[0])+.5);x++){
+    const key=x+','+y;
     if(x<2||y<2||x>=width-2||y>=height-2||seen.has(key))continue;
+    const dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((x+.5-a[0])*dx+(y+.5-a[1])*dy)/(length*length)));
+    if(Math.hypot(x+.5-a[0]-dx*t,y+.5-a[1]-dy*t)>.5)continue;
     seen.add(key);
     if(protectedBoxes.some(box=>x+.5>=box[0]-2&&x+.5<=box[2]+2&&y+.5>=box[1]-2&&y+.5<=box[3]+2))continue;
     const index=at(x,y);
     if(coverage[index+2]<254||glow[index]+glow[index+1]+glow[index+2]>3)continue;
-    // Exclude the native material edge, whose unchanged Boundary is independent.
-    if([[0,0],[-2,0],[2,0],[0,-2],[0,2]].some(([dx,dy])=>coverage[at(x+dx,y+dy)+2]<254))continue;
     points.push({point:[x+.5,y+.5],rgb:[pixels[index]/255,pixels[index+1]/255,pixels[index+2]/255]});
    }
   }
@@ -108,7 +108,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   const style=selectEventLineStyle({role:immutableEventPlan.intent.line.style_role,theme:plans.REGIONAL.theme,
    primaryMaterialColor:plans.REGIONAL.theme.primary,backgroundSamples:selected.length?selected.map(item=>item.rgb):undefined});
   style.selection.backgroundSamplePoints=selected.map(item=>item.point);
-  style.selection.backgroundSampling='PROJECTED_EVENT_GEOMETRY_PRIMARY_COVERAGE_NATIVE_GLOW_AND_PROTECTED_GRAPHICS_EXCLUDED';
+  style.selection.backgroundSampling='ACTUAL_FULL_CORE_RASTER_CENTERS_PRIMARY_COVERAGE_NATIVE_GLOW_AND_PROTECTED_GRAPHICS_EXCLUDED';
   linePass?.dispose();linePass=createEventLinePass({renderer,width,height,style});
   eventStyleCache={signature,style};return style;
  }
