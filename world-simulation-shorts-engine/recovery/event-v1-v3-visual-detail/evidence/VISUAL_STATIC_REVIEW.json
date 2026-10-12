@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "reviewer": "Assistant visual inspection of actual native PNGs",
+  "source": "evidence/static-probes-r2/REPORT.json",
+  "candidates": {
+    "D0": {
+      "visual": {
+        "terrain": "VISUAL_WARNING",
+        "coastline": "VISUAL_WARNING",
+        "canal": "VISUAL_PASS",
+        "marker": "VISUAL_PASS",
+        "labels": "VISUAL_PASS",
+        "safeArea": "VISUAL_PASS",
+        "metric": "VISUAL_PASS",
+        "lineReadable": false,
+        "metricRelated": true
+      },
+      "warnings": [
+        "Retained native basemap is softened/coarse when enlarged; original terrain style and source bytes are unchanged.",
+        "Coastline uses retained generalized geometry; slight visible detail limitations remain."
+      ],
+      "blockingError": null,
+      "inspection": "Actual native 1080x1920 PNG inspected. D1 whole original canal/teal line/40px metric readable; no severe terrain corruption or wrong geography. D2/D3 native render inspected; Event rejected by protected Title collision."
+    },
+    "D1": {
+      "visual": {
+        "terrain": "VISUAL_WARNING",
+        "coastline": "VISUAL_WARNING",
+        "canal": "VISUAL_PASS",
+        "marker": "VISUAL_PASS",
+        "labels": "VISUAL_PASS",
+        "safeArea": "VISUAL_PASS",
+        "metric": "VISUAL_PASS",
+        "lineReadable": true,
+        "metricRelated": true
+      },
+      "warnings": [
+        "Retained native basemap is softened/coarse when enlarged; original terrain style and source bytes are unchanged.",
+        "Coastline uses retained generalized geometry; slight visible detail limitations remain."
+      ],
+      "blockingError": null,
+      "inspection": "Actual native 1080x1920 PNG inspected. D1 whole original canal/teal line/40px metric readable; no severe terrain corruption or wrong geography. D2/D3 native render inspected; Event rejected by protected Title collision."
+    },
+    "D2": {
+      "visual": {
+        "terrain": "VISUAL_WARNING",
+        "coastline": "VISUAL_WARNING",
+        "canal": "VISUAL_PASS",
+        "marker": "VISUAL_PASS",
+        "labels": "VISUAL_PASS",
+        "safeArea": "VISUAL_PASS",
+        "metric": "VISUAL_FAIL",
+        "lineReadable": false,
+        "metricRelated": false
+      },
+      "warnings": [
+        "Retained native basemap is softened/coarse when enlarged; original terrain style and source bytes are unchanged.",
+        "Coastline uses retained generalized geometry; slight visible detail limitations remain."
+      ],
+      "blockingError": "EVENT_LINE_PROTECTED_GRAPHIC_COLLISION: existing fixed Title/Panel",
+      "inspection": "Actual native 1080x1920 PNG inspected. D1 whole original canal/teal line/40px metric readable; no severe terrain corruption or wrong geography. D2/D3 native render inspected; Event rejected by protected Title collision."
+    },
+    "D3": {
+      "visual": {
+        "terrain": "VISUAL_WARNING",
+        "coastline": "VISUAL_WARNING",
+        "canal": "VISUAL_PASS",
+        "marker": "VISUAL_PASS",
+        "labels": "VISUAL_PASS",
+        "safeArea": "VISUAL_PASS",
+        "metric": "VISUAL_FAIL",
+        "lineReadable": false,
+        "metricRelated": false
+      },
+      "warnings": [
+        "Retained native basemap is softened/coarse when enlarged; original terrain style and source bytes are unchanged.",
+        "Coastline uses retained generalized geometry; slight visible detail limitations remain."
+      ],
+      "blockingError": "EVENT_LINE_PROTECTED_GRAPHIC_COLLISION: existing fixed Title/Panel",
+      "inspection": "Actual native 1080x1920 PNG inspected. D1 whole original canal/teal line/40px metric readable; no severe terrain corruption or wrong geography. D2/D3 native render inspected; Event rejected by protected Title collision."
+    }
+  },
+  "semanticIntegrity": {
+    "sameGeography": true,
+    "sameObject": true,
+    "relationCorrect": true,
+    "geometryMeaningPreserved": true,
+    "metricMateriallyTrue": true
+  },
+  "semanticBasis": "Original approved OSM axis and official Metric are immutable. Native map location, canal entrances and whole route remain represented; no coordinate generation or data substitution.",
+  "surveyGradeCertified": false,
+  "cameraAnimationStarted": false,
+  "firstProbeToolFailurePreserved": "evidence/static-probes/REPORT.json: host passed a non-null Event frame while disabled; corrected in host only before actual review."
+}
