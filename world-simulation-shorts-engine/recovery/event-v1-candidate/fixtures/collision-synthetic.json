@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "id": "EVENT_GEOGRAPHIC_MARKER_COLLISION_SYNTHETIC_V1",
+  "scope": "PRIVATE_SYNTHETIC_REGRESSION_NOT_PRODUCTION_PROOF",
+  "data_mode": "SYNTHETIC_TEST",
+  "camera_frame": 249,
+  "camera_binding": "Existing immutable V5 Final Hold; no Camera, Renderer or native Visual edits",
+  "derivation": {
+    "anchor": "Native measured MARKER geographic anchor and screen box center",
+    "projection": "Inverse of existing final camera flatBounds and canonical output",
+    "half_span_marker_sizes": 2,
+    "candidate_screen_directions": [[0, 1], [1, 0], [1, 1], [1, -1]],
+    "selection": "First unchanged three-vertex straight line that crosses only native geographic Marker reservations",
+    "vertices": ["anchor - half span", "native anchor", "anchor + half span"],
+    "direction_cases": ["FORWARD", "REVERSE"]
+  },
+  "source": {
+    "source_type": "SYNTHETIC_TEST",
+    "source_reference": "fixture://event-v1-candidate/collision-synthetic/native-layout-derived",
+    "verification_status": "SYNTHETIC_TEST"
+  },
+  "timeline": {
+    "fps": 30,
+    "profile": {
+      "ready_frames": 1,
+      "line_reveal_frames": 9,
+      "line_hold_frames": 3,
+      "metric_reveal_frames": 2,
+      "information_hold_frames": 2
+    },
+    "seed": 0
+  },
+  "negative_roles": ["COUNTRY", "LOCATION_LABEL", "EVENT_TITLE", "TITLE_CONTRAST_PANEL", "SCENARIO_DISCLOSURE"],
+  "required_checks": [
+    "Full native pipeline Marker crossing succeeds in both directions",
+    "All native protected pixels remain exact",
+    "Native layout, Marker size/design/anchor and Camera diagnostic remain exact",
+    "Arc-length continues through the hidden Marker center",
+    "Full supplied geometry and primitive remain unchanged",
+    "Text, title, panel, country and disclosure crossings remain rejected",
+    "Safe Area halo and endpoint rules remain rejected",
+    "Metric placement still treats Marker reservation as strict"
+  ]
+}
