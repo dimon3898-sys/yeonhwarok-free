@@ -43,6 +43,7 @@ async function main(){
    const THREE=await import('/three.js');
    const {createMapInfographicRenderer}=await import('/modules/renderer.mjs');
    const {createMovingGraphicPass}=await import('/modules/graphic_motion_pass_v4.mjs');
+   const {compileEventIntent}=await import('/modules/event_contract_v1.mjs');
    const {compileGeographicLinePrimitive}=await import('/modules/event_line_v1.mjs');
    const {createEventLinePass}=await import('/modules/event_line_pass_v1.mjs');
    const {selectEventLineStyle,EVENT_LINE_COLOR_CANDIDATES_SRGB,contrastRatioSrgb,
@@ -101,7 +102,7 @@ async function main(){
     // immediately and is never modified to improve a candidate's contrast.
     factory.boundaryLayerProbe();gl.finish();const nativeBoundary=factory.readPixels();
     fail(await digest(native())===baseHash,'NATIVE_BASE_RESTORE_FAILED');
-    const primitive=compileGeographicLinePrimitive(fixture.intent,{project:p=>factory.screen(p)});
+    const primitive=compileGeographicLinePrimitive(compileEventIntent(fixture.intent),{project:p=>factory.screen(p)});
     fail(JSON.stringify(primitive.screenCoordinates)===JSON.stringify(runtimeRow.line.path),
      'RUNTIME_LINE_GEOMETRY_DIFFERS_FROM_NATIVE_PROJECTED_GEOMETRY');
     const role=fixture.intent.line.style_role,prefix=role==='PRIMARY'?'primary':'secondary';
