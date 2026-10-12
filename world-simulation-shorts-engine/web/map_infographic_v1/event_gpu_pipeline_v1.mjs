@@ -74,6 +74,11 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
  function prepareEvent(camera,layout,visual,eventFrame){
   if(!immutableEventPlan)throw Error('EVENT_PLAN_REQUIRED_WHEN_ENABLED');
   const protectedBoxes=protectedRectangles(layout.items),safeArea=layoutContract.safeArea;
+  // Preserve every native reservation. The native MARKER role alone owns the exemption.
+  const protectedGraphics=layout.items.map((item,index)=>({
+   kind:item.role==='MARKER'&&item.kind!=='TEXT'&&item.kind!=='PANEL'?'MARKER':item.kind==='TEXT'?'TEXT':'PANEL',
+   box:protectedBoxes[index],
+  }));
   const project=point=>factory.screen(point);
   const controls=evaluateEventFrame(immutableEventPlan,eventFrame,{cameraState:camera,project,safeArea,
    scalePlan:plans.REGIONAL,heightSource,protectedBoxes});
@@ -81,7 +86,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   if(immutableEventPlan.intent.line){
    const style=lineStyle(immutableEventPlan.intent.line.style_role,plans.REGIONAL.theme);
    linePrimitive=compileGeographicLinePrimitive(immutableEventPlan.intent,{project});
-   lineFootprint=validateEventLineFootprint(linePrimitive,{style,safeArea,protectedBoxes});
+   lineFootprint=validateEventLineFootprint(linePrimitive,{style,safeArea,protectedGraphics});
    if(!linePass)linePass=createEventLinePass({renderer,width,height,style});
   }
   if(immutableEventPlan.intent.metric){
@@ -91,7 +96,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
     safeArea,protectedBoxes,markerSize:visual.markerSize,gap:profile.gap,lineRoi:lineFootprint?.fullRoi??null});
    if(!metricPass)metricPass=createEventMetricPass({renderer,primitive:metricPrimitive,width,height,color:[1,1,1]});
   }
-  return {controls,linePrimitive,lineFootprint,placement,safeArea,protectedBoxes};
+  return {controls,linePrimitive,lineFootprint,placement,safeArea,protectedBoxes,protectedGraphics};
  }
 
  function drawFrame(cameraFrame,{eventFrame=null,eventEnabled=false}={}){
@@ -109,7 +114,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
   const prepared=eventEnabled?prepareEvent(camera,layout,visual,eventFrame):null;
   let line=null,metric=null;
   if(prepared?.controls.lineActive)line=linePass.draw({primitive:prepared.linePrimitive,
-   visibleFraction:prepared.controls.lineFraction,safeArea:prepared.safeArea,protectedBoxes:prepared.protectedBoxes});
+   visibleFraction:prepared.controls.lineFraction,safeArea:prepared.safeArea,protectedGraphics:prepared.protectedGraphics});
   const nativeGraphics=graphics.draw({items:layout.items,reveal});
   if(prepared?.controls.metricActive)metric=metricPass.draw({visibleFraction:prepared.controls.metricFraction,
    placement:prepared.placement});
@@ -126,6 +131,7 @@ export async function createEventGpuPipeline({canvas,plans,cameraPlan,scene,heig
     layoutChoice:layout.choice,visibleRoles:[...nativeGraphics.visibleRoles],geographicAnchor:[...camera.geographicAnchor]},
    event:{enabled:eventEnabled,cameraOwnership:'READ_ONLY',baseRenderedFresh:true,rois,
     controls:prepared?.controls??null,protectedBoxes:prepared?.protectedBoxes??[],
+    protectedGraphics:prepared?.protectedGraphics??[],
     line,metric,placement:prepared?.placement??null,lineFullRoi:prepared?.lineFootprint?.fullRoi??null}};
   return lastDiagnostic;
  }
