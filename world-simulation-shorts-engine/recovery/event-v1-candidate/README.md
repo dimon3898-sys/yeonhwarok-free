@@ -32,7 +32,7 @@ TLS checks; do not replace locked assets or relax verification when access fails
 
 ```sh
 git lfs pull --include="world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif,world-simulation-shorts-engine/web/dem/glo30/height.f32" --exclude=""
-npm --prefix cinematic-world-map ci --ignore-scripts --no-audit --no-fund --strict-ssl=true
+npm --prefix cinematic-world-map ci --ignore-scripts --no-audit --no-fund --strict-ssl=true --cache /workspace/.onboarding/yeonhwarok-free/npm-cache
 /usr/bin/python3 -B world-simulation-shorts-engine/recovery/event-v1-candidate/validate_manifests.py --require-persisted
 ```
 
@@ -75,6 +75,11 @@ pixel-identical; line geometry continues behind them. Only the explicit
 geographic Event line/Marker pair can overlap. Text, Title, Safe Area and Metric
 constraints remain strict. Static protection source/tests and collision
 fixtures are retained separately with their results.
+
+The Event caller reserves the full fixed metric atlas within the existing Safe
+Area instead of borrowing a Location Label's text-width limit. Font, size,
+outline, baseline, native glyph API and every original Visual remain unchanged.
+The full measured reservation still passes the unchanged strict placement checks.
 
 Grammar validates the preserved 64306 semantic audit: geographic line reveal,
 complete-line hold, fixed measured glyph reveal and information hold. It does
@@ -123,3 +128,7 @@ Use an installed `gitleaks` command or provide its verified location to the
 scan procedure. It is delivery verification tooling, with no temporary binary
 path included among required rendering or build inputs. The manifest validator
 records this metadata without claiming to execute the secret scan.
+
+```sh
+/usr/bin/python3 -B world-simulation-shorts-engine/recovery/event-v1-candidate/scan_candidate.py --repo . --candidate world-simulation-shorts-engine/recovery/event-v1-candidate --base 00ad07e4 --tip HEAD --scanner /ABSOLUTE_PATH_TO_VERIFIED_GITLEAKS
+```
