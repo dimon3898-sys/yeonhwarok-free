@@ -258,6 +258,13 @@ async function main(){
      contrast:measureContrast(v1Draw.bytes,baselineStyle,'V1_NATIVE_BOUNDARY_STYLE','BASELINE'),
      terrainCoverage:area(v1Draw.bytes,baselineStyle)};
     const palette=[];
+    // Keep complete measurements available even when a later acceptance
+    // assertion rejects selection. The Node driver saves this immutable
+    // diagnostic result rather than losing the readings with the exception.
+    window.eventVisualMeasurement={nativeBaseFramebufferIdentity:true,nativeBaseRawRgbaSha256:baseHash,
+     savedV1LineHoldFramebufferIdentity:true,baseline,candidates:palette,
+     actualPrimaryCoreSampleCount:centerPixels.length,actualUnoccludedCrossSectionCount:profilePoints.length,
+     nativeSafeArea};
     let selectedBytes=null;
     for(const candidate of EVENT_LINE_COLOR_CANDIDATES_SRGB){
      const style={width:expectedStyle.width,glowRadius:expectedStyle.glowRadius,glowGain:expectedStyle.glowGain,
@@ -273,15 +280,25 @@ async function main(){
     fail(await digest(selectedBytes)===runtimeRow.raw_rgba_sha256,'MEASURED_SELECTED_STYLE_DIFFERS_FROM_RUNTIME');
     const observedWinner=palette.reduce((best,row)=>row.score>best.score?row:best);
     const selected=palette.find(row=>row.name===expectedStyle.selection.selectedName);
-    fail(observedWinner.name===selected.name,'ACTUAL_RENDERED_PALETTE_WINNER_DIFFERS_FROM_AUTOMATIC_SELECTION');
     const independentSelector=selectEventLineStyle({role,theme:regional.theme,primaryMaterialColor:regional.theme.primary,
      backgroundSamples:centerPixels.map(([x,y])=>rgb(base,x,y))});
+    const baselineComparison={luminanceP10RatioImproved:selected.luminanceContrast.p10>baseline.contrast.luminanceContrast.p10,
+     actualChromaticP10DistanceImproved:selected.OKLabChromaticDistance.p10>baseline.contrast.OKLabChromaticDistance.p10,
+     actualCompositeScoreImproved:selected.score>baseline.contrast.score};
+    Object.assign(window.eventVisualMeasurement,{selection:{runtimeName:selected.name,
+     actualRenderedWinner:observedWinner.name,sameWinner:observedWinner.name===selected.name,
+     primaryOnlyIndependentSelectorWinner:independentSelector.selection.selectedName,
+     runtimeScore:selected.score,actualWinnerScore:observedWinner.score,
+     independentPrimaryOnlyModel:independentSelector.selection},baselineComparison,
+     selected:{name:selected.name,style:expectedStyle,width:selected.width,terrainCoverage:selected.terrainCoverage,
+      luminanceContrast:selected.luminanceContrast,OKLabDistance:selected.OKLabDistance,
+      OKLabChromaticDistance:selected.OKLabChromaticDistance}});
+    fail(observedWinner.name===selected.name,'ACTUAL_RENDERED_PALETTE_WINNER_DIFFERS_FROM_AUTOMATIC_SELECTION');
     fail(independentSelector.selection.selectedName===selected.name,'PRIMARY_ONLY_BACKGROUND_SELECTOR_WINNER_DIFFERS');
     fail(selected.width.coreFwhmPixels.median>baseline.width.coreFwhmPixels.median,
      'ACTUAL_RENDERED_LINE_DID_NOT_BECOME_THICKER');
-    fail(selected.luminanceContrast.p10>baseline.contrast.luminanceContrast.p10,
-     'ACTUAL_PRIMARY_BACKGROUND_LUMINANCE_CONTRAST_DID_NOT_IMPROVE');
-    fail(selected.OKLabChromaticDistance.p10>baseline.contrast.OKLabChromaticDistance.p10,
+    fail(baselineComparison.actualCompositeScoreImproved,'ACTUAL_PRIMARY_BACKGROUND_COMPOSITE_SCORE_DID_NOT_IMPROVE');
+    fail(baselineComparison.actualChromaticP10DistanceImproved,
      'ACTUAL_PRIMARY_BACKGROUND_CHROMATIC_CONTRAST_DID_NOT_IMPROVE');
     fail(frozenInputs===JSON.stringify({regional,continent,input,fixture}),'MEASUREMENT_MUTATED_FROZEN_INPUT');
     fail(await digest(native())===baseHash,'NATIVE_BASE_NOT_RESTORED_AFTER_MEASUREMENT');
@@ -295,7 +312,7 @@ async function main(){
       color:'8-bit actual rendered core and unchanged background from identical raster pixels; decode display sRGB once to linear sRGB for WCAG luminance ratio and D65 OKLab analysis.',
       contrastScore:expectedStyle.selection.scoreFormula,
       unchangedPass:'The native Event raster pass, geographic primitive and typed Marker occlusions are reused without shader or native Renderer edits.'},
-     baseline,candidates:palette,selection:{runtimeName:selected.name,actualRenderedWinner:observedWinner.name,
+     baseline,baselineComparison,candidates:palette,selection:{runtimeName:selected.name,actualRenderedWinner:observedWinner.name,
       sameWinner:true,primaryOnlyIndependentSelectorWinner:independentSelector.selection.selectedName,
       runtimeScore:selected.score,runnerUpScore:palette.filter(row=>row.name!==selected.name).reduce((a,b)=>Math.max(a,b.score),-Infinity)},
      selected:{name:selected.name,style:expectedStyle,width:selected.width,terrainCoverage:selected.terrainCoverage,
@@ -309,7 +326,14 @@ async function main(){
   assert.equal(measured.glError,0);assert.equal(session.errors.length,0);
   assert.deepEqual(await inventory(),inputs,'Source/assets changed during native measurement');
   report.status='PASS';report.command.exit_code=0;
- }catch(error){report.status='FAIL';report.command.exit_code=1;report.errors.push(String(error.stack??error));throw error;}
+ }catch(error){
+  report.status='FAIL';report.command.exit_code=1;report.errors.push(String(error.stack??error));
+  if(session){
+   const partial=await session.page.evaluate(()=>window.eventVisualMeasurement??null).catch(()=>null);
+   if(partial)report.partialMeasurements=partial;
+  }
+  throw error;
+ }
  finally{
   try{await session?.close();}finally{
    report.completed_at_utc=new Date().toISOString();await writeJson(path.join(out,'REPORT.json'),report);
