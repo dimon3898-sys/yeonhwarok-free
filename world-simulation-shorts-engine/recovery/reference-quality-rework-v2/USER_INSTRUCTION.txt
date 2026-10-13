@@ -1,0 +1,51 @@
+WORLD ENGINE — 5S REFERENCE QUALITY REWORK MASTER
+Date: 2026-10-14
+
+MISSION
+Improve the existing five-second reproduction Candidate to match or exceed the visible quality of the corresponding 5.181813–10.181813s segment of the 31.8s reference 65379.mp4. Do not restart the project. Do not declare quality PASS based on technical tests alone.
+
+BASELINE / IMMUTABLE HISTORY
+Camera V5 FINAL (29b8ee294360812b55ef577b62411de58159003b); Event V1 FINAL (f79f3d55d945ef0e53b03ac2ed666f48f28b5881); Flow V2 FINAL (fbc3be89d94040271c7f54a051162913ad134bac); Area V3 FINAL (7da699c07cddf618f5e8a93ca735db51d31bbb39). Planner V1 is CANDIDATE, not FINAL. Latest reference reproduction branch development/reference-reproduction-20261014, render source 312b335, Candidate f7eee83, final record 8e27472. Confirm actual repository and remote state; if inconsistent, stop without reset or overwrite. Keep previous 14s Candidates and 5s Candidate unchanged. Work on a new branch from verified latest saved point.
+
+INPUTS
+- REQUIRED: actual 31.8s 65379.mp4 reference (compressed copy acceptable if frame content preserved).
+- COMPARISON: existing 5s 65404.mp4 Candidate, or SHA-verified repository MP4.
+- Existing SCENE_PLAN.json, compare PNGs, renderer and available assets.
+- Verify both videos are actually readable, fully decoded, and correctly identified. Never use 14s Korean War Candidate as the reference. If the reference cannot be opened, STOP, preserve state and request a usable copy; do not guess.
+
+ORDER OF WORK (ONE CONDITIONAL BUNDLE)
+0. SAFETY GATE: inspect branch, worktree, commit, remote HEAD, tracked/untracked assets, permanent source locations, disk availability. Protect originals. No force push, destructive clean/reset, replacing baselines, or required /tmp-only assets. Checkpoint commit and remote push before expensive work; confirm push success.
+1. REFERENCE GAP: decode the full reference, inspect temporal movement across all 31.8s, then compare the exact selected continuous 5s segment against the current 5s output. Separate phone-recording UI/crop/noise from the actual content. Identify precise differences in front shape, ownership colors, camera translation/scale/rotation, terrain/ocean, and any units/effects ACTUALLY visible in that segment. Generate aligned start/mid/end and time-series comparisons. Do not invent content absent from the reference.
+2. REUSE AUDIT: inspect Area V3, Camera V5 and existing visual renderer. Determine which differences are fixable via Scene JSON, settings, overlays or non-invasive adapters. Avoid changing FINAL core. If a change threatens a FINAL baseline or requires missing high-impact assets, isolate that work and stop the dependent part; do not silently substitute unrelated visuals.
+3. IMPLEMENT TARGETED FIXES:
+   A. TERRITORY: strongly differentiated faction ownership colors on the actual terrain, continuously changing along a coherent irregular advancing front; winning color grows as losing color shrinks. No abrupt global repaint, rectangular band, hard straight sweep, disconnected islands, or drift unrelated to combat. Retain legible terrain and coastlines. Ground direction and temporal sequence in reference and factual event context.
+   B. CAMERA: reproduce reference pan, zoom, tracking, and approximately 6-degree rotation only as supported by actual frame measurements; ensure rotation is about the appropriate focal point, smooth and without black corners or clipped geography. Prefer extending orchestration/adapter over modifying Camera V5 FINAL.
+   C. MAP: improve terrain/ocean appearance toward the reference using available licensed/provenance-safe assets and shader/lighting adjustments. No uncontrolled downloading or publication of restricted assets. Preserve correct geography. If unavailable, explicitly report blocker rather than claim parity.
+   D. COMBAT: reproduce only the unit symbols/impact cues present in the selected reference interval and only if essential to match it. They must track actual map coordinates and remain consistent with the front. No speculative explosions, random icons, or additional visual clutter.
+   E. STRICT EXCLUSIONS: remove all decorative lines, arrows, route traces, direction guides and unnecessary frontier strokes. Territory boundary itself may remain visually legible without added guide lines. Text and TTS are not substitutes for readable action.
+4. RENDER AND VERIFY: 5.000s, 150 frames, 1080x1920, 30fps, H.264 MP4, muted. Preserve frame-accurate timing. Validate complete decode, frame order, no black/blank frames, clipping, broken masks, occlusion failures or GPU errors. Compare full temporal motion, not just 5 static frames. Perform at most a reasonable number of focused local iterations; do not claim quality PASS when differences remain. If unmet, label NEEDS_REWORK with exact visual gaps and preserve the best Candidate.
+5. SAVE AND DELIVER: commit and push source, scene plan and verified review artifacts; verify remote commit and required temp-only=0, secrets=0. Public review should expose only MP4, comparison PNGs, Scene JSON (if needed), SHA256SUMS. Provide mobile-accessible direct HTTP URLs; verify HTTP 200 and downloaded SHA-256 equals local source. Do not expose internal source, diagnostics or credentials in public review.
+
+VISUAL ACCEPTANCE CRITERIA (ALL MUST BE MET FOR QUALITY-PASS CANDIDACY)
+- Ownership colors clearly distinguish the sides on a phone screen.
+- Winning territory visibly expands continuously, losing territory recedes, with a believable irregular front.
+- Camera movement, scale and rotation closely reproduce the selected reference segment.
+- Terrain and ocean appearance are comparable to the reference, not merely technically valid.
+- Visible combat elements match what is actually in the selected segment, not arbitrary decorations.
+- No unnecessary lines, arrows or movement paths.
+- With audio muted and text ignored, the advance and outcome are obvious.
+- Temporal rhythm and scene composition are reference-comparable.
+Quality cannot be self-certified as reference-equivalent solely through PASS scripts. Report honest remaining gaps and await USER approval.
+
+UNATTENDED RUN / CAPACITY SAFETY
+If Selected model is at capacity or connectivity interrupts: use bounded platform-supported retries (e.g. 1m/3m/5m), then safely stop if unavailable. An instruction cannot guarantee automatic resumption when the service is down. At each completed safe stage save a durable checkpoint with stage, commands, inputs, outputs, hashes, next step; commit/push when meaningful. On resume check current state and skip already completed work. Do not start from scratch or overwrite previous data. Never bypass approval or access controls.
+
+STOP GATE
+USER_VIDEO_REVIEW_REQUIRED. Do NOT expand to 14s, promote Planner V1 FINAL, modify FINAL baselines or launch unrelated work without explicit user approval.
+
+FINAL REPORT (SHORT, KOREAN)
+1. What was preserved / completed
+2. Exact visual quality status for each of five categories (territory, camera, map, combat, color/clarity), with evidence and remaining gaps
+3. Direct downloadable MP4 / comparisons / Scene JSON / SHA URLs and verification
+4. Branch, commit, remote HEAD, checkpoint and resume status
+5. USER_VIDEO_REVIEW_REQUIRED
