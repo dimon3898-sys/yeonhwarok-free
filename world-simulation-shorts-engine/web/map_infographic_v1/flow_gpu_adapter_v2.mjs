@@ -4,6 +4,7 @@ import {assertCameraDetailApproachPlan,evaluateCameraDetailApproachFrame} from '
 import {assertFlowPlan,compileFlowRoute,evaluateFlowFrame} from './flow_core_v2.mjs';
 import {selectEventLineStyle} from './event_style_v1.mjs';
 import {createFlowGraphicPass} from './flow_graphic_pass_v2.mjs';
+import {applyFlowVisualProfile} from './flow_visual_profile_v2.mjs';
 
 export const FLOW_GPU_ADAPTER_V2_VERSION='FLOW_GPU_ADAPTER_V2';
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -12,7 +13,7 @@ const inside=(x,y,b)=>x+.5>=b[0]&&x+.5<=b[2]&&y+.5>=b[1]&&y+.5<=b[3];
 
 /** Disabled extension delegates unchanged V1 directly, before any Flow validation. */
 export async function createFlowGpuAdapter({canvas,plans,cameraPlan,scene,heightSource,contextTerrain=null,
- flowPlan,detailPlan,approvedEventStyle,approvedMetricStyle,extensionEnabled=true,...nativeOptions}={}){
+ flowPlan,detailPlan,approvedEventStyle,approvedMetricStyle,visualProfile=null,extensionEnabled=true,...nativeOptions}={}){
  if(extensionEnabled===false)return createEventDetailGpuAdapter({canvas,plans,cameraPlan,scene,heightSource,
   contextTerrain,approvedEventStyle,approvedMetricStyle,...nativeOptions});
  if(extensionEnabled!==true)throw Error('FLOW_EXPLICIT_EXTENSION_FLAG_REQUIRED');
@@ -51,7 +52,7 @@ export async function createFlowGpuAdapter({canvas,plans,cameraPlan,scene,height
    const native=base.draw({bounds:scheduled.flatBounds,cameraLocked:scheduled.cameraLocked,
     eventEnabled:active,eventFrame:active?0:null,frame});
    gl.finish();const before=active||protect?pixels():null;
-   let controls=null,result=null,primitive=null;
+   let controls=null,result=null,primitive=null,presentation=null;
    if(active){
     if(native.event.line!==null||native.event.metric!==null||native.event.controls.state!=='EVENT_READY')
      throw Error('FLOW_NATIVE_BINDING_MUST_NOT_DRAW_EVENT');
@@ -61,8 +62,10 @@ export async function createFlowGpuAdapter({canvas,plans,cameraPlan,scene,height
     primitive=compileFlowRoute(flow.intent,{project});
     controls=evaluateFlowFrame(flow,flow.startFrame+scheduled.eventFrame,{primitive,eventContext:{cameraState:native,
      project,safeArea,scalePlan:plans.REGIONAL,heightSource,protectedBoxes:native.event.protectedBoxes}});
+    if(visualProfile)presentation=applyFlowVisualProfile({flowPlan:flow,controls,primitive,profile:visualProfile});
     if(!pass){style=chooseStyle(primitive,native.event.protectedGraphics,before);pass=createFlowGraphicPass({canvas,style});}
-    result=pass.draw({primitive,controls,safeArea,protectedGraphics:native.event.protectedGraphics,flowIntent:flow.intent});
+    result=pass.draw({primitive,controls:presentation?.controls??controls,safeArea,protectedGraphics:native.event.protectedGraphics,
+     flowIntent:presentation?{...flow.intent,object_graphic:presentation.objectGraphic}:flow.intent});
    }
    gl.finish();const after=pixels(),rois=result?.rois??[],protection={changedPixels:0,protectedChangedPixels:0,markerChangedPixels:0,outsideRoiChangedPixels:0};
    if(protect&&before){
@@ -78,7 +81,8 @@ export async function createFlowGpuAdapter({canvas,plans,cameraPlan,scene,height
    }
    const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('FLOW_COMPOSITION_GL_ERROR_'+error);
    last={frame,state:controls?.state??scheduled.state,camera:scheduled,native,flow:{enabled:active,controls,
-    primitive,graphics:result,style:copy(style),protection},width,height,glError:0};return last;
+    primitive,graphics:result,style:copy(style),protection,
+    ...(presentation?{visualControls:presentation.controls,visualProfile:presentation.metadata}:{})},width,height,glError:0};return last;
   },readPixels:pixels,png:()=>canvas.toDataURL('image/png'),get diagnostic(){return last;},
   dispose(){pass?.dispose();base.dispose();}};
 }
