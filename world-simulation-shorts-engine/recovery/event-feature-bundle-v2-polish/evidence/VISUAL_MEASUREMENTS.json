@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "status": "MEASURED_REQUIRES_ACTUAL_VISUAL_REVIEW",
+  "scope": "FOCUSED_EXISTING_MP4_DECODE_AND_FROZEN_FRAME_RECORD_INSPECTION",
+  "noRenderingOrVideoReencoding": true,
+  "publicMediaUnchanged": true,
+  "inputs": {
+    "video": {
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/SUEZ_EVENT_FEATURE_BUNDLE_V2_FLOW_MOVEMENT_POLISH.mp4",
+      "sha256": "5ff055643ded594198f3dc5e313d9acadb6b636d4f621294ad69456d4b6449fe",
+      "bytes": 2148518
+    },
+    "proofReport": {
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/evidence/proof/REPORT.json",
+      "sha256": "7abac58b719cd9dd18f5fafb42d257c53f577c31f38aa47ad497ae62afb59bd6",
+      "bytes": 20613700
+    },
+    "visualProfile": {
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/fixtures/VISUAL_PROFILE.json",
+      "sha256": "fec725f7bf7c154b9161667bd560dae4efacad31a999dcdc9278cfca201c4b19",
+      "bytes": 251
+    },
+    "acceptedDisclosureLayoutEvidence": {
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2/evidence/integration/REPORT.json",
+      "sha256": "80865f873931824d825d79cc9f16ffad8b1692e04283542d0a94bcaf75eeddfa",
+      "bytes": 2077606
+    }
+  },
+  "video": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "durationSeconds": 8,
+    "frames": 240,
+    "audioStreams": 0
+  },
+  "decodeFramesInContactOrder": [
+    0,
+    26,
+    60,
+    72,
+    80,
+    88,
+    100,
+    120,
+    145,
+    157,
+    170,
+    187,
+    192,
+    199,
+    206,
+    239
+  ],
+  "decodedContacts": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/evidence/visual/DECODED_FULL_CONTACT.png",
+      "sha256": "c9d5f5eb01755196891fc1051302613e950ee43e1090368b6c6558d9042a5cce",
+      "bytes": 1049476
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/evidence/visual/DECODED_ROUTE_CONTACT.png",
+      "sha256": "aa86569ab3b3bc460a0a5fc23d0acffac5fc3ee637f85f3dea7c1abb2ee58788",
+      "bytes": 1958113
+    }
+  ],
+  "extractionCommands": [
+    [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-threads",
+      "2",
+      "-i",
+      "/workspace/yeonhwarok-free/world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/SUEZ_EVENT_FEATURE_BUNDLE_V2_FLOW_MOVEMENT_POLISH.mp4",
+      "-vf",
+      "select='eq(n,0)+eq(n,26)+eq(n,60)+eq(n,72)+eq(n,80)+eq(n,88)+eq(n,100)+eq(n,120)+eq(n,145)+eq(n,157)+eq(n,170)+eq(n,187)+eq(n,192)+eq(n,199)+eq(n,206)+eq(n,239)',scale=270:480,tile=4x4:padding=4:margin=4:color=black",
+      "-frames:v",
+      "1",
+      "-update",
+      "1",
+      "/workspace/yeonhwarok-free/world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/evidence/visual/DECODED_FULL_CONTACT.png"
+    ],
+    [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-threads",
+      "2",
+      "-i",
+      "/workspace/yeonhwarok-free/world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/SUEZ_EVENT_FEATURE_BUNDLE_V2_FLOW_MOVEMENT_POLISH.mp4",
+      "-vf",
+      "select='eq(n,0)+eq(n,26)+eq(n,60)+eq(n,72)+eq(n,80)+eq(n,88)+eq(n,100)+eq(n,120)+eq(n,145)+eq(n,157)+eq(n,170)+eq(n,187)+eq(n,192)+eq(n,199)+eq(n,206)+eq(n,239)',crop=400:500:330:745,tile=4x4:padding=4:margin=4:color=black",
+      "-frames:v",
+      "1",
+      "-update",
+      "1",
+      "/workspace/yeonhwarok-free/world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/evidence/visual/DECODED_ROUTE_CONTACT.png"
+    ]
+  ],
+  "nativeCheckpoints": [
+    {
+      "frame": 72,
+      "state": "DIRECTIONAL_FLOW",
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/01_ROUTE_START.png",
+      "sha256": "df2e83fc267fcd758037cdc8020e548b9723fa7d4d6ef6e59b079011cc01e0bd",
+      "bytes": 1880200,
+      "exactNativeInputCheckpoint": true
+    },
+    {
+      "frame": 88,
+      "state": "MOVING_OBJECT",
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/02_OBJECT_DEPARTURE.png",
+      "sha256": "6631e3151902981c7d8c14e9a2c8079b1529111f56311459167b13b83ddcdb2b",
+      "bytes": 1881597,
+      "exactNativeInputCheckpoint": true
+    },
+    {
+      "frame": 120,
+      "state": "MOVING_OBJECT",
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/03_OBJECT_TRAVEL.png",
+      "sha256": "35768d7c2fdf140860396952ccfca4d77c4db97005c203b7d0d6739813356732",
+      "bytes": 1881006,
+      "exactNativeInputCheckpoint": true
+    },
+    {
+      "frame": 170,
+      "state": "MOVING_OBJECT",
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/04_TRAVEL_APPROACH.png",
+      "sha256": "7854f5f368bd08f9121912144cbc20ab7fa5749abb3b3b36b3cd64e668132982",
+      "bytes": 1880631,
+      "exactNativeInputCheckpoint": true
+    },
+    {
+      "frame": 192,
+      "state": "ENDPOINT_PULSE",
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/05_ENDPOINT_PULSE.png",
+      "sha256": "177e0ecc7bdbe686ac87b94f3c72ac65948314381b3680c7aaa0f7d6abec22da",
+      "bytes": 1882682,
+      "exactNativeInputCheckpoint": true
+    },
+    {
+      "frame": 239,
+      "state": "ROUTE_HOLD",
+      "path": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/public-review/06_FINAL_HOLD.png",
+      "sha256": "af67123fb95c4fc4fdadafb2c176276ae58c052569240739614e28a8b459b197",
+      "bytes": 1881101,
+      "exactNativeInputCheckpoint": true
+    }
+  ],
+  "focusedMeasurements": {
+    "cameraFrameRecordsEqualAccepted": 240,
+    "objectCoreFrameRecordsEqualAccepted": 180,
+    "objectBeforeSize": [
+      52,
+      30
+    ],
+    "objectAfterSize": [
+      62.4,
+      36
+    ],
+    "sizeIncreasePercent": 20,
+    "normalizedControlRecordsEqualAccepted": 180,
+    "onlyAllowedReadinessContextDifference": {
+      "removedRole": "SCENARIO_DISCLOSURE",
+      "measuredBox": [
+        49.0,
+        1797.6,
+        171.39999999999998,
+        1846.0
+      ]
+    },
+    "visualRouteMonotonic": true,
+    "oldRouteCompletionFrame": 92,
+    "polishedRouteCompletionFrame": 157,
+    "maximumObjectStepPixels": 6.762280081973385,
+    "maximumHeadingStepDegrees": 7.385409812281809,
+    "singleArrivalPulseFrames": [
+      188,
+      189,
+      190,
+      191,
+      192,
+      193,
+      194,
+      195,
+      196,
+      197,
+      198,
+      199,
+      200,
+      201,
+      202,
+      203,
+      204,
+      205
+    ],
+    "arrivalPeakFrame": 192,
+    "singleDeparturePulseFrames": [
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97
+    ],
+    "holdFrames": 34,
+    "holdNativeRawPixelStable": true,
+    "objectReservationOverlapFrames": [
+      134,
+      135,
+      136,
+      137,
+      138,
+      139,
+      140,
+      141,
+      142,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149,
+      150,
+      151,
+      152,
+      153
+    ],
+    "objectReservationOverlapDurationSeconds": 0.6666666666666666,
+    "publicTestDisclosureInstances": 0,
+    "protectedChangedPixels": 0,
+    "markerChangedPixels": 0,
+    "outsideRoiChangedPixels": 0
+  },
+  "reviewLimitation": "These measurements do not claim visual approval. Inspect decoded contact sheets and all six exact native checkpoints before writing VISUAL_AUDIT.json."
+}
