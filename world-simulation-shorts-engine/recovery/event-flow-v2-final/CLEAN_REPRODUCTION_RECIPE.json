@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "scope": "EVENT_FLOW_V2_FINAL_CLEAN_REPRODUCTION",
+  "remote": "https://github.com/dimon3898-sys/yeonhwarok-free.git",
+  "branch": "development/event-flow-polish-v2-20261013",
+  "remote_checkout_revision": "4a1f773dcf377ebca5e46d83b81204707a56b59d",
+  "original_render_source_revision": "be428ab6dbe6723f8b3cc25a287c18a744a9c318",
+  "approved_media_commit": "a0add53bc5d9182bf24a17ac9dd13e69129c9fa0",
+  "approved_mp4_sha256": "5ff055643ded594198f3dc5e313d9acadb6b636d4f621294ad69456d4b6449fe",
+  "checkout_policy": "Fresh remote Git clone with independent Git objects; fetch required original Git/LFS bodies from remote; fresh locked npm install and cache. No current-workspace source or asset copies, alternates, shared objects, hardlinks or symlink reuse.",
+  "sparse_inputs": "413 approved HASH rows, HASH_MANIFEST.json, manifests/SHA256SUMS plus Git infrastructure; exact selected paths derive from the immutable approved inventory.",
+  "clone_argv": [
+    "git",
+    "clone",
+    "--depth",
+    "1",
+    "--single-branch",
+    "--branch",
+    "development/event-flow-polish-v2-20261013",
+    "--filter=blob:none",
+    "--no-checkout",
+    "https://github.com/dimon3898-sys/yeonhwarok-free.git",
+    "<separate-checkout>"
+  ],
+  "clone_environment_overrides": {
+    "GIT_LFS_SKIP_SMUDGE": "1"
+  },
+  "revision_pin": "Explicitly fetch/check out approved_validation_commit if branch HEAD has advanced.",
+  "bootstrap_argv": [
+    "/usr/bin/python3",
+    "-B",
+    "world-simulation-shorts-engine/recovery/event-flow-v2-final/bootstrap_clean_checkout.py",
+    "--checkout",
+    "<separate-checkout>"
+  ],
+  "fresh_npm_argv": [
+    "npm",
+    "--prefix",
+    "cinematic-world-map",
+    "ci",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    "--strict-ssl=true"
+  ],
+  "system_toolchain": "Existing pinned system tools; new operating-system image is not claimed.",
+  "reproduction_argv": [
+    "node",
+    "world-simulation-shorts-engine/recovery/event-flow-v2-final/reproduce_clean_flow.mjs",
+    "--checkout",
+    "<separate-checkout>",
+    "--output-dir",
+    "<repository>/world-simulation-shorts-engine/recovery/event-flow-v2-final/evidence/clean-reproduction"
+  ],
+  "output_directory_must_be_absent": true,
+  "runtime_origin": "Every runtime module and asset comes from the fresh remote checkout; approved runtime.repo is checked against that checkout.",
+  "checks": [
+    "415 actual required input body hashes",
+    "240 native RGBA frame hashes",
+    "240 native PNG frame hashes",
+    "Entire camera, timeline, original Flow and presentation controls",
+    "6 original native checkpoint PNG bodies",
+    "Original encoder arguments and MP4 bytes, or all 240 decoded pixel hashes for encoder-only differences",
+    "Clean tracked checkout before and after reproduction"
+  ],
+  "private_verification_outputs": true,
+  "approved_public_review_modified": false,
+  "required_temp_only_files": [],
+  "checkout_infrastructure": [
+    ".gitattributes",
+    "cinematic-world-map/.gitignore",
+    "world-simulation-shorts-engine/.gitignore"
+  ],
+  "fetch_approved_revision_argv": [
+    "git",
+    "fetch",
+    "--depth",
+    "1",
+    "origin",
+    "4a1f773dcf377ebca5e46d83b81204707a56b59d"
+  ],
+  "sparse_preparation": {
+    "inventory": "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/manifests/HASH_MANIFEST.json",
+    "additional_production_files": [
+      "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/manifests/HASH_MANIFEST.json",
+      "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/manifests/SHA256SUMS"
+    ],
+    "pattern_recipe": "Sort all required_files paths plus the additional production/infrastructure paths. Prefix each with / and send one path per line to git sparse-checkout set --no-cone --stdin. Only path metadata is read from the frozen inventory; no source or asset body is copied.",
+    "commands": [
+      [
+        "git",
+        "sparse-checkout",
+        "init",
+        "--no-cone"
+      ],
+      [
+        "git",
+        "sparse-checkout",
+        "set",
+        "--no-cone",
+        "--stdin"
+      ],
+      [
+        "git",
+        "checkout",
+        "--detach",
+        "4a1f773dcf377ebca5e46d83b81204707a56b59d"
+      ]
+    ],
+    "environment_overrides": {
+      "GIT_LFS_SKIP_SMUDGE": "1"
+    },
+    "observed_selected_files": 418
+  }
+}
