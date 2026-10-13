@@ -55,6 +55,10 @@ const waveVisualInput={origin,coastGeometry,source,data_mode:'PRODUCTION',fps:30
  wave_count:3,fade_frames:12,contact_frames:20,pulse_frames:24};
 const presentation=structuredClone(parent.value.presentation);
 presentation.videoFilename='TOHOKU_2011_TSUNAMI_WAVE_VISUAL_POLISH.mp4';
+presentation.totalFrames=240;
+presentation.proofDurationPolicy='STOP_AFTER_VISIBLE_EVENT_COMPLETION_AND_SHORT_INFORMATION_HOLD; evaluation horizon may exceed proof window';
+presentation.eventEvaluationHorizonFrames=waveVisualInput.total_frames;
+presentation.outputMovieFrames=presentation.totalFrames;
 presentation.checkpoints=[
  {frame:0,file:'01_EVENT_ARRIVAL.png'},
  {frame:54,file:'02_ORIGIN.png'},
@@ -63,7 +67,7 @@ presentation.checkpoints=[
  {frame:125,file:'05_COAST_APPROACH.png'},
  {frame:150,file:'06_SEQUENTIAL_IMPACT.png'},
  {frame:187,file:'07_ENERGY_FADE.png'},
- {frame:269,file:'08_FINAL_HOLD.png'}];
+ {frame:239,file:'08_FINAL_HOLD.png'}];
 // Keep the source date, unchanged title and native country label. The previous
 // explanatory COAST/HOLD annotations were fixture text, not event facts.
 presentation.annotations=presentation.annotations.filter(label=>label.id==='ORIGIN');
@@ -93,6 +97,9 @@ await write('data/FIXTURE_PROTECTION.json',{schema:1,status:'PASS',
  nativeInputsUnchanged:JSON.stringify(fixture.nativeFiles)===JSON.stringify(parent.value.nativeFiles),
  cameraStartFrameUnchanged:presentation.cameraStartFrame===parent.value.presentation.cameraStartFrame,
  eventLockFrameUnchanged:presentation.eventStartFrame===parent.value.presentation.eventStartFrame,
+ eventEvaluationHorizonFrames:waveVisualInput.total_frames,
+ outputMovieFrames:presentation.totalFrames,
+ proofDurationPolicy:presentation.proofDurationPolicy,
  coastUsesOriginalVertices:coordinates.every((point,index)=>JSON.stringify(point)===JSON.stringify(originalRing[startVertex+index])),
  coastVertexCount:coordinates.length,coastContactSegmentCount:contactSegments.length,
  historicalSourceReResearch:false});

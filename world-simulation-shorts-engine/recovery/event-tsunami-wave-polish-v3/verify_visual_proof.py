@@ -46,6 +46,74 @@ def contiguous(frames):
     return not frames or frames == list(range(frames[0], frames[-1] + 1))
 
 
+def measure_colors(video, rows, count):
+    """Read original decoded pixels inside event geometry ROIs, excluding text."""
+    decoder = subprocess.Popen(["ffmpeg", "-v", "error", "-xerror", "-threads", "2", "-i", str(video),
+                                "-map", "0:v:0", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1"],
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    colors = []
+    frame_size = 1080 * 1920 * 3
+    date_only_pixels = rows[-1]["wave"]["protection"]["changedPixels"]
+    for frame in range(count):
+        chunk = bytearray()
+        while len(chunk) < frame_size:
+            part = decoder.stdout.read(frame_size - len(chunk))
+            require(part, "COMPLETE_DECODED_RGB_FRAME")
+            chunk.extend(part)
+        pixels = np.frombuffer(chunk, dtype=np.uint8).reshape(-1, 3)
+        r, g, b = pixels[:, 0], pixels[:, 1], pixels[:, 2]
+        # Native terrain contains a few cyan pixels. Restrict detection to
+        # actual projected event geometry ROIs and exclude the date glyph ROI.
+        roi_mask = np.zeros((1920, 1080), dtype=bool)
+        wave = rows[frame]["wave"]
+        graphics = wave.get("graphics") or {}
+        annotation = wave.get("annotation") or {}
+        annotation_box = annotation.get("roi")
+        if wave["protection"]["changedPixels"] > date_only_pixels:
+            for box in graphics.get("rois", []):
+                if box == annotation_box:
+                    continue
+                x0, y0 = max(0, math.floor(box[0])), max(0, math.floor(box[1]))
+                x1, y1 = min(1080, math.ceil(box[2])), min(1920, math.ceil(box[3]))
+                roi_mask[y0:y1, x0:x1] = True
+        roi_mask = roi_mask.reshape(-1)
+        teal = (r < 90) & (g > 135) & (b > 110) & roi_mask
+        contact = (r > 125) & (b > 125) & (g < 120) & roi_mask
+        colors.append({"frame": frame, "tealWavePixels": int(np.count_nonzero(teal)),
+                       "magentaContactPixels": int(np.count_nonzero(contact))})
+    require(decoder.stdout.read(1) == b"", "NO_EXTRA_DECODED_FRAMES")
+    error = decoder.stderr.read().decode()
+    require(decoder.wait() == 0, "FULL_DECODE_ERROR: " + error)
+    active = [row["frame"] for row in colors if row["tealWavePixels"] + row["magentaContactPixels"] >= 12]
+    require(len(active) > 0, "NO_VISIBLE_WAVE_PIXELS")
+    return colors, active, date_only_pixels
+
+
+def measurement_fields(colors, active, count, date_only_pixels):
+    return {"firstVisibleWavePixelFrame": active[0], "lastVisibleWavePixelFrame": active[-1],
+            "decodedColorMeasurement": "MINIMUM_12_TEAL_MAGENTA_PIXELS_INSIDE_EVENT_GEOMETRY_ROIS_EXCLUDING_DATE_AND_DATE_ONLY_FRAMES",
+            "dateOnlyNativeChangedPixelBaseline": date_only_pixels,
+            "decodedMapHoldFrames": count - 1 - active[-1],
+            "observedFinalMapHoldFrames": count - 1 - active[-1], "decodedColorPixelsByFrame": colors}
+
+
+def refresh_measurement():
+    """A focused correction reruns only decoded color measurement, not gates."""
+    path = ROOT / "evidence/VISUAL_AUDIT.json"
+    value = json.loads(path.read_text())
+    report_path = ROOT / "evidence/proof/REPORT.json"
+    report = json.loads(report_path.read_text())
+    video = ROOT / value["originalMp4"]["file"]
+    require(value["status"] == "PASS", "EXISTING_VISUAL_AUDIT_PASS_REQUIRED")
+    require(sha(video) == value["originalMp4"]["sha256"] == report["video"]["sha256"], "ORIGINAL_MP4_UNCHANGED")
+    require(sha(report_path) == value["renderReport"]["sha256"], "RENDER_REPORT_UNCHANGED")
+    colors, active, baseline = measure_colors(video, report["frames"], report["totalFrames"])
+    value["wave"].update(measurement_fields(colors, active, report["totalFrames"], baseline))
+    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+    print(json.dumps({"status": value["status"], "scope": "DECODED_VISIBLE_MEASUREMENT_ONLY",
+                      "lastVisibleWavePixelFrame": active[-1], "observedFinalMapHoldFrames": report["totalFrames"] - 1 - active[-1]}))
+
+
 def audit(visual_review):
     fixture_path = ROOT / "fixtures/REAL_FIXTURE.json"
     report_path = ROOT / "evidence/proof/REPORT.json"
@@ -161,28 +229,7 @@ def audit(visual_review):
                          "meanAbsoluteChannelError": round(float(np.mean(np.abs(diff))), 4)})
 
     # Measured from actual decoded pixels, not inferred from a timeline diagnostic.
-    decoder = subprocess.Popen(["ffmpeg", "-v", "error", "-xerror", "-threads", "2", "-i", str(video),
-                                "-map", "0:v:0", "-pix_fmt", "rgb24", "-f", "rawvideo", "pipe:1"],
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    colors = []
-    frame_size = 1080 * 1920 * 3
-    for frame in range(count):
-        chunk = bytearray()
-        while len(chunk) < frame_size:
-            part = decoder.stdout.read(frame_size - len(chunk))
-            require(part, "COMPLETE_DECODED_RGB_FRAME")
-            chunk.extend(part)
-        pixels = np.frombuffer(chunk, dtype=np.uint8).reshape(-1, 3)
-        r, g, b = pixels[:, 0], pixels[:, 1], pixels[:, 2]
-        teal = (r < 90) & (g > 135) & (b > 110)
-        contact = (r > 125) & (b > 125) & (g < 120)
-        colors.append({"frame": frame, "tealWavePixels": int(np.count_nonzero(teal)),
-                       "magentaContactPixels": int(np.count_nonzero(contact))})
-    require(decoder.stdout.read(1) == b"", "NO_EXTRA_DECODED_FRAMES")
-    error = decoder.stderr.read().decode()
-    require(decoder.wait() == 0, "FULL_DECODE_ERROR: " + error)
-    active = [row["frame"] for row in colors if row["tealWavePixels"] + row["magentaContactPixels"] >= 12]
-    require(len(active) > 0, "NO_VISIBLE_WAVE_PIXELS")
+    colors, active, baseline = measure_colors(video, rows, count)
     result = {
         "schema": 1, "status": "PASS" if visual_review else "TECHNICAL_PASS_VISUAL_REVIEW_REQUIRED",
         "scope": "ACTUAL_DECODED_TSUNAMI_WAVE_VISUAL_PROOF", "originalMp4": record(video),
@@ -195,9 +242,9 @@ def audit(visual_review):
                  "contactOrder": actual_order, "maximumSimultaneousLocalContacts": max_contacts,
                  "contactWindows": [{"id": key, "firstFrame": value[0], "lastFrame": value[-1]} for key, value in contact_frames.items()],
                  "oneAccentPerCoastInterval": True, "repeatBlink": False, "wholeCountryFlash": False,
-                 "completeFrame": complete_frame, "declaredHoldFrames": hold_frames,
-                 "firstVisibleWavePixelFrame": active[0], "lastVisibleWavePixelFrame": active[-1],
-                 "observedFinalMapHoldFrames": count - 1 - active[-1], "decodedColorPixelsByFrame": colors},
+                 "completeFrame": complete_frame, "compiledHorizonHoldFrames": hold_frames,
+                 "timelineHoldInProofFrames": max(0, count - complete_frame),
+                 **measurement_fields(colors, active, count, baseline)},
         "protection": {"checkedFrames": count, "protectedChangedPixels": 0, "markerChangedPixels": 0,
                        "outsideRoiChangedPixels": 0, "safeAreaChangedPixels": 0, "glErrors": 0},
         "publicText": text, "testExplanatoryTextRemoved": True,
@@ -212,6 +259,13 @@ def audit(visual_review):
                                   "direction": "ORIGIN_TO_PACIFIC_COAST", "arrival": "SHORT_ORDERED_LOCAL_COAST_ACCENTS",
                                   "mobileReadability": "PASS", "contrast": "PASS", "rhythm": "PASS",
                                   "limitations": ["Illustrative wave and arrival timing; not a physical tsunami or inundation model."]}
+        observed_hold = result["wave"]["observedFinalMapHoldFrames"]
+        if observed_hold > 45:
+            result["visualReview"]["warnings"] = [
+                f"Compiled horizon hold: {hold_frames} frames ({hold_frames / 30:.2f} s); "
+                f"timeline hold inside this proof: {max(0, count - complete_frame)} frames. "
+                f"Measured map/date-only hold after the last >=12-pixel decoded wave/contact signal: {observed_hold} frames "
+                f"({observed_hold / 30:.2f} s); keep as an explicit user rhythm review point."]
     (ROOT / "evidence/VISUAL_AUDIT.json").write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({"status": result["status"], "videoSha256": result["originalMp4"]["sha256"],
                       "frames": count, "lastVisibleWavePixelFrame": active[-1],
@@ -221,4 +275,9 @@ def audit(visual_review):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--visual-review-pass", action="store_true", help="Use only after inspecting the extracted actual decoded video frames.")
-    audit(parser.parse_args().visual_review_pass)
+    parser.add_argument("--refresh-visible-measurement", action="store_true", help="Correct only the visible-pixel measurement in an existing PASS receipt; do not repeat gates.")
+    args = parser.parse_args()
+    if args.refresh_visible_measurement:
+        refresh_measurement()
+    else:
+        audit(args.visual_review_pass)

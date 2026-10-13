@@ -22,7 +22,8 @@ try{
  assert.equal(off.diagnostic.wave.enabled,false);
  report.nativeOff={frame:0,rawRgbaSha256:off.raw_rgba_sha256,status:'BIT_EXACT',
   reference:'PARENT_NATIVE_EVENT_ARRIVAL_FRAME_0'};
- const frames=[0,42,54,65,110,125,150,187,220,269];
+ const finalMovieFrame=session.presentation.totalFrames-1;
+ const frames=[0,42,54,65,110,125,150,187,220,finalMovieFrame];
  for(const frame of frames){
   const row=await session.page.evaluate(value=>window.waveProof.capture(value,{protect:true,png:true}),frame);
   const {diagnostic:d}=row,w=d.wave;
@@ -54,6 +55,7 @@ try{
    cameraLocked:d.camera.cameraLocked,glError:d.glError,protection:w.protection,
    wave:w.diagnostics,originPulseActive:w.originPulse?.active??false,
    dateAnnotation:w.annotation?.text??null};
+  if(frame===finalMovieFrame){assert.equal(d.state,'HOLD');assert.equal(w.controls.hold,true);}
   report.frames.push(summary);console.log(JSON.stringify({frame,glError:d.glError,
    protectedChangedPixels:w.protection.protectedChangedPixels,majorFronts:w.diagnostics?.majorFrontCount??0,
    coastContacts:w.diagnostics?.coastContactCount??0,pulse:summary.originPulseActive}));
@@ -61,7 +63,9 @@ try{
  const train=report.frames.find(row=>row.frame===110);assert.equal(train.wave.majorFrontCount,3);
  assert.equal(report.frames.find(row=>row.frame===54).originPulseActive,true);
  assert.ok(report.frames.some(row=>row.wave?.coastContactCount>0));
- assert.equal(report.frames.find(row=>row.frame===269).wave.majorFrontCount,0);
+ const finalMovie=report.frames.find(row=>row.frame===finalMovieFrame);
+ assert.equal(finalMovie.wave.majorFrontCount,0);assert.equal(finalMovie.wave.coastContactCount,0);
+ report.finalMovieFrame={frame:finalMovieFrame,state:'HOLD',majorFrontCount:0,coastContactCount:0};
  const order=session.wavePlan.contacts.map(contact=>({id:contact.id,frame:contact.arrivalFrame}));
  assert.ok(new Set(order.map(row=>row.frame.toFixed(3))).size>1,'WHOLE_COAST_SIMULTANEOUS_FLASH');
  report.coastArrival={localIntervals:order.length,arrivalOrder:order.sort((a,b)=>a.frame-b.frame),

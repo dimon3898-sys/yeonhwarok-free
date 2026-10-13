@@ -76,6 +76,10 @@ try{
    protectedGraphics:d.camera.protectedGraphics,layoutValidation:d.camera.gpu.layoutValidation,glError:d.glError});
   if(frame%15===0||frame===report.totalFrames-1)console.log(JSON.stringify({phase:'WAVE_PROOF',frame,total:report.totalFrames,state:d.state}));
  }
+ const end=report.frames.at(-1);
+ assert.equal(end.state,'HOLD','PROOF_MUST_END_AFTER_EVENT_COMPLETION');
+ assert.equal(end.wave.diagnostics.majorFrontCount,0,'PROOF_MUST_NOT_CUT_ACTIVE_FRONT');
+ assert.equal(end.wave.diagnostics.coastContactCount,0,'PROOF_MUST_NOT_CUT_ACTIVE_CONTACT');
  encoder.stdin.end();assert.equal((await encoderExit).code,0,'WAVE_ENCODER_FAILED '+encoderError);
  report.ffprobe=JSON.parse((await execute('ffprobe',['-v','error','-count_frames','-show_streams','-show_format','-of','json',video])).stdout);
  const stream=report.ffprobe.streams[0];assert.equal(report.ffprobe.streams.length,1);assert.equal(stream.width,1080);assert.equal(stream.height,1920);
