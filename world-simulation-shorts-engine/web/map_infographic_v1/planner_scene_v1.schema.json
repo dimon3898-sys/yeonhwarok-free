@@ -1,0 +1,1183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:world-engine:planner-scene-json:v1",
+  "title": "World Engine Planner Scene JSON V1",
+  "description": "Portable supplied-fact scene plan. Runtime validation also verifies geometry topology, source references, chronological states, and camera-lock ordering using the existing Final contracts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "metadata",
+    "subject",
+    "locations",
+    "time_range",
+    "topic_intent",
+    "event_type",
+    "selected_features",
+    "camera_intent",
+    "scale_intent",
+    "beats",
+    "geometries",
+    "visual_roles",
+    "timing",
+    "source_notes"
+  ],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "planner_version",
+        "fact_dataset_version",
+        "data_mode",
+        "topic",
+        "policy",
+        "deterministic",
+        "user_video_review_required",
+        "semantic_mode",
+        "output"
+      ],
+      "properties": {
+        "schema": {
+          "const": "PLANNER_SCENE_JSON_V1"
+        },
+        "planner_version": {
+          "const": "1.0.0"
+        },
+        "fact_dataset_version": {
+          "const": "PLANNER_FACTS_V1"
+        },
+        "data_mode": {
+          "enum": [
+            "PRODUCTION",
+            "SYNTHETIC_TEST"
+          ]
+        },
+        "topic": {
+          "$ref": "#/$defs/text"
+        },
+        "policy": {
+          "const": "FACT_BASED_VISUAL_GRADE"
+        },
+        "deterministic": {
+          "const": true
+        },
+        "user_video_review_required": {
+          "const": true
+        },
+        "semantic_mode": {
+          "enum": [
+            "ILLUSTRATIVE_FACT_BASED_VISUAL",
+            "SUPPLIED_OBSERVED_STATES"
+          ]
+        },
+        "output": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "height",
+            "fps",
+            "audio"
+          ],
+          "properties": {
+            "width": {
+              "$ref": "#/$defs/positiveInteger"
+            },
+            "height": {
+              "$ref": "#/$defs/positiveInteger"
+            },
+            "fps": {
+              "$ref": "#/$defs/positiveInteger"
+            },
+            "audio": {
+              "const": false
+            }
+          }
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "label",
+        "aliases",
+        "event_family"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "$ref": "#/$defs/text"
+        },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/text"
+          }
+        },
+        "event_family": {
+          "$ref": "#/$defs/family"
+        }
+      }
+    },
+    "locations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "anchor"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "label": {
+            "$ref": "#/$defs/text"
+          },
+          "anchor": {
+            "$ref": "#/$defs/anchor"
+          },
+          "country_id": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "time_range": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/date"
+        },
+        "end": {
+          "$ref": "#/$defs/date"
+        }
+      }
+    },
+    "topic_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "topic",
+        "subject_id",
+        "event_family",
+        "subject_match",
+        "data_policy",
+        "question",
+        "facts_required",
+        "natural_language_owner"
+      ],
+      "properties": {
+        "version": {
+          "const": "TOPIC_INTENT_V1"
+        },
+        "topic": {
+          "$ref": "#/$defs/text"
+        },
+        "subject_id": {
+          "$ref": "#/$defs/id"
+        },
+        "event_family": {
+          "$ref": "#/$defs/family"
+        },
+        "subject_match": {
+          "const": "SUPPLIED_DATA_ALIAS"
+        },
+        "data_policy": {
+          "const": "FACT_BASED_VISUAL_GRADE"
+        },
+        "question": {
+          "enum": [
+            "EXPLAIN_CHANGE",
+            "SHOW_EVENT"
+          ]
+        },
+        "facts_required": {
+          "const": true
+        },
+        "natural_language_owner": {
+          "const": "PLANNER_ONLY"
+        }
+      }
+    },
+    "event_type": {
+      "$ref": "#/$defs/family"
+    },
+    "selected_features": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "ROUTE_REVEAL",
+          "DIRECTIONAL_FLOW",
+          "MOVING_OBJECT",
+          "ENDPOINT_PULSE",
+          "ROUTE_HOLD",
+          "GEOGRAPHIC_LINE_REVEAL",
+          "METRIC_ANNOTATION",
+          "INFORMATION_HOLD",
+          "PROPAGATION_WAVE",
+          "IMPACT_ZONE",
+          "AREA_HOLD",
+          "FRONT_LINE",
+          "STATE_TRANSITION",
+          "TIME_STEP"
+        ]
+      }
+    },
+    "camera_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "arrival_required",
+        "anchor",
+        "target_geometry_refs",
+        "minimum_context_geometry_refs",
+        "detail_policy"
+      ],
+      "properties": {
+        "owner": {
+          "const": "CAMERA_DIRECTOR_V5_WITH_DETAIL_ADAPTER"
+        },
+        "arrival_required": {
+          "const": true
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "target_geometry_refs": {
+          "$ref": "#/$defs/nonemptyRefs"
+        },
+        "minimum_context_geometry_refs": {
+          "$ref": "#/$defs/refs"
+        },
+        "detail_policy": {
+          "const": "FACT_BASED_VISUAL_GRADE"
+        },
+        "native_context": {
+          "$ref": "#/$defs/nativeContext"
+        }
+      }
+    },
+    "scale_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner",
+        "preferred",
+        "target_geometry_refs"
+      ],
+      "properties": {
+        "owner": {
+          "const": "EXISTING_SCALE_CORE"
+        },
+        "preferred": {
+          "enum": [
+            "CONTINENT",
+            "REGIONAL",
+            "LOCAL"
+          ]
+        },
+        "target_geometry_refs": {
+          "$ref": "#/$defs/nonemptyRefs"
+        }
+      }
+    },
+    "beats": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "type",
+          "start_frame",
+          "end_frame",
+          "duration_frames",
+          "geometry_refs"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "type": {
+            "enum": [
+              "GEOGRAPHIC_CONTEXT",
+              "EVENT_APPROACH",
+              "EVENT_ACTION",
+              "STATE_CHANGE",
+              "HOLD"
+            ]
+          },
+          "start_frame": {
+            "$ref": "#/$defs/frame"
+          },
+          "end_frame": {
+            "$ref": "#/$defs/positiveInteger"
+          },
+          "duration_frames": {
+            "$ref": "#/$defs/positiveInteger"
+          },
+          "geometry_refs": {
+            "$ref": "#/$defs/nonemptyRefs"
+          },
+          "camera_intent": {
+            "enum": [
+              "ARRIVE_WITH_CONTEXT",
+              "DETAIL_IF_ADMITTED",
+              "LOCK"
+            ]
+          },
+          "state_id": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "geometries": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "geometry",
+          "source_id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "geometry": {
+            "$ref": "#/$defs/geometry"
+          },
+          "source_id": {
+            "$ref": "#/$defs/id"
+          },
+          "note": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    },
+    "markers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "anchor"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "label": {
+            "$ref": "#/$defs/text"
+          },
+          "anchor": {
+            "$ref": "#/$defs/anchor"
+          },
+          "source_id": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "geometry_ref",
+          "direction",
+          "source_id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "geometry_ref": {
+            "$ref": "#/$defs/id"
+          },
+          "direction": {
+            "enum": [
+              "FORWARD",
+              "REVERSE"
+            ]
+          },
+          "source_id": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "moving_objects": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "route_id",
+          "role",
+          "profile"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "route_id": {
+            "$ref": "#/$defs/id"
+          },
+          "role": {
+            "$ref": "#/$defs/text"
+          },
+          "profile": {
+            "$ref": "#/$defs/text"
+          },
+          "graphic": {
+            "$ref": "#/$defs/objectGraphic"
+          }
+        }
+      }
+    },
+    "areas": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/stateGeometry"
+      }
+    },
+    "front_lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/stateGeometry"
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "display_value",
+          "unit",
+          "anchor",
+          "source_id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "display_value": {
+            "$ref": "#/$defs/text"
+          },
+          "unit": {
+            "$ref": "#/$defs/text"
+          },
+          "anchor": {
+            "$ref": "#/$defs/anchor"
+          },
+          "source_id": {
+            "$ref": "#/$defs/id"
+          }
+        }
+      }
+    },
+    "time_steps": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "date",
+          "label",
+          "area_ids",
+          "front_line_ids",
+          "start_frame",
+          "transition_frames"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "date": {
+            "$ref": "#/$defs/date"
+          },
+          "label": {
+            "$ref": "#/$defs/text"
+          },
+          "area_ids": {
+            "$ref": "#/$defs/nonemptyRefs"
+          },
+          "front_line_ids": {
+            "$ref": "#/$defs/nonemptyRefs"
+          },
+          "start_frame": {
+            "$ref": "#/$defs/frame"
+          },
+          "transition_frames": {
+            "type": "integer",
+            "minimum": 2
+          }
+        }
+      }
+    },
+    "text": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "content",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "content": {
+            "$ref": "#/$defs/text"
+          },
+          "role": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    },
+    "visual_roles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_map",
+        "event",
+        "geographic_markers",
+        "text",
+        "camera",
+        "physics"
+      ],
+      "properties": {
+        "base_map": {
+          "const": "EXISTING_TERRAIN_AND_REGION_MATERIAL"
+        },
+        "event": {
+          "const": "EXISTING_AUTO_CONTRAST"
+        },
+        "geographic_markers": {
+          "const": "PROTECTED_NATIVE_MARKERS"
+        },
+        "text": {
+          "const": "EXISTING_GLYPH_AND_LAYOUT"
+        },
+        "camera": {
+          "const": "READ_ONLY_EXISTING_DIRECTOR"
+        },
+        "physics": {
+          "const": "NONE"
+        }
+      }
+    },
+    "timing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fps",
+        "total_frames",
+        "duration_seconds",
+        "camera_lock_frame",
+        "event_start_frame",
+        "initial_reveal_frames",
+        "state_transition_frames",
+        "final_hold_frames",
+        "action_frames",
+        "frame_policy",
+        "blank_interstage_frames"
+      ],
+      "properties": {
+        "fps": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "total_frames": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "duration_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "camera_lock_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "event_start_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "initial_reveal_frames": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "state_transition_frames": {
+          "$ref": "#/$defs/frame"
+        },
+        "final_hold_frames": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "action_frames": {
+          "$ref": "#/$defs/positiveInteger"
+        },
+        "frame_policy": {
+          "const": "INTEGER_DETERMINISTIC"
+        },
+        "blank_interstage_frames": {
+          "const": 0
+        }
+      }
+    },
+    "source_notes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    },
+    "propagations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "origin",
+          "source_id",
+          "visual_only",
+          "physical_simulation"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "origin": {
+            "$ref": "#/$defs/anchor"
+          },
+          "source_id": {
+            "$ref": "#/$defs/id"
+          },
+          "visual_only": {
+            "const": true
+          },
+          "physical_simulation": {
+            "const": false
+          },
+          "geometry_ref": {
+            "$ref": "#/$defs/id"
+          },
+          "radius_start_degrees": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 60
+          },
+          "radius_end_degrees": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 60
+          },
+          "angular_range_degrees": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "impact_zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/geometryRef"
+      }
+    },
+    "geographic_lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "geometry_ref",
+          "direction",
+          "style_role"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "geometry_ref": {
+            "$ref": "#/$defs/id"
+          },
+          "direction": {
+            "enum": [
+              "FORWARD",
+              "REVERSE"
+            ]
+          },
+          "style_role": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "WAR"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "areas",
+          "front_lines",
+          "time_steps"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "TRANSPORT"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "routes",
+          "moving_objects"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "DISASTER"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "propagations",
+          "impact_zones"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "LINE_METRIC"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "geographic_lines",
+          "metrics"
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.:-]+$"
+    },
+    "family": {
+      "enum": [
+        "TRANSPORT",
+        "LINE_METRIC",
+        "DISASTER",
+        "WAR"
+      ]
+    },
+    "frame": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "positiveInteger": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "format": "date"
+    },
+    "refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "nonemptyRefs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/id"
+      }
+    },
+    "anchor": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
+      ],
+      "items": false
+    },
+    "lineCoordinates": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/anchor"
+      }
+    },
+    "ring": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/anchor"
+      }
+    },
+    "polygonCoordinates": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ring"
+      }
+    },
+    "geometry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "properties": {
+            "type": {
+              "const": "Point"
+            },
+            "coordinates": {
+              "$ref": "#/$defs/anchor"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "properties": {
+            "type": {
+              "const": "LineString"
+            },
+            "coordinates": {
+              "$ref": "#/$defs/lineCoordinates"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "properties": {
+            "type": {
+              "const": "Polygon"
+            },
+            "coordinates": {
+              "$ref": "#/$defs/polygonCoordinates"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "properties": {
+            "type": {
+              "const": "MultiPolygon"
+            },
+            "coordinates": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/polygonCoordinates"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "geometryRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "geometry_ref"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "geometry_ref": {
+          "$ref": "#/$defs/id"
+        }
+      }
+    },
+    "stateGeometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "geometry_ref",
+        "stage_id",
+        "source_id",
+        "role",
+        "style_role"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "geometry_ref": {
+          "$ref": "#/$defs/id"
+        },
+        "stage_id": {
+          "$ref": "#/$defs/id"
+        },
+        "source_id": {
+          "$ref": "#/$defs/id"
+        },
+        "role": {
+          "enum": [
+            "EVENT_AREA",
+            "FRONT_LINE"
+          ]
+        },
+        "style_role": {
+          "$ref": "#/$defs/text"
+        },
+        "direction": {
+          "enum": [
+            "FORWARD",
+            "REVERSE"
+          ]
+        }
+      }
+    },
+    "nativeContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "country_ids": {
+          "$ref": "#/$defs/refs"
+        },
+        "primary_country_id": {
+          "$ref": "#/$defs/id"
+        },
+        "secondary_country_ids": {
+          "$ref": "#/$defs/refs"
+        },
+        "context_location_ids": {
+          "$ref": "#/$defs/refs"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_type",
+        "source_reference",
+        "verification_status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "source_type": {
+          "$ref": "#/$defs/text"
+        },
+        "source_reference": {
+          "$ref": "#/$defs/text"
+        },
+        "verification_status": {
+          "enum": [
+            "VERIFIED",
+            "SYNTHETIC_TEST"
+          ]
+        },
+        "note": {
+          "$ref": "#/$defs/text"
+        },
+        "verification_basis": {
+          "$ref": "#/$defs/text"
+        },
+        "live_access": {
+          "$ref": "#/$defs/text"
+        },
+        "retrieval_date": {
+          "$ref": "#/$defs/text"
+        },
+        "license": {
+          "$ref": "#/$defs/text"
+        },
+        "version": {
+          "$ref": "#/$defs/text"
+        },
+        "original_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_wrapper_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "crs": {
+          "$ref": "#/$defs/text"
+        },
+        "resolution": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "objectGraphic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "width_px",
+        "height_px",
+        "polygons"
+      ],
+      "properties": {
+        "width_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "height_px": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "polygons": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "points",
+              "color"
+            ],
+            "properties": {
+              "points": {
+                "type": "array",
+                "minItems": 3,
+                "items": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "items": {
+                    "type": "number",
+                    "minimum": -0.5,
+                    "maximum": 0.5
+                  }
+                }
+              },
+              "color": {
+                "type": "array",
+                "minItems": 4,
+                "maxItems": 4,
+                "items": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "B_DISASTER",
+  "topic": "합성 해역 쓰나미의 확산과 영향권",
+  "expected_features": ["PROPAGATION_WAVE", "IMPACT_ZONE", "AREA_HOLD"],
+  "excluded_features": ["ROUTE_REVEAL", "MOVING_OBJECT", "FRONT_LINE", "STATE_TRANSITION", "TIME_STEP", "METRIC_ANNOTATION"],
+  "facts": {
+    "version": "PLANNER_FACTS_V1", "data_mode": "SYNTHETIC_TEST",
+    "subject": {"id": "DISASTER_SUBJECT", "label": "합성 해역", "aliases": ["합성 해역", "Synthetic Sea"], "event_family": "DISASTER"},
+    "locations": [{"id": "SOURCE_LOCATION", "label": "발생", "anchor": [-14, 11]}],
+    "time_range": {"start": "2000-02-01", "end": "2000-02-01"},
+    "source_notes": [{"id": "SYNTH_SOURCE", "source_type": "SYNTHETIC_TEST", "source_reference": "EXPLICIT_SYNTHETIC_PROPAGATION_NOT_PRODUCTION", "verification_status": "SYNTHETIC_TEST"}],
+    "geometries": [{"id": "IMPACT_GEOMETRY", "source_id": "SYNTH_SOURCE", "geometry": {"type": "Polygon", "coordinates": [[[-15.5, 10], [-14.8, 10], [-14.5, 12.2], [-15.2, 12.2], [-15.5, 10]]]}}],
+    "propagations": [{"id": "WAVE_EVENT", "origin": [-14, 11], "source_id": "SYNTH_SOURCE", "radius_start_degrees": 0.05, "radius_end_degrees": 1.6, "angular_range_degrees": [205, 350]}],
+    "impacts": [{"id": "COAST_IMPACT", "geometry_ref": "IMPACT_GEOMETRY"}],
+    "camera": {"anchor": [-14.7, 11.1], "target_geometry_refs": ["IMPACT_GEOMETRY"], "detail_policy": "FACT_BASED_VISUAL_GRADE"},
+    "scale": {"preferred": "REGIONAL"}
+  }
+}

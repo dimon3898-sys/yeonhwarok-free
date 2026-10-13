@@ -1,0 +1,20 @@
+{
+  "name": "A_TRANSPORT",
+  "topic": "시험 항로의 선박 이동 경로",
+  "expected_features": ["ROUTE_REVEAL", "DIRECTIONAL_FLOW", "MOVING_OBJECT", "ENDPOINT_PULSE", "ROUTE_HOLD"],
+  "excluded_features": ["PROPAGATION_WAVE", "IMPACT_ZONE", "FRONT_LINE", "STATE_TRANSITION", "TIME_STEP", "METRIC_ANNOTATION"],
+  "facts": {
+    "version": "PLANNER_FACTS_V1", "data_mode": "SYNTHETIC_TEST",
+    "subject": {"id": "TRANSPORT_SUBJECT", "label": "시험 항로", "aliases": ["시험 항로", "Synthetic Harbor"], "event_family": "TRANSPORT"},
+    "locations": [{"id": "START_PORT", "label": "출발", "anchor": [4, 8]}, {"id": "END_PORT", "label": "도착", "anchor": [9, 10]}],
+    "time_range": {"start": "2000-01-01", "end": "2000-01-01"},
+    "source_notes": [{"id": "SYNTH_SOURCE", "source_type": "SYNTHETIC_TEST", "source_reference": "EXPLICIT_SYNTHETIC_TRANSPORT_NOT_PRODUCTION", "verification_status": "SYNTHETIC_TEST"}],
+    "geometries": [{"id": "ROUTE_GEOMETRY", "source_id": "SYNTH_SOURCE", "geometry": {"type": "LineString", "coordinates": [[4, 8], [5, 8.4], [6.5, 9.2], [9, 10]]}}],
+    "routes": [{"id": "TRANSIT_ROUTE", "geometry_ref": "ROUTE_GEOMETRY", "direction": "FORWARD", "object_role": "GENERIC_TRANSPORT", "object_profile": "SUPPLIED_TRANSPORT_PROFILE", "object_graphic": {
+      "width_px": 52, "height_px": 30,
+      "polygons": [{"points": [[-0.5, -0.35], [0.3, -0.35], [0.5, 0], [0.3, 0.35], [-0.5, 0.35]], "color": [0.94, 0.98, 1, 1]}]
+    }}],
+    "camera": {"anchor": [6.5, 9], "target_geometry_refs": ["ROUTE_GEOMETRY"], "detail_policy": "FACT_BASED_VISUAL_GRADE"},
+    "scale": {"preferred": "REGIONAL"}
+  }
+}
