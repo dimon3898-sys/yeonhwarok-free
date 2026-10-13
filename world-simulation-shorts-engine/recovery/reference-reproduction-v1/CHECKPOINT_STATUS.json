@@ -3,7 +3,7 @@
   "sourceCommit": "116b676f0eb0a38ec486324c962a8f08355ac137",
   "branch": "development/reference-reproduction-20261014",
   "status": "IN_PROGRESS",
-  "phase": "PHASE1_FULL_REFERENCE_AUDIT_READY",
+  "phase": "PHASE1_PASS",
   "phases": {
     "0": {
       "status": "PASS",
@@ -13,11 +13,26 @@
       "nextAction": "Persist and verify source checkpoint remote before full audit"
     },
     "1": {
-      "status": "IN_PROGRESS",
-      "nextAction": "Decode and visually inspect all958frames in time order, quantify motion and faction fills, compare prior14s candidate, select contiguous5s interval only after audit success"
+      "status": "PASS",
+      "nextAction": "Decode and visually inspect all958frames in time order, quantify motion and faction fills, compare prior14s candidate, select contiguous5s interval only after audit success",
+      "lastPassingCheck": "958/958 full actual decoded frames chronologically inspected; exact5.181813\u201310.181813s segment selected",
+      "selectedSegment": {
+        "startSeconds": 5.181813,
+        "endSeconds": 10.181813,
+        "durationSeconds": 5,
+        "startFrameIndex": 160,
+        "selection": "Continuous western-first northward Purple gain with equal Orange loss and a smooth northward camera follow; avoids nuclear/aircraft/closing-flag sequence",
+        "endSelectionUsesTimeNotFrameCount": "Variable reference PTS, output150fixed30fps samples"
+      },
+      "outputs": [
+        "evidence/REFERENCE_AUDIT_SUMMARY.json",
+        "evidence/reference_audit/DECODE_REPORT.json",
+        "evidence/reference_audit/CONTACT_SHEETS_INDEX.json"
+      ]
     },
     "2": {
-      "status": "NOT_STARTED"
+      "status": "NOT_STARTED",
+      "nextAction": "Inspect and compose existing Area/Camera APIs; frozen source edits forbidden"
     },
     "3": {
       "status": "NOT_STARTED"
@@ -57,7 +72,7 @@
   "requiredTempOnlyFiles": 0,
   "gate": "USER_VIDEO_REVIEW_REQUIRED",
   "newVideoReviewCandidateReady": false,
-  "next": "FULL_REFERENCE_DECODE_AND_CHRONOLOGICAL_VISUAL_AUDIT",
+  "next": "PHASE2_MINIMAL_EXTENSION",
   "plannerFinal": false,
   "capacityRecovery": {
     "supportedRetryBackoffSeconds": [
