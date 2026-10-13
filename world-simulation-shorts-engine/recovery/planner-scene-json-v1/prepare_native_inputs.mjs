@@ -28,24 +28,32 @@ export async function prepareNativeInputs({scene,facts,checkpoints,videoFilename
  // Universal geographic aspect fit and padding come from the existing Scale API.
  const finalBounds=fitGeographicExtent(fullBounds,{output:[scene.metadata.output.width,scene.metadata.output.height],padding:1.18});
  const terrain=structuredClone(regionalTemplate.assets.terrain),anchor=request.cameraRequest.anchor;
- const labels=structuredClone(facts.native_labels??[]);
+ const requestedLabels=structuredClone(facts.native_labels??[]);
+ // The frozen COUNTRY layout validates interior candidates against its primary
+ // geometry. Do not feed unsupported secondary labels into that owner.
+ const labels=requestedLabels.filter(label=>label.geometry_ref===context.primary_country_id);
+ const skippedLabels=requestedLabels.filter(label=>label.geometry_ref!==context.primary_country_id)
+  .map(label=>({geometry_ref:label.geometry_ref,text:label.text,
+   reason:'FROZEN_COUNTRY_LAYOUT_OWNS_PRIMARY_INTERIOR_ONLY'}));
  if(!labels.length)throw Error('PLANNER_NATIVE_GEOGRAPHIC_LABEL_DATA_REQUIRED');
+ const marker=scene.markers?.[0]??null;
+ if(marker&&JSON.stringify(marker.anchor)!==JSON.stringify(anchor))throw Error('PLANNER_NATIVE_MARKER_ANCHOR_BINDING_REQUIRED');
+ const locationLabel=marker?.label??'';
  const base=structuredClone(regionalTemplate);
  delete base._recovery;
  base.primary=primary.id;base.secondary=secondary.map(record=>record.id);base.anchor.coordinates=anchor;
  base.framing={projection:'REGIONAL_EQUIRECTANGULAR',bounds:finalBounds};base.geometries=countries;
- base.assets.terrain=terrain;base.text={locationLabel:'',eventTitle:scene.subject.label,watermark:''};
- base.scale.information.location=false;base.layout.countryLabels=labels;
+ base.assets.terrain=terrain;base.text={locationLabel,eventTitle:scene.subject.label,watermark:''};
+ base.scale.information.location=Boolean(locationLabel);base.layout.countryLabels=labels;
  const REGIONAL=compileScalePlan(base,'REGIONAL',{allCountries:countries,eventGeometry:request.areaPlan.sweepGeometries});
- REGIONAL.scale.information.location=false;
+ REGIONAL.scale.information.location=Boolean(locationLabel);
  const continentBase=structuredClone(base);
  continentBase.framing={projection:'REGIONAL_EQUIRECTANGULAR',bounds:fitGeographicExtent(fullBounds,{padding:1.35})};
- const CONTINENT=compileScalePlan(continentBase,'CONTINENT',{allCountries:countries,eventGeometry:request.areaPlan.sweepGeometries});
- CONTINENT.scale.information.location=false;
+ const CONTINENT=compileScalePlan(continentBase,'CONTINENT',{allCountries:countries,eventGeometry:request.areaPlan.sweepGeometries,padding:1.35});
  const nativeScene={primary_region_id:primary.id,primary_geometry:primary,event_anchor:anchor,
   event_geometry:request.areaPlan.sweepGeometries,context_geometry:secondary,
   primary_label:labels.find(row=>row.geometry_ref===primary.id)?.text??scene.subject.label,
-  location_label:'',event_title:scene.subject.label,canonical_output:[1080,1920],safe_area:base.layout.safe,
+  location_label:locationLabel,event_title:scene.subject.label,canonical_output:[1080,1920],safe_area:base.layout.safe,
   approved_final_extent:finalBounds,desired_detail_level:request.cameraRequest.scale,
   scale_admission:{localDetail:{admission:{status:'LOCAL_NOT_ADMITTED',renderLocal:false},
    safeClosest:{bounds:finalBounds,status:'FACT_BASED_VISUAL_REGIONAL_CURRENT_VIEW_PENDING_RENDER'}}}};
@@ -63,6 +71,9 @@ export async function prepareNativeInputs({scene,facts,checkpoints,videoFilename
  const runtime={schema:1,subject:scene.subject.label,scenePlanPath:'recovery/planner-scene-json-v1/fixtures/SCENE_PLAN.json',
   nativeFiles,presentation,sourceGeometryBinding:request.sourceGeometryBinding,
   sourcePolicy:'FACT_BASED_VISUAL_GRADE_SUPPLIED_SCHEMATIC_STATE_BOUNDARIES_NOT_SURVEY_CONTROL_MAP',
+  nativeGraphicsBinding:{primaryCountryLabels:labels,skippedCountryLabels:skippedLabels,
+   marker:marker?{id:marker.id,anchor:marker.anchor,label:marker.label}:null,
+   locationInformation:REGIONAL.scale.information.location,styles:'UNCHANGED_NATIVE_GLYPH_MARKER_LAYOUT'},
   cameraDecision:{decision:'USE_CURRENT_VIEW',core:'UNCHANGED_CAMERA_DIRECTOR_V5',
    derivedFrom:'Scene geometry + supplied registered context countries + existing geographic aspect fit',
    finalBounds,firstLocked,cameraStartFrame,eventStartFrame:request.timing.eventStartFrame}};
@@ -76,7 +87,8 @@ export async function prepareNativeInputs({scene,facts,checkpoints,videoFilename
   nativeRegisteredCountryIds:[primary.id,...secondary.map(record=>record.id)],
   geometrySourceSha256:sha(Buffer.from(JSON.stringify(scene.geometries))),
   nativeContextSource:'Inherited registered Natural Earth country geometry and terrain assets',
-  sourceGeometryMutated:false,rendererDuplicated:false,finalBounds,
+  sourceGeometryMutated:false,rendererDuplicated:false,finalBounds,skippedCountryLabels:skippedLabels,
+  locationLabel,markerAnchor:anchor,
   cameraStartFrame,eventStartFrame:request.timing.eventStartFrame,firstLocked,totalFrames:presentation.totalFrames});
  await write('fixtures/RUNTIME_ROUTES.json',{runtime_routes:[
   {url:'/inputs/camera-plan.json',file:'world-simulation-shorts-engine/'+nativeFiles.cameraPlan},

@@ -4,7 +4,8 @@ import path from 'node:path';
 import {openPlannerRuntime,root,sha} from './planner_runtime.mjs';
 
 const report={schema:1,status:'STARTED',frames:[],pipeline:'SCENE_JSON_TO_EXISTING_ENGINE',
- physicalSimulation:false,permanentGateExecuted:false,naturalLanguageInRenderer:false};
+ physicalSimulation:false,permanentGateExecuted:false,naturalLanguageInRenderer:false,
+ scope:'NATIVE_COMPATIBILITY_PROTECTED_PIXELS_AND_GEOMETRY_BINDING',visualReviewRequired:true};
 await mkdir(path.join(root,'evidence/integration'),{recursive:true});
 let session;
 try{

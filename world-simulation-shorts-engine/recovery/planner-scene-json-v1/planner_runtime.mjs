@@ -13,6 +13,11 @@ export async function openPlannerRuntime({fixtureFile=path.join(root,'fixtures/R
  const fixture=await json(fixtureFile),scenePlan=await json(path.join(engine,fixture.scenePlanPath));
  const {compileSceneEngineRequest}=await import('../../web/map_infographic_v1/planner_engine_adapter_v1.mjs');
  const request=compileSceneEngineRequest(scenePlan),require=createRequire(path.join(repo,'cinematic-world-map/package.json'));
+ if(fixture.sourceGeometryBinding!==request.sourceGeometryBinding)throw Error('PLANNER_PERSISTED_SCENE_GEOMETRY_BINDING_REQUIRED');
+ const nativeScene=await json(path.join(engine,fixture.nativeFiles.scene));
+ if(JSON.stringify(nativeScene.event_anchor)!==JSON.stringify(scenePlan.camera_intent.anchor)
+  ||nativeScene.primary_region_id!==scenePlan.camera_intent.native_context.primary_country_id)
+  throw Error('PLANNER_PERSISTED_CAMERA_INTENT_BINDING_REQUIRED');
  if(process.version!=='v24.19.0'||require('playwright/package.json').version!=='1.62.1')throw Error('PINNED_PLANNER_NODE_PLAYWRIGHT_REQUIRED');
  const flags={regionalPlan:'regional-plan',continentPlan:'continent-plan',scene:'scene',cameraPlan:'camera-plan',inputManifest:'input-manifest'};
  const args=['-B',path.join(engine,'recovery/v5/serve.py')];

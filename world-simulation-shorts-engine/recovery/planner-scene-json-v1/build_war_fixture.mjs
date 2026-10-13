@@ -95,41 +95,30 @@ function authoredFront(coordinates) {
  return {type: 'LineString', coordinates};
 }
 
-function trimFrontToMainland(coordinates, mainland) {
- const coast = mainland.coordinates[0], inside = ([x, y]) => {
-  let result = false;
-  for (let i = 0; i < coast.length - 1; i++) {
-   const a = coast[i], b = coast[i + 1];
-   if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) result = !result;
-  }
-  return result;
- };
+/** The event front is exactly the state polygon's inland edge, so no detached second front appears. */
+function frontFromClippedState(area, mainland) {
+ const ring = area.coordinates[0], coast = mainland.coordinates[0];
+ const onSegment = (p, a, b) => Math.abs((b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0])) < 1e-8
+  && p[0] >= Math.min(a[0], b[0]) - 1e-8 && p[0] <= Math.max(a[0], b[0]) + 1e-8
+  && p[1] >= Math.min(a[1], b[1]) - 1e-8 && p[1] <= Math.max(a[1], b[1]) + 1e-8;
+ const nativeEdge = (a, b) => coast.slice(1).some((d, i) => onSegment(a, coast[i], d) && onSegment(b, coast[i], d));
+ const count = ring.length - 1, firstCoast = ring.slice(1).findIndex((point, i) => nativeEdge(ring[i], point));
+ if (firstCoast < 0) throw Error('FIXTURE_STATE_NATIVE_COAST_EDGE_REQUIRED');
  const groups = []; let current = [];
  const finish = () => {if (current.length > 1) groups.push(current); current = [];};
- const cross = (a, b) => a[0] * b[1] - a[1] * b[0];
- for (let i = 0; i < coordinates.length - 1; i++) {
-  const a = coordinates[i], b = coordinates[i + 1], r = [b[0] - a[0], b[1] - a[1]], cuts = [0, 1];
-  for (let k = 0; k < coast.length - 1; k++) {
-   const c = coast[k], d = coast[k + 1], s = [d[0] - c[0], d[1] - c[1]], den = cross(r, s);
-   if (Math.abs(den) < 1e-14) continue;
-   const ca = [c[0] - a[0], c[1] - a[1]], t = cross(ca, s) / den, u = cross(ca, r) / den;
-   if (t > 1e-10 && t < 1 - 1e-10 && u >= -1e-10 && u <= 1 + 1e-10) cuts.push(t);
-  }
-  const ts = cuts.sort((x, y) => x - y).filter((t, n, all) => !n || t - all[n - 1] > 1e-10);
-  const point = t => [round(a[0] + r[0] * t), round(a[1] + r[1] * t)];
-  for (let k = 0; k < ts.length - 1; k++) {
-   if (!inside(point((ts[k] + ts[k + 1]) / 2))) {finish(); continue;}
-   const first = point(ts[k]), last = point(ts[k + 1]);
-   if (current.length && !equal(current.at(-1), first)) finish();
-   if (!current.length) current.push(first);
-   if (!equal(current.at(-1), last)) current.push(last);
-  }
+ for (let offset = 1; offset <= count; offset++) {
+  const index = (firstCoast + offset) % count, a = ring[index], b = ring[(index + 1) % count];
+  if (nativeEdge(a, b)) {finish(); continue;}
+  if (!current.length) current.push([...a]);
+  current.push([...b]);
  }
  finish();
  const length = points => points.slice(1).reduce((sum, p, i) => sum + Math.hypot(p[0] - points[i][0], p[1] - points[i][1]), 0);
  groups.sort((a, b) => length(b) - length(a));
- if (!groups.length) throw Error('FIXTURE_FRONT_DOES_NOT_INTERSECT_MAINLAND');
- return groups[0];
+ if (!groups.length) throw Error('FIXTURE_STATE_INLAND_FRONT_EDGE_REQUIRED');
+ const front = groups[0];
+ if (front[0][0] > front.at(-1)[0]) front.reverse();
+ return front;
 }
 
 export function buildWarFacts() {
@@ -172,8 +161,9 @@ export function buildWarFacts() {
   const areaId = 'HELD_CORE_' + stage.id, frontId = 'FRONT_' + stage.id;
   const area = stage.area ?? clipMainland(mainland.geometry, stage.planes);
   validateAreaGeometry(area);
+  const front = stage.id === 'ARMISTICE' ? stage.front : frontFromClippedState(area, mainland.geometry);
   geometries.push({id: areaId, geometry: area, source_id: 'SCHEMATIC_STATES'},
-   {id: frontId, geometry: authoredFront(trimFrontToMainland(stage.front, mainland.geometry)), source_id: 'SCHEMATIC_STATES'});
+   {id: frontId, geometry: authoredFront(front), source_id: 'SCHEMATIC_STATES'});
   return {id: stage.id, date: stage.date, label: stage.label, area_refs: [areaId], front_refs: [frontId],
    fact: stage.fact, semantic_role: 'SIMPLIFIED_REPUBLIC_OF_KOREA_UN_HELD_MAINLAND_CORE'};
  });

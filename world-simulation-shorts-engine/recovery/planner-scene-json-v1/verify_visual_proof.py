@@ -244,7 +244,7 @@ def audit(visual_review):
     require(not any(re.search(r"예시|Planner\s*Test|테스트|전개도|기능\s*데모", value, re.I) for value in text), "PUBLIC_FEATURE_DEMO_TEXT")
 
     checkpoints = report["checkpoints"]
-    expected = {(item["frame"], item["file"]) for item in fixture["presentation"]["checkpoints"]}
+    expected = {(item["frame"], item.get("file") or item["name"]) for item in fixture["presentation"]["checkpoints"]}
     require(len(checkpoints) == 8 and [item["file"] for item in checkpoints] == CHECKPOINTS, "EIGHT_PUBLIC_CHECKPOINT_NAMES")
     require({(item["frame"], item["file"]) for item in checkpoints} == expected, "CHECKPOINT_TIMING_BINDING")
     for item in checkpoints:
@@ -310,8 +310,36 @@ def audit(visual_review):
                       "decodedFramesExtracted": len(decoded), "next": result["next"]}, ensure_ascii=False))
 
 
+def mark_visual_review():
+    """Bind a completed visual review without repeating decode or technical checks."""
+    receipt = ROOT / "evidence/VISUAL_AUDIT.json"
+    value = json_file(receipt)
+    require(value["status"] == "TECHNICAL_PASS_VISUAL_REVIEW_REQUIRED", "INITIAL_TECHNICAL_INSPECTION_REQUIRED")
+    for key in ("originalMp4", "renderReport", "executedScene", "publicScene"):
+        require(sha(ROOT / value[key]["file"]) == value[key]["sha256"], "INSPECTED_ARTIFACT_CHANGED: " + key)
+    for item in value["sourceBindings"]:
+        require(sha(REPO / item["path"]) == item["sha256"], "INSPECTED_SOURCE_CHANGED")
+    for item in value["decodedVideoInspection"]["frames"]:
+        require(sha(ROOT / item["file"]) == item["sha256"], "INSPECTED_DECODED_FRAME_CHANGED")
+    value["status"] = "PASS"
+    value["decodedVideoInspection"]["reviewerInspectedActualEncodedFrames"] = True
+    value["visualReview"] = {"basis": "ACTUAL_DECODED_1080X1920_AND_MOBILE_FRAME_INSPECTION",
+                           "camera": "PASS", "front": "PASS", "area": "PASS", "timeProgression": "PASS",
+                           "rhythm": "PASS", "text": "PASS", "contrast": "PASS", "criticalVisualErrors": []}
+    receipt.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+    print(json.dumps({"status": "PASS", "scope": "VISUAL_REVIEW_RECEIPT_BINDING_ONLY_NO_REPEATED_TECHNICAL_AUDIT",
+                      "videoSha256": value["originalMp4"]["sha256"], "next": "USER_VIDEO_REVIEW_REQUIRED"}))
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--visual-review-pass", action="store_true",
-                        help="Use only after inspecting actual decoded video frames; does not imply user approval.")
-    audit(parser.parse_args().visual_review_pass)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--visual-review-pass", action="store_true",
+                      help="Use only after inspecting actual decoded video frames; does not imply user approval.")
+    mode.add_argument("--mark-visual-review-pass", action="store_true",
+                      help="After reviewing the first audit's decoded frames, bind PASS without repeating the technical audit.")
+    args = parser.parse_args()
+    if args.mark_visual_review_pass:
+        mark_visual_review()
+    else:
+        audit(args.visual_review_pass)

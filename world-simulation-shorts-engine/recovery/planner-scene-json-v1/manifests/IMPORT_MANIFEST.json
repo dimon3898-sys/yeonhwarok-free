@@ -2,7 +2,7 @@
   "schema": 1,
   "scope": "PLANNER_SCENE_JSON_V1",
   "development_branch": "development/event-area-v3-final-planner-v1-20261013",
-  "inventory_stage": "implementation",
+  "inventory_stage": "fixture",
   "candidate_state": "IMPLEMENTATION_CHECKPOINT",
   "status": "PROOF_RENDER_PENDING",
   "parent_baseline": {
@@ -50,8 +50,10 @@
   },
   "roots": [
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/build_war_fixture.mjs",
+    "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/prepare_native_inputs.mjs",
+    "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/verify_integration.mjs",
     "world-simulation-shorts-engine/tests/planner_engine_adapter_v1.test.mjs",
     "world-simulation-shorts-engine/tests/planner_scene_v1.test.mjs",
@@ -60,8 +62,10 @@
   ],
   "reachable_modules": [
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/build_war_fixture.mjs",
+    "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/prepare_native_inputs.mjs",
+    "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
     "world-simulation-shorts-engine/recovery/planner-scene-json-v1/verify_integration.mjs",
     "world-simulation-shorts-engine/tests/planner_engine_adapter_v1.test.mjs",
     "world-simulation-shorts-engine/tests/planner_scene_v1.test.mjs",
@@ -155,6 +159,40 @@
       "line": 6
     },
     {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "to": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/build_war_fixture.mjs",
+      "specifier": "./build_war_fixture.mjs",
+      "kind": "static",
+      "names": [
+        "buildWarFacts"
+      ],
+      "default": false,
+      "line": 6
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "to": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/prepare_native_inputs.mjs",
+      "specifier": "./prepare_native_inputs.mjs",
+      "kind": "static",
+      "names": [
+        "prepareNativeInputs"
+      ],
+      "default": false,
+      "line": 7
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+      "specifier": "../../web/map_infographic_v1/planner_scene_v1.mjs",
+      "kind": "static",
+      "names": [
+        "compileScenePlan",
+        "validateScenePlan"
+      ],
+      "default": false,
+      "line": 8
+    },
+    {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
       "to": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
       "specifier": "../../web/map_infographic_v1/planner_engine_adapter_v1.mjs",
@@ -170,7 +208,7 @@
       "kind": "dynamic",
       "names": [],
       "default": false,
-      "line": 36
+      "line": 41
     },
     {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
@@ -179,7 +217,7 @@
       "kind": "dynamic",
       "names": [],
       "default": false,
-      "line": 38
+      "line": 43
     },
     {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/prepare_native_inputs.mjs",
@@ -217,6 +255,32 @@
       "line": 8
     },
     {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "to": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
+      "specifier": "./planner_runtime.mjs",
+      "kind": "static",
+      "names": [
+        "openPlannerRuntime",
+        "root",
+        "repo",
+        "json",
+        "sha"
+      ],
+      "default": false,
+      "line": 8
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+      "specifier": "../../web/map_infographic_v1/planner_scene_v1.mjs",
+      "kind": "static",
+      "names": [
+        "validateScenePlan"
+      ],
+      "default": false,
+      "line": 9
+    },
+    {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/verify_integration.mjs",
       "to": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
       "specifier": "./planner_runtime.mjs",
@@ -236,7 +300,7 @@
       "kind": "dynamic",
       "names": [],
       "default": false,
-      "line": 37
+      "line": 38
     },
     {
       "from": "world-simulation-shorts-engine/tests/planner_engine_adapter_v1.test.mjs",
@@ -1299,6 +1363,49 @@
       "node_version": "24.19.0"
     },
     {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "specifier": "node:crypto",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "createHash"
+      ],
+      "default": false,
+      "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "writeFile",
+        "mkdir"
+      ],
+      "default": false,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 4,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/generate_scene.mjs",
+      "specifier": "node:url",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "fileURLToPath"
+      ],
+      "default": false,
+      "line": 5,
+      "node_version": "24.19.0"
+    },
+    {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
       "specifier": "node:child_process",
       "kind": "NODE_BUILTIN",
@@ -1376,7 +1483,7 @@
     {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
       "specifier": "playwright",
-      "line": 28,
+      "line": 33,
       "kind": "LOCKED_NPM_COMMONJS_PACKAGE",
       "version": "1.62.1",
       "integrity": "sha512-0M+L3LAD8/nm554LOla9Ayx0j0tmFZ0FBcoQ7F1VuVHpM/XpiC8RcDzBQB8W5+hA8L22THxELzeF+2WcUzvcLg==",
@@ -1386,7 +1493,7 @@
     {
       "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
       "specifier": "playwright/package.json",
-      "line": 16,
+      "line": 21,
       "kind": "LOCKED_NPM_COMMONJS_PACKAGE",
       "version": "1.62.1",
       "integrity": "sha512-0M+L3LAD8/nm554LOla9Ayx0j0tmFZ0FBcoQ7F1VuVHpM/XpiC8RcDzBQB8W5+hA8L22THxELzeF+2WcUzvcLg==",
@@ -1435,6 +1542,71 @@
       ],
       "default": false,
       "line": 4,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "specifier": "node:assert/strict",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "specifier": "node:child_process",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "spawn",
+        "execFile"
+      ],
+      "default": false,
+      "line": 4,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "specifier": "node:events",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "once"
+      ],
+      "default": false,
+      "line": 5,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "mkdir",
+        "readFile",
+        "writeFile"
+      ],
+      "default": false,
+      "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 7,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/render_proof.mjs",
+      "specifier": "node:util",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "promisify"
+      ],
+      "default": false,
+      "line": 6,
       "node_version": "24.19.0"
     },
     {
