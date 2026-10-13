@@ -99,9 +99,10 @@ def build():
     regional['text']['eventTitle'] = '한반도'
     # New fixture color inputs through the unchanged public Region Material
     # contract. Original plans, material code and Boundary style are preserved.
-    regional['theme'].update(primary=[60 / 255, 0, 180 / 255],
+    regional['theme'].update(primary=[.04, 0, .70],
                              secondary=[172 / 255, 32 / 255, 0],
-                             primaryLuminance=.36, secondaryLuminance=.36,
+                             primaryStrength=.93, secondaryStrength=.94,
+                             primaryLuminance=.22, secondaryLuminance=.36,
                              visualColorProfile='REFERENCE_ORANGE_PURPLE_DATA_PROFILE_V1')
     native_scene['event_title'] = '한반도'
     native_files = copy.deepcopy(original['nativeFiles'])
