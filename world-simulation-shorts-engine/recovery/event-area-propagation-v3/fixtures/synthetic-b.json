@@ -1,0 +1,352 @@
+{
+  "schema": 1,
+  "key": "b",
+  "nativeFiles": {
+    "regionalPlan": "recovery/event-feature-bundle-v2-polish/fixtures/REGIONAL-plan.json",
+    "continentPlan": "recovery/event-feature-bundle-v2-polish/fixtures/CONTINENT-plan.json",
+    "scene": "recovery/event-feature-bundle-v2-polish/fixtures/scene.json",
+    "cameraPlan": "recovery/v5/inputs/camera-plan.json",
+    "inputManifest": "recovery/v4/V4-state-records/input-manifest.json"
+  },
+  "areaPlan": {
+    "version": "AREA_PLAN_V3",
+    "intent": {
+      "version": "AREA_INTENT_V3",
+      "data_mode": "SYNTHETIC_TEST",
+      "provenance_class": "SYNTHETIC_TEST_NOT_PRODUCTION",
+      "source": {
+        "source_type": "SYNTHETIC_TEST",
+        "source_reference": "Authored deterministic topology/motion regression fixture",
+        "verification_status": "SYNTHETIC_TEST"
+      },
+      "origin": [
+        32.382202,
+        30.318359
+      ],
+      "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL",
+      "areas": [],
+      "states": [
+        {
+          "state_id": "A",
+          "time_label": "단계 1",
+          "areas": [
+            {
+              "id": "zone",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      30.382202,
+                      29.318359
+                    ],
+                    [
+                      32.382202,
+                      29.118359
+                    ],
+                    [
+                      33.382202,
+                      30.318359
+                    ],
+                    [
+                      32.382202,
+                      31.318359
+                    ],
+                    [
+                      30.382202,
+                      30.818359
+                    ],
+                    [
+                      30.382202,
+                      29.318359
+                    ]
+                  ]
+                ]
+              },
+              "role": "EVENT_AREA",
+              "style_role": "PRIMARY",
+              "source": {
+                "source_type": "SYNTHETIC_TEST",
+                "source_reference": "Authored deterministic topology/motion regression fixture",
+                "verification_status": "SYNTHETIC_TEST"
+              },
+              "anchor": [
+                31.882202,
+                30.218359
+              ]
+            }
+          ],
+          "fronts": []
+        },
+        {
+          "state_id": "B",
+          "time_label": "단계 2",
+          "areas": [
+            {
+              "id": "zone",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      30.882202,
+                      28.818359
+                    ],
+                    [
+                      33.882202,
+                      28.818359
+                    ],
+                    [
+                      33.882202,
+                      31.818359
+                    ],
+                    [
+                      30.882202,
+                      31.818359
+                    ],
+                    [
+                      30.882202,
+                      28.818359
+                    ]
+                  ]
+                ]
+              },
+              "role": "EVENT_AREA",
+              "style_role": "PRIMARY",
+              "source": {
+                "source_type": "SYNTHETIC_TEST",
+                "source_reference": "Authored deterministic topology/motion regression fixture",
+                "verification_status": "SYNTHETIC_TEST"
+              },
+              "anchor": [
+                32.382202,
+                30.318359
+              ]
+            }
+          ],
+          "fronts": []
+        },
+        {
+          "state_id": "C",
+          "time_label": "단계 3",
+          "areas": [
+            {
+              "id": "zone",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      31.382202,
+                      28.318359
+                    ],
+                    [
+                      33.382202,
+                      29.318359
+                    ],
+                    [
+                      34.382202,
+                      31.318359
+                    ],
+                    [
+                      32.382202,
+                      32.318359
+                    ],
+                    [
+                      31.382202,
+                      28.318359
+                    ]
+                  ]
+                ]
+              },
+              "role": "EVENT_AREA",
+              "style_role": "PRIMARY",
+              "source": {
+                "source_type": "SYNTHETIC_TEST",
+                "source_reference": "Authored deterministic topology/motion regression fixture",
+                "verification_status": "SYNTHETIC_TEST"
+              },
+              "anchor": [
+                32.882202,
+                30.318359
+              ]
+            }
+          ],
+          "fronts": []
+        }
+      ],
+      "propagations": [],
+      "impacts": [],
+      "fronts": [],
+      "trajectories": [],
+      "metric": null,
+      "physicalSimulation": false
+    },
+    "fps": 30,
+    "startFrame": 0,
+    "endFrame": 90,
+    "totalFrames": 90,
+    "durationSeconds": 3,
+    "operations": [
+      {
+        "id": "OP_0",
+        "type": "AREA_REVEAL",
+        "start_frame": 0,
+        "duration_frames": 10,
+        "target_id": "zone",
+        "from": 0,
+        "to": 1
+      },
+      {
+        "id": "OP_1",
+        "type": "STATE_TRANSITION",
+        "start_frame": 10,
+        "duration_frames": 60,
+        "state_ids": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      {
+        "id": "OP_2",
+        "type": "AREA_HOLD",
+        "start_frame": 70,
+        "duration_frames": 20
+      }
+    ],
+    "timeline": [
+      {
+        "state": "AREA_REVEAL",
+        "types": [
+          "AREA_REVEAL"
+        ],
+        "startFrame": 0,
+        "endFrame": 10,
+        "durationFrames": 10
+      },
+      {
+        "state": "STATE_TRANSITION",
+        "types": [
+          "STATE_TRANSITION"
+        ],
+        "startFrame": 10,
+        "endFrame": 70,
+        "durationFrames": 60
+      },
+      {
+        "state": "AREA_HOLD",
+        "types": [
+          "AREA_HOLD"
+        ],
+        "startFrame": 70,
+        "endFrame": 90,
+        "durationFrames": 20
+      }
+    ],
+    "geometryBinding": "{\"areas\":[],\"impacts\":[],\"fronts\":[],\"states\":[{\"state_id\":\"A\",\"time_label\":\"단계 1\",\"areas\":[{\"id\":\"zone\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[30.382202,29.318359],[32.382202,29.118359],[33.382202,30.318359],[32.382202,31.318359],[30.382202,30.818359],[30.382202,29.318359]]]},\"role\":\"EVENT_AREA\",\"style_role\":\"PRIMARY\",\"source\":{\"source_type\":\"SYNTHETIC_TEST\",\"source_reference\":\"Authored deterministic topology/motion regression fixture\",\"verification_status\":\"SYNTHETIC_TEST\"},\"anchor\":[31.882202,30.218359]}],\"fronts\":[]},{\"state_id\":\"B\",\"time_label\":\"단계 2\",\"areas\":[{\"id\":\"zone\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[30.882202,28.818359],[33.882202,28.818359],[33.882202,31.818359],[30.882202,31.818359],[30.882202,28.818359]]]},\"role\":\"EVENT_AREA\",\"style_role\":\"PRIMARY\",\"source\":{\"source_type\":\"SYNTHETIC_TEST\",\"source_reference\":\"Authored deterministic topology/motion regression fixture\",\"verification_status\":\"SYNTHETIC_TEST\"},\"anchor\":[32.382202,30.318359]}],\"fronts\":[]},{\"state_id\":\"C\",\"time_label\":\"단계 3\",\"areas\":[{\"id\":\"zone\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[31.382202,28.318359],[33.382202,29.318359],[34.382202,31.318359],[32.382202,32.318359],[31.382202,28.318359]]]},\"role\":\"EVENT_AREA\",\"style_role\":\"PRIMARY\",\"source\":{\"source_type\":\"SYNTHETIC_TEST\",\"source_reference\":\"Authored deterministic topology/motion regression fixture\",\"verification_status\":\"SYNTHETIC_TEST\"},\"anchor\":[32.882202,30.318359]}],\"fronts\":[]}],\"trajectories\":[],\"propagations\":[],\"operations\":[{\"id\":\"OP_0\",\"type\":\"AREA_REVEAL\",\"start_frame\":0,\"duration_frames\":10,\"target_id\":\"zone\",\"from\":0,\"to\":1},{\"id\":\"OP_1\",\"type\":\"STATE_TRANSITION\",\"start_frame\":10,\"duration_frames\":60,\"state_ids\":[\"A\",\"B\",\"C\"]},{\"id\":\"OP_2\",\"type\":\"AREA_HOLD\",\"start_frame\":70,\"duration_frames\":20}]}",
+    "sweepGeometries": [
+      {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              30.382202,
+              29.318359
+            ],
+            [
+              32.382202,
+              29.118359
+            ],
+            [
+              33.382202,
+              30.318359
+            ],
+            [
+              32.382202,
+              31.318359
+            ],
+            [
+              30.382202,
+              30.818359
+            ],
+            [
+              30.382202,
+              29.318359
+            ]
+          ]
+        ]
+      },
+      {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              30.882202,
+              28.818359
+            ],
+            [
+              33.882202,
+              28.818359
+            ],
+            [
+              33.882202,
+              31.818359
+            ],
+            [
+              30.882202,
+              31.818359
+            ],
+            [
+              30.882202,
+              28.818359
+            ]
+          ]
+        ]
+      },
+      {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              31.382202,
+              28.318359
+            ],
+            [
+              33.382202,
+              29.318359
+            ],
+            [
+              34.382202,
+              31.318359
+            ],
+            [
+              32.382202,
+              32.318359
+            ],
+            [
+              31.382202,
+              28.318359
+            ]
+          ]
+        ]
+      }
+    ],
+    "ownership": {
+      "camera": "READ_ONLY_EXISTING_V5_AND_DETAIL",
+      "projection": "EXISTING_NATIVE",
+      "nativeGraphics": "READ_ONLY",
+      "geometry": "SUPPLIED_TOPOLOGY_PRESERVED",
+      "progression": "DETERMINISTIC_VISUAL_NOT_PHYSICAL",
+      "simulation": "NONE"
+    }
+  },
+  "presentation": {
+    "totalFrames": 90,
+    "eventStartFrame": 0,
+    "cameraStartFrame": 249,
+    "annotations": [],
+    "checkpoints": []
+  },
+  "productionEligible": false
+}

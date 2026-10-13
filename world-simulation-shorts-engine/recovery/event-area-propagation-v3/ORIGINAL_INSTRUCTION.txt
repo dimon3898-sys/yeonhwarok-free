@@ -1,0 +1,186 @@
+[작업명]
+WORLD ENGINE — EVENT FEATURE BUNDLE V3
+AREA / PROPAGATION — INTEGRATED IMPLEMENTATION + TSUNAMI PROOF
+
+[기준점]
+EVENT_FEATURE_BUNDLE_V2_FLOW_FINAL_BASELINE
+Commit: fbc3be89d94040271c7f54a051162913ad134bac
+Manifest SHA: 43f83ff77895ef8f4749b328a49a3acd0bb6b13667198347bb606e187efbe1e3
+Scope commit: 05bdd90
+
+[목표]
+기존 FINAL을 잠근 채 다음을 하나의 범용 Area/Propagation 계층으로 구현한다:
+AREA_REVEAL / GROW / CONTRACT / MOVE / HOLD
+PROPAGATION_RING/WAVE
+IMPACT_ZONE
+FRONT_LINE
+STATE_TRANSITION
+TIME_STEP
+
+Synthetic A/B/C 후 실제 Tsunami Fixture 1개로 8~12초 무음 MP4까지 생성한다.
+사용자 승인 전 FINAL 금지.
+
+[개발 원칙]
+과학/측량 시뮬레이터가 아니라 사실 기반 몰입형 지도 인포그래픽이다.
+우선순위: 시각적 재미 > 리듬 > 가독성 > 핵심 사실 > 세부 GIS 정밀도.
+FACT_BASED_VISUAL_GRADE 사용.
+작은 GIS 오차·단순화·근사 영향권은 허용.
+명백한 허위 위치/사건/규모 왜곡만 BLOCK.
+
+[보호]
+EVENT_SYSTEM_V1_FINAL, FLOW_V2_FINAL, Camera V5, 기존 Detail, Terrain Visual,
+Region Color, Boundary/Glow, Marker, Glyph/Layout, Route/Flow/Moving Object,
+승인 Timing/Style 수정 금지. V3는 별도 계층으로 확장.
+
+[재사용]
+Event Timeline, integer-frame evaluator, Projection, Polygon/Geometry utilities,
+Camera State, Scale, FACT_BASED_VISUAL_DETAIL, Layout/Safe Area, Occlusion,
+Marker/Metric, Contrast, GL state protection, Flow Timeline을 우선 재사용.
+중복 Engine 금지.
+
+[POLYGON 계층]
+기존 LineString Detail 계약을 억지로 변경하지 않는다.
+별도 AREA_DATA_PROFILE / AREA_VISUAL_ADMISSION / AREA_OVERLAY_PASS를 만든다.
+
+[AREA CONTRACT]
+입력 후보:
+area_geometry, area_role, start_frame, duration_frames, transition_type,
+origin, direction, impact_geometry, state_id, time_label, style_role.
+Engine Source에 사건명/국가명/특정 좌표 하드코딩 금지.
+
+[기능]
+AREA_REVEAL: 자연스러운 영역 등장.
+AREA_GROW/CONTRACT: 자료 기반 상태 또는 합리적 시각 interpolation. 의미/Topology 훼손 금지.
+AREA_MOVE: 태풍 영향권 등 영역 이동. Projection 기반 deterministic frame motion.
+PROPAGATION_RING/WAVE: 발생점에서 시각적 파동 확산. 정밀 물리 계산 금지.
+IMPACT_ZONE: 도달/영향지역 별도 Overlay. 기존 Region Color 변경 금지.
+FRONT_LINE: 시간별 경계 Geometry 기반 전선/경계 이동. 전술 Simulation 금지.
+STATE_TRANSITION/TIME_STEP: 상태 A→B→C와 날짜/단계 Label. 기존 Glyph/Layout 재사용.
+
+[실제 TSUNAMI FIXTURE]
+실제 알려진 쓰나미 사건 하나를 선택한다.
+발생 위치와 대략적 영향 방향/해안 관계를 신뢰 가능한 공개자료 1~2개로 확인하면 진행.
+최고정밀 과학 데이터 탐색으로 장시간 BLOCK 금지.
+자료가 지원하지 않는 정확한 파고/도달시간을 임의 주장하지 않는다.
+
+표현:
+Geographic Arrival → 발생점 → Context/Detail → Wave/Propagation →
+해안 접근 → Impact Zone → 필요한 Metric/Time → Hold.
+
+[전쟁 범용성]
+실제 전쟁 Fixture는 이번 Proof에서 필수 아님.
+Synthetic C에서 반드시:
+초기 Area → Front 이동 → 통제/점령 Area 변화 → Time Step → Hold
+를 같은 Area/State Core로 검증한다.
+
+[SYNTHETIC]
+A: 단순 원형 Area Grow/Contract + Propagation.
+B: 불규칙 Polygon State A→B→C.
+C: Front Line 이동 + 영역 변화 + Time Step.
+
+[CAMERA]
+기존 V5 + Detail 구조 재사용.
+Area가 충분히 보이면 유지, 작으면 FACT_BASED_VISUAL_DETAIL 사용.
+새 Area Camera Director 금지. 전체 관계를 잃는 Crop 금지.
+
+[VISUAL]
+기존 Visual Language 유지.
+Area는 국가색과 분리되는 자동 Contrast.
+Fill + outline/glow 절제.
+Terrain/국가 관계를 가릴 정도의 불투명 Overlay 금지.
+
+[리듬/가독성 — 엄격]
+실제 MP4에서 반드시 확인:
+첫 변화가 늦지 않음, Dead Time 없음, Area 의미 즉시 인지,
+Wave 방향 명확, Impact 명확, Text 크기/충돌, Hold 길이,
+Camera 반복 없음, 9:16 시선 집중.
+데이터 정밀도는 느슨하게 하되 이 항목은 느슨하게 하지 않는다.
+
+[데이터 허용]
+허용: 단순 Polygon, 근사 영향권, 수십 m GIS 차이, 작은 규모 차이.
+BLOCK: 잘못된 발생 위치/국가/해안, 실제와 반대 진행, 큰 규모 왜곡,
+허위 수치/사건, 화면상 명백한 Geometry 오류.
+
+[구현 순서]
+1 Parent Final/Scope 확인
+2 재사용점 확인
+3 Area Contract + Timeline
+4 Polygon Admission/Overlay
+5 Reveal/Grow/Contract/Move/Hold
+6 Propagation Ring/Wave
+7 Impact Zone
+8 Front Line
+9 State Transition/Time Step
+10 Synthetic A/B/C
+11 실제 Tsunami Fixture
+12 Camera/Detail 연결
+13 실제 Proof
+14 핵심 보호 회귀
+15 Candidate 영구 저장
+16 Public Review
+
+자동 PASS되는 연속 단계는 멈추지 않는다.
+기존 FINAL 손상 위험이 확인되면 그 이후만 중단한다.
+
+[빠른 검증]
+중복 Audit 금지.
+중간 핵심 검사만:
+Parent Final Source unchanged, Camera unchanged, Projection, Polygon validity,
+Timeline determinism, Safe Area, Occlusion, no hardcode, no obvious visual corruption.
+전체 Permanent Gate는 사용자 승인 후 1회.
+
+[저장 안전]
+장시간 렌더 전 Core+Synthetic PASS를 먼저 commit.
+실제 Fixture 연결 후 Proof 전에 commit.
+Proof 후 Candidate commit.
+Required temp-only files = 0.
+
+[PROOF]
+8~12초 / 1080×1920 / 30fps / 9:16 / 무음.
+길이는 리듬 기준으로 결정.
+
+Checkpoint 최소:
+01_EVENT_ARRIVAL
+02_ORIGIN
+03_PROPAGATION_START
+04_PROPAGATION_MID
+05_COAST_APPROACH
+06_IMPACT
+07_STATE_TIME
+08_FINAL_HOLD
+
+[다운로드 — 필수]
+/workspace 내부 링크만 제공 금지.
+휴대폰에서 직접 다운로드 가능한 MP4/PNG/SHA256SUMS URL 제공.
+모든 URL HTTP 200 확인.
+다운로드 SHA-256과 원본 SHA 일치 확인.
+Public Review에는 MP4/PNG/SHA256SUMS만 둔다.
+
+[제외]
+정밀 Tsunami/Weather Physics, 무기/폭발 Simulation, 전술 AI, 복잡 Agent,
+TTS, Subtitle, BGM/SFX, Planner, 완성 40~80초 Story는 이번 Bundle에서 제외.
+
+[최종 보고]
+[BASELINE] Parent/Protection
+[AREA CORE] Reveal/Grow/Contract/Move/Hold
+[PROPAGATION] Ring/Wave/Impact
+[WAR GENERALIZATION] Front/State/Time Step
+[SYNTHETIC] A/B/C
+[REAL FIXTURE] Event/Source basis/Fact integrity
+[VISUAL] Area/Propagation/Impact/Rhythm/Text/Camera
+[PROTECTION] Parent/Camera/Layout
+[PROOF] Duration/Frames/MP4 Download/Checkpoint/SHA
+[PERSISTENCE] Branch/Core commit/Fixture commit/Candidate commit/Temp-only
+[WARNINGS]
+[BLOCKING ERRORS]
+[DECISION]
+EVENT_FEATURE_BUNDLE_V3_AREA_CANDIDATE_PASS /
+EVENT_FEATURE_BUNDLE_V3_AREA_NEEDS_REWORK /
+EVENT_FEATURE_BUNDLE_V3_AREA_BLOCKED
+[NEXT]
+USER_VIDEO_REVIEW_REQUIRED / AREA_V3_ACTION_REQUIRED
+
+[종료]
+사용자 검토용 영상 제출 후 멈춘다.
+FINAL 자동 승격 금지.
+다음 Planner/Audio Bundle 자동 시작 금지.
