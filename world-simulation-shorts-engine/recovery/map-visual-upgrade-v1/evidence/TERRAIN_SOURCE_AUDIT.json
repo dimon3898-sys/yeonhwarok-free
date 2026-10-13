@@ -1,0 +1,188 @@
+{
+  "schema": "MAP_VISUAL_TERRAIN_SOURCE_AUDIT_V3",
+  "status": "SOURCE_VERIFIED_IMPLEMENTATION_READY_GPU_PROTOTYPE_PENDING",
+  "nativeCoreChanged": false,
+  "originalAssetsChanged": false,
+  "newDownloads": false,
+  "source": {
+    "id": "natural-earth-1-east-asia",
+    "file": "web/flat_assets/natural_earth_1_east_asia.png",
+    "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+    "bytes": 13947958,
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-raster/f04832c819e7a203d159dffe93cd9245332d6b33/10m_rasters/NE1_HR_LC_SR_W_DR/NE1_HR_LC_SR_W_DR.tif",
+    "author": "Tom Patterson, Nathaniel Vaughn Kelso and Natural Earth contributors",
+    "license": "Public Domain",
+    "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+    "attribution_required": false,
+    "download_date": "2026-10-05T08:48:14.288503+00:00",
+    "source_name": "Natural Earth I with shaded relief, water and drainages",
+    "source_type": "VERIFIED_GIS_RASTER",
+    "source_pinned_commit": "f04832c819e7a203d159dffe93cd9245332d6b33",
+    "source_original_file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tif",
+    "source_original_sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+    "source_original_bytes": 699969932,
+    "source_original_dimensions": [
+      21600,
+      10800
+    ],
+    "derived_dimensions": [
+      2880,
+      3360
+    ],
+    "crop_source_pixel_box": [
+      17040,
+      1620,
+      19920,
+      4980
+    ],
+    "geographic_bounds": {
+      "west": 104.0,
+      "east": 152.0,
+      "south": 7.0,
+      "north": 63.0
+    },
+    "coordinate_reference_system": "EPSG:4326",
+    "degrees_per_native_pixel": 0.016666666666666666,
+    "world_file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.tfw",
+    "world_file_sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+    "projection_file": "library/flat/terrain/NE1_HR_LC_SR_W_DR.prj",
+    "projection_file_sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+    "source_readme": "library/flat/terrain/NE1_HR_LC_SR_W_DR.README.html",
+    "source_readme_sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+    "license_notice": "assets/flat/NATURAL_EARTH_PUBLIC_DOMAIN.txt",
+    "modification": "Exact geographic ROI crop, lossless PNG encoding; no upscale, generated geography, recoloring or synthetic terrain detail",
+    "source_download_seconds": 14.275171425004373,
+    "asset_preparation_seconds": 5.9317653000034625,
+    "limitations": [
+      "Cartographic shaded relief/land-cover raster, not a survey DEM",
+      "Source registration is global equirectangular WGS84 at 1 arc-minute per pixel",
+      "Use original V3 global texture outside the documented ROI; do not stretch ROI over other countries",
+      "Surface colors and relief are stylized cartography; not current satellite weather or country-border data"
+    ],
+    "actualPngSha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+    "actualPngBytes": 13947958,
+    "actualPngDimensions": [
+      2880,
+      3360
+    ],
+    "hashMatchesPersistedRecord": true
+  },
+  "dem": {
+    "decision": "NO_KOREA_DEM_PRESENT_BAKED_RELIEF_VISUAL_EXTENSION_ONLY",
+    "existingGlo30Footprint": [
+      32,
+      29,
+      34,
+      31
+    ],
+    "existingGlo30CoversKorea": false,
+    "existingGlo30ReusedForKorea": false,
+    "newHeight": false,
+    "heightFromRgb": false,
+    "physicalNormalsClaimed": false
+  },
+  "sourceInspection": {
+    "method": "ACTUAL_FULL_SOURCE_PNG_VIEW_IMAGE_AND_NATIVE_GRID_CROP_STATISTICS",
+    "dimensionsAcrossPreviousInitialView": [
+      408,
+      579
+    ],
+    "landSourceY_5_50_95": [
+      0.6249733333333333,
+      0.8132243137254902,
+      0.9203090196078432
+    ],
+    "seaSourceY_5_50_95": [
+      0.608022980392157,
+      0.6797309803921568,
+      0.7775125098039195
+    ],
+    "classificationForStatistics": "PROVISIONAL_RGB_LAND_WATER_STATISTICS_NOT_GIS",
+    "actualBakedMountainAndOceanReliefVisible": true
+  },
+  "newMaterial": {
+    "module": "web/map_infographic_v1/reference_terrain_material_v3.mjs",
+    "moduleSha256": "d788c884e677d5655f4e0d1b550567c618d9fcd05ed5d536a6aa7296aeeac839",
+    "factory": "createReferenceTerrainMaterialPassV3({canvas,source,profile,width:1080,height:1920})",
+    "factoryAlias": "createMapTerrainMaterialPassV3",
+    "draw": "draw({bounds,coverage:factory.coverage(),frame,fps})",
+    "landTint": [
+      0.19607843137254902,
+      0.2627450980392157,
+      0.16862745098039217
+    ],
+    "landSourceAnchor": 0.8,
+    "landContrast": 2.25,
+    "sourceChromaRetention": 0.55,
+    "bakedShadeLocalContrast": 1.25,
+    "warmHighlightColor": [
+      1,
+      0.69,
+      0.24
+    ],
+    "warmHighlightStrength": 0.17,
+    "warmMeaning": "ARTISTIC_TINT_OF_ALREADY_BRIGHT_LOCAL_BAKED_SHADE_FEATURES_NOT_NEW_SLOPE_LIGHT",
+    "warmUniformContourGlow": false,
+    "terrainSnapshot": "OWNED_RGB8_COPY_OF_ACTUAL_MATERIAL_DEFAULT_FRAMEBUFFER_BOTTOM_LEFT",
+    "referenceMovieSampled": false,
+    "syntheticLandDetail": false,
+    "nodePureProfileImportPass": true
+  },
+  "ocean": {
+    "module": "web/map_infographic_v1/reference_ocean_material_v3.mjs",
+    "moduleSha256": "a14781ae8eb1c4380e28d36f2b876912d77cce8a90aa023faba949aadfb72395",
+    "source": "SAME_ACTUAL_REGISTERED_ORIGINAL_RGB",
+    "nearshore": "UNCHANGED_NATIVE_GIS_COVERAGE_NEIGHBOURS_MATERIAL_PROXIMITY_ONLY",
+    "depthMeasurementClaimed": false,
+    "surfaceMicroTexture": "ORIGINAL_LOW_AMPLITUDE_DERIVATIVE_FILTERED_GEOGRAPHIC_APPEARANCE_NO_WATER_SIMULATION",
+    "nearshoreMethod": "WEIGHTED_2_6_12_PIXEL_NATIVE_COVERAGE_FOUR_DIRECTION_AVERAGES_0.55_0.30_0.15_NO_MAX_DILATION_BAND",
+    "nearshoreExtraCoverageSamples": 12
+  },
+  "protection": {
+    "previousV2SourcesEdited": false,
+    "previousCandidatesEdited": false,
+    "licensedOriginalPngEdited": false,
+    "sourceRegistration": "UNCHANGED_EPSG_4326_ORIGINAL_GEOGRAPHIC_BOUNDS",
+    "coverage": "UNCHANGED_NATIVE_ACTUAL_GIS_RGBA8_ROW0_SOUTH"
+  },
+  "quality": {
+    "grade": "FACT_BASED_VISUAL_GRADE",
+    "limitation": "AVAILABLE_NE1_NATIVE_1_ARC_MINUTE_NO_KOREA_HIGH_DENSITY_DEM_OR_SATELLITE_TEXTURE",
+    "photoRealParityClaimed": false,
+    "referenceEquivalentClaimed": false,
+    "visualQualityPass": false,
+    "videoAssessment": "PENDING_ACTUAL_STATIC_AND_150_FRAME_PROOF_REVIEW"
+  },
+  "requiredTempOnlyFiles": 0,
+  "finalPromotion": false,
+  "prototypeIteration1": {
+    "actualFramesViewed": [
+      0,
+      74,
+      149
+    ],
+    "source": "ACTUAL_NEW_NATIVE_PROBE_PNGS_VIEW_IMAGE",
+    "originalPngsPreserved": true,
+    "observations": [
+      "Baked shade enhancement appears coarse/lumpy with point-like warm accents",
+      "Max-neighbour coastal proximity creates an excessive uniform teal band"
+    ],
+    "visualQualityPass": false,
+    "framePngSha256": {
+      "000.png": "1046e59ded26f44de2d984ba73242d7cf31440893030cfa653aa9372fc8de3c9",
+      "074.png": "a721de3ec3ea349e5ea21c7af92f904a83e60e3ea9d63c43de7d653ea418eb44",
+      "149.png": "df330f4bf8e33350650f7c021fc13a43c1bc52bcec36fbd0938717100bc78661"
+    }
+  },
+  "focusedIteration2": {
+    "sourceChange": "WEIGHTED_COAST_PROXIMITY_ONLY_IN_NEW_TERRAIN_V3",
+    "geometryAndOriginalCoverageChanged": false,
+    "suggestedFixtureOverrides": {
+      "landContrast": 1.8,
+      "bakedShadeLocalContrast": 0.65,
+      "warmHighlightStrength": 0.1
+    },
+    "defaultProfileChanged": false,
+    "actualGpuAndVisualResult": "PENDING_SEPARATE_PROBE_BY_ROOT"
+  }
+}
