@@ -1,9 +1,9 @@
 {
   "schema": 1,
   "scope": "EVENT_SYSTEM_V1_V3_VISUAL_DETAIL",
-  "inventory_stage": "inputs",
-  "candidate_state": "CHECKPOINT_B_INPUT_INVENTORY",
-  "status": "PROOF_RENDER_PENDING",
+  "inventory_stage": "candidate",
+  "candidate_state": "EVENT_SYSTEM_V1_V3_VISUAL_CANDIDATE",
+  "status": "USER_VIDEO_REVIEW_REQUIRED",
   "baselines": {
     "camera_v5": "29b8ee294360812b55ef577b62411de58159003b",
     "event_v2": "8cbbbd64573ea87aa56decbc0fb5218071e45bbe",
@@ -49,6 +49,7 @@
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_visual_request.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/probe_static_candidates.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/render_proof.mjs",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_integration.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_off250.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/visual_runtime.mjs",
@@ -63,6 +64,7 @@
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_visual_request.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/probe_static_candidates.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/render_proof.mjs",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_integration.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_off250.mjs",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/visual_runtime.mjs",
@@ -267,6 +269,19 @@
       ],
       "default": false,
       "line": 9
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
+      "to": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/visual_runtime.mjs",
+      "specifier": "./visual_runtime.mjs",
+      "kind": "static",
+      "names": [
+        "engine",
+        "json",
+        "sha"
+      ],
+      "default": false,
+      "line": 5
     },
     {
       "from": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_integration.mjs",
@@ -1492,6 +1507,36 @@
       ],
       "default": false,
       "line": 6,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
+      "specifier": "node:assert/strict",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "readFile",
+        "writeFile"
+      ],
+      "default": false,
+      "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 4,
       "node_version": "24.19.0"
     },
     {

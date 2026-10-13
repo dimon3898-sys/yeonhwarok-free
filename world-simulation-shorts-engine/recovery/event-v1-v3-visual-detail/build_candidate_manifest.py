@@ -246,6 +246,60 @@ def common_source_guard():
             raise ValueError("TEMPORARY_OR_ABSOLUTE_ENGINE_REFERENCE: " + path)
 
 
+def verified_proof(selected):
+    """Bind completed proof evidence to unchanged original delivery bodies."""
+    report_path = BASE + "/evidence/proof/REPORT.json"
+    report = json.loads(HELPER.safe_file(report_path).read_text())
+    def require(condition, reason):
+        if not condition:
+            raise ValueError("CANDIDATE_PROOF_EVIDENCE_INVALID: " + reason)
+    require(report.get("status") == "PASS" and report.get("state") == "EVENT_SYSTEM_V1_V3_VISUAL_CANDIDATE", "STATUS")
+    require(report.get("finalGateExecuted") is False and report.get("eventFinal") is False, "APPROVAL_GATE")
+    require(report.get("decodeValidation") == "PASS", "DECODE")
+    require((report.get("width"), report.get("height"), report.get("fps"), report.get("audio")) == (1080, 1920, 30, False), "FORMAT")
+    count, duration, lock = report.get("totalFrames"), report.get("durationSeconds"), report.get("lockFrame")
+    require(isinstance(count, int) and isinstance(duration, (int, float)) and 6 <= duration <= 8 and count == duration * 30, "FRAME_DURATION")
+    require(isinstance(lock, int) and 0 <= lock < count, "DETAIL_LOCK")
+    frames = report.get("frames", [])
+    require(len(frames) == count, "COMPLETE_FRAME_INVENTORY")
+    for index, frame in enumerate(frames):
+        require(frame.get("frame") == index, "FRAME_ORDER")
+        require(all(frame.get(key) == 0 for key in ("protected_changed_pixels", "marker_changed_pixels", "outside_roi_changed_pixels")), "FRAME_PROTECTION")
+        event = frame.get("event") or {}
+        if index < lock:
+            require(frame.get("eventFrame") is None and all(event.get(key) is None for key in ("controls", "line", "metric")), "GRAPHIC_BEFORE_LOCK")
+        else:
+            require(frame.get("cameraLocked") is True and frame.get("eventFrame") == index - lock, "EVENT_LOCK_CONTINUITY")
+    protection = report.get("protection", {})
+    require(protection.get("eventOnFrames") == count - lock, "EVENT_FRAME_COUNT")
+    require(all(protection.get(key) == 0 for key in ("protectedChangedPixels", "markerChangedPixels", "outsideRoiChangedPixels", "metricCollisions")), "PROTECTION")
+    require(all(protection.get(key) is True for key in ("geometryUnchanged", "eventProgressUnchanged", "lineStyleUnchanged", "metricValueSourceStyleUnchanged")), "EVENT_V2_PROTECTION")
+    streams = report.get("ffprobe", {}).get("streams", [])
+    require(len(streams) == 1, "SILENT_SINGLE_VIDEO_STREAM")
+    stream = streams[0]
+    require(stream.get("codec_type") == "video" and stream.get("codec_name") == "h264", "VIDEO_CODEC")
+    require((stream.get("width"), stream.get("height"), stream.get("avg_frame_rate")) == (1080, 1920, "30/1"), "PROBED_FORMAT")
+    require(int(stream.get("nb_read_frames", -1)) == count and float(stream.get("duration", -1)) == duration, "PROBED_FRAME_DURATION")
+    video = report.get("video", {})
+    require(video.get("file") == MP4_NAME and all(video.get(key) == selected[MP4_NAME][key] for key in ("sha256", "bytes")), "MP4_BODY")
+    checkpoints = report.get("checkpoints", [])
+    require(len(checkpoints) == len(CHECKPOINT_NAMES) and {row.get("file") for row in checkpoints} == set(CHECKPOINT_NAMES), "CHECKPOINT_NAMES")
+    for row in checkpoints:
+        require(all(row.get(key) == selected[row["file"]][key] for key in ("sha256", "bytes")), "CHECKPOINT_BODY")
+        frame = row.get("frame")
+        require(isinstance(frame, int) and 0 <= frame < count and frames[frame].get("png_sha256") == row["sha256"], "CHECKPOINT_NATIVE_FRAME")
+        require(row.get("sourceMatchesEncodedNativeFrame") is True, "CHECKPOINT_ENCODE_INPUT")
+    sums_path = BASE + "/public-review/SHA256SUMS"
+    expected_sums = "".join(selected[name]["sha256"] + "  " + name + "\n" for name in sorted(selected))
+    require(HELPER.safe_file(sums_path).read_text() == expected_sums, "PUBLIC_SHA256SUMS")
+    return {"mp4": selected[MP4_NAME], "checkpoints": [selected[n] for n in CHECKPOINT_NAMES],
+            "output": {"width": 1080, "height": 1920, "fps": 30, "aspect": "9:16", "audio": "NONE"},
+            "total_frames": count, "duration_seconds": duration, "detail_lock_frame": lock,
+            "report": record(report_path), "public_checksums": record(sums_path),
+            "original_candidate_delivery": True, "proof_metadata_evidence": "PASS_AND_BOUND_TO_ACTUAL_DELIVERY_HASHES",
+            "ffprobe_and_decode_reexecuted": False, "permanent_gate_executed": False}
+
+
 def documents(stage, postsave):
     protection = baseline_protection()
     common_source_guard()
@@ -278,9 +332,7 @@ def documents(stage, postsave):
             if len(hashes) != 1:
                 raise ValueError("CANDIDATE_PROOF_DUPLICATE_BODY_DIFFERS: " + name)
             selected[name] = record(sorted(choices)[0])
-        proof = {"mp4": selected[MP4_NAME], "checkpoints": [selected[n] for n in CHECKPOINT_NAMES],
-                 "output": {"width": 1080, "height": 1920, "fps": 30, "aspect": "9:16", "audio": "NONE"},
-                 "original_candidate_delivery": True, "proof_metadata_requires_evidence_report": True}
+        proof = verified_proof(selected)
     base = {"schema": 1, "scope": "EVENT_SYSTEM_V1_V3_VISUAL_DETAIL", "inventory_stage": stage,
             "candidate_state": "EVENT_SYSTEM_V1_V3_VISUAL_CANDIDATE" if stage == "candidate" else "CHECKPOINT_B_INPUT_INVENTORY",
             "status": "USER_VIDEO_REVIEW_REQUIRED" if stage == "candidate" else "PROOF_RENDER_PENDING",

@@ -1,9 +1,9 @@
 {
   "schema": 1,
   "scope": "EVENT_SYSTEM_V1_V3_VISUAL_DETAIL",
-  "inventory_stage": "inputs",
-  "candidate_state": "CHECKPOINT_B_INPUT_INVENTORY",
-  "status": "PROOF_RENDER_PENDING",
+  "inventory_stage": "candidate",
+  "candidate_state": "EVENT_SYSTEM_V1_V3_VISUAL_CANDIDATE",
+  "status": "USER_VIDEO_REVIEW_REQUIRED",
   "baselines": {
     "camera_v5": "29b8ee294360812b55ef577b62411de58159003b",
     "event_v2": "8cbbbd64573ea87aa56decbc0fb5218071e45bbe",
@@ -39,8 +39,8 @@
   "candidate_entrypoints": [
     {
       "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_candidate_manifest.py",
-      "sha256": "d1a0b7aae3534f4ef6627423e13baad8701217b6d29026fae3dba473e43b2402",
-      "bytes": 26064
+      "sha256": "698f4a1c4b504a09ea2cb287957cb86d78e75514d96959b73bb29e54211053ee",
+      "bytes": 30222
     },
     {
       "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_visual_request.mjs",
@@ -63,6 +63,11 @@
       "bytes": 5323
     },
     {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/validate_proof_grammar.mjs",
+      "sha256": "e5f029c1840e3526b4352978bc2684713d582837a6c245836ec09be45c1c3553",
+      "bytes": 3427
+    },
+    {
       "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_integration.mjs",
       "sha256": "232f355137335ad5a33ff2194896b453b40df37fa0257d1a196eb8198d18101f",
       "bytes": 2868
@@ -71,6 +76,11 @@
       "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_off250.mjs",
       "sha256": "f1c5cc9a6b93e557ba819e05dab196762a92f6573549cb3603ed176711682b7e",
       "bytes": 2207
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_public_downloads.py",
+      "sha256": "0a86f200552a75ace22297f19235efe94bd0c874da656a840a885f6d981af0c5",
+      "bytes": 2937
     },
     {
       "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/visual_runtime.mjs",
@@ -123,7 +133,7 @@
     "-B",
     "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_candidate_manifest.py",
     "--stage",
-    "inputs"
+    "candidate"
   ],
   "fresh_render_reproduction": "NOT_EXECUTED_BY_INVENTORY_TOOL",
   "clean_environment_final_gate": "DEFERRED_UNTIL_USER_VIDEO_APPROVAL",
@@ -169,5 +179,72 @@
       "bytes": 57507
     }
   ],
-  "proof": null
+  "proof": {
+    "mp4": {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/SUEZ_EVENT_SYSTEM_V1_V3_VISUAL_DETAIL.mp4",
+      "sha256": "adea9790ee91834622cdee2cf96ef5715812ea2eb846a18a70984a81469f1049",
+      "bytes": 2082239
+    },
+    "checkpoints": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/01_EVENT_ARRIVAL.png",
+        "sha256": "fe0bc9666ccb61c36d9b428abc29051a6d51e10c81777d7e56f6fb309f2e9673",
+        "bytes": 3237292
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/02_DETAIL_APPROACH.png",
+        "sha256": "9d25a990725b243dd37cddb68bb7b03721a06a2ea7fe8ba44ba04e2eabb965a7",
+        "bytes": 2320354
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/03_DETAIL_LOCK.png",
+        "sha256": "e61669b6c6a1f7b6690a324bc5eb65725bcca6dfa3341066e94271464a5cb331",
+        "bytes": 1884290
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/04_LINE_REVEAL.png",
+        "sha256": "5d176450cce70171fc9ded54bdd7e84588bbf7710ccd84dfbf432663684c84cb",
+        "bytes": 1884367
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/05_LINE_COMPLETE.png",
+        "sha256": "c11889877c7aa2dda50a113f2fe982f02e21ffd3e4c6b439935e0c6bb500f079",
+        "bytes": 1884458
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/06_METRIC_REVEAL.png",
+        "sha256": "ecc4785499779f6a2cfd588f3c40a1aa9e26a776465bc55f0a2fb4d71b060da0",
+        "bytes": 1889051
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/07_INFORMATION_HOLD.png",
+        "sha256": "6e8c425a43637949017702a41d3e840f6287560dcc7f2ad886af7ec189cb0f92",
+        "bytes": 1893467
+      }
+    ],
+    "output": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "aspect": "9:16",
+      "audio": "NONE"
+    },
+    "total_frames": 210,
+    "duration_seconds": 7,
+    "detail_lock_frame": 60,
+    "report": {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/proof/REPORT.json",
+      "sha256": "d683a862a84f5b9ef8189508032a8b5493e4ba3233f0ab85a20dd05900129f13",
+      "bytes": 18092570
+    },
+    "public_checksums": {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/public-review/SHA256SUMS",
+      "sha256": "b6b726b1628a141051dbfaa58478d87e35552735cc6df1236e7bf18478ff7dce",
+      "bytes": 718
+    },
+    "original_candidate_delivery": true,
+    "proof_metadata_evidence": "PASS_AND_BOUND_TO_ACTUAL_DELIVERY_HASHES",
+    "ffprobe_and_decode_reexecuted": false,
+    "permanent_gate_executed": false
+  }
 }
