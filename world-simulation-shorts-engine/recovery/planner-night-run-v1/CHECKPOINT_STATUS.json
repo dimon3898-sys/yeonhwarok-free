@@ -27,10 +27,12 @@
     },
     "2": {
       "name": "CAPABILITY_GAP_CHECK",
-      "status": "NOT_STARTED",
-      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
-      "outputs": [],
-      "resume": "Run this stage only after previous PASS checkpoint"
+      "status": "PASS",
+      "input_commit": "cab6cbca00540bc18978b42ad556ab472abce5c4",
+      "outputs": [
+        "evidence/GAP_CHECK.json"
+      ],
+      "resume": "Implement only safe optional Scene wiring and new composition adapter, then focused checks before rendering"
     },
     "3": {
       "name": "MINIMAL_CAUSAL_VISUAL_COMPOSITION",
@@ -64,5 +66,18 @@
     "orchestrator": "NO_EXTERNAL_DURABLE_ORCHESTRATOR_ASSUMED",
     "guard": "Inspect saved status and running processes before resuming incomplete work; never blindly duplicate a render"
   },
-  "resume_instruction": "Read CHECKPOINT_STATUS.json; skip PASS stages and resume first incomplete stage from recorded input commit"
+  "resume_instruction": "Read CHECKPOINT_STATUS.json; skip PASS stages and resume first incomplete stage from recorded input commit",
+  "start_checkpoint_commit": "cab6cbca00540bc18978b42ad556ab472abce5c4",
+  "start_checkpoint_remote_verified": true,
+  "capacity_recovery_events": [
+    {
+      "agent": "night_composition_gap",
+      "error": "Selected model is at capacity",
+      "scope": "READ_ONLY_GAP_CHECK",
+      "last_checkpoint": "cab6cbca00540bc18978b42ad556ab472abce5c4",
+      "recovery": "Supported followup_task after more than60seconds backoff; root continued unaffected checks",
+      "retry_result": "PASS",
+      "duplicate_render_started": false
+    }
+  ]
 }
