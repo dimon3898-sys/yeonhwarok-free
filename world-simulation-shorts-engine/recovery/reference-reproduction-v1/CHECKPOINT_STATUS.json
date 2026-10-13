@@ -2,18 +2,19 @@
   "schema": "REFERENCE_REPRODUCTION_CHECKPOINT_V1",
   "sourceCommit": "116b676f0eb0a38ec486324c962a8f08355ac137",
   "branch": "development/reference-reproduction-20261014",
-  "status": "BLOCKED_REFERENCE_INPUT",
-  "phase": "PHASE0_REFERENCE_AVAILABILITY",
+  "status": "IN_PROGRESS",
+  "phase": "PHASE1_FULL_REFERENCE_AUDIT_READY",
   "phases": {
     "0": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "preservation": "PASS",
-      "referenceAvailability": "BLOCKED",
-      "lastPassingCheck": "Remote source HEAD and uploaded candidate SHA verified",
-      "nextAction": "Make original target reference accessible; verify start checkpoint remote ref before PHASE1"
+      "referenceAvailability": "PASS_COMPRESSED_TARGET_AVAILABLE",
+      "lastPassingCheck": "Authorized compressed target received12.2MB;31.813189s958frames; previousCandidate and FINAL unchanged",
+      "nextAction": "Persist and verify source checkpoint remote before full audit"
     },
     "1": {
-      "status": "NOT_STARTED"
+      "status": "IN_PROGRESS",
+      "nextAction": "Decode and visually inspect all958frames in time order, quantify motion and faction fills, compare prior14s candidate, select contiguous5s interval only after audit success"
     },
     "2": {
       "status": "NOT_STARTED"
@@ -31,12 +32,32 @@
     {
       "path": "evidence/START_CHECKPOINT.json",
       "sha256": "4eb430243a351de081820f400b424d6ba80d94dc27c3df0f57652c676fc2bc59"
+    },
+    {
+      "path": "evidence/REFERENCE_ACCESS_AUDIT.json",
+      "sha256": "b1055d9e28a831dea5daf4ec8ba11886547468adb89fdb74d03c10a08a6af5ca"
+    },
+    {
+      "path": "evidence/TRANSFER_METHOD_VERIFICATION.json",
+      "sha256": "719a5d2d17703812690b08d526a033fc6992514ed55441b07042ca6b9a80bbe5"
+    },
+    {
+      "path": "transfer_parts.py",
+      "sha256": "9262004566f5e5233a5b774a7d0e4cb43bd270ac57ffcd86d960059a393d8e80"
+    },
+    {
+      "path": "FILE_ACCESS_OPTIONS.md",
+      "sha256": "f19590c71d08bb51872a1e3a03b3f7721a429006899cf934a815f9c89bc8a65e"
+    },
+    {
+      "path": "data/REFERENCE_INPUT_MANIFEST.json",
+      "sha256": "f58bfdc99ca7697f6d6bf5653859cbe7649275765abe9014f964f888287605f9"
     }
   ],
   "requiredTempOnlyFiles": 0,
   "gate": "USER_VIDEO_REVIEW_REQUIRED",
   "newVideoReviewCandidateReady": false,
-  "next": "REFERENCE_INPUT_REQUIRED",
+  "next": "FULL_REFERENCE_DECODE_AND_CHRONOLOGICAL_VISUAL_AUDIT",
   "plannerFinal": false,
   "capacityRecovery": {
     "supportedRetryBackoffSeconds": [
@@ -49,5 +70,24 @@
     "blindSameFileRetry": false,
     "noModelSwitchOrExternalOrchestratorAssumed": true
   },
-  "resume": "Skip completed Night Run and preserved FINAL work. Obtain actual reference, verify its identity, then audit first-to-last frames and select a contiguous5s segment before dependent implementation."
+  "resume": "Use persisted compressed target; do not repeat completed access search or completed Night Run. Resume PHASE1 full target audit, then dependent implementation only if PASS.",
+  "targetReference": {
+    "identity": "65379.mp4",
+    "expectedDurationSecondsApprox": 31.8,
+    "uploadedFilename": "Screen_Recording_20261013_223349_YouTube.mp4",
+    "contentAccess": "AVAILABLE_COMPRESSED_INPUT_AUTHORIZED_BY_USER",
+    "filename": "data/REFERENCE_65379_COMPRESSED.mp4",
+    "sha256": "5bfe11c8d034a6681bd1ce1ca81fa66c142d58c18a1ea8d2f1c80c903a8476a6",
+    "actualDurationSeconds": 31.813189,
+    "probeFrames": 958
+  },
+  "previousCandidate": {
+    "durationSeconds": 14,
+    "role": "COMPARISON_ONLY_NOT_TARGET_REFERENCE",
+    "mustNotSubstituteForTarget": true
+  },
+  "lastPersistedAccessCheckpoint": "27560769b9ccaaea03935eeb6b6e0cf66a1fbd0f",
+  "lastPersistedAccessRemoteHead": "27560769b9ccaaea03935eeb6b6e0cf66a1fbd0f",
+  "videoImplementationStarted": false,
+  "newProofRendered": false
 }
