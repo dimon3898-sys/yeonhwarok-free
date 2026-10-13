@@ -1,0 +1,683 @@
+[작업명]
+WORLD ENGINE — AREA/PROPAGATION V3 FINAL
++ PLANNER / SCENE JSON V1 INTEGRATED IMPLEMENTATION
+
+==================================================
+0. 검수 결론 / 실행 조건
+==================================================
+
+이번 작업은 두 PART로 구성한다.
+
+PART A:
+사용자 승인된 Area/Propagation V3 + Tsunami Wave Polish를 FINAL로 고정.
+
+PART B:
+PART A가 PASS한 경우에만 Planner / Scene JSON V1을 구현하고
+실제 전쟁 주제 1개로 통합 Proof까지 진행.
+
+두 작업은 순서 의존성이 명확하고,
+PART A 실패 시 PART B를 자동 중단할 수 있으므로 한 작업으로 묶어도 안전하다.
+
+기존 FINAL Core를 Planner 때문에 수정하지 않는다.
+
+==================================================
+1. 현재 기준점
+==================================================
+
+Parent Flow Final:
+EVENT_FEATURE_BUNDLE_V2_FLOW_FINAL_BASELINE
+Commit:
+fbc3be89d94040271c7f54a051162913ad134bac
+
+Area V3 Candidate:
+Branch:
+development/event-area-propagation-v3-20261013
+Candidate:
+a479033
+
+Tsunami Wave Polish:
+Branch:
+development/event-tsunami-wave-polish-v3-20261013
+Candidate:
+263a525
+
+Approved MP4:
+TOHOKU_2011_TSUNAMI_WAVE_VISUAL_POLISH.mp4
+
+Approved MP4 SHA-256:
+d41891620cf08aa953eed78e5b0d443b51843b173912fa1f887fb7e163d9ead7
+
+USER_VIDEO_REVIEW:
+PASS
+
+==================================================
+PART A — AREA/PROPAGATION V3 FINAL
+==================================================
+
+2. 목표
+
+새 기능 개발 없이 승인된 Area/Propagation V3를 FINAL로 고정한다.
+
+승인된 다음 기능을 보존:
+
+AREA_REVEAL
+AREA_GROW
+AREA_CONTRACT
+AREA_MOVE
+AREA_HOLD
+PROPAGATION_RING/WAVE
+IMPACT_ZONE
+FRONT_LINE
+STATE_TRANSITION
+TIME_STEP
+Tsunami irregular Wave Front
+Sequential Coast Impact
+
+다시 튜닝하지 않는다.
+
+==================================================
+3. Final 검증
+==================================================
+
+불필요한 Audit 반복 금지.
+
+다음 Permanent Gate 7개만 최종 확인:
+
+SOURCE_PERSISTED
+ASSETS_PERSISTED
+HASH_MANIFEST_PASS
+DEPENDENCY_MANIFEST_PASS
+IMPORT_MANIFEST_PASS
+NO_REQUIRED_TEMP_FILES
+CLEAN_ENV_REPRODUCIBLE
+
+Clean checkout에서 승인 Candidate를 재현한다.
+
+가능하면 BIT_EXACT.
+인코더 차이만 있으면 decoded pixel equality 허용.
+
+승인 Visual/Timing이 달라지면 FAIL.
+
+==================================================
+4. Area V3 Final
+==================================================
+
+7/7 PASS 시:
+
+EVENT_FEATURE_BUNDLE_V3_AREA_FINAL_BASELINE
+
+으로 고정.
+
+Final Manifest와 Reproduction 정보를 원격 저장.
+
+Required temp-only files:
+0
+
+Secret Scan 실행.
+
+PART A 실패 시:
+AREA_V3_FINAL_BLOCKED
+로 종료하고 PART B 시작 금지.
+
+==================================================
+PART B — PLANNER / SCENE JSON V1
+==================================================
+
+5. 시작 조건
+
+PART A가 완전히 PASS한 경우에만 시작.
+
+목표:
+
+사용자가 자연어로 주제를 입력하면
+현재 완성된 World Engine 기능을 조합해
+영상 Scene Plan을 자동 생성하는 Planner를 만든다.
+
+예:
+
+"한국전쟁 당시 전선은 어떻게 변했을까?"
+
+→ 사건/위치/시간축 파악
+→ 필요한 Camera/Scale 결정
+→ Marker/Area/Front/Route/Metric 선택
+→ Scene JSON 생성
+→ Timeline 구성
+→ 기존 Engine으로 렌더
+
+Planner는 Renderer가 아니다.
+
+==================================================
+6. 개발 목표
+==================================================
+
+현재까지 만든 기능을 자동 선택·조합하는 계층이다.
+
+사용 가능한 기존 기능:
+
+Camera V5
+Detail Approach
+Marker
+Metric
+Geographic Line
+Route
+Directional Flow
+Moving Object
+Endpoint Pulse
+Area Reveal/Grow/Contract/Move/Hold
+Propagation Wave
+Impact Zone
+Front Line
+State Transition
+Time Step
+
+Planner가 이 기능들을 다시 구현하면 FAIL.
+
+==================================================
+7. Planner 구조
+==================================================
+
+최소 구조:
+
+Natural Language Topic
+→ TopicIntent
+→ Fact/Event Data
+→ Story Beats
+→ ScenePlan
+→ Scene JSON
+→ Existing Engine
+
+Planner 출력은 deterministic한 구조화 데이터여야 한다.
+
+Renderer 내부에 자연어 해석 로직을 넣지 않는다.
+
+==================================================
+8. Scene JSON
+==================================================
+
+Scene JSON은 최소 다음 범주를 표현할 수 있어야 한다.
+
+metadata
+subject
+locations
+time_range
+camera_intent
+scale_intent
+event_type
+beats
+geometries
+markers
+routes
+moving_objects
+areas
+front_lines
+metrics
+time_steps
+text
+visual_roles
+timing
+source_notes
+
+필드가 필요 없는 Scene에서는 생략 가능.
+
+==================================================
+9. Beat 구조
+==================================================
+
+Planner는 영상을 Beat 단위로 계획한다.
+
+예:
+
+HOOK
+→ GEOGRAPHIC_CONTEXT
+→ EVENT_APPROACH
+→ EVENT_ACTION
+→ STATE_CHANGE
+→ CONSEQUENCE
+→ HOLD
+
+모든 영상이 이 구조를 강제로 사용할 필요는 없다.
+
+주제에 필요한 Beat만 선택한다.
+
+==================================================
+10. Feature Selection
+==================================================
+
+Planner는 사건 성격에 따라 기능을 선택한다.
+
+예:
+
+이동/물류:
+Route + Moving Object
+
+운하/국경/지리:
+Line + Metric
+
+쓰나미/재난:
+Propagation + Impact Zone
+
+전쟁:
+Front Line + Area State + Time Step + 필요시 Route
+
+불필요한 Primitive를 화면에 추가하지 않는다.
+
+==================================================
+11. Camera / Scale
+==================================================
+
+Planner는 Camera를 직접 계산하지 않는다.
+
+Camera Intent와 대상 Geometry를 기존 Camera/Detail 계층에 전달한다.
+
+Camera V5 Core 수정 금지.
+
+Planner가 특정 화면 좌표를 하드코딩하지 않는다.
+
+==================================================
+12. 사실성 정책
+==================================================
+
+FACT_BASED_VISUAL_GRADE 유지.
+
+목표는 학술/측량 영상이 아니라
+사실 기반의 몰입도 높은 영상이다.
+
+허용:
+작은 수치 차이
+단순화된 경계
+근사 Route
+근사 영향권
+작은 GIS 오차
+
+금지:
+허위 사건
+잘못된 국가/위치
+실제 진행과 반대되는 표현
+큰 규모 왜곡
+사실관계를 바꾸는 조작
+
+정확한 자료 확보 때문에 장시간 BLOCK하지 않는다.
+
+==================================================
+13. Story / Retention 정책
+==================================================
+
+Planner에서 이 부분은 엄격하게 유지한다.
+
+목표:
+계속 보게 되는 지도 영상.
+
+검사:
+
+첫 변화가 늦지 않는가
+같은 화면이 오래 유지되지 않는가
+Camera 변화에 목적이 있는가
+정보가 한꺼번에 과다 등장하지 않는가
+다음 Beat가 자연스럽게 이어지는가
+시선이 어디로 가야 하는지 명확한가
+Text가 모바일에서 읽히는가
+Hold가 불필요하게 길지 않은가
+
+==================================================
+14. Planner가 하지 않을 것
+==================================================
+
+이번 V1에서 제외:
+
+TTS 생성
+Subtitle 생성
+BGM/SFX
+완성 Narration Script
+AI Web Research Agent 전체 자동화
+복잡한 Fact Verification Pipeline
+정밀 물리 Simulation
+자동 Thumbnail
+YouTube Upload
+
+이번 목표는 Scene Planning + Existing Engine 조합.
+
+==================================================
+15. Data Source 처리
+==================================================
+
+Planner는 Fixture/Data에서 제공된 사실을 우선 사용한다.
+
+실제 Fixture에 필요한 최소 공개 사실은 빠르게 확인 가능.
+
+공식 출처가 쉽게 있으면 사용.
+그렇지 않으면 신뢰 가능한 공개 자료 사용.
+
+여러 출처를 끝없이 교차검증하지 않는다.
+
+출처가 불명확하거나 사실관계가 크게 의심될 때만 BLOCK.
+
+==================================================
+16. Timing
+==================================================
+
+Planner가 각 Beat의 목표 길이를 제안한다.
+
+정확한 초를 고정하지 않는다.
+
+영상 변화량과 정보량을 기준으로 결정.
+
+Dead Time을 피한다.
+
+각 Primitive의 기존 Timeline 계약을 재사용한다.
+
+==================================================
+17. Synthetic Planner Tests
+==================================================
+
+최소 3개:
+
+A. 물류/이동 주제
+기대:
+Route + Moving Object 선택.
+
+B. 쓰나미/재난 주제
+기대:
+Propagation + Impact 선택.
+
+C. 전쟁/전선 주제
+기대:
+Front Line + Area State + Time Step 선택.
+
+각 테스트에서 불필요한 기능이 선택되지 않는지 확인.
+
+==================================================
+18. 실제 통합 Fixture — 전쟁
+==================================================
+
+Planner V1의 실제 통합 테스트는
+역사적 전쟁 사건 1개를 사용한다.
+
+조건:
+
+전선/영역 변화가 명확함
+시간 단계가 존재함
+공개 자료로 핵심 사실 확인이 쉬움
+지도 영상으로 이해하기 쉬움
+
+추천 우선 후보:
+한국전쟁의 주요 전선 변화.
+
+단 데이터 확보가 불필요하게 오래 걸리면
+다른 역사적 전쟁 Fixture로 변경 가능.
+
+실제 Fixture 선택 이유를 기록한다.
+
+==================================================
+19. 전쟁 Proof 목표
+==================================================
+
+이번 Proof는 완성 40~80초 영상이 아니다.
+
+Planner가 제대로:
+
+주제
+→ Scene JSON
+→ Camera
+→ Front/Area
+→ Time Step
+
+을 연결하는지 보는 짧은 통합 Proof.
+
+목표:
+약 10~15초
+1080×1920
+30fps
+9:16
+무음
+
+리듬에 따라 길이 조정 가능.
+
+==================================================
+20. 전쟁 연출
+==================================================
+
+예시 흐름:
+
+Geographic Context
+→ 초기 전선
+→ Time Step
+→ Front 이동
+→ 통제/영역 변화
+→ 다음 Time Step
+→ 핵심 변화 Hold
+
+병력/Route가 실제로 필요한 경우에만 추가.
+
+화면을 기능 데모처럼 복잡하게 만들지 않는다.
+
+==================================================
+21. Text
+==================================================
+
+테스트성 문구 금지.
+
+예:
+"전선 이동 예시"
+"Planner Test"
+
+같은 문구를 Public Proof에 표시하지 않는다.
+
+실제 사건 이해에 필요한 최소 Text만 사용.
+
+==================================================
+22. 구현 순서
+==================================================
+
+PART A:
+1 Area V3 승인 Candidate 확인
+2 Permanent Gate 7/7
+3 Clean reproduction
+4 Area V3 Final 저장
+
+PASS 후 PART B:
+
+5 Planner Contract
+6 Scene JSON Schema
+7 Beat Planner
+8 Feature Selector
+9 Camera/Scale Intent Adapter
+10 Timing Planner
+11 Synthetic A/B/C
+12 실제 전쟁 Fixture
+13 Scene JSON 생성
+14 Existing Engine 연결
+15 10~15초 Proof
+16 리듬/가독성 집중검사
+17 Candidate 영구 저장
+18 Public Review
+
+자동 PASS되는 연속 단계는 중간에 멈추지 않는다.
+
+==================================================
+23. 빠른 검증
+==================================================
+
+중복 Audit 금지.
+
+Planner 개발 중 핵심만 검사:
+
+Parent Final unchanged
+Scene JSON schema valid
+No renderer duplication
+No camera duplication
+No topic-specific Engine hardcode
+Feature selection correct
+Timeline deterministic
+Safe Area
+No obvious visual corruption
+Mobile readability
+
+Planner Candidate의 전체 Permanent Gate는
+사용자 영상 승인 후 수행.
+
+==================================================
+24. 저장 안전
+==================================================
+
+다음 지점에서 commit:
+
+A. Area V3 Final
+B. Planner Core + Synthetic PASS
+C. 실제 Fixture + Scene JSON
+D. Proof Candidate
+
+장시간 렌더 전에 반드시 저장.
+
+Required temp-only:
+0
+
+==================================================
+25. 영상 검수 기준
+==================================================
+
+데이터 정밀도보다 다음을 엄격히 본다:
+
+Camera rhythm
+Front readability
+Area change readability
+Time progression
+Visual hierarchy
+Text readability
+Color contrast
+Dead Time
+Repetition
+Viewer attention
+
+==================================================
+26. 다운로드 — 필수
+==================================================
+
+사용자가 휴대폰에서 직접 검수한다.
+
+/workspace 내부 링크만 제공 금지.
+
+반드시:
+
+MP4 다운로드 URL
+Checkpoint PNG URL
+Scene JSON 다운로드 URL
+SHA256SUMS URL
+
+HTTP 200 확인.
+다운로드 SHA와 원본 SHA 일치 확인.
+
+Public Review에는:
+MP4
+PNG
+Scene JSON
+SHA256SUMS
+
+만.
+
+Source/Diagnostics/Internal Plan 공개 금지.
+
+==================================================
+27. Candidate
+==================================================
+
+기술 PASS 시:
+
+PLANNER_SCENE_JSON_V1_CANDIDATE
+
+로 저장.
+
+사용자 승인 전 FINAL 금지.
+
+==================================================
+28. 최종 보고
+==================================================
+
+[AREA V3 FINAL]
+
+Gate 7/7:
+Clean reproduction:
+Final name:
+Commit:
+Manifest SHA:
+
+[PLANNER]
+
+TopicIntent:
+Beat Planner:
+Feature Selector:
+Timing:
+Scene JSON:
+
+[SYNTHETIC]
+
+A:
+B:
+C:
+
+[REAL WAR FIXTURE]
+
+Subject:
+Fact basis:
+Scene beats:
+Selected features:
+
+[VISUAL]
+
+Camera:
+Front:
+Area:
+Time:
+Rhythm:
+Text:
+
+[PROTECTION]
+
+Area Final:
+Flow Final:
+Camera:
+PASS / FAIL
+
+[PROOF]
+
+Duration:
+Frames:
+MP4 Download:
+Scene JSON Download:
+Checkpoint:
+SHA:
+
+[PERSISTENCE]
+
+Branch:
+Planner commit:
+Fixture commit:
+Candidate commit:
+Temp-only:
+
+[WARNINGS]
+...
+
+[BLOCKING ERRORS]
+...
+
+[DECISION]
+
+AREA_V3_FINAL_AND_PLANNER_V1_CANDIDATE_PASS /
+AREA_V3_FINAL_ONLY /
+PLANNER_V1_NEEDS_REWORK /
+PLANNER_V1_BLOCKED
+
+[NEXT]
+
+USER_VIDEO_REVIEW_REQUIRED /
+PLANNER_V1_ACTION_REQUIRED
+
+==================================================
+29. 종료
+==================================================
+
+사용자 검토용 Planner Proof를 제출하고 멈춘다.
+
+Planner FINAL 자동 승격 금지.
+TTS/Audio 자동 시작 금지.
+40~80초 완성 Story 자동 시작 금지.
