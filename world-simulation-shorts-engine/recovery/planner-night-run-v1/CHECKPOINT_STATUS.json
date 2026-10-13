@@ -1,0 +1,68 @@
+{
+  "schema": "NIGHT_RUN_CHECKPOINT_V1",
+  "branch": "development/planner-night-causal-visual-20261013",
+  "source": {
+    "branch": "development/event-area-v3-final-planner-v1-20261013",
+    "head": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+    "remote_head": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+    "media_commit": "f0714e94a43b825bd8428db1974d5de6ca8153ff",
+    "mp4_sha256": "d8a2fbcca285b8e87f5782cbc6e94c7c0d84a110f16aa5a06eb2b879157b45d0",
+    "scene_sha256": "ee4fdfc84798849288037cc4c8718cfe5c210c0da076eb0551a084d379e41074",
+    "hash_manifest_sha256": "0f284dcfe7a210b9769f2bf53e537611e325b9f6f4c4c9d41bb77e4f9c3ad560",
+    "area_final": "7da699c07cddf618f5e8a93ca735db51d31bbb39",
+    "flow_final": "fbc3be89d94040271c7f54a051162913ad134bac",
+    "event_final": "f79f3d55d945ef0e53b03ac2ed666f48f28b5881",
+    "camera_final": "29b8ee294360812b55ef577b62411de58159003b"
+  },
+  "stages": {
+    "1": {
+      "name": "PRESERVE_CHECKPOINT",
+      "status": "PASS",
+      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+      "outputs": [
+        "evidence/START_CHECKPOINT.json",
+        "evidence/START_DOWNLOAD_VERIFY.json"
+      ],
+      "resume": "Verify remote continuation ref then begin STEP 2 targeted gap check"
+    },
+    "2": {
+      "name": "CAPABILITY_GAP_CHECK",
+      "status": "NOT_STARTED",
+      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+      "outputs": [],
+      "resume": "Run this stage only after previous PASS checkpoint"
+    },
+    "3": {
+      "name": "MINIMAL_CAUSAL_VISUAL_COMPOSITION",
+      "status": "NOT_STARTED",
+      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+      "outputs": [],
+      "resume": "Run this stage only after previous PASS checkpoint"
+    },
+    "4": {
+      "name": "REVIEW_PROOF_AND_DOWNLOAD",
+      "status": "NOT_STARTED",
+      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+      "outputs": [],
+      "resume": "Run this stage only after previous PASS checkpoint"
+    }
+  },
+  "gate": "USER_VIDEO_REVIEW_REQUIRED",
+  "planner_final": false,
+  "required_temp_only": 0,
+  "capacity_recovery": {
+    "mechanism": "SUPPORTED_COLLABORATION_FOLLOWUP_OR_TOOL_SESSION_RESUME_ONLY",
+    "bounded_backoff_seconds": [
+      60,
+      180,
+      300,
+      600,
+      900
+    ],
+    "honor_retry_after": true,
+    "model_switching": "NOT_REQUESTED",
+    "orchestrator": "NO_EXTERNAL_DURABLE_ORCHESTRATOR_ASSUMED",
+    "guard": "Inspect saved status and running processes before resuming incomplete work; never blindly duplicate a render"
+  },
+  "resume_instruction": "Read CHECKPOINT_STATUS.json; skip PASS stages and resume first incomplete stage from recorded input commit"
+}
