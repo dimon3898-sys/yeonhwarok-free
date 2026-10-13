@@ -2,9 +2,9 @@
   "schema": 1,
   "scope": "EVENT_FEATURE_BUNDLE_V3_AREA_PROPAGATION",
   "development_branch": "development/event-area-propagation-v3-20261013",
-  "inventory_stage": "fixture",
-  "candidate_state": "IMPLEMENTATION_CHECKPOINT",
-  "status": "PROOF_RENDER_PENDING",
+  "inventory_stage": "candidate",
+  "candidate_state": "EVENT_FEATURE_BUNDLE_V3_AREA_CANDIDATE",
+  "status": "USER_VIDEO_REVIEW_REQUIRED",
   "parent_baseline": {
     "baseline": "EVENT_FEATURE_BUNDLE_V2_FLOW_FINAL_BASELINE",
     "commit": "fbc3be89d94040271c7f54a051162913ad134bac",
@@ -52,6 +52,7 @@
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/overlay_smoke.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_synthetic.mjs",
     "world-simulation-shorts-engine/tests/area_core_v3.test.mjs",
     "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
@@ -69,6 +70,7 @@
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/overlay_smoke.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_synthetic.mjs",
     "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/polish_runtime.mjs",
     "world-simulation-shorts-engine/tests/area_core_v3.test.mjs",
@@ -289,6 +291,38 @@
       "names": [],
       "default": false,
       "line": 24
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "to": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/area_runtime.mjs",
+      "specifier": "./area_runtime.mjs",
+      "kind": "static",
+      "names": [
+        "openAreaRuntime",
+        "root",
+        "repo",
+        "json"
+      ],
+      "default": false,
+      "line": 7
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+      "specifier": "/modules/area_native_bridge_v3.mjs",
+      "kind": "dynamic",
+      "names": [],
+      "default": false,
+      "line": 21
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v5.mjs",
+      "specifier": "/modules/camera_gpu_pipeline_v5.mjs",
+      "kind": "dynamic",
+      "names": [],
+      "default": false,
+      "line": 22
     },
     {
       "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_synthetic.mjs",
@@ -2001,6 +2035,58 @@
       "names": [],
       "default": true,
       "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "specifier": "node:assert/strict",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "specifier": "node:child_process",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "execFile"
+      ],
+      "default": false,
+      "line": 4,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "readFile",
+        "writeFile"
+      ],
+      "default": false,
+      "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 6,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_protection.mjs",
+      "specifier": "node:util",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "promisify"
+      ],
+      "default": false,
+      "line": 5,
       "node_version": "24.19.0"
     },
     {
