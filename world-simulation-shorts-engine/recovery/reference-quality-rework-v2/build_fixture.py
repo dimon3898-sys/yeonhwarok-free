@@ -96,10 +96,10 @@ def build():
                              qualityParityClaimed=False)
     scene['style'] = {'profileName': 'REFERENCE_OLIVE_BASE_ORANGE_PURPLE_V2',
                       'losingColor': [186/255, 30/255, 11/255, .70],
-                      'existingWinningColor': [95/255, 30/255, 186/255, .80],
+                      'existingWinningColor': [104/255, 23/255, 229/255, .65],
                       'gainedWinningColor': [91/255, 0, 251/255, .98],
                       'interfaceColor': [1, 1, 1, 0], 'interfaceWidthPixels': 0,
-                      'sharedDomainBoundary': 'CONTROL_MATERIAL_ONLY_NO_DECORATIVE_STROKE'}
+                      'sharedDomainBoundary': 'CONTROL_MATERIAL_REPLACES_INTERNAL_SEPARATOR'}
     scene['terrainProfile'] = {'profileName': 'NE1_REFERENCE_OLIVE_TEAL_VISUAL_V2',
                               'landTint': [64/255, 72/255, 25/255], 'seaTint': [31/255, 78/255, 87/255],
                               'landSourceAnchor': .85, 'seaSourceAnchor': .70,

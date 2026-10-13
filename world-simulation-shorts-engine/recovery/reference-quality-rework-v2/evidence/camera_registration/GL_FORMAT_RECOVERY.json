@@ -1,0 +1,37 @@
+{
+  "status": "ROOT_CAUSE_ISOLATED_AND_FIXED",
+  "nativeContext": {
+    "alpha": false,
+    "antialias": false,
+    "preserveDrawingBuffer": true
+  },
+  "standaloneChromium": "154.0.8037.57",
+  "actualColourCopyProbe": [
+    {
+      "texture": "RGBA8",
+      "allocationGL": 0,
+      "copyGL": 1282
+    },
+    {
+      "texture": "RGB8",
+      "allocationGL": 0,
+      "copyGL": 0
+    },
+    {
+      "texture": "RGBA",
+      "allocationGL": 0,
+      "copyGL": 1282
+    },
+    {
+      "texture": "RGB",
+      "allocationGL": 0,
+      "copyGL": 0
+    }
+  ],
+  "rootCause": "WebGL2 default framebuffer alpha:false RGB base format cannot copy into RGBA destination texture",
+  "fix": "Owned native copy texture follows actual context alpha: RGB8 for alpha:false, RGBA8 for alpha:true; no baseline/source render change",
+  "newModuleSHA256": "9fd7c91f8d49a6dbf469d14b20135453abf9c40131603a667867269f196b7277",
+  "nativeIntegrationRetest": "PENDING_ROOT_STATIC_PROBE",
+  "oldSourceChanged": false,
+  "qualityParityClaimed": false
+}

@@ -142,7 +142,8 @@ export async function createReferencePresentationPass({canvas,width=1080,height=
  if(canvas?.width!==width||canvas?.height!==height)throw Error('PRESENTATION_CANVAS_DIMENSIONS_REQUIRED');
  const gl=canvas.getContext('webgl2');if(!gl)throw Error('PRESENTATION_NATIVE_WEBGL2_REQUIRED');
  const {captureFlowNativeGlState,restoreFlowNativeGlState}=await import('./flow_graphic_pass_v2.mjs');
- const initial=captureFlowNativeGlState(gl),program=gl.createProgram(),shaders=[],texture=gl.createTexture(),vao=gl.createVertexArray();
+ const initial=captureFlowNativeGlState(gl),program=gl.createProgram(),shaders=[],texture=gl.createTexture(),vao=gl.createVertexArray(),
+  textureFormat=gl.getContextAttributes().alpha?'RGBA8':'RGB8';
  let disposed=false;
  try{
   for(const [type,source]of[[gl.VERTEX_SHADER,vertexSource],[gl.FRAGMENT_SHADER,fragmentSource]]){
@@ -152,7 +153,8 @@ export async function createReferencePresentationPass({canvas,width=1080,height=
   }
   gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error('PRESENTATION_LINK_'+gl.getProgramInfoLog(program));
   gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);gl.bindBuffer(gl.PIXEL_UNPACK_BUFFER,null);
-  gl.texStorage2D(gl.TEXTURE_2D,1,gl.RGBA8,width,height);
+  // WebGL2 copyTexSubImage2D requires a compatible base format: an alpha:false default framebuffer is RGB, not RGBA.
+  gl.texStorage2D(gl.TEXTURE_2D,1,gl[textureFormat],width,height);
   for(const [name,value]of[[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],
    [gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,name,value);
   const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('PRESENTATION_INITIAL_GL_ERROR_'+error);
@@ -169,6 +171,7 @@ export async function createReferencePresentationPass({canvas,width=1080,height=
    gl.bindFramebuffer(gl.READ_FRAMEBUFFER,null);gl.readBuffer(gl.BACK);
    gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);gl.bindSampler(0,null);
    gl.copyTexSubImage2D(gl.TEXTURE_2D,0,0,0,0,0,width,height);
+   const copyError=gl.getError();if(copyError!==gl.NO_ERROR)throw Error('PRESENTATION_NATIVE_COPY_GL_ERROR_'+copyError);
    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);
    gl.viewport(0,0,width,height);gl.colorMask(true,true,true,true);
    for(const capability of ['BLEND','DEPTH_TEST','STENCIL_TEST','SCISSOR_TEST','CULL_FACE','RASTERIZER_DISCARD'])gl.disable(gl[capability]);
@@ -184,10 +187,10 @@ export async function createReferencePresentationPass({canvas,width=1080,height=
    minimumCornerInsetPixels:Math.min(sample.sourceUVBounds[0]*width,sample.sourceUVBounds[1]*height,
     (1-sample.sourceUVBounds[2])*width,(1-sample.sourceUVBounds[3])*height),
    sourceUVBounds:copy(sample.sourceUVBounds),glError:error,nativeStateRestored:true,
-   source:'CURRENT_NATIVE_GEOGRAPHIC_FRAMEBUFFER',sourceFootageSampling:false,
+   source:'CURRENT_NATIVE_GEOGRAPHIC_FRAMEBUFFER',textureFormat,sourceFootageSampling:false,
    cpuPixelReadback:false,nativeProjectionSourceUnchanged:true,cameraV5SourceUnchanged:true};
  }
  function dispose(){if(!disposed){disposed=true;gl.deleteProgram(program);gl.deleteTexture(texture);gl.deleteVertexArray(vao);}}
  return{draw,dispose,evidence:{version,composition:'GENUINE_NATIVE_MAP_GPU_COPY_UNIFORM_ROTATE_CROP',
-  sourceFootageSampling:false,sourceGeometryMutation:false,originalSourceChanged:false}};
+  textureFormat,sourceFootageSampling:false,sourceGeometryMutation:false,originalSourceChanged:false}};
 }
