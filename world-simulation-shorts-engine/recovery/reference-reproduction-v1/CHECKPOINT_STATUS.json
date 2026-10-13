@@ -1,0 +1,53 @@
+{
+  "schema": "REFERENCE_REPRODUCTION_CHECKPOINT_V1",
+  "sourceCommit": "116b676f0eb0a38ec486324c962a8f08355ac137",
+  "branch": "development/reference-reproduction-20261014",
+  "status": "BLOCKED_REFERENCE_INPUT",
+  "phase": "PHASE0_REFERENCE_AVAILABILITY",
+  "phases": {
+    "0": {
+      "status": "BLOCKED",
+      "preservation": "PASS",
+      "referenceAvailability": "BLOCKED",
+      "lastPassingCheck": "Remote source HEAD and uploaded candidate SHA verified",
+      "nextAction": "Make original target reference accessible; verify start checkpoint remote ref before PHASE1"
+    },
+    "1": {
+      "status": "NOT_STARTED"
+    },
+    "2": {
+      "status": "NOT_STARTED"
+    },
+    "3": {
+      "status": "NOT_STARTED"
+    },
+    "4": {
+      "status": "NOT_STARTED"
+    }
+  },
+  "inputInstructionSha256": "1fccb540bfc31740bcbf8d765ca4ffff0b4a38a4f13f768e68e824aca90e4194",
+  "lastCompletedCandidateCommit": "51cb8bde4c4ac720317dfb04e06de3f9d3b40dbd",
+  "outputs": [
+    {
+      "path": "evidence/START_CHECKPOINT.json",
+      "sha256": "4eb430243a351de081820f400b424d6ba80d94dc27c3df0f57652c676fc2bc59"
+    }
+  ],
+  "requiredTempOnlyFiles": 0,
+  "gate": "USER_VIDEO_REVIEW_REQUIRED",
+  "newVideoReviewCandidateReady": false,
+  "next": "REFERENCE_INPUT_REQUIRED",
+  "plannerFinal": false,
+  "capacityRecovery": {
+    "supportedRetryBackoffSeconds": [
+      60,
+      180,
+      300
+    ],
+    "honorRetryAfter": true,
+    "currentFailure": "DETERMINISTIC_FILE_SIZE_LIMIT_NOT_MODEL_CAPACITY",
+    "blindSameFileRetry": false,
+    "noModelSwitchOrExternalOrchestratorAssumed": true
+  },
+  "resume": "Skip completed Night Run and preserved FINAL work. Obtain actual reference, verify its identity, then audit first-to-last frames and select a contiguous5s segment before dependent implementation."
+}

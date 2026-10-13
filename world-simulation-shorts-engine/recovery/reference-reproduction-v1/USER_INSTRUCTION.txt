@@ -1,0 +1,58 @@
+WORLD ENGINE — REFERENCE REPRODUCTION MASTER
+Version: 2026-10-14 / USER VIDEO REVIEW GATE
+
+MISSION
+Reproduce the attached 65379.mp4 reference as faithfully as possible, targeting equal-or-better visual quality. This is a fidelity task, not an invitation to invent alternate animation. The key visible action is the moving map camera following a continuously advancing territorial-color boundary: winning faction gains colored territory, losing faction loses the same area. No decorative arrows, route lines, direction lines, or unnecessary line overlays. Factions' colors must be immediately distinguishable over visible terrain. Text and TTS are not the focus; silent playback must communicate the action. Do not claim parity without measured side-by-side comparison and user approval.
+
+CURRENT OFFICIAL BASELINE (DO NOT RESTART)
+Camera Director V5 FINAL: 29b8ee294360812b55ef577b62411de58159003b
+Event System V1 FINAL: f79f3d55d945ef0e53b03ac2ed666f48f28b5881
+Flow / Movement V2 FINAL: fbc3be89d94040271c7f54a051162913ad134bac
+Area / Propagation V3 FINAL: 7da699c07cddf618f5e8a93ca735db51d31bbb39
+Planner V1: CANDIDATE PASS, NOT FINAL.
+Previous causal visual branch: development/planner-night-causal-visual-20261013
+Previous candidate: 51cb8bd
+Reported remote HEAD: 116b676f0eb0a38ec486324c962a8f08355ac137
+Current 14s candidate reference: 65385.mp4 (if attached).
+Target reference: 65379.mp4 (must be attached or available to Codex; if missing STOP, do not guess).
+
+EXECUTION ORDER — STRICT
+PHASE 0 — PRESERVE & VERIFY
+- Inspect actual repo/branch/HEAD, remote reachability, clean/dirty tree and asset availability. Do not assume supplied commit references match checkout; resolve discrepancy safely.
+- Protect all FINAL baselines, original candidates, scene JSON, sources, runtime and assets. Do not reset --hard, force push, rewrite history, delete or overwrite originals.
+- Create a new isolated branch from the verified continuation point. Before long operations, commit/push a durable checkpoint and verify remote hash. Required temp-only files = 0; secret scan = 0.
+- If remote persistence cannot be verified, STOP before risky changes. If there are uncommitted user changes, preserve them non-destructively and report rather than overwriting.
+
+PHASE 1 — FULL REFERENCE AUDIT
+- Decode and inspect 65379.mp4 from first to last frame, not only selected stills. Record timeline and key motion segments: map pan/zoom, territory boundaries, faction color values/opacity, expansion timing and direction, camera tracking, rhythm, any battle effects actually visible.
+- Compare with existing 65385.mp4 candidate where available. Select the most representative CONTIGUOUS 5-second segment showing camera tracking and continuous territory-color expansion. Document exact reference start/end timestamps. Do not fabricate observations.
+- Explicitly separate mandatory reference behavior from optional elements. No arrows, route/direction lines, decorative trails or standalone frontline lines. The changing border between colored territories itself conveys the frontline. Avoid a color scheme that hides terrain or makes factions ambiguous.
+
+PHASE 2 — MINIMAL IMPLEMENTATION
+- Inspect existing AREA V3 (grow/contract/move/state transition/front line), Camera V5, and Planner bindings. Reuse verified capabilities; do not rebuild FINAL cores or create a separate war-only engine.
+- Implement the smallest extension/adaptor needed for continuous territory control color animation synchronized to camera movement. Winning and losing regions must remain spatially complementary without gaps, flicker, popping, or sudden whole-area swaps. Respect map geography, coastlines, correct countries and historical event direction; visual-grade approximations are allowed but factual reversal is not.
+- Ensure camera movement follows the advancing control boundary smoothly and purposefully, rather than static full-map framing. Keep faction colors high-contrast, stable, distinguishable on mobile, with terrain still readable.
+- Remove/disable route-line and arrow visuals in THIS fixture without breaking the underlying reusable Flow V2 feature for other topics.
+- If a critical feature requires touching FINAL core or unrelated large systems, STOP and report a scoped safe alternative. No uncontrolled scope expansion.
+- For each safely independent implementation milestone: focused test -> commit -> push -> verify remote -> proceed. Stop dependent work on failure.
+
+PHASE 3 — 5-SECOND PROOF
+- Render exactly 5.0s, 150 frames, 1080x1920, 30fps, H.264 MP4. Prefer silent output; no TTS or subtitle dependencies. Reproduce the selected 5-second reference segment's camera framing, boundary movement, relative speed, colors and visible rhythm as closely as technically possible.
+- The colored territory must visibly advance across the map continuously; the losing color must retreat in step. No arrow/route/direction line substitutes. No sudden color swaps. No blank/black frames, broken coastlines, occlusion artifacts, or camera jump cuts absent from the reference.
+- Render reference-vs-output comparison PNGs at matching relative timestamps and provide a concise discrepancy table. Inspect the WHOLE rendered video in time order; technical decoding alone is not visual acceptance.
+- A technically successful render is not a quality PASS. If fidelity is short, make limited safe corrections within the agreed 5-second scope; do not repeatedly expand the system. Report any remaining gaps honestly as USER REVIEW REQUIRED.
+
+PHASE 4 — PERSIST & DELIVER
+- Commit/push implementation and relevant non-secret artifacts to the isolated branch; verify remote HEAD and all required persistent assets. Never rely on /tmp alone.
+- Publish only the review MP4, reference-comparison PNGs, necessary scene JSON and SHA256SUMS to a public review location. Never publish source/internal plans, diagnostics, credentials or sensitive assets.
+- Provide direct phone-download HTTP(S) URLs. Verify HTTP 200 for each and compare downloaded SHA-256 with original and committed artifacts. If verification fails, report failure; never claim a working link.
+- Final report in concise Korean: completed tasks, reference segment timestamps, actual visual differences, MP4/PNG/JSON/SHA links, branch and commit hashes, checkpoint/recovery state, USER_VIDEO_REVIEW_REQUIRED.
+
+OVERNIGHT ERROR HANDLING
+- If 'Selected model is at capacity', transient network errors or disconnects occur, use only supported retry/resume mechanisms, with bounded backoff (e.g., 1, 3, 5 minutes, then stop if still failing). No unsupported claims of forced automatic model switch or guaranteed unattended resumption.
+- Persist a machine-readable progress checkpoint (phase, last passing test, commit, remote HEAD, next action) before expensive work and after every PASS. On restart verify repository state, then resume at the last successful checkpoint, skipping completed phases.
+- Never retry destructive operations automatically. If state is ambiguous, stop safely and explain what needs human intervention.
+
+NON-NEGOTIABLE STOP GATE
+- Do not produce a 14s expansion, promote Planner V1 to FINAL, change existing FINAL baselines, or start 40-80s planning without explicit user approval of the 5s video.
+- Preserve previous candidates. If the 5s video is not visually comparable to the reference, say so. Never substitute arrows/lines for colored territory expansion or mark quality PASS from test results alone.
