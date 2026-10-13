@@ -75,7 +75,7 @@
     },
     "4": {
       "name": "REVIEW_PROOF_AND_DOWNLOAD",
-      "status": "IN_PROGRESS",
+      "status": "PASS",
       "input_commit": "366d44b3d69ac9086a6c5a39b8ab9e5a468af16a",
       "outputs": [
         {
@@ -105,9 +105,17 @@
         {
           "path": "public-review/SHA256SUMS",
           "sha256": "7f848419ff745431e96f431390e9ffc34b84b609be7f8f28b9f73a7d0748920f"
+        },
+        {
+          "path": "evidence/HTTP_DOWNLOAD_VERIFY.json",
+          "sha256": "b67d6ee7e313c0d1fe84614fe5e22e8bf07bcae2a1be351d27e8b3ea4e6df61f"
+        },
+        {
+          "path": "evidence/PERSISTENCE_VERIFICATION.json",
+          "sha256": "5d4b03f113d11d50313352345419063c8560dbb2861c75989a46f03e6313432d"
         }
       ],
-      "resume": "Native render PASS; do not render or reencode. Resume focused candidate audit, sampled visual inspection, candidate persistence and real HTTPS download verification",
+      "resume": "All stages PASS; do not render, reencode or start another feature. Await user review of the complete MP4",
       "input_scene_sha256": "77b0660a885a56d6ac25d49560910e592070e00011010339fa162e31118651b2",
       "native_render": {
         "status": "PASS",
@@ -127,10 +135,8 @@
         "full_video_review": false,
         "user_gate": "USER_VIDEO_REVIEW_REQUIRED"
       },
-      "remaining_checks": [
-        "REMOTE_CANDIDATE_PERSISTENCE",
-        "HTTP200_DOWNLOADED_SHA_EQUALITY"
-      ]
+      "remaining_checks": [],
+      "saved_output_commit": "51cb8bde4c4ac720317dfb04e06de3f9d3b40dbd"
     }
   },
   "gate": "USER_VIDEO_REVIEW_REQUIRED",
@@ -174,5 +180,12 @@
     ]
   },
   "implementation_checkpoint_commit": "366d44b3d69ac9086a6c5a39b8ab9e5a468af16a",
-  "implementation_checkpoint_remote_verified": true
+  "implementation_checkpoint_remote_verified": true,
+  "media_checkpoint_commit": "51cb8bde4c4ac720317dfb04e06de3f9d3b40dbd",
+  "media_checkpoint_remote_verified": true,
+  "verified_public_files": 11,
+  "verified_http200_files": 11,
+  "verified_download_hashes": 11,
+  "next": "USER_VIDEO_REVIEW_REQUIRED",
+  "completion_receipt": "COMMIT_CONTAINING_THIS_STATUS"
 }
