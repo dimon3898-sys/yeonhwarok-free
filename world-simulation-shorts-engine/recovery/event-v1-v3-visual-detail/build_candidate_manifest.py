@@ -47,6 +47,9 @@ CHECKPOINT_NAMES = ("01_EVENT_ARRIVAL.png", "02_DETAIL_APPROACH.png", "03_DETAIL
                     "04_LINE_REVEAL.png", "05_LINE_COMPLETE.png", "06_METRIC_REVEAL.png",
                     "07_INFORMATION_HOLD.png")
 DEFAULT_POSTSAVE = {
+    BASE + "/evidence/SECRET_SCAN_A.json",
+    BASE + "/evidence/SECRET_SCAN_B.json",
+    BASE + "/evidence/SECRET_SCAN.json",
     BASE + "/evidence/PERSISTENCE_VERIFICATION.json",
     BASE + "/evidence/POST_COMMIT_VERIFICATION.json",
     BASE + "/evidence/FINAL_PERSISTENCE.json",

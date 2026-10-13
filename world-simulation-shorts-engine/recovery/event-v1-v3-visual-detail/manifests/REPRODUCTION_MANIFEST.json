@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "scope": "EVENT_SYSTEM_V1_V3_VISUAL_DETAIL",
+  "inventory_stage": "inputs",
+  "candidate_state": "CHECKPOINT_B_INPUT_INVENTORY",
+  "status": "PROOF_RENDER_PENDING",
+  "baselines": {
+    "camera_v5": "29b8ee294360812b55ef577b62411de58159003b",
+    "event_v2": "8cbbbd64573ea87aa56decbc0fb5218071e45bbe",
+    "suez_data": "69e6ed83acac00bfa7ab1853722f873792a813e1",
+    "v3_block": "9cf4661a56db0334bc1d9e936a6671f643562112",
+    "survey_detail_evidence": "8e68b02016707db5274535f18e808b5630bb57d2"
+  },
+  "protected_baselines": {
+    "comparison_base": "8e68b02016707db5274535f18e808b5630bb57d2",
+    "original_tracked_paths": 2208,
+    "changed_original_paths": [],
+    "camera_v5_core": "UNCHANGED",
+    "event_v2_sources_and_style": "UNCHANGED",
+    "production_geometry_metric_and_provenance": "UNCHANGED",
+    "survey_detail_result": "RETAINED_UNALTERED",
+    "visual_detail_is_separate_policy": true
+  },
+  "event_final": false,
+  "user_video_approved": false,
+  "permanent_gate_executed": false,
+  "required_temp_only_files": [],
+  "inventory_root": "REPOSITORY_ROOT",
+  "postsave_report_exclusions": [
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/FINAL_PERSISTENCE.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/PERSISTENCE_VERIFICATION.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/POST_COMMIT_VERIFICATION.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/POST_SCAN_SOURCE_CHECK.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/SECRET_SCAN.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/SECRET_SCAN_A.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/SECRET_SCAN_B.json",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/evidence/SOURCE_AFTER_SECRET_SCAN.json"
+  ],
+  "candidate_entrypoints": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_candidate_manifest.py",
+      "sha256": "d1a0b7aae3534f4ef6627423e13baad8701217b6d29026fae3dba473e43b2402",
+      "bytes": 26064
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_visual_request.mjs",
+      "sha256": "1601b4c4afd20a1ad5c145fe3043468b1cc4d4641b56ec27300fa62703348b2f",
+      "bytes": 4263
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/probe_static_candidates.mjs",
+      "sha256": "029d9cb092410a08ac056dd649d048cc4689e743b3a30891625754b6ae4bfcd3",
+      "bytes": 2775
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/render_proof.mjs",
+      "sha256": "66d91e14694aa6fbb075dfbde56d8e23a880b77ad2604d62c6ef8401056b7daf",
+      "bytes": 7471
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/scan_visual_candidate.py",
+      "sha256": "49749b47f8ef12eaf52a2933e27909b8181e0aec5a5e2023cd42a80cd6363ccf",
+      "bytes": 5323
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_integration.mjs",
+      "sha256": "232f355137335ad5a33ff2194896b453b40df37fa0257d1a196eb8198d18101f",
+      "bytes": 2868
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/verify_off250.mjs",
+      "sha256": "f1c5cc9a6b93e557ba819e05dab196762a92f6573549cb3603ed176711682b7e",
+      "bytes": 2207
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/visual_runtime.mjs",
+      "sha256": "5fb682e123a3cd8766baab8a3cc243a1f86d97cf38fe5b47471c7ff44d34d944",
+      "bytes": 4269
+    }
+  ],
+  "setup_recipe": [
+    "npm",
+    "--prefix",
+    "cinematic-world-map",
+    "ci",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    "--strict-ssl=true"
+  ],
+  "python_requirements": {
+    "path": "world-simulation-shorts-engine/recovery/v4/runtime/python-requirements.lock",
+    "sha256": "de855b8f5e4ec6d9d80264160d4ade42ac486795fdc013fb36ab52358d88af8d",
+    "bytes": 197
+  },
+  "interpreters": [
+    {
+      "name": "python",
+      "executable": "/usr/bin/python3",
+      "version": "3.13.5"
+    },
+    {
+      "name": "node",
+      "version": "24.19.0"
+    },
+    {
+      "name": "chromium",
+      "version": "154.0.8037.57"
+    },
+    {
+      "name": "ffmpeg",
+      "version": "7.1.5"
+    }
+  ],
+  "focused_test_argv": [
+    "node",
+    "--test",
+    "world-simulation-shorts-engine/tests/visual_detail_admission_v1.test.mjs",
+    "world-simulation-shorts-engine/tests/camera_detail_approach_adapter_v1.test.mjs"
+  ],
+  "candidate_manifest_argv": [
+    "/usr/bin/python3",
+    "-B",
+    "world-simulation-shorts-engine/recovery/event-v1-v3-visual-detail/build_candidate_manifest.py",
+    "--stage",
+    "inputs"
+  ],
+  "fresh_render_reproduction": "NOT_EXECUTED_BY_INVENTORY_TOOL",
+  "clean_environment_final_gate": "DEFERRED_UNTIL_USER_VIDEO_APPROVAL",
+  "retained_input_manifest_references": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/SOURCE_MANIFEST.json",
+      "sha256": "e36db746fdf22917af45dcf68cc8b9eab777024cf7c06eb59e21b85a817b41ce",
+      "bytes": 30463
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/FIXTURE_MANIFEST.json",
+      "sha256": "33667661083d85303532e585cea8ec4030a9ea5a4e35188038b2836091a3dbec",
+      "bytes": 10224
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/EVIDENCE_MANIFEST.json",
+      "sha256": "f8178c65f41be0cf2cf32b17f986ba297f58d73595d1eab1c66eb34f362ceb29",
+      "bytes": 11664
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/RUNTIME_ASSET_MANIFEST.json",
+      "sha256": "c1641c064cd24fbccb136d548fb1b89fd96c641998cc132149acbe1d68bd1247",
+      "bytes": 17434
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/BUILD_INPUT_MANIFEST.json",
+      "sha256": "ed958605265b6cfd57ebd8a0302b6c986cbc9a8c7554aa142b633c036e73ce22",
+      "bytes": 4732
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/DEPENDENCY_MANIFEST.json",
+      "sha256": "7112bd39c86560267ef397a008fee2422d5bef3d98eac8ae0a49baf074627bb2",
+      "bytes": 19090
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/IMPORT_MANIFEST.json",
+      "sha256": "bff3ba489e09a5e99c9610ff31ac5355ea89959f688efed9d532ddd023493191",
+      "bytes": 36968
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/event-v1-candidate-v2/manifests/HASH_MANIFEST.json",
+      "sha256": "c9b0c27787392bfe5f5b5a990bd61c91b566fe922609359261d35e21f6266c8b",
+      "bytes": 57507
+    }
+  ],
+  "proof": null
+}

@@ -22,10 +22,10 @@ export async function openVisualRuntime(){
     pipeline=await createEventDetailGpuAdapter({...common,canvas,targetFraming,mode,certificate,detailEnabled});
     return {evidence:pipeline.evidence};
    },
-   async capture({bounds,cameraLocked=true,eventFrame=149,eventEnabled=true,protect=false,png=true,disabledFrame=null}){
+   async capture({bounds,cameraLocked=true,eventFrame=149,eventEnabled=true,protect=false,png=true,disabledFrame=null,frame=0}){
     let clean=null;
-    if(protect){pipeline.draw({bounds,cameraLocked,eventEnabled:false});glFinish();clean=new Uint8Array(pipeline.readPixels());}
-    const diagnostic=disabledFrame===null?pipeline.draw({bounds,cameraLocked,eventFrame:eventEnabled?eventFrame:null,eventEnabled}):pipeline.drawFrame(disabledFrame,{eventEnabled:false});
+    if(protect){pipeline.draw({bounds,cameraLocked,eventEnabled:false,frame});glFinish();clean=new Uint8Array(pipeline.readPixels());}
+    const diagnostic=disabledFrame===null?pipeline.draw({bounds,cameraLocked,eventFrame:eventEnabled?eventFrame:null,eventEnabled,frame}):pipeline.drawFrame(disabledFrame,{eventEnabled:false});
     glFinish();const pixels=new Uint8Array(pipeline.readPixels()),result={diagnostic,raw_rgba_sha256:await digest(pixels)};
     const encoded=png?pipeline.png():null;
     if(encoded){result.png=encoded;result.png_sha256=await digest(Uint8Array.from(atob(encoded.split(',')[1]),c=>c.charCodeAt(0)));}
