@@ -215,11 +215,19 @@ def runtime_assets(graph):
     for path in graph["browser_runtime_modules"]:
         url = "/three.js" if "/web/vendor/" in path else "/modules/" + Path(path).name
         routes[url] = {"url": url, "file": path}
+    inherited = fixture.get("inheritedAdmissionFiles", {})
+    require(set(inherited) == {"scenePlan", "visualAdmission"}, "PERSISTED_INHERITED_VISUAL_PROFILE_REQUIRED")
+    inherited_bodies = []
+    for relative in inherited.values():
+        require(isinstance(relative, str) and not Path(relative).is_absolute() and ".." not in Path(relative).parts,
+                "INHERITED_PROFILE_MUST_BE_PERSISTED_ENGINE_INPUT")
+        inherited_bodies.append(H.protected_record(PARENT, ENGINE + "/" + relative))
     return {"runtime_routes": sorted(routes.values(), key=lambda row: row["url"]),
             "asset_bodies": sorted(assets.values(), key=lambda row: row["path"]),
             "source_license_documents": sorted(license_documents.values(), key=lambda row: row["path"]),
             "non_runtime_original_provenance_references": non_runtime_references,
             "native_input_bodies": [record(ENGINE + "/" + fixture["nativeFiles"][key]) for key in mapping],
+            "inherited_visual_admission_bodies": inherited_bodies,
             "loopback_server": record(ENGINE + "/recovery/v5/serve.py"),
             "generated_routes": ["/runtime-config.json"],
             "live_external_runtime_requests": False, "height_source_present": load(routes["/inputs/input-manifest.json"]["file"]).get("heightSource") is not None}
@@ -310,7 +318,7 @@ def documents(stage, exclusions):
                                    reference_semantics="MODERN_COUNTERFACTUAL_VISUAL_STUDY_NOT_HISTORICAL_KOREAN_WAR", original_historical_data_unchanged=True),
         "EVIDENCE_MANIFEST.json": make(entries=[record(p) for p in evidence], proof=proof, whole_reference_audit=record(BASE + "/evidence/input_audit/REPORT.json"), public_allowed_bodies=["MP4", "PNG", "Canonical Scene JSON", "SHA256SUMS"]),
         "RUNTIME_ASSET_MANIFEST.json": make(**assets),
-        "DEPENDENCY_MANIFEST.json": make(parent=record(dependency_path), dependencies=dependencies["dependencies"], interpreters=dependencies["interpreters"], setup=dependencies["setup"], dependency_locks=[H.verify_record(row) for row in dependencies["dependency_locks"]], parser_provider=dependencies["parser_provider"], observed_toolchain=installed, additional_runtime_dependencies=[]),
+        "DEPENDENCY_MANIFEST.json": make(parent=record(dependency_path), dependencies=dependencies["dependencies"], interpreters=dependencies["interpreters"], setup=dependencies["setup"], dependency_locks=[H.verify_record(row) for row in dependencies["dependency_locks"]], parser_provider=dependencies["parser_provider"], observed_toolchain=installed, additional_runtime_dependencies=[], optional_measurement_build_tools={"scipy": "1.15.3", "numpy": "2.2.4", "already_installed": True, "required_for_saved_fixture_proof": False, "usage": "Source silhouette diagnostics and measured badge PCHIP fixture authoring; runtime uses persisted anchors"}),
         "IMPORT_MANIFEST.json": make(**graph),
         "BUILD_INPUT_MANIFEST.json": make(reused_hash_ast_helper=H.protected_record(BASELINES["area_v3"], ENGINE + "/recovery/event-v1-v3-visual-detail/build_candidate_manifest.py"), inherited_build_recipe=H.protected_record(PARENT, OLD + "/manifests/BUILD_INPUT_MANIFEST.json"), dependency_locks=[H.verify_record(row) for row in dependencies["dependency_locks"]], terrain_regenerated=False, final_source_modified=False),
         "REPRODUCTION_MANIFEST.json": make(setup_recipe=dependencies["setup"], focused_test_argv=["node", "--test", *H.NEW_TESTS], proof_argv=["node", BASE + "/render_proof.mjs"], candidate_audit_argv=["/usr/bin/python3", "-B", BASE + "/audit_candidate.py"], instructions=record(BASE + "/REPRODUCTION.md"), proof=proof, clean_final_gate="DEFERRED_UNTIL_USER_VIDEO_APPROVAL", renderer_backend="ANGLE_SWIFTSHADER", cache_and_onboarding_tool_paths_required=False),
