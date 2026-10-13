@@ -36,17 +36,49 @@
     },
     "3": {
       "name": "MINIMAL_CAUSAL_VISUAL_COMPOSITION",
-      "status": "NOT_STARTED",
-      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
-      "outputs": [],
-      "resume": "Run this stage only after previous PASS checkpoint"
+      "status": "PASS",
+      "input_commit": "e120724b376abcfd139d59b6f5c7d58a6dafee61",
+      "outputs": [
+        {
+          "path": "fixtures/SCENE_PLAN.json",
+          "sha256": "77b0660a885a56d6ac25d49560910e592070e00011010339fa162e31118651b2"
+        },
+        {
+          "path": "fixtures/FACT_DATA.json",
+          "sha256": "c606e46f48d3960ec0aeba822a8febf92bac89250f73a1f3c0dfe0ba77c8f8fe"
+        },
+        {
+          "path": "fixtures/CAUSAL_PLAN.json",
+          "sha256": "f2e1ed9ea76b910a4a95c839070c7e45265e6485232586b2ffacc639126e8880"
+        },
+        {
+          "path": "fixtures/RUNTIME_FIXTURE.json",
+          "sha256": "ce7502e88ead3aad7fd0cc69e73523fc6f48515895918fe78e6432650f75cc74"
+        },
+        {
+          "path": "evidence/ROUTE_SELECTION.json",
+          "sha256": "67e9b86d76eb8479188d1ca931d886f05e7a45e35c2aedce8403e0485abd6293"
+        },
+        {
+          "path": "evidence/FOCUSED_TESTS.json",
+          "sha256": "0fb2349646b0b2daa3c5426e711dd5042ae5662464f6db3c92e910e607cf3273"
+        },
+        {
+          "path": "evidence/INTEGRATION.json",
+          "sha256": "cd0eb79aaa064db9a301322854bc07a56b435188d1a23ecaa38651a90fefa354"
+        }
+      ],
+      "resume": "Source checkpoint must be pushed and remote verified before STEP 4 render; do not repeat saved native route selection or passed focused checks",
+      "focused_tests": 26,
+      "native_integration_frames": 23
     },
     "4": {
       "name": "REVIEW_PROOF_AND_DOWNLOAD",
-      "status": "NOT_STARTED",
-      "input_commit": "8bf6fa536a4dafba1ae803a421781ee953397be2",
+      "status": "IN_PROGRESS",
+      "input_commit": "SELF_SOURCE_CHECKPOINT_AFTER_COMMIT",
       "outputs": [],
-      "resume": "Run this stage only after previous PASS checkpoint"
+      "resume": "Inspect evidence/proof/CAPTURE_STATUS.json and running node process; from persisted source checkpoint run node recovery/planner-night-run-v1/render_proof.mjs to capture only missing verified frames",
+      "input_scene_sha256": "77b0660a885a56d6ac25d49560910e592070e00011010339fa162e31118651b2"
     }
   },
   "gate": "USER_VIDEO_REVIEW_REQUIRED",
@@ -79,5 +111,14 @@
       "retry_result": "PASS",
       "duplicate_render_started": false
     }
-  ]
+  ],
+  "gap_checkpoint_commit": "e120724b376abcfd139d59b6f5c7d58a6dafee61",
+  "protection_scope": {
+    "frozen_final_paths": 2684,
+    "old_planner_recovery": "UNCHANGED",
+    "allowed_nonfinal_extensions": [
+      "planner_scene_v1.mjs",
+      "planner_scene_v1.schema.json"
+    ]
+  }
 }

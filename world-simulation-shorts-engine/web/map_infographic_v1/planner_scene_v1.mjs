@@ -102,6 +102,94 @@ function nativeContext(value) {
   ? id(value[key], 'COUNTRY_ID') : list(value[key], key).map(item => id(item, 'CONTEXT_ID'));
  return result;
 }
+const timingFields = Object.freeze(['fps', 'total_frames', 'duration_seconds', 'camera_lock_frame',
+ 'event_start_frame', 'initial_reveal_frames', 'state_transition_frames', 'final_hold_frames',
+ 'action_frames', 'frame_policy', 'blank_interstage_frames']);
+function suppliedTiming(value) {
+ record(value, 'SCENE_TIMING');
+ if (Object.keys(value).some(key => !timingFields.includes(key)) || timingFields.some(key => value[key] === undefined))
+  throw Error('PLANNER_COMPLETE_SCENE_TIMING_REQUIRED');
+ const result = {};
+ for (const key of timingFields) result[key] = ['duration_seconds', 'frame_policy'].includes(key) ? value[key]
+  : integer(value[key], 'SCENE_TIMING_' + key.toUpperCase(), ['fps', 'total_frames', 'final_hold_frames'].includes(key) ? 1 : 0);
+ if (result.duration_seconds !== result.total_frames / result.fps || result.frame_policy !== 'INTEGER_DETERMINISTIC'
+  || result.blank_interstage_frames !== 0 || result.camera_lock_frame !== result.event_start_frame
+  || result.event_start_frame >= result.total_frames) throw Error('PLANNER_SCENE_TIMING_LOCK_AND_DURATION_REQUIRED');
+ return result;
+}
+function causalTrackRecord(value) {
+ record(value, 'CAUSAL_TRACK');
+ const allowed = ['id', 'source_id', 'action_kind', 'from_state_id', 'to_state_id', 'motion_start_frame',
+  'contact_frame', 'control_start_frame', 'control_end_frame', 'end_frame', 'contact_kind', 'semantic_mode',
+  'represents_historical_unit', 'route_id', 'object_id', 'target_front_line_id', 'contact_anchor'];
+ if (Object.keys(value).some(key => !allowed.includes(key))) throw Error('PLANNER_CAUSAL_TRACK_UNKNOWN_FIELD');
+ const result = {id: id(value.id, 'CAUSAL_TRACK_ID'), source_id: id(value.source_id, 'CAUSAL_SOURCE_ID'),
+  action_kind: text(value.action_kind, 'CAUSAL_ACTION'), from_state_id: id(value.from_state_id, 'CAUSAL_FROM_STATE'),
+  to_state_id: id(value.to_state_id, 'CAUSAL_TO_STATE')};
+ for (const key of ['motion_start_frame', 'contact_frame', 'control_start_frame', 'control_end_frame', 'end_frame'])
+  result[key] = integer(value[key], 'CAUSAL_' + key.toUpperCase());
+ if (!['SCHEMATIC_FRONT_CONTACT', 'ARRIVAL', 'NONE'].includes(value.contact_kind)
+  || value.semantic_mode !== 'SCHEMATIC_STATE_TRANSITION' || value.represents_historical_unit !== false)
+  throw Error('PLANNER_CAUSAL_SCHEMATIC_SEMANTICS_REQUIRED');
+ Object.assign(result, {contact_kind: value.contact_kind, semantic_mode: value.semantic_mode, represents_historical_unit: false});
+ for (const key of ['route_id', 'object_id', 'target_front_line_id']) if (value[key] !== undefined) result[key] = id(value[key], 'CAUSAL_' + key.toUpperCase());
+ if (value.contact_anchor !== undefined) result.contact_anchor = validateEventAnchor(value.contact_anchor, 'CAUSAL_CONTACT_ANCHOR');
+ return result;
+}
+function pointOnLine(point, geometry) {
+ return geometry.coordinates.slice(1).some((b, index) => {
+  const a = geometry.coordinates[index], dx = b[0] - a[0], dy = b[1] - a[1], length = Math.hypot(dx, dy);
+  return length > 0 && Math.abs(dx * (point[1] - a[1]) - dy * (point[0] - a[0])) <= 1e-8 * length
+   && point[0] >= Math.min(a[0], b[0]) - 1e-8 && point[0] <= Math.max(a[0], b[0]) + 1e-8
+   && point[1] >= Math.min(a[1], b[1]) - 1e-8 && point[1] <= Math.max(a[1], b[1]) + 1e-8;
+ });
+}
+/** Optional composition data binds existing actors and state snapshots; it supplies no simulation. */
+function validateCausalTracks(tracks, {sourceMap, geometryMap, routes, objects, steps, fronts, timing, mode}) {
+ if (!tracks.length) throw Error('PLANNER_NONEMPTY_CAUSAL_TRACKS_REQUIRED');
+ const routeMap = new Map(routes.map(row => [row.id, row])), objectMap = new Map(objects.map(row => [row.id, row]));
+ const frontMap = new Map(fronts.map(row => [row.id, row]));
+ for (const track of tracks) {
+  if (!sourceMap.has(track.source_id)) throw Error('PLANNER_CAUSAL_SOURCE_REFERENCE_REQUIRED');
+  const index = steps.findIndex(step => step.id === track.from_state_id), target = steps[index + 1];
+  if (index < 0 || target?.id !== track.to_state_id) throw Error('PLANNER_CAUSAL_ADJACENT_STATES_REQUIRED');
+  const start = track.motion_start_frame, contact = track.contact_frame, controlStart = track.control_start_frame,
+   controlEnd = track.control_end_frame, end = track.end_frame;
+  if (!(start < contact && contact <= controlStart && controlStart < controlEnd && controlEnd <= end))
+   throw Error('PLANNER_CAUSAL_FRAME_ORDER_REQUIRED');
+  if (timing && (start < timing.camera_lock_frame || end > timing.total_frames
+   || start < steps[index].start_frame || controlStart < target.start_frame
+   || controlEnd > target.start_frame + target.transition_frames)) throw Error('PLANNER_CAUSAL_STATE_WINDOW_REQUIRED');
+  const actor = track.route_id !== undefined, controlOnly = ['CONTROL_ONLY', 'SETTLEMENT'].includes(track.action_kind);
+  if (actor !== (track.object_id !== undefined) || controlOnly === actor
+   || (!actor || controlOnly) && track.contact_kind !== 'NONE') throw Error('PLANNER_CAUSAL_ACTOR_BINDING_REQUIRED');
+  const frontDeclared = track.target_front_line_id !== undefined;
+  if (frontDeclared !== (track.contact_anchor !== undefined) || frontDeclared && (!actor || track.contact_kind === 'NONE'))
+   throw Error('PLANNER_CAUSAL_FRONT_ANCHOR_BINDING_REQUIRED');
+  if (!actor) continue;
+  const route = routeMap.get(track.route_id), object = objectMap.get(track.object_id);
+  if (!route || !object || object.route_id !== route.id) throw Error('PLANNER_CAUSAL_ROUTE_OBJECT_REFERENCE_REQUIRED');
+  const geo = expectGeometry(route.geometry_ref, geometryMap, ['LineString'], 'CAUSAL_ROUTE');
+  if (!sourceMap.has(route.source_id) || route.source_id !== geo.source_id || !['FORWARD', 'REVERSE'].includes(route.direction))
+   throw Error('PLANNER_CAUSAL_ROUTE_SOURCE_DIRECTION_REQUIRED');
+  if (!object.graphic) throw new PlannerDataRequiredError('supplied causal moving-object graphic');
+  const points = geo.geometry.coordinates, endpoint = route.direction === 'REVERSE' ? points[0] : points.at(-1);
+  compileFlowIntent({data_mode: mode,
+   route_geometry: geo.geometry, route_source: contractSource(sourceMap.get(route.source_id)), direction: route.direction,
+   start_anchor: route.direction === 'REVERSE' ? points.at(-1) : points[0], end_anchor: endpoint,
+   object_role: object.role, object_graphic: object.graphic});
+  if (frontDeclared) {
+   const front = frontMap.get(track.target_front_line_id);
+   if (!front || front.stage_id !== target.id || !target.front_line_ids.includes(front.id)
+    || !equal(track.contact_anchor, endpoint)
+    || !pointOnLine(track.contact_anchor, expectGeometry(front.geometry_ref, geometryMap, ['LineString'], 'CAUSAL_FRONT').geometry))
+    throw Error('PLANNER_CAUSAL_SUPPLIED_FRONT_CONTACT_REQUIRED');
+  } else if (track.contact_kind === 'SCHEMATIC_FRONT_CONTACT' && !target.front_line_ids.some(ref => {
+   const front = frontMap.get(ref);
+   return front && pointOnLine(endpoint, expectGeometry(front.geometry_ref, geometryMap, ['LineString'], 'CAUSAL_FRONT').geometry);
+  })) throw Error('PLANNER_CAUSAL_SUPPLIED_FRONT_CONTACT_REQUIRED');
+ }
+}
 /** Sources and geographical validation reuse Final contracts; no geometry is invented or repaired. */
 export function validateFactDataset(input) {
  const given = record(input, 'FACTS');
@@ -213,8 +301,24 @@ export function validateFactDataset(input) {
  const context = nativeContext(given.native_context ?? camera.native_context);
  const preferred = given.scale?.preferred ?? 'REGIONAL';
  if (!['CONTINENT', 'REGIONAL', 'LOCAL'].includes(preferred)) throw Error('PLANNER_SCALE_INTENT_REQUIRED');
+ const sceneTiming = given.scene_timing === undefined ? undefined : suppliedTiming(given.scene_timing);
+ const causalTracks = given.causal_tracks === undefined ? undefined
+  : unique(list(given.causal_tracks, 'CAUSAL_TRACKS').map(causalTrackRecord), 'CAUSAL_TRACK');
+ if (causalTracks) {
+  const fronts = stages.flatMap(stage => stage.front_refs.map((ref, part) =>
+   ({id: 'FRONT_' + stage.id + '_' + part, stage_id: stage.id, geometry_ref: ref})));
+  const steps = stages.map((stage, index) => ({id: stage.id,
+   front_line_ids: fronts.filter(front => front.stage_id === stage.id).map(front => front.id),
+   ...(sceneTiming === undefined ? {} : {start_frame: sceneTiming.event_start_frame + (index === 0 ? 0
+    : sceneTiming.initial_reveal_frames + (index - 1) * sceneTiming.state_transition_frames),
+   transition_frames: index === 0 ? sceneTiming.initial_reveal_frames : sceneTiming.state_transition_frames})}));
+  validateCausalTracks(causalTracks, {sourceMap, geometryMap,
+   routes: routes.filter(route => route.required_for_story).map(route => ({...route, source_id: geometryMap.get(route.geometry_ref).source_id})),
+   objects: routes.map(route => ({id: 'OBJECT_' + route.id, route_id: route.id, role: route.object_role, graphic: route.object_graphic})),
+   steps, fronts, timing: sceneTiming, mode});
+ }
  const allIds = [...geometries, ...locations, ...stages, ...routes, ...geographicLines, ...impacts, ...propagations,
-  ...metrics, ...markers, ...texts].map(value => value.id);
+  ...metrics, ...markers, ...texts, ...(causalTracks ?? [])].map(value => value.id);
  if (new Set(allIds).size !== allIds.length) throw Error('PLANNER_DUPLICATE_DATA_ID');
  if (!['ILLUSTRATIVE_FACT_BASED_VISUAL', 'SUPPLIED_OBSERVED_STATES'].includes(given.semantic_mode ?? 'ILLUSTRATIVE_FACT_BASED_VISUAL'))
   throw Error('PLANNER_SEMANTIC_MODE_REQUIRED');
@@ -225,7 +329,8 @@ export function validateFactDataset(input) {
   camera: {anchor: validateEventAnchor(camera.anchor), target_geometry_refs: targetRefs,
    minimum_context_geometry_refs: refs(camera.minimum_context_geometry_refs ?? [], geometryMap, 'MINIMUM_CONTEXT_GEOMETRY'),
    detail_policy: 'FACT_BASED_VISUAL_GRADE', ...(context === undefined ? {} : {native_context: context})},
-  scale: {preferred}});
+  scale: {preferred}, ...(sceneTiming === undefined ? {} : {scene_timing: sceneTiming}),
+  ...(causalTracks === undefined ? {} : {causal_tracks: causalTracks})});
 }
 
 const familyPatterns = Object.freeze({
@@ -270,6 +375,14 @@ export function selectFeatures(intent, factsInput) {
  return freezeEventData(selected);
 }
 function planningTiming(family, facts, fps) {
+ if (facts.scene_timing !== undefined) {
+  const timing = suppliedTiming(facts.scene_timing), action = family === 'WAR'
+   ? timing.initial_reveal_frames + timing.state_transition_frames * (facts.stages.length - 1) : timing.action_frames;
+  if (timing.fps !== fps || timing.total_frames !== timing.event_start_frame + action + timing.final_hold_frames
+   || family === 'WAR' && (timing.initial_reveal_frames < 2 || timing.state_transition_frames < 2 || timing.action_frames !== action)
+   || family !== 'WAR' && timing.action_frames < 2) throw Error('PLANNER_SCENE_TIMING_STATE_AND_OUTPUT_BINDING_REQUIRED');
+  return timing;
+ }
  const context = Math.round(fps), approach = Math.round(fps), initial = Math.round(1.2 * fps), hold = Math.round(1.2 * fps);
  const transition = family === 'WAR' ? Math.max(Math.round(2.4 * fps),
   Math.ceil((10 * fps - context - approach - initial - hold) / (facts.stages.length - 1))) : 0;
@@ -290,8 +403,9 @@ function planBeats(intent, facts, timing) {
    geometry_refs: [...targets], ...extra};
   start += duration; beats.push(beat); return beat;
  };
- add('GEOGRAPHIC_CONTEXT', timing.fps, {camera_intent: 'ARRIVE_WITH_CONTEXT'});
- add('EVENT_APPROACH', timing.camera_lock_frame - timing.fps, {camera_intent: 'DETAIL_IF_ADMITTED'});
+ const contextFrames = Math.min(timing.fps, timing.camera_lock_frame), approachFrames = timing.camera_lock_frame - contextFrames;
+ if (contextFrames) add('GEOGRAPHIC_CONTEXT', contextFrames, {camera_intent: 'ARRIVE_WITH_CONTEXT'});
+ if (approachFrames) add('EVENT_APPROACH', approachFrames, {camera_intent: 'DETAIL_IF_ADMITTED'});
  if (intent.event_family === 'WAR') {
   add('EVENT_ACTION', timing.initial_reveal_frames, {state_id: facts.stages[0].id});
   for (const stage of facts.stages.slice(1)) add('STATE_CHANGE', timing.state_transition_frames, {state_id: stage.id});
@@ -354,6 +468,7 @@ export function compileScenePlan({topic, facts: factsInput, output = {}}) {
  if (intent.event_family === 'LINE_METRIC') {
   scene.geographic_lines = copy(facts.geographic_lines); scene.metrics = copy(facts.metrics);
  }
+ if (facts.causal_tracks !== undefined) scene.causal_tracks = copy(facts.causal_tracks);
  validateScenePlan(scene);
  return freezeEventData(scene);
 }
@@ -363,7 +478,7 @@ export function validateScenePlan(scene) {
  const value = record(scene, 'SCENE');
  const allowed = ['metadata', 'subject', 'locations', 'time_range', 'topic_intent', 'event_type', 'selected_features',
   'camera_intent', 'scale_intent', 'beats', 'geometries', 'markers', 'routes', 'moving_objects', 'areas', 'front_lines',
-  'metrics', 'time_steps', 'text', 'visual_roles', 'timing', 'source_notes', 'propagations', 'impact_zones', 'geographic_lines'];
+  'metrics', 'time_steps', 'text', 'visual_roles', 'timing', 'source_notes', 'propagations', 'impact_zones', 'geographic_lines', 'causal_tracks'];
  if (Object.keys(value).some(key => !allowed.includes(key))) throw Error('PLANNER_SCENE_UNKNOWN_FIELD');
  const meta = record(value.metadata, 'METADATA');
  if (meta.schema !== PLANNER_SCENE_VERSION || meta.policy !== 'FACT_BASED_VISUAL_GRADE' || meta.deterministic !== true)
@@ -480,6 +595,12 @@ export function validateScenePlan(scene) {
   else if (!Number.isFinite(propagation.radius_end_degrees) || !Number.isFinite(propagation.radius_start_degrees ?? 0)
    || propagation.radius_end_degrees <= (propagation.radius_start_degrees ?? 0) || propagation.radius_end_degrees > 60
    || (propagation.radius_start_degrees ?? 0) < 0) throw Error('PLANNER_VISUAL_PROPAGATION_RADIUS_REQUIRED');
+ }
+ if (value.causal_tracks !== undefined) {
+  const tracks = unique(list(value.causal_tracks, 'CAUSAL_TRACKS').map(causalTrackRecord), 'CAUSAL_TRACK');
+  if (!equal(tracks, value.causal_tracks)) throw Error('PLANNER_CAUSAL_NON_CANONICAL_TRACKS_REQUIRED');
+  validateCausalTracks(tracks, {sourceMap, geometryMap, routes: value.routes ?? [], objects: value.moving_objects ?? [],
+   steps: value.time_steps ?? [], fronts: value.front_lines ?? [], timing, mode});
  }
  // No timestamp, environment path, renderer state or screen layout is part of this portable contract.
  return {valid: true, schema: PLANNER_SCENE_VERSION, event_type: value.event_type,

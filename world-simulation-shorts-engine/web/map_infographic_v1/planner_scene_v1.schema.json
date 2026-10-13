@@ -302,7 +302,7 @@
     },
     "beats": {
       "type": "array",
-      "minItems": 4,
+      "minItems": 2,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -466,6 +466,14 @@
             "$ref": "#/$defs/objectGraphic"
           }
         }
+      }
+    },
+    "causal_tracks": {
+      "description": "Optional schematic motion/contact/control ordering; runtime validates state, source, object, geometry and frame references.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/causalTrack"
       }
     },
     "areas": {
@@ -1121,6 +1129,160 @@
           "$ref": "#/$defs/text"
         }
       }
+    },
+    "causalTrack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source_id",
+        "action_kind",
+        "from_state_id",
+        "to_state_id",
+        "motion_start_frame",
+        "contact_frame",
+        "control_start_frame",
+        "control_end_frame",
+        "end_frame",
+        "contact_kind",
+        "semantic_mode",
+        "represents_historical_unit"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "source_id": {
+          "$ref": "#/$defs/id"
+        },
+        "action_kind": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/text"
+            },
+            {
+              "pattern": "\\S"
+            }
+          ]
+        },
+        "from_state_id": {
+          "$ref": "#/$defs/id"
+        },
+        "to_state_id": {
+          "$ref": "#/$defs/id"
+        },
+        "motion_start_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "contact_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "control_start_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "control_end_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "end_frame": {
+          "$ref": "#/$defs/frame"
+        },
+        "contact_kind": {
+          "enum": [
+            "SCHEMATIC_FRONT_CONTACT",
+            "ARRIVAL",
+            "NONE"
+          ]
+        },
+        "semantic_mode": {
+          "const": "SCHEMATIC_STATE_TRANSITION"
+        },
+        "represents_historical_unit": {
+          "const": false
+        },
+        "route_id": {
+          "$ref": "#/$defs/id"
+        },
+        "object_id": {
+          "$ref": "#/$defs/id"
+        },
+        "target_front_line_id": {
+          "$ref": "#/$defs/id"
+        },
+        "contact_anchor": {
+          "$ref": "#/$defs/anchor"
+        }
+      },
+      "dependentRequired": {
+        "route_id": [
+          "object_id"
+        ],
+        "object_id": [
+          "route_id"
+        ],
+        "target_front_line_id": [
+          "contact_anchor"
+        ],
+        "contact_anchor": [
+          "target_front_line_id"
+        ]
+      },
+      "allOf": [
+        {
+          "if": {
+            "not": {
+              "required": [
+                "route_id"
+              ]
+            }
+          },
+          "then": {
+            "properties": {
+              "action_kind": {
+                "enum": [
+                  "CONTROL_ONLY",
+                  "SETTLEMENT"
+                ]
+              },
+              "contact_kind": {
+                "const": "NONE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "action_kind": {
+                "enum": [
+                  "CONTROL_ONLY",
+                  "SETTLEMENT"
+                ]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "contact_kind": {
+                "const": "NONE"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "route_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "object_id"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
     },
     "objectGraphic": {
       "type": "object",
