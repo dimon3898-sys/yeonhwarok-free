@@ -56,10 +56,10 @@ def main():
                'sha256':digest(original),'originalSha256':digest(original),'gitSha256':digest(saved),
                'downloadedSha256':digest(downloaded),'byteEquality':True}
         receipt['files'].append(row)
-        (HERE/'evidence/PUBLIC_DOWNLOADS.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        (HERE/'evidence/HTTP_DOWNLOAD_VERIFY.json').write_text(json.dumps(receipt,indent=2)+'\n')
         print(json.dumps({'file':name,'httpStatus':200,'sha256':row['sha256'],'equal':True}),flush=True)
     receipt['status']='PASS'
-    (HERE/'evidence/PUBLIC_DOWNLOADS.json').write_text(json.dumps(receipt,indent=2)+'\n')
+    (HERE/'evidence/HTTP_DOWNLOAD_VERIFY.json').write_text(json.dumps(receipt,indent=2)+'\n')
     print(json.dumps({'status':'PASS','verifiedDownloads':len(receipt['files'])}),flush=True)
 
 if __name__ == '__main__':
