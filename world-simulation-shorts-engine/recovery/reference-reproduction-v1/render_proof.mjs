@@ -90,6 +90,8 @@ const report={schema:'REFERENCE_REPRODUCTION_NATIVE_PROOF_V1',state:'REFERENCE_R
  frames:[],checkpoints:[],visualAdmission:admission,
  protectionSemantic:'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND',
  translucentEdgePixelIdentityClaimed:false,backgroundOutsideSafeAreaIsExpected:true,
+ protectedBoundaryCounterScope:'OUTER_UNSHARED_NATIVE_BOUNDARY_ONLY',allNativeBoundaryPixelEqualityClaimed:false,
+ sharedInternalBoundaryMaterialReplacementIsExpected:true,
  qualityParityClaimed:false,fullVisualReviewClaimed:false,userVideoApproved:false,finalPromotion:false,permanentGateExecuted:false,
  requiredTempOnlyFiles:0,resume:{signature,command:resumeCommand,capturedFrames:0,reusedFrames:0,
   cacheRequiredForCleanReproduction:false,mechanism:'VERIFY_SOURCE_COMMIT_SIGNATURE_FRAME_ROW_AND_PNG_THEN_CAPTURE_ONLY_MISSING_FRAMES'}};
@@ -187,10 +189,13 @@ try{
  await assertInputsUnchanged();
  const unexpected=['protectedChangedPixels','markerChangedPixels','textChangedPixels','outsideRoiChangedPixels',
   'safeAreaChangedPixels','protectedBoundaryChangedPixels'],expected=['backgroundOutsideSafeAreaChangedPixels',
-  'partialAlphaForegroundChangedPixels','transparentReservationBackgroundChangedPixels'];
+  'partialAlphaForegroundChangedPixels','transparentReservationBackgroundChangedPixels',
+  'sharedInternalBoundaryChangedPixels','allNativeBoundaryChangedPixels'];
  report.protection={checkedFrames:150,semantic:report.protectionSemantic,geometryUnchanged:true,
   opaqueForegroundAndSupportPreserved:true,sourceForegroundAndProjectionUnchanged:true,
   allForegroundPixelsIdenticalClaimed:false,
+  protectedBoundaryCounterScope:report.protectedBoundaryCounterScope,allNativeBoundaryPixelEqualityClaimed:false,
+  sharedInternalBoundaryMaterialReplacementIsExpected:true,
   critical:Object.fromEntries(unexpected.map(key=>[key,Math.max(...report.frames.map(row=>row.protection[key]))])),
   expectedBackgroundDependent:Object.fromEntries(expected.map(key=>[key,{maximum:Math.max(...report.frames.map(row=>row.protection[key])),
    sum:report.frames.reduce((total,row)=>total+row.protection[key],0)}]))};

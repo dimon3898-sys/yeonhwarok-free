@@ -77,13 +77,24 @@ alone is not visual approval. Compare matched reference timestamps and output
 checkpoints. Report remaining rotation, terrain, framing, or material gaps
 honestly and stop at `USER_VIDEO_REVIEW_REQUIRED`.
 
-Public review contains only the new MP4, explicitly declared checkpoint and
-reference-comparison PNGs, canonical executed `SCENE_PLAN.json`, and `SHA256SUMS`.
+Public review contains only the new MP4, five reference-comparison checkpoint
+PNGs, canonical executed `SCENE_PLAN.json`, and `SHA256SUMS`. Original Native
+checkpoint captures remain private under `evidence/proof/checkpoints/`.
 Declare exact file names in private `evidence/PUBLIC_REVIEW_FILES.json` using
 `{"files":[{"file":"NAME"}, ...]}`. The public Scene is byte-identical to the
 executed fixture and must have no internal paths or credential keys. The entire
 reference source movie, source code, manifests, diagnostics, and internal plans
 are not public review bodies.
+
+Territory control is a background land material, drawn before the unchanged
+native foreground. Opaque glyph/marker support must remain pixel-identical;
+background-dependent antialiasing and transparent reservation pixels are counted
+separately. The explicit shared-domain separator option identifies reverse,
+identical geographic edges belonging to distinct supplied control domains. Those
+internal separators are replaced by the same control material, so no residual
+enemy strip remains. Their changed pixels are reported separately from strict
+outer/coastal boundary protection. This never edits source country coordinates,
+FINAL Boundary/Glow code, or the old Event Line/Route collision policies.
 
 After the proof, decode audit, actual visual inspection, and comparison are saved:
 

@@ -80,10 +80,11 @@ def build():
         w, h = width / factor, height / factor
         camera.append({'frame': frame, 'bounds': [x - w / 2, y - h / 2, x + w / 2, y + h / 2]})
     style = {'profileName': 'MEASURED_ORANGE_PURPLE_REFERENCE_MATERIAL_V1',
-             'losingColor': [172 / 255, 32 / 255, 0, 0],
-             'existingWinningColor': [60 / 255, 0, 180 / 255, 0],
+             'losingColor': [145 / 255, 24 / 255, 12 / 255, .50],
+             'existingWinningColor': [94 / 255, 43 / 255, 137 / 255, .80],
              'gainedWinningColor': [91 / 255, 0, 253 / 255, .88],
-             'interfaceColor': [1, 1, 1, .85], 'interfaceWidthPixels': 1}
+             'interfaceColor': [1, 1, 1, .85], 'interfaceWidthPixels': 1,
+             'sharedDomainBoundary': 'CONTROL_MATERIAL_REPLACES_INTERNAL_SEPARATOR'}
     scene = {'version': 'REFERENCE_VISUAL_SCENE_V1',
              'metadata': {'output': {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False},
                           'referenceSHA256': tracking['input_sha256'],

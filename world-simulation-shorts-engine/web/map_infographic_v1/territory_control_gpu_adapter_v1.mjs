@@ -35,6 +35,7 @@ uniform vec4 reservations[64];uniform int reservationCount;uniform sampler2D bou
 uniform vec3 controlKnots[64];uniform int knotCount;uniform float advanceSign;
 uniform vec4 losingColor,existingWinningColor,gainedWinningColor;
 uniform vec4 interfaceColor;uniform float interfaceWidthPixels;
+uniform bool replaceSharedInternalBoundary;
 vec2 boundaries(float lon){
  if(lon<=controlKnots[0].x)return controlKnots[0].yz;
  for(int i=1;i<64;i++){if(i>=knotCount)break;
@@ -47,7 +48,8 @@ void main(){
  if(p.x<safeArea.x||p.y<safeArea.y||p.x>safeArea.z||p.y>safeArea.w)discard;
  for(int i=0;i<64;i++){if(i>=reservationCount)break;vec4 b=reservations[i];
   if(p.x>=b.x&&p.y>=b.y&&p.x<=b.z&&p.y<=b.w)discard;}
- if(texture(boundaryMask,gl_FragCoord.xy/screenSize).r>.5)discard;
+ vec2 nativeBoundarySupport=texture(boundaryMask,gl_FragCoord.xy/screenSize).rg;
+ if(nativeBoundarySupport.r>.5)discard;
  vec2 limit=boundaries(geo.x);
  float movingDistance=advanceSign*(limit.y-geo.y),baseDistance=advanceSign*(geo.y-limit.x);
  float movingAA=max(fwidth(movingDistance)*.5,1.e-7),baseAA=max(fwidth(baseDistance)*.5,1.e-7);
@@ -56,6 +58,8 @@ void main(){
  vec4 winner=mix(existingWinningColor,gainedWinningColor,gainedWeight);
  // One field selects both factions. There are no separately overlapping or disappearing region meshes.
  frag=mix(losingColor,winner,winningWeight);
+ // Replace only the finite support of an EXACT shared internal source separator, with this SAME classified RGB.
+ if(replaceSharedInternalBoundary&&nativeBoundarySupport.g>.5)frag.a=1.;
  // Optional one-pixel material interface: it shares this exact field, not a separate Front/Line engine.
  if(interfaceWidthPixels>0.&&interfaceColor.a>0.){
   float pixelDistance=abs(movingDistance)/max(fwidth(movingDistance),1.e-7);
@@ -71,10 +75,10 @@ layout(location=0) in vec2 position;layout(location=1) in vec4 endpoints;layout(
 uniform vec2 screenSize;flat out vec4 edge;flat out float support;
 void main(){edge=endpoints;support=radius;gl_Position=vec4(position.x/screenSize.x*2.-1.,1.-position.y/screenSize.y*2.,0.,1.);}`;
 const maskFragment=`#version 300 es
-precision highp float;uniform vec2 screenSize;flat in vec4 edge;flat in float support;out vec4 frag;
+precision highp float;uniform vec2 screenSize;uniform int maskRole;flat in vec4 edge;flat in float support;out vec4 frag;
 float segmentDistance(vec2 p,vec2 a,vec2 b){vec2 ab=b-a;return length(p-a-ab*clamp(dot(p-a,ab)/max(dot(ab,ab),1.e-12),0.,1.));}
 void main(){vec2 p=vec2(gl_FragCoord.x,screenSize.y-gl_FragCoord.y);
- if(segmentDistance(p,edge.xy,edge.zw)>support)discard;frag=vec4(1.,0.,0.,1.);}`;
+ if(segmentDistance(p,edge.xy,edge.zw)>support)discard;frag=maskRole==0?vec4(1.,0.,0.,1.):vec4(0.,1.,0.,1.);}`;
 
 function program(gl,vertex,fragment){
  const shaders=[],output=gl.createProgram();
@@ -96,6 +100,8 @@ function styleRecord(style){
   ||style.interfaceColor.some(value=>!Number.isFinite(value)||value<0||value>1)))throw Error('TERRITORY_INTERFACE_RGBA_REQUIRED');
  if(style.interfaceWidthPixels!==undefined&&(!Number.isFinite(style.interfaceWidthPixels)
   ||style.interfaceWidthPixels<0||style.interfaceWidthPixels>4))throw Error('TERRITORY_INTERFACE_PIXEL_WIDTH_REQUIRED');
+ if(style.sharedDomainBoundary!==undefined&&style.sharedDomainBoundary!=='PRESERVE_ALL_NATIVE_COUNTRY_BOUNDARIES'
+  &&style.sharedDomainBoundary!=='CONTROL_MATERIAL_REPLACES_INTERNAL_SEPARATOR')throw Error('TERRITORY_SHARED_INTERNAL_BOUNDARY_MODE_REQUIRED');
  return copy(style);
 }
 function sourceDomain(domain){
@@ -132,8 +138,8 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
  try{
   programs.fill=program(gl,vertexSource,fragmentSource);programs.mask=program(gl,maskVertex,maskFragment);
   fillUniforms=locations(gl,programs.fill,['screenSize','safeArea','reservations[0]','reservationCount','boundaryMask',
-   'controlKnots[0]','knotCount','advanceSign','losingColor','existingWinningColor','gainedWinningColor','interfaceColor','interfaceWidthPixels']);
-  maskUniforms=locations(gl,programs.mask,['screenSize']);
+   'controlKnots[0]','knotCount','advanceSign','losingColor','existingWinningColor','gainedWinningColor','interfaceColor','interfaceWidthPixels','replaceSharedInternalBoundary']);
+  maskUniforms=locations(gl,programs.mask,['screenSize','maskRole']);
   fillBuffer=gl.createBuffer();buffers.push(fillBuffer);fillVao=gl.createVertexArray();vaos.push(fillVao);
   gl.bindVertexArray(fillVao);gl.bindBuffer(gl.ARRAY_BUFFER,fillBuffer);
   for(const [index,offset] of [[0,0],[1,8]]){gl.enableVertexAttribArray(index);gl.vertexAttribPointer(index,2,gl.FLOAT,false,16,offset);}
@@ -143,7 +149,7 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
   boundaryTexture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,boundaryTexture);
   for(const key of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,key,gl.NEAREST);
   for(const key of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,key,gl.CLAMP_TO_EDGE);
-  gl.texStorage2D(gl.TEXTURE_2D,1,gl.R8,width,height);boundaryFbo=gl.createFramebuffer();
+  gl.texStorage2D(gl.TEXTURE_2D,1,gl.RG8,width,height);boundaryFbo=gl.createFramebuffer();
   gl.bindFramebuffer(gl.FRAMEBUFFER,boundaryFbo);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,boundaryTexture,0);
   if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('TERRITORY_BOUNDARY_MASK_FRAMEBUFFER');
  }catch(error){Object.values(programs).forEach(p=>gl.deleteProgram(p));buffers.forEach(b=>gl.deleteBuffer(b));vaos.forEach(v=>gl.deleteVertexArray(v));
@@ -156,31 +162,38 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
   if(blend){gl.enable(gl.BLEND);gl.blendEquationSeparate(gl.FUNC_ADD,gl.FUNC_ADD);
    gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);}else gl.disable(gl.BLEND);
  }
- function mask(boundaries){
+ function mask(boundaries,internalBoundaries){
   gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,boundaryFbo);gl.drawBuffers([gl.COLOR_ATTACHMENT0]);gpuState(false);gl.disable(gl.SCISSOR_TEST);
-  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);if(!boundaries.length)return;
-  const data=new Float32Array(boundaries.length*6*7);let at=0;
-  for(const edge of boundaries){const r=edge.radius+1,b=[Math.min(edge.a[0],edge.b[0])-r,Math.min(edge.a[1],edge.b[1])-r,
-   Math.max(edge.a[0],edge.b[0])+r,Math.max(edge.a[1],edge.b[1])+r],vertices=boxes(b);
-   for(let i=0;i<6;i++){data.set([vertices[i*2],vertices[i*2+1],...edge.a,...edge.b,edge.radius],at);at+=7;}}
-  gl.useProgram(programs.mask);gl.bindVertexArray(maskVao);gl.bindBuffer(gl.ARRAY_BUFFER,maskBuffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STREAM_DRAW);
-  gl.uniform2fv(maskUniforms.screenSize,[width,height]);gl.drawArrays(gl.TRIANGLES,0,boundaries.length*6);
+  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+  // Outer support wins at a shared boundary's coastal junction. MAX cannot erase a protected mask channel.
+  gl.enable(gl.BLEND);gl.blendEquationSeparate(gl.MAX,gl.MAX);gl.blendFuncSeparate(gl.ONE,gl.ONE,gl.ONE,gl.ONE);
+  gl.useProgram(programs.mask);gl.bindVertexArray(maskVao);gl.bindBuffer(gl.ARRAY_BUFFER,maskBuffer);gl.uniform2fv(maskUniforms.screenSize,[width,height]);
+  for(const [role,records] of [[0,boundaries],[1,internalBoundaries]]){
+   if(!records.length)continue;const data=new Float32Array(records.length*6*7);let at=0;
+   for(const edge of records){const r=edge.radius+1,b=[Math.min(edge.a[0],edge.b[0])-r,Math.min(edge.a[1],edge.b[1])-r,
+    Math.max(edge.a[0],edge.b[0])+r,Math.max(edge.a[1],edge.b[1])+r],vertices=boxes(b);
+    for(let i=0;i<6;i++){data.set([vertices[i*2],vertices[i*2+1],...edge.a,...edge.b,edge.radius],at);at+=7;}}
+   gl.bufferData(gl.ARRAY_BUFFER,data,gl.STREAM_DRAW);gl.uniform1i(maskUniforms.maskRole,role);gl.drawArrays(gl.TRIANGLES,0,records.length*6);
+  }
  }
  return{evidence:{version:TERRITORY_CONTROL_GPU_ADAPTER_V1_VERSION,composition:'FRESH_NATIVE_TERRAIN_PLUS_SINGLE_COMPLEMENTARY_CONTROL_FIELD',
   nativeRendererSourceUnchanged:true,polygonEngine:'UNCHANGED_RENDERER_POLYGONS_AND_TRIANGULATE_REGION',
   continuousComplementaryOwnership:true,standaloneFrontLine:false,routeVisuals:false,arrowVisuals:false,
   finishedFrameBlit:false,cpuRenderer:false,sourceGeometryMutation:false,terrainRetainedByExplicitMaterialAlpha:true,
   stateRestoration:'FROZEN_FLOW_NATIVE_GL_STATE_HELPERS',material:copy(material)},
-  draw({controls,project,safeArea,protectedGraphics=[],boundarySegments=[]}={}){
+  draw({controls,project,safeArea,protectedGraphics=[],boundarySegments=[],internalBoundarySegments=[]}={}){
    if(disposed)throw Error('TERRITORY_GPU_DISPOSED');
    if(controls?.version!=='TERRITORY_CONTROL_FRAME_V1'||typeof project!=='function'||!rectangle(safeArea))throw Error('TERRITORY_GPU_CONTROL_NATIVE_CONTEXT_REQUIRED');
    if(JSON.stringify(controls.landDomain)!==binding||controls.domainGeometryBinding!==binding)throw Error('TERRITORY_GPU_SOURCE_DOMAIN_CHANGED');
    const knots=controls.longitudinalKnots,base=controls.baseBoundaryLatitudes,moving=controls.boundaryLatitudes;
    if(!Array.isArray(knots)||knots.length<2||knots.length>MAX_KNOTS||base?.length!==knots.length||moving?.length!==knots.length
     ||![1,-1].includes(controls.advanceSign))throw Error('TERRITORY_GPU_CLASSIFIER_CONTRACT_REQUIRED');
-   const reservations=protectionRecords(protectedGraphics),boundaries=boundaryRecords(boundarySegments),state=captureFlowNativeGlState(gl),rois=[],parts=[];
+   const reservations=protectionRecords(protectedGraphics),boundaries=boundaryRecords(boundarySegments),
+    internals=boundaryRecords(internalBoundarySegments),replaceInternal=material.sharedDomainBoundary==='CONTROL_MATERIAL_REPLACES_INTERNAL_SEPARATOR',
+    state=captureFlowNativeGlState(gl),rois=[],parts=[];
+   if(internals.length&&!replaceInternal)throw Error('TERRITORY_INTERNAL_BOUNDARY_REPLACEMENT_EXPLICIT_PROFILE_REQUIRED');
    try{
-    mask(boundaries);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);gl.enable(gl.SCISSOR_TEST);
+    mask(boundaries,internals);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);gl.enable(gl.SCISSOR_TEST);
     const left=Math.max(0,Math.ceil(safeArea[0])),right=Math.min(width,Math.floor(safeArea[2])),
      top=Math.max(0,Math.ceil(safeArea[1])),bottom=Math.min(height,Math.floor(safeArea[3]));
     gl.scissor(left,height-bottom,Math.max(0,right-left),Math.max(0,bottom-top));gl.useProgram(programs.fill);gl.bindVertexArray(fillVao);
@@ -194,6 +207,7 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
     gl.uniform1f(fillUniforms.advanceSign,controls.advanceSign);
     for(const name of ['losingColor','existingWinningColor','gainedWinningColor'])gl.uniform4fv(fillUniforms[name],material[name]);
     gl.uniform4fv(fillUniforms.interfaceColor,material.interfaceColor??[0,0,0,0]);gl.uniform1f(fillUniforms.interfaceWidthPixels,material.interfaceWidthPixels??0);
+    gl.uniform1i(fillUniforms.replaceSharedInternalBoundary,replaceInternal?1:0);
     gl.bindBuffer(gl.ARRAY_BUFFER,fillBuffer);
     for(const item of domain){const data=new Float32Array(item.geographic.length*2),points=[];
      for(let i=0;i<item.geographic.length;i+=2){const geo=[item.geographic[i],item.geographic[i+1]],p=project(geo);
@@ -209,7 +223,9 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
     controls:{longitudinalKnots:copy(knots),baseBoundaryLatitudes:copy(base),boundaryLatitudes:copy(moving),advanceSign:controls.advanceSign},
     ownership:'ONE_GEOGRAPHIC_SCALAR_FIELD_COMPLEMENTARY_WINNER_AND_LOSER',domainGeometryBinding:binding,
     geometryUnchanged:true,sourcePartsAndHolesPreserved:true,standaloneFrontLine:false,routeVisuals:false,arrowVisuals:false,
-    nativeBoundaryGlowPreserved:true,nativeStateRestored:true,boundaryMaskSegments:boundaries.length,
+    nativeBoundaryGlowPreserved:internals.length===0,outerNativeBoundaryGlowPreserved:true,
+    sharedInternalNativeBoundaryReplaced:internals.length>0,nativeStateRestored:true,boundaryMaskSegments:boundaries.length,
+    sharedInternalBoundarySegments:internals.length,sharedInternalAlphaPolicy:replaceInternal?'SAME_CONTROL_MATERIAL_RGB_OPAQUE_ONLY_AT_SHARED_SUPPORT':'UNCHANGED',
     material:copy(material),safeArea:copy(safeArea),protectedReservations:reservations,glError};
   },dispose(){if(disposed)return;const state=captureFlowNativeGlState(gl);
    try{Object.values(programs).forEach(p=>gl.deleteProgram(p));buffers.forEach(b=>gl.deleteBuffer(b));vaos.forEach(v=>gl.deleteVertexArray(v));
@@ -219,12 +235,41 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
 
 const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const roleKey={MARKER:'marker',LOCATION_LABEL:'location',COUNTRY:'country',EVENT_TITLE:'title',TITLE_CONTRAST_PANEL:'title',SCENARIO_DISCLOSURE:'disclosure'};
+const geographicSegmentKey=(a,b)=>JSON.stringify([a,b].sort((p,q)=>p[0]-q[0]||p[1]-q[1]));
+
+/** Source-only adjacency proof. Exact reverse-oriented edges shared by distinct
+ * supplied land domains are internal; approximate/nearly matching edges never qualify.
+ * No geographic vertex, country name, boundary width or FINAL policy is changed.
+ */
+export function findSharedTerritoryDomainEdges(landDomain){
+ if(!Array.isArray(landDomain)||!landDomain.length)throw Error('TERRITORY_SHARED_EDGE_SOURCE_DOMAIN_REQUIRED');
+ const entries=new Map();
+ for(const domain of landDomain){
+  if(typeof domain.id!=='string'||!domain.id.trim())throw Error('TERRITORY_SHARED_EDGE_SOURCE_ID_REQUIRED');
+  const record={geometry_type:domain.geometry?.type,coordinates:domain.geometry?.coordinates};
+  for(const polygon of polygons(record))for(const ring of polygon)for(let i=1;i<ring.length;i++){
+   const a=ring[i-1],b=ring[i];if(!point(a)||!point(b))throw Error('TERRITORY_SHARED_EDGE_FINITE_SOURCE_COORDINATES_REQUIRED');
+   const key=geographicSegmentKey(a,b);if(!entries.has(key))entries.set(key,[]);
+   entries.get(key).push({domainId:domain.id,a:[...a],b:[...b],direction:JSON.stringify([a,b])});
+  }
+ }
+ const shared=[];
+ for(const [key,records] of entries){
+  const reversePairs=records.filter(a=>records.some(b=>a.domainId!==b.domainId&&same(a.a,b.b)&&same(a.b,b.a)));
+  if(!reversePairs.length)continue;
+  shared.push({key,sourceCoordinates:JSON.parse(key),domainIds:[...new Set(reversePairs.map(record=>record.domainId))].sort(),
+   reverseOrientationVerified:true});
+ }
+ return{sharedEdges:shared,uniqueSharedGeographicEdges:shared.length,
+  detection:'EXACT_REVERSE_ORIENTED_SOURCE_COORDINATES_SHARED_BY_DISTINCT_LAND_DOMAINS',
+  tolerance:0,geometryModified:false,countryNameBranch:false,coordinateBranch:false};
+}
 function measuredReservations(items){
  return items.map(item=>{const [x,y,w,h]=item.box,pad=item.kind==='TEXT'?(item.outlineRadius??item.metrics?.outlineRadius??0)+2:2;
   if(![x,y,w,h,pad].every(Number.isFinite)||w<=0||h<=0||pad<0)throw Error('TERRITORY_NATIVE_MEASURED_GRAPHIC_REQUIRED');
   return{kind:item.kind==='MARKER'?'MARKER':item.kind==='TEXT'?'TEXT':'PANEL',role:item.role,box:[x-pad,y-pad,x+w+pad,y+h+pad]};});
 }
-function nativeBoundaries(plans,factory,visual){
+function nativeBoundaries(plans,factory,visual,sharedKeys=new Set()){
  const secondary=new Set(plans.REGIONAL.secondary??[]),records=plans.REGIONAL.geometries.filter(item=>item.id===plans.REGIONAL.primary||secondary.has(item.id)),result=[];
  const primaryRadius=Math.max(visual.primaryWidth,visual.primaryEdgeWidth,visual.glowWidth)/2+Math.SQRT2*3.230769*visual.glowRadius+2,
   secondaryRadius=Math.max(visual.secondaryWidth,visual.secondaryEdgeWidth)/2+2;
@@ -234,7 +279,9 @@ function nativeBoundaries(plans,factory,visual){
    const a=factory.screen(ring[i-1]),b=factory.screen(ring[i]);if(!point(a)||!point(b))throw Error('TERRITORY_NATIVE_BOUNDARY_PROJECTION_REQUIRED');
    if(Math.max(a[0],b[0])+radiusPx<0||Math.min(a[0],b[0])-radiusPx>WIDTH
     ||Math.max(a[1],b[1])+radiusPx<0||Math.min(a[1],b[1])-radiusPx>HEIGHT)continue;
-   result.push({a:[...a],b:[...b],radiusPx,sourceId:record.id,role:record.id===plans.REGIONAL.primary?'PRIMARY':'SECONDARY'});
+   const geographicKey=geographicSegmentKey(ring[i-1],ring[i]);
+   result.push({a:[...a],b:[...b],radiusPx,sourceId:record.id,role:record.id===plans.REGIONAL.primary?'PRIMARY':'SECONDARY',
+    sharedInternalSourceBoundary:sharedKeys.has(geographicKey),geographicSegmentKey:geographicKey});
   }}return result;
 }
 function indexedBoundaryCheck(boundaries){
@@ -364,7 +411,10 @@ async function createNativeForegroundSupport({canvas,nativeAtlases}={}){
 export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,scene,heightSource=null,contextTerrain=null,
  cameraTrack,territoryPlan,style,mode='STATIC_VISUAL_PROBE',visualAdmission=null}={}){
  const track=assertReferenceCameraTrackPlan(cameraTrack),controlPlan=assertTerritoryControlPlan(territoryPlan),
-  regional=plans?.REGIONAL,safeArea=copy(regional?.layout?.safe),target=copy(track.targetBounds),material=styleRecord(style);
+  regional=plans?.REGIONAL,safeArea=copy(regional?.layout?.safe),target=copy(track.targetBounds),material=styleRecord(style),
+  sharedEvidence=findSharedTerritoryDomainEdges(controlPlan.intent.domain),
+  sharedReplacement=material.sharedDomainBoundary==='CONTROL_MATERIAL_REPLACES_INTERNAL_SEPARATOR',
+  sharedKeys=new Set(sharedReplacement?sharedEvidence.sharedEdges.map(edge=>edge.key):[]);
  if(!['STATIC_VISUAL_PROBE','VISUAL_REFERENCE_STUDY'].includes(mode))throw Error('TERRITORY_EXPLICIT_VISUAL_MODE_REQUIRED');
  if(!rectangle(safeArea)||!same(track.baseCameraPlan,cameraPlan)||!same(cameraPlan?.intent?.finalExtent,regional?.framing?.bounds)
   ||scene?.primary_region_id!==regional?.primary||track.totalFrames!==controlPlan.totalFrames||track.fps!==controlPlan.fps)
@@ -422,7 +472,9 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
    factory.updateCamera(bounds);factory.setScaleVisual(visual);factory.setTerrainLod(lod.weight);
    const native=factory.renderFrame({...params,graphics:false,reveal,primaryMaterial:1});
    if(native.glError!==gl.NO_ERROR)throw Error('TERRITORY_NATIVE_FACTORY_GL_ERROR_'+native.glError);
-   const boundaries=nativeBoundaries(plans,factory,visual);
+   const boundaries=nativeBoundaries(plans,factory,visual,sharedKeys),
+    outerBoundaries=boundaries.filter(edge=>!edge.sharedInternalSourceBoundary),
+    internalBoundaries=boundaries.filter(edge=>edge.sharedInternalSourceBoundary);
    let before=null,support=null,nativeDrawCount=1;
    if(protect){
     graphics.draw({items:layout.items,reveal});gl.finish();before=pixels();
@@ -434,7 +486,7 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
    }
    const controls=evaluateTerritoryControlFrame(controlPlan,controlPlan.startFrame+frame),materialCanvas=[0,0,WIDTH,HEIGHT],
     controlGraphics=territoryEnabled?territory.draw({controls,project:point=>factory.screen(point),safeArea:materialCanvas,
-     protectedGraphics:[],boundarySegments:boundaries}):null,rois=controlGraphics?.rois??[];
+     protectedGraphics:[],boundarySegments:outerBoundaries,internalBoundarySegments:internalBoundaries}):null,rois=controlGraphics?.rois??[];
    // Territory control is a land BACKGROUND material. Graphic Safe Area/occlusion rules apply to the unchanged foreground,
    // not to a screen-sized country material. The old Event Line/Route/Text collision rules are untouched.
    const nativeGraphics=graphics.draw({items:layout.items,reveal});
@@ -443,11 +495,15 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
     outsideRoiChangedPixels:0,safeAreaChangedPixels:0,protectedBoundaryChangedPixels:0,
     backgroundOutsideSafeAreaChangedPixels:0,partialAlphaForegroundChangedPixels:0,
     transparentReservationBackgroundChangedPixels:0,opaqueForegroundSupportPixels:0,
+    sharedInternalBoundaryChangedPixels:0,allNativeBoundaryChangedPixels:0,
     semantic:'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND',
     protectedCounterScope:'ACTUAL_OPAQUE_FOREGROUND_ALPHA_SUPPORT_NOT_BOUNDING_BOX_BACKGROUND',
     partialAlphaPolicy:'FOREGROUND_STYLE_UNCHANGED_EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE',
-    supportSource:foregroundSupport.evidence.source};
-   if(protect){const after=pixels(),first=new Uint32Array(before.buffer),second=new Uint32Array(after.buffer),onBoundary=indexedBoundaryCheck(boundaries);
+    supportSource:foregroundSupport.evidence.source,
+    protectedBoundaryCounterScope:sharedReplacement?'OUTER_UNSHARED_NATIVE_BOUNDARY_ONLY':'ALL_NATIVE_COUNTRY_BOUNDARIES',
+    sharedInternalBoundaryPolicy:sharedReplacement?'EXPECTED_SAME_CONTROL_MATERIAL_REPLACEMENT_REPORTED':'UNCHANGED'};
+   if(protect){const after=pixels(),first=new Uint32Array(before.buffer),second=new Uint32Array(after.buffer),
+    onBoundary=indexedBoundaryCheck(outerBoundaries),onInternalBoundary=indexedBoundaryCheck(internalBoundaries);
     for(let i=0;i<second.length;i++){
      const supportOffset=i*4,opaque=support[supportOffset]===255;
      if(opaque)protection.opaqueForegroundSupportPixels++;
@@ -464,7 +520,10 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
      if(support[supportOffset+1]===255)protection.partialAlphaForegroundChangedPixels++;
      if(!opaque&&support[supportOffset+1]===0&&reservations.some(item=>inside(x,y,item.box)))
       protection.transparentReservationBackgroundChangedPixels++;
-     if(onBoundary(x,y))protection.protectedBoundaryChangedPixels++;
+     const onOuter=onBoundary(x,y),onInternal=onInternalBoundary(x,y);
+     if(onOuter)protection.protectedBoundaryChangedPixels++;
+     if(onInternal)protection.sharedInternalBoundaryChangedPixels++;
+     if(onOuter||onInternal)protection.allNativeBoundaryChangedPixels++;
     }
     if(protection.protectedChangedPixels||protection.markerChangedPixels||protection.textChangedPixels
      ||protection.outsideRoiChangedPixels||protection.safeAreaChangedPixels||protection.protectedBoundaryChangedPixels)
@@ -484,7 +543,11 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
      layer:'GEOGRAPHIC_LAND_BACKGROUND_MATERIAL_BEFORE_UNCHANGED_NATIVE_FOREGROUND',
      materialCoverage:materialCanvas,graphicSafeArea:copy(safeArea),nativeForegroundSourceUnchanged:true},
     protection,rois,protectedGraphics:reservations,boundaryProtection:{segmentCount:boundaries.length,
-     source:'ACTUAL_NATIVE_PRIMARY_SECONDARY_RING_PROJECTION',finiteGlowSupport:true},
+     outerUnsharedSegmentCount:outerBoundaries.length,sharedInternalSegmentCount:internalBoundaries.length,
+     strictPixelEqualityScope:protection.protectedBoundaryCounterScope,allNativeBoundaryPixelEqualityClaimed:!sharedReplacement,
+     sharedSourceGeographicEdges:sharedEvidence.uniqueSharedGeographicEdges,
+     source:'ACTUAL_NATIVE_PRIMARY_SECONDARY_RING_PROJECTION',finiteGlowSupport:true,
+     sourceGeometryAndNativeStyleUnchanged:true},
     sourceV5Unchanged:true,surveyAdmissionPreserved:true,admission:copy(arrival.admission),
     visualAdmission:{mode,status:visualAdmission?.status??'STATIC_PROBE_ONLY',productionEligible:mode==='VISUAL_REFERENCE_STUDY'}};
    return last;
@@ -500,9 +563,14 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
     gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),
     finishedFrameMix:false,projectionChange:false,frozenMaterialParameters:copy(params),graphicPass:graphics.evidence,
     territoryPass:territory.evidence,foregroundSupport:foregroundSupport.evidence,
+    sharedInternalBoundaryContract:{enabled:sharedReplacement,mode:material.sharedDomainBoundary??'PRESERVE_ALL_NATIVE_COUNTRY_BOUNDARIES',
+     sharedGeographicEdges:sharedEvidence.uniqueSharedGeographicEdges,detection:sharedEvidence.detection,tolerance:0,
+     sourceGeometryModified:false,nativeStyleSourceChanged:false,oldEventOcclusionChanged:false,
+     outerUnsharedNativeBoundaryPixels:'STRICT_UNCHANGED',sharedInternalNativeBoundaryPixels:'EXPECTED_CONTROL_MATERIAL_REPLACEMENT_REPORTED',
+     allNativeBoundaryPixelEqualityClaimed:!sharedReplacement,internalSupportAlpha:'SAME_CONTROL_RGB_OPAQUE_ONLY_AT_SHARED_SUPPORT'},
     backgroundContract:{materialCoverage:'FULL_CANVAS_REAL_SOURCE_LAND_ONLY',foregroundSafeArea:'UNCHANGED_NATIVE_LAYOUT',
      opaqueForegroundPixels:'STRICT_UNCHANGED',partialAlphaForegroundPixels:'EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE_REPORTED',
-     unchangedCountryBoundary:'SAME_GEOMETRIC_MASK_WIDTHS_AND_GLOW',oldEventLineAndRouteRules:'UNCHANGED',
+     unchangedCountryBoundary:sharedReplacement?'STRICT_OUTER_UNSHARED_MASK_WIDTHS_AND_GLOW_INTERNAL_REPLACEMENT_REPORTED':'SAME_GEOMETRIC_MASK_WIDTHS_AND_GLOW',oldEventLineAndRouteRules:'UNCHANGED',
      verificationNativeDraws:2,normalNativeDraws:1,finishedFrameBlit:false},
     adapterReason:'FIXED_AREA_NATIVE_BRIDGE_API_CANNOT_CONSUME_EXTERNAL_CAMERA_WITHOUT_V5_PLAN_FORGERY'},
    get diagnostic(){return last;},dispose(){if(disposed)return;foregroundSupport.dispose();territory.dispose();graphics.dispose();factory.dispose();renderer.dispose();disposed=true;}};

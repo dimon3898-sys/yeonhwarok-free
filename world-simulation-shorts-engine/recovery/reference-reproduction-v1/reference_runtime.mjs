@@ -32,13 +32,17 @@ export function assertReferenceDiagnostic(diagnostic,{frame,protect=true}={}){
  assert.equal(d.territory.routeVisuals,false);assert.equal(d.territory.arrowVisuals,false);
  assert.equal(d.territory.standaloneFrontLine,false);
  assert.equal(d.protection.semantic,'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND');
+ assert.equal(d.protection.protectedBoundaryCounterScope,'OUTER_UNSHARED_NATIVE_BOUNDARY_ONLY');
+ assert.equal(d.boundaryProtection.allNativeBoundaryPixelEqualityClaimed,false);
+ assert.equal(d.territory.graphics.outerNativeBoundaryGlowPreserved,true);
  assert.equal(d.protection.checked,protect);
  if(protect){
   for(const key of ['protectedChangedPixels','markerChangedPixels','textChangedPixels','outsideRoiChangedPixels',
    'safeAreaChangedPixels','protectedBoundaryChangedPixels'])assert.equal(d.protection[key],0,key);
   assert.ok(Number.isSafeInteger(d.protection.opaqueForegroundSupportPixels)&&d.protection.opaqueForegroundSupportPixels>0);
   for(const key of ['backgroundOutsideSafeAreaChangedPixels','partialAlphaForegroundChangedPixels',
-   'transparentReservationBackgroundChangedPixels'])assert.ok(Number.isSafeInteger(d.protection[key])&&d.protection[key]>=0,key);
+   'transparentReservationBackgroundChangedPixels','sharedInternalBoundaryChangedPixels',
+   'allNativeBoundaryChangedPixels'])assert.ok(Number.isSafeInteger(d.protection[key])&&d.protection[key]>=0,key);
  }
  assert.equal(d.territory.graphics.nativeStateRestored,true);
  return d;

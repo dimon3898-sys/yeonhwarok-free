@@ -43,6 +43,8 @@ try{
   actualCameraLocked:false,surveyAdmissionModified:false,sourceSignature:session?.sourceSignature??null,
   protectionSemantic:'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND',
   translucentEdgePixelIdentityClaimed:false,backgroundOutsideSafeAreaIsExpected:true,
+  protectedBoundaryCounterScope:'OUTER_UNSHARED_NATIVE_BOUNDARY_ONLY',allNativeBoundaryPixelEqualityClaimed:false,
+  sharedInternalBoundaryMaterialReplacementIsExpected:true,
   sourceBindings:session?.sourceBindings??[],cameraKeyframeBinding:session?.info.cameraKeyframeBinding??null,
   domainGeometryBinding:session?.info.domainGeometryBinding??null,boundaryKeyframeBinding:session?.info.boundaryKeyframeBinding??null,
   runtime:session?.info??null,samples,requiredTempOnlyFiles:0,

@@ -27,6 +27,7 @@ REFERENCE_MAP_CROP = [0, 211, 1080, 2131]
 COLOR_MAP_ROI = [24, 9, 915, 1599]
 STRICT_COUNTERS = ["protectedChangedPixels", "markerChangedPixels", "textChangedPixels", "outsideRoiChangedPixels", "safeAreaChangedPixels", "protectedBoundaryChangedPixels"]
 EXPECTED_BACKGROUND_COUNTERS = ["backgroundOutsideSafeAreaChangedPixels", "partialAlphaForegroundChangedPixels", "transparentReservationBackgroundChangedPixels", "opaqueForegroundSupportPixels"]
+INTENDED_INTERNAL_BOUNDARY_COUNTERS = ["sharedInternalBoundaryChangedPixels", "allNativeBoundaryChangedPixels"]
 CHECKPOINTS = [(0,"01_START.png","COMPARE_01_START.png"), (38,"02_ADVANCE.png","COMPARE_02_ADVANCE.png"), (75,"03_TRACKING.png","COMPARE_03_TRACKING.png"), (112,"04_CONTINUOUS_CONTROL.png","COMPARE_04_CONTINUOUS_CONTROL.png"), (149,"05_END.png","COMPARE_05_END.png")]
 
 
@@ -140,11 +141,14 @@ def validate_runtime_rows(report: dict) -> dict:
         raise RuntimeError('COMPLETE_CHRONOLOGICAL_150_NATIVE_ROWS_REQUIRED')
     strict_totals={key:0 for key in STRICT_COUNTERS}
     expected_totals={key:0 for key in EXPECTED_BACKGROUND_COUNTERS}
+    internal_totals={key:0 for key in INTENDED_INTERNAL_BOUNDARY_COUNTERS}
     bounds=[]
     for row in rows:
         protection=row.get('protection')
         if not isinstance(protection,dict) or protection.get('checked') is not True:
             raise RuntimeError('ACTUAL_NATIVE_PROTECTION_CHECK_REQUIRED')
+        if protection.get('protectedBoundaryCounterScope')!='OUTER_UNSHARED_NATIVE_BOUNDARY_ONLY':
+            raise RuntimeError('EXPLICIT_OUTER_UNSHARED_BOUNDARY_PROTECTION_SCOPE_REQUIRED')
         for key in STRICT_COUNTERS:
             if protection.get(key)!=0:raise RuntimeError('CRITICAL_NATIVE_PROTECTION_ERROR: '+key)
             strict_totals[key]+=protection[key]
@@ -152,6 +156,10 @@ def validate_runtime_rows(report: dict) -> dict:
             value=protection.get(key,0)
             if not isinstance(value,int) or value<0:raise RuntimeError('INVALID_BACKGROUND_COUNTER')
             expected_totals[key]+=value
+        for key in INTENDED_INTERNAL_BOUNDARY_COUNTERS:
+            value=protection.get(key)
+            if not isinstance(value,int) or value<0:raise RuntimeError('EXPLICIT_SHARED_INTERNAL_BOUNDARY_COUNTER_REQUIRED')
+            internal_totals[key]+=value
         if row.get('glError')!=0 or row.get('nativeDrawCount')!=2 or row.get('cameraLocked') is not False:
             raise RuntimeError('ACTUAL_NATIVE_GL_DRAW_OR_MOVING_CAMERA_STATE_FAILED')
         box=row.get('cameraBounds')
@@ -163,7 +171,7 @@ def validate_runtime_rows(report: dict) -> dict:
             raise RuntimeError('GEOMETRY_OR_NO_DECORATIVE_ROUTE_CONTRACT_FAILED')
     b=np.asarray(bounds,dtype=float)
     centers=(b[:,:2]+b[:,2:])/2;spans=b[:,2:]-b[:,:2]
-    return {'status':'PASS','native_frames':150,'actual_native_draws_per_protected_frame':2,'actual_camera_locked':False,'strict_opaque_foreground_support_counters':strict_totals,'expected_background_dependent_counters':expected_totals,'opaque_foreground_scope':'ACTUAL_OPAQUE_FOREGROUND_ALPHA_SUPPORT_NOT_BOUNDING_BOX_BACKGROUND','full_marker_or_text_rgba_equality_claimed':False,'partial_alpha_policy':'FOREGROUND_SOURCE_AND_STYLE_UNCHANGED_BACKGROUND_DEPENDENT_COMPOSITE_EXPECTED','camera':{'bounds_first':bounds[0],'bounds_last':bounds[-1],'centre_first':centers[0].tolist(),'centre_last':centers[-1].tolist(),'span_first':spans[0].tolist(),'span_last':spans[-1].tolist(),'longitude_span_zoom_ratio':float(spans[0,0]/spans[-1,0]),'latitude_span_zoom_ratio':float(spans[0,1]/spans[-1,1]),'maximum_consecutive_centre_delta_degrees':float(np.linalg.norm(np.diff(centers,axis=0),axis=1).max()),'maximum_consecutive_log_span_delta':float(np.max(np.abs(np.diff(np.log(spans),axis=0)))),'source':'ACTUAL_NATIVE_FRAME_REPORT_NOT_INFERRED_REFERENCE_POSE'},'geometry_unchanged':True,'route_visuals':False,'standalone_front_line':False}
+    return {'status':'PASS','native_frames':150,'actual_native_draws_per_protected_frame':2,'actual_camera_locked':False,'strict_opaque_foreground_support_counters':strict_totals,'expected_background_dependent_counters':expected_totals,'intended_shared_internal_boundary_replacement_counters':internal_totals,'opaque_foreground_scope':'ACTUAL_OPAQUE_FOREGROUND_ALPHA_SUPPORT_NOT_BOUNDING_BOX_BACKGROUND','protected_boundary_counter_scope':'OUTER_UNSHARED_NATIVE_BOUNDARY_ONLY','all_native_country_boundary_pixels_unchanged_claimed':False,'shared_internal_boundary_policy':'EXACT_SHARED_REVERSE_GEOGRAPHIC_EDGES_BETWEEN_CONTROL_DOMAINS_REPLACED_BY_SAME_COMPLEMENTARY_CONTROL_MATERIAL','outer_unshared_coast_and_native_boundary_pixels':'STRICT_UNCHANGED','final_core_geometry_and_existing_event_collision_rules_modified':False,'full_marker_or_text_rgba_equality_claimed':False,'partial_alpha_policy':'FOREGROUND_SOURCE_AND_STYLE_UNCHANGED_BACKGROUND_DEPENDENT_COMPOSITE_EXPECTED','camera':{'bounds_first':bounds[0],'bounds_last':bounds[-1],'centre_first':centers[0].tolist(),'centre_last':centers[-1].tolist(),'span_first':spans[0].tolist(),'span_last':spans[-1].tolist(),'longitude_span_zoom_ratio':float(spans[0,0]/spans[-1,0]),'latitude_span_zoom_ratio':float(spans[0,1]/spans[-1,1]),'maximum_consecutive_centre_delta_degrees':float(np.linalg.norm(np.diff(centers,axis=0),axis=1).max()),'maximum_consecutive_log_span_delta':float(np.max(np.abs(np.diff(np.log(spans),axis=0)))),'source':'ACTUAL_NATIVE_FRAME_REPORT_NOT_INFERRED_REFERENCE_POSE'},'geometry_unchanged':True,'route_visuals':False,'standalone_front_line':False}
 
 
 def run_audit(args) -> dict:
