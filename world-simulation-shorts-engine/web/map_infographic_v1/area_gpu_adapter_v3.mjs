@@ -2,6 +2,7 @@
 import {createAreaNativeBridge} from './area_native_bridge_v3.mjs';
 import {assertAreaPlan,evaluateAreaFrame} from './area_core_v3.mjs';
 import {createAreaOverlayPass} from './area_overlay_pass_v3.mjs';
+import {geometryBounds} from './scale_contract.mjs';
 
 const inside=(x,y,b)=>x+.5>=b[0]&&x+.5<=b[2]&&y+.5>=b[1]&&y+.5<=b[3];
 export async function createAreaGpuAdapter({canvas,plans,cameraPlan,scene,heightSource,contextTerrain=null,areaPlan,presentation}){
@@ -37,8 +38,14 @@ export async function createAreaGpuAdapter({canvas,plans,cameraPlan,scene,height
     const [x,y]=native.project(point).map(Math.floor);
     if(x>=0&&x<1080&&y>=0&&y<1920){const i=((1919-y)*1080+x)*4;samples.push([...before.slice(i,i+3)].map(v=>v/255));}
    }
+   const bounds=nativeFrame.camera.flatBounds;
+   const mediumExclusions=presentation.propagationMedium==='WATER'||presentation.impactMedium==='WATER'?plans.REGIONAL.geometries.filter(record=>{
+    const b=geometryBounds(record);return b[0]<bounds[2]&&b[2]>bounds[0]&&b[1]<bounds[3]&&b[3]>bounds[1];
+   }).map(record=>({type:record.geometry_type,coordinates:record.coordinates})):[];
    result=overlay.draw({controls,project:native.project,safeArea,protectedGraphics:reservations,
-    primaryMaterialColor:plans.REGIONAL.theme.primary,backgroundSamples:samples,boundarySegments:nativeFrame.boundarySegments});
+    primaryMaterialColor:plans.REGIONAL.theme.primary,backgroundSamples:samples,boundarySegments:nativeFrame.boundarySegments,
+    propagationExclusionGeometries:presentation.propagationMedium==='WATER'?mediumExclusions:[],
+    impactExclusionGeometries:presentation.impactMedium==='WATER'?mediumExclusions:[]});
    rois=[...result.rois];
    if(text){text={...text,...annotation.draw(text)};if(text.roi)rois.push(text.roi);}
   }
@@ -63,7 +70,7 @@ export async function createAreaGpuAdapter({canvas,plans,cameraPlan,scene,height
    graphics:result,annotation:text,protection,geometryUnchanged:true},glError:0,width:1080,height:1920};
   return last;
  }
- return {drawFrame,readPixels:pixels,png:()=>canvas.toDataURL('image/png'),get diagnostic(){return last;},
+ return {drawFrame,project:native.project,readPixels:pixels,png:()=>canvas.toDataURL('image/png'),get diagnostic(){return last;},
   evidence:{version:'AREA_GPU_ADAPTER_V3',parent:'EVENT_FEATURE_BUNDLE_V2_FLOW_FINAL_BASELINE',
    cameraOwnership:'UNCHANGED_V5',projection:'ACTUAL_NATIVE_FACTORY_SCREEN',finishedFrameBlit:false,
    native:native.evidence,overlay:overlay.evidence},dispose(){annotation?.dispose();overlay.dispose();native.dispose();}};

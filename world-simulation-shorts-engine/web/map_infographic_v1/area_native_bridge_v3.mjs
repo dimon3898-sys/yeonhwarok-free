@@ -51,8 +51,14 @@ export async function createAreaNativeBridge({canvas,plans,cameraPlan,scene,heig
   graphics=await createMovingGraphicPass({renderer,factory,width,height});
   const layoutContract=compileMovingLayoutContract({regionalPlan:plans.REGIONAL,measuredLayout:factory.evidence.layout});
   const visualTokensForFrame=state=>geographicScaleVisualTokens(state.camera.flatBounds,plans);
-  const revealPlan=compileGuidedRevealPlan({cameraPlan,scene,layoutContract,
-   evaluateCamera:evaluateMinimumContextCameraFrame,visualTokensForFrame});
+  let revealPlan;
+  try{revealPlan=compileGuidedRevealPlan({cameraPlan,scene,layoutContract,
+   evaluateCamera:evaluateMinimumContextCameraFrame,visualTokensForFrame});}
+  catch(error){
+   const state=evaluateMinimumContextCameraFrame(cameraPlan,cameraPlan.totalFrames-1);
+   const layout=evaluateMovingLayout(layoutContract,state,{markerSize:visualTokensForFrame(state).markerSize,boundaryTokens:visualTokensForFrame(state)});
+   throw Error(error.message+' '+JSON.stringify({finalReadiness:layout.readiness,finalFailures:layout.validation.failuresByRole,items:layout.items.map(i=>({role:i.role,box:i.box,placement:i.placement}))}));
+  }
   const params={dem:heightSource!==null,verticalExaggeration:2,bakedSuppression:.1,
    correctedLight:true,shadingCorrection:'FINAL'};
   const secondary=new Set(plans.REGIONAL.secondary??[]);

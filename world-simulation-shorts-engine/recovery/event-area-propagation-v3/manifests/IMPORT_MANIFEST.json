@@ -2,7 +2,7 @@
   "schema": 1,
   "scope": "EVENT_FEATURE_BUNDLE_V3_AREA_PROPAGATION",
   "development_branch": "development/event-area-propagation-v3-20261013",
-  "inventory_stage": "implementation",
+  "inventory_stage": "fixture",
   "candidate_state": "IMPLEMENTATION_CHECKPOINT",
   "status": "PROOF_RENDER_PENDING",
   "parent_baseline": {
@@ -47,8 +47,11 @@
   },
   "roots": [
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/area_runtime.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_synthetic_fixtures.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/overlay_smoke.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_synthetic.mjs",
     "world-simulation-shorts-engine/tests/area_core_v3.test.mjs",
     "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
@@ -61,8 +64,11 @@
   ],
   "reachable_modules": [
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/area_runtime.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_synthetic_fixtures.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/overlay_smoke.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+    "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
     "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_synthetic.mjs",
     "world-simulation-shorts-engine/recovery/event-feature-bundle-v2-polish/polish_runtime.mjs",
     "world-simulation-shorts-engine/tests/area_core_v3.test.mjs",
@@ -162,6 +168,42 @@
       "line": 34
     },
     {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+      "specifier": "../../web/map_infographic_v1/area_core_v3.mjs",
+      "kind": "static",
+      "names": [
+        "compileAreaIntent",
+        "compileAreaPlan"
+      ],
+      "default": false,
+      "line": 6
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+      "specifier": "../../web/map_infographic_v1/camera_director_v5.mjs",
+      "kind": "static",
+      "names": [
+        "compileMinimumContextPlan"
+      ],
+      "default": false,
+      "line": 7
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+      "specifier": "../../web/map_infographic_v1/scale_contract.mjs",
+      "kind": "static",
+      "names": [
+        "compileScalePlan",
+        "fitGeographicExtent",
+        "geometryBounds"
+      ],
+      "default": false,
+      "line": 8
+    },
+    {
       "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_synthetic_fixtures.mjs",
       "to": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
       "specifier": "../../web/map_infographic_v1/area_core_v3.mjs",
@@ -210,6 +252,43 @@
       "names": [],
       "default": false,
       "line": 18
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "to": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/area_runtime.mjs",
+      "specifier": "./area_runtime.mjs",
+      "kind": "static",
+      "names": [
+        "openAreaRuntime",
+        "root",
+        "repo",
+        "json",
+        "sha"
+      ],
+      "default": false,
+      "line": 8
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+      "to": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/area_runtime.mjs",
+      "specifier": "./area_runtime.mjs",
+      "kind": "static",
+      "names": [
+        "openAreaRuntime",
+        "root",
+        "sha"
+      ],
+      "default": false,
+      "line": 4
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/area_visual_admission_v3.mjs",
+      "specifier": "/modules/area_visual_admission_v3.mjs",
+      "kind": "dynamic",
+      "names": [],
+      "default": false,
+      "line": 24
     },
     {
       "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_synthetic.mjs",
@@ -413,12 +492,23 @@
     },
     {
       "from": "world-simulation-shorts-engine/web/map_infographic_v1/area_gpu_adapter_v3.mjs",
+      "to": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+      "specifier": "./scale_contract.mjs",
+      "kind": "static",
+      "names": [
+        "geometryBounds"
+      ],
+      "default": false,
+      "line": 5
+    },
+    {
+      "from": "world-simulation-shorts-engine/web/map_infographic_v1/area_gpu_adapter_v3.mjs",
       "to": "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
       "specifier": "./area_annotation_v3.mjs",
       "kind": "dynamic",
       "names": [],
       "default": false,
-      "line": 12
+      "line": 13
     },
     {
       "from": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
@@ -1698,6 +1788,50 @@
       "resolution_root": "cinematic-world-map/package.json"
     },
     {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "specifier": "node:crypto",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "createHash"
+      ],
+      "default": false,
+      "line": 5,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "readFile",
+        "writeFile",
+        "mkdir"
+      ],
+      "default": false,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_real_fixture.mjs",
+      "specifier": "node:url",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "fileURLToPath"
+      ],
+      "default": false,
+      "line": 4,
+      "node_version": "24.19.0"
+    },
+    {
       "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/build_synthetic_fixtures.mjs",
       "specifier": "node:fs/promises",
       "kind": "NODE_BUILTIN",
@@ -1772,6 +1906,101 @@
       ],
       "default": false,
       "line": 7,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "specifier": "node:assert/strict",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "specifier": "node:child_process",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "spawn",
+        "execFile"
+      ],
+      "default": false,
+      "line": 4,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "specifier": "node:events",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "once"
+      ],
+      "default": false,
+      "line": 5,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "mkdir",
+        "readFile",
+        "writeFile"
+      ],
+      "default": false,
+      "line": 3,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 7,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/render_proof.mjs",
+      "specifier": "node:util",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "promisify"
+      ],
+      "default": false,
+      "line": 6,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+      "specifier": "node:assert/strict",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 1,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+      "specifier": "node:fs/promises",
+      "kind": "NODE_BUILTIN",
+      "names": [
+        "mkdir",
+        "writeFile"
+      ],
+      "default": false,
+      "line": 2,
+      "node_version": "24.19.0"
+    },
+    {
+      "from": "world-simulation-shorts-engine/recovery/event-area-propagation-v3/verify_integration.mjs",
+      "specifier": "node:path",
+      "kind": "NODE_BUILTIN",
+      "names": [],
+      "default": true,
+      "line": 3,
       "node_version": "24.19.0"
     },
     {

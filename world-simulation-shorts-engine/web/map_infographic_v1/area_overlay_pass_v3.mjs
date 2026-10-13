@@ -122,6 +122,7 @@ export function createAreaOverlayPass({canvas,width=1080,height=1920,style=null}
  try{
   programs.fill=compileProgram(gl,shaderVertex,fillFragment);programs.contour=compileProgram(gl,shaderVertex,contourFragment);
   programs.mask=compileProgram(gl,maskVertex,maskFragment);
+  programs.exclusion=compileProgram(gl,shaderVertex,'#version 300 es\nprecision highp float;out vec4 frag;void main(){frag=vec4(1.,0.,0.,1.);}');
   fillUniforms=uniformLocations(gl,programs.fill,names);contourUniforms=uniformLocations(gl,programs.contour,names);
   maskUniforms=uniformLocations(gl,programs.mask,['screenSize']);
   positionBuffer=gl.createBuffer();buffers.push(positionBuffer);positionVao=gl.createVertexArray();vaos.push(positionVao);
@@ -221,7 +222,7 @@ export function createAreaOverlayPass({canvas,width=1080,height=1920,style=null}
   return{id:item.id,drawn:records.length>0,reveal,contours:records,roi:records.length?bounds(records.flatMap(record=>[[record.roi[0],record.roi[1]],[record.roi[2],record.roi[3]]])):null,
    evaluator:'UNCHANGED_GEOGRAPHIC_LINE_REVEAL_V1'};
  }
- return{evidence,draw({controls,project,safeArea,protectedGraphics=[],primaryMaterialColor,backgroundSamples,boundarySegments=[]}={}){
+ return{evidence,draw({controls,project,safeArea,protectedGraphics=[],primaryMaterialColor,backgroundSamples,boundarySegments=[],propagationExclusionGeometries=[],impactExclusionGeometries=[]}={}){
   if(disposed)throw Error('AREA_GPU_DISPOSED');
   if(!controls||typeof project!=='function'||!validBox(safeArea))throw Error('AREA_GPU_DRAW_CONTRACT_REQUIRED');
   const reservations=protectedRecords(protectedGraphics),boundaries=boundaryRecords(boundarySegments),
@@ -230,13 +231,27 @@ export function createAreaOverlayPass({canvas,width=1080,height=1920,style=null}
   try{
    boundaryMask(boundaries);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);
    const areas=(controls.areas??[]).map(item=>drawArea(item,styles.AREA,project,reservations,safeArea));
+   if(propagationExclusionGeometries.length){
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,boundaryFbo);gl.drawBuffers([gl.COLOR_ATTACHMENT0]);gpuState(false);gl.disable(gl.SCISSOR_TEST);
+    gl.useProgram(programs.exclusion);gl.uniform2fv(gl.getUniformLocation(programs.exclusion,'screenSize'),[width,height]);
+    for(const geometry of propagationExclusionGeometries){const polygon=projectedPolygon(geometry,project);vertices(polygon.triangles);gl.drawArrays(gl.TRIANGLES,0,polygon.triangles.length/2);}
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);
+   }
    const propagations=(controls.propagations??[]).map(item=>drawLine(item,styles.PROPAGATION,project,reservations,safeArea));
+   if(propagationExclusionGeometries.length){boundaryMask(boundaries);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);}
+   if(impactExclusionGeometries.length){
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,boundaryFbo);gl.drawBuffers([gl.COLOR_ATTACHMENT0]);gpuState(false);gl.disable(gl.SCISSOR_TEST);
+    gl.useProgram(programs.exclusion);gl.uniform2fv(gl.getUniformLocation(programs.exclusion,'screenSize'),[width,height]);
+    for(const geometry of impactExclusionGeometries){const polygon=projectedPolygon(geometry,project);vertices(polygon.triangles);gl.drawArrays(gl.TRIANGLES,0,polygon.triangles.length/2);}
+    gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);
+   }
    const impacts=(controls.impacts??[]).map(item=>drawArea(item,styles.IMPACT,project,reservations,safeArea));
+   if(impactExclusionGeometries.length){boundaryMask(boundaries);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);}
    const fronts=(controls.fronts??[]).map(item=>drawLine(item,styles.FRONT,project,reservations,safeArea));
    const items=[...areas,...propagations,...impacts,...fronts];
    result={version:AREA_OVERLAY_PASS_V3_VERSION,areas,propagations,impacts,fronts,rois:items.filter(item=>item.drawn&&item.roi).map(item=>clone(item.roi)),
     style:clone(styles),safeArea:clone(safeArea),protectedReservations:clone(reservations),boundaryMaskSegments:boundaries.length,
-    nativeBoundaryGlowPreserved:true,nativeStateRestored:true,sourceGeometryMutation:false,
+    nativeBoundaryGlowPreserved:true,nativeStateRestored:true,sourceGeometryMutation:false,propagationExclusionPolygonCount:propagationExclusionGeometries.length,
     reservedOverlap:items.filter(item=>item.drawn&&item.roi).flatMap(item=>reservations.filter(reservation=>intersect(item.roi,reservation.box)).map(reservation=>({id:item.id,kind:reservation.kind,box:clone(reservation.box),rasterMasked:true})))};
   }finally{restoreFlowNativeGlState(gl,state);}
   const error=gl.getError();if(error!==gl.NO_ERROR)throw Object.assign(Error('AREA_GPU_GL_ERROR_'+error),{diagnostic:result});return result;
