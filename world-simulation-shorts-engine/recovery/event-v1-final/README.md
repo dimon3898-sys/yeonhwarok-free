@@ -11,6 +11,8 @@ The immutable candidate inventory validator is executed once with `--stage candi
 
 Clean reproduction uses an actual HTTPS remote clone at the approved source revision, independent Git objects, remote Git LFS asset retrieval and fresh `npm ci` dependencies. The system browser, encoder, Node and Python are the existing pinned toolchain, rather than a newly provisioned operating system. The bootstrap receipt records this limitation explicitly.
 
+`CLEAN_REPRODUCTION_RECIPE.json` saves the remote clone, explicit approved-revision pin, selected LFS pull, frozen npm install and invocation recipe. Future branch HEAD may contain final metadata, so fetch/check out the approved `a7241a1` revision explicitly. The one-time bootstrap helper is not a runtime dependency.
+
 From repository root, run the following verification-only procedure after the clean checkout has been prepared:
 
 ```

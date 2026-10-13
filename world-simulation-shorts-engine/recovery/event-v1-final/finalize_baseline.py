@@ -414,6 +414,7 @@ def build():
         "verification_procedures": [record(FINAL / name) for name in (
             "reproduce_clean_candidate.mjs", "finalize_baseline.py", "scan_final_freeze.py"
         )],
+        "verification_recipe": record(FINAL / "CLEAN_REPRODUCTION_RECIPE.json"),
         "event_profile": {
             "version": event["version"], "intent_version": event["intent"]["version"],
             "detail_adapter_version": plan["version"], "detail_timeline_version": plan["timelineVersion"],

@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "purpose": "Reproduce the approved frozen Event V1 source without depending on one-time bootstrap files",
+  "approved_source_revision": "a7241a1e69d901fdd7ef5212ea5faf34d0ea6baf",
+  "remote": "https://github.com/dimon3898-sys/yeonhwarok-free.git",
+  "branch": "development/event-system-v1-20261012",
+  "placeholders": {
+    "CHECKOUT": "Absent directory for a fresh remote clone",
+    "PRIVATE_OUTPUT": "Absent private output directory outside CHECKOUT",
+    "FINAL_TOOLS": "Saved event-v1-final procedure directory from the final baseline commit"
+  },
+  "setup": [
+    {
+      "argv": ["git", "clone", "--depth", "1", "--single-branch", "--branch", "development/event-system-v1-20261012", "https://github.com/dimon3898-sys/yeonhwarok-free.git", "CHECKOUT"],
+      "environment": {"GIT_LFS_SKIP_SMUDGE": "1"},
+      "local_source_or_asset_reuse": false
+    },
+    {
+      "cwd": "CHECKOUT",
+      "argv": ["git", "fetch", "--depth", "1", "origin", "a7241a1e69d901fdd7ef5212ea5faf34d0ea6baf"]
+    },
+    {
+      "cwd": "CHECKOUT",
+      "argv": ["git", "checkout", "--detach", "a7241a1e69d901fdd7ef5212ea5faf34d0ea6baf"],
+      "environment": {"GIT_LFS_SKIP_SMUDGE": "1"},
+      "reason": "Future branch HEAD contains final verification metadata; runtime reproduction remains fixed to approved a724 source"
+    },
+    {"cwd": "CHECKOUT", "argv": ["git", "lfs", "install", "--local"]},
+    {
+      "cwd": "CHECKOUT",
+      "argv": ["git", "lfs", "pull", "--include=world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tif,world-simulation-shorts-engine/web/dem/glo30/height.f32", "--exclude="]
+    },
+    {
+      "cwd": "CHECKOUT",
+      "argv": ["npm", "--prefix", "cinematic-world-map", "ci", "--ignore-scripts", "--no-audit", "--no-fund", "--strict-ssl=true"],
+      "environment": {"npm_config_cache": "CHECKOUT/.git/fresh-npm-cache"},
+      "requirements": ["Fresh node_modules", "Fresh cache", "Frozen package-lock.json bytes"]
+    }
+  ],
+  "system_toolchain": {"node": "24.19.0", "python": "3.13.5", "chromium": "154.0.8037.57", "ffmpeg": "7.1.5"},
+  "system_toolchain_policy": "Use these pinned versions; actual final verification uses an existing pinned machine, not a newly provisioned OS",
+  "reproduction": {
+    "argv": ["node", "FINAL_TOOLS/reproduce_clean_candidate.mjs", "--checkout", "CHECKOUT", "--output-dir", "PRIVATE_OUTPUT"],
+    "runtime_imports": "Only unchanged approved source from CHECKOUT",
+    "comparisons": ["210 native raw RGBA hashes", "210 native PNG hashes", "Camera/Timeline/Event controls", "7 checkpoint PNG bytes", "Original MP4 SHA or all 210 decoded frame hashes"],
+    "public_proof_write": false
+  },
+  "actual_setup_receipt": "evidence/CLEAN_CHECKOUT_SETUP.json",
+  "one_time_bootstrap_helper_is_required_runtime_input": false,
+  "required_temp_only_files": []
+}
