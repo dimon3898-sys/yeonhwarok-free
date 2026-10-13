@@ -70,15 +70,67 @@
       ],
       "resume": "Source checkpoint must be pushed and remote verified before STEP 4 render; do not repeat saved native route selection or passed focused checks",
       "focused_tests": 26,
-      "native_integration_frames": 23
+      "native_integration_frames": 23,
+      "saved_output_commit": "366d44b3d69ac9086a6c5a39b8ab9e5a468af16a"
     },
     "4": {
       "name": "REVIEW_PROOF_AND_DOWNLOAD",
       "status": "IN_PROGRESS",
-      "input_commit": "SELF_SOURCE_CHECKPOINT_AFTER_COMMIT",
-      "outputs": [],
-      "resume": "Inspect evidence/proof/CAPTURE_STATUS.json and running node process; from persisted source checkpoint run node recovery/planner-night-run-v1/render_proof.mjs to capture only missing verified frames",
-      "input_scene_sha256": "77b0660a885a56d6ac25d49560910e592070e00011010339fa162e31118651b2"
+      "input_commit": "366d44b3d69ac9086a6c5a39b8ab9e5a468af16a",
+      "outputs": [
+        {
+          "path": "evidence/proof/REPORT.json",
+          "sha256": "6864de8c809f737a14536b1925fdc53c876c70b4de18e339ff715f3ef6fa3742"
+        },
+        {
+          "path": "evidence/CANDIDATE_AUDIT.json",
+          "sha256": "596e3cd04d048bf6dc0cc54d2cf1ea4edf77ac7286054111078954a63b6625d1"
+        },
+        {
+          "path": "evidence/ASSISTANT_VISUAL_REVIEW.json",
+          "sha256": "3a83dfc168e6d70c715a205ad613186124455319e1233eb37008ed41098ebcda"
+        },
+        {
+          "path": "public-review/KOREAN_WAR_PLANNER_SCENE_JSON_V1_CAUSAL_VISUAL_14S.mp4",
+          "sha256": "9e20dec13945e7ad48558eb7bf664eaa0699a4a13fe024f691bec46b3081e916"
+        },
+        {
+          "path": "public-review/PREVIEW.png",
+          "sha256": "c2f5b536c5d594d45fcd13c856f11ad282d99f7687d5bf0b79429fb9e6db9bae"
+        },
+        {
+          "path": "public-review/SCENE_PLAN.json",
+          "sha256": "77b0660a885a56d6ac25d49560910e592070e00011010339fa162e31118651b2"
+        },
+        {
+          "path": "public-review/SHA256SUMS",
+          "sha256": "7f848419ff745431e96f431390e9ffc34b84b609be7f8f28b9f73a7d0748920f"
+        }
+      ],
+      "resume": "Native render PASS; do not render or reencode. Resume focused candidate audit, sampled visual inspection, candidate persistence and real HTTPS download verification",
+      "input_scene_sha256": "77b0660a885a56d6ac25d49560910e592070e00011010339fa162e31118651b2",
+      "native_render": {
+        "status": "PASS",
+        "frames": 420,
+        "source_commit": "366d44b3d69ac9086a6c5a39b8ab9e5a468af16a",
+        "mp4_sha256": "9e20dec13945e7ad48558eb7bf664eaa0699a4a13fe024f691bec46b3081e916",
+        "mp4": "public-review/KOREAN_WAR_PLANNER_SCENE_JSON_V1_CAUSAL_VISUAL_14S.mp4"
+      },
+      "technical_audit": {
+        "status": "PASS",
+        "all_frames_decoded": 420,
+        "black_blank_decode_errors": 0,
+        "longest_measured_static_action_frames": 15
+      },
+      "visual_review": {
+        "scope": "SEVEN_ACTUAL_DECODED_STILLS",
+        "full_video_review": false,
+        "user_gate": "USER_VIDEO_REVIEW_REQUIRED"
+      },
+      "remaining_checks": [
+        "REMOTE_CANDIDATE_PERSISTENCE",
+        "HTTP200_DOWNLOADED_SHA_EQUALITY"
+      ]
     }
   },
   "gate": "USER_VIDEO_REVIEW_REQUIRED",
@@ -120,5 +172,7 @@
       "planner_scene_v1.mjs",
       "planner_scene_v1.schema.json"
     ]
-  }
+  },
+  "implementation_checkpoint_commit": "366d44b3d69ac9086a6c5a39b8ab9e5a468af16a",
+  "implementation_checkpoint_remote_verified": true
 }
