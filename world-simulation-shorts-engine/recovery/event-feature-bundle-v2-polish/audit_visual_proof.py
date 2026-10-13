@@ -9,6 +9,7 @@ import json
 import math
 import struct
 import subprocess
+import copy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -62,6 +63,15 @@ def main():
     assert sorted(p.name for p in public.iterdir()) == sorted([VIDEO_NAME, 'SHA256SUMS', *[c['file'] for c in report['checkpoints']]])
 
     accepted = read_json(ROOT.parent / 'event-feature-bundle-v2/evidence/proof/REPORT.json')
+    integration_file = ROOT.parent / 'event-feature-bundle-v2/evidence/integration/REPORT.json'
+    integration = read_json(integration_file)
+    disclosures = [item for item in integration['frames'][0]['diagnostic']['native']['gpu']['layout']
+                   if item['role'] == 'SCENARIO_DISCLOSURE']
+    assert len(disclosures) == 1 and disclosures[0]['kind'] == 'TEXT'
+    disclosure = disclosures[0]
+    x, y, width, height = disclosure['box']
+    pad = disclosure.get('outlineRadius', disclosure.get('metrics', {}).get('outlineRadius', 0)) + 2
+    removed_disclosure_box = [x - pad, y - pad, x + width + pad, y + height + pad]
     old_source = ROOT.parent / 'event-feature-bundle-v2/fixtures'
     for name in ['FLOW_PLAN.json', 'DETAIL_ADAPTER_PLAN.json']:
         assert (ROOT / 'fixtures' / name).read_bytes() == (old_source / name).read_bytes()
@@ -70,14 +80,22 @@ def main():
         number = row['frame']
         assert row['cameraBounds'] == accepted['frames'][number]['cameraBounds']
         assert row['glError'] == 0
-        assert not any(item['role'] == 'SCENARIO_DISCLOSURE' for item in row['layoutValidation']['items'])
+        assert row['layoutValidation']['valid']
+        assert not any(item['role'] == 'SCENARIO_DISCLOSURE' for item in row['layoutItems'])
         protection = row['flow']['protection']
         assert all(protection[key] == 0 for key in ['protectedChangedPixels', 'markerChangedPixels', 'outsideRoiChangedPixels'])
         if not row['flow']['enabled']:
             assert number < 60
             continue
         assert row['cameraLocked']
-        assert row['flow']['controls'] == accepted['frames'][number]['flow']['controls']
+        expected_controls = copy.deepcopy(accepted['frames'][number]['flow']['controls'])
+        prior_boxes = expected_controls['eventControls']['readiness']['protectedBoxes']
+        filtered = [box for box in prior_boxes if box != removed_disclosure_box]
+        assert len(prior_boxes) - len(filtered) == 1, 'Only the measured optional footer reservation may differ'
+        expected_controls['eventControls']['readiness']['protectedBoxes'] = filtered
+        assert row['flow']['controls'] == expected_controls
+        assert row['protectedGraphics'] == [graphic for graphic in accepted['frames'][number]['protectedGraphics']
+                                            if graphic['box'] != removed_disclosure_box]
         visual, core = row['flow']['visualControls'], row['flow']['controls']
         for field in ['objectFraction', 'objectPosition', 'objectHeading', 'headingLookAheadPixels', 'state', 'localFrame']:
             assert visual[field] == core[field]
@@ -124,12 +142,15 @@ def main():
         'scope': 'FOCUSED_EXISTING_MP4_DECODE_AND_FROZEN_FRAME_RECORD_INSPECTION',
         'noRenderingOrVideoReencoding': True, 'publicMediaUnchanged': True,
         'inputs': {'video': digest(video), 'proofReport': digest(report_file),
-                   'visualProfile': digest(ROOT / 'fixtures/VISUAL_PROFILE.json')},
+                   'visualProfile': digest(ROOT / 'fixtures/VISUAL_PROFILE.json'),
+                   'acceptedDisclosureLayoutEvidence': digest(integration_file)},
         'video': {'width': 1080, 'height': 1920, 'fps': 30, 'durationSeconds': 8, 'frames': 240, 'audioStreams': 0},
         'decodeFramesInContactOrder': FRAMES, 'decodedContacts': contacts, 'extractionCommands': commands,
         'nativeCheckpoints': checks,
         'focusedMeasurements': {'cameraFrameRecordsEqualAccepted': 240, 'objectCoreFrameRecordsEqualAccepted': 180,
             'objectBeforeSize': [52, 30], 'objectAfterSize': [62.4, 36], 'sizeIncreasePercent': 20,
+            'normalizedControlRecordsEqualAccepted': 180,
+            'onlyAllowedReadinessContextDifference': {'removedRole': 'SCENARIO_DISCLOSURE', 'measuredBox': removed_disclosure_box},
             'visualRouteMonotonic': True, 'oldRouteCompletionFrame': old_completion, 'polishedRouteCompletionFrame': completion,
             'maximumObjectStepPixels': maximum_step, 'maximumHeadingStepDegrees': maximum_heading * 180 / math.pi,
             'singleArrivalPulseFrames': arrival_frames, 'arrivalPeakFrame': peak['frame'],

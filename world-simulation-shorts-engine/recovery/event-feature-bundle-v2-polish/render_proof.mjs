@@ -10,6 +10,14 @@ const execute=promisify(execFile);
 assert.equal((await json(path.join(root,'evidence/FOCUSED_VALIDATION.json'))).status,'PASS');
 assert.equal((await json(path.join(root,'evidence/OBJECT_SIZE_COMPARISON.json'))).status,'PASS');
 const approved=await json(path.join(root,'../event-feature-bundle-v2/evidence/proof/REPORT.json'));
+const acceptedIntegration=await json(path.join(root,'../event-feature-bundle-v2/evidence/integration/REPORT.json'));
+const disclosure=acceptedIntegration.frames[0].diagnostic.native.gpu.layout.find(x=>x.role==='SCENARIO_DISCLOSURE');
+assert(disclosure&&disclosure.kind==='TEXT');
+const [disclosureX,disclosureY,disclosureWidth,disclosureHeight]=disclosure.box;
+const disclosurePad=(disclosure.outlineRadius??disclosure.metrics?.outlineRadius??0)+2;
+const removedDisclosureBox=[disclosureX-disclosurePad,disclosureY-disclosurePad,
+ disclosureX+disclosureWidth+disclosurePad,disclosureY+disclosureHeight+disclosurePad];
+const sameBox=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 const visualProfile=await json(path.join(root,'fixtures/VISUAL_PROFILE.json'));
 assert.equal(visualProfile.objectScale,1.2);
 const publicDir=path.join(root,'public-review'),proofDir=path.join(root,'evidence/proof');
@@ -41,7 +49,13 @@ try{
   if(frame<session.detailPlan.detailLockFrame){assert.equal(d.flow.enabled,false);assert.equal(d.flow.controls,null);}
   else{assert.equal(d.camera.cameraLocked,true);assert.equal(d.flow.graphics.nativeStateRestored,true);
    assert.deepEqual(d.flow.primitive.intent.line.geometry,session.flowPlan.intent.route_geometry);assert.equal(d.flow.style.width,7);
-   assert.deepEqual(d.flow.controls,approved.frames[frame].flow.controls,'ACCEPTED_CORE_MOTION_OR_TIMELINE_CHANGED');
+   const expectedControls=structuredClone(approved.frames[frame].flow.controls);
+   const priorBoxes=expectedControls.eventControls.readiness.protectedBoxes;
+   expectedControls.eventControls.readiness.protectedBoxes=priorBoxes.filter(box=>!sameBox(box,removedDisclosureBox));
+   assert.equal(priorBoxes.length-expectedControls.eventControls.readiness.protectedBoxes.length,1,'ONLY_REMOVED_DISCLOSURE_RESERVATION_ALLOWED');
+   assert.deepEqual(d.native.event.protectedGraphics,approved.frames[frame].protectedGraphics.filter(g=>!sameBox(g.box,removedDisclosureBox)),
+    'RETAINED_PROTECTED_GRAPHICS_CHANGED');
+   assert.deepEqual(d.flow.controls,expectedControls,'ACCEPTED_CORE_MOTION_OR_TIMELINE_CHANGED');
    for(const key of ['objectFraction','objectPosition','objectHeading','headingLookAheadPixels','localFrame','state'])
     assert.deepEqual(d.flow.visualControls[key],d.flow.controls[key],'PRESENTATION_CHANGED_OBJECT_MOTION_'+key);
    assert.deepEqual(d.flow.visualProfile.afterSize,[62.4,36]);}
@@ -57,7 +71,8 @@ try{
    report.checkpoints.push({frame,state:d.state,file:checkpoint,sha256:sha(bytes),bytes:bytes.length,sourceMatchesEncodedNativeFrame:true});}
   report.frames.push({frame,state:d.state,raw_rgba_sha256:row.raw_rgba_sha256,png_sha256:row.png_sha256,
    cameraBounds:d.camera.flatBounds,cameraLocked:d.camera.cameraLocked,flow:d.flow,
-   protectedGraphics:d.native.event.protectedGraphics,layoutValidation:d.native.gpu.layoutValidation,glError:d.glError});
+   protectedGraphics:d.native.event.protectedGraphics,layoutValidation:d.native.gpu.layoutValidation,
+   layoutItems:d.native.gpu.layout,visibleRoles:d.native.gpu.visibleRoles,glError:d.glError});
   if(frame%15===0||frame===239)console.log(JSON.stringify({phase:'FLOW_POLISH_PROOF',frame,total:report.totalFrames,state:d.state}));
  }
  encoder.stdin.end();assert.equal((await encoderExit).code,0,'FLOW_ENCODER_FAILED '+encoderError);
@@ -70,7 +85,8 @@ try{
  const bytes=await readFile(video);report.video={file:filename,sha256:sha(bytes),bytes:bytes.length};
  const checks=[...report.checkpoints,report.video].sort((a,b)=>a.file.localeCompare(b.file));
  await writeFile(path.join(publicDir,'SHA256SUMS'),checks.map(r=>r.sha256+'  '+r.file).join('\n')+'\n',{flag:'wx'});
- report.protection={eventOnFrames:180,protectedChangedPixels:0,markerChangedPixels:0,outsideRoiChangedPixels:0,geometryUnchanged:true,cameraUnchanged:true,coreObjectMotionUnchanged:true,headingUnchanged:true};
+ report.protection={eventOnFrames:180,protectedChangedPixels:0,markerChangedPixels:0,outsideRoiChangedPixels:0,geometryUnchanged:true,cameraUnchanged:true,coreObjectMotionUnchanged:true,headingUnchanged:true,
+ allowedProtectedContextChange:'REMOVED_SCENARIO_DISCLOSURE_MEASURED_BOX_ONLY',removedDisclosureBox};
  report.visualProfile=visualProfile;report.polish={beforeSize:[52,30],afterSize:[62.4,36],routeVisualCompletionFrame:157,
  arrivalPeakFrame:192,arrivalPulseCount:1,holdFrames:34,removedPublicText:['이동 예시'],coreTimingUnchanged:true};
  report.decodeValidation='PASS';report.status='PASS';

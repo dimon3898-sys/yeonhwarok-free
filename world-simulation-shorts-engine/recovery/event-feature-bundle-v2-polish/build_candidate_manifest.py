@@ -23,7 +23,7 @@ ACCEPTED_FIXTURE_NAMES = ("ROUTE_FLOW_REAL.json", "FLOW_PLAN.json", "DETAIL_ADAP
                           "synthetic-a.json", "synthetic-b.json", "synthetic-c.json", "scene.json",
                           "REGIONAL-plan.json", "CONTINENT-plan.json")
 ACCEPTED_INPUTS = [ACCEPTED + "/fixtures/" + name for name in ACCEPTED_FIXTURE_NAMES]
-ACCEPTED_INPUTS += [ACCEPTED + "/evidence/proof/REPORT.json"]
+ACCEPTED_INPUTS += [ACCEPTED + "/evidence/proof/REPORT.json", ACCEPTED + "/evidence/integration/REPORT.json"]
 PARENT = ENGINE + "/recovery/event-v1-v3-visual-detail"
 FINAL = ENGINE + "/recovery/event-v1-final/FINAL_MANIFEST.json"
 PARENT_COMMIT = "f79f3d55d945ef0e53b03ac2ed666f48f28b5881"
