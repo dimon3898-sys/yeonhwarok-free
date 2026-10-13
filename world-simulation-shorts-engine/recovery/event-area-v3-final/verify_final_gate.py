@@ -247,6 +247,8 @@ def build():
             "checkpoint_pngs_bit_exact": 8, "runtime_checkout": str(checkout),
             "verification_outputs": outputs, "new_os_image_claimed": False},
         "verification_receipts": receipts, "readonly_canonical_helper": record(REPO / HELPER),
+        "verification_procedures": [record(ROOT / name) for name in
+            ("bootstrap_clean_checkout.py", "verify_clean_reproduction.mjs", "verify_final_gate.py")],
         "reproduction_instructions": record(ROOT / "README.md"), "required_temp_only_files": [],
         "public_proof": {"unchanged": True, "new_user_video_required": False,
             "source_diagnostics_internal_plan_added": False},
