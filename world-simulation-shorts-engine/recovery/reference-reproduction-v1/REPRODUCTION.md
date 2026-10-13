@@ -64,6 +64,13 @@ remote checkpoint. Then run the new five-second renderer once:
 node world-simulation-shorts-engine/recovery/reference-reproduction-v1/render_proof.mjs
 ```
 
+For recovery after a media/report commit, use the exact saved render source
+commit from `evidence/proof/REPORT.json`, rather than the newer checkout HEAD:
+
+```sh
+node world-simulation-shorts-engine/recovery/reference-reproduction-v1/render_proof.mjs --source-commit=FULL_SAVED_RENDER_SOURCE_COMMIT
+```
+
 The proof is 150 frames, 1080×1920, fixed 30 fps, H.264, and silent. Native frames
 come from the unchanged renderer APIs plus the new data-owned control/camera
 adapters. The reference movie is never used as a finished-frame background.
