@@ -304,15 +304,15 @@ function requireVisualAdmission(receipt,cameraTrack,territoryPlan){
 }
 
 const coverageVertex=`#version 300 es
-precision highp float;layout(location=0) in vec2 position;uniform vec2 screenSize;
-void main(){gl_Position=vec4(position.x/screenSize.x*2.-1.,1.-position.y/screenSize.y*2.,0.,1.);}`;
+precision highp float;
+uniform mat4 projectionMatrix,modelViewMatrix;layout(location=0) in vec3 position;layout(location=1) in vec2 uv;out vec2 vUv;
+void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`;
 const coverageFragment=`#version 300 es
 precision highp float;precision highp int;
-out vec4 frag;uniform vec2 screenSize;uniform vec4 box;uniform int mode;
+in vec2 vUv;out vec4 frag;uniform vec4 box;uniform int mode;
 uniform sampler2D glyph;uniform vec2 texel;uniform float outlineRadius,opacity;
 void main(){
- vec2 p=vec2(gl_FragCoord.x,screenSize.y-gl_FragCoord.y),uv=(p-box.xy)/box.zw;
- if(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)discard;
+ vec2 uv=vUv;
  float alpha=0.;
  if(mode==0){
   // The coverage expression is the frozen marker shader's outer alpha; its design is not redrawn here.
@@ -327,7 +327,7 @@ void main(){
   float d=length(max(q,0.))+min(max(q.x,q.y),0.)-10.;alpha=(1.-smoothstep(-.7,.7,d))*opacity;
  }
  if(alpha<=0.)discard;
- float opaque=alpha>=.999999?1.:0.;
+ float opaque=alpha==1.?1.:0.;
  frag=vec4(opaque,opaque==0.?1.:0.,mode==0?opaque:0.,mode!=0?opaque:0.);
 }`;
 
@@ -335,14 +335,24 @@ void main(){
  * versus partially transparent coverage of the ACTUAL unchanged foreground.
  * Canvas prepares only the existing font coverage PNG, as the frozen glyph pass does.
  */
-async function createNativeForegroundSupport({canvas,nativeAtlases}={}){
+async function createNativeForegroundSupport({canvas,nativeAtlases,nativeLayout}={}){
  const gl=canvas.getContext('webgl2'),textures=new Map(),programs={},buffers=[],vaos=[],initial=captureFlowNativeGlState(gl);
+ // Reuse the SAME Three geometry and camera constructors and base dimensions as the frozen Graphic pass.
+ // This preserves vertex order, interpolated UVs and Float32 matrix/attribute rounding at subpixel alpha edges.
+ const camera=new THREE.OrthographicCamera(0,WIDTH,0,HEIGHT,.1,10);camera.position.z=5;camera.updateMatrixWorld();
+ const entries=nativeLayout.map(item=>{
+  const geometry=new THREE.PlaneGeometry(item.box[2],item.box[3]),position=geometry.getAttribute('position'),uv=geometry.getAttribute('uv'),index=geometry.getIndex(),
+   data=new Float32Array(index.count*5);
+  for(let i=0;i<index.count;i++){const v=index.getX(i);data.set([position.getX(v),position.getY(v),position.getZ(v),uv.getX(v),uv.getY(v)],i*5);}
+  geometry.dispose();return{item:copy(item),data,transform:new THREE.Object3D(),modelView:new THREE.Matrix4()};
+ });
  let texture,fbo,vao,buffer,uniforms,disposed=false;
  try{
   programs.coverage=program(gl,coverageVertex,coverageFragment);
-  uniforms=locations(gl,programs.coverage,['screenSize','box','mode','glyph','texel','outlineRadius','opacity']);
+  uniforms=locations(gl,programs.coverage,['projectionMatrix','modelViewMatrix','box','mode','glyph','texel','outlineRadius','opacity']);
   buffer=gl.createBuffer();buffers.push(buffer);vao=gl.createVertexArray();vaos.push(vao);
-  gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+  for(const [attribute,size,offset] of [[0,3,0],[1,2,12]]){gl.enableVertexAttribArray(attribute);gl.vertexAttribPointer(attribute,size,gl.FLOAT,false,20,offset);}
   for(const atlas of nativeAtlases){
    if(typeof atlas.name!=='string'||typeof atlas.dataURL!=='string'||!atlas.dataURL.startsWith('data:image/png;base64,'))
     throw Error('TERRITORY_ACTUAL_FROZEN_GLYPH_ATLAS_REQUIRED');
@@ -366,9 +376,11 @@ async function createNativeForegroundSupport({canvas,nativeAtlases}={}){
   for(const atlas of textures.values())gl.deleteTexture(atlas.texture);if(texture)gl.deleteTexture(texture);if(fbo)gl.deleteFramebuffer(fbo);throw error;
  }finally{restoreFlowNativeGlState(gl,initial);}
  return{evidence:{source:'ACTUAL_FROZEN_GLYPH_ATLAS_ALPHA_AND_IDENTICAL_MARKER_PANEL_COVERAGE_EXPRESSIONS',
-  mapPixelsSampled:false,finishedFrameBlit:false,fontAndMarkerSourceUnchanged:true,partialAlphaPixels:'EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE'},
+  mapPixelsSampled:false,finishedFrameBlit:false,fontAndMarkerSourceUnchanged:true,partialAlphaPixels:'EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE',
+  vertexPipeline:'FROZEN_THREE_PLANE_GEOMETRY_UV_ORDER_AND_ORTHOGRAPHIC_MESH_TRANSFORM',opaqueDefinition:'SHADER_ALPHA_EXACTLY_ONE_NO_EPSILON'},
   draw({items,reveal}={}){
    if(disposed)throw Error('TERRITORY_FOREGROUND_SUPPORT_DISPOSED');
+   if(!Array.isArray(items)||items.length!==entries.length)throw Error('TERRITORY_FROZEN_FOREGROUND_ITEM_COUNT_CHANGED');
    const state=captureFlowNativeGlState(gl),bytes=new Uint8Array(WIDTH*HEIGHT*4);
    try{
     gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.drawBuffers([gl.COLOR_ATTACHMENT0]);gl.readBuffer(gl.COLOR_ATTACHMENT0);gl.viewport(0,0,WIDTH,HEIGHT);
@@ -376,12 +388,19 @@ async function createNativeForegroundSupport({canvas,nativeAtlases}={}){
      gl.SAMPLE_ALPHA_TO_COVERAGE,gl.SAMPLE_COVERAGE,gl.DITHER,gl.SCISSOR_TEST,gl.BLEND])gl.disable(flag);
     gl.depthMask(false);gl.colorMask(true,true,true,true);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(programs.coverage);gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-    gl.uniform2fv(uniforms.screenSize,[WIDTH,HEIGHT]);
+    gl.uniformMatrix4fv(uniforms.projectionMatrix,false,camera.projectionMatrix.elements);
     const firstAtlas=textures.values().next().value;
     if(!firstAtlas)throw Error('TERRITORY_NATIVE_FOREGROUND_GLYPH_SOURCE_REQUIRED');
     gl.activeTexture(gl.TEXTURE0);gl.bindSampler(0,null);gl.bindTexture(gl.TEXTURE_2D,firstAtlas.texture);gl.uniform1i(uniforms.glyph,0);
-    for(const item of items){if((reveal[roleKey[item.role]]??0)<=0)continue;
-     const [x,y,w,h]=item.box;gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(boxes([x,y,x+w,y+h])),gl.STREAM_DRAW);
+    for(let itemIndex=0;itemIndex<items.length;itemIndex++){
+     const item=items[itemIndex],entry=entries[itemIndex];
+     if(item.kind!==entry.item.kind||item.role!==entry.item.role||item.text!==entry.item.text)
+      throw Error('TERRITORY_FROZEN_FOREGROUND_IDENTITY_CHANGED');
+     if((reveal[roleKey[item.role]]??0)<=0)continue;
+     const [x,y,w,h]=item.box;gl.bufferData(gl.ARRAY_BUFFER,entry.data,gl.STREAM_DRAW);
+     entry.transform.position.set(x+w/2,y+h/2,0);entry.transform.scale.set(w/entry.item.box[2],h/entry.item.box[3],1);
+     entry.transform.updateMatrixWorld();entry.modelView.multiplyMatrices(camera.matrixWorldInverse,entry.transform.matrixWorld);
+     gl.uniformMatrix4fv(uniforms.modelViewMatrix,false,entry.modelView.elements);
      gl.uniform4fv(uniforms.box,[x,y,w,h]);
      const mode=item.kind==='MARKER'?0:item.kind==='TEXT'?1:item.kind==='PANEL'?2:null;
      if(mode===null)throw Error('TERRITORY_FROZEN_GRAPHIC_KIND_REQUIRED');gl.uniform1i(uniforms.mode,mode);
@@ -390,7 +409,7 @@ async function createNativeForegroundSupport({canvas,nativeAtlases}={}){
       if(!atlas||!same(atlas.dimensions,item.atlasDimensions))throw Error('TERRITORY_FROZEN_GLYPH_BINDING_CHANGED');
       gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlas.texture);gl.uniform1i(uniforms.glyph,0);
       gl.uniform2fv(uniforms.texel,[1/atlas.dimensions[0],1/atlas.dimensions[1]]);gl.uniform1f(uniforms.outlineRadius,item.outlineRadius);}
-     gl.drawArrays(gl.TRIANGLES,0,6);
+     gl.drawArrays(gl.TRIANGLES,0,entry.data.length/5);
     }
     gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);gl.pixelStorei(gl.PACK_ALIGNMENT,1);gl.pixelStorei(gl.PACK_ROW_LENGTH,0);
     gl.pixelStorei(gl.PACK_SKIP_PIXELS,0);gl.pixelStorei(gl.PACK_SKIP_ROWS,0);gl.readPixels(0,0,WIDTH,HEIGHT,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
@@ -440,7 +459,7 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
   factory=await createMapInfographicRenderer({...common,layoutPlan:endpointPlan});
   graphics=await createMovingGraphicPass({renderer,factory:facade,width:WIDTH,height:HEIGHT});
   territory=createTerritoryControlPass({canvas,landDomain:controlPlan.intent.domain,style:material});
-  foregroundSupport=await createNativeForegroundSupport({canvas,nativeAtlases});
+  foregroundSupport=await createNativeForegroundSupport({canvas,nativeAtlases,nativeLayout});
   const arrival=evaluateMinimumContextCameraFrame(cameraPlan,cameraPlan.totalFrames-1),
    sourceRevealPlan=compileGuidedRevealPlan({cameraPlan,scene,layoutContract,evaluateCamera:evaluateMinimumContextCameraFrame,
     visualTokensForFrame:state=>geographicScaleVisualTokens(state.camera.flatBounds,plans)}),
