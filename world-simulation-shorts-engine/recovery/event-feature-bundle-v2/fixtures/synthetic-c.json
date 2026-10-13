@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "id": "FLOW_SYNTHETIC_C_PROTECTED",
+  "scope": "EXPLICIT_SYNTHETIC_REGRESSION_NOT_FACTUAL_PRODUCTION",
+  "provenance": "SYNTHETIC_TEST",
+  "description": "The route crosses a protected Marker and passes below nearby Label/Title; native graphics remain unchanged.",
+  "intent": {
+    "data_mode": "SYNTHETIC_TEST",
+    "route_geometry": {
+      "type": "LineString",
+      "coordinates": [
+        [
+          3,
+          5
+        ],
+        [
+          5,
+          5
+        ],
+        [
+          7,
+          5
+        ]
+      ]
+    },
+    "route_source": {
+      "source_type": "SYNTHETIC_TEST",
+      "source_reference": "fixture://event-feature-bundle-v2/explicit-synthetic",
+      "verification_status": "SYNTHETIC_TEST"
+    },
+    "start_anchor": [
+      3,
+      5
+    ],
+    "end_anchor": [
+      7,
+      5
+    ],
+    "direction": "FORWARD",
+    "object_role": "generic_transport",
+    "object_graphic": {
+      "width_px": 52,
+      "height_px": 30,
+      "polygons": [
+        {
+          "points": [
+            [
+              -0.5,
+              -0.3
+            ],
+            [
+              0.19,
+              -0.42
+            ],
+            [
+              0.5,
+              0
+            ],
+            [
+              0.19,
+              0.42
+            ],
+            [
+              -0.5,
+              0.3
+            ]
+          ],
+          "color": [
+            0.93,
+            0.99,
+            1,
+            1
+          ]
+        },
+        {
+          "points": [
+            [
+              -0.35,
+              -0.25
+            ],
+            [
+              -0.08,
+              -0.25
+            ],
+            [
+              -0.08,
+              0.25
+            ],
+            [
+              -0.35,
+              0.25
+            ]
+          ],
+          "color": [
+            0.055,
+            0.11,
+            0.15,
+            1
+          ]
+        },
+        {
+          "points": [
+            [
+              -0.01,
+              -0.18
+            ],
+            [
+              0.21,
+              -0.18
+            ],
+            [
+              0.29,
+              0
+            ],
+            [
+              0.21,
+              0.18
+            ],
+            [
+              -0.01,
+              0.18
+            ]
+          ],
+          "color": [
+            0.15,
+            0.68,
+            0.7,
+            1
+          ]
+        },
+        {
+          "points": [
+            [
+              -0.29,
+              -0.15
+            ],
+            [
+              -0.19,
+              -0.15
+            ],
+            [
+              -0.19,
+              0.15
+            ],
+            [
+              -0.29,
+              0.15
+            ]
+          ],
+          "color": [
+            0.92,
+            0.97,
+            0.99,
+            1
+          ]
+        }
+      ]
+    }
+  },
+  "timeline": {
+    "fps": 30,
+    "start_frame": 0,
+    "reveal_frames": 32,
+    "direction_start_frame": 12,
+    "object_start_frame": 20,
+    "travel_frames": 108,
+    "departure_pulse_frames": 18,
+    "arrival_pulse_frames": 18,
+    "hold_frames": 34
+  },
+  "context": {
+    "cameraState": {
+      "scale": "REGIONAL",
+      "projection": "FLAT_GEOGRAPHIC",
+      "camera": {
+        "flatBounds": [
+          0,
+          0,
+          10,
+          10
+        ]
+      },
+      "cameraLocked": true,
+      "settle": {
+        "locked": true
+      },
+      "admission": {
+        "status": "LOCAL_NOT_ADMITTED",
+        "effectiveScale": "REGIONAL",
+        "localUsed": false
+      }
+    },
+    "output": [
+      1080,
+      1920
+    ],
+    "safeArea": [
+      48,
+      72,
+      1032,
+      1848
+    ],
+    "protectedGraphics": [
+      {
+        "kind": "MARKER",
+        "box": [
+          518,
+          938,
+          562,
+          982
+        ]
+      },
+      {
+        "kind": "TEXT",
+        "box": [
+          390,
+          865,
+          505,
+          915
+        ]
+      },
+      {
+        "kind": "PANEL",
+        "box": [
+          600,
+          760,
+          820,
+          834
+        ]
+      }
+    ],
+    "protectedBoxes": [
+      [
+        390,
+        865,
+        505,
+        915
+      ],
+      [
+        600,
+        760,
+        820,
+        834
+      ]
+    ]
+  },
+  "expected": {
+    "route_geometry_unchanged": true,
+    "deterministic_arc_length_motion": true,
+    "single_departure_pulse": true,
+    "single_arrival_pulse": true,
+    "endpoint_hold": true,
+    "marker_occlusion_allowed": true,
+    "text_collision_allowed": false
+  },
+  "negative_cases": [
+    {
+      "id": "TEXT_CROSSING_MUST_NOT_DRAW_OVER_TEXT",
+      "route_geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            3.5,
+            5.36
+          ],
+          [
+            5,
+            5.36
+          ]
+        ]
+      }
+    },
+    {
+      "id": "SAFE_AREA_OBJECT_CROP_MUST_REJECT",
+      "route_geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            0.45,
+            5
+          ],
+          [
+            2,
+            5
+          ]
+        ]
+      }
+    }
+  ]
+}
