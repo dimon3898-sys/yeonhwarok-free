@@ -34,6 +34,7 @@ uniform vec2 screenSize;uniform vec4 safeArea;
 uniform vec4 reservations[64];uniform int reservationCount;uniform sampler2D boundaryMask;
 uniform vec3 controlKnots[64];uniform int knotCount;uniform float advanceSign;
 uniform vec4 losingColor,existingWinningColor,gainedWinningColor;
+uniform vec4 interfaceColor;uniform float interfaceWidthPixels;
 vec2 boundaries(float lon){
  if(lon<=controlKnots[0].x)return controlKnots[0].yz;
  for(int i=1;i<64;i++){if(i>=knotCount)break;
@@ -54,7 +55,15 @@ void main(){
  float gainedWeight=smoothstep(-baseAA,baseAA,baseDistance);
  vec4 winner=mix(existingWinningColor,gainedWinningColor,gainedWeight);
  // One field selects both factions. There are no separately overlapping or disappearing region meshes.
- frag=mix(losingColor,winner,winningWeight);if(frag.a<=0.)discard;
+ frag=mix(losingColor,winner,winningWeight);
+ // Optional one-pixel material interface: it shares this exact field, not a separate Front/Line engine.
+ if(interfaceWidthPixels>0.&&interfaceColor.a>0.){
+  float pixelDistance=abs(movingDistance)/max(fwidth(movingDistance),1.e-7);
+  float edge=(1.-smoothstep(max(0.,interfaceWidthPixels*.5-.5),interfaceWidthPixels*.5+.5,pixelDistance))*interfaceColor.a;
+  float alpha=edge+frag.a*(1.-edge);
+  if(alpha>0.)frag=vec4((interfaceColor.rgb*edge+frag.rgb*frag.a*(1.-edge))/alpha,alpha);
+ }
+ if(frag.a<=0.)discard;
 }`;
 const maskVertex=`#version 300 es
 precision highp float;
@@ -83,6 +92,10 @@ function styleRecord(style){
  if(!style||typeof style.profileName!=='string'||!style.profileName.trim())throw Error('TERRITORY_EXPLICIT_MATERIAL_PROFILE_REQUIRED');
  for(const name of names)if(!Array.isArray(style[name])||style[name].length!==4
   ||style[name].some(value=>!Number.isFinite(value)||value<0||value>1))throw Error('TERRITORY_MATERIAL_RGBA_REQUIRED_'+name);
+ if(style.interfaceColor!==undefined&&(!Array.isArray(style.interfaceColor)||style.interfaceColor.length!==4
+  ||style.interfaceColor.some(value=>!Number.isFinite(value)||value<0||value>1)))throw Error('TERRITORY_INTERFACE_RGBA_REQUIRED');
+ if(style.interfaceWidthPixels!==undefined&&(!Number.isFinite(style.interfaceWidthPixels)
+  ||style.interfaceWidthPixels<0||style.interfaceWidthPixels>4))throw Error('TERRITORY_INTERFACE_PIXEL_WIDTH_REQUIRED');
  return copy(style);
 }
 function sourceDomain(domain){
@@ -119,7 +132,7 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
  try{
   programs.fill=program(gl,vertexSource,fragmentSource);programs.mask=program(gl,maskVertex,maskFragment);
   fillUniforms=locations(gl,programs.fill,['screenSize','safeArea','reservations[0]','reservationCount','boundaryMask',
-   'controlKnots[0]','knotCount','advanceSign','losingColor','existingWinningColor','gainedWinningColor']);
+   'controlKnots[0]','knotCount','advanceSign','losingColor','existingWinningColor','gainedWinningColor','interfaceColor','interfaceWidthPixels']);
   maskUniforms=locations(gl,programs.mask,['screenSize']);
   fillBuffer=gl.createBuffer();buffers.push(fillBuffer);fillVao=gl.createVertexArray();vaos.push(fillVao);
   gl.bindVertexArray(fillVao);gl.bindBuffer(gl.ARRAY_BUFFER,fillBuffer);
@@ -180,6 +193,7 @@ export function createTerritoryControlPass({canvas,landDomain,style,width=WIDTH,
     gl.uniform3fv(fillUniforms['controlKnots[0]'],packedKnots);gl.uniform1i(fillUniforms.knotCount,knots.length);
     gl.uniform1f(fillUniforms.advanceSign,controls.advanceSign);
     for(const name of ['losingColor','existingWinningColor','gainedWinningColor'])gl.uniform4fv(fillUniforms[name],material[name]);
+    gl.uniform4fv(fillUniforms.interfaceColor,material.interfaceColor??[0,0,0,0]);gl.uniform1f(fillUniforms.interfaceWidthPixels,material.interfaceWidthPixels??0);
     gl.bindBuffer(gl.ARRAY_BUFFER,fillBuffer);
     for(const item of domain){const data=new Float32Array(item.geographic.length*2),points=[];
      for(let i=0;i<item.geographic.length;i+=2){const geo=[item.geographic[i],item.geographic[i+1]],p=project(geo);
@@ -242,6 +256,106 @@ function requireVisualAdmission(receipt,cameraTrack,territoryPlan){
   throw Error('TERRITORY_ACTUAL_BOUND_NATIVE_VISUAL_PROBE_REQUIRED');
 }
 
+const coverageVertex=`#version 300 es
+precision highp float;layout(location=0) in vec2 position;uniform vec2 screenSize;
+void main(){gl_Position=vec4(position.x/screenSize.x*2.-1.,1.-position.y/screenSize.y*2.,0.,1.);}`;
+const coverageFragment=`#version 300 es
+precision highp float;precision highp int;
+out vec4 frag;uniform vec2 screenSize;uniform vec4 box;uniform int mode;
+uniform sampler2D glyph;uniform vec2 texel;uniform float outlineRadius,opacity;
+void main(){
+ vec2 p=vec2(gl_FragCoord.x,screenSize.y-gl_FragCoord.y),uv=(p-box.xy)/box.zw;
+ if(uv.x<0.||uv.y<0.||uv.x>1.||uv.y>1.)discard;
+ float alpha=0.;
+ if(mode==0){
+  // The coverage expression is the frozen marker shader's outer alpha; its design is not redrawn here.
+  float r=length((uv-.5)*2.);alpha=1.-smoothstep(.87,.93,r);
+ }else if(mode==1){
+  // Same actual glyph texture, linear sampler and outline-alpha expression as the frozen Graphic pass.
+  float a=texture(glyph,uv).a,edge=a;
+  for(int x=-2;x<=2;x++)for(int y=-2;y<=2;y++)edge=max(edge,texture(glyph,uv+vec2(float(x),float(y))*texel*outlineRadius*.5).a);
+  alpha=edge;
+ }else{
+  vec2 q=abs((uv-.5)*box.zw)-(box.zw*.5-vec2(10.));
+  float d=length(max(q,0.))+min(max(q.x,q.y),0.)-10.;alpha=(1.-smoothstep(-.7,.7,d))*opacity;
+ }
+ if(alpha<=0.)discard;
+ float opaque=alpha>=.999999?1.:0.;
+ frag=vec4(opaque,opaque==0.?1.:0.,mode==0?opaque:0.,mode!=0?opaque:0.);
+}`;
+
+/** A pass-owned support mask, not an image of the map. Its pixels encode opaque
+ * versus partially transparent coverage of the ACTUAL unchanged foreground.
+ * Canvas prepares only the existing font coverage PNG, as the frozen glyph pass does.
+ */
+async function createNativeForegroundSupport({canvas,nativeAtlases}={}){
+ const gl=canvas.getContext('webgl2'),textures=new Map(),programs={},buffers=[],vaos=[],initial=captureFlowNativeGlState(gl);
+ let texture,fbo,vao,buffer,uniforms,disposed=false;
+ try{
+  programs.coverage=program(gl,coverageVertex,coverageFragment);
+  uniforms=locations(gl,programs.coverage,['screenSize','box','mode','glyph','texel','outlineRadius','opacity']);
+  buffer=gl.createBuffer();buffers.push(buffer);vao=gl.createVertexArray();vaos.push(vao);
+  gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
+  for(const atlas of nativeAtlases){
+   if(typeof atlas.name!=='string'||typeof atlas.dataURL!=='string'||!atlas.dataURL.startsWith('data:image/png;base64,'))
+    throw Error('TERRITORY_ACTUAL_FROZEN_GLYPH_ATLAS_REQUIRED');
+   const image=new Image();image.src=atlas.dataURL;await image.decode();
+   const coverage=document.createElement('canvas');coverage.width=image.naturalWidth;coverage.height=image.naturalHeight;
+   const context=coverage.getContext('2d');if(!context)throw Error('TERRITORY_GLYPH_COVERAGE_DECODE_FAILED');context.drawImage(image,0,0);
+   const value=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,value);
+   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,false);
+   gl.pixelStorei(gl.UNPACK_ALIGNMENT,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,coverage);
+   for(const key of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,key,gl.LINEAR);
+   for(const key of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,key,gl.CLAMP_TO_EDGE);
+   textures.set(atlas.name,{texture:value,dimensions:[coverage.width,coverage.height]});
+  }
+  texture=gl.createTexture();gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,texture);
+  for(const key of [gl.TEXTURE_MIN_FILTER,gl.TEXTURE_MAG_FILTER])gl.texParameteri(gl.TEXTURE_2D,key,gl.NEAREST);
+  for(const key of [gl.TEXTURE_WRAP_S,gl.TEXTURE_WRAP_T])gl.texParameteri(gl.TEXTURE_2D,key,gl.CLAMP_TO_EDGE);
+  gl.texStorage2D(gl.TEXTURE_2D,1,gl.RGBA8,WIDTH,HEIGHT);fbo=gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,texture,0);
+  if(gl.checkFramebufferStatus(gl.FRAMEBUFFER)!==gl.FRAMEBUFFER_COMPLETE)throw Error('TERRITORY_FOREGROUND_SUPPORT_FRAMEBUFFER');
+ }catch(error){Object.values(programs).forEach(p=>gl.deleteProgram(p));buffers.forEach(b=>gl.deleteBuffer(b));vaos.forEach(v=>gl.deleteVertexArray(v));
+  for(const atlas of textures.values())gl.deleteTexture(atlas.texture);if(texture)gl.deleteTexture(texture);if(fbo)gl.deleteFramebuffer(fbo);throw error;
+ }finally{restoreFlowNativeGlState(gl,initial);}
+ return{evidence:{source:'ACTUAL_FROZEN_GLYPH_ATLAS_ALPHA_AND_IDENTICAL_MARKER_PANEL_COVERAGE_EXPRESSIONS',
+  mapPixelsSampled:false,finishedFrameBlit:false,fontAndMarkerSourceUnchanged:true,partialAlphaPixels:'EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE'},
+  draw({items,reveal}={}){
+   if(disposed)throw Error('TERRITORY_FOREGROUND_SUPPORT_DISPOSED');
+   const state=captureFlowNativeGlState(gl),bytes=new Uint8Array(WIDTH*HEIGHT*4);
+   try{
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fbo);gl.drawBuffers([gl.COLOR_ATTACHMENT0]);gl.readBuffer(gl.COLOR_ATTACHMENT0);gl.viewport(0,0,WIDTH,HEIGHT);
+    for(const flag of [gl.DEPTH_TEST,gl.STENCIL_TEST,gl.CULL_FACE,gl.POLYGON_OFFSET_FILL,gl.RASTERIZER_DISCARD,
+     gl.SAMPLE_ALPHA_TO_COVERAGE,gl.SAMPLE_COVERAGE,gl.DITHER,gl.SCISSOR_TEST,gl.BLEND])gl.disable(flag);
+    gl.depthMask(false);gl.colorMask(true,true,true,true);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(programs.coverage);gl.bindVertexArray(vao);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+    gl.uniform2fv(uniforms.screenSize,[WIDTH,HEIGHT]);
+    const firstAtlas=textures.values().next().value;
+    if(!firstAtlas)throw Error('TERRITORY_NATIVE_FOREGROUND_GLYPH_SOURCE_REQUIRED');
+    gl.activeTexture(gl.TEXTURE0);gl.bindSampler(0,null);gl.bindTexture(gl.TEXTURE_2D,firstAtlas.texture);gl.uniform1i(uniforms.glyph,0);
+    for(const item of items){if((reveal[roleKey[item.role]]??0)<=0)continue;
+     const [x,y,w,h]=item.box;gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(boxes([x,y,x+w,y+h])),gl.STREAM_DRAW);
+     gl.uniform4fv(uniforms.box,[x,y,w,h]);
+     const mode=item.kind==='MARKER'?0:item.kind==='TEXT'?1:item.kind==='PANEL'?2:null;
+     if(mode===null)throw Error('TERRITORY_FROZEN_GRAPHIC_KIND_REQUIRED');gl.uniform1i(uniforms.mode,mode);
+     gl.uniform1f(uniforms.opacity,item.opacity??1);
+     if(mode===1){const atlas=textures.get(item.glyphAtlasFile);
+      if(!atlas||!same(atlas.dimensions,item.atlasDimensions))throw Error('TERRITORY_FROZEN_GLYPH_BINDING_CHANGED');
+      gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,atlas.texture);gl.uniform1i(uniforms.glyph,0);
+      gl.uniform2fv(uniforms.texel,[1/atlas.dimensions[0],1/atlas.dimensions[1]]);gl.uniform1f(uniforms.outlineRadius,item.outlineRadius);}
+     gl.drawArrays(gl.TRIANGLES,0,6);
+    }
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER,null);gl.pixelStorei(gl.PACK_ALIGNMENT,1);gl.pixelStorei(gl.PACK_ROW_LENGTH,0);
+    gl.pixelStorei(gl.PACK_SKIP_PIXELS,0);gl.pixelStorei(gl.PACK_SKIP_ROWS,0);gl.readPixels(0,0,WIDTH,HEIGHT,gl.RGBA,gl.UNSIGNED_BYTE,bytes);
+   }finally{restoreFlowNativeGlState(gl,state);}
+   const error=gl.getError();if(error!==gl.NO_ERROR)throw Error('TERRITORY_FOREGROUND_SUPPORT_GL_ERROR_'+error);return bytes;
+  },dispose(){if(disposed)return;const state=captureFlowNativeGlState(gl);
+   try{Object.values(programs).forEach(p=>gl.deleteProgram(p));buffers.forEach(b=>gl.deleteBuffer(b));vaos.forEach(v=>gl.deleteVertexArray(v));
+    for(const atlas of textures.values())gl.deleteTexture(atlas.texture);gl.deleteTexture(texture);gl.deleteFramebuffer(fbo);disposed=true;
+   }finally{restoreFlowNativeGlState(gl,state);}}
+ };
+}
+
 /** External-camera glue follows the existing Detail adapter's public native APIs.
  * The fixed Area bridge cannot accept these bounds without manufacturing a V5 plan.
  * This extension therefore reuses the native factory directly, keeping its endpoint
@@ -263,7 +377,7 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
  renderer.autoClear=false;renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
  const common={canvas,plan:regional,contextTerrain:wideSource,contextGeometries:plans.CONTINENT.geometries,
   heightSource,width:WIDTH,height:HEIGHT,outputRenderer:renderer,outputTarget:null};
- let measuredFactory,factory,graphics,territory,disposed=false,last=null;
+ let measuredFactory,factory,graphics,territory,foregroundSupport,disposed=false,last=null;
  try{
   measuredFactory=await createMapInfographicRenderer({...common,layoutPlan:regional});
   const nativeLayout=copy(measuredFactory.evidence.layout),nativeLayoutValidation=copy(measuredFactory.evidence.layoutValidation),
@@ -276,6 +390,7 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
   factory=await createMapInfographicRenderer({...common,layoutPlan:endpointPlan});
   graphics=await createMovingGraphicPass({renderer,factory:facade,width:WIDTH,height:HEIGHT});
   territory=createTerritoryControlPass({canvas,landDomain:controlPlan.intent.domain,style:material});
+  foregroundSupport=await createNativeForegroundSupport({canvas,nativeAtlases});
   const arrival=evaluateMinimumContextCameraFrame(cameraPlan,cameraPlan.totalFrames-1),
    sourceRevealPlan=compileGuidedRevealPlan({cameraPlan,scene,layoutContract,evaluateCamera:evaluateMinimumContextCameraFrame,
     visualTokensForFrame:state=>geographicScaleVisualTokens(state.camera.flatBounds,plans)}),
@@ -307,22 +422,48 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
    factory.updateCamera(bounds);factory.setScaleVisual(visual);factory.setTerrainLod(lod.weight);
    const native=factory.renderFrame({...params,graphics:false,reveal,primaryMaterial:1});
    if(native.glError!==gl.NO_ERROR)throw Error('TERRITORY_NATIVE_FACTORY_GL_ERROR_'+native.glError);
-   const nativeGraphics=graphics.draw({items:layout.items,reveal}),boundaries=nativeBoundaries(plans,factory,visual);
-   gl.finish();const before=protect?pixels():null,controls=evaluateTerritoryControlFrame(controlPlan,controlPlan.startFrame+frame),
-    controlGraphics=territoryEnabled?territory.draw({controls,project:point=>factory.screen(point),safeArea,
-     protectedGraphics:reservations,boundarySegments:boundaries}):null,rois=controlGraphics?.rois??[];
+   const boundaries=nativeBoundaries(plans,factory,visual);
+   let before=null,support=null,nativeDrawCount=1;
+   if(protect){
+    graphics.draw({items:layout.items,reveal});gl.finish();before=pixels();
+    support=foregroundSupport.draw({items:layout.items,reveal});
+    // A second fresh native draw removes the verification foreground. It is not a copied, blitted or sampled map frame.
+    const verificationRedraw=factory.renderFrame({...params,graphics:false,reveal,primaryMaterial:1});
+    nativeDrawCount++;
+    if(verificationRedraw.glError!==gl.NO_ERROR)throw Error('TERRITORY_NATIVE_VERIFICATION_REDRAW_GL_ERROR_'+verificationRedraw.glError);
+   }
+   const controls=evaluateTerritoryControlFrame(controlPlan,controlPlan.startFrame+frame),materialCanvas=[0,0,WIDTH,HEIGHT],
+    controlGraphics=territoryEnabled?territory.draw({controls,project:point=>factory.screen(point),safeArea:materialCanvas,
+     protectedGraphics:[],boundarySegments:boundaries}):null,rois=controlGraphics?.rois??[];
+   // Territory control is a land BACKGROUND material. Graphic Safe Area/occlusion rules apply to the unchanged foreground,
+   // not to a screen-sized country material. The old Event Line/Route/Text collision rules are untouched.
+   const nativeGraphics=graphics.draw({items:layout.items,reveal});
    gl.finish();
    const protection={checked:protect,changedPixels:0,protectedChangedPixels:0,markerChangedPixels:0,textChangedPixels:0,
-    outsideRoiChangedPixels:0,safeAreaChangedPixels:0,protectedBoundaryChangedPixels:0};
+    outsideRoiChangedPixels:0,safeAreaChangedPixels:0,protectedBoundaryChangedPixels:0,
+    backgroundOutsideSafeAreaChangedPixels:0,partialAlphaForegroundChangedPixels:0,
+    transparentReservationBackgroundChangedPixels:0,opaqueForegroundSupportPixels:0,
+    semantic:'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND',
+    protectedCounterScope:'ACTUAL_OPAQUE_FOREGROUND_ALPHA_SUPPORT_NOT_BOUNDING_BOX_BACKGROUND',
+    partialAlphaPolicy:'FOREGROUND_STYLE_UNCHANGED_EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE',
+    supportSource:foregroundSupport.evidence.source};
    if(protect){const after=pixels(),first=new Uint32Array(before.buffer),second=new Uint32Array(after.buffer),onBoundary=indexedBoundaryCheck(boundaries);
-    for(let i=0;i<second.length;i++)if(first[i]!==second[i]){
+    for(let i=0;i<second.length;i++){
+     const supportOffset=i*4,opaque=support[supportOffset]===255;
+     if(opaque)protection.opaqueForegroundSupportPixels++;
+     if(first[i]===second[i])continue;
      const x=i%WIDTH,y=HEIGHT-1-Math.floor(i/WIDTH);protection.changedPixels++;
-     if(!inside(x,y,safeArea))protection.safeAreaChangedPixels++;
+     if(!inside(x,y,safeArea)){
+      if(opaque)protection.safeAreaChangedPixels++;
+      else protection.backgroundOutsideSafeAreaChangedPixels++;
+     }
      if(!rois.some(roi=>inside(x,y,roi)))protection.outsideRoiChangedPixels++;
-     const overlaps=reservations.filter(item=>inside(x,y,item.box));
-     if(overlaps.length)protection.protectedChangedPixels++;
-     if(overlaps.some(item=>item.kind==='MARKER'))protection.markerChangedPixels++;
-     if(overlaps.some(item=>item.kind==='TEXT'||item.kind==='PANEL'))protection.textChangedPixels++;
+     if(opaque)protection.protectedChangedPixels++;
+     if(support[supportOffset+2]===255)protection.markerChangedPixels++;
+     if(support[supportOffset+3]===255)protection.textChangedPixels++;
+     if(support[supportOffset+1]===255)protection.partialAlphaForegroundChangedPixels++;
+     if(!opaque&&support[supportOffset+1]===0&&reservations.some(item=>inside(x,y,item.box)))
+      protection.transparentReservationBackgroundChangedPixels++;
      if(onBoundary(x,y))protection.protectedBoundaryChangedPixels++;
     }
     if(protection.protectedChangedPixels||protection.markerChangedPixels||protection.textChangedPixels
@@ -333,13 +474,15 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
    if(inputBinding!==JSON.stringify({plans,cameraPlan,scene,heightSource,contextTerrain,cameraTrack,territoryPlan,style}))
     throw Error('TERRITORY_PROTECTED_INPUT_MUTATION');
    last={frame,state:'REFERENCE_TERRITORY_CONTROL',camera,cameraLocked:false,settle:copy(schedule.settle),
-    gpu:{stage:'REFERENCE_CONTROL_EXTENSION_OVER_UNCHANGED_NATIVE_FACTORY',glError,factoryCount:1,nativeDrawCount:1,
+    gpu:{stage:'REFERENCE_CONTROL_EXTENSION_OVER_UNCHANGED_NATIVE_FACTORY',glError,factoryCount:1,nativeDrawCount,
      actualCamera:copy(factory.evidence.cameraFrame),actualReveal:copy(factory.evidence.revealState),boundaryPixels:visual,terrainLod:lod,
      layout:copy(layout.items),layoutValidation:{valid:critical.length===0,failures:critical,warnings},
      visibleRoles:copy(nativeGraphics.visibleRoles),finishedFrameMix:false,projectionChange:false,graphicPass:graphics.evidence.version},
     territory:{enabled:territoryEnabled,graphics:controlGraphics,domainGeometryBinding:controlPlan.domainGeometryBinding,
      boundaryKeyframeBinding:controlPlan.boundaryKeyframeBinding,semanticMode:controls.semanticMode,
-     geometryUnchanged:true,continuousComplementaryOwnership:true,standaloneFrontLine:false,routeVisuals:false,arrowVisuals:false},
+     geometryUnchanged:true,continuousComplementaryOwnership:true,standaloneFrontLine:false,routeVisuals:false,arrowVisuals:false,
+     layer:'GEOGRAPHIC_LAND_BACKGROUND_MATERIAL_BEFORE_UNCHANGED_NATIVE_FOREGROUND',
+     materialCoverage:materialCanvas,graphicSafeArea:copy(safeArea),nativeForegroundSourceUnchanged:true},
     protection,rois,protectedGraphics:reservations,boundaryProtection:{segmentCount:boundaries.length,
      source:'ACTUAL_NATIVE_PRIMARY_SECONDARY_RING_PROJECTION',finiteGlowSupport:true},
     sourceV5Unchanged:true,surveyAdmissionPreserved:true,admission:copy(arrival.admission),
@@ -349,14 +492,19 @@ export async function createTerritoryControlGpuAdapter({canvas,plans,cameraPlan,
   const debug=gl.getExtension('WEBGL_debug_renderer_info');
   return{drawFrame,draw:drawFrame,readPixels:pixels,png:()=>canvas.toDataURL('image/png'),project:p=>factory.screen(p),
    evidence:{version:TERRITORY_CONTROL_GPU_ADAPTER_V1_VERSION,mode,productionEligible:mode==='VISUAL_REFERENCE_STUDY',
-    factoryCount:1,measurementFactoryDisposedBeforeActiveFactory:true,composition:'FRESH_NATIVE_TERRAIN_AND_FROZEN_GRAPHICS_PLUS_COMPLEMENTARY_EVENT_MATERIAL',
+    factoryCount:1,measurementFactoryDisposedBeforeActiveFactory:true,composition:'FRESH_NATIVE_TERRAIN_PLUS_COMPLEMENTARY_BACKGROUND_MATERIAL_THEN_FROZEN_FOREGROUND',
     rendererSourceUnchanged:true,cameraV5SourceUnchanged:true,layoutSourceUnchanged:true,sourceGeometryMutation:false,
     nativeEndpointGuardActive:true,targetFraming:{bounds:copy(target)},originalNativeLayout:nativeLayout,
     originalGlyphAtlases:nativeAtlases.map(atlas=>atlas.name),surveyAdmissionPreserved:true,surveyAdmission:copy(arrival.admission),
     actualCameraLocked:false,arrivalReadinessForged:false,externalMotionOwner:track.ownership.camera,
     gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),
     finishedFrameMix:false,projectionChange:false,frozenMaterialParameters:copy(params),graphicPass:graphics.evidence,
-    territoryPass:territory.evidence,adapterReason:'FIXED_AREA_NATIVE_BRIDGE_API_CANNOT_CONSUME_EXTERNAL_CAMERA_WITHOUT_V5_PLAN_FORGERY'},
-   get diagnostic(){return last;},dispose(){if(disposed)return;territory.dispose();graphics.dispose();factory.dispose();renderer.dispose();disposed=true;}};
- }catch(error){measuredFactory?.dispose();territory?.dispose();graphics?.dispose();factory?.dispose();renderer.dispose();throw error;}
+    territoryPass:territory.evidence,foregroundSupport:foregroundSupport.evidence,
+    backgroundContract:{materialCoverage:'FULL_CANVAS_REAL_SOURCE_LAND_ONLY',foregroundSafeArea:'UNCHANGED_NATIVE_LAYOUT',
+     opaqueForegroundPixels:'STRICT_UNCHANGED',partialAlphaForegroundPixels:'EXPECTED_BACKGROUND_DEPENDENT_COMPOSITE_REPORTED',
+     unchangedCountryBoundary:'SAME_GEOMETRIC_MASK_WIDTHS_AND_GLOW',oldEventLineAndRouteRules:'UNCHANGED',
+     verificationNativeDraws:2,normalNativeDraws:1,finishedFrameBlit:false},
+    adapterReason:'FIXED_AREA_NATIVE_BRIDGE_API_CANNOT_CONSUME_EXTERNAL_CAMERA_WITHOUT_V5_PLAN_FORGERY'},
+   get diagnostic(){return last;},dispose(){if(disposed)return;foregroundSupport.dispose();territory.dispose();graphics.dispose();factory.dispose();renderer.dispose();disposed=true;}};
+ }catch(error){measuredFactory?.dispose();foregroundSupport?.dispose();territory?.dispose();graphics?.dispose();factory?.dispose();renderer.dispose();throw error;}
 }

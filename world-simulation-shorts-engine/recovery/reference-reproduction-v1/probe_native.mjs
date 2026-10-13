@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import {mkdir,writeFile,rename} from 'node:fs/promises';
 import path from 'node:path';
-import {openReferenceRuntime,root,sha} from './reference_runtime.mjs';
+import {openReferenceRuntime,assertReferenceDiagnostic,root,sha} from './reference_runtime.mjs';
 
 const out=path.join(root,'evidence/native_probe');
 await mkdir(out,{recursive:true});
@@ -20,19 +20,8 @@ try{
  assert.equal(session.info.evidence.arrivalReadinessForged,false);
  for(const frame of frames){
   const result=await session.page.evaluate(frame=>window.referenceProof.capture(frame,{protect:true,png:true}),frame),
-   diagnostic=result.diagnostic;
-  assert.equal(diagnostic.gpu.glError,0);assert.equal(diagnostic.gpu.nativeDrawCount,1);
-  assert.equal(diagnostic.gpu.factoryCount,1);assert.equal(diagnostic.gpu.layoutValidation.valid,true);
-  assert.equal(diagnostic.cameraLocked,false);assert.equal(diagnostic.settle.locked,false);
-  assert.equal(diagnostic.surveyAdmissionPreserved,true);assert.equal(diagnostic.sourceV5Unchanged,true);
-  assert.equal(diagnostic.territory.geometryUnchanged,true);
-  assert.equal(diagnostic.territory.continuousComplementaryOwnership,true);
-  assert.equal(diagnostic.territory.routeVisuals,false);assert.equal(diagnostic.territory.arrowVisuals,false);
-  assert.equal(diagnostic.territory.standaloneFrontLine,false);
+   diagnostic=assertReferenceDiagnostic(result.diagnostic,{frame,protect:true});
   assert.equal(diagnostic.visualAdmission.productionEligible,false);
-  assert.equal(diagnostic.protection.checked,true);
-  for(const key of ['protectedChangedPixels','markerChangedPixels','textChangedPixels','outsideRoiChangedPixels',
-   'safeAreaChangedPixels','protectedBoundaryChangedPixels'])assert.equal(diagnostic.protection[key],0);
   const bytes=Buffer.from(result.png.split(',')[1],'base64'),name=String(frame).padStart(3,'0')+'.png';
   assert.equal(sha(bytes),result.png_sha256);
   await save(path.join(out,name),bytes);
@@ -52,6 +41,8 @@ try{
   visual:'NOT_REVIEWED',visualAdmission:'NOT_GRANTED',productionEligible:false,
   fullVideoRendered:false,fullVisualReviewClaimed:false,referenceParityClaimed:false,
   actualCameraLocked:false,surveyAdmissionModified:false,sourceSignature:session?.sourceSignature??null,
+  protectionSemantic:'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND',
+  translucentEdgePixelIdentityClaimed:false,backgroundOutsideSafeAreaIsExpected:true,
   sourceBindings:session?.sourceBindings??[],cameraKeyframeBinding:session?.info.cameraKeyframeBinding??null,
   domainGeometryBinding:session?.info.domainGeometryBinding??null,boundaryKeyframeBinding:session?.info.boundaryKeyframeBinding??null,
   runtime:session?.info??null,samples,requiredTempOnlyFiles:0,

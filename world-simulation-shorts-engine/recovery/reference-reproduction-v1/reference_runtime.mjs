@@ -4,6 +4,7 @@ import {spawn} from 'node:child_process';
 import {createRequire} from 'node:module';
 import {createInterface} from 'node:readline';
 import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
 import path from 'node:path';
 export {sha,json,repo,engine} from '../planner-scene-json-v1/planner_runtime.mjs';
 import {sha,json,repo,engine} from '../planner-scene-json-v1/planner_runtime.mjs';
@@ -17,6 +18,31 @@ const relativeFile=value=>{
   throw Error('REFERENCE_RUNTIME_ENGINE_RELATIVE_INPUT_REQUIRED');
  return path.join(engine,value);
 };
+
+/** Background composition preserves actual opaque support; translucent edges receive the new background. */
+export function assertReferenceDiagnostic(diagnostic,{frame,protect=true}={}){
+ const d=diagnostic;
+ if(frame!==undefined)assert.equal(d.frame,frame);
+ assert.equal(d.gpu.glError,0);assert.equal(d.gpu.factoryCount,1);
+ assert.equal(d.gpu.nativeDrawCount,protect?2:1);
+ assert.equal(d.gpu.layoutValidation.valid,true);
+ assert.equal(d.cameraLocked,false);assert.equal(d.settle.locked,false);
+ assert.equal(d.sourceV5Unchanged,true);assert.equal(d.surveyAdmissionPreserved,true);
+ assert.equal(d.territory.geometryUnchanged,true);assert.equal(d.territory.continuousComplementaryOwnership,true);
+ assert.equal(d.territory.routeVisuals,false);assert.equal(d.territory.arrowVisuals,false);
+ assert.equal(d.territory.standaloneFrontLine,false);
+ assert.equal(d.protection.semantic,'BACKGROUND_MATERIAL_BEFORE_UNCHANGED_FOREGROUND');
+ assert.equal(d.protection.checked,protect);
+ if(protect){
+  for(const key of ['protectedChangedPixels','markerChangedPixels','textChangedPixels','outsideRoiChangedPixels',
+   'safeAreaChangedPixels','protectedBoundaryChangedPixels'])assert.equal(d.protection[key],0,key);
+  assert.ok(Number.isSafeInteger(d.protection.opaqueForegroundSupportPixels)&&d.protection.opaqueForegroundSupportPixels>0);
+  for(const key of ['backgroundOutsideSafeAreaChangedPixels','partialAlphaForegroundChangedPixels',
+   'transparentReservationBackgroundChangedPixels'])assert.ok(Number.isSafeInteger(d.protection[key])&&d.protection[key]>=0,key);
+ }
+ assert.equal(d.territory.graphics.nativeStateRestored,true);
+ return d;
+}
 
 /** No fixture defaults infer a subject, framing, camera readiness, or admission. */
 export async function openReferenceRuntime({fixtureFile=path.join(root,'fixtures/RUNTIME_FIXTURE.json'),

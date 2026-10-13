@@ -37,7 +37,10 @@ def build():
     boundary = next(g['geometry']['coordinates'] for g in facts['geometries'] if g['id'] == 'FRONT_ARMISTICE')
     points = sorted(boundary)
     source_lons = [p[0] for item in domain for p in coordinates(item['geometry']['coordinates'])]
-    knots = sorted(set([min(source_lons) - .1, max(source_lons) + .1] + [p[0] for p in points]))
+    left, right = min(source_lons) - .1, max(source_lons) + .1
+    # A uniformly sampled visual envelope avoids near-vertical steps caused by
+    # tiny longitude gaps in the existing boundary; source GIS stays untouched.
+    knots = [left + (right - left) * i / 47 for i in range(48)]
 
     def base_at(x):
         if x <= points[0][0]:
@@ -77,9 +80,10 @@ def build():
         w, h = width / factor, height / factor
         camera.append({'frame': frame, 'bounds': [x - w / 2, y - h / 2, x + w / 2, y + h / 2]})
     style = {'profileName': 'MEASURED_ORANGE_PURPLE_REFERENCE_MATERIAL_V1',
-             'losingColor': [172 / 255, 32 / 255, 0, .82],
-             'existingWinningColor': [60 / 255, 0, 180 / 255, .82],
-             'gainedWinningColor': [91 / 255, 0, 253 / 255, .94]}
+             'losingColor': [172 / 255, 32 / 255, 0, 0],
+             'existingWinningColor': [60 / 255, 0, 180 / 255, 0],
+             'gainedWinningColor': [91 / 255, 0, 253 / 255, .88],
+             'interfaceColor': [1, 1, 1, .85], 'interfaceWidthPixels': 1}
     scene = {'version': 'REFERENCE_VISUAL_SCENE_V1',
              'metadata': {'output': {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False},
                           'referenceSHA256': tracking['input_sha256'],
@@ -93,6 +97,12 @@ def build():
     regional = load(ENGINE / original['nativeFiles']['regionalPlan'])
     native_scene = load(ENGINE / original['nativeFiles']['scene'])
     regional['text']['eventTitle'] = '한반도'
+    # New fixture color inputs through the unchanged public Region Material
+    # contract. Original plans, material code and Boundary style are preserved.
+    regional['theme'].update(primary=[60 / 255, 0, 180 / 255],
+                             secondary=[172 / 255, 32 / 255, 0],
+                             primaryLuminance=.36, secondaryLuminance=.36,
+                             visualColorProfile='REFERENCE_ORANGE_PURPLE_DATA_PROFILE_V1')
     native_scene['event_title'] = '한반도'
     native_files = copy.deepcopy(original['nativeFiles'])
     native_files.update(regionalPlan='recovery/reference-reproduction-v1/fixtures/REGIONAL-plan.json',
@@ -109,7 +119,9 @@ def build():
     receipt = {'status': 'FIXTURE_READY_FOR_NATIVE_PROBE', 'sourceCountryGeometriesUnchanged': True,
                'historicalOriginalSourceChanged': False, 'actualRelativeCameraMeasurementUsed': True,
                'absoluteFramingAndControlEnvelope': 'VISUAL_APPROXIMATION_NOT_SURVEYED_EVENT',
-               'protectedCameraPlanChanged': False, 'protectedNativeThemeOrStyleChanged': False,
+               'protectedCameraPlanChanged': False, 'originalNativeThemeOrStyleChanged': False,
+               'newFixtureRegionColorInputs': 'PURPLE_ORANGE_PUBLIC_THEME_CONTRACT',
+               'boundaryStyleChanged': False,
                'newFixtureTitle': '한반도', 'requiredTempOnlyFiles': 0,
                'sceneSHA256': hashlib.sha256((ROOT / 'fixtures/SCENE_PLAN.json').read_bytes()).hexdigest()}
     write(ROOT / 'evidence/FIXTURE_BUILD.json', receipt)
