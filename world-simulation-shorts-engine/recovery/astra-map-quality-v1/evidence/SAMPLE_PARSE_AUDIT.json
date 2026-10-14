@@ -1,0 +1,122 @@
+{
+  "schema": "ASTRA_SUPPLIED_SAMPLE_PARSE_V1",
+  "validationSource": "DELEGATED_READ_ONLY_IN_MEMORY_AUDIT",
+  "criticalParseErrors": [],
+  "allArchiveMembersRead": true,
+  "jsonFilesParsed": 7,
+  "wmtsXmlParsed": true,
+  "copernicusLicensePdfPagesRead": 3,
+  "terrain": {
+    "file": "samples/Copernicus_GLO30_2021_N37E128_crop.tif",
+    "dimensions": [
+      1800,
+      1800
+    ],
+    "dtype": "Float32",
+    "units": "m",
+    "finiteCells": 3240000,
+    "range": [
+      204,
+      1574.278564453125
+    ],
+    "crs": "EPSG:4326",
+    "registration": "PixelIsPoint",
+    "pixelScaleDegrees": [
+      0.0002777777777777778,
+      0.0002777777777777778
+    ],
+    "modelTiepoint": [
+      128.25,
+      37.75
+    ],
+    "actualBounds": [
+      128.2498611111111,
+      37.25013888888889,
+      128.7498611111111,
+      37.75013888888889
+    ],
+    "verticalDatum": "EGM2008; metadata only; not encoded in TIFF"
+  },
+  "bathymetry": {
+    "file": "samples/GEBCO_2026_Korea_EastSea_subset.nc",
+    "parser": "libnetcdf nc_open_mem via ctypes",
+    "dimensions": [
+      480,
+      480
+    ],
+    "dtype": "signed Int16",
+    "units": "m",
+    "range": [
+      -2124,
+      1613
+    ],
+    "negativeCells": 142575,
+    "latLonAxesAscending": true,
+    "latFirstLast": [
+      37.00208333333333,
+      38.99791666666667
+    ],
+    "lonFirstLast": [
+      128.0020833333333,
+      129.99791666666664
+    ],
+    "bounds": [
+      128,
+      37,
+      130,
+      39
+    ],
+    "valuesAndAxesEqualBundledOpedapAscii": true,
+    "verticalDatum": "EPSG:5831; heterogeneous mean sea level caveat"
+  },
+  "surface": {
+    "file": "samples/BlueMarble_NextGeneration_Korea.png",
+    "dimensions": [
+      1600,
+      2000
+    ],
+    "mode": "RGBA",
+    "alphaRange": [
+      255,
+      255
+    ],
+    "worldfile": [
+      0.005,
+      0,
+      0,
+      -0.005,
+      124.0025,
+      42.9975
+    ],
+    "crs": "EPSG:4326",
+    "bounds": [
+      124,
+      33,
+      132,
+      43
+    ],
+    "sourceMonth": "2004-08"
+  },
+  "metadataDiscrepancy": {
+    "severity": "WARNING",
+    "dataset": "GEBCO_2026",
+    "manifestAcquiredUtc": "2026-10-14T00:49:30.362139+00:00",
+    "provenanceAndNetcdfAcquiredUtc": "2026-10-14T00:50:36.557312+00:00",
+    "originalBytesPreserved": true
+  },
+  "licenses": {
+    "copernicusFullLicenseBundledAndRead": true,
+    "gebcoAndNasaEvidenceBundled": true,
+    "liveExternalTermsReinvestigated": false,
+    "attributionPreservedInsideOriginalArchive": true
+  },
+  "limits": [
+    "Checksums do not certify ground accuracy",
+    "Full original Copernicus tile is not bundled; source crop equality claim not independently revalidated against remote original",
+    "GEBCO equality checked against supplied ASCII, not new remote acquisition",
+    "No shoreline datum equality claim",
+    "No renderer compatibility or global real-data certification from sample parse",
+    "No fabricated missing heights/depths",
+    "No other datasets acquired"
+  ]
+}

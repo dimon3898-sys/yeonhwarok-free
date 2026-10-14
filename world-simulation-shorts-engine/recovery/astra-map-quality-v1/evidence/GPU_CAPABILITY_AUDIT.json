@@ -1,0 +1,36 @@
+{
+  "schema": "WORLD_ENGINE_PHYSICAL_GPU_AUDIT_V1",
+  "phase": "A",
+  "decision": "NO_GO",
+  "blockingDependency": "ACCESSIBLE_PHYSICAL_GRAPHICS_GPU",
+  "hardwareAccelerationVerified": false,
+  "checkedDeviceGlobs": [
+    "/dev/nvidia*",
+    "/dev/dri/*",
+    "/dev/kfd",
+    "/dev/fb*"
+  ],
+  "matchingDeviceNodes": [],
+  "pciClassPrefixesChecked": [
+    "0x03",
+    "0x12"
+  ],
+  "matchingPciFunctions": [],
+  "drmClassEntries": [],
+  "nvidiaProcDriverPresent": false,
+  "vulkanIcdManifests": [],
+  "eglManifests": [
+    "50_mesa.json"
+  ],
+  "eglManifestIsHardwareProof": false,
+  "diagnosticBinariesPresent": [],
+  "managedCapabilities": [],
+  "callablePhysicalGpuProvisioningOrRemoteRenderTool": false,
+  "existingBackend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+  "existingRuntime": "recovery/moving-frontier-glow-fix-v1/reference_runtime.mjs",
+  "softwareForcedAtLine": 118,
+  "softwareRequiredAtLine": 154,
+  "hardwareOnlyProbe": "evidence/HARDWARE_ONLY_WEBGL_PROBE.json",
+  "newIntegratedRenderExecuted": false,
+  "minimalExternalAction": "Provide an accessible graphics-enabled physical GPU worker, or an authorized remote graphics GPU runner through secure environment configuration. Verify hardware renderer before any integrated render."
+}
