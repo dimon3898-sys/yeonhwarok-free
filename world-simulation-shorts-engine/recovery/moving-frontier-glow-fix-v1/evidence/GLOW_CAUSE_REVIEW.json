@@ -1,0 +1,168 @@
+{
+  "schema": "MOVING_FRONTIER_GLOW_CAUSE_REVIEW_V1",
+  "status": "STYLE_UNDEREMPHASIS_IDENTIFIED_EXISTING_SOURCE_REUSE",
+  "reviewer": "bundle_engine_feasibility",
+  "protectedParentCommit": "8e2b994755330907ceed9b9bfcc922e9b113138d",
+  "verifiedSafetyCheckpointCommit": "0ffe37c377f15698fc1797d338abc5bdf1dd6f67",
+  "scope": "Only actual advancing territory edge glow. All old sources, assets, outputs, map material, national markers, camera, control geometry and timing remain locked.",
+  "sourceActuallyInspected": [
+    {
+      "file": "web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+      "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+      "bytes": 18791
+    },
+    {
+      "file": "web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+      "bytes": 19678
+    },
+    {
+      "file": "web/map_infographic_v1/reference_presentation_adapter_v2.mjs",
+      "sha256": "9fd7c91f8d49a6dbf469d14b20135453abf9c40131603a667867269f196b7277",
+      "bytes": 14324
+    },
+    {
+      "file": "recovery/map-engine-unit-bundle-v1/fixtures/SCENE_PLAN.json",
+      "sha256": "73d5ab5bd41e91866227a9174af64c219c46dc001bd570bd7f854c153e1dc09b",
+      "bytes": 371938
+    }
+  ],
+  "actualFullSizeVisualsInspected": [
+    {
+      "file": "recovery/map-engine-unit-bundle-v1/evidence/input_audit/reference/REFERENCE_REL_02.500_FRAME_235.png",
+      "sha256": "7cf2efb099e34611301a4928054330660f78ddf7513afc5c61b95b20fa09d5a6",
+      "bytes": 1909688
+    },
+    {
+      "file": "recovery/map-engine-unit-bundle-v1/evidence/proof/checkpoints/03_TRACKING.png",
+      "sha256": "bbe9dae45089f49dde0fe8ffd7fbfcf93887b5d3642f054c388632babea30527",
+      "bytes": 2637162
+    }
+  ],
+  "actualReferenceObservation": "At source relative2.5s the orange/purple advancing interface has a bright sharp near-white irregular contour. Its static gold external national/coast edges are separate visual roles and are not the moving-front target. Existing Candidate has a much thinner warm/amber divider with little apparent soft glow.",
+  "baselineProfile": {
+    "centerColor": [
+      1,
+      0.86,
+      0.56
+    ],
+    "haloColor": [
+      1,
+      0.52,
+      0.14
+    ],
+    "centerWidthPixels": 1.8,
+    "haloSigmaPixels": 2.1,
+    "haloSupportPixels": 6.5,
+    "centerAlpha": 0.94,
+    "haloAlpha": 0.22,
+    "settledStrength": 0.2,
+    "velocityWindowFrames": 6,
+    "luminanceAnchor": 0.36,
+    "minimumLightingFactor": 0.83,
+    "reliefLightingEnabled": true,
+    "profileName": "REAL_CONTROL_WARM_FRONTIER_V4"
+  },
+  "baselineActualAll150DiagnosticSummary": {
+    "renderReport": {
+      "file": "recovery/map-engine-unit-bundle-v1/evidence/proof/REPORT.json",
+      "sha256": "756d89793df6369061fdb235581bb18771dc0b025a2179dafca0b0f2383c757f",
+      "bytes": 25785047
+    },
+    "frames": 150,
+    "glErrors": 0,
+    "advancingFrames": 150,
+    "strengthMinimum": 0.6813955068183107,
+    "strengthMaximum": 1,
+    "strengthMean": 0.8317256808406327,
+    "centerPeakAlphaRange": [
+      0.6405117764092121,
+      0.94
+    ],
+    "haloPeakAlphaRange": [
+      0.14990701150002836,
+      0.22
+    ],
+    "actualNativeWidthPixels": {
+      "center": 1.3235294117647058,
+      "sigma": 1.5441176470588236,
+      "support": 4.779411764705882
+    },
+    "declaredFinalOutputWidthPixels": {
+      "center": 1.8,
+      "sigma": 2.1,
+      "supportRadius": 6.5
+    },
+    "widthsAreProfileDeclarationsNotMeasuredRenderedFWHM": true
+  },
+  "causeAssessment": {
+    "center": {
+      "classification": "PRIMARY_STYLE_CAUSE",
+      "reason": "1.8px output core is only1.3235 native pixels before LINEAR coherent overscan/roll resampling. Warm RGB[1,.86,.56] is less neutral/bright than the observed white reference contour; motionstrength further reduces source alpha."
+    },
+    "halo": {
+      "classification": "PRIMARY_STYLE_CAUSE",
+      "reason": "Low .22 halo alpha, sigma2.1 and finite6.5px radius provide little wide glow. Amber halo is similar to orange territory; outside the thin core its opacity falls rapidly and visual contrast is weak."
+    },
+    "projection": {
+      "classification": "COHERENT_NOT_A_LOCATION_BUG",
+      "reason": "Same trusted geographic field/projector is used; width correctly divides by1.36 overscan. LINEAR presentation sampling softens a sub-two-native-pixel core but does not invent a displaced boundary."
+    },
+    "layer": {
+      "classification": "ORDER_CORRECT_PROTECTED_MARKERS_ABOVE",
+      "reason": "Territory and actual-terrain multiplier draw first; edge light draws after them, before coherent presentation; national badges draw afterward. Terrain is not subsequently painted over the edge. Badge overlap can occlude a local part but is not the primary global weakness."
+    },
+    "synchronization": {
+      "classification": "NO_DESYNCHRONIZATION_EVIDENCE",
+      "reason": "Shader reads same current evaluated64-knot boundary as complementary ownership; draw checks expected currentframe and binding. All150renderframes have GL0."
+    },
+    "fade": {
+      "classification": "NOT_PREMATURE_END_FADE",
+      "reason": "All150baselineframes are advancing and strengths remain.6814–1.0; no false excerpt-end stop. Existing deterministic velocity oracle dims from true boundary displacement. Currentweakness is not an early zero-alpha fade."
+    },
+    "encoding": {
+      "classification": "SECONDARY_PRESENTATION_RISK_NOT_MEASURED_CAUSE",
+      "reason": "H264 yuv420p encoding can soften narrow coloured edge detail. No quantitative encoder-loss attribution was measured by this diagnosis."
+    }
+  },
+  "selectedMinimalRootFix": {
+    "sourceModulesChanged": false,
+    "newEngineOrAPIRequired": false,
+    "method": "New Scene frontierProfile only, reusing exact existing shader, native domain clipping, existing oracle and adapter.",
+    "requestedProfileFields": {
+      "centerColor": [
+        1,
+        0.985,
+        0.94
+      ],
+      "centerWidthPixels": 2.5,
+      "centerAlpha": 1,
+      "haloColor": [
+        1,
+        0.7,
+        0.25
+      ],
+      "haloSigmaPixels": 3.5,
+      "haloSupportPixels": 10,
+      "haloAlpha": 0.35,
+      "velocityWindowFrames": 12,
+      "settledStrength": 0.08
+    },
+    "existingValidatorLimitsRespected": true,
+    "glowTemporalResponseChange": "velocityWindow12 and settledStrength.08 tune only the existing glow energy response; they do not change territory progress, keyframe timing or camera.",
+    "newRenderedQuality": "PENDING_ACTUAL_NATIVE_AND_ENCODED_PROOF"
+  },
+  "focusedValidationAdvice": {
+    "edgeTracking": "Measure sampled same geographic boundary versus glow centre over all relevant frames; exclude badge/shore collision points.",
+    "visibility": "Report measured rendered FWHM/peak luminance/finitehalo spread on actual finalpixels, not only profile widths.",
+    "lockedBody": "Compare fresh rawNative vs preserved rawNative at identicalframes; require pixel equality outside expected finiteglowband. SourceSHA and bodytests remain separate from H264 decoded variations.",
+    "protectedUnits": "Keep badges above frontier and check icon pixels/anchors unchanged.",
+    "stopFade": "The actual five-second excerpt never stops. Preserve it and verify the existing stop fade on a private synthetic stop fixture; do not invent an endpoint stop or change control speed."
+  },
+  "qualityPassClaimed": false,
+  "rootNewProfileRenderedByReviewer": false,
+  "referenceMovieOrSourceChanged": false,
+  "otherBodyOrSourceChanged": false,
+  "newWrittenFileOnly": "evidence/GLOW_CAUSE_REVIEW.json",
+  "next": "FOCUSED_REAL_GLOW_PROOF_THEN_USER_VIDEO_REVIEW_REQUIRED"
+}

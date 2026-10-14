@@ -1,0 +1,73 @@
+{
+  "schema": "MOVING_FRONTIER_GLOW_FOCUSED_TEST_V1",
+  "status": "PASS",
+  "command": "node recovery/moving-frontier-glow-fix-v1/test_control_frontier_glow.mjs",
+  "tests": 4,
+  "pass": 4,
+  "fail": 0,
+  "framesChecked": 150,
+  "runtimeReportedDurationMs": 137.091649,
+  "sourceBindings": [
+    {
+      "path": "recovery/moving-frontier-glow-fix-v1/test_control_frontier_glow.mjs",
+      "sha256": "82459062a5b6c5cd86896d2bafbf7879a054e18b8ab01785e490e7537d7cb707",
+      "bytes": 7671
+    },
+    {
+      "path": "recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json",
+      "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+      "bytes": 371934
+    },
+    {
+      "path": "recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_GLOW_OFF.json",
+      "sha256": "c813fb4667c667a5ce8798b9015f3db253eaf40ce4fe938e626dbababdcdcc2f",
+      "bytes": 371937
+    },
+    {
+      "path": "recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_CORE_ONLY.json",
+      "sha256": "da7881c0d672b9b0206ebb617ad102a1bebb4516f18f152301d41eb592da6419",
+      "bytes": 371938
+    },
+    {
+      "path": "recovery/map-engine-unit-bundle-v1/fixtures/SCENE_PLAN.json",
+      "sha256": "73d5ab5bd41e91866227a9174af64c219c46dc001bd570bd7f854c153e1dc09b",
+      "bytes": 371938
+    },
+    {
+      "path": "web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+      "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+      "bytes": 18791
+    },
+    {
+      "path": "web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+      "bytes": 19678
+    }
+  ],
+  "checks": [
+    "ALL_NON_GLOW_SCENE_INPUTS_EQUAL_IMMUTABLE_PARENT",
+    "ACTUAL_ALL_150_CONTROL_BOUNDARIES_AND_CAMERA_IDENTICAL",
+    "EXISTING_RELIEF_LIGHTING_PARAMETERS_AND_FACTOR_IDENTICAL",
+    "EDGE_OFF_AND_CORE_ONLY_CHANGE_ONLY_ALPHA_AND_PRIVATE_PROFILE_NAME",
+    "PUBLIC_ALL_150_FRAMES_STILL_ADVANCING_NO_FALSE_END_FADE",
+    "PRIVATE_GENERIC_ACTUAL_STOP_MONOTONE_12_FRAME_SETTLE",
+    "DETERMINISTIC_SHUFFLED_REPEATED_EVALUATION"
+  ],
+  "privateStopFixture": {
+    "semanticMode": "SYNTHETIC_ONLY_NOT_PUBLIC_STORY",
+    "globalActualStopFrame": 27,
+    "velocityWindowFrames": 12,
+    "fullySettledFrame": 39,
+    "settledStrength": 0.08,
+    "publicTimelineChanged": false
+  },
+  "testAuthorCorrection": {
+    "initialPass": 3,
+    "initialFail": 1,
+    "reason": "Private capture profileName intentionally differs; first test treated this descriptive non-shader field as a material uniform. Corrected test to permit only that name and edge alpha differences. No implementation, scene or shader changed."
+  },
+  "nativePixelsMeasured": false,
+  "renderedGpuValidated": false,
+  "qualityPassClaimed": false,
+  "next": "ROOT_SOURCE_COMMIT_THEN_STATIC_NATIVE_CAPTURE_AND_PIXEL_MEASUREMENT"
+}
