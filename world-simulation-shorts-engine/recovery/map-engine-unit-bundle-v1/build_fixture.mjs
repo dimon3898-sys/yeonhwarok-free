@@ -71,6 +71,9 @@ let maximumStep=0;for(let f=0;f<150;f++){
 }
 const scene=structuredClone(source);scene.schema=scene.version='MAP_ENGINE_UNIT_SCENE_V4';
 scene.terrainProfile=structuredClone(DEFAULT_REFERENCE_TERRAIN_PROFILE_V4);
+// Actual static review found over-emphasized coarse bright spots. A restrained
+// final profile keeps the same raster/shader and avoids invented fine detail.
+Object.assign(scene.terrainProfile,{landContrast:1.6,bakedShadeLocalContrast:.35,warmHighlightStrength:.075});
 scene.frontierProfile={...scene.frontierProfile,profileName:'REAL_CONTROL_WARM_FRONTIER_V4',centerWidthPixels:1.8,centerColor:[1,.86,.56],haloColor:[1,.52,.14],
  centerAlpha:.94,haloAlpha:.22,haloSigmaPixels:2.1,haloSupportPixels:6.5,minimumLightingFactor:.83,luminanceAnchor:.36};
 scene.style={...scene.style,profileName:'TERRAIN_READABLE_ORANGE_PURPLE_V4',losingColor:[186/255,30/255,11/255,.62],existingWinningColor:[104/255,23/255,229/255,.61],gainedWinningColor:[104/255,23/255,229/255,.61]};

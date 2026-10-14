@@ -17,7 +17,10 @@ Use the retained pinned tools: Node 24.19.0, `/usr/bin/python3` 3.13.5,
 Chromium 154.0.8037.57, FFmpeg 7.1.5, Three 0.170.0, Playwright 1.62.1,
 NumPy 2.2.4 and Pillow 11.1.0. Keep proxy, CA and TLS settings intact.
 Licensed saved Natural Earth terrain and GIS are reused. Baked shading and
-procedural water are visual materials, not new elevation/bathymetry data.
+source-backed water tones are visual materials, not new elevation/bathymetry
+data. V4 removes analytical ripple, glint and drift. The final profile reduces
+coarse bright-spot emphasis after the first actual static review; both sets of
+probe images and the first executed Scene are retained.
 
 From the repository root, the fresh bounded input audit is:
 
