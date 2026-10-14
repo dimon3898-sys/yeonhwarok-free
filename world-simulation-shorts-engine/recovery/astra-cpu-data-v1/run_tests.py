@@ -42,7 +42,7 @@ def main():
     parser.add_argument('--phase', choices=['B_C', 'ALL'], default='ALL')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
-    patterns = ['test_model.py', 'test_terrain.py', 'test_bathymetry.py', 'test_surface.py', 'test_providers.py'] if args.phase == 'B_C' else ['test_*.py']
+    patterns = ['test_model.py', 'test_terrain.py', 'test_bathymetry.py', 'test_surface.py', 'test_providers.py', 'test_contract_hardening.py'] if args.phase == 'B_C' else ['test_*.py']
     suite = unittest.TestSuite()
     for pattern in patterns:
         suite.addTests(unittest.defaultTestLoader.discover(str(ROOT/'tests'), pattern=pattern))

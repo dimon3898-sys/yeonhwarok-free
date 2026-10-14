@@ -17,10 +17,14 @@ def sha256(data: bytes) -> str:
 
 def validate_bbox(bbox):
     if (not isinstance(bbox, (list, tuple)) or len(bbox) != 4
-            or any(isinstance(v, bool) or not isinstance(v, (int, float))
-                   or not math.isfinite(v) for v in bbox)):
+            or any(isinstance(v, bool) or not isinstance(v, (int, float)) for v in bbox)):
         raise DataError("bbox must be four finite numbers [west,south,east,north]")
-    west, south, east, north = map(float, bbox)
+    try:
+        west, south, east, north = map(float, bbox)
+    except (ValueError, TypeError, OverflowError) as error:
+        raise DataError('bbox numeric values exceed supported finite range') from error
+    if not all(math.isfinite(v) for v in (west, south, east, north)):
+        raise DataError('bbox must be finite')
     if not (-180 <= west <= 180 and -180 <= east <= 180
             and -90 <= south < north <= 90 and west != east):
         raise DataError("invalid geographic bbox")
@@ -60,7 +64,10 @@ class RasterData:
         values = np.array(self.values, copy=True)
         x = np.array(self.x, dtype=np.float64, copy=True)
         y = np.array(self.y, dtype=np.float64, copy=True)
-        valid = np.array(self.valid, dtype=np.bool_, copy=True)
+        raw_valid = np.asarray(self.valid)
+        if raw_valid.dtype != np.bool_:
+            raise DataError("support mask must contain actual booleans, not coerced values")
+        valid = np.array(raw_valid, copy=True)
         meta = deepcopy(self.metadata)
         if (values.ndim not in (2, 3) or not values.shape[0] or not values.shape[1]
                 or x.ndim != 1 or y.ndim != 1

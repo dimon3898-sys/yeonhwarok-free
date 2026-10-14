@@ -4,6 +4,7 @@ from pathlib import PurePosixPath
 from copy import deepcopy
 import json
 import math
+import re
 from urllib.parse import urlsplit
 import zipfile
 
@@ -25,9 +26,14 @@ class DataRequest:
         if self.crs != 'EPSG:4326':
             raise DataError('CPU source extraction currently supports geographic EPSG:4326 only; no implicit reprojection')
         resolution = self.target_ground_resolution
-        if resolution is not None and (isinstance(resolution, bool)
-                or not isinstance(resolution, (int, float)) or not math.isfinite(resolution) or resolution <= 0):
-            raise DataError('targetGroundResolution must be finite positive meters')
+        if resolution is not None:
+            try:
+                valid = (not isinstance(resolution, bool) and isinstance(resolution, (int, float))
+                         and math.isfinite(float(resolution)) and resolution > 0)
+            except (ValueError, TypeError, OverflowError):
+                valid = False
+            if not valid:
+                raise DataError('targetGroundResolution must be finite positive meters')
 
 
 @dataclass(frozen=True)
@@ -44,6 +50,18 @@ class SourceSpec:
     license_verified: bool = False
     metadata: dict = field(default_factory=dict)
     sidecars: tuple = ()
+
+    def __post_init__(self):
+        if not isinstance(self.license_verified, bool):
+            raise DataError('license verification must be an explicit boolean')
+        for value in (self.source_id, self.source_version, self.source_url, self.data_class, self.relative_path):
+            if not isinstance(value, str) or not value.strip():
+                raise DataError('source identity/version/path must be nonempty strings')
+        url = urlsplit(self.source_url)
+        if url.scheme != 'https' or not url.hostname or url.username or url.password or url.fragment:
+            raise DataError('source URL must be HTTPS without embedded credentials or fragment')
+        if not isinstance(self.sha256, str) or re.fullmatch('[0-9a-f]{64}', self.sha256) is None:
+            raise DataError('source hash must be lowercase SHA-256')
 
     @classmethod
     def from_manifest(cls, item, attribution, *, license_verified=False):
@@ -108,12 +126,15 @@ class RasterProvider:
                               actual_bbox, rasters[0].metadata['crs'] if rasters else spec.metadata.get('horizontal_crs', 'UNKNOWN'), spec.native_resolution,
                               [{'spacingDegrees': [abs(x.metadata['transform'][1]), abs(x.metadata['transform'][5])],
                                 'dimensions': [len(x.x), len(x.y)], 'resampling': 'NONE'} for x in rasters],
-                              spec.vertical_datum, [x.metadata.get('nodata') for x in rasters],
+                              rasters[0].metadata.get('verticalDatum') if rasters else spec.vertical_datum,
+                              [x.metadata.get('nodata') for x in rasters],
                               spec.attribution, spec.sha256, error, tuple(rasters), tuple(warnings), coverage or {})
 
     def provide(self, request: DataRequest, *, source_version=None):
         spec = self.spec
         try:
+            if not isinstance(request, DataRequest):
+                raise DataError('provider requires a DataRequest')
             request.validate()
             if spec.data_class != self.data_class:
                 raise DataError('provider class does not match source data class')
@@ -145,8 +166,11 @@ class RasterProvider:
                                     error={'code': 'NO_VALID_SAMPLE_SUPPORT', 'message': 'all requested cells are nodata/invalid'},
                                     coverage={'requestedBBox': list(request.bbox), 'gridPresent': True, 'validSamples': 0})
             supplied = raster.bbox
-            complete = not absent and all(supplied[0] <= p[0] and supplied[1] <= p[1]
-                                         and supplied[2] >= p[2] and supplied[3] >= p[3] for p in parts)
+            # Match the axis/transform roundoff tolerance; this does not add a
+            # pixel of support, pad arrays or relax a visual admission rule.
+            epsilon = 1e-9
+            complete = not absent and all(supplied[0] <= p[0] + epsilon and supplied[1] <= p[1] + epsilon
+                                         and supplied[2] >= p[2] - epsilon and supplied[3] >= p[3] - epsilon for p in parts)
             if not complete:
                 warnings.append('PARTIAL_SOURCE_COVERAGE_NO_PADDING_OR_EXTRAPOLATION')
             if request.target_ground_resolution is not None:
@@ -205,9 +229,8 @@ class ArchiveCatalog:
     """
     def __init__(self, archive_path, *, license_verified=False):
         self.archive_path = archive_path
-        with zipfile.ZipFile(archive_path) as archive:
-            self.manifest = json.loads(archive.read('DATA_MANIFEST.json'))
-            attribution = archive.read('licenses/ATTRIBUTION.txt').decode()
+        self.manifest = json.loads(self._read_member('DATA_MANIFEST.json', 2*1024*1024))
+        attribution = self._read_member('licenses/ATTRIBUTION.txt', 1024*1024).decode()
         self.sources = {}
         for item in self.manifest['datasets']:
             spec = SourceSpec.from_manifest(item, attribution, license_verified=license_verified)
@@ -216,12 +239,19 @@ class ArchiveCatalog:
             self.sources[spec.source_id] = spec
 
     def read_bytes(self, relative_path):
+        return self._read_member(relative_path, 64*1024*1024)
+
+    def _read_member(self, relative_path, max_bytes):
+        if not isinstance(relative_path, str) or '\\' in relative_path:
+            raise DataError('source archive path must be canonical POSIX relative text')
         path = PurePosixPath(relative_path)
-        if path.is_absolute() or '..' in path.parts:
+        if path.is_absolute() or '..' in path.parts or path.as_posix() != relative_path:
             raise DataError('unsafe source archive path')
         with zipfile.ZipFile(self.archive_path) as archive:
             entries = [x for x in archive.infolist() if x.filename == relative_path]
-            if len(entries) != 1 or entries[0].file_size > 64*1024*1024:
+            if not entries:
+                raise FileNotFoundError('source archive member missing')
+            if len(entries) != 1 or entries[0].is_dir() or entries[0].file_size > max_bytes:
                 raise DataError('duplicate/oversized source asset')
             return archive.read(relative_path)
 

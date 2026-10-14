@@ -115,6 +115,9 @@ def _png(data):
         raise DataError("invalid PNG IHDR")
     if data[24] != 8 or data[25] not in (2, 6):
         raise DataError("surface PNG must contain original 8-bit RGB or RGBA channels")
+    width, height = int.from_bytes(data[16:20], 'big'), int.from_bytes(data[20:24], 'big')
+    if not 0 < width * height <= 16_000_000:
+        raise DataError('surface subset exceeds bounded CPU raster size')
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)

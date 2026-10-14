@@ -1,4 +1,7 @@
 from dataclasses import replace
+from io import BytesIO
+from unittest.mock import patch
+import zipfile
 import unittest
 from pathlib import Path
 import numpy as np
@@ -86,6 +89,29 @@ class NeutralSyntheticTests(unittest.TestCase):
         for body,kwargs in ((b'broken',{}),(payload,{'expected_sha256':'0'*64}),
                             (payload,{'max_expanded_bytes':1})):
             with self.assertRaises(ValueError): decode_neutral(body,**kwargs)
+
+    def test_forged_npy_shape_rejected_before_numpy_load(self):
+        payload=encode_neutral(self.raster())
+        bad=BytesIO()
+        header=BytesIO()
+        np.lib.format.write_array_header_1_0(header, {'descr':'<f8', 'fortran_order':False, 'shape':(100000000,)})
+        with zipfile.ZipFile(BytesIO(payload)) as original, zipfile.ZipFile(bad,'w') as target:
+            for name in original.namelist():
+                target.writestr(name, header.getvalue() if name=='values.npy' else original.read(name))
+        with patch('astra_cpu.neutral.np.load', side_effect=AssertionError('must reject before allocating')) as load:
+            with self.assertRaisesRegex(ValueError, 'declared shape'):
+                decode_neutral(bad.getvalue(), max_expanded_bytes=4096)
+            load.assert_not_called()
+
+    def test_literal_metadata_marker_dictionaries_are_not_reinterpreted(self):
+        original=self.raster()
+        metadata=dict(original.metadata)
+        metadata['literalMarker']={'__numeric_metadata__':'NaN'}
+        metadata['nestedMarker']={'__literal_dictionary__':{'__binary_metadata__':'not binary'}}
+        raster=RasterData(original.values,original.x,original.y,original.valid,metadata)
+        decoded=decode_neutral(encode_neutral(raster))
+        self.assertEqual(decoded.metadata['literalMarker'],metadata['literalMarker'])
+        self.assertEqual(decoded.metadata['nestedMarker'],metadata['nestedMarker'])
 
     def test_all_invalid_support_not_published_as_available(self):
         spec=SourceSpec('synthetic','v1','https://example.invalid/file','land_elevation','file','0'*64,

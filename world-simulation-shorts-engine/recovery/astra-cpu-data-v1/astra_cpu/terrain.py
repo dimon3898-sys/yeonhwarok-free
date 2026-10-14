@@ -62,6 +62,8 @@ def parse_terrain(data: bytes, *, expected_sha256: str | None = None,
                                   allowed_drivers=["GTiff"])
             if dataset is None or dataset.RasterCount != 1:
                 raise DataError("terrain must be a readable single-band GeoTIFF")
+            if not 0 < dataset.RasterXSize * dataset.RasterYSize <= 16_000_000:
+                raise DataError('terrain subset exceeds bounded CPU raster size')
             band = dataset.GetRasterBand(1)
             if band.DataType != gdal.GDT_Float32:
                 raise DataError("terrain requires Float32 samples; numeric conversion is unsupported")

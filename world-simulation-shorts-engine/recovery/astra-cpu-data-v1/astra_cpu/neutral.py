@@ -17,7 +17,12 @@ def json_value(value):
     if isinstance(value, float) and not math.isfinite(value):
         return {"__numeric_metadata__": "NaN" if math.isnan(value) else ("+Inf" if value > 0 else "-Inf")}
     if isinstance(value, dict):
-        return {str(k): json_value(v) for k, v in value.items()}
+        if not all(isinstance(k, str) for k in value):
+            raise DataError("metadata keys must be strings")
+        output = {k: json_value(v) for k, v in value.items()}
+        if len(output) == 1 and set(output) <= {'__numeric_metadata__', '__binary_metadata__', '__literal_dictionary__'}:
+            return {'__literal_dictionary__': output}
+        return output
     if isinstance(value, (list, tuple)):
         return [json_value(v) for v in value]
     if value is None or isinstance(value, (str, int, float, bool)):
@@ -27,6 +32,11 @@ def json_value(value):
 
 def _decode_metadata(value):
     if isinstance(value, dict):
+        if set(value) == {'__literal_dictionary__'}:
+            payload = value['__literal_dictionary__']
+            if not isinstance(payload, dict):
+                raise DataError('invalid escaped dictionary')
+            return {k: _decode_metadata(v) for k, v in payload.items()}
         if set(value) == {"__binary_metadata__"}:
             try:
                 return base64.b64decode(value["__binary_metadata__"], validate=True)
@@ -65,6 +75,24 @@ def decode_neutral(data: bytes, *, expected_sha256=None, max_expanded_bytes=256*
                     or {x.filename for x in entries} != {'values.npy', 'x.npy', 'y.npy', 'valid.npy', 'metadata.npy'}
                     or sum(x.file_size for x in entries) > max_expanded_bytes):
                 raise DataError("invalid/oversized neutral archive")
+            # A tiny malicious NPY header can claim a huge shape. Validate the
+            # declared numeric payload against the actual member BEFORE NumPy
+            # can allocate it; ZIP expanded-size checking alone is insufficient.
+            for entry in entries:
+                with archive.open(entry) as member:
+                    version = np.lib.format.read_magic(member)
+                    if version == (1, 0):
+                        shape, _, dtype = np.lib.format.read_array_header_1_0(member)
+                    elif version == (2, 0):
+                        shape, _, dtype = np.lib.format.read_array_header_2_0(member)
+                    else:
+                        raise DataError('unsupported neutral NPY header version')
+                    if (dtype.hasobject or dtype.fields or dtype.kind not in 'fiub'
+                            or any(isinstance(n, bool) or not isinstance(n, int) or n < 0 for n in shape)):
+                        raise DataError('unsupported neutral numeric dtype/shape')
+                    declared = math.prod(shape) * dtype.itemsize
+                    if declared > max_expanded_bytes or declared != entry.file_size - member.tell():
+                        raise DataError('neutral declared shape exceeds actual bounded payload')
         with np.load(BytesIO(data), allow_pickle=False) as archive:
             marker = archive['metadata']
             if marker.ndim != 1 or marker.dtype != np.uint8 or marker.size > 1024*1024:
