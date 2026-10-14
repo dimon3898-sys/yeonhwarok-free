@@ -9,6 +9,19 @@ import {openHardwareRuntime,readAdmission,assertQualityDiagnostic,root,repo,pack
 const execute=promisify(execFile),exists=async file=>stat(file).then(()=>true,()=>false);
 const atomic=async(file,value)=>{const pending=file+'.writing';await writeFile(pending,JSON.stringify(value)+'\n',{mode:0o600});await rename(pending,file);};
 
+export async function processIdentity(pid=process.pid){
+ assert.ok(Number.isSafeInteger(pid)&&pid>0,'VALID_CAPTURE_PID_REQUIRED');
+ const bootId=(await readFile('/proc/sys/kernel/random/boot_id','utf8')).trim();
+ const state=await readFile('/proc/'+pid+'/stat','utf8'),fields=state.slice(state.lastIndexOf(')')+2).trim().split(/\s+/);
+ assert.ok(fields.length>=20&&/^\d+$/.test(fields[19]),'PROCESS_START_ID_REQUIRED');
+ return {pid,bootId,startTime:fields[19]};
+}
+export async function isActiveCapture(lock,identity=processIdentity){
+ if(!Number.isSafeInteger(lock?.pid)||lock.pid<=0||typeof lock.bootId!=='string'||typeof lock.startTime!=='string')return false;
+ try{const actual=await identity(lock.pid);return actual.bootId===lock.bootId&&actual.startTime===lock.startTime;}
+ catch(error){if(error.code==='ENOENT'||error.code==='ESRCH')return false;throw error;}
+}
+
 // These are the exact encoding arguments of the approved original capture.
 // Only frame directory and new output file differ; neither original MP4 nor source is overwritten.
 export function originalEncodingArgs(framesDir,partial){
@@ -44,22 +57,24 @@ export async function captureHardware({admissionFile,outputRoot}){
  }
  const lockPath=path.join(runRoot,'ACTIVE_CAPTURE_LOCK.json');
  if(await exists(lockPath)){
-  const prior=await json(lockPath);let running=false;try{process.kill(prior.pid,0);running=true;}catch{}
-  if(running)throw Error('GPU_CAPTURE_ALREADY_RUNNING');
+  const prior=await json(lockPath);
+  if(await isActiveCapture(prior))throw Error('GPU_CAPTURE_ALREADY_RUNNING');
   await rename(lockPath,path.join(runRoot,'STALE_LOCK_'+Date.now()+'.json'));
  }
- const lock=await open(lockPath,'wx',0o600);await lock.writeFile(JSON.stringify({pid:process.pid,signature})+'\n');await lock.close();
+ const identity=await processIdentity();
+ const lock=await open(lockPath,'wx',0o600);await lock.writeFile(JSON.stringify({...identity,signature})+'\n');await lock.close();
  const report={schema:'RTX_GPU_HARDWARE_CAPTURE_V1',status:'IN_PROGRESS',signature,sourceVerification:source,
   stagingReceiptSha256:sha(receiptBytes),hardware:admission.probe,frames:[],checkpoints:[],
   output:[1080,1920],totalFrames:150,fps:30,durationSeconds:5,audio:false,
   qualityParityClaimed:false,userVideoApproved:false,finalPromotion:false,requiredTempOnlyFiles:0,
   reusedFrames:0,startedAt:new Date().toISOString()};
- let session,failure;
- const terminate=()=>{session?.close().finally(()=>process.exit(143))??process.exit(143);};
+ let session,failure,pendingCleanup;
+ const terminate=()=>{const cleanup=session?()=>session.close():pendingCleanup;
+  if(cleanup)Promise.resolve().then(cleanup).finally(()=>process.exit(143));else process.exit(143);};
  process.once('SIGTERM',terminate);
  try{
   // Always create and draw-test the real hardware context before reading a saved frame.
-  session=await openHardwareRuntime({mode:'VISUAL_REFERENCE_STUDY',admissionFile});
+  session=await openHardwareRuntime({mode:'VISUAL_REFERENCE_STUDY',admissionFile,onPendingCleanup:cleanup=>{pendingCleanup=cleanup;}});
   assert.equal(session.info.productionEligible,true);assert.equal(session.info.cameraMotion.status,'PASS');
   assert.equal(session.info.cameraMotion.fakeLockCount,0);report.runtime=session.info;
   const fresh=await session.page.evaluate(async()=>window.referenceProof.capture(0,{png:false}));

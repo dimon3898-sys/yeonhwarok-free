@@ -51,7 +51,7 @@ export async function readAdmission(file){
 export async function openHardwareRuntime({fixtureFile=path.join(root,'fixtures/RUNTIME_FIXTURE.json'),
  scenePlanFile=path.join(root,'fixtures/SCENE_PLAN.json'),mode='STATIC_VISUAL_PROBE',
  visualAdmissionFile=path.join(root,'evidence/VISUAL_ADMISSION.json'),
- admissionFile=process.env.RTX_GPU_ADMISSION_FILE}={}){
+ admissionFile=process.env.RTX_GPU_ADMISSION_FILE,onPendingCleanup=null}={}){
  if(!['STATIC_VISUAL_PROBE','VISUAL_REFERENCE_STUDY'].includes(mode))throw Error('EXPLICIT_QUALITY_RUNTIME_MODE_REQUIRED');
  const fixture=await json(fixtureFile),scenePlan=await json(scenePlanFile);
  assert.equal(fixture.totalFrames,150);assert.equal(fixture.fps,30);assert.equal(fixture.videoFilename,legacyMovieName);
@@ -111,7 +111,12 @@ export async function openHardwareRuntime({fixtureFile=path.join(root,'fixtures/
  const args=['-B',path.join(engine,'recovery/v5/serve.py')];
  for(const [key,flag] of Object.entries(inputFlags))args.push('--'+flag,fixture.nativeFiles[key]);
  const server=spawn('/usr/bin/python3',args,{cwd:repo,stdio:['ignore','pipe','pipe']});
- let browser,stderr='',closed=false;
+ let browser,browserStarting,stderr='',closed=false,aborted=false;
+ onPendingCleanup?.(async()=>{
+  aborted=true;server.kill();
+  const pending=browser??await browserStarting?.catch(()=>null);
+  await pending?.close().catch(()=>{});
+ });
  server.stderr.on('data',value=>{stderr=(stderr+value).slice(-4096);});
  try{
   const url=await new Promise((resolve,reject)=>{
@@ -126,9 +131,12 @@ export async function openHardwareRuntime({fixtureFile=path.join(root,'fixtures/
    server.once('error',error=>{clearTimeout(timer);lines.close();reject(error);});
    server.once('exit',code=>{clearTimeout(timer);lines.close();reject(Error('QUALITY_NATIVE_SERVER_EXIT_'+code+' '+stderr));});
   });
-  browser=await require('playwright').chromium.launch({
+  if(aborted)throw Error('HARDWARE_RUNTIME_ABORTED');
+  browserStarting=require('playwright').chromium.launch({
    executablePath:path.join(engine,'deployment/gcube/chromium_wrapper.py'),headless:true,
    ignoreDefaultArgs:['--disable-dev-shm-usage'],args:['--no-sandbox']});
+  browser=await browserStarting;
+  if(aborted)throw Error('HARDWARE_RUNTIME_ABORTED');
   assert.equal(browser.version(),admission.probe.browser_version,'SAME_ADMITTED_BROWSER_REQUIRED');
   const page=await browser.newPage({viewport:{width:1080,height:1920},deviceScaleFactor:1}),errors=[];
   page.on('pageerror',error=>errors.push(error.message));

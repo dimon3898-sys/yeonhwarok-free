@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import argparse
 import csv
+from contextlib import contextmanager
+import fcntl
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -371,8 +373,41 @@ def _stop_render(process, *, stop_group=None):
         process.wait(timeout=5)
 
 
-def render_65422(admission, config, *, runner=None, process_factory=None,
-                 memory_runner=None, clock=time.monotonic, sleep=time.sleep, stop_group=None):
+@contextmanager
+def capture_guard(output_root):
+    """Kernel-held lock prevents concurrent operator jobs across stale recovery."""
+    directory = _private_directory(output_root)
+    descriptor = os.open(directory / "CAPTURE.guard", os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    with os.fdopen(descriptor, "r+") as stream:
+        try:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise LauncherError("GPU_CAPTURE_ALREADY_RUNNING") from None
+        try:
+            yield
+        finally:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
+def render_65422(admission, config, **options):
+    if not admission.test_only:
+        with capture_guard(admission.output_root):
+            signals = (signal.SIGTERM, signal.SIGINT, signal.SIGHUP)
+            previous = {number: signal.getsignal(number) for number in signals}
+            def interrupted(number, frame):
+                raise LauncherError("GPU_RENDER_INTERRUPTED")
+            try:
+                for number in signals:
+                    signal.signal(number, interrupted)
+                return _render_65422(admission, config, **options)
+            finally:
+                for number, handler in previous.items():
+                    signal.signal(number, handler)
+    return _render_65422(admission, config, **options)
+
+
+def _render_65422(admission, config, *, runner=None, process_factory=None,
+                  memory_runner=None, clock=time.monotonic, sleep=time.sleep, stop_group=None):
     if admission.test_only and runner is None and process_factory is None:
         raise LauncherError("TEST_ADMISSION_NOT_EXECUTABLE")
     command = ["node", str(HERE / "hardware_render.mjs"), "--admission-file", str(admission.admission_file),

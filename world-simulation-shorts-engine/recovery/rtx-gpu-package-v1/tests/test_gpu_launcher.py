@@ -76,6 +76,33 @@ class LauncherTests(unittest.TestCase):
     def admit(self, **extra):
         return launcher.admit_gpu(self.config, **self.dependencies(**extra))
 
+    def test_kernel_capture_guard_blocks_concurrent_jobs_then_releases(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with launcher.capture_guard(Path(directory)):
+                with self.assertRaises(launcher.LauncherError) as blocked:
+                    with launcher.capture_guard(Path(directory)):
+                        self.fail("parallel capture acquired guard")
+                self.assertEqual(blocked.exception.code, "GPU_CAPTURE_ALREADY_RUNNING")
+            with launcher.capture_guard(Path(directory)):
+                pass
+
+    def test_parent_signal_handlers_restore_after_interruption(self):
+        from types import SimpleNamespace
+        admission = SimpleNamespace(test_only=False, output_root=Path(tempfile.gettempdir()))
+        handlers = {}
+        def install(number, callback):
+            handlers[number] = callback
+        def body(*args, **kwargs):
+            handlers[launcher.signal.SIGTERM](launcher.signal.SIGTERM, None)
+        with mock.patch.object(launcher, "capture_guard") as guard, \
+             mock.patch.object(launcher.signal, "getsignal", return_value="previous"), \
+             mock.patch.object(launcher.signal, "signal", side_effect=install), \
+             mock.patch.object(launcher, "_render_65422", side_effect=body):
+            with self.assertRaises(launcher.LauncherError) as blocked:
+                launcher.render_65422(admission, launcher.LauncherConfig())
+            self.assertEqual(blocked.exception.code, "GPU_RENDER_INTERRUPTED")
+            self.assertEqual(set(handlers.values()), {"previous"})
+
     def test_allowed_models_and_physical_memory_threshold(self):
         for model, total in ((MODEL, 15360), ("NVIDIA GeForce RTX 4090", 24564),
                              ("NVIDIA GeForce RTX 5090", 32607)):

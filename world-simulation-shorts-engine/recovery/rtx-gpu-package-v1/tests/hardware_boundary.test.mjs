@@ -4,7 +4,7 @@ import {mkdtemp,writeFile,chmod,rm,symlink,readFile} from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {assertHardwareBackend,readAdmission,root} from '../hardware_runtime.mjs';
-import {originalEncodingArgs} from '../hardware_render.mjs';
+import {originalEncodingArgs,processIdentity,isActiveCapture} from '../hardware_render.mjs';
 // Synthetic unit data checks rejection paths only; this is never hardware evidence.
 const backend='ANGLE (NVIDIA, NVIDIA GeForce RTX 4080 SUPER, OpenGL)';
 const make=()=>({status:'GPU_VERIFIED',testOnly:false,gpuRenderingVerified:true,observedAt:new Date().toISOString(),
@@ -37,4 +37,10 @@ test('approved encoder options are reused with new paths only',async()=>{
  const match=original.match(/const encodeArgs=(\[\s*'-hide_banner'[\s\S]+?partial\]);/);assert.ok(match);
  const evaluate=new Function('path','framesDir','partial','return '+match[1]);
  assert.deepEqual(originalEncodingArgs('/persistent/frames','/persistent/new.mp4'),evaluate(path,'/persistent/frames','/persistent/new.mp4'));
+});
+test('restart locks distinguish reboot and reused PIDs from an active process',async()=>{
+ const identity=await processIdentity();assert.equal(await isActiveCapture(identity),true);
+ assert.equal(await isActiveCapture({...identity,bootId:'different-boot'}),false);
+ assert.equal(await isActiveCapture({...identity,startTime:String(BigInt(identity.startTime)+1n)}),false);
+ assert.equal(await isActiveCapture({pid:process.pid}),false);
 });

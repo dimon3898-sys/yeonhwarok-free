@@ -1,0 +1,58 @@
+{
+  "schema": "RTX_CPU_VALIDATION_V1",
+  "status": "PASS",
+  "focusedTests": {
+    "sourceContract": 42,
+    "gpuLauncher": 26,
+    "dependencyBootstrap": 27,
+    "hardwareBoundary": 5,
+    "unchangedFrontierRegression": 4
+  },
+  "totalTests": 104,
+  "failedTests": 0,
+  "skippedExecutedTests": 0,
+  "sourceVerification": {
+    "originalFiles": 140,
+    "bytes": 70186954,
+    "gitBlobAndAncestry": "PASS",
+    "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180"
+  },
+  "stagedContext": {
+    "files": 160,
+    "status": "PASS",
+    "noGitRuntimeVerification": "PASS",
+    "runtimeApiRoutes": 66,
+    "http200AndOriginalShaEquality": "PASS",
+    "stagingReceiptSha256": "359af7f64d847558dd62a4b136396e5017da2947bb22c7a0074300affca83397"
+  },
+  "composeConfig": "PASS",
+  "dockerBuildkitCheck": {
+    "status": "PASS",
+    "warnings": 0,
+    "imageBuilt": false,
+    "frontendDigestObserved": "sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e"
+  },
+  "actualNoGpuGuard": "PASS_EXPECTED_GPU_HARDWARE_UNAVAILABLE_EXIT_2",
+  "physicalGpuValidation": "NOT_RUN",
+  "fullImageDependencyRuntime": "NOT_RUN_IMAGE_NOT_BUILT",
+  "old233CpuSuite": "REUSED_PRIOR_PASS_NOT_RERUN",
+  "permanentGate": "NOT_RUN_NOT_THIS_TASK",
+  "gpuRenderExecuted": false,
+  "newMovieCreated": false,
+  "qualityPassClaimed": false,
+  "gCubeDeployed": false,
+  "commands": [
+    "PYTHONPATH=recovery/rtx-gpu-package-v1 /usr/bin/python3 -B -m unittest discover -s recovery/rtx-gpu-package-v1/tests -p test_*.py",
+    "node recovery/rtx-gpu-package-v1/tests/hardware_boundary.test.mjs",
+    "node recovery/moving-frontier-glow-fix-v1/test_control_frontier_glow.mjs",
+    "python -B recovery/rtx-gpu-package-v1/prepare_context.py --destination <new-isolated-context>",
+    "docker compose -f recovery/rtx-gpu-package-v1/compose.example.yml config --quiet",
+    "docker buildx build --check --platform=linux/amd64 --file <staged-Dockerfile> <staged-context>"
+  ],
+  "pinnedComponents": {
+    "GDAL3.10.3": "SYSROOT_CPU_IMPORT_PASS",
+    "NetCDF4.9.2": "SYSROOT_SIGNED_PARSER_PASS",
+    "Chrome155.0.8059.79": "ARTIFACT_HASH_CONTROL_PASS_BROWSER_NOT_RUN",
+    "FFmpeg6.1.1": "SIGNED_PACKAGE_PIN_VERIFIED_NEW_IMAGE_EXECUTION_NOT_RUN"
+  }
+}
