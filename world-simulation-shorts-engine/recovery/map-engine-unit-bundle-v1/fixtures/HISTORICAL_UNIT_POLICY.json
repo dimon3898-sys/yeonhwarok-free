@@ -1,0 +1,71 @@
+{
+  "version": "UNIT_PARTICIPATION_POLICY_V1",
+  "semantic_mode": "PRIVATE_HISTORICAL_RULE_TEST_NOT_PUBLIC_SCENE",
+  "event_id": "KOREAN_WAR",
+  "accepted_scene_semantics": ["HISTORICAL_FACT_BASED_VISUAL"],
+  "event_time_range": {"start_date": "1950-06-25", "end_date": "1953-07-27"},
+  "require_location_evidence": true,
+  "evidence_status": "CURATED_ESTABLISHED_CHRONOLOGY_REFERENCE_ONLY_NOT_NEW_LIVE_RETRIEVAL",
+  "public_scene_unchanged": true,
+  "public_scene_semantics": "COUNTERFACTUAL_REFERENCE_VISUAL_STUDY_NOT_KOREAN_WAR_HISTORY",
+  "public_scope_note": "User explicitly chose the existing modern counterfactual scene. These historical tests must not remove, insert, relabel, relocate or retime its eight actors, control field or camera.",
+  "source_records": [
+    {"reference": "recovery/planner-scene-json-v1/data/FACT_DATA.json", "retrieval_status": "EXISTING_CURATED_RECORD_REFERENCES_HTTP_403_NO_BODY_RETRIEVED", "scope": "Established outbreak, counteradvance, withdrawal and armistice chronology; schematic fronts, not unit coordinates."},
+    {"reference": "https://history.state.gov/milestones/1945-1952/korean-war-2", "retrieval_status": "REFERENCE_ONLY_NOT_RETRIEVED_IN_THIS_TASK", "scope": "Historical overview citation, not a newly fetched source body."},
+    {"reference": "https://history.army.mil/html/reference/army_flag/kw.html", "retrieval_status": "REFERENCE_ONLY_NOT_RETRIEVED_IN_THIS_TASK", "scope": "Campaign reference citation, not a newly fetched source body."}
+  ],
+  "countries": [
+    {
+      "country_id": "ROK", "aliases": ["KOR"],
+      "role_rules": [
+        {"role": "GROUND_COMBAT", "start_date": "1950-06-25", "end_date": "1953-07-27", "location_scopes": ["KOREAN_PENINSULA"], "basis": "Republic of Korea defense from the outbreak."},
+        {"role": "SUPPORT", "start_date": "1950-06-25", "end_date": "1953-07-27", "location_scopes": ["KOREAN_PENINSULA", "SUPPORT_REAR"], "basis": "Support role is distinct from a claimed battlefield unit."}
+      ]
+    },
+    {
+      "country_id": "US", "aliases": ["USA"],
+      "role_rules": [
+        {"role": "GROUND_COMBAT", "start_date": "1950-07-05", "end_date": "1953-07-27", "location_scopes": ["KOREAN_PENINSULA"], "basis": "First United States ground combat at Osan; July 1 troop arrival is not the same gate."},
+        {"role": "AVIATION", "start_date": "1950-06-27", "end_date": "1953-07-27", "location_scopes": ["KOREAN_AIRSPACE", "ADJACENT_THEATER"], "basis": "United States air involvement after the June 27 intervention decision."},
+        {"role": "NAVAL", "start_date": "1950-06-27", "end_date": "1953-07-27", "location_scopes": ["KOREAN_COASTAL_WATERS", "ADJACENT_THEATER"], "basis": "United States naval involvement after the June 27 intervention decision."},
+        {"role": "SUPPORT", "start_date": "1950-06-27", "end_date": "1953-07-27", "location_scopes": ["SUPPORT_REAR", "EXTERNAL_SUPPORT_BASE"], "basis": "Support gate does not imply ground combat."}
+      ]
+    },
+    {
+      "country_id": "DPRK", "aliases": ["PRK"],
+      "role_rules": [
+        {"role": "GROUND_COMBAT", "start_date": "1950-06-25", "end_date": "1953-07-27", "location_scopes": ["KOREAN_PENINSULA"], "basis": "North Korean invasion and subsequent ground participation."},
+        {"role": "SUPPORT", "start_date": "1950-06-25", "end_date": "1953-07-27", "location_scopes": ["KOREAN_PENINSULA", "SUPPORT_REAR"], "basis": "Support role is distinct from a claimed battlefield unit."}
+      ]
+    },
+    {
+      "country_id": "PRC", "aliases": ["CHN", "PVA"],
+      "role_rules": [
+        {"role": "GROUND_COMBAT", "start_date": "1950-10-25", "end_date": "1953-07-27", "location_scopes": ["KOREAN_PENINSULA"], "basis": "People's Volunteer Army first combat; October 19 border crossing is not the combat gate."}
+      ]
+    },
+    {
+      "country_id": "USSR", "aliases": ["SUN"],
+      "role_rules": [
+        {"role": "AVIATION", "start_date": "1950-11-01", "end_date": "1953-07-27", "date_precision": "MONTH", "location_scopes": ["KOREAN_AIRSPACE", "EXTERNAL_SUPPORT_BASE"], "basis": "Curated November 1950 air-participation period; first-of-month is a month-level policy boundary, not a newly certified exact operational date."},
+        {"role": "SUPPORT", "start_date": "1950-06-25", "end_date": "1953-07-27", "location_scopes": ["SUPPORT_REAR", "EXTERNAL_SUPPORT_BASE"], "basis": "Equipment, training and other support existed by the outbreak; this does not represent Soviet ground invasion or occupation."}
+      ]
+    }
+  ],
+  "flag_profiles": [
+    {"id": "ROK_1949_TAEGEUK", "country_id": "ROK", "valid_from": "1949-10-15", "required_traits": {"taegeuk": true, "trigram_count": 4}, "basis": "1949 national flag standardization; authored semantic flag pattern, not an archival geometric certificate."},
+    {"id": "US_1950_48_STAR", "country_id": "US", "valid_from": "1912-07-04", "valid_to": "1959-07-03", "required_traits": {"star_count": 48, "star_rows": 6, "star_columns": 8}, "basis": "Contemporary Korean War United States flag, 48 stars and 13 stripes."},
+    {"id": "US_MODERN_50_STAR", "country_id": "US", "valid_from": "1960-07-04", "required_traits": {"star_count": 50, "star_rows": 9}, "basis": "Negative historical-era test and separate modern counterfactual design; not valid in 1950–1953."},
+    {"id": "DPRK_1948", "country_id": "DPRK", "valid_from": "1948-09-08", "required_traits": {"star_count": 1}, "basis": "Contemporary DPRK national flag; red star in white circle with red, white and blue bands."},
+    {"id": "PRC_1949", "country_id": "PRC", "valid_from": "1949-10-01", "required_traits": {"star_count": 5}, "basis": "One large and four correctly oriented small stars on red, established in 1949."},
+    {"id": "USSR_1936", "country_id": "USSR", "valid_from": "1936-12-05", "valid_to": "1953-07-27", "required_traits": {"hammer_sickle": true, "outlined_star": true, "modern_tricolor": false}, "basis": "Contemporary Soviet red flag family for the Korean War private tests, not the Russian tricolor."},
+    {"id": "RUS_MODERN_TRICOLOR", "country_id": "RUS", "valid_from": "1991-08-22", "required_traits": {"modern_tricolor": true}, "basis": "Separate modern counterfactual identity; deliberately not a USSR historical participation rule."}
+  ],
+  "limitations": [
+    "Participation eligibility does not prove exact historical military unit coordinates or strength.",
+    "Declared flag traits are a contract check; rendered vector design still needs private visual inspection.",
+    "No historical policy is applied to the selected counterfactual public scene.",
+    "No new live historical source retrieval or survey-grade certificate is claimed.",
+    "Soviet aviation month-level chronology must not be presented as newly verified exact-day evidence."
+  ]
+}

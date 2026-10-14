@@ -1,0 +1,43 @@
+{
+  "schema": "MAP_TERRAIN_OCEAN_FOCUSED_TEST_V4",
+  "status": "PASS",
+  "command": [
+    "node",
+    "--test",
+    "--test-isolation=none",
+    "--test-reporter=tap",
+    "tests/reference_ocean_material_v4.test.mjs",
+    "tests/reference_terrain_material_v4.test.mjs"
+  ],
+  "tests": 6,
+  "pass": 6,
+  "fail": 0,
+  "meaningfulChecks": [
+    "Removed procedural ocean animation cannot be re-enabled by profile.",
+    "Invalid source/coast/chroma inputs rejected.",
+    "No new ocean resource or geography ownership.",
+    "No synthetic terrain or inferred-elevation profile escape hatch.",
+    "Relief and warm material bounds enforced.",
+    "Default nested profiles remain immutable under copied scene validation."
+  ],
+  "modules": [
+    {
+      "file": "web/map_infographic_v1/reference_terrain_material_v4.mjs",
+      "sha256": "fa44852e518b7e73cea5acaa6493f2ced405883de1ddb362f3251339d1909980",
+      "bytes": 16247
+    },
+    {
+      "file": "web/map_infographic_v1/reference_ocean_material_v4.mjs",
+      "sha256": "1ac6dad69b5a5ccaf1d94fa351eaef98172de76ef7fdfe0acee63c2885a204db",
+      "bytes": 4733
+    }
+  ],
+  "gpuExecuted": false,
+  "visualQualityPassClaimed": false,
+  "nonVisualInitializationFailureFix": {
+    "ownedResourceCleanupAddedForPostRestoreGLError": true,
+    "normalShadersOrProfilesChanged": false,
+    "validation": "Node syntax check and six direct focused tests PASS; source-reviewed resource lifecycle",
+    "actualGLErrorFaultInjectionClaimed": false
+  }
+}

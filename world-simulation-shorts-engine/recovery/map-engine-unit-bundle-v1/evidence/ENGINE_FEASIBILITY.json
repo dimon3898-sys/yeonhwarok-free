@@ -1,0 +1,128 @@
+{
+  "schema": "MAP_ENGINE_BOUNDED_FEASIBILITY_V1",
+  "status": "EXISTING_ENGINE_EXTENSION_SUPPORTED_NO_SECOND_ENGINE_REQUIRED",
+  "reviewedAtUtc": "2026-10-14T00:09:40.667085+00:00",
+  "protectedParentCommit": "882bd8e939010962b40a81c268937e7f7e88bb62",
+  "safetyCheckpointCommit": "daf2371f3672a3b12147fed42c55c32d3647bf59",
+  "codeActuallyInspected": [
+    {
+      "file": "web/map_infographic_v1/renderer.mjs",
+      "sha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+      "bytes": 53468
+    },
+    {
+      "file": "web/map_infographic_v1/reference_terrain_material_v3.mjs",
+      "sha256": "d788c884e677d5655f4e0d1b550567c618d9fcd05ed5d536a6aa7296aeeac839",
+      "bytes": 15295
+    },
+    {
+      "file": "web/map_infographic_v1/reference_ocean_material_v3.mjs",
+      "sha256": "a14781ae8eb1c4380e28d36f2b876912d77cce8a90aa023faba949aadfb72395",
+      "bytes": 5717
+    },
+    {
+      "file": "web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+      "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+      "bytes": 18791
+    },
+    {
+      "file": "web/map_infographic_v1/map_visual_gpu_adapter_v3.mjs",
+      "sha256": "322efd6d48e3f05243fa786386e8dd2ef1f08204dd8e0a0e6190a9808ead0f1b",
+      "bytes": 17775
+    }
+  ],
+  "actualVisualsInspected": [
+    {
+      "file": "recovery/map-visual-upgrade-v1/evidence/native_probe/074.png",
+      "sha256": "68915d7f76f3144a33c8a1597ef03d11059b3204d48075603064ecd8e7611ee5",
+      "bytes": 2811260
+    },
+    {
+      "file": "recovery/map-visual-upgrade-v1/public-review/COMPARE_05_END.png",
+      "sha256": "cf99baf8f6f346a6ab47edc3c292718dc494b5c0c7a200d51242ebcb771a7ea3",
+      "bytes": 3401290
+    }
+  ],
+  "observedBaselineGaps": {
+    "terrain": "Coarse broad ridges and local tonal treatment read as bumpy emboss; selective gold is weak.",
+    "ocean": "Regular diagonal analytical surface pattern is visible.",
+    "frontier": "Actual-boundary highlight works but is faint and can be partially occluded by units.",
+    "units": "Compact original infantry has weak faction identification."
+  },
+  "nativeCapabilities": {
+    "heightSource": "Existing optional validated R32F EPSG:4326 metres descriptor; real licensed coverage only.",
+    "heightEvaluator": "Existing explicit bilinear texelFetch and 3x3 sparse output-footprint-aware height sampling.",
+    "normalEvaluator": "Existing geographic central derivatives, WGS84 east/north distances; no inferred RGB height.",
+    "physicalLighting": "Existing corrected ambient/diffuse and frozen direction with real DEM normals.",
+    "diagnostics": {
+      "mode7": "Existing normalized light framebuffer output",
+      "mode9": "Existing real DEM footprint weight",
+      "mode10": "Existing actual DEM normals framebuffer output"
+    },
+    "reusePath": "With an acquired admitted real Korea DEM, a separate material wrapper could sample genuine native light/normal outputs under the same camera; do not duplicate the evaluator.",
+    "nativeSourceChangeRequired": false
+  },
+  "dataLimit": {
+    "classification": "DATA_LIMITED_NOT_ARCHITECTURE_LIMITED",
+    "existingKoreaSource": {
+      "file": "web/flat_assets/natural_earth_1_east_asia.png",
+      "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+      "bytes": 13947958
+    },
+    "sourceType": "Licensed Natural Earth I baked shaded relief and water RGB; not a DEM.",
+    "nativeKoreaApproxDimensions": [
+      408,
+      579
+    ],
+    "realKoreaDEMAvailable": false,
+    "existingSuezHeightCoverage": [
+      32,
+      29,
+      34,
+      31
+    ],
+    "suezHeightReused": false,
+    "heightFromRGB": false,
+    "newDEMResearchOrDownloadPerformed": false,
+    "photorealParityAvailable": false
+  },
+  "safeSelectedImplementation": {
+    "secondEngineCreated": false,
+    "terrain": "New V4 source material only: source chroma .78, lower local tonal emboss .55, restrained warm bright faces .15. Geometry, licensed raster and projection unchanged.",
+    "ocean": "New V4 source tone/chroma and actual GIS coastal neighbourhood only. Removed analytic ripple, glint and phase drift; no synthetic water noise or extra resources.",
+    "frontier": "Reuse same evaluated control field and land triangles; new profile styling only, never a separate moving line path.",
+    "goldLightingClaim": "Artistic tint of actual baked bright faces; no physical DEM lighting claimed.",
+    "camera": "Reuse existing camera/presentation adapter unchanged.",
+    "runtimeSnapshot": "RGB8 copy of newly rendered actual terrain framebuffer; never reference video sampled as background."
+  },
+  "separateRiskyBranch": {
+    "status": "NOT_STARTED_DATA_MISSING",
+    "reason": "Full elevation-based lighting requires a licensed, geographically registered Korea DEM. Missing data does not justify replacing the engine.",
+    "forbiddenAlternatives": [
+      "invented elevation",
+      "height from source RGB",
+      "Suez DEM reused over Korea",
+      "unlicensed photoreal assets",
+      "Final or prior Candidate source edits"
+    ]
+  },
+  "baselineOfflinePerformance": {
+    "sourceReport": {
+      "file": "recovery/map-visual-upgrade-v1/evidence/proof/REPORT.json",
+      "sha256": "6eea0f1d10dd8e7849b2df213dcacd0a82606b3c444432ec7aeb4ade39d26534",
+      "bytes": 25134085
+    },
+    "frames": 150,
+    "completedRenderWallMs": {
+      "minimum": 789,
+      "mean": 906.9240000002583,
+      "maximum": 2253.5999999940395
+    },
+    "completionMeasuredAfterGlFinish": true,
+    "realTime30fpsClaimed": false,
+    "output30fpsIsEncodingTimeline": true
+  },
+  "currentNewImplementationGPUStatus": "PENDING_ROOT_NATIVE_PROBE",
+  "qualityPassClaimed": false,
+  "noSourceOrAssetMutation": true
+}
