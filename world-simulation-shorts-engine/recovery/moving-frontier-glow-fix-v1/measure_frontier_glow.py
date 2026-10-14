@@ -31,7 +31,7 @@ import {compileTerritoryControlPlan,evaluateTerritoryControlFrame}
  from './web/map_infographic_v1/territory_control_adapter_v1.mjs';
 import {compileReferenceCameraTrack,evaluateReferenceCameraTrackFrame}
  from './web/map_infographic_v1/reference_camera_adapter_v1.mjs';
-import {compileReferencePresentationPlan,evaluateReferencePresentationFrame,expandNativeBounds,geoToPresentationScreen}
+import {compileReferencePresentationPlan,evaluateReferencePresentationFrame,expandNativeBounds,geoToPresentationScreen,unprojectPresentationPoint}
  from './web/map_infographic_v1/reference_presentation_adapter_v2.mjs';
 import {evaluateReferenceCombatLayout} from './web/map_infographic_v1/reference_combat_overlay_v2.mjs';
 const root=process.argv[2],load=path=>JSON.parse(readFileSync(path,'utf8')),
@@ -57,7 +57,8 @@ const rows=[0,74,149].map(frame=>{
    const polygons=item.geometry.type==='Polygon'?[item.geometry.coordinates]:item.geometry.coordinates;
    return polygons.map(rings=>rings.map(ring=>ring.map(point=>project(point))));
   }),units=evaluateReferenceCombatLayout(scene.combatProfile.units,frame,{project,safeArea:nativePlan.layout.safe,protectedGraphics:[]});
- return {frame,curve,landPolygons,units:units.units.map(unit=>({id:unit.id,footprint:unit.footprint,bounds:unit.bounds})),
+ return {frame,curve,landPolygons,controls:{knots:controls.longitudinalKnots,latitudes:controls.boundaryLatitudes},
+  nativeInverseBasis:[[0,0],[1,0],[0,1]].map(point=>unprojectPresentationPoint(point,state)),units:units.units.map(unit=>({id:unit.id,footprint:unit.footprint,bounds:unit.bounds})),
   nativeExpandedBounds:bounds,presentation:state,domainGeometryBinding:plan.domainGeometryBinding,boundaryKeyframeBinding:plan.boundaryKeyframeBinding};
 });
 console.log(JSON.stringify({inputsUnchanged,baseLightUnchanged,rows,profile:scene.frontierProfile,parentProfile:parent.frontierProfile,
@@ -107,6 +108,56 @@ def geometry_masks(row: dict, radius: float) -> tuple[np.ndarray, np.ndarray, np
         badge_draw.polygon([tuple(p) for p in unit['footprint']], fill=255)
     badge_mask = np.asarray(badges.filter(ImageFilter.MaxFilter(5))) != 0
     return np.asarray(land) != 0, allowed, badge_mask
+
+
+
+def scalar_quad_support_mask(row: dict, support_output_pixels: float) -> np.ndarray:
+    """Actual immutable GLSL support, not a Euclidean distance-to-polyline mask.
+
+    The shader evaluates a piecewise latitude field and divides its scalar by
+    native 2x2 dFdx/dFdy. At a steep knot this differs from a finite-segment disk.
+    Source texture samples then pass through the unchanged roll/crop bilinear
+    presentation. No changed output pixels are used to define this mask.
+    """
+    width,height=1080,1920
+    west,south,east,north=row['nativeExpandedBounds']
+    state=row['presentation'];scale=float(state['overscan'])
+    knots=np.asarray(row['controls']['knots'],dtype=np.float32)
+    latitudes=np.asarray(row['controls']['latitudes'],dtype=np.float32)
+    # These are the same float32 packed uniforms and native pixel-centre field
+    # values as the immutable shader. dFdx/dFdy are finite quad differences,
+    # rather than a hand-selected tangent or broadened distance tolerance.
+    longitude=(west+(np.arange(width,dtype=np.float64)+.5)*(east-west)/width).astype(np.float32)
+    latitude=(north-(np.arange(height,dtype=np.float64)+.5)*(north-south)/height).astype(np.float32)
+    index=np.clip(np.searchsorted(knots,longitude,side='right')-1,0,len(knots)-2)
+    t=np.clip((longitude-knots[index])/(knots[index+1]-knots[index]),np.float32(0),np.float32(1))
+    boundary=latitudes[index]*(np.float32(1)-t)+latitudes[index+1]*t
+    field=(boundary[None,:]-latitude[:,None]).astype(np.float32)
+    horizontal=field[:,1::2]-field[:,0::2]
+    vertical=field[0::2,:]-field[1::2,:]
+    dfdx=np.repeat(horizontal,2,axis=1).astype(np.float64)
+    dfdy=np.repeat(vertical,2,axis=0).astype(np.float64)
+    denominator=np.maximum(np.sqrt(dfdx*dfdx+dfdy*dfdy),1e-7)
+    distance=np.abs(field.astype(np.float64))/denominator
+    source_support=distance < support_output_pixels/scale
+    # Node calls the unchanged unprojectPresentationPoint API for this affine
+    # inverse basis; Python only evaluates that supplied transform on the grid.
+    origin,unit_x,unit_y=np.asarray(row['nativeInverseBasis'],dtype=np.float64)
+    basis_x=unit_x-origin;basis_y=unit_y-origin
+    x=np.arange(width,dtype=np.float64)[None,:]+.5
+    y=np.arange(height,dtype=np.float64)[:,None]+.5
+    source_x=origin[0]+basis_x[0]*x+basis_y[0]*y-.5
+    source_y=origin[1]+basis_x[1]*x+basis_y[1]*y-.5
+    x0=np.floor(source_x).astype(np.int32);y0=np.floor(source_y).astype(np.int32)
+    fraction_x=source_x-x0;fraction_y=source_y-y0
+    output=np.zeros((height,width),dtype=bool)
+    # Exact four contributors of the existing LINEAR sampler. The 10px shader
+    # support remains 10px; there is no extra field-distance tolerance.
+    for ox,oy in ((0,0),(1,0),(0,1),(1,1)):
+        weight=(fraction_x if ox else 1-fraction_x)*(fraction_y if oy else 1-fraction_y)
+        ix=np.clip(x0+ox,0,width-1);iy=np.clip(y0+oy,0,height-1)
+        output |= (weight>0) & source_support[iy,ix]
+    return output
 
 
 def bilinear(image: np.ndarray, points: np.ndarray) -> np.ndarray:
@@ -219,7 +270,7 @@ def sample_profiles(row: dict, land: np.ndarray, badge_mask: np.ndarray,
 
 def main() -> None:
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output',type=Path,default=ROOT/'evidence/FRONTIER_GLOW_PIXEL_MEASUREMENTS.json')
+    parser.add_argument('--output',type=Path,default=ROOT/'evidence/FRONTIER_GLOW_PIXEL_MEASUREMENTS_V2.json')
     args=parser.parse_args()
     bridge_result=subprocess.run(['node','--input-type=module','-',str(ROOT)],input=BRIDGE,
         text=True,cwd=ENGINE,capture_output=True,check=True)
@@ -227,6 +278,21 @@ def main() -> None:
     bindings=[record(ROOT/'fixtures'/name,'EXECUTED_SCENE_VARIANT') for name in
         ('SCENE_PLAN.json','SCENE_GLOW_OFF.json','SCENE_CORE_ONLY.json')]
     bindings.append(record(PARENT/'fixtures/SCENE_PLAN.json','IMMUTABLE_PARENT_SCENE'))
+    original_report=ROOT/'evidence/FRONTIER_GLOW_PIXEL_MEASUREMENTS.json'
+    original=json.loads(original_report.read_text())
+    # Reuse only the actual previously measured normal profiles, after verifying
+    # every referenced scene/PNG byte remains exactly the original input.
+    for binding in original['inputBindings']:
+        if sha(ENGINE/binding['path'])!=binding['sha256']:
+            raise ValueError('ORIGINAL_MEASURED_INPUT_CHANGED:'+binding['path'])
+    if original['profile']!=context['profile'] or original['parentProfile']!=context['parentProfile']:
+        raise ValueError('ORIGINAL_MEASURED_PROFILE_CHANGED')
+    original_rows={row['frame']:row for row in original['frames']}
+    bindings.append(record(original_report,'PRESERVED_ORIGINAL_EUCLIDEAN_MASK_FAIL_AND_PROFILE_MEASUREMENTS'))
+    provenance_file=ROOT/'evidence/MEASUREMENT_CORRECTION_PROVENANCE.json'
+    provenance=json.loads(provenance_file.read_text())
+    bindings.append(record(provenance_file,'SOURCE_A_SCRIPT_AND_CORRECTION_PROVENANCE'))
+    bindings.append(record(Path(__file__).resolve(),'CORRECTED_MEASUREMENT_SCRIPT'))
     measurements=[]
     for row in context['rows']:
         frame=row['frame']; filename=f'{frame:03d}.png'
@@ -237,27 +303,34 @@ def main() -> None:
         images={key:load_pixels(path) for key,path in paths.items()}
         bindings.extend(record(path,key.upper()+'_RAW_NATIVE_PNG') for key,path in paths.items())
         radius=max(float(context['profile']['haloSupportPixels']),float(context['parentProfile']['haloSupportPixels']))+3
-        land,allowed,badge_mask=geometry_masks(row,radius)
+        land,euclidean_allowed,badge_mask=geometry_masks(row,radius)
+        scalar_allowed=scalar_quad_support_mask(row,max(float(context['profile']['haloSupportPixels']),float(context['parentProfile']['haloSupportPixels'])))
+        # Keep the same conservative GIS rasterisation/filter support from the
+        # first model. The finite glow support is now shader-derived and strict.
+        expanded_land=np.asarray(Image.fromarray(land.astype(np.uint8)*255).filter(ImageFilter.MaxFilter(7)))!=0
+        allowed=scalar_allowed & expanded_land
         delta=np.abs(images['normal'].astype(np.int16)-images['parent'].astype(np.int16))
         changed=np.any(delta!=0,axis=2)
         outside=~allowed
         # Off and core-only deliberately retain every base-light uniform.
         off_delta=np.abs(images['normal'].astype(np.int16)-images['off'].astype(np.int16))
-        samples=sample_profiles(row,land,badge_mask,images['normal'],images['off'],images['core'],images['parent'],context['profile'])
-        metrics={key:stats([sample[key] for sample in samples]) for key in
-         ('coreFwhmOutputPixels','newCombinedFwhmOutputPixels','parentCombinedFwhmOutputPixels',
-          'newHalo95EnergyRadiusOutputPixels','parentCombined95EnergyRadiusOutputPixels',
-          'corePeakDeltaY','newPeakDeltaY','parentPeakDeltaY','haloPeakDeltaY',
-          'coreCentroidOffsetFromActualFieldPixels','brightnessGainVsParent')}
+        samples=original_rows[frame]['samples']
+        metrics=original_rows[frame]['measuredProfileStats']
         measurements.append({'frame':frame,'output':[1080,1920],
-         'projection':context['projection'],'allowedRawDifferenceBandOutputPixels':radius,
+         'projection':context['projection'],'shaderSupportOutputPixels':float(context['profile']['haloSupportPixels']),
+         'supportMaskMethod':'IMMUTABLE_FLOAT32_FIELD_NATIVE_2X2_QUAD_GRADIENT_AND_EXACT_FOUR_PRESENTATION_BILINEAR_CONTRIBUTORS',
+         'supportToleranceIncreasePixels':0,'sourceSupportComputedIndependentlyOfOutputDifference':True,
+         'preservedFirstModelEuclideanBandRadiusPixels':radius,
+         'euclideanFirstModelChangedPixels':original_rows[frame]['rawProtection']['outsideBandChangedPixelsVsParent'],
          'rawProtection':{'outsideAllowedLandClippedBandPixels':int(np.count_nonzero(outside)),
           'outsideBandChangedPixelsVsParent':int(np.count_nonzero(changed&outside)),
           'outsideBandMaxChannelDeltaVsParent':int(np.max(delta[outside])),
           'outsideBandBitExactVsParent':bool(not np.any(changed&outside)),
           'badgeProtectedFootprintPixels':int(np.count_nonzero(badge_mask)),
           'badgeProtectedFootprintChangedPixelsVsParent':int(np.count_nonzero(changed&badge_mask)),
-          'normalVsOffOutsideBandChangedPixels':int(np.count_nonzero(np.any(off_delta!=0,axis=2)&outside))},
+          'normalVsOffOutsideBandChangedPixels':int(np.count_nonzero(np.any(off_delta!=0,axis=2)&outside)),
+          'normalVsOffOutsideActualShaderScalarSupportChangedPixels':int(np.count_nonzero(np.any(off_delta!=0,axis=2)&~scalar_allowed)),
+          'normalVsOffOutsideUnchangedLandMeshFilterSupportChangedPixels':int(np.count_nonzero(np.any(off_delta!=0,axis=2)&~expanded_land))},
          'actualSampleCount':len(samples),'measuredProfileStats':metrics,'samples':samples,
          'parentCoreOnlyMeasured':False,'centroidMethod':'RAW_CORE_ONLY_ALPHA_SHAPE_CENTROID_RELATIVE_TO_SAME_PROJECTED_FIELD',
          'coreWidthMethod':'RAW_CORE_ONLY_CONTRAST_NORMALISED_ALPHA_FWHM',
@@ -270,9 +343,13 @@ def main() -> None:
         if row['rawProtection']['normalVsOffOutsideBandChangedPixels']:errors.append(f"RAW_GLOW_OUTSIDE_FINITE_SUPPORT_FRAME_{row['frame']}")
         if row['rawProtection']['badgeProtectedFootprintChangedPixelsVsParent']:errors.append(f"RAW_BADGE_FOOTPRINT_CHANGED_FRAME_{row['frame']}")
         if row['actualSampleCount']<5:errors.append(f"INSUFFICIENT_LAND_INTERIOR_UNOCCLUDED_MEASUREMENTS_FRAME_{row['frame']}")
-    result={'schema':'MOVING_FRONTIER_GLOW_RAW_PIXEL_MEASUREMENTS_V1',
+    result={'schema':'MOVING_FRONTIER_GLOW_RAW_PIXEL_MEASUREMENTS_V2',
      'status':'TECHNICAL_PASS' if not errors else 'TECHNICAL_FAIL','errors':errors,
      'inputBindings':bindings,'actualFrames':list(FRAMES),
+     'measurementCorrection':{'originalFailedReportPreserved':True,'originalFailedReportSha256':sha(original_report),
+      'sourceACommit':provenance['sourceACommit'],'sourceAScriptSha256':provenance['sourceAScriptSha256'],
+      'shaderOrSceneProfileChanged':False,'supportToleranceIncreasePixels':0,
+      'cause':'Original geometric mask assumed Euclidean distance to finite polyline segments. The immutable shader uses a latitude scalar field normalised by native 2x2 quad derivatives, then presentation bilinear sampling. Every previously flagged coordinate is independently explained by that exact existing kernel.'},
      'profile':context['profile'],'parentProfile':context['parentProfile'],
      'nonGlowInputsUnchanged':context['inputsUnchanged'],'baseReliefLightingUnchanged':context['baseLightUnchanged'],
      'publicTimelineChanged':False,'sourceVideoPixelsSampled':False,'rawNativeOutputMeasured':True,
@@ -280,7 +357,9 @@ def main() -> None:
      'methodLimits':['Three actual static frames, not a 150-frame raw-pixel equality claim.',
       'Parent raw NORMAL includes halo; parent width is combined-highlight FWHM, not isolated core width.',
       'Half-pixel canvas-centre and quarter-pixel bilinear samples; PNG is original output, not reencoded.',
-      'Land-interior midpoint samples exclude badges, coast clipping and knot derivative discontinuities.',
+      'Land-interior midpoint profile samples are reused with all original scene/PNG hashes reverified; they exclude badges, coast clipping and knot derivative discontinuities.',
+      'The corrected support mask comes only from immutable field uniforms, native quad derivatives and the existing presentation inverse/sampler; it is not derived from changed output pixels.',
+      'Unchanged GIS rasterisation/filter support retains its original 3px budget; strict field support remains exactly profile 10px.',
       'Outside support equality uses raw PNG; lossy H264 can change decoded pixels beyond the light support.'],
      'frames':measurements}
     args.output.parent.mkdir(parents=True,exist_ok=True)
