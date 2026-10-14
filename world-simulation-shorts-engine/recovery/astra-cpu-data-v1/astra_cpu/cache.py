@@ -288,11 +288,17 @@ class FileCache:
     Corruption raises CacheError (a DataError); repair and garbage collection are
     explicit future operations. Lock files are never unlinked or shared by FD.
     """
-    def __init__(self, root, max_bytes=MAX_BYTES):
+    def __init__(self, root, max_bytes=MAX_BYTES, *, create=True):
         if isinstance(max_bytes, bool) or not isinstance(max_bytes, int) or not 0 < max_bytes <= MAX_BYTES:
             raise CacheError("cache byte limit must be 1..64MiB")
+        if not isinstance(create, bool):
+            raise CacheError("cache create flag must be an explicit boolean")
         self.root = Path(root).resolve()
         self.max_bytes = max_bytes
+        # This flag controls constructor initialization, not authorization for
+        # later writes. Callers enforce their cache read/write mode separately.
+        if not create:
+            return
         for kind in ("raw", "derived"):
             (self.root / "blobs" / kind).mkdir(parents=True, exist_ok=True)
             (self.root / "lookups" / kind).mkdir(parents=True, exist_ok=True)

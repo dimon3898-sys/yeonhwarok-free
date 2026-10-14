@@ -80,7 +80,8 @@ class SceneConfigTests(unittest.TestCase):
             result = prepare_scene(self.scene, sources)
         self.assertTrue(result.enabled)
         self.assertEqual(set(result.source_bindings), {"terrain", "bathymetry", "surfaceTexture"})
-        self.assertIs(result.source_bindings["terrain"], sources["fixture-terrain"])
+        self.assertEqual(result.source_bindings["terrain"], sources["fixture-terrain"])
+        self.assertIsNot(result.source_bindings["terrain"], sources["fixture-terrain"])
         self.assertFalse(result.source_bindings["terrain"].license_verified)
         self.assertEqual(result.request.bbox, (-74, -35, -70, -31))
         self.assertEqual(result.request.target_ground_resolution, 750)
@@ -99,6 +100,32 @@ class SceneConfigTests(unittest.TestCase):
         self.assertEqual(set(result.source_bindings), {"bathymetry"})
         self.assertEqual(split_dateline(result.request.bbox), [(179, -10, 180.0, 10), (-180.0, -10, -179, 10)])
         self.assertFalse(result.gpu_activation)
+
+    def test_source_bindings_snapshot_nested_metadata_and_sidecars(self):
+        spec = source_spec("surfaceTexture")
+        spec.metadata["nested"] = {"registration": "original", "nativeSpacing": [.01, .01]}
+        sidecar = {"relative_path": "fixture/surface.pgw", "sha256": sha256(b"original sidecar"),
+                   "metadata": {"format": "original-worldfile"}}
+        from dataclasses import replace
+        spec = replace(spec, sidecars=(sidecar,))
+        sources = {spec.source_id: spec}
+        scene = dict(self.scene, mapData=enabled_map("surfaceTexture"))
+        prepared = prepare_scene(scene, sources)
+        binding = prepared.source_bindings["surfaceTexture"]
+        self.assertEqual(binding, spec)
+        self.assertIsNot(binding, spec)
+        self.assertIsNot(binding.metadata, spec.metadata)
+        self.assertIsNot(binding.sidecars[0], spec.sidecars[0])
+        spec.metadata["nested"]["registration"] = "changed"
+        spec.metadata["nested"]["nativeSpacing"][0] = 99
+        spec.sidecars[0]["sha256"] = sha256(b"changed sidecar")
+        spec.sidecars[0]["metadata"]["format"] = "changed-worldfile"
+        self.assertNotEqual(binding, sources[spec.source_id])
+        self.assertEqual(binding.metadata["nested"], {"registration": "original", "nativeSpacing": [.01, .01]})
+        self.assertEqual(binding.sidecars[0]["sha256"], sha256(b"original sidecar"))
+        self.assertEqual(binding.sidecars[0]["metadata"]["format"], "original-worldfile")
+        binding.metadata["nested"]["registration"] = "binding-only change"
+        self.assertEqual(spec.metadata["nested"]["registration"], "changed")
 
     def test_unknown_source_version_role_and_registry_identity_reject(self):
         settings = enabled_map()

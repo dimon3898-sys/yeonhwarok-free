@@ -7,6 +7,8 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass, field
 import json
 from pathlib import Path
+from pathlib import PurePosixPath
+import re
 
 from .cache import CacheError, CacheRequest, FileCache
 from .model import DataError, RasterData, sha256, split_dateline
@@ -67,9 +69,22 @@ class CpuDataPipeline:
         self.transform_version = implementation_version()
 
     def _raw_reader(self, spec):
+        def asset_path(path):
+            if not isinstance(path,str) or '\\' in path:
+                raise DataError('source/sidecar path must be canonical relative POSIX text')
+            value=PurePosixPath(path)
+            if value.is_absolute() or '..' in value.parts or value.as_posix()!=path:
+                raise DataError('unsafe source/sidecar asset path')
+        asset_path(spec.relative_path)
+        if spec.data_class=='land_surface_texture':
+            if len(spec.sidecars)!=2 or {PurePosixPath(s['relative_path']).suffix.lower() for s in spec.sidecars}!={'.pgw','.prj'}:
+                raise DataError('surface source must declare exactly one PGW and one PRJ sidecar')
         identities = {spec.relative_path: spec.sha256}
         for sidecar in spec.sidecars:
             path, digest = sidecar['relative_path'], sidecar['sha256']
+            asset_path(path)
+            if not isinstance(digest,str) or re.fullmatch('[0-9a-f]{64}',digest) is None:
+                raise DataError('sidecar digest must be lowercase SHA-256')
             if path in identities:
                 raise DataError('duplicate source/sidecar path')
             identities[path] = digest

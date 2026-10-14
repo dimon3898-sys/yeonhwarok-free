@@ -512,6 +512,41 @@ class CacheHardeningTests(unittest.TestCase):
     lookup = RawCacheTests.lookup
     blob = RawCacheTests.blob
 
+    def test_create_false_absent_cache_returns_misses_without_creating_directories(self):
+        root = Path(self.temp.name) / "absent" / "cache"
+        with patch.object(Path, "mkdir", side_effect=AssertionError("read-only construction cannot mkdir")):
+            cache = FileCache(root, create=False)
+            self.assertIsNone(cache.get_raw(self.request))
+            self.assertIsNone(cache.get_derived(replace(self.request, transform_version="PARSE_V1")))
+        self.assertFalse(root.parent.exists())
+
+    def test_create_false_incomplete_cache_preserves_existing_directory_contents(self):
+        root = Path(self.temp.name) / "incomplete-cache"
+        root.mkdir()
+        marker = root / "retained.txt"
+        marker.write_bytes(b"user-created existing marker")
+        with patch.object(Path, "mkdir", side_effect=AssertionError("no missing cache directories may be created")):
+            cache = FileCache(root, create=False)
+            self.assertIsNone(cache.get_raw(self.request))
+        self.assertEqual(list(root.iterdir()), [marker])
+        self.assertEqual(marker.read_bytes(), b"user-created existing marker")
+
+    def test_create_false_reads_existing_raw_and_derived_cache_without_initialization(self):
+        self.cache.put_raw(self.request, RAW)
+        derived = replace(self.request, transform_version="PARSE_V1")
+        self.cache.put_derived(derived, raster_fixture())
+        before = {path.relative_to(self.cache.root) for path in self.cache.root.rglob("*")}
+        with patch.object(Path, "mkdir", side_effect=AssertionError("existing-cache reads cannot mkdir")):
+            cache = FileCache(self.cache.root, create=False)
+            self.assertEqual(cache.get_raw(self.request).data, RAW)
+            np.testing.assert_array_equal(cache.get_derived(derived).values, raster_fixture().values)
+        self.assertEqual(before, {path.relative_to(self.cache.root) for path in self.cache.root.rglob("*")})
+
+    def test_create_flag_rejects_truthy_non_boolean_values(self):
+        for value in (1, "false", None):
+            with self.subTest(value=value), self.assertRaises(CacheError):
+                FileCache(Path(self.temp.name) / "bad-create", create=value)
+
     def test_threads_sharing_one_cache_instance_are_singleflight(self):
         barrier, calls, results = threading.Barrier(6), [], Queue()
 

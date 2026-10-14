@@ -212,5 +212,7 @@ def prepare_scene(scene: dict, sources=None) -> ScenePreparation:
             raise DataError(f"source version mismatch for {role}; explicit pinned version required")
         if spec.data_class != _ROLES[role]:
             raise DataError(f"source data class does not match selected {role} role")
-        bindings[role] = spec
+        # SourceSpec is frozen only at its top level. Snapshot nested metadata
+        # and sidecars so catalog edits cannot silently alter validated bindings.
+        bindings[role] = deepcopy(spec)
     return ScenePreparation(renderer, fingerprint, deepcopy(settings), True, request, bindings, cache_policy)

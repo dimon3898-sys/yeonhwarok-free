@@ -112,6 +112,49 @@ class PipelineRealDataTests(unittest.TestCase):
         self.catalog.sources[key]=replace(self.catalog.sources[key],source_version='changed')
         with self.assertRaises(ValueError):self.pipeline.prepare(prepared)
 
+    def test_prepared_binding_snapshot_detects_in_place_catalog_metadata_change(self):
+        scene=json.loads((ROOT/'fixtures/LOCAL_DATA_SCENE.json').read_bytes())
+        prepared=prepare_scene(scene,self.catalog)
+        key=next(iter(self.catalog.sources))
+        self.catalog.sources[key].metadata['provenance']='changed after preparation'
+        with self.assertRaises(ValueError):self.pipeline.prepare(prepared)
+
+    def test_read_only_cli_missing_cache_performs_no_cache_directory_creation(self):
+        scene=json.loads((ROOT/'fixtures/LOCAL_DATA_SCENE.json').read_bytes())
+        scene['mapData']['cache']['mode']='read_only'
+        scene_path=Path(self.temp.name)/'read-only.json'
+        scene_path.write_text(json.dumps(scene))
+        cache=Path(self.temp.name)/'no-cache-created'
+        result=subprocess.run(['/usr/bin/python3','-B',str(ROOT/'prepare_data.py'),'--scene',str(scene_path),
+                               '--archive',str(ARCHIVE),'--cache-dir',str(cache),'--output',str(Path(self.temp.name)/'readonly-export'),
+                               '--accept-recorded-license-evidence'],capture_output=True,check=True,timeout=10)
+        self.assertFalse(cache.exists())
+        self.assertEqual(set(json.loads(result.stdout)['statusByRole'].values()),{'available'})
+
+    def test_immutable_publication_rejects_changed_output_and_directory_aliases(self):
+        from prepare_data import _publish, _validate_paths
+        output=Path(self.temp.name)/'atomic.bin'
+        _publish(output,b'original')
+        with self.assertRaises(ValueError):_publish(output,b'changed')
+        self.assertEqual(output.read_bytes(),b'original')
+        self.assertEqual(list(Path(self.temp.name).glob('.tmp-*')),[])
+        input_file=Path(self.temp.name)/'inputs/scene.json'
+        for cache,out in ((None,Path(self.temp.name)/'inputs'),
+                          (Path(self.temp.name)/'inputs',Path(self.temp.name)/'output'),
+                          (Path(self.temp.name)/'same',Path(self.temp.name)/'same/subdirectory')):
+            with self.assertRaises(ValueError):_validate_paths(input_file,ARCHIVE,cache,out)
+
+    def test_raw_hash_reuse_cannot_bypass_invalid_surface_sidecar_contract(self):
+        spec=next(s for s in self.catalog.sources.values() if s.data_class=='land_surface_texture')
+        self.assertEqual(self.pipeline.provide(spec.source_id,self.request).status,'available')
+        pgw=next(s for s in spec.sidecars if s['relative_path'].endswith('.pgw'))
+        bad_path=dict(pgw,relative_path=pgw['relative_path'].replace('/','/./',1))
+        duplicate=dict(pgw,relative_path='alternative.pgw')
+        for sidecars in (tuple(bad_path if s is pgw else s for s in spec.sidecars),spec.sidecars+(duplicate,)):
+            self.catalog.sources[spec.source_id]=replace(spec,sidecars=sidecars)
+            for mode in ('bypass','read_write'):
+                self.assertEqual(CpuDataPipeline(self.catalog,self.cache,mode=mode).provide(spec.source_id,self.request).status,'invalid_data')
+
     def test_cli_artifacts_are_deterministic_in_a_fresh_process_and_all_hashes_match(self):
         output=Path(self.temp.name)/'export'
         command=['/usr/bin/python3','-B',str(ROOT/'prepare_data.py'),'--scene',str(ROOT/'fixtures/LOCAL_DATA_SCENE.json'),
@@ -119,9 +162,11 @@ class PipelineRealDataTests(unittest.TestCase):
                  '--output',str(output),'--accept-recorded-license-evidence']
         first=subprocess.run(command,check=True,capture_output=True,timeout=20)
         manifest_before=(output/'CPU_PREPARATION_MANIFEST.json').read_bytes()
+        timestamps={file.name:file.stat().st_mtime_ns for file in output.iterdir()}
         second=subprocess.run(command,check=True,capture_output=True,timeout=20)
         self.assertEqual(first.stdout,second.stdout)
         self.assertEqual(manifest_before,(output/'CPU_PREPARATION_MANIFEST.json').read_bytes())
+        self.assertEqual(timestamps,{file.name:file.stat().st_mtime_ns for file in output.iterdir()})
         manifest=json.loads(manifest_before)
         self.assertEqual(len(manifest['artifacts']),3)
         for item in manifest['artifacts']:
