@@ -35,3 +35,7 @@ The current V4 recovery composition is Flat-only; generic source metadata alone 
 Reuse actual territory/control geometry, speed, screen-space glow, marker/unit artwork, camera and timing exactly. Valid glow-off A/B must retain destination terrain-light multiplication and only disable core/halo alpha; the old `frontierEnabled:false` removes both. Stopping-state decay remains a separate fixture, not a fabricated stop at frame149.
 
 Real hardware rendering, seam/LOD flicker, ocean style, gold relief, color contrast, glow synchronization, units and mobile readability remain unexecuted. Resume the original TOTAL MASTER verification/delivery after hardware is supplied. No 14-second expansion, FINAL promotion or video-quality PASS is authorized by this CPU result.
+
+## Concrete resume handoff
+
+Use `prepare_scene` to obtain the unchanged renderer payload, explicit source/request bindings and cache policy. Use `CpuDataPipeline` for local data or the existing acquisition-plan/DownloadManager contracts for permitted live retrieval. Do not recreate source identity, original-byte validation, neutral serialization or raw/derived cache. The saved local CLI fixture is intentionally tiny and never substitutes for full protected-camera coverage. Live Copernicus index/header validation, complete GEBCO coordinate discovery and actual metadata-driven NASA availability remain input prerequisites for regional supplier acquisition; no configured hardware or endpoint access is implied by CPU readiness.
