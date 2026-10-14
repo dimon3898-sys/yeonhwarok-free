@@ -1,0 +1,54 @@
+{
+  "schema": "ASTRA_EXISTING_CPU_REGRESSIONS_V1",
+  "cases": [
+    {
+      "name": "flat_terrain_cache",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_flat_terrain_cache.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "testsRun": 10,
+      "status": "PASS"
+    },
+    {
+      "name": "production_visual_cache",
+      "command": [
+        "/usr/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_production_visual_cache.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "testsRun": 5,
+      "status": "PASS"
+    },
+    {
+      "name": "frontier_cpu",
+      "command": [
+        "node",
+        "recovery/moving-frontier-glow-fix-v1/test_control_frontier_glow.mjs"
+      ],
+      "exitCode": 0,
+      "testsRun": 4,
+      "status": "PASS"
+    }
+  ],
+  "recordedLogsReparsedWithoutRerun": true,
+  "gpuTestsExecuted": false,
+  "vendorNetworkRequestsExecuted": false
+}
