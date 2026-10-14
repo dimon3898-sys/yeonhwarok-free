@@ -1,0 +1,483 @@
+{
+  "artifacts": [
+    {
+      "file": "terrain-00.npz",
+      "role": "terrain",
+      "sha256": "17f5eaf5333dc4ed118a15da3033bcb8a59d2139d22c2666c240b8247502dfea",
+      "sourceId": "copernicus-glo30-aws-2021",
+      "sourceVersion": "2021 release per AWS registry; exact release suffix UNVERIFIED"
+    },
+    {
+      "file": "bathymetry-00.npz",
+      "role": "bathymetry",
+      "sha256": "a74d6fb13ea5048d87d11fb1dc433eafbfe4d85dbf441c5e2cef07eb0da37938",
+      "sourceId": "gebco-2026",
+      "sourceVersion": "GEBCO_2026; source date_created 2026-04-17; released April 2026"
+    },
+    {
+      "file": "surfaceTexture-00.npz",
+      "role": "surfaceTexture",
+      "sha256": "2b6fdbaafd454f59a7044c17ebc5576604027e1d54e2ac09cf8ff0e88b28cd7f",
+      "sourceId": "nasa-bmng-200408-gibs",
+      "sourceVersion": "August 2004 static composite; GIBS ongoing=false"
+    }
+  ],
+  "enabled": true,
+  "gpuActivation": false,
+  "networkRequestsExecuted": false,
+  "rendererPayloadSHA256": "47dd130d4eabd63c013a64b6e38d0d637f2928d1d9dd25de86007c7a3f61c45e",
+  "schema": "ASTRA_CPU_PREPARATION_V1",
+  "sources": {
+    "bathymetry": {
+      "CRS": "EPSG:4326",
+      "SHA-256": "644fe9c1fbd2ef0284145443f645ddb3d08997b29b52cb1803f7a16d0dc38ea1",
+      "attribution": "WORLD ENGINE sample data \u2014 source notices\n\n[Copernicus GLO-30 \u2014 modified regional crop]\nproduced using Copernicus WorldDEM-30 \u00a9 DLR e.V. 2010-2014 and \u00a9 Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\n\nThe organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.\n\n\uc9c0\uc5ed \ud06c\ub86d\ubcf8\uc785\ub2c8\ub2e4. \uc6d0 \uace0\ub3c4\uac12\uc740 \ubcf4\uc874\ud588\uc73c\uba70 \ubcf4\uac04\ud558\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4. \uc6d0\ub77c\uc774\uc120\uc2a4 Article 6\uc758 \ucd9c\ucc98\u00b7\uac00\uacf5 \uace0\uc9c0, \uba74\ucc45, \uacf5\uc2dd \ubcf4\uc99d \uc554\uc2dc \uae08\uc9c0 \ubc0f \ud6c4\uc18d \uc0ac\uc6a9\uc790 \uc758\ubb34\ub97c \uc720\uc9c0\ud558\uc138\uc694. \ub3d9\ubd09 License-COPDEM-30.pdf\ub97c \ud568\uaed8 \uc804\ub2ec\ud558\uc138\uc694.\n\n[GEBCO_2026 \u2014 regional subset]\nGEBCO Bathymetric Compilation Group 2026 (2026). The GEBCO_2026 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals. NERC EDS British Oceanographic Data Centre NOC.\nhttps://doi.org/10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa\nhttps://www.gebco.net/data-products/gridded-bathymetry/terms-of-use\n\uacf5\uc2dd GEBCO \ubd80\ubd84 \uc751\ub2f5\uc758 \uc9c0\uc5ed \ud30c\uc0dd\ubcf8\uc785\ub2c8\ub2e4. \uae30\uad00\uc758 \ubcf4\uc99d\uc744 \uc758\ubbf8\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4. \ud56d\ud574\u00b7\ud574\uc0c1 \uc548\uc804\uc6a9\uc73c\ub85c \uc0ac\uc6a9\ud558\uc9c0 \ub9c8\uc138\uc694.\n\n[NASA Blue Marble: Next Generation]\nNASA Earth Observatory\nImagery accessed through NASA Global Imagery Browse Services (GIBS).\nSource composite: August 2004. Regional WMS image acquired 2026-10-14.\nhttps://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/\nNASA \uc790\ub8cc\uac00 \ud3ec\ud568\ub418\uc5c8\ub2e4\ub294 \ucd9c\ucc98 \ud45c\uc2dc\uc774\uba70, WORLD ENGINE\uc758 \uacb0\uacfc\ub97c NASA\uac00 \uc81c\uc791\u00b7\uac80\uc218\u00b7\ubcf4\uc99d\ud588\ub2e4\ub294 \ub73b\uc774 \uc544\ub2d9\ub2c8\ub2e4.\n\n[\ubc30\ud3ec \uc548\ub0b4]\n\uc774 \uc790\ub8cc\ub85c \ub9cc\ub4e0 \uc0c1\uc5c5 \uc601\uc0c1\u00b7\ud30c\uc0dd \uc5d0\uc14b\uc5d0\ub3c4 \uc801\uc6a9\ub418\ub294 \ucd9c\ucc98 \uace0\uc9c0\ub97c \uc720\uc9c0\ud558\uc138\uc694. \ud574\ub2f9 \uae30\uad00\uc758 \uc9c0\uc9c0\u00b7\ubcf4\uc99d\uc744 \uc554\uc2dc\ud558\uc9c0 \ub9c8\uc138\uc694. \uc815\ud655\ud55c \uc0ac\uc6a9 \uc870\uac74\uc740 \uac01 \uc6d0\ub77c\uc774\uc120\uc2a4/\uacf5\uc2dd \uc9c0\uce68\uc744 \ub530\ub985\ub2c8\ub2e4.\n",
+      "bbox": [
+        128.35,
+        37.349999999999994,
+        128.35833333333332,
+        37.358333333333334
+      ],
+      "coverage": {
+        "absentParts": [],
+        "actualBBoxes": [
+          [
+            128.35,
+            37.349999999999994,
+            128.35833333333332,
+            37.358333333333334
+          ]
+        ],
+        "complete": true,
+        "completenessMeaning": "GRID_EXTENT_ONLY_NOT_GROUND_ACCURACY_OR_NODATA",
+        "paddingApplied": false,
+        "requestedBBox": [
+          128.35,
+          37.35,
+          128.36,
+          37.36
+        ],
+        "sourceBBox": [
+          127.99999999999997,
+          37.0,
+          129.99999999999997,
+          39.0
+        ],
+        "validSampleCount": 4
+      },
+      "error": null,
+      "gpuUploadExecuted": false,
+      "nativeResolution": {
+        "description": "15 arc-second grid; approximately 464 m north-south; not uniform measurement resolution",
+        "sampleSpacingDegrees": [
+          0.004166666666666667,
+          0.004166666666666667
+        ]
+      },
+      "nodata": [
+        null
+      ],
+      "outputResolution": [
+        {
+          "dimensions": [
+            2,
+            2
+          ],
+          "resampling": "NONE",
+          "spacingDegrees": [
+            0.004166666666666674,
+            0.004166666666666674
+          ]
+        }
+      ],
+      "rasters": [
+        {
+          "bbox": [
+            128.35,
+            37.349999999999994,
+            128.35833333333332,
+            37.358333333333334
+          ],
+          "dtype": "<i2",
+          "metadata": {
+            "cropPolicy": "CENTER_IN_HALF_OPEN_BBOX_NO_RESAMPLING",
+            "crs": "EPSG:4326",
+            "defaultFillValue": -32767,
+            "dtype": "int16",
+            "inputSha256": "644fe9c1fbd2ef0284145443f645ddb3d08997b29b52cb1803f7a16d0dc38ea1",
+            "nodata": null,
+            "oceanMaskStatus": "UNRESOLVED",
+            "positive": "up",
+            "quantity": "SIGNED_ELEVATION",
+            "registration": "CELL_CENTER",
+            "requestedBBox": [
+              128.35,
+              37.35,
+              128.36,
+              37.36
+            ],
+            "rowOrder": "SOUTH_TO_NORTH",
+            "sourceAttributes": {
+              "crs": {
+                "epsg_code": "EPSG:4326",
+                "grid_mapping_name": "latitude_longitude",
+                "inverse_flattening": 298.257223563,
+                "semi_major_axis": 6378137.0
+              },
+              "elevation": {
+                "grid_mapping": "crs",
+                "long_name": "Elevation relative to sea level",
+                "standard_name": "height_above_mean_sea_level",
+                "units": "m"
+              },
+              "global": {
+                "Conventions": "CF-1.6",
+                "acquisition_utc": "2026-10-14T00:50:36.557312+00:00",
+                "comment": "Not for navigation. Mean sea level assumption; heterogeneous source datums. Latest errata applies.",
+                "geospatial_bounds": [
+                  128.0,
+                  37.0,
+                  130.0,
+                  39.0
+                ],
+                "geospatial_bounds_crs": "EPSG:4326",
+                "geospatial_bounds_vertical_crs": "EPSG:5831",
+                "geospatial_lat_max": 39.0,
+                "geospatial_lat_min": 37.0,
+                "geospatial_lat_resolution": 0.004166666666666667,
+                "geospatial_lon_max": 130.0,
+                "geospatial_lon_min": 128.0,
+                "geospatial_lon_resolution": 0.004166666666666667,
+                "geospatial_vertical_max": 1613.0,
+                "geospatial_vertical_min": -2124.0,
+                "geospatial_vertical_positive": "up",
+                "geospatial_vertical_units": "m",
+                "history": "Official OPeNDAP ASCII response parsed to NetCDF4. Original signed integer values and returned coordinates preserved. Parent metadata retained separately in GEBCO_2026.das.",
+                "license": "GEBCO public domain terms; attribution required. https://www.gebco.net/data-products/gridded-bathymetry/terms-of-use",
+                "node_offset": 1,
+                "references": "https://doi.org/10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa",
+                "source": "https://dap.ceda.ac.uk/thredds/dodsC/bodc/gebco/global/gebco_2026/ice_surface_elevation/netcdf/GEBCO_2026.nc",
+                "title": "GEBCO_2026 regional subset; locally repackaged without resampling"
+              },
+              "latitude": {
+                "axis": "Y",
+                "standard_name": "latitude",
+                "units": "degrees_north"
+              },
+              "longitude": {
+                "axis": "X",
+                "standard_name": "longitude",
+                "units": "degrees_east"
+              }
+            },
+            "sourceDtype": "int16",
+            "sourceVerticalDatum": "EPSG:5831",
+            "spacing": [
+              0.004166666666666674,
+              0.004166666666666674
+            ],
+            "transform": [
+              128.34999999999997,
+              0.004166666666666674,
+              0.0,
+              37.35,
+              0.0,
+              0.004166666666666674
+            ],
+            "units": "m",
+            "variable": "elevation",
+            "verticalDatum": "Mean sea level assumption; source metadata EPSG:5831; source vertical datums can be heterogeneous",
+            "verticalDatumStatus": "DECLARED_CALLER"
+          },
+          "shape": [
+            2,
+            2
+          ]
+        }
+      ],
+      "sourceId": "gebco-2026",
+      "sourceURL": "https://dap.ceda.ac.uk/thredds/dodsC/bodc/gebco/global/gebco_2026/ice_surface_elevation/netcdf/GEBCO_2026.nc",
+      "sourceVersion": "GEBCO_2026; source date_created 2026-04-17; released April 2026",
+      "status": "available",
+      "verticalDatum": "Mean sea level assumption; source metadata EPSG:5831; source vertical datums can be heterogeneous",
+      "warnings": [
+        "TARGET_RESOLUTION_IS_INTENT_ONLY_ORIGINAL_GRID_PRESERVED_NO_NEW_DETAIL",
+        "OCEAN_MASK_REQUIRED_FOR_DEPTH_CLASSIFICATION; SIGNED_ELEVATION_IS_NOT_A_LAND_MASK"
+      ]
+    },
+    "surfaceTexture": {
+      "CRS": "EPSG:4326",
+      "SHA-256": "991c7bdfb8515a787c220b58b066241ac38411721124fbd8e6fae22131c793be",
+      "attribution": "WORLD ENGINE sample data \u2014 source notices\n\n[Copernicus GLO-30 \u2014 modified regional crop]\nproduced using Copernicus WorldDEM-30 \u00a9 DLR e.V. 2010-2014 and \u00a9 Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\n\nThe organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.\n\n\uc9c0\uc5ed \ud06c\ub86d\ubcf8\uc785\ub2c8\ub2e4. \uc6d0 \uace0\ub3c4\uac12\uc740 \ubcf4\uc874\ud588\uc73c\uba70 \ubcf4\uac04\ud558\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4. \uc6d0\ub77c\uc774\uc120\uc2a4 Article 6\uc758 \ucd9c\ucc98\u00b7\uac00\uacf5 \uace0\uc9c0, \uba74\ucc45, \uacf5\uc2dd \ubcf4\uc99d \uc554\uc2dc \uae08\uc9c0 \ubc0f \ud6c4\uc18d \uc0ac\uc6a9\uc790 \uc758\ubb34\ub97c \uc720\uc9c0\ud558\uc138\uc694. \ub3d9\ubd09 License-COPDEM-30.pdf\ub97c \ud568\uaed8 \uc804\ub2ec\ud558\uc138\uc694.\n\n[GEBCO_2026 \u2014 regional subset]\nGEBCO Bathymetric Compilation Group 2026 (2026). The GEBCO_2026 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals. NERC EDS British Oceanographic Data Centre NOC.\nhttps://doi.org/10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa\nhttps://www.gebco.net/data-products/gridded-bathymetry/terms-of-use\n\uacf5\uc2dd GEBCO \ubd80\ubd84 \uc751\ub2f5\uc758 \uc9c0\uc5ed \ud30c\uc0dd\ubcf8\uc785\ub2c8\ub2e4. \uae30\uad00\uc758 \ubcf4\uc99d\uc744 \uc758\ubbf8\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4. \ud56d\ud574\u00b7\ud574\uc0c1 \uc548\uc804\uc6a9\uc73c\ub85c \uc0ac\uc6a9\ud558\uc9c0 \ub9c8\uc138\uc694.\n\n[NASA Blue Marble: Next Generation]\nNASA Earth Observatory\nImagery accessed through NASA Global Imagery Browse Services (GIBS).\nSource composite: August 2004. Regional WMS image acquired 2026-10-14.\nhttps://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/\nNASA \uc790\ub8cc\uac00 \ud3ec\ud568\ub418\uc5c8\ub2e4\ub294 \ucd9c\ucc98 \ud45c\uc2dc\uc774\uba70, WORLD ENGINE\uc758 \uacb0\uacfc\ub97c NASA\uac00 \uc81c\uc791\u00b7\uac80\uc218\u00b7\ubcf4\uc99d\ud588\ub2e4\ub294 \ub73b\uc774 \uc544\ub2d9\ub2c8\ub2e4.\n\n[\ubc30\ud3ec \uc548\ub0b4]\n\uc774 \uc790\ub8cc\ub85c \ub9cc\ub4e0 \uc0c1\uc5c5 \uc601\uc0c1\u00b7\ud30c\uc0dd \uc5d0\uc14b\uc5d0\ub3c4 \uc801\uc6a9\ub418\ub294 \ucd9c\ucc98 \uace0\uc9c0\ub97c \uc720\uc9c0\ud558\uc138\uc694. \ud574\ub2f9 \uae30\uad00\uc758 \uc9c0\uc9c0\u00b7\ubcf4\uc99d\uc744 \uc554\uc2dc\ud558\uc9c0 \ub9c8\uc138\uc694. \uc815\ud655\ud55c \uc0ac\uc6a9 \uc870\uac74\uc740 \uac01 \uc6d0\ub77c\uc774\uc120\uc2a4/\uacf5\uc2dd \uc9c0\uce68\uc744 \ub530\ub985\ub2c8\ub2e4.\n",
+      "bbox": [
+        128.35,
+        37.35,
+        128.35999999999999,
+        37.36
+      ],
+      "coverage": {
+        "absentParts": [],
+        "actualBBoxes": [
+          [
+            128.35,
+            37.35,
+            128.35999999999999,
+            37.36
+          ]
+        ],
+        "complete": true,
+        "completenessMeaning": "GRID_EXTENT_ONLY_NOT_GROUND_ACCURACY_OR_NODATA",
+        "paddingApplied": false,
+        "requestedBBox": [
+          128.35,
+          37.35,
+          128.36,
+          37.36
+        ],
+        "sourceBBox": [
+          124.0,
+          33.0,
+          132.0,
+          43.0
+        ],
+        "validSampleCount": 4
+      },
+      "error": null,
+      "gpuUploadExecuted": false,
+      "nativeResolution": {
+        "description": "Source nominal 500m; GIBS 500m tile matrix; output WMS sampling 0.005 deg (~557m N-S)",
+        "sampleSpacingDegrees": [
+          0.005,
+          0.005
+        ]
+      },
+      "nodata": [
+        {
+          "alpha": 0
+        }
+      ],
+      "outputResolution": [
+        {
+          "dimensions": [
+            2,
+            2
+          ],
+          "resampling": "NONE",
+          "spacingDegrees": [
+            0.005,
+            0.005
+          ]
+        }
+      ],
+      "rasters": [
+        {
+          "bbox": [
+            128.35,
+            37.35,
+            128.35999999999999,
+            37.36
+          ],
+          "dtype": "|u1",
+          "metadata": {
+            "axisOrder": "LONGITUDE_LATITUDE",
+            "colorConversion": "NONE",
+            "colorSpace": "UNSPECIFIED_ENCODED_PNG_BYTES_PRESERVED",
+            "cropPolicy": "CENTER_IN_HALF_OPEN_BBOX_NO_RESAMPLING",
+            "crs": "EPSG:4326",
+            "crsWkt": "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AXIS[\"Latitude\",NORTH],AXIS[\"Longitude\",EAST],AUTHORITY[\"EPSG\",\"4326\"]]",
+            "gridSpacing": [
+              0.005,
+              -0.005
+            ],
+            "horizontalUnits": "degree",
+            "inputSha256": "991c7bdfb8515a787c220b58b066241ac38411721124fbd8e6fae22131c793be",
+            "mode": "RGBA",
+            "nodata": {
+              "alpha": 0
+            },
+            "physicalAlbedo": "NOT_INFERRED",
+            "pixelRegistration": "Area",
+            "pngColorMetadata": {},
+            "pngInfo": {},
+            "projectionWkt": "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AXIS[\"Latitude\",NORTH],AXIS[\"Longitude\",EAST],AUTHORITY[\"EPSG\",\"4326\"]]\n",
+            "requestedBBox": [
+              128.35,
+              37.35,
+              128.36,
+              37.36
+            ],
+            "rowOrder": "NORTH_TO_SOUTH",
+            "sidecarSha256": {
+              "projection": "d0b1115b75468680d8d22aa102e02d4ce76b79de9c06e4c7f8663f4c3d29fcd2",
+              "worldfile": "aa58b9441629200b0c916fc339fedf5fa244fbc27db3f3d6b4c3abd31ea85807"
+            },
+            "transform": [
+              128.35,
+              0.005,
+              0.0,
+              37.36,
+              0.0,
+              -0.005
+            ],
+            "units": "uint8_encoded_color",
+            "verticalDatum": "NOT_APPLICABLE",
+            "worldfileCoefficients": [
+              0.005,
+              0.0,
+              0.0,
+              -0.005,
+              124.0025,
+              42.9975
+            ],
+            "worldfileRegistration": "UPPER_LEFT_PIXEL_CENTER"
+          },
+          "shape": [
+            2,
+            2,
+            4
+          ]
+        }
+      ],
+      "sourceId": "nasa-bmng-200408-gibs",
+      "sourceURL": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=BlueMarble_NextGeneration&STYLES=&FORMAT=image%2Fpng&CRS=EPSG%3A4326&BBOX=33%2C124%2C43%2C132&WIDTH=1600&HEIGHT=2000",
+      "sourceVersion": "August 2004 static composite; GIBS ongoing=false",
+      "status": "available",
+      "verticalDatum": "NOT_APPLICABLE",
+      "warnings": [
+        "TARGET_RESOLUTION_IS_INTENT_ONLY_ORIGINAL_GRID_PRESERVED_NO_NEW_DETAIL"
+      ]
+    },
+    "terrain": {
+      "CRS": "EPSG:4326",
+      "SHA-256": "cb9ace49fbd4b5bd5f1cc1313eab728124fe6227eb742f8b0d73b20a2163ff84",
+      "attribution": "WORLD ENGINE sample data \u2014 source notices\n\n[Copernicus GLO-30 \u2014 modified regional crop]\nproduced using Copernicus WorldDEM-30 \u00a9 DLR e.V. 2010-2014 and \u00a9 Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved.\n\nThe organisations in charge of the Copernicus programme by law or by delegation do not incur any liability for any use of the Copernicus WorldDEM-30.\n\n\uc9c0\uc5ed \ud06c\ub86d\ubcf8\uc785\ub2c8\ub2e4. \uc6d0 \uace0\ub3c4\uac12\uc740 \ubcf4\uc874\ud588\uc73c\uba70 \ubcf4\uac04\ud558\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4. \uc6d0\ub77c\uc774\uc120\uc2a4 Article 6\uc758 \ucd9c\ucc98\u00b7\uac00\uacf5 \uace0\uc9c0, \uba74\ucc45, \uacf5\uc2dd \ubcf4\uc99d \uc554\uc2dc \uae08\uc9c0 \ubc0f \ud6c4\uc18d \uc0ac\uc6a9\uc790 \uc758\ubb34\ub97c \uc720\uc9c0\ud558\uc138\uc694. \ub3d9\ubd09 License-COPDEM-30.pdf\ub97c \ud568\uaed8 \uc804\ub2ec\ud558\uc138\uc694.\n\n[GEBCO_2026 \u2014 regional subset]\nGEBCO Bathymetric Compilation Group 2026 (2026). The GEBCO_2026 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals. NERC EDS British Oceanographic Data Centre NOC.\nhttps://doi.org/10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa\nhttps://www.gebco.net/data-products/gridded-bathymetry/terms-of-use\n\uacf5\uc2dd GEBCO \ubd80\ubd84 \uc751\ub2f5\uc758 \uc9c0\uc5ed \ud30c\uc0dd\ubcf8\uc785\ub2c8\ub2e4. \uae30\uad00\uc758 \ubcf4\uc99d\uc744 \uc758\ubbf8\ud558\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4. \ud56d\ud574\u00b7\ud574\uc0c1 \uc548\uc804\uc6a9\uc73c\ub85c \uc0ac\uc6a9\ud558\uc9c0 \ub9c8\uc138\uc694.\n\n[NASA Blue Marble: Next Generation]\nNASA Earth Observatory\nImagery accessed through NASA Global Imagery Browse Services (GIBS).\nSource composite: August 2004. Regional WMS image acquired 2026-10-14.\nhttps://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/\nNASA \uc790\ub8cc\uac00 \ud3ec\ud568\ub418\uc5c8\ub2e4\ub294 \ucd9c\ucc98 \ud45c\uc2dc\uc774\uba70, WORLD ENGINE\uc758 \uacb0\uacfc\ub97c NASA\uac00 \uc81c\uc791\u00b7\uac80\uc218\u00b7\ubcf4\uc99d\ud588\ub2e4\ub294 \ub73b\uc774 \uc544\ub2d9\ub2c8\ub2e4.\n\n[\ubc30\ud3ec \uc548\ub0b4]\n\uc774 \uc790\ub8cc\ub85c \ub9cc\ub4e0 \uc0c1\uc5c5 \uc601\uc0c1\u00b7\ud30c\uc0dd \uc5d0\uc14b\uc5d0\ub3c4 \uc801\uc6a9\ub418\ub294 \ucd9c\ucc98 \uace0\uc9c0\ub97c \uc720\uc9c0\ud558\uc138\uc694. \ud574\ub2f9 \uae30\uad00\uc758 \uc9c0\uc9c0\u00b7\ubcf4\uc99d\uc744 \uc554\uc2dc\ud558\uc9c0 \ub9c8\uc138\uc694. \uc815\ud655\ud55c \uc0ac\uc6a9 \uc870\uac74\uc740 \uac01 \uc6d0\ub77c\uc774\uc120\uc2a4/\uacf5\uc2dd \uc9c0\uce68\uc744 \ub530\ub985\ub2c8\ub2e4.\n",
+      "bbox": [
+        128.3498611111111,
+        37.34986111111111,
+        128.36013888888888,
+        37.359861111111115
+      ],
+      "coverage": {
+        "absentParts": [],
+        "actualBBoxes": [
+          [
+            128.3498611111111,
+            37.34986111111111,
+            128.36013888888888,
+            37.359861111111115
+          ]
+        ],
+        "complete": true,
+        "completenessMeaning": "GRID_EXTENT_ONLY_NOT_GROUND_ACCURACY_OR_NODATA",
+        "paddingApplied": false,
+        "requestedBBox": [
+          128.35,
+          37.35,
+          128.36,
+          37.36
+        ],
+        "sourceBBox": [
+          128.2498611111111,
+          37.25013888888889,
+          128.7498611111111,
+          37.75013888888889
+        ],
+        "validSampleCount": 1332
+      },
+      "error": null,
+      "gpuUploadExecuted": false,
+      "nativeResolution": {
+        "description": "1 arc-second in latitude and longitude for this tile; nominal GLO-30; longitudinal spacing coarsens at high latitude",
+        "sampleSpacingDegrees": [
+          0.0002777777777777778,
+          0.0002777777777777778
+        ]
+      },
+      "nodata": [
+        null
+      ],
+      "outputResolution": [
+        {
+          "dimensions": [
+            37,
+            36
+          ],
+          "resampling": "NONE",
+          "spacingDegrees": [
+            0.0002777777777777778,
+            0.0002777777777777778
+          ]
+        }
+      ],
+      "rasters": [
+        {
+          "bbox": [
+            128.3498611111111,
+            37.34986111111111,
+            128.36013888888888,
+            37.359861111111115
+          ],
+          "dtype": "<f4",
+          "metadata": {
+            "axisOrder": "LONGITUDE_LATITUDE",
+            "cropPolicy": "CENTER_IN_HALF_OPEN_BBOX_NO_RESAMPLING",
+            "crs": "EPSG:4326",
+            "crsWkt": "GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]],AXIS[\"Latitude\",NORTH],AXIS[\"Longitude\",EAST],AUTHORITY[\"EPSG\",\"4326\"]]",
+            "dataClass": "terrain",
+            "dtype": "Float32",
+            "format": "GeoTIFF",
+            "inputSha256": "cb9ace49fbd4b5bd5f1cc1313eab728124fe6227eb742f8b0d73b20a2163ff84",
+            "maskFlags": 1,
+            "nodata": null,
+            "pixelRegistration": "Point",
+            "requestedBBox": [
+              128.35,
+              37.35,
+              128.36,
+              37.36
+            ],
+            "rowOrder": "NORTH_TO_SOUTH",
+            "sourceBandMetadata": {},
+            "sourceMetadata": {
+              "ACQUIRED_UTC": "2026-10-14T00:50:58.955300+00:00",
+              "AREA_OR_POINT": "Point",
+              "PROCESSING": "Window crop only; no resampling; modified Copernicus DEM",
+              "SOURCE_URL": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E128_00_DEM/Copernicus_DSM_COG_10_N37_00_E128_00_DEM.tif"
+            },
+            "sourceOffset": null,
+            "sourceScale": null,
+            "sourceUnit": null,
+            "spacing": [
+              0.0002777777777777778,
+              0.0002777777777777778
+            ],
+            "transform": [
+              128.3498611111111,
+              0.0002777777777777778,
+              0.0,
+              37.359861111111115,
+              0.0,
+              -0.0002777777777777778
+            ],
+            "units": "m",
+            "unitsSource": "TERRAIN_INPUT_CONTRACT",
+            "verticalDatum": "EGM2008 (EPSG:3855), per official specification; not encoded as compound CRS in sampled TIFF",
+            "verticalDatumSource": "CALLER"
+          },
+          "shape": [
+            36,
+            37
+          ]
+        }
+      ],
+      "sourceId": "copernicus-glo30-aws-2021",
+      "sourceURL": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N37_00_E128_00_DEM/Copernicus_DSM_COG_10_N37_00_E128_00_DEM.tif",
+      "sourceVersion": "2021 release per AWS registry; exact release suffix UNVERIFIED",
+      "status": "available",
+      "verticalDatum": "EGM2008 (EPSG:3855), per official specification; not encoded as compound CRS in sampled TIFF",
+      "warnings": [
+        "TARGET_RESOLUTION_IS_INTENT_ONLY_ORIGINAL_GRID_PRESERVED_NO_NEW_DETAIL"
+      ]
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:astra:cpu:scene-map-data:v1",
+  "title": "Optional CPU mapData scene wrapper configuration",
+  "description": "Additive wrapper schema only. Original scene fields pass through unchanged; the wrapper consumes mapData before existing strict scene parsers. This schema does not extend those parsers or activate GPU work. Runtime validation also checks finite JSON numbers, geographic bbox relationships, registered source IDs, exact versions and source roles.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "mapData": { "$ref": "#/$defs/mapData" }
+  },
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1024,
+      "pattern": "\\S"
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceId": { "$ref": "#/$defs/text" },
+        "version": { "$ref": "#/$defs/text" }
+      }
+    },
+    "completeSelector": {
+      "allOf": [
+        { "$ref": "#/$defs/selector" },
+        { "required": ["sourceId", "version"] }
+      ]
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mode": { "enum": ["read_write", "read_only", "bypass"], "default": "read_write" },
+        "maxBytes": { "type": "integer", "minimum": 1, "maximum": 67108864, "default": 67108864 },
+        "maxConcurrency": { "type": "integer", "minimum": 1, "maximum": 8, "default": 2 },
+        "maxRetries": { "type": "integer", "minimum": 0, "maximum": 5, "default": 2 },
+        "timeoutSeconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 3600, "default": 10 },
+        "deadlineSeconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 3600, "default": 30 },
+        "retryAfterCeilingSeconds": { "type": "number", "minimum": 0, "maximum": 3600, "default": 10 },
+        "resume": { "type": "boolean", "default": false }
+      }
+    },
+    "mapData": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false, "description": "CPU configuration/preparation only; GPU activation is permanently false." },
+        "bbox": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "prefixItems": [
+            { "type": "number", "minimum": -180, "maximum": 180 },
+            { "type": "number", "minimum": -90, "maximum": 90 },
+            { "type": "number", "minimum": -180, "maximum": 180 },
+            { "type": "number", "minimum": -90, "maximum": 90 }
+          ],
+          "items": false,
+          "description": "[west,south,east,north], finite numbers; runtime requires south<north and west!=east, allowing west>east dateline splits."
+        },
+        "crs": { "const": "EPSG:4326", "default": "EPSG:4326" },
+        "targetGroundResolution": { "type": "number", "exclusiveMinimum": 0, "description": "Positive meter intent; no implied resampling or increased source detail." },
+        "terrain": { "$ref": "#/$defs/selector" },
+        "bathymetry": { "$ref": "#/$defs/selector" },
+        "surfaceTexture": { "$ref": "#/$defs/selector" },
+        "cache": { "$ref": "#/$defs/cache" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "enabled": { "const": true } }, "required": ["enabled"] },
+          "then": {
+            "required": ["bbox"],
+            "anyOf": [
+              { "required": ["terrain"] },
+              { "required": ["bathymetry"] },
+              { "required": ["surfaceTexture"] }
+            ],
+            "properties": {
+              "terrain": { "$ref": "#/$defs/completeSelector" },
+              "bathymetry": { "$ref": "#/$defs/completeSelector" },
+              "surfaceTexture": { "$ref": "#/$defs/completeSelector" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
