@@ -1,0 +1,114 @@
+{
+  "schema": "WORLD_ENGINE_DETACHED_RENDER_RESULT_V1",
+  "decision": "DETACHED_RENDER_IMAGE_CPU_VERIFIED_ACTUAL_GCUBE_REVIEW_REQUIRED",
+  "baselineCommit": "b7e50d34b01b52f7ae1683df587010cb2fbb02d3",
+  "branch": "development/gcube-detached-render-20261015",
+  "implementationCheckpoint": "ce56da76895ed33506d0637ea3cd453d195e41f5",
+  "sourceCommit": "aaa9347bcb50eaa480dc83e135bc2ebca6f1f5f2",
+  "ciEvidenceCommit": "282628db42715bc33e2b21115d6839b202abefd2",
+  "ciRun": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/38737830116",
+  "image": {
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+    "imageDigest": "sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+    "configDigest": "sha256:4714835444080900e7874e50bad971347a094198ba6c2530b941f3a8b4df6de6",
+    "pullVerified": true,
+    "ciCommit": "aaa9347bcb50eaa480dc83e135bc2ebca6f1f5f2",
+    "schema": "WORLD_ENGINE_DETACHED_MANAGER_IMAGE_V1",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38737830116-1",
+    "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842",
+    "build": "PASS",
+    "push": "PASS",
+    "independentPull": "PASS",
+    "gpuExecuted": false,
+    "gCubeDeployed": false,
+    "paidWorkExecuted": false
+  },
+  "actualReportedDisconnectionCause": "UNCONFIRMED_NO_LIVE_5373_ACCESS",
+  "confirmedSourcePath": "Foreground launcher turns SIGHUP into GPU_RENDER_INTERRUPTED and terminates its render child",
+  "actualExisting5373RenderState": "UNOBSERVED_MUST_INSPECT_WITHOUT_RESTART",
+  "implementation": {
+    "localCLIOnly": true,
+    "newHTTPEndpoint": false,
+    "forkSetsidAndIgnoreSighup": true,
+    "persistedSupervisorAndNativePIDIdentity": true,
+    "states": [
+      "QUEUED",
+      "RUNNING",
+      "COMPLETED",
+      "FAILED"
+    ],
+    "duplicatePrevention": [
+      "lifetime POSIX lock",
+      "private atomic ledger",
+      "fixed exclusive shared claim",
+      "all terminal states retained"
+    ],
+    "autoStartOnContainerRestart": false,
+    "resetOrRetryAPI": false,
+    "nativeGPUChecksUnchanged": true,
+    "globalDistributedExactlyOnceClaimed": false
+  },
+  "focusedCPU": {
+    "PASS": 73,
+    "FAIL": 0,
+    "SKIP": 0,
+    "counts": {
+      "store": 23,
+      "inspection": 17,
+      "manager": 16,
+      "nativeMonitor": 4,
+      "ci": 13
+    },
+    "actualPTYDisconnect": "PASS_TEST_ONLY_CPU_JOB",
+    "atomicStateStress": {
+      "trials": 5,
+      "writes": 500,
+      "reads": 5684,
+      "errors": 0
+    },
+    "realImageReadOnlyCLI": {
+      "inspect": "CLEAR",
+      "status": "NOT_STARTED"
+    },
+    "productionStartExecuted": false
+  },
+  "preBuildFailuresPreserved": [
+    "38735648777-1 fixture staging",
+    "38736136579-1 verifier descriptor inheritance",
+    "38736932697-1 atomic-reader replacement"
+  ],
+  "protection": {
+    "originalSourceFilesVerified": 160,
+    "inheritedHelperHashesVerified": 7,
+    "inheritedManifestHashesVerified": 4,
+    "runtimeHashesVerified": 4,
+    "existingSourceModifications": 0,
+    "existingImagesDeletedOrOverwritten": false,
+    "requiredTempOnlyFiles": 0
+  },
+  "sharedLedger": "/world-storage/world-engine-65422-job-v1/",
+  "completion": "Native exit0 plus exact original export receipt,7 public files,source-anchored hashes and artifact/FFprobe verification",
+  "publicReviewAllowlist": [
+    "MP4",
+    "five checkpoint PNGs",
+    "SHA256SUMS"
+  ],
+  "hardwareOrPlatformChecks": {
+    "actualGcubeRun": "NOT_EXECUTED",
+    "gpu": "NOT_EXECUTED",
+    "providerTerminalLifecycle": "UNVERIFIED",
+    "providerRestartHealthPolicy": "UNVERIFIED",
+    "dropboxExternalSync": "UNVERIFIED",
+    "externalResultDownloadAndSHA": "UNVERIFIED",
+    "actualVideoQuality": "NOT_EVALUATED",
+    "paidWorkExecuted": false
+  },
+  "remainingLimits": [
+    "Cannot survive container deletion/SIGKILL or host failure",
+    "Retained shared claim vetoes replay; missing/delayed ledger cannot prove no previous work",
+    "FAILED does not prove every native process is idle",
+    "Render deadline does not stop provider billing"
+  ],
+  "userNext": "Inspect existing5373 without restart; preserve/recover prior work; review image/runbook; separately authorize any paid hardware run",
+  "next": "USER_REVIEW_REQUIRED_NO_GPU_DEPLOYMENT_NO_FINAL_PROMOTION"
+}
