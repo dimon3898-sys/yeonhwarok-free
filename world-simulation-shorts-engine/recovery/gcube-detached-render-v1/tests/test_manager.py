@@ -361,7 +361,9 @@ class ExportHandoffTests(unittest.TestCase):
         Reuses the existing PNG fixture builder only, without running old tests.
         The one solid-color 150-frame MP4 is explicitly synthetic CPU encoding.
         """
-        old_fixture = HERE.parent / "gcube-65422-render-v1/tests/test_artifacts.py"
+        old_fixture = HERE / "cpu-artifact-fixture/tests/test_artifacts.py"
+        if not old_fixture.is_file():
+            old_fixture = HERE.parent / "gcube-65422-render-v1/tests/test_artifacts.py"
         fixture_spec = importlib.util.spec_from_file_location("png_fixture_builder", old_fixture)
         fixture = importlib.util.module_from_spec(fixture_spec)
         fixture_spec.loader.exec_module(fixture)

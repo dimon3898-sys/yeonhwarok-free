@@ -146,5 +146,16 @@ class DetachedCISafety(unittest.TestCase):
             ("status", 0, {**status, "gpuRenderingVerified": True}), ("start", 0, status)]:
             with self.subTest(action=action, body=body), self.assertRaises(RuntimeError): ci.validate_read_only_result(action, code, body)
 
+    def test_png_builder_fixture_is_pinned_and_staged_outside_checkout(self):
+        self.seed(); destination = ci.prepare_unit_context()
+        self.assertFalse(destination.is_relative_to(ci.REPO))
+        self.assertEqual(ci.sha(destination / "cpu-artifact-fixture/tests/test_artifacts.py"), ci.CPU_FIXTURE_SHA)
+        self.assertEqual(ci.sha(destination / "cpu-artifact-fixture/verify_artifacts.py"), ci.VERIFIER_SHA)
+        self.assertEqual(ci.sha(destination / "verify_artifacts.py"), ci.VERIFIER_SHA)
+        self.assertEqual(ci.state()["unitFixture"]["scope"], "REUSED_PNG_BUILDER_ONLY_OLD_SUITE_NOT_EXECUTED")
+        original = ci.sha
+        with patch.object(ci, "sha", side_effect=lambda p: "0" * 64 if Path(p).name == "test_artifacts.py" else original(p)):
+            with self.assertRaisesRegex(RuntimeError, "PINNED_CPU_FIXTURE_REQUIRED"): ci.prepare_unit_context()
+
 
 if __name__ == "__main__": unittest.main()

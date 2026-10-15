@@ -29,6 +29,7 @@ DEST = "/opt/world-engine-detached-render"
 PARENT_NAMESPACE = HERE.parent / "gcube-65422-render-v1"
 MODULES = ("job_manager.py", "job_store.py", "inspect_existing.py")
 VERIFIER_SHA = "137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109"
+CPU_FIXTURE_SHA = "8ff45a5972d3e59270c33e186738c225ade3d1161bca852fe9d46848a2a26e61"
 INHERITED_MANIFESTS = {
     "/opt/world-engine-storage-fix/STORAGE_FILES.json": "c6d0d1566d2f6dce221c4c8049aa21dbb638e28ac72d9172a960ec86ccc3a3e3",
     "/opt/world-engine-diagnostic-result/RESULT_FILES.json": "98c37d4ec021571be39a8148d2cd0aa1a644659b69f903ea3a9f0a82457ef213",
@@ -81,6 +82,22 @@ def manifest():
         "inheritedSources": inherited, "inheritedManifests": INHERITED_MANIFESTS}
 
 
+def prepare_unit_context():
+    fixture = PARENT_NAMESPACE / "tests/test_artifacts.py"
+    verifier = PARENT_NAMESPACE / "verify_artifacts.py"
+    if sha(fixture) != CPU_FIXTURE_SHA or sha(verifier) != VERIFIER_SHA:
+        raise RuntimeError("PINNED_CPU_FIXTURE_REQUIRED")
+    destination = Path(tempfile.mkdtemp(prefix="detached-unit-context-", dir=os.environ["RUNNER_TEMP"]))
+    shutil.copytree(HERE, destination, dirs_exist_ok=True, ignore=shutil.ignore_patterns("runs", "__pycache__"))
+    shutil.copyfile(verifier, destination / "verify_artifacts.py")
+    dependency = destination / "cpu-artifact-fixture"; (dependency / "tests").mkdir(parents=True)
+    shutil.copyfile(fixture, dependency / "tests/test_artifacts.py")
+    shutil.copyfile(verifier, dependency / "verify_artifacts.py")
+    value = state(); value["unitFixture"] = {"sourceCommit": BASELINE, "fixtureSha256": CPU_FIXTURE_SHA,
+        "verifierSha256": VERIFIER_SHA, "scope": "REUSED_PNG_BUILDER_ONLY_OLD_SUITE_NOT_EXECUTED"}; save(value)
+    return destination
+
+
 def test():
     helpers().require_space()
     host = subprocess.run([sys.executable, "-B", "-m", "unittest", "discover", "-s", str(HERE / "tests"), "-p", "test_ci.py", "-v"], text=True, capture_output=True, check=False, timeout=60)
@@ -89,9 +106,8 @@ def test():
     run(["docker", "pull", BASE], timeout=900)
     # A separate unit context avoids a nested mount creating an untracked file
     # inside the read-only checkout when the reused verifier is staged.
-    test_root = Path(tempfile.mkdtemp(prefix="detached-unit-context-", dir=os.environ["RUNNER_TEMP"]))
-    shutil.copytree(HERE, test_root, dirs_exist_ok=True, ignore=shutil.ignore_patterns("runs", "__pycache__"))
-    shutil.copyfile(PARENT_NAMESPACE / "verify_artifacts.py", test_root / "verify_artifacts.py")
+    test_root = prepare_unit_context()
+    value = state()
     command = ["docker", "run", "--rm", "--network=none", "--memory=4g", "--cpus=2", "--pids-limit=256", "--restart=no", "--user=0:0",
         "--tmpfs", "/workspace:rw,mode=1777", "--entrypoint=/usr/bin/python3",
         "--mount", "type=bind,source=" + str(test_root) + ",target=" + DEST + ",readonly",
