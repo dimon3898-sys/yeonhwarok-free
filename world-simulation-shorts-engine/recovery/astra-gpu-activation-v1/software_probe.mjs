@@ -6,7 +6,7 @@ import {promisify} from 'node:util';
 import {createRequire} from 'node:module';
 import {createInterface} from 'node:readline';
 import {fileURLToPath} from 'node:url';
-import {tmpdir} from 'node:os';
+import {tmpdir,userInfo} from 'node:os';
 import path from 'node:path';
 import {loadAstraRuntimePlan,sha,repo} from './astra_runtime.mjs';
 const execute=promisify(execFile),here=path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +20,9 @@ try{
  const plan=await loadAstraRuntimePlan({activationFile:prepared.activationFile,expectedActivationSha256:prepared.activationSha256});
  const chromium=require('playwright').chromium;
  browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,
+  // CI drops UID before this child; use that account's real home, not inherited root HOME.
+  env:{...process.env,HOME:userInfo().homedir,XDG_CONFIG_HOME:path.join(root,'chromium-config'),
+   XDG_CACHE_HOME:path.join(root,'chromium-cache')},
   ignoreDefaultArgs:['--disable-dev-shm-usage'],args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader',
    '--enable-unsafe-swiftshader','--disable-gpu-sandbox']});
  async function view(materialProfile,frames){

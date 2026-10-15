@@ -1,0 +1,16 @@
+{
+  "schema": "ASTRA_CPU_BROWSER_ENV_RECOVERY_V1",
+  "failedRun": "38809015824-1",
+  "sourceCheckpoint": "936a78a7a7c34a6caf9014c4f8b7067779cf0a6b",
+  "confirmedFailure": "CPU CI dropped UID1000 while inheriting root HOME; Chromium mkdir /root permission error and crashpad database startup failed",
+  "failedBefore": [
+    "software shader compile",
+    "Docker image build",
+    "GHCR push"
+  ],
+  "focusedTestsPassed": 96,
+  "fix": "Only software probe child environment uses actual operating-system user home and its own private XDG config/cache; no production renderer/GPU gate changes",
+  "gpuExecuted": false,
+  "parentImageModified": false,
+  "retryReason": "Confirmed CPU harness environment correction"
+}
