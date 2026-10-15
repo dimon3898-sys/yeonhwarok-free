@@ -1,0 +1,51 @@
+name: WORLD ENGINE immutable startup CPU reproduction
+
+on:
+  push:
+    branches: [development/gcube-startup-repro-20261015]
+    paths:
+      - .github/workflows/gcube-startup-repro.yml
+      - world-simulation-shorts-engine/recovery/gcube-startup-repro-v1/*.py
+  workflow_dispatch:
+
+concurrency:
+  group: world-engine-startup-repro-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  reproduce:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/gcube-startup-repro-20261015'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    env:
+      STARTUP_REPOSITORY_PUBLIC: 'true'
+      STARTUP_RUNNER_LABEL: ubuntu-24.04
+      STARTUP_EVIDENCE_DIR: ${{ runner.temp }}/world-engine-startup-evidence
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout only diagnostic harness and protected source history
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/gcube-startup-repro.yml
+            /world-simulation-shorts-engine/recovery/gcube-startup-repro-v1/**
+      - name: Confirm protected baseline and diagnostic files only
+        id: protection
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-startup-repro-v1/persist_evidence.py protection
+      - name: Pull the existing digest and execute CPU startup cases
+        id: matrix
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-startup-repro-v1/run_matrix.py
+      - name: Persist bounded synthetic stdout stderr exit codes and checksums
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          STARTUP_STEP_OUTCOMES: >-
+            {"protection":"${{ steps.protection.outcome }}","matrix":"${{ steps.matrix.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-startup-repro-v1/persist_evidence.py persist
