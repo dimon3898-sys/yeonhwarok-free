@@ -307,9 +307,12 @@ def main(argv=None, *, operations=None, session_factory=None, environ=None,
                 drop = startup._drop_diagnostic_privileges if privilege_drop is None else privilege_drop
                 drop(native.account())
             except Exception as error:
-                record = startup._failure("UID_GID", error, mode=mode, test_only=test_only)
-                _publish(record, session, mode=mode, test_only=test_only)
-                return record["exitCode"]
+                secondary = startup._failure("UID_GID", error, mode=mode, test_only=test_only)
+                if (isinstance(record, dict) and type(record.get("exitCode")) is int
+                        and record["exitCode"] != 0):
+                    _publish(record, session, mode=mode, test_only=test_only)
+                _publish(secondary, session, mode=mode, test_only=test_only)
+                return secondary["exitCode"]
             _publish(record, session, mode=mode, test_only=test_only)
             serve = serve_diagnostic if diagnostic_service is None else diagnostic_service
             return serve(record, port=port, max_seconds=ttl)

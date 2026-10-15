@@ -178,10 +178,72 @@ def _checks(operations, args, *, mode, test_only):
         return None, _failure(stage.name, error, mode=mode, test_only=test_only)
 
 
+def _admission_diagnostics(checked, *, test_only):
+    """Validate the native result envelope, then forward only existing safe GPU data."""
+    if type(test_only) is not bool or not isinstance(checked, tuple) or len(checked) != 3:
+        raise ValueError()
+    admission = checked[2]
+    safe = getattr(admission, "safe_report", None)
+    private = getattr(admission, "private_report", None)
+    admitted_test = getattr(admission, "test_only", None)
+    if (type(admitted_test) is not bool or admitted_test and not test_only
+            or not isinstance(safe, dict) or not isinstance(private, dict)
+            or safe.get("schema") != "RTX_GPU_ADMISSION_V1"
+            or safe.get("testOnly") is not admitted_test
+            or safe.get("status") != ("TEST_ONLY" if admitted_test else "GPU_VERIFIED")
+            or safe.get("gpuRenderingVerified") is not (not admitted_test)
+            or safe.get("verificationScope") != "STARTUP_NATIVE_GPU_PIXEL_DRAW"
+            or safe.get("renderMode") != "gpu-required" or safe.get("gpuProfile") not in {"egl", "vulkan"}
+            or safe.get("autoRender") is not False or safe.get("renderExecuted") is not False
+            or safe.get("visualQualityVerified") is not False
+            or not isinstance(safe.get("sourceVerification"), dict)
+            or safe["sourceVerification"].get("status") != "PASS"):
+        raise ValueError()
+    probe = private.get("probe")
+    if (not isinstance(probe, dict) or probe.get("gpu_rendering_verified") is not True
+            or probe.get("render_mode") != "gpu-required" or probe.get("hardware_status") != "visible"
+            or probe.get("gpu_profile") != safe["gpuProfile"]):
+        raise ValueError()
+    diagnostics = probe.get("diagnostics")
+    if (not isinstance(diagnostics, dict) or type(diagnostics.get("schema_version")) is not int
+            or diagnostics.get("schema_version") != 1
+            or diagnostics.get("render_mode") != "gpu-required"
+            or diagnostics.get("gpu_profile") != safe["gpuProfile"]
+            or diagnostics.get("reason_code") != "VERIFIED" or diagnostics.get("failed_stage") is not None):
+        raise ValueError()
+    stages = diagnostics.get("stages")
+    if (not isinstance(stages, list) or len(stages) != 6
+            or any(not isinstance(item, dict) or item.get("status") != "PASS" for item in stages)
+            or {item.get("id") for item in stages} != set("ABCDEF")):
+        raise ValueError()
+    webgl = diagnostics.get("webgl")
+    if (not isinstance(webgl, dict) or webgl.get("context_available") is not True
+            or webgl.get("webgl2") is not True or webgl.get("draw_passed") is not True
+            or webgl.get("software_renderer") is not False or type(webgl.get("webgl_error")) is not int
+            or webgl.get("webgl_error") != 0):
+        raise ValueError()
+    pixel = webgl.get("pixel")
+    if (not isinstance(pixel, list) or len(pixel) != 4
+            or any(type(value) is not int or not 0 <= value <= 255 for value in pixel)
+            or pixel[0] < 250 or pixel[1] > 5 or pixel[2] > 5 or pixel[3] < 250):
+        raise ValueError()
+    # make_record applies the unchanged engine sanitizer and strict secondary
+    # allowlist. No admission object, environment, allocation UUID or render
+    # capability is transferred through the diagnostic worker pipe.
+    return diagnostics
+
+
 def _worker_record(operations, args, test_only):
-    _, failure = _checks(operations, args, mode="diagnostic", test_only=test_only)
-    return failure or records.make_record("DIAGNOSTIC_SERVICE", "DIAGNOSTIC_ONLY", 0,
-                                          mode="diagnostic", test_only=test_only)
+    checked, failure = _checks(operations, args, mode="diagnostic", test_only=test_only)
+    if failure is not None:
+        return failure
+    try:
+        diagnostics = _admission_diagnostics(checked, test_only=test_only)
+        return records.make_record("DIAGNOSTIC_SERVICE", "DIAGNOSTIC_ONLY", 0, mode="diagnostic",
+                                   gpu_diagnostics=diagnostics, test_only=test_only)
+    except Exception:
+        return records.make_record("DIAGNOSTIC_SERVICE", "DIAGNOSTIC_RECORD_INVALID", 1,
+                                   mode="diagnostic", test_only=test_only)
 
 
 def _diagnostic_worker(operations, args, *, test_only, timeout=WORKER_TIMEOUT_SECONDS):
@@ -343,9 +405,11 @@ def main(argv=None, *, operations=None, environ=None, worker=None,
                 drop = _drop_diagnostic_privileges if privilege_drop is None else privilege_drop
                 drop(account)
             except Exception as error:
-                record = _failure("UID_GID", error, mode=mode, test_only=test_only)
-                _publish(record)
-                return record["exitCode"]
+                if record.get("exitCode", 0) > 0:
+                    _publish(record)  # Preserve the first known startup failure.
+                secondary = _failure("UID_GID", error, mode=mode, test_only=test_only)
+                _publish(secondary)
+                return secondary["exitCode"]
             _publish(record)
             serve = serve_diagnostic if diagnostic_service is None else diagnostic_service
             return serve(record, port=port, max_seconds=ttl)
