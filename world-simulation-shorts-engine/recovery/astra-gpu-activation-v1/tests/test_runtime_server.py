@@ -7,6 +7,7 @@ from pathlib import Path
 import tempfile
 import threading
 import unittest
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('astra_server_under_test', ROOT / 'serve_astra.py')
@@ -126,6 +127,39 @@ class RuntimeServerTests(unittest.TestCase):
         self.config['runtimeConfig']['testOnlySoftwareProbe'] = True
         self.start()
         self.assertIn(b'testOnlySoftwareProbe:true', self.get('/astra/bootstrap.mjs')[2])
+
+    def test_saved_scene_control_intent_order_survives_http_and_original_compiler(self):
+        scene_file = ROOT.parent / 'moving-frontier-glow-fix-v1' / 'fixtures' / 'SCENE_PLAN.json'
+        scene = json.loads(scene_file.read_text())
+        self.config['runtimeConfig']['bootstrap'] = {'scenePlan': scene}
+        self.start()
+        status, _, body = self.get('/runtime-config.json')
+        self.assertEqual(status, 200)
+        received = json.loads(body)['bootstrap']['scenePlan']
+
+        def same_order(expected, actual):
+            if isinstance(expected, dict):
+                self.assertEqual(list(actual), list(expected))
+                for key in expected:
+                    same_order(expected[key], actual[key])
+            elif isinstance(expected, list):
+                self.assertEqual(len(actual), len(expected))
+                for a, b in zip(expected, actual):
+                    same_order(a, b)
+            else:
+                self.assertEqual(actual, expected)
+
+        same_order(scene, received)
+        module = server_module.ENGINE / 'web/map_infographic_v1/territory_control_adapter_v1.mjs'
+        script = ("import {readFileSync} from 'node:fs';"
+                  "const {compileTerritoryControlPlan}=await import(" + json.dumps(module.as_uri()) + ");"
+                  "const scene=JSON.parse(readFileSync(0,'utf8'));"
+                  "const plan=compileTerritoryControlPlan(scene.controlIntent);"
+                  "if(plan.totalFrames!==150||plan.fps!==30)throw Error('SCENE_TIMING_CHANGED');")
+        result = subprocess.run(['node', '--input-type=module', '-e', script],
+                                input=json.dumps(received).encode(), stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, timeout=30, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr.decode())
 
 
 if __name__ == '__main__':

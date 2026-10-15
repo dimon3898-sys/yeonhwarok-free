@@ -92,7 +92,10 @@ def load_config(file, expected_sha):
 
 
 def make_server(config, exact, *, port=0):
-    runtime = json.dumps(config['runtimeConfig'], sort_keys=True, separators=(',', ':')).encode()
+    # Protected control intents are canonical in their saved insertion order.
+    # Transport must retain that order; sorting nested Scene keys changes the
+    # existing compiler's JSON binding even though numerical values are equal.
+    runtime = json.dumps(config['runtimeConfig'], separators=(',', ':')).encode()
     bootstrap = SOFTWARE_BOOTSTRAP if config['runtimeConfig'].get('testOnlySoftwareProbe') is True else BOOTSTRAP
 
     class Handler(BaseHTTPRequestHandler):
