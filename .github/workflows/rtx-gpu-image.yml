@@ -1,0 +1,114 @@
+name: WORLD ENGINE RTX image build and immutable GHCR publish
+
+on:
+  push:
+    branches: [development/rtx-gpu-package-20261015]
+    paths:
+      - .github/workflows/rtx-gpu-image.yml
+      - world-simulation-shorts-engine/recovery/rtx-image-build-v1/*.py
+      - world-simulation-shorts-engine/recovery/rtx-image-build-v1/tests/**
+  workflow_dispatch:
+
+concurrency:
+  group: world-engine-rtx-image-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/rtx-gpu-package-20261015'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      digest: ${{ steps.publish.outputs.digest }}
+    env:
+      RTX_RUNNER_LABEL: ubuntu-24.04
+      RTX_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RTX_PHASE: build
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fetch only orchestration and package contracts
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/rtx-gpu-image.yml
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+            /world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json
+            /world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/package_overlay.json
+      - name: Require free public standard runner and 20 GiB disk-backed space
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py preflight
+      - name: Check authentication and unused unique tag before build
+        id: tag_guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py tag_guard
+      - name: Stage unchanged 140 source files and 20 explicit package files
+        id: stage
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py stage
+      - name: Build exact existing Dockerfile without GPU or secret build arguments
+        id: build
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py build
+      - name: Verify image sources and CPU dependencies and scan actual application bytes
+        id: verify
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py verify
+      - name: Recheck tag then publish once and verify immutable remote digest
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py publish
+      - name: Persist sanitized evidence to development branch
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RTX_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","tag_guard":"${{ steps.tag_guard.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py persist
+
+  verify-pull:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.digest != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      packages: write
+    env:
+      RTX_RUNNER_LABEL: ubuntu-24.04
+      RTX_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RTX_PHASE: pull
+      RTX_PUBLISHED_TAG: ${{ needs.build.outputs.tag }}
+      RTX_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fetch only verification helpers on a fresh hosted runner
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/rtx-gpu-image.yml
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+      - name: Require free public standard runner and sufficient disk-backed space
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py preflight
+      - name: Pull by verified immutable digest and recheck exact sources
+        id: pull
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py pull
+      - name: Persist sanitized independent pull evidence
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RTX_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/rtx-image-build-v1/pipeline.py persist
