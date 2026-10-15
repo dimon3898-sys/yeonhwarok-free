@@ -1,0 +1,424 @@
+{
+  "schema": "GCUBE_DIAGNOSTIC_RESULT_IMAGE_V1",
+  "status": "PUBLISHED_INDEPENDENT_PULL_PENDING",
+  "ciCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+  "gpuExecuted": false,
+  "gCubeDeployed": false,
+  "paidWorkExecuted": false,
+  "finalModified": false,
+  "rendererModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": true,
+  "imagePushed": true,
+  "pullVerified": false,
+  "builder": {
+    "root": "/var/lib/docker",
+    "freeBytes": 91397505024,
+    "filesystem": "ext2/ext3",
+    "driver": "overlay2"
+  },
+  "tag": "rtx4080s-2f9158b-38713103848-1",
+  "protection": {
+    "status": "PASS",
+    "base": "d1f6041d4fdb97c5ac1c8245d3b8ce66821b3343",
+    "changedFiles": [
+      ".github/workflows/gcube-diagnostic-result.yml",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/Dockerfile",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/LOCAL_VALIDATION.json",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/OBSERVED_RESULT.json",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/TRACE_AND_CAUSE.md",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/ci.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/recover_existing.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/tests/test_ci.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/tests/test_failure_retention.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/tests/test_recovery.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/tests/test_success_result.py",
+      "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py"
+    ],
+    "allowedExistingPatches": [
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py",
+      "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py"
+    ]
+  },
+  "freeRunner": {
+    "publicRepository": true,
+    "label": "ubuntu-24.04",
+    "largerRunner": false
+  },
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38713103848-1",
+  "tagCheck": {
+    "status": "PASS",
+    "stage": "tag_absence",
+    "tag": "rtx4080s-2f9158b-38713103848-1",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38713103848-1",
+    "tagAvailable": true,
+    "tagReserved": false,
+    "issuedAccess": {
+      "status": "UNVERIFIED",
+      "pull": null,
+      "push": null,
+      "pushVerified": false
+    },
+    "writeVerified": false
+  },
+  "ciSafetyTests": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_actual_image_contract_mismatch_is_rejected (test_ci.ResultCISafety.test_actual_image_contract_mismatch_is_rejected) ... ok\ntest_combined_manifests_preserve_unchanged_hashes_and_parent_chain (test_ci.ResultCISafety.test_combined_manifests_preserve_unchanged_hashes_and_parent_chain) ... ok\ntest_console_records_parser_is_bounded_to_valid_objects (test_ci.ResultCISafety.test_console_records_parser_is_bounded_to_valid_objects) ... ok\ntest_dockerfile_inherits_entrypoint_and_does_not_install_or_copy_renderer (test_ci.ResultCISafety.test_dockerfile_inherits_entrypoint_and_does_not_install_or_copy_renderer) ... ok\ntest_explicit_context_contains_only_patches_helper_and_manifests (test_ci.ResultCISafety.test_explicit_context_contains_only_patches_helper_and_manifests) ... ok\ntest_failed_unit_tests_prevent_staging (test_ci.ResultCISafety.test_failed_unit_tests_prevent_staging) ... ok\ntest_free_public_standard_branch_and_run_identity_required (test_ci.ResultCISafety.test_free_public_standard_branch_and_run_identity_required) ... ok\ntest_independent_pull_requires_original_and_all_patch_hashes (test_ci.ResultCISafety.test_independent_pull_requires_original_and_all_patch_hashes) ... ok\ntest_only_two_old_runtime_files_are_allowlisted (test_ci.ResultCISafety.test_only_two_old_runtime_files_are_allowlisted) ... ok\ntest_publish_never_claims_independent_pull_success (test_ci.ResultCISafety.test_publish_never_claims_independent_pull_success) ... ok\ntest_publish_requires_verification_zero_secrets_and_double_unused_tag_guard (test_ci.ResultCISafety.test_publish_requires_verification_zero_secrets_and_double_unused_tag_guard) ... ok\ntest_source_labels_platform_and_original_entrypoint_fail_closed (test_ci.ResultCISafety.test_source_labels_platform_and_original_entrypoint_fail_closed) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.052s\n\nOK\n",
+    "scope": "NEW_CI_MOCKS_ONLY"
+  },
+  "focusedTests": {
+    "exitCode": 0,
+    "results": [
+      {
+        "pattern": "test_success_result.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_actual_fork_pipe_roundtrip_and_existing_http_routes_keep_safe_success_details (test_success_result.SuccessResultTests.test_actual_fork_pipe_roundtrip_and_existing_http_routes_keep_safe_success_details) ... ok\ntest_existing_first_failure_record_is_returned_identically (test_success_result.SuccessResultTests.test_existing_first_failure_record_is_returned_identically) ... ok\ntest_legacy_success_shape_omits_details_and_fixed_worker_preserves_them (test_success_result.SuccessResultTests.test_legacy_success_shape_omits_details_and_fixed_worker_preserves_them) ... ok\ntest_malformed_or_missing_success_evidence_is_explicitly_invalid (test_success_result.SuccessResultTests.test_malformed_or_missing_success_evidence_is_explicitly_invalid) ... ok\ntest_old_startup_privilege_failure_publishes_primary_before_secondary (test_success_result.SuccessResultTests.test_old_startup_privilege_failure_publishes_primary_before_secondary) ... ok\ntest_original_test_admission_is_supported_only_as_explicit_test_only (test_success_result.SuccessResultTests.test_original_test_admission_is_supported_only_as_explicit_test_only) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.071s\n\nOK\n"
+      },
+      {
+        "pattern": "test_failure_retention.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_diagnostic_only_success_publishes_only_actual_uid_failure (test_failure_retention.FirstFailureTests.test_diagnostic_only_success_publishes_only_actual_uid_failure) ... ok\ntest_gpu_failure_retains_first_code_timestamp_gpu_and_all_save_order (test_failure_retention.FirstFailureTests.test_gpu_failure_retains_first_code_timestamp_gpu_and_all_save_order) ... ok\ntest_source_failure_is_not_replaced_by_secondary_uid_failure (test_failure_retention.FirstFailureTests.test_source_failure_is_not_replaced_by_secondary_uid_failure) ... ok\ntest_storage_errno_is_preserved_separately_from_secondary_permission_errno (test_failure_retention.FirstFailureTests.test_storage_errno_is_preserved_separately_from_secondary_permission_errno) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.015s\n\nOK\n"
+      },
+      {
+        "pattern": "test_recovery.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_fixed_loopback_without_proxy_and_bounded_timeout (test_recovery.LoopbackTests.test_fixed_loopback_without_proxy_and_bounded_timeout) ... ok\ntest_http_error_oversize_and_redirect_rejected (test_recovery.LoopbackTests.test_http_error_oversize_and_redirect_rejected) ... ok\ntest_no_cli_paths_and_unavailable_endpoint_do_not_initialize_hardware (test_recovery.LoopbackTests.test_no_cli_paths_and_unavailable_endpoint_do_not_initialize_hardware) ... ok\ntest_unknown_exception_or_recovery_message_stays_private_and_errno_is_static (test_recovery.LoopbackTests.test_unknown_exception_or_recovery_message_stays_private_and_errno_is_static) ... ok\ntest_current_failure_or_testonly_never_overwritten (test_recovery.RecoveryTests.test_current_failure_or_testonly_never_overwritten) ... ok\ntest_duplicate_and_nonfinite_json_rejected (test_recovery.RecoveryTests.test_duplicate_and_nonfinite_json_rejected) ... ok\ntest_duplicate_export_record_is_ambiguous (test_recovery.RecoveryTests.test_duplicate_export_record_is_ambiguous) ... ok\ntest_duplicate_native_admissions_are_ambiguous (test_recovery.RecoveryTests.test_duplicate_native_admissions_are_ambiguous) ... ok\ntest_exact_existing_receipt_and_safe_admission_correlate_read_only (test_recovery.RecoveryTests.test_exact_existing_receipt_and_safe_admission_correlate_read_only) ... ok\ntest_failed_testonly_software_and_wrong_scope_never_verified (test_recovery.RecoveryTests.test_failed_testonly_software_and_wrong_scope_never_verified) ... ok\ntest_fixed_stale_reason_code_preserved (test_recovery.RecoveryTests.test_fixed_stale_reason_code_preserved) ... ok\ntest_invalid_source_memory_and_shared_memory_fail_closed (test_recovery.RecoveryTests.test_invalid_source_memory_and_shared_memory_fail_closed) ... ok\ntest_loopback_must_match_exact_exported_startup_record (test_recovery.RecoveryTests.test_loopback_must_match_exact_exported_startup_record) ... ok\ntest_missing_receipt_and_missing_admission_never_guess_latest (test_recovery.RecoveryTests.test_missing_receipt_and_missing_admission_never_guess_latest) ... ok\ntest_no_private_admission_file_ever_read (test_recovery.RecoveryTests.test_no_private_admission_file_ever_read) ... ok\ntest_private_file_mode_and_symlink_rejected (test_recovery.RecoveryTests.test_private_file_mode_and_symlink_rejected) ... ok\ntest_receipt_root_and_directory_identity_must_match (test_recovery.RecoveryTests.test_receipt_root_and_directory_identity_must_match) ... ok\ntest_stale_and_future_admission_rejected (test_recovery.RecoveryTests.test_stale_and_future_admission_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 18 tests in 0.037s\n\nOK\n"
+      }
+    ],
+    "scope": "ONLY_NEW_DIAGNOSTIC_RESULT_FAILURE_RECOVERY_TESTS_WITH_EXPLICIT_MOCKS_NO_GPU"
+  },
+  "context": "/home/runner/work/_temp/result-context-rtx4080s-2f9158b-38713103848-1",
+  "manifests": {
+    "DIAGNOSTIC_FILES.json": {
+      "schema": "WORLD_ENGINE_STARTUP_DIAGNOSTICS_FILES_V1",
+      "parentDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+      "sourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+      "previousManifestSha256": "de56af52ab0655045efed69fbc7a1f3cdf2b99ade96e700e89cf8a0e6dcba59a",
+      "files": {
+        "startup.py": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7",
+        "records.py": "d5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080",
+        "service.py": "f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5",
+        "healthcheck.py": "0f49a39d6158ff4012fa2bf172cf23b20cb6a922a20e15fb567942f500c557c5"
+      }
+    },
+    "STORAGE_FILES.json": {
+      "schema": "WORLD_ENGINE_STORAGE_FILES_V1",
+      "parentDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+      "sourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+      "previousManifestSha256": "ecee5f20c68bb55ae9d63964befa30fd6209b21d7615bde52847de033ee62b30",
+      "files": {
+        "storage.py": "ff8679bdbdf1f42f75b498ee9f68afa701346e4f535043bfdda9663005c130c1",
+        "launch.py": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c"
+      }
+    },
+    "RESULT_FILES.json": {
+      "schema": "WORLD_ENGINE_DIAGNOSTIC_RESULT_FILES_V1",
+      "parentDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+      "sourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+      "helperSha256": "7a12a58f130a9cdc7c50646a14f5a92cf06030dd0a3f4912f7480988ea8ba039",
+      "patchedSources": {
+        "/opt/world-engine-startup-diagnostics/startup.py": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7",
+        "/opt/world-engine-storage-fix/launch.py": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c"
+      },
+      "unchangedSources": {
+        "/opt/world-engine-startup-diagnostics/records.py": "d5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080",
+        "/opt/world-engine-startup-diagnostics/service.py": "f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5",
+        "/opt/world-engine-startup-diagnostics/healthcheck.py": "0f49a39d6158ff4012fa2bf172cf23b20cb6a922a20e15fb567942f500c557c5",
+        "/opt/world-engine-storage-fix/storage.py": "ff8679bdbdf1f42f75b498ee9f68afa701346e4f535043bfdda9663005c130c1"
+      }
+    }
+  },
+  "manifestSha256": {
+    "DIAGNOSTIC_FILES.json": "1299b2a789ffcff29a69269cdc31801b7261085cc571b35324a59336bfdb658c",
+    "STORAGE_FILES.json": "1b0481cd1f2ccb6fc10fa06b3eed3ca4e5177dc755feacb5e7e839adfb85ddc3",
+    "RESULT_FILES.json": "3f4b8d692a81d45cecdd390076141fcc47de488caf160389c1c043c08d978a1e"
+  },
+  "dockerfileSha256": "165b9cc9c05373e1b897d1157b6adc92fae56a394155a641e9861a3206240cea",
+  "explicitContextFiles": [
+    "DIAGNOSTIC_FILES.json",
+    "Dockerfile",
+    "RESULT_FILES.json",
+    "STORAGE_FILES.json",
+    "launch.py",
+    "recover_existing.py",
+    "startup.py"
+  ],
+  "builderBeforeBuild": {
+    "root": "/var/lib/docker",
+    "freeBytes": 89757741056,
+    "filesystem": "ext2/ext3",
+    "driver": "overlay2"
+  },
+  "configDigest": "sha256:456fbf96fc22d8e2ad702de1de8a54a359e449cf9557c6f9ddbe14e5872f24dd",
+  "imageSizeBytes": 1570529677,
+  "rootfsDiffIds": [
+    "sha256:4b7c01ed0534d4f9be9cf97d068da1598c6c20b26cb6134fad066defdb6d541d",
+    "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
+    "sha256:ad1bea77aba13370e253de6e5d05000d0207166dd4a8c39ffcbc6c176f9d88f1",
+    "sha256:665b595b785fb4aefae18a21b1c1c015c4b2b57ce55c9a8779eaf9c31b7f85c6",
+    "sha256:f8370a950e45e4ac4b646a693edc5c8ac62698d29de3b46afaa9100d6abf0dcb",
+    "sha256:7a87853b74e1796857ed80f6cf236c7091fee6df2774fe28a9aecba5a1110ebb",
+    "sha256:1409635932821442c0023b69cd8c673eee93b4cd718af726600b0f1ef4a0bcba",
+    "sha256:396bf1597ef960516ffcaf1798e9b3724d3bc72f649f0053415ea98d7aff7101",
+    "sha256:effd88033873ed81be1ae4c1253d07a22f00f1af2be10d36b6048e2c36cce9ff",
+    "sha256:735f5f2e545ff5d6b60c4822d8fd50c0222e07a856155506706580545175ca36",
+    "sha256:1dbcd01f62f92da3c1687cd07fb2af512013688f542e5d0804b38bcdb1f44088",
+    "sha256:2e309a41c0267c8da86bbc378bdbafce24927e23ecec51727a39169a296380b0",
+    "sha256:c037176ff2dacbf490557d1122a7488aba5ff1a0411581c0806f2452868eebca",
+    "sha256:37e6ad36a3a775622b68daf8582da97f9d4e88310e698ad5eedf37febce3ab46",
+    "sha256:965a5b28ce74c70af78b347071e27d969e0a879e1540570190ea634f729f6458",
+    "sha256:d5c7fbdfe157343087485c4ea29d7dede458e9f4d5aa4e8f155bc512e24b105a",
+    "sha256:120f66e5147619bcdf25da320e5f57de717c67994de0de04ef821302f43f8b83",
+    "sha256:0d72d5af08a7800a5d992ca8ee2a9e6daf78881b2ca21cc2f51378e849c6a600",
+    "sha256:9df29c70440ef8f18eb6ec9a20df7c076f0820954292ec0e8b77c54b9e96c2bf",
+    "sha256:c2aa18150b6dd67fe12d0b69db6f8776536cabe4693dd4a77ee885c064ca9e6c",
+    "sha256:e0364420764c035f3104ad92e3cd45381857402f2fe92a03b4f5587fe7d75835",
+    "sha256:8efca425fb37d101f45f7a9f998061dfafe9af0cb710d608024bbe7f2072867a",
+    "sha256:05de51732e56235c8db2c8bcaef27f271f1e38caec20164c30a8ee38b0454db3",
+    "sha256:c918d230c552f052eab53a52e6eb96a394c0a2e511d1bd4ccd7c1329ed3f5125",
+    "sha256:78aae0e0e03d7c67db4a4fae307d229c646a6cf2fd85e34bab05f69181d625f1",
+    "sha256:958c30d69fcdd7217c098d1bc3bd7e6bb5cb6629ee268f18f951eccd84179e37",
+    "sha256:eea3db5398e818be7955c8fc240182c5bdfe3e3eaadf90844510c321d894f22d",
+    "sha256:932267f05f69b4ce3516b5d342dd962a237e2658283eac03e19ee792103fead5",
+    "sha256:006221b41f42eb679c369f7dc2b8b1af0f991dace44502ca5aefd8ae16d93eb0",
+    "sha256:ba6d8d274c102b1c369a0272bb640c1e4a4e4af17eee6c182dc302f737f491fb",
+    "sha256:8505b8b5359fff84c0c1c420ffde1ee47a45a159886d8e3e04aaf4fdd26312b4",
+    "sha256:65968bd14ff6c4aa10ecb30c124d48d7eeaadba09806ca6fdf68c922db8e7639"
+  ],
+  "originalSources": {
+    "browserPageOpened": false,
+    "credentials": {
+      "engineHome": "PASS",
+      "processEnvironment": "PASS",
+      "rootHome": "SEPARATE_PRIVILEGED_CI_CHECK_REQUIRED",
+      "stagedSources": "PASS"
+    },
+    "gpuExecuted": false,
+    "mode": "hashes-only",
+    "networkIsolation": "LOOPBACK_ONLY",
+    "schema": "RTX_BUILT_IMAGE_CPU_CHECK_V1",
+    "source": {
+      "derivedBytecodeCount": 6,
+      "derivedBytecodeProofSha256": "866e1138448645e463efd4a068ec88d9c616b8fac40338d5e380ef4b9dbf9222",
+      "files": 160,
+      "originalFiles": 140,
+      "sourceCommits": {
+        "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+        "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+      },
+      "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+      "stagingReceiptSha256": "8f0b2b0795fe7337a5d63c2c721271c9215a4ecd27a192affcf93142fa41f9d1"
+    },
+    "sourceOwnership": "ROOT_OWNED_READABLE_NOT_WRITABLE",
+    "status": "PASS",
+    "uid": 1000
+  },
+  "imageHashes": {
+    "DIAGNOSTIC_FILES.json": {
+      "schema": "WORLD_ENGINE_STARTUP_DIAGNOSTICS_FILES_V1",
+      "parentDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+      "sourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+      "previousManifestSha256": "de56af52ab0655045efed69fbc7a1f3cdf2b99ade96e700e89cf8a0e6dcba59a",
+      "files": {
+        "startup.py": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7",
+        "records.py": "d5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080",
+        "service.py": "f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5",
+        "healthcheck.py": "0f49a39d6158ff4012fa2bf172cf23b20cb6a922a20e15fb567942f500c557c5"
+      }
+    },
+    "STORAGE_FILES.json": {
+      "schema": "WORLD_ENGINE_STORAGE_FILES_V1",
+      "parentDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+      "sourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+      "previousManifestSha256": "ecee5f20c68bb55ae9d63964befa30fd6209b21d7615bde52847de033ee62b30",
+      "files": {
+        "storage.py": "ff8679bdbdf1f42f75b498ee9f68afa701346e4f535043bfdda9663005c130c1",
+        "launch.py": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c"
+      }
+    },
+    "RESULT_FILES.json": {
+      "schema": "WORLD_ENGINE_DIAGNOSTIC_RESULT_FILES_V1",
+      "parentDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+      "sourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+      "helperSha256": "7a12a58f130a9cdc7c50646a14f5a92cf06030dd0a3f4912f7480988ea8ba039",
+      "patchedSources": {
+        "/opt/world-engine-startup-diagnostics/startup.py": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7",
+        "/opt/world-engine-storage-fix/launch.py": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c"
+      },
+      "unchangedSources": {
+        "/opt/world-engine-startup-diagnostics/records.py": "d5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080",
+        "/opt/world-engine-startup-diagnostics/service.py": "f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5",
+        "/opt/world-engine-startup-diagnostics/healthcheck.py": "0f49a39d6158ff4012fa2bf172cf23b20cb6a922a20e15fb567942f500c557c5",
+        "/opt/world-engine-storage-fix/storage.py": "ff8679bdbdf1f42f75b498ee9f68afa701346e4f535043bfdda9663005c130c1"
+      }
+    }
+  },
+  "sharedStorageBefore": {
+    "worldUid": 1001,
+    "worldMode": 511,
+    "oldLeafUid": 0,
+    "oldLeafMode": 493,
+    "sentinelUid": 0,
+    "sentinelMode": 420,
+    "sentinelSha256": "7af4b76f7d1f5b6ad65adac2689650bf4feafa6597e93a7f39a61834d3ef4608"
+  },
+  "identityProbe": {
+    "uid": 1000,
+    "gid": 1000,
+    "groups": [
+      1000
+    ]
+  },
+  "integrationCases": [
+    {
+      "case": "root-diagnostic-gpu-absence",
+      "actualGPU": false,
+      "mock": false,
+      "diagnostics": {
+        "errorCode": "GPU_HARDWARE_UNAVAILABLE",
+        "exitCode": 2,
+        "gpuRenderingVerified": false,
+        "renderAllowed": false,
+        "safeDiagnostics": {
+          "exceptionType": "LauncherError"
+        },
+        "schema": "WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1",
+        "stage": "NVIDIA",
+        "startupMode": "diagnostic",
+        "status": "BLOCKED",
+        "terminationReason": "Required NVIDIA hardware could not be queried.",
+        "timestamp": "2026-10-15T09:28:20.674874+00:00"
+      },
+      "endpoints": {
+        "GET /healthz": 200,
+        "GET /readyz": 503,
+        "GET /render": 404,
+        "POST /render": 405
+      },
+      "runningState": {
+        "restartCount": 0,
+        "running": true,
+        "health": "healthy"
+      },
+      "exitCode": 2,
+      "stdout": "{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"safeFacts\": {\"export\": {\"externalDownloadVerified\": false, \"legacyCandidate\": {\"filesystem\": \"ext4\", \"gid\": 0, \"inspectionStatus\": \"AVAILABLE\", \"isDirectory\": true, \"isSymlink\": false, \"modeBits\": 493, \"present\": true, \"privateContractMatched\": false, \"uid\": 0}, \"mountedViewReadbackVerified\": true, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false, \"root\": {\"filesystem\": \"ext4\", \"gid\": 1001, \"inspectionStatus\": \"AVAILABLE\", \"modeBits\": 511, \"present\": true, \"uid\": 1001}, \"storageRole\": \"UNTRUSTED_SHARED_EXPORT_ONLY\"}, \"externalDownloadVerified\": false, \"mountedViewReadbackVerified\": true, \"private\": {\"filesystem\": \"overlay\", \"gid\": 1000, \"mode\": \"0700\", \"storageRole\": \"PRIVATE_POSIX_LOCAL\", \"uid\": 1000, \"writeReadRenameFsyncFlockVerified\": true}, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false}, \"schema\": \"WORLD_ENGINE_STORAGE_FACTS_V1\", \"status\": \"PASS\", \"testOnly\": false, \"timestamp\": \"2026-10-15T09:28:20.113198+00:00\"}\n{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"schema\": \"WORLD_ENGINE_STARTUP_PHASE_V1\", \"stage\": \"SOURCE_INTEGRITY\", \"status\": \"PASS\", \"testOnly\": false}\n{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"schema\": \"WORLD_ENGINE_STARTUP_PHASE_V1\", \"stage\": \"DEPENDENCY\", \"status\": \"PASS\", \"testOnly\": false}\n{\"errorCode\":\"GPU_HARDWARE_UNAVAILABLE\",\"exitCode\":2,\"gpuRenderingVerified\":false,\"renderAllowed\":false,\"safeDiagnostics\":{\"exceptionType\":\"LauncherError\"},\"schema\":\"WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1\",\"stage\":\"NVIDIA\",\"startupMode\":\"diagnostic\",\"status\":\"BLOCKED\",\"terminationReason\":\"Required NVIDIA hardware could not be queried.\",\"timestamp\":\"2026-10-15T09:28:20.674874+00:00\"}\n{\"exportDirectory\": \"world-engine-export-b7cf157746dede442249fd8c\", \"externalDownloadVerified\": false, \"files\": [{\"bytes\": 404, \"file\": \"startup-safe-d1fe6bc30760061abf868e56.json\", \"sha256\": \"2d8ede6308732c5d872cd9943bdb3b7a480c8b3954772d080a389fa329fa43a5\"}], \"mountedViewReadbackVerified\": true, \"remotePersistenceVerified\": false, \"schema\": \"WORLD_ENGINE_EXPORT_LOCATION_V1\", \"testOnly\": false}\n",
+      "stderr": "{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"safeFacts\": {\"export\": {\"externalDownloadVerified\": false, \"legacyCandidate\": {\"filesystem\": \"ext4\", \"gid\": 0, \"inspectionStatus\": \"AVAILABLE\", \"isDirectory\": true, \"isSymlink\": false, \"modeBits\": 493, \"present\": true, \"privateContractMatched\": false, \"uid\": 0}, \"mountedViewReadbackVerified\": true, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false, \"root\": {\"filesystem\": \"ext4\", \"gid\": 1001, \"inspectionStatus\": \"AVAILABLE\", \"modeBits\": 511, \"present\": true, \"uid\": 1001}, \"storageRole\": \"UNTRUSTED_SHARED_EXPORT_ONLY\"}, \"externalDownloadVerified\": false, \"mountedViewReadbackVerified\": true, \"private\": {\"filesystem\": \"overlay\", \"gid\": 1000, \"mode\": \"0700\", \"storageRole\": \"PRIVATE_POSIX_LOCAL\", \"uid\": 1000, \"writeReadRenameFsyncFlockVerified\": true}, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false}, \"schema\": \"WORLD_ENGINE_STORAGE_FACTS_V1\", \"status\": \"PASS\", \"testOnly\": false, \"timestamp\": \"2026-10-15T09:28:20.113198+00:00\"}\n{\"errorCode\":\"GPU_HARDWARE_UNAVAILABLE\",\"exitCode\":2,\"gpuRenderingVerified\":false,\"renderAllowed\":false,\"safeDiagnostics\":{\"exceptionType\":\"LauncherError\"},\"schema\":\"WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1\",\"stage\":\"NVIDIA\",\"startupMode\":\"diagnostic\",\"status\":\"BLOCKED\",\"terminationReason\":\"Required NVIDIA hardware could not be queried.\",\"timestamp\":\"2026-10-15T09:28:20.674874+00:00\"}\n",
+      "recordReadback": {
+        "status": "PASS",
+        "firstFailurePrivateCopies": 1,
+        "secondaryUIDCopies": 0,
+        "firstFailureSharedCopies": [
+          {
+            "sha256": "2d8ede6308732c5d872cd9943bdb3b7a480c8b3954772d080a389fa329fa43a5",
+            "bytes": 404
+          }
+        ],
+        "secondaryUIDSharedCopies": 0,
+        "mountedViewReadbackVerified": true,
+        "remotePersistenceVerified": false,
+        "externalDownloadVerified": false
+      },
+      "status": "PASS",
+      "containerState": {
+        "Status": "exited",
+        "ExitCode": 2,
+        "OOMKilled": false
+      }
+    },
+    {
+      "case": "unprivileged-first-error-preserved",
+      "actualGPU": false,
+      "mock": false,
+      "exitCode": 1,
+      "stdout": "{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"safeFacts\": {\"export\": {\"externalDownloadVerified\": false, \"legacyCandidate\": {\"filesystem\": \"ext4\", \"gid\": 0, \"inspectionStatus\": \"AVAILABLE\", \"isDirectory\": true, \"isSymlink\": false, \"modeBits\": 493, \"present\": true, \"privateContractMatched\": false, \"uid\": 0}, \"mountedViewReadbackVerified\": true, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false, \"root\": {\"filesystem\": \"ext4\", \"gid\": 1001, \"inspectionStatus\": \"AVAILABLE\", \"modeBits\": 511, \"present\": true, \"uid\": 1001}, \"storageRole\": \"UNTRUSTED_SHARED_EXPORT_ONLY\"}, \"externalDownloadVerified\": false, \"mountedViewReadbackVerified\": true, \"private\": {\"filesystem\": \"overlay\", \"gid\": 1000, \"mode\": \"0700\", \"storageRole\": \"PRIVATE_POSIX_LOCAL\", \"uid\": 1000, \"writeReadRenameFsyncFlockVerified\": true}, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false}, \"schema\": \"WORLD_ENGINE_STORAGE_FACTS_V1\", \"status\": \"PASS\", \"testOnly\": false, \"timestamp\": \"2026-10-15T09:28:26.176720+00:00\"}\n{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"schema\": \"WORLD_ENGINE_STARTUP_PHASE_V1\", \"stage\": \"SOURCE_INTEGRITY\", \"status\": \"PASS\", \"testOnly\": false}\n{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"schema\": \"WORLD_ENGINE_STARTUP_PHASE_V1\", \"stage\": \"DEPENDENCY\", \"status\": \"PASS\", \"testOnly\": false}\n{\"errorCode\":\"GPU_HARDWARE_UNAVAILABLE\",\"exitCode\":2,\"gpuRenderingVerified\":false,\"renderAllowed\":false,\"safeDiagnostics\":{\"exceptionType\":\"LauncherError\"},\"schema\":\"WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1\",\"stage\":\"NVIDIA\",\"startupMode\":\"diagnostic\",\"status\":\"BLOCKED\",\"terminationReason\":\"Required NVIDIA hardware could not be queried.\",\"timestamp\":\"2026-10-15T09:28:26.732290+00:00\"}\n{\"exportDirectory\": \"world-engine-export-8ae6442e253ab2b63a52664e\", \"externalDownloadVerified\": false, \"files\": [{\"bytes\": 404, \"file\": \"startup-safe-449af85f4355dbe074de820b.json\", \"sha256\": \"36877328813549f8a96dbeb817950960fea8521bc85aa3fe523cad9391a9ae94\"}], \"mountedViewReadbackVerified\": true, \"remotePersistenceVerified\": false, \"schema\": \"WORLD_ENGINE_EXPORT_LOCATION_V1\", \"testOnly\": false}\n{\"errorCode\":\"UID_GID_FAILED\",\"exitCode\":1,\"gpuRenderingVerified\":false,\"renderAllowed\":false,\"safeDiagnostics\":{},\"schema\":\"WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1\",\"stage\":\"UID_GID\",\"startupMode\":\"diagnostic\",\"status\":\"BLOCKED\",\"terminationReason\":\"Engine account permission validation or transition failed.\",\"timestamp\":\"2026-10-15T09:28:26.743225+00:00\"}\n{\"exportDirectory\": \"world-engine-export-8ae6442e253ab2b63a52664e\", \"externalDownloadVerified\": false, \"files\": [{\"bytes\": 375, \"file\": \"startup-safe-95eb86f33522902bb94295ef.json\", \"sha256\": \"a0d13b73a19d2de8ed113d0395b9fd7b749e3262d02e6f34a4a1b9f55ee4c972\"}], \"mountedViewReadbackVerified\": true, \"remotePersistenceVerified\": false, \"schema\": \"WORLD_ENGINE_EXPORT_LOCATION_V1\", \"testOnly\": false}\n",
+      "stderr": "{\"gpuRenderingVerified\": false, \"renderAllowed\": false, \"safeFacts\": {\"export\": {\"externalDownloadVerified\": false, \"legacyCandidate\": {\"filesystem\": \"ext4\", \"gid\": 0, \"inspectionStatus\": \"AVAILABLE\", \"isDirectory\": true, \"isSymlink\": false, \"modeBits\": 493, \"present\": true, \"privateContractMatched\": false, \"uid\": 0}, \"mountedViewReadbackVerified\": true, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false, \"root\": {\"filesystem\": \"ext4\", \"gid\": 1001, \"inspectionStatus\": \"AVAILABLE\", \"modeBits\": 511, \"present\": true, \"uid\": 1001}, \"storageRole\": \"UNTRUSTED_SHARED_EXPORT_ONLY\"}, \"externalDownloadVerified\": false, \"mountedViewReadbackVerified\": true, \"private\": {\"filesystem\": \"overlay\", \"gid\": 1000, \"mode\": \"0700\", \"storageRole\": \"PRIVATE_POSIX_LOCAL\", \"uid\": 1000, \"writeReadRenameFsyncFlockVerified\": true}, \"privateDataAllowed\": false, \"remotePersistenceVerified\": false}, \"schema\": \"WORLD_ENGINE_STORAGE_FACTS_V1\", \"status\": \"PASS\", \"testOnly\": false, \"timestamp\": \"2026-10-15T09:28:26.176720+00:00\"}\n{\"errorCode\":\"GPU_HARDWARE_UNAVAILABLE\",\"exitCode\":2,\"gpuRenderingVerified\":false,\"renderAllowed\":false,\"safeDiagnostics\":{\"exceptionType\":\"LauncherError\"},\"schema\":\"WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1\",\"stage\":\"NVIDIA\",\"startupMode\":\"diagnostic\",\"status\":\"BLOCKED\",\"terminationReason\":\"Required NVIDIA hardware could not be queried.\",\"timestamp\":\"2026-10-15T09:28:26.732290+00:00\"}\n{\"errorCode\":\"UID_GID_FAILED\",\"exitCode\":1,\"gpuRenderingVerified\":false,\"renderAllowed\":false,\"safeDiagnostics\":{},\"schema\":\"WORLD_ENGINE_STARTUP_DIAGNOSTIC_V1\",\"stage\":\"UID_GID\",\"startupMode\":\"diagnostic\",\"status\":\"BLOCKED\",\"terminationReason\":\"Engine account permission validation or transition failed.\",\"timestamp\":\"2026-10-15T09:28:26.743225+00:00\"}\n",
+      "recordReadback": {
+        "status": "PASS",
+        "firstFailurePrivateCopies": 1,
+        "secondaryUIDCopies": 1,
+        "firstFailureSharedCopies": [
+          {
+            "sha256": "36877328813549f8a96dbeb817950960fea8521bc85aa3fe523cad9391a9ae94",
+            "bytes": 404
+          }
+        ],
+        "secondaryUIDSharedCopies": 1,
+        "mountedViewReadbackVerified": true,
+        "remotePersistenceVerified": false,
+        "externalDownloadVerified": false
+      },
+      "status": "PASS",
+      "containerState": {
+        "Status": "exited",
+        "ExitCode": 1,
+        "OOMKilled": false
+      }
+    }
+  ],
+  "sharedStorageProtection": {
+    "status": "PASS",
+    "before": {
+      "worldUid": 1001,
+      "worldMode": 511,
+      "oldLeafUid": 0,
+      "oldLeafMode": 493,
+      "sentinelUid": 0,
+      "sentinelMode": 420,
+      "sentinelSha256": "7af4b76f7d1f5b6ad65adac2689650bf4feafa6597e93a7f39a61834d3ef4608"
+    },
+    "after": {
+      "worldUid": 1001,
+      "worldMode": 511,
+      "oldLeafUid": 0,
+      "oldLeafMode": 493,
+      "sentinelUid": 0,
+      "sentinelMode": 420,
+      "sentinelSha256": "7af4b76f7d1f5b6ad65adac2689650bf4feafa6597e93a7f39a61834d3ef4608"
+    }
+  },
+  "verification": "PASS",
+  "secretScan": {
+    "status": "PASS",
+    "findings": 0,
+    "scannerExitCode": 0,
+    "scannerSha256": "e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad",
+    "scope": "actual patched two modules, new recovery helper, new namespace and workflow; parent audit reused"
+  },
+  "imageDigest": "sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+  "registryVerification": {
+    "status": "PASS",
+    "stage": "remote_digest",
+    "digest": "sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "imageManifestDigest": "sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+    "configDigest": "sha256:456fbf96fc22d8e2ad702de1de8a54a359e449cf9557c6f9ddbe14e5872f24dd",
+    "platform": "linux/amd64",
+    "remotePresenceVerified": true,
+    "manifestAndConfigBytesVerified": true,
+    "layerContentsVerified": false,
+    "issuedAccess": {
+      "status": "UNVERIFIED",
+      "pull": null,
+      "push": null,
+      "pushVerified": false
+    },
+    "writeVerified": false
+  },
+  "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+  "stepOutcomes": {
+    "preflight": "success",
+    "guard": "success",
+    "test": "success",
+    "stage": "success",
+    "build": "success",
+    "verify": "success",
+    "publish": "success"
+  }
+}
