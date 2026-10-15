@@ -25,6 +25,8 @@ or GPU service is configured. Runner availability and capacity are unverified
 until its job actually starts. Each job requires at least 20 GiB free on the
 Docker disk-backed filesystem. It never prunes images, cache, volumes or tools.
 The local Codex vfs builder has about 1.87 GiB free and is not used for a build.
+GitHub also documents GHCR container image storage and bandwidth as currently
+free: https://github.com/github/docs/blob/main/content/billing/concepts/product-billing/github-packages.md
 
 ## Execution
 
@@ -41,7 +43,8 @@ authorized manual dispatch can also run it on this branch. The image tag is
    context. No authentication files enter that context.
 4. Build the existing Dockerfile for `linux/amd64`. No secret build argument.
 5. Override its GPU entrypoint. As UID 1000 with `--network=none`, verify source
-   hashes, installed CPU dependencies/APIs, Playwright module loading and a tiny
+   hashes and any receipt-bound CPython caches against freshly compiled original
+   source bytes, then installed CPU dependencies/APIs, Playwright module loading and a tiny
    two-frame 16x16 CPU codec fixture. No Chromium page or GPU rendering is run.
 6. Check image credential environment keys and known root credential paths;
    run pinned Gitleaks on actual copied application bytes. Credential values
@@ -58,6 +61,16 @@ Registry scope observations and a missing tag do not prove successful writing.
 Only the actual push and verified registry presence establish publication.
 There is no tag-reservation API; serialized workflow plus unique run/attempt
 tags and an immediate pre-push check protect this workflow's writers.
+
+Run `38659996603` proved an 85 GiB free hosted builder, unchanged 160-file
+staging and an actual 1,570,248,543-byte image build. Publication was correctly
+skipped when the new source-tree checker rejected an extra generated file.
+The existing Dockerfile imports ASTRA modules before disabling Python bytecode
+writing. The additive checker now verifies standard receipt-bound caches by
+source SHA, interpreter magic, timestamp/size and exact compiled-body bytes;
+it neither executes nor unmarshals cache contents. Other extra files remain
+failures. The original Dockerfile, runtime and sources are preserved. See
+`RETRY_RECORD.json` and the saved first-run report for the retry's evidence.
 
 ## Permissions and blockers
 

@@ -212,7 +212,14 @@ def publish():
     try:
         # Repeat the no-overwrite check immediately before the first and only push.
         registry.check_tag(value["tag"])
-        output = run(["docker", "push", value["image"]], env=env, timeout=900)
+        try:
+            output = run(["docker", "push", value["image"]], env=env, timeout=900)
+        except subprocess.CalledProcessError as error:
+            message = (error.stderr or "").lower()
+            denied = any(word in message for word in ("denied", "unauthorized", "authentication required", "permission"))
+            code = "GHCR_PUSH_AUTH_OR_PACKAGE_ACCESS_DENIED" if denied else "DOCKER_PUSH_FAILED"
+            value["pushFailure"] = {"exitCode": error.returncode, "reasonCode": code}; save(value)
+            raise RuntimeError(code) from None
         value["imagePushed"] = True; save(value)
         digests = re.findall(r"^"+re.escape(value["tag"])+r": digest: (sha256:[0-9a-f]{64}) size: [0-9]+$", output, re.MULTILINE)
         if len(digests) != 1: raise RuntimeError("UNIQUE_PUSH_DIGEST_REQUIRED")

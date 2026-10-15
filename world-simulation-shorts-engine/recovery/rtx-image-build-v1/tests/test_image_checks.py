@@ -9,7 +9,9 @@ import io
 import json
 import os
 from pathlib import Path
+import py_compile
 import stat
+import struct
 import subprocess
 import sys
 import tempfile
@@ -364,6 +366,91 @@ class ToolProbeTests(unittest.TestCase):
         self.assertEqual(command.call_count, 1)
 
 
+class BytecodeTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="rtx-pyc-test-", dir="/tmp")
+        self.addCleanup(self.temporary.cleanup)
+        self.base = Path(self.temporary.name)
+        self.source = self.base / "bound_source.py"
+        self.source.write_bytes(b"answer = 1\n")
+        self.source_hash = hashlib.sha256(self.source.read_bytes()).hexdigest()
+        self.bytecode = Path(importlib.util.cache_from_source(str(self.source)))
+        self.compile_source()
+        self.original = self.bytecode.read_bytes()
+        # These tests bind bytecode; the separate filesystem tests cover ownership.
+        self.ownership = mock.patch.object(checks, "_root_owned_readonly")
+        self.ownership.start()
+        self.addCleanup(self.ownership.stop)
+
+    def compile_source(self, mode=py_compile.PycInvalidationMode.TIMESTAMP):
+        py_compile.compile(str(self.source), cfile=str(self.bytecode), doraise=True,
+                           invalidation_mode=mode, optimize=0)
+
+    def test_valid_timestamp_bytecode_proves_both_source_and_cache_hashes(self):
+        proof = checks._validate_bytecode(self.bytecode, self.source, expected_source_sha256=self.source_hash)
+        self.assertIsInstance(proof, dict)
+        self.assertEqual(proof["sourceSha256"], self.source_hash)
+        self.assertEqual(proof["bytecodeSha256"], hashlib.sha256(self.original).hexdigest())
+        self.assertEqual(proof["compiledBodySha256"], hashlib.sha256(self.original[16:]).hexdigest())
+
+    def test_changed_or_trailing_bytecode_payload_is_rejected(self):
+        for body in (self.original[:-1] + bytes([self.original[-1] ^ 1]), self.original + b"\x00"):
+            with self.subTest(trailing=len(body) != len(self.original)):
+                self.bytecode.write_bytes(body)
+                with self.assertRaises(checks.ImageCheckError):
+                    checks._validate_bytecode(self.bytecode, self.source)
+
+    def test_cache_requires_the_exact_source_and_current_interpreter_tag(self):
+        other_source = self.base / "unbound_source.py"
+        other_source.write_bytes(self.source.read_bytes())
+        with self.assertRaises(checks.ImageCheckError):
+            checks._validate_bytecode(self.bytecode, other_source)
+        other_cache = self.bytecode.with_name("bound_source.other-interpreter.pyc")
+        other_cache.write_bytes(self.original)
+        with self.assertRaises(checks.ImageCheckError):
+            checks._validate_bytecode(other_cache, self.source)
+        optimized = self.bytecode.with_name("bound_source." + sys.implementation.cache_tag + ".opt-1.pyc")
+        optimized.write_bytes(self.original)
+        with self.assertRaises(checks.ImageCheckError):
+            checks._validate_bytecode(optimized, self.source)
+
+    def test_hash_based_cache_modes_are_rejected(self):
+        for mode in (py_compile.PycInvalidationMode.CHECKED_HASH, py_compile.PycInvalidationMode.UNCHECKED_HASH):
+            with self.subTest(mode=mode):
+                self.compile_source(mode)
+                with self.assertRaises(checks.ImageCheckError):
+                    checks._validate_bytecode(self.bytecode, self.source)
+
+    def test_magic_flags_mtime_size_and_truncated_headers_are_rejected(self):
+        magic, flags, mtime, size = struct.unpack("<4sIII", self.original[:16])
+        bad_magic = bytes([magic[0] ^ 1]) + magic[1:]
+        headers = (struct.pack("<4sIII", bad_magic, flags, mtime, size),
+                   struct.pack("<4sIII", magic, 4, mtime, size),
+                   struct.pack("<4sIII", magic, flags, (mtime + 1) & 0xffffffff, size),
+                   struct.pack("<4sIII", magic, flags, mtime, size + 1))
+        bodies = [header + self.original[16:] for header in headers] + [self.original[:15]]
+        for index, body in enumerate(bodies):
+            with self.subTest(header_case=index):
+                self.bytecode.write_bytes(body)
+                with self.assertRaises(checks.ImageCheckError):
+                    checks._validate_bytecode(self.bytecode, self.source)
+
+    def test_old_code_is_rejected_even_when_source_size_and_mtime_header_are_updated(self):
+        for body in (b"answer = 2\n", b"answer = 1\n# changed comment\n"):
+            with self.subTest(body=body):
+                self.source.write_bytes(body)
+                details = self.source.stat()
+                updated_header = (self.original[:8] + struct.pack("<II", int(details.st_mtime) & 0xffffffff,
+                                                                details.st_size & 0xffffffff))
+                self.bytecode.write_bytes(updated_header + self.original[16:])
+                if body == b"answer = 2\n":
+                    # A matching header alone cannot authorize an old code body.
+                    with self.assertRaisesRegex(checks.ImageCheckError, "BYTECODE_BODY_MISMATCH"):
+                        checks._validate_bytecode(self.bytecode, self.source)
+                with self.assertRaises(checks.ImageCheckError):
+                    checks._validate_bytecode(self.bytecode, self.source, expected_source_sha256=self.source_hash)
+
+
 class FilesystemTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="rtx-image-fs-test-", dir="/tmp")
@@ -492,6 +579,31 @@ class FilesystemTests(unittest.TestCase):
         with self.assertRaisesRegex(checks.ImageCheckError, "OWNERSHIP_OR_PERMISSIONS"):
             checks._check_source_tree(self.root)
 
+    def test_receipt_bound_timestamp_bytecode_is_accepted_as_derived_data(self):
+        relative = checks.PACKAGE_REL + "/synthetic_bytecode_source.py"
+        body = b"answer = 1\n"
+        source = self.write("repo/" + relative, body)
+        record = {"repoPath": relative, "bytes": len(body), "sha256": hashlib.sha256(body).hexdigest()}
+        self.write("STAGING_RECEIPT.json", json.dumps({"files": [*self.records, record]}).encode())
+        cache = importlib.util.cache_from_source(str(source))
+        py_compile.compile(str(source), cfile=cache, doraise=True,
+                           invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP, optimize=0)
+        result = checks._check_source_tree(self.root)
+        self.assertEqual(result["files"], 141)
+        self.assertEqual(result["derivedBytecodeCount"], 1)
+        self.assertRegex(result["derivedBytecodeProofSha256"], r"^[0-9a-f]{64}$")
+
+    def test_bytecode_without_a_receipt_bound_source_is_rejected(self):
+        source = self.base / "unbound_source.py"
+        source.write_bytes(b"answer = 1\n")
+        cache = Path(importlib.util.cache_from_source(str(source)))
+        py_compile.compile(str(source), cfile=str(cache), doraise=True,
+                           invalidation_mode=py_compile.PycInvalidationMode.TIMESTAMP, optimize=0)
+        self.write("repo/sources/__pycache__/" + cache.name, cache.read_bytes())
+        with self.assertRaises(checks.ImageCheckError) as caught:
+            checks._check_source_tree(self.root)
+        self.assertEqual(caught.exception.relative_path, "repo/sources/__pycache__/" + cache.name)
+
     def test_duplicate_and_traversal_receipt_records_are_rejected(self):
         candidates = [self.records + [self.records[0]],
                       [dict(self.records[0], repoPath="../escape")],
@@ -600,6 +712,27 @@ class MainOutputTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertNotIn(SECRET, stdout + stderr)
         self.assertEqual(report["errorCode"], "UNEXPECTED_CHECK_FAILURE")
+
+    def test_main_reports_only_sanitized_relative_path_for_known_errors(self):
+        relative = "repo/sources/unexpected.pyc"
+        error = checks.ImageCheckError("UNEXPECTED_STAGED_FILE", relative_path=relative)
+        code, report, stdout, stderr, _ = self.invoke(side_effect=error)
+        self.assertEqual(code, 1)
+        self.assertEqual(report["errorCode"], "UNEXPECTED_STAGED_FILE")
+        self.assertEqual(report["unexpectedRelativePath"], relative)
+        self.assertEqual(stderr, "")
+
+    def test_main_rejects_absolute_traversal_nonascii_and_oversized_path_diagnostics(self):
+        invalid = ("/tmp/" + SECRET, "repo/../" + SECRET, "repo\\" + SECRET,
+                   "repo/" + SECRET + "\n", "repo/" + SECRET + "\x00", "repo/\u00e9/" + SECRET,
+                   "repo/" + SECRET + "/" + "x" * 512)
+        for relative in invalid:
+            with self.subTest(relative=relative):
+                error = checks.ImageCheckError("UNEXPECTED_STAGED_FILE", relative_path=relative)
+                code, report, stdout, stderr, _ = self.invoke(side_effect=error)
+                self.assertEqual(code, 1)
+                self.assertNotIn("unexpectedRelativePath", report)
+                self.assertNotIn(SECRET, stdout + stderr)
 
 
 if __name__ == "__main__":

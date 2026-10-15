@@ -13,11 +13,13 @@ import hashlib
 import importlib.util
 import io
 import json
+import marshal
 import os
 from pathlib import Path
 import pwd
 import re
 import stat
+import struct
 import subprocess
 import tempfile
 
@@ -48,6 +50,8 @@ SAFE_ERROR_CODES = {
     "PLAYWRIGHT_MODULE_CONTRACT_FAILED", "CODEC_PROBE_JSON_INVALID", "SYNTHETIC_CODEC_STREAM_INVALID",
     "SYNTHETIC_CODEC_CONTRACT_FAILED", "UID_1000_REQUIRED", "PACKAGED_SOURCE_VERIFICATION_FAILED",
     "STRICT_NATIVE_DEPENDENCY_CHECK_FAILED", "NATIVE_REPORT_INVALID", "NATIVE_API_OR_PROBE_FAILED",
+    "DERIVED_BYTECODE_INVALID", "DERIVED_BYTECODE_SOURCE_HASH_MISMATCH",
+    "DERIVED_BYTECODE_HEADER_MISMATCH", "DERIVED_BYTECODE_BODY_MISMATCH",
 }
 NODE_PLAYWRIGHT_PROBE = r"""
 const {createRequire}=require('node:module');
@@ -62,6 +66,15 @@ process.stdout.write(JSON.stringify({node:process.versions.node,playwright:versi
 
 class ImageCheckError(RuntimeError):
     """A fixed, safe error code; subprocess output and secrets are never logged."""
+
+    def __init__(self, code, *, relative_path=None):
+        super().__init__(code)
+        self.relative_path = None
+        if (isinstance(relative_path, str) and len(relative_path) <= 512
+                and re.fullmatch(r"[A-Za-z0-9._/-]+", relative_path, re.ASCII)
+                and not relative_path.startswith("/")
+                and all(part not in {"", ".", ".."} for part in relative_path.split("/"))):
+            self.relative_path = relative_path
 
 
 def _canonical(value):
@@ -117,6 +130,35 @@ def _read_json(path):
         raise ImageCheckError("STAGED_METADATA_INVALID") from error
 
 
+def _validate_bytecode(path, source, *, expected_source_sha256=None):
+    """Compare trusted source compilation to a cache body; never unmarshal it."""
+    path, source = Path(path), Path(source)
+    expected = Path(importlib.util.cache_from_source(str(source), optimization=""))
+    if path != expected:
+        raise ImageCheckError("DERIVED_BYTECODE_INVALID")
+    _root_owned_readonly(source)
+    _root_owned_readonly(path)
+    try:
+        if source.stat().st_size > 16 * 1024**2 or path.stat().st_size > 16 * 1024**2:
+            raise ImageCheckError("DERIVED_BYTECODE_INVALID")
+        source_bytes, cache = source.read_bytes(), path.read_bytes()
+        source_hash = hashlib.sha256(source_bytes).hexdigest()
+        if expected_source_sha256 is not None and source_hash != expected_source_sha256:
+            raise ImageCheckError("DERIVED_BYTECODE_SOURCE_HASH_MISMATCH")
+        source_stat = source.stat()
+        if (len(cache) < 16 or cache[:4] != importlib.util.MAGIC_NUMBER
+                or struct.unpack("<III", cache[4:16]) != (
+                    0, int(source_stat.st_mtime) & 0xffffffff, source_stat.st_size & 0xffffffff)):
+            raise ImageCheckError("DERIVED_BYTECODE_HEADER_MISMATCH")
+        compiled = compile(source_bytes, str(source.absolute()), "exec", dont_inherit=True, optimize=0)
+        if cache[16:] != marshal.dumps(compiled):
+            raise ImageCheckError("DERIVED_BYTECODE_BODY_MISMATCH")
+        return {"sourceSha256": source_hash, "bytecodeSha256": hashlib.sha256(cache).hexdigest(),
+                "compiledBodySha256": hashlib.sha256(cache[16:]).hexdigest()}
+    except (OSError, SyntaxError, ValueError, OverflowError) as error:
+        raise ImageCheckError("DERIVED_BYTECODE_INVALID") from error
+
+
 def _check_source_tree(root):
     root = Path(root)
     # Protect replaceable ancestors too, not only the file inode.
@@ -132,6 +174,7 @@ def _check_source_tree(root):
     if not isinstance(copied, list):
         raise ImageCheckError("STAGED_INVENTORY_INVALID")
     expected = {"source_contract.json", "STAGING_RECEIPT.json"}
+    bytecode_sources = {}
     for record in copied:
         if not isinstance(record, dict):
             raise ImageCheckError("STAGED_INVENTORY_INVALID")
@@ -139,8 +182,13 @@ def _check_source_tree(root):
         if relative in expected or _credential_path(relative):
             raise ImageCheckError("STAGED_CREDENTIAL_OR_DUPLICATE_FILE")
         expected.add(relative)
+        if relative.endswith(".py"):
+            source = root / relative
+            cached = Path(importlib.util.cache_from_source(str(source), optimization=""))
+            bytecode_sources[cached.relative_to(root).as_posix()] = (source, record.get("sha256"))
     installed = root / "repo/cinematic-world-map/node_modules"
     observed = set()
+    bytecode_proofs = []
 
     def walk_error(_error):
         raise ImageCheckError("STAGED_TREE_UNREADABLE")
@@ -160,14 +208,29 @@ def _check_source_tree(root):
         for name in filenames:
             candidate = parent / name
             relative = candidate.relative_to(root).as_posix()
-            if relative not in expected or _credential_path(relative):
-                raise ImageCheckError("UNEXPECTED_STAGED_FILE")
+            if relative not in expected:
+                if relative in bytecode_sources and not _credential_path(relative):
+                    source, source_hash = bytecode_sources[relative]
+                    if not isinstance(source_hash, str) or not re.fullmatch(r"[0-9a-f]{64}", source_hash):
+                        raise ImageCheckError("DERIVED_BYTECODE_INVALID", relative_path=relative)
+                    try:
+                        proof = _validate_bytecode(candidate, source, expected_source_sha256=source_hash)
+                    except ImageCheckError as error:
+                        raise ImageCheckError(str(error), relative_path=relative) from None
+                    bytecode_proofs.append({"path": relative, **proof})
+                    continue
+                raise ImageCheckError("UNEXPECTED_STAGED_FILE", relative_path=relative)
+            if _credential_path(relative):
+                raise ImageCheckError("UNEXPECTED_STAGED_FILE", relative_path=relative)
             _root_owned_readonly(candidate)
             observed.add(relative)
     if observed != expected:
         raise ImageCheckError("STAGED_FILE_MISSING")
+    proof_body = json.dumps(sorted(bytecode_proofs, key=lambda item: item["path"]),
+                            sort_keys=True, separators=(",", ":")).encode()
     return {"files": len(copied), "sourceContractSha256": contract_hash,
-            "stagingReceiptSha256": receipt_hash}
+            "stagingReceiptSha256": receipt_hash, "derivedBytecodeCount": len(bytecode_proofs),
+            "derivedBytecodeProofSha256": hashlib.sha256(proof_body).hexdigest()}
 
 
 def _check_credentials(environ):
@@ -326,6 +389,8 @@ def main(argv=None):
     except ImageCheckError as error:
         result = {"schema": "RTX_BUILT_IMAGE_CPU_CHECK_V1", "status": "FAIL", "gpuExecuted": False,
                   "errorCode": str(error) if str(error) in SAFE_ERROR_CODES else "UNEXPECTED_CHECK_FAILURE"}
+        if str(error) in SAFE_ERROR_CODES and error.relative_path is not None:
+            result["unexpectedRelativePath"] = error.relative_path
     except Exception:
         result = {"schema": "RTX_BUILT_IMAGE_CPU_CHECK_V1", "status": "FAIL", "gpuExecuted": False,
                   "errorCode": "UNEXPECTED_CHECK_FAILURE"}

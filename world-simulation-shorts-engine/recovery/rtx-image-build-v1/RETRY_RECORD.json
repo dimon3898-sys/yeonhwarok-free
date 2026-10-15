@@ -1,0 +1,18 @@
+{
+  "schema": "RTX_IMAGE_EVIDENCED_RETRY_V1",
+  "firstWorkflowRun": 38659996603,
+  "firstEvidenceCommit": "9371f3f7090c815f8f4a875b1bb2dac4f7ac0d09",
+  "firstCiCommit": "359e31380fcaaae8795966b2acef1e3d7d882e91",
+  "actualFreeBuilder": {"label": "ubuntu-24.04", "dockerDriver": "overlay2", "diskFreeBeforeBuildBytes": 91201044480, "freePublicStandardRunner": true},
+  "firstBuild": {"result": "PASS", "imageSizeBytes": 1570248543, "localConfigDigest": "sha256:4922502ed47f658221660c796b2e06f9bcb7ddcc1c08569825fe3b9da16815e3", "registryManifestDigest": null},
+  "firstStage": {"sourceFiles": 140, "stagedFiles": 160, "sourceHashesAndGitObjects": "PASS", "protectedSourceChanges": 0, "protectedPackageChanges": 0},
+  "failure": {"phase": "verify", "code": "UNEXPECTED_STAGED_FILE", "published": false},
+  "directDockerfileEvidence": "Existing RUN invokes verify_dependencies.py and imports astra_cpu modules before the later ENV disables bytecode writing; compiled cache artifacts are not source receipt entries.",
+  "safeResolution": "Keep the Dockerfile and protected sources unchanged. Verify any derived CPython cache against its bound original source, header, source metadata and freshly compiled bytecode, retaining strict rejection of all other extra files. Add canonical-path-only failure diagnostics.",
+  "retryConditions": "Focused tests and new source Secret Scan pass; remote checkpoint preserved; only new CI helper changed; fresh unique run tag; actual space/authentication gates rechecked.",
+  "focusedVerification": {"newCacheTests": 10, "affectedFilesystemAndOutputTestsExecuted": 30, "result": "PASS", "fullExisting104Repeated": false},
+  "writePermission": "UNVERIFIED_UNTIL_ACTUAL_PUSH",
+  "gpuExecuted": false,
+  "videoRendered": false,
+  "existingFilesDeleted": false
+}
