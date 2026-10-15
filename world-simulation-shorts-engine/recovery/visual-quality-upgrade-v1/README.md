@@ -7,3 +7,5 @@ The new code selects support-distance material feathering, a generic territory o
 Variants are A original ASTRA, B support boundary only, C territory expression only, D unchanged frontier with explicit synchronization audit, E camera only, F integrated. A/B/C/D use the same original camera and event timeline. E/F use the same candidate camera; A/E is a separate camera experiment. Neither F/A pixel difference nor CPU software output is an independent visual-quality approval.
 
 See IMPLEMENTATION_REPORT.md, GCUBE_EXECUTION.md and the final IMAGE.json/RESULT.json/SHA256SUMS after CI completion. Paid deployment, real NVIDIA output, remote Dropbox download and user visual approval are separate remaining gates. Nothing autostarts rendering or promotes FINAL.
+
+Final free validation:92focused tests passed; actual software A–F draws/readbacks and independent image pull passed. Parent A is software BIT_EXACT at0/75/149. See IMAGE.json for the published candidate and AB_COMPARISON.json for measured improvements plus the bathymetry coast/sign warning. Actual NVIDIA/video quality is pending.

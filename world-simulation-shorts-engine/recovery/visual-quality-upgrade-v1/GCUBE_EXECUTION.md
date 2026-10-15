@@ -32,3 +32,17 @@ Use completed status `.result` to locate the unique export. Keep both receipts a
 Verify150frames,1080×1920,30fps,5seconds,silent; decode/play the whole output; verify source/PNG hashes and the F receipt. Mounted Dropbox readback is not remote synchronization. Confirm remote paths, download original MP4/PNGs/SHA256SUMS by approved direct URLs, check actual HTTP200 and downloaded/source SHA equality, and review on a mobile screen. No remote synchronization/download is claimed by the current CPU/image task.
 
 Hardware review must assess natural source boundaries, no coast blur, territory change comprehension, true frontier alignment, camera priority/rhythm, units/flags, NoData/fallback, performance/VRAM, and comparison with the reference. Software A/B PNGs are supporting engineering evidence, not NVIDIA footage or final user approval. Do not promote FINAL before the user approves the actual GPU video.
+
+Verified candidate image tag for the gCube image field:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine:visual-v1-a7df81f-38821837659-1
+```
+
+Immutable reference for digest-aware tools:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:92698c51b718a051c9ccf48fc31c2755962038854119f5b572d5ce11e72086ae
+```
+
+Build and independent digest pull succeeded. No live gCube account pull/deployment was performed in this task.

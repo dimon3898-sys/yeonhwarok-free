@@ -90,3 +90,27 @@ No original FINAL/V4/camera/territory/frontier/data/provider/encoder/storage/old
 After separate user authorization: NVIDIA upload/draw; actual supported-region seam/coast/NoData behavior; territory readability and frontier alignment; camera rhythm; flags/units; VRAM/shared-memory/per-frame performance; complete MP4 decode; Dropbox remote synchronization and original-download HTTP200/SHA equality; reference/mobile visual comparison. The task does not claim that code/software PASS meets the reference's visual quality.
 
 Use GCUBE_EXECUTION.md and the immutable image recorded in IMAGE.json after reviewing this candidate. No deployment, paid rendering, fourteen-second extension or FINAL promotion follows automatically.
+
+## Final free validation and image result
+
+- Package decision: **VISUAL_QUALITY_GPU_CANDIDATE_READY**; actual GPU/video quality remains **UNVERIFIED**, not PASS.
+- Source commit: `17393dd6a017a06de542a1484686cd8f8f598e60`; initial profile/job checkpoint: `c372322247fd2cc55d014f3ac24e2d01870189a4`; remote evidence commit: `eb333e68ebc4c05886d4566b824fd40987f7b8d8`.
+- Branch: `development/visual-quality-upgrade-v1-20261016`.
+- Free standard public CPU [workflow38821837659](https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/38821837659): build, registry push and separate immutable pull all successful. No retry/image repair was needed.
+- Focused tests: **92PASS /0FAIL /0SKIP** (58Python +34Node). Six local HTTP tests initially hit sandbox socket restrictions, then all six passed with the allowed local-server execution; no engine code correction was needed. Old full suites were not repeated.
+- Actual Chromium SwiftShader full-resolution draw/readPixels: **10frames**, eight saved PNGs, before build and again inside the actual built image. Parent A pixels are BIT_EXACT at0/75/149; D75 equals A75. Software is explicitly test-only, physical NVIDIA=false.
+- Controlled synthetic actual GL support-mask tests: all3roles reduced the immediately adjacent NoData-edge RGB jump to0 with original source/valid SHA unchanged. This is separate synthetic evidence, not a claim about all natural-image gradients.
+- Real-data same-camera A/B atframe75: surface outer-edge normalized RGB jump .03846→.01023 (about73% reduction,16samples); terrain outer-edge .00947→.00826 (64samples); terrain validity edge .01049→.00856 (128samples); bathymetry outer-edge .03180→.02381 (45samples).
+- **Warning:** bathymetry validity/sign-edge jump .06078→.06980 increases (128samples). These samples include actual coast/sign transitions and do not isolate a false material seam. Native GIS/coast coverage remains unblurred; actual NVIDIA coastline inspection is still required. No universal boundary-quality PASS is asserted.
+- Real rendered C mean saturation .74388→.75865 versus A under the same camera. This is a frame-wide statistic; user readability approval is not inferred from it.
+- PNGs directly inspected: A/B/C/E75 and F0/75/149. A's rectangular land-texture boundary is visibly softened in B; C keeps source hues while increasing fill; unit/flag design remains present. Static software images cannot establish video rhythm or reference parity.
+- Exact source inventory **193regular files**: original160, original metadata2, previous ASTRA14 and new17 (runtime14, quality manifest1, test tools2). Unexpectedfiles0; original6bytecode derivatives verified separately. Parent/source contracts unchanged.
+- Actual image and independent pull verify QUALITY manifest SHA `cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff`.
+- Actual new-image/runtime/new namespace/workflow Secret Scan: **0findings**; inherited parent audit reused. Final local report/checksum scan is recorded in FINAL_CHECKS.json.
+- Image: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:visual-v1-a7df81f-38821837659-1`.
+- Immutable reference: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:92698c51b718a051c9ccf48fc31c2755962038854119f5b572d5ce11e72086ae`.
+- Config digest: `sha256:20da68889f5203babd8e19db6be9b2d287986dc5b6fd71dd00a678b323961694`; actual size1,571,225,474bytes.
+- Eight software PNG download URLs: DOWNLOAD_VERIFICATION.json, **HTTP200 and original/downloadSHA equality confirmed for every file**. PNG-only SHA256SUMS is beside them.
+- Existing protected files changed:0. Existing jobs/images/media deleted or overwritten:0. Required temp-only source/asset/recipe files:0.
+
+See AB_COMPARISON.json for compact metrics and distinct comparison scopes, IMAGE.json for the image identity, RESULT.json for remaining gates and GCUBE_EXECUTION.md for exact future commands. New gCube deployment, actual NVIDIA video, Dropbox external recovery, reference/mobile video approval and FINAL promotion have not occurred. Review this package and software evidence, then separately authorize a real F video run.
