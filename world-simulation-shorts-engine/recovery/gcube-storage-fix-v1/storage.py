@@ -16,6 +16,9 @@ import stat
 
 PRIVATE_BASE = Path("/var/lib/world-engine-private/engine")
 EXPORT_ROOT = Path("/world-storage")
+# A 150-frame hardware capture retains per-frame diagnostics in its completed
+# report. Keep a bounded report read distinct from the much smaller safe logs.
+CAPTURE_REPORT_MAX_BYTES = 64 * 1024 * 1024
 LOCAL_FILESYSTEMS = frozenset({"overlay", "ext2", "ext3", "ext4", "xfs", "btrfs", "tmpfs"})
 KNOWN_EXPORT_FILESYSTEMS = LOCAL_FILESYSTEMS | {"fuse", "fuse.rclone", "fuse.s3fs", "fuse.drivefs", "nfs", "nfs4",
     "cifs", "smb3", "9p", "virtiofs", "fuse.gcsfuse", "fuse.blobfuse2", "other", "unknown", "untrusted-shared"}
@@ -466,8 +469,10 @@ class StorageSession:
                     except FileNotFoundError:
                         continue  # In-progress captures are never a complete public export.
                     try:
-                        _file_info(report_fd, uid=1000)
-                        report = json.loads(_read_fd(report_fd, limit=1024 * 1024))
+                        report_info = _file_info(report_fd, uid=1000)
+                        if not 1 <= report_info.st_size <= CAPTURE_REPORT_MAX_BYTES:
+                            raise _error("EXPORT", "PUBLIC_SOURCE_INVALID")
+                        report = json.loads(_read_fd(report_fd, limit=CAPTURE_REPORT_MAX_BYTES))
                     finally:
                         os.close(report_fd)
                     if (not isinstance(report, dict) or report.get("schema") != "RTX_GPU_HARDWARE_CAPTURE_V1"
