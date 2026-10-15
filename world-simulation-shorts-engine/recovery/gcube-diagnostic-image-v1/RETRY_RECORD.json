@@ -1,0 +1,21 @@
+{
+  "schema": "GCUBE_DIAGNOSTIC_FOCUSED_RETRY_V1",
+  "failedRun": "38676332924",
+  "failedSourceCommit": "dfb713539ba98f408b46e97192fcc00894c0e3b7",
+  "failureStage": "test",
+  "imageBuilt": false,
+  "imagePushed": false,
+  "observedFailure": "Original GPU sanitizer correctly removed a malformed UUID-bearing device name; the test incorrectly indexed the removed entry.",
+  "changes": [
+    "Use a valid model name and a separate UUID privacy canary in the test fixture.",
+    "Use the existing strict safe_record normalizer for already sanitized worker envelopes, preserving safe numeric facts and timestamp without reapplying the identity parser.",
+    "Add focused original-sanitizer and worker idempotence coverage."
+  ],
+  "originalSanitizerChanged": false,
+  "originalSourceChanged": false,
+  "focusedTests": "Three directly related tests PASS locally with the original sanitizer importable; full new diagnostic suite is delegated to the next CPU Actions run.",
+  "oldEightCaseReproductionRepeated": false,
+  "old104PackageTestsRepeated": false,
+  "gpuExecuted": false,
+  "gCubeDeployed": false
+}

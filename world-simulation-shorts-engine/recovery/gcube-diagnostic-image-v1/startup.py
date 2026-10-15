@@ -255,11 +255,10 @@ def _diagnostic_worker(operations, args, *, test_only, timeout=WORKER_TIMEOUT_SE
                     or value.get("gpuRenderingVerified") is not False or value.get("renderAllowed") is not False
                     or not os.WIFEXITED(status) or os.WEXITSTATUS(status) != value.get("exitCode")):
                 raise ValueError()
-            # Re-apply the same allowlists instead of trusting a worker envelope.
-            return records.make_record(value.get("stage"), value.get("errorCode"), value.get("exitCode"),
-                                       mode="diagnostic", errno_value=safe.get("errno"),
-                                       exception_type=safe.get("exceptionType"),
-                                       gpu_diagnostics=safe.get("gpu"), test_only=test_only)
+            # The child has already applied the engine sanitizer and removed
+            # identities. Re-apply the strict record allowlist without sending
+            # redacted device data through the original identity-based parser.
+            return records.safe_record(value)
         except (ValueError, TypeError, AttributeError):
             return records.make_record("UNEXPECTED", "DIAGNOSTIC_WORKER_FAILED", 1,
                                        mode="diagnostic", test_only=test_only)

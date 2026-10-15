@@ -277,6 +277,30 @@ class StartupTests(unittest.TestCase):
         self.assertEqual((os.getuid(), os.getgid(), os.getgroups()), before)
 
     @unittest.skipUnless(hasattr(os, "fork"), "Linux diagnostic supervisor uses fork")
+    def test_worker_record_is_idempotent_with_original_engine_sanitizer_available(self):
+        canary = "worker-private-identity-canary"
+        diagnostics = {"failed_stage": "F", "reason_code": "WEBGL_DRAW_FAILED", "password": canary,
+                       "nvidia_devices": [{"name": "NVIDIA GeForce RTX 4080 SUPER",
+                                           "driver_version": "580.105.08", "memory_total_mib": 16384}],
+                       "webgl": {"webgl2": True, "context_available": True, "draw_passed": False,
+                                 "pixel": [12, 34, 56, 255]}}
+        args = SimpleNamespace(vram_budget_gib=8.0, port=8000)
+        with patch.object(sys, "path", [str(HERE.parents[1]), *sys.path]), patch.dict(sys.modules):
+            from deployment.gcube.gpu import sanitize_gpu_diagnostics
+            self.assertEqual(sanitize_gpu_diagnostics(diagnostics)["nvidia_devices"][0]["memory_total_mib"], 16384)
+            record = startup._diagnostic_worker(
+                FakeOperations(gpu_error=GPUFailure("GPU_WEBGL_UNVERIFIED", diagnostics)),
+                args, test_only=True, timeout=2)
+        safe_gpu = record["safeDiagnostics"]["gpu"]
+        self.assertEqual(safe_gpu["nvidia_devices"], [{"driver_version": "580.105.08", "memory_total_mib": 16384}])
+        self.assertEqual(safe_gpu["webgl"]["pixel"], [12, 34, 56, 255])
+        self.assertEqual(record["errorCode"], "GPU_WEBGL_UNVERIFIED")
+        self.assertNotIn("GeForce", json.dumps(record))
+        self.assertNotIn(canary, json.dumps(record))
+        self.assertFalse(record["gpuRenderingVerified"])
+        self.assertFalse(record["renderAllowed"])
+
+    @unittest.skipUnless(hasattr(os, "fork"), "Linux diagnostic supervisor uses fork")
     def test_worker_timeout_is_bounded_and_nonzero(self):
         args = SimpleNamespace(vram_budget_gib=8.0, port=8000)
         before = time.monotonic()

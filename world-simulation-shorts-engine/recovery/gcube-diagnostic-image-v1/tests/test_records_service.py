@@ -50,7 +50,7 @@ class RecordTests(unittest.TestCase):
                  "profile_attempts": [{"backend": "egl", "status": "failed",
                     "error_code": "GPU_WEBGL_UNVERIFIED", "diagnostics": {
                         "reason_code": "GPU_WEBGL_UNVERIFIED", "failed_stage": "D"}}],
-                 "nvidia_devices": [{"name": "NVIDIA RTX 4080 SUPER " + canary,
+                 "nvidia_devices": [{"name": "NVIDIA GeForce RTX 4080 SUPER",
                                      "uuid": canary, "driver_version": "560.35.03", "memory_total_mib": 16384}],
                  "runtime": {"environment": {"NVIDIA_VISIBLE_DEVICES": {
                      "present": True, "selection": "configured", "value": canary}}}}
@@ -62,6 +62,40 @@ class RecordTests(unittest.TestCase):
         self.assertEqual(gpu["webgl"]["reason_code"], "WEBGL2_CONTEXT_UNAVAILABLE")
         self.assertEqual(gpu["profile_attempts"][0]["backend"], "egl")
         self.assertEqual(gpu["nvidia_devices"][0]["memory_total_mib"], 16384)
+
+    def test_native_and_standalone_sanitizers_preserve_safe_numeric_facts(self):
+        # The immutable image imports the original sanitizer. Its legitimate-name
+        # requirement must remain intact; UUID canaries belong in UUID fields.
+        # CI mounts this diagnostic overlay separately from the immutable repo.
+        # Resolve the original module from the image/PYTHONPATH, with the source
+        # checkout as the local fallback, rather than assuming a sibling layout.
+        engine_candidates = [Path("/opt/rtx-package/repo/world-simulation-shorts-engine"),
+                             HERE.parents[1], *(Path(item) for item in sys.path if item)]
+        engine = next(path for path in engine_candidates if (path / "deployment/gcube/gpu.py").is_file())
+        canary = "GPU-aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+        raw = {"reason_code": "GPU_WEBGL_UNVERIFIED", "failed_stage": "D",
+               "webgl": {"unmasked_renderer": "NVIDIA " + canary,
+                         "reason_code": "WEBGL2_CONTEXT_UNAVAILABLE"},
+               "nvidia_devices": [{"name": "NVIDIA GeForce RTX 4080 SUPER", "uuid": canary,
+                                   "driver_version": "560.35.03", "memory_total_mib": 16384}]}
+        standalone = records._safe_gpu(raw)
+        with mock.patch.object(sys, "path", [str(engine), *sys.path]):
+            from deployment.gcube import gpu as original_gpu
+            self.assertEqual(Path(original_gpu.__file__).resolve(),
+                             (engine / "deployment/gcube/gpu.py").resolve())
+            native = records._engine_sanitize(raw)
+            record = records.make_record("WEBGL2", "GPU_WEBGL_UNVERIFIED", 2, gpu_diagnostics=raw)
+        for safe in (standalone, native):
+            self.assertEqual(safe["failed_stage"], "D")
+            self.assertEqual(safe["webgl"]["reason_code"], "WEBGL2_CONTEXT_UNAVAILABLE")
+            self.assertEqual(safe["nvidia_devices"][0],
+                             {"driver_version": "560.35.03", "memory_total_mib": 16384})
+            self.assertNotIn(canary, json.dumps(safe))
+        # Worker envelopes must use this idempotent second allowlist, rather
+        # than requiring removed raw names again through the original parser.
+        self.assertEqual(records.safe_record(records.safe_record(record)), records.safe_record(record))
+        self.assertEqual(records.safe_record(record)["safeDiagnostics"]["gpu"]["nvidia_devices"],
+                         [{"driver_version": "560.35.03", "memory_total_mib": 16384}])
 
     def test_errno_and_exception_type_are_bounded(self):
         record = records.make_record("STORAGE", "STORAGE_PERMISSION_DENIED", 1,
