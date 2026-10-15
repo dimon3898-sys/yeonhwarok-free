@@ -1,0 +1,38 @@
+{
+  "schema": "GCUBE_STORAGE_CI_RETRY_V1",
+  "run": "38680285245",
+  "sourceCommit": "97872d4949ad9a0d0c96b96fc418a68f24e67f67",
+  "newFocusedTests": "52/52 PASS (12 CI, 24 storage, 16 launch)",
+  "imageBuilt": true,
+  "imagePushed": false,
+  "passedActualCases": [
+    {
+      "case": "before-original-shared-permission",
+      "errorCode": "STORAGE_VALIDATION_FAILED",
+      "exitCode": 1
+    },
+    {
+      "case": "after-normal-shared-storage",
+      "errorCode": "GPU_HARDWARE_UNAVAILABLE",
+      "exitCode": 2
+    },
+    {
+      "case": "after-normal-default-root",
+      "errorCode": "GPU_HARDWARE_UNAVAILABLE",
+      "exitCode": 2
+    },
+    {
+      "case": "after-normal-readonly-export",
+      "errorCode": "STORAGE_UNAVAILABLE",
+      "exitCode": 1
+    }
+  ],
+  "observedFailure": "The forced UID1000 diagnostic test reached storage/source/dependencies, then preserved the existing UID_GID_FAILED refusal before serving. Exact supplementary groups are measured in the next focused CPU run.",
+  "correction": "Use the image default root entry for the diagnostic-service case so the unchanged privilege-drop function can clear supplementary groups. Also measure and retain the forced UID1000 refusal; never weaken that security check.",
+  "productionSourceChangedForRetry": false,
+  "reusePolicy": "Reuse prior storage/launch tests and passed CPU integration only after exact original commit, parent digest, two runtime module hashes, Dockerfile SHA and evidence status match. New CI safety and changed diagnostic paths execute afresh.",
+  "reasonForNewBuild": "The failed verification prevented publication; its free runner ended. A fresh runner must build the small same-source layer before verifying and publishing a new unique tag. No approved base rebuild occurs.",
+  "gpuExecuted": false,
+  "gCubeDeployed": false,
+  "historicalGcubeCauseStillUnmeasured": true
+}

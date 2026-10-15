@@ -154,5 +154,53 @@ class StorageCISafety(unittest.TestCase):
         self.assertIn("'remotePersistenceVerified':False", code)
         self.assertIn("'externalDownloadVerified':False", code)
 
+    def reuse_git(self, arguments, **kwargs):
+        self.assertEqual(arguments[:2], ["git", "show"])
+        name = arguments[2].rsplit("/", 1)[-1]
+        return (HERE / "tests" / name).read_text()
+
+    def test_pinned_reuse_requires_original_production_tests_and_counts(self):
+        self.run.side_effect = self.reuse_git
+        evidence, origin = ci.verified_reuse()
+        self.assertEqual(origin["run"], "38680285245-1")
+        self.assertIs(origin["testSourceHashesMatch"], True)
+        self.assertEqual(origin["reusedCPUUnitTests"], 40)
+        self.assertEqual(len(evidence["integrationCases"]), 4)
+        self.assertEqual(self.run.call_count, 2)
+        self.run.side_effect = lambda arguments, **kwargs: "changed test source"
+        with self.assertRaisesRegex(RuntimeError, "REUSE_TEST_SOURCE_CHANGED"): ci.verified_reuse()
+
+    def test_corrupt_evidence_and_changed_production_hashes_are_not_reused(self):
+        original_sha = ci.sha
+        self.run.side_effect = self.reuse_git
+        for changed in ("build.json", "storage.py", "launch.py", "Dockerfile"):
+            def modified(path):
+                return "0" * 64 if Path(path).name == changed else original_sha(path)
+            with self.subTest(changed=changed), patch.object(ci, "sha", side_effect=modified), self.assertRaises(RuntimeError):
+                ci.verified_reuse()
+
+    def test_actual_diagnostic_uses_default_root_and_nonroot_guard_stays_explicit(self):
+        self.seed(); self.run.side_effect = None
+        for groups in ([1000], []):
+            self.run.return_value = json.dumps({"uid": 1000, "gid": 1000, "groups": groups})
+            with patch.object(ci, "image_hashes", return_value={}), patch.object(ci, "fixture_root", return_value=self.root), \
+                 patch.object(ci, "fixture_snapshot", return_value={"unchanged": True}), \
+                 patch.object(ci, "verified_reuse", return_value=({}, {"observation": "REUSED_NOT_REEXECUTED"})), \
+                 patch.object(ci, "secret_scan"), patch.object(ci, "execute_case", return_value={"status": "PASS"}) as execute:
+                ci.verify()
+                self.assertEqual(execute.call_args_list[0].kwargs["as_root"], True)
+                self.assertEqual(execute.call_args_list[0].kwargs["service_expected"], True)
+                self.assertEqual(execute.call_args_list[0].kwargs["expected_code"], "GPU_HARDWARE_UNAVAILABLE")
+                if groups:
+                    self.assertEqual(execute.call_count, 2)
+                    guard = execute.call_args_list[1].kwargs
+                    self.assertIs(guard["as_root"], False)
+                    self.assertIs(guard["diagnostic"], True)
+                    self.assertIs(guard["service_expected"], False)
+                    self.assertEqual((guard["expected_code"], guard["expected_exit"]), ("UID_GID_FAILED", 1))
+                else:
+                    self.assertEqual(execute.call_count, 1)
+                    self.assertEqual(ci.state()["unprivilegedDiagnosticGroupGuard"]["status"], "SKIP")
+
 
 if __name__ == "__main__": unittest.main()

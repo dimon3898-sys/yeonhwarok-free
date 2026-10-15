@@ -31,6 +31,9 @@ PACKAGE = "/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/rtx-gpu
 ENGINE = "/opt/rtx-package/repo/world-simulation-shorts-engine"
 MODULES = ("storage.py", "launch.py")
 SCANNER_SHA = "e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad"
+REUSE_RUN = "38680285245-1"
+REUSE_SOURCE = "97872d4949ad9a0d0c96b96fc418a68f24e67f67"
+REUSE_EVIDENCE_SHA = "db585124797f17f86949adc04f2ba602da02534f5db883c1a5b1eb3a51371461"
 sys.path.insert(0, str(HERE.parent / "rtx-image-build-v1"))
 
 
@@ -107,6 +110,52 @@ def manifest():
         "sourceCommit": os.environ["GITHUB_SHA"], "files": {name: sha(HERE / name) for name in MODULES}}
 
 
+def verified_reuse():
+    """Reuse observations only when pinned evidence and production bytes agree."""
+    path = HERE / "runs" / REUSE_RUN / "build.json"
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 1024**2 or sha(path) != REUSE_EVIDENCE_SHA:
+        raise RuntimeError("PINNED_REUSE_EVIDENCE_REQUIRED")
+    evidence = json.loads(path.read_text())
+    expected_files = {name: sha(HERE / name) for name in MODULES}
+    results = evidence.get("focusedTests", {}).get("results", [])
+    if (evidence.get("ciCommit") != REUSE_SOURCE or evidence.get("parentImage") != BASE
+            or evidence.get("storageManifest", {}).get("files") != expected_files
+            or evidence.get("dockerfileSha256") != sha(HERE / "Dockerfile")
+            or evidence.get("focusedTests", {}).get("exitCode") != 0
+            or {item.get("pattern") for item in results} != {"test_storage.py", "test_launch.py"}
+            or any(item.get("exitCode") != 0 for item in results)
+            or evidence.get("gpuExecuted") is not False or evidence.get("gCubeDeployed") is not False
+            or evidence.get("originalSources", {}).get("status") != "PASS"
+            or evidence.get("imageHashes", {}).get("originalDiagnosticManifestSha256") != DIAGNOSTIC_MANIFEST_SHA):
+        raise RuntimeError("REUSE_PRODUCTION_BYTES_OR_TEST_EVIDENCE_MISMATCH")
+    expected_counts = {"test_storage.py": 24, "test_launch.py": 16}
+    for name, count in expected_counts.items():
+        current_test = HERE / "tests" / name
+        original = run(["git", "show", REUSE_SOURCE + ":" + NAMESPACE + "/tests/" + name], cwd=REPO)
+        if current_test.is_symlink() or hashlib.sha256(original.encode()).hexdigest() != sha(current_test):
+            raise RuntimeError("REUSE_TEST_SOURCE_CHANGED")
+        observation = next(item for item in results if item["pattern"] == name)
+        observed_count = re.search(r"\bRan ([0-9]+) tests? in ", observation.get("stderr", ""))
+        if observed_count is None or int(observed_count[1]) != count:
+            raise RuntimeError("REUSE_TEST_EXECUTION_COUNT_MISMATCH")
+    expected_cases = {"before-original-shared-permission": ("STORAGE_VALIDATION_FAILED", 1),
+        "after-normal-shared-storage": ("GPU_HARDWARE_UNAVAILABLE", 2),
+        "after-normal-default-root": ("GPU_HARDWARE_UNAVAILABLE", 2),
+        "after-normal-readonly-export": ("STORAGE_UNAVAILABLE", 1)}
+    cases = evidence.get("integrationCases", [])
+    if len(cases) != 4 or {item.get("case") for item in cases} != set(expected_cases):
+        raise RuntimeError("REUSE_INTEGRATION_EVIDENCE_INCOMPLETE")
+    for item in cases:
+        expected_code, expected_exit = expected_cases[item["case"]]
+        if (item.get("status") != "PASS" or item.get("errorCode") != expected_code
+                or item.get("exitCode") != expected_exit or item.get("actualGPU") is not False or item.get("mock") is not False):
+            raise RuntimeError("REUSE_INTEGRATION_EVIDENCE_INVALID")
+    origin = {"run": REUSE_RUN, "sourceCommit": REUSE_SOURCE, "evidenceSha256": REUSE_EVIDENCE_SHA,
+              "productionModuleHashesMatch": True, "dockerfileHashMatches": True, "testSourceHashesMatch": True,
+              "reusedCPUUnitTests": 40, "observation": "REUSED_NOT_REEXECUTED"}
+    return evidence, origin
+
+
 def test():
     helpers().require_space()
     host = subprocess.run([sys.executable, "-B", "-m", "unittest", "discover", "-s", str(HERE / "tests"),
@@ -115,21 +164,9 @@ def test():
         "stdout": safe_log(host.stdout), "stderr": safe_log(host.stderr), "externalOperations": "MOCK_ONLY"}; save(value)
     if host.returncode: raise RuntimeError("NEW_CI_SAFETY_TESTS_FAILED")
     run(["docker", "pull", BASE], timeout=900)
-    command = ["docker", "run", "--rm", "--network=none", "--memory=4g", "--cpus=2", "--pids-limit=256", "--restart=no",
-        "--user=0:0", "--entrypoint=/usr/bin/python3", "--mount", "type=bind,source=" + str(HERE) + ",target=" + DEST + ",readonly",
-        "--env", "PYTHONPATH=" + DEST + ":" + DIAGNOSTIC + ":" + PACKAGE + ":" + ENGINE, BASE, "-B", "-c"]
-    value = state(); results = []
-    for pattern in ("test_storage.py", "test_launch.py"):
-        code = ("import os,pathlib,unittest; p=pathlib.Path('/var/lib/world-engine-private/engine'); "
-            "p.mkdir(parents=True,mode=0o700); os.chown(p,1000,1000); os.chmod(p,0o700); "
-            "os.setgroups([]); os.setgid(1000); os.setuid(1000); "
-            "s=unittest.defaultTestLoader.discover('" + DEST + "/tests',pattern='" + pattern + "'); "
-            "r=unittest.TextTestRunner(verbosity=2).run(s); raise SystemExit(0 if r.wasSuccessful() else 1)")
-        result = subprocess.run(command + [code], text=True, capture_output=True, timeout=180, check=False)
-        results.append({"pattern": pattern, "exitCode": result.returncode, "stdout": safe_log(result.stdout), "stderr": safe_log(result.stderr)})
-        value["focusedTests"] = {"exitCode": max(item["exitCode"] for item in results), "results": results,
-            "scope": "NEW_STORAGE_AND_LAUNCH_TESTS_ONLY_REAL_CPU_AND_EXPLICIT_MOCKS_NO_GPU"}; save(value)
-        if result.returncode: raise RuntimeError("NEW_STORAGE_TESTS_FAILED")
+    evidence, origin = verified_reuse()
+    value = state(); value["focusedTests"] = {**evidence["focusedTests"], "reuse": origin}
+    value["reusedIntegrationCases"] = {"reuse": origin, "cases": evidence["integrationCases"]}; save(value)
 
 
 def stage():
@@ -224,7 +261,8 @@ def get_records(text):
     return result
 
 
-def execute_case(image, name, root, *, diagnostic=False, readonly=False, expected_code=None, expected_exit=2, as_root=False):
+def execute_case(image, name, root, *, diagnostic=False, readonly=False, expected_code=None, expected_exit=2, as_root=False, service_expected=None):
+    service_expected = diagnostic if service_expected is None else service_expected
     args = ["docker", "create", "--network=none", "--memory=4g", "--cpus=2", "--pids-limit=256",
         "--restart=no", "--shm-size=2g", "--mount", "type=bind,source=" + str(root) + ",target=/world-storage" + (",readonly" if readonly else "")]
     if not as_root: args += ["--user=1000:1000"]
@@ -236,7 +274,7 @@ def execute_case(image, name, root, *, diagnostic=False, readonly=False, expecte
     report = {"case": name, "actualGPU": False, "mock": False, "entryAccount": "image-default-root" if as_root else "uid1000"}
     try:
         run(["docker", "start", container])
-        if diagnostic:
+        if service_expected:
             probe = """import json,urllib.request,urllib.error
 o=urllib.request.build_opener(urllib.request.ProxyHandler({}))
 r=o.open('http://127.0.0.1:8000/healthz',timeout=2); b=json.load(r)
@@ -377,14 +415,23 @@ def verify():
     value.update(originalSources=helpers().check_image(image, hashes_only=True), imageHashes=image_hashes(image)); save(value)
     shared = fixture_root(); before = fixture_snapshot(shared); cases = []
     value["sharedStorageBefore"] = before; save(value)
-    for args in [(BASE, "before-original-shared-permission", False, False, "STORAGE_VALIDATION_FAILED", 1, False),
-        (image, "after-normal-shared-storage", False, False, "GPU_HARDWARE_UNAVAILABLE", 2, False),
-        (image, "after-normal-default-root", False, False, "GPU_HARDWARE_UNAVAILABLE", 2, True),
-        (image, "after-normal-readonly-export", False, True, "STORAGE_UNAVAILABLE", 1, False),
-        (image, "after-diagnostic-shared-storage", True, False, "GPU_HARDWARE_UNAVAILABLE", 2, False)]:
-        reference, name, diagnostic, readonly, code, exit_code, as_root = args
+    _, reuse_origin = verified_reuse()
+    value["reusedIntegrationEvidenceOrigin"] = reuse_origin; save(value)
+    identity_code = "import json,os; print(json.dumps({'uid':os.getuid(),'gid':os.getgid(),'groups':os.getgroups()}))"
+    identity = json.loads(run(["docker", "run", "--rm", "--network=none", "--user=1000:1000", "--entrypoint=/usr/bin/python3",
+        image, "-B", "-c", identity_code]))
+    if identity.get("uid") != 1000 or identity.get("gid") != 1000 or not isinstance(identity.get("groups"), list):
+        raise RuntimeError("UNPRIVILEGED_DIAGNOSTIC_IDENTITY_REQUIRED")
+    value["unprivilegedIdentityProbe"] = identity; save(value)
+    actual_cases = [(image, "after-diagnostic-shared-default-root", True, False, "GPU_HARDWARE_UNAVAILABLE", 2, True, True)]
+    if identity["groups"]:
+        actual_cases.append((image, "unprivileged-diagnostic-group-guard", True, False, "UID_GID_FAILED", 1, False, False))
+    else:
+        value["unprivilegedDiagnosticGroupGuard"] = {"status": "SKIP", "reasonCode": "NO_SUPPLEMENTARY_GROUPS_PRESENT"}; save(value)
+    for args in actual_cases:
+        reference, name, diagnostic, readonly, code, exit_code, as_root, service_expected = args
         cases.append(execute_case(reference, name, shared, diagnostic=diagnostic, readonly=readonly, expected_code=code,
-            expected_exit=exit_code, as_root=as_root))
+            expected_exit=exit_code, as_root=as_root, service_expected=service_expected))
         if fixture_snapshot(shared) != before: raise RuntimeError("EXISTING_SHARED_STORAGE_CHANGED")
         value["integrationCases"] = cases; save(value)
     after = fixture_snapshot(shared)
