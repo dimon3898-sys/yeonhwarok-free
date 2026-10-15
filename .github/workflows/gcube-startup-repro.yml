@@ -25,7 +25,7 @@ jobs:
     env:
       STARTUP_REPOSITORY_PUBLIC: 'true'
       STARTUP_RUNNER_LABEL: ubuntu-24.04
-      STARTUP_EVIDENCE_DIR: ${{ runner.temp }}/world-engine-startup-evidence
+      STARTUP_EVIDENCE_DIR: /tmp/world-engine-startup-evidence-${{ github.run_id }}-${{ github.run_attempt }}
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - name: Checkout only diagnostic harness and protected source history
