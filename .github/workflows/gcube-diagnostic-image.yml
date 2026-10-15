@@ -1,0 +1,118 @@
+name: WORLD ENGINE isolated startup diagnostic image
+
+on:
+  push:
+    branches: [development/gcube-diagnostic-image-20261015]
+    paths:
+      - .github/workflows/gcube-diagnostic-image.yml
+      - world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/*.py
+      - world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/Dockerfile
+      - world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/tests/**
+  workflow_dispatch:
+
+concurrency:
+  group: world-engine-gcube-diagnostic-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/gcube-diagnostic-image-20261015'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      digest: ${{ steps.publish.outputs.digest }}
+    env:
+      DIAG_RUNNER_LABEL: ubuntu-24.04
+      DIAG_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      DIAG_PHASE: build
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fetch new diagnostic code and unchanged verification helpers only
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/gcube-diagnostic-image.yml
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/**
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+      - name: Require public free standard runner, protected sources and disk-backed 20 GiB
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py preflight
+      - name: Check unique tag without writing to registry
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py guard
+      - name: Run only changed startup and diagnostic tests on immutable approved CPU image
+        id: test
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py test
+      - name: Stage only four modules, diagnostic hashes and Dockerfile outside checkout
+        id: stage
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py stage
+      - name: Build diagnostic layer without package rebuild or GPU access
+        id: build
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py build
+      - name: Verify original hashes, new modules, real CPU failures and read-only diagnostic service
+        id: verify
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py verify
+      - name: Recheck unique tag then publish and inspect remote config digest
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py publish
+      - name: Persist bounded synthetic test evidence to independent branch
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          DIAG_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py persist
+
+  verify-pull:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.digest != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: write
+    env:
+      DIAG_RUNNER_LABEL: ubuntu-24.04
+      DIAG_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      DIAG_PHASE: pull
+      DIAG_PUBLISHED_TAG: ${{ needs.build.outputs.tag }}
+      DIAG_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fresh independent checkout of new and unchanged verification helpers
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/gcube-diagnostic-image.yml
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/**
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+      - name: Require free standard runner, source protection and sufficient disk
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py preflight
+      - name: Pull immutable digest and recheck 160 approved files plus four diagnostic modules
+        id: pull
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py pull
+      - name: Persist independent pull evidence without changing application files
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          DIAG_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py persist
