@@ -1,0 +1,9 @@
+# ASTRA independent GPU material activation
+
+This is an explicit opt-in rendering lane on top of the unchanged parent65422 engine. It does not deploy a GPU or autostart a render. Physical NVIDIA upload/draw, gCube execution, Dropbox remote sync/download and video quality remain hardware validation items.
+
+The new local job profile selects launch_astra.py→capture_astra.mjs→astra_runtime.mjs. A new pinned HTML import map selects only the ASTRA source-material factory; original V4 orchestration and original default material bytes are imported unchanged. The material runs baseline→surface→actual-height lighting→signed-depth treatment before original territory/frontier/presentation/nationalunits, and exposes its combinedRGB8texture to the existing frontier. Outside source/NoData support it retains the baseline. Raw elevations and source coordinates remain intact. DEM drives real finite-difference normal lighting and a restrained altitude tone, not displaced mesh geometry.
+
+Old65422 claims/results/FINAL are never reset or changed. The ASTRA supervisor uses distinct local/shared job namespaces and explicit new-job confirmation. A retained baseline history requires explicit acknowledgment for the separate operation; live PIDs, common GPU lock and unsafe records still block. The original common CAPTURE.guard is taken before admission and held through export. Terminal detachment and completion checks reuse the existing pinned manager and seven-file verifier, with an additional ASTRA receipt outside PublicReview.
+
+Source checkpoint CPU tests:96PASS. The free image workflow must additionally compile/draw the complete new material in explicitly labelled SwiftShader software mode, verify A/B pixel changes with the same camera/geometry, then build/register/pull the new unique image. Software output is never NVIDIA or visual-quality PASS. See final report/image metadata after CI completion.
