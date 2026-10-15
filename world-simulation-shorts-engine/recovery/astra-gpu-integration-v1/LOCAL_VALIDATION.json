@@ -1,0 +1,53 @@
+{
+  "schema": "ASTRA_GPU_UPLOAD_LOCAL_CPU_VALIDATION_V1",
+  "baselineCommit": "5269521131059cacdd18de5110ee3aaae302b8b5",
+  "newFocusedTests": {
+    "PASS": 54,
+    "FAIL": 0,
+    "SKIP": 0,
+    "pythonAudit": 16,
+    "pythonBundle": 18,
+    "nodeFakeWebGL2": 20
+  },
+  "commands": [
+    "/usr/bin/python3 -B -m unittest discover -s world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/tests -p test_*.py -v",
+    "node --test --test-isolation=none world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/tests/test_gpu_upload.mjs",
+    "/usr/bin/python3 -B world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/verify_bridge.py"
+  ],
+  "realSourceCrosscheck": {
+    "status": "PASS",
+    "dimensions": {
+      "terrain": [
+        37,
+        36
+      ],
+      "bathymetry": [
+        2,
+        2
+      ],
+      "surfaceTexture": [
+        2,
+        2
+      ]
+    },
+    "artifactCount": 12,
+    "artifactBytes": 7340,
+    "manifestSHA256": "cc0d1e64660074b4a1d0508ce4eb480e3f7e334d2fe7ee0af272656bcfbc1ddc",
+    "rendererPayloadSHA256": "e98302532ec17757798cd8d4a4c40991219eddbef696d44f74d6e53981fc7186",
+    "legacySceneByteUnchanged": true
+  },
+  "confirmedNewCodeCorrections": [
+    "Cross-language canonical object equality instead of JSON insertion order",
+    "Big-endian source precision/NaN bytes preserved with byte-swap-only upload",
+    "Shared manifest/texture/part limits and source-byte SHA validation"
+  ],
+  "oldSuitesRepeated": false,
+  "existingDataReacquired": false,
+  "archive24MemberAuditRepeated": false,
+  "actualGPUExecuted": false,
+  "NVIDIATextureUploadVerified": false,
+  "actualCoastAlignmentVerified": false,
+  "displayMaterialApplied": false,
+  "activeIntegration": "BLOCKED_PROTECTED_ACTIVE_SELECTOR",
+  "newImageBuilt": false
+}

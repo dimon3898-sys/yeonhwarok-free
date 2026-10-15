@@ -1,0 +1,79 @@
+name: ASTRA inactive GPU upload CPU validation
+on:
+  push:
+    branches: [development/astra-gpu-minimal-integration-20261016]
+    paths:
+      - .github/workflows/astra-gpu-integration.yml
+      - world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/*.py
+      - world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/*.mjs
+      - world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/tests/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: astra-inactive-upload-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  cpu-contract:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/astra-gpu-minimal-integration-20261016'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    env:
+      ASTRA_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      ASTRA_RUNNER_LABEL: ubuntu-24.04
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout exact new tests and previously audited source boundary
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/astra-gpu-integration.yml
+            /world-simulation-shorts-engine/recovery/astra-cpu-data-v1/SOURCE_ASSET_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/pipeline.py
+            /world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/scene.py
+            /world-simulation-shorts-engine/recovery/astra-cpu-data-v1/fixtures/neutral-output/CPU_PREPARATION_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/**
+            /world-simulation-shorts-engine/recovery/astra-map-quality-v1/evidence/CAMERA_SOURCE_ENVELOPE.json
+            /world-simulation-shorts-engine/recovery/astra-map-quality-v1/evidence/SAMPLE_PARSE_AUDIT.json
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/IMAGE.json
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py
+            /world-simulation-shorts-engine/recovery/map-engine-unit-bundle-v1/fixtures/SCENE_PLAN.json
+            /world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/RUNTIME_FIXTURE.json
+            /world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json
+            /world-simulation-shorts-engine/recovery/planner-scene-json-v1/fixtures/input-manifest.json
+            /world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/scene-native.json
+            /world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py
+            /world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/hardware_render.mjs
+            /world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/hardware_runtime.mjs
+            /world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json
+            /world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs
+            /world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs
+            /world-simulation-shorts-engine/web/map_infographic_v1/reference_camera_adapter_v1.mjs
+            /world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs
+            /world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs
+            /world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs
+      - name: Require free public standard runner, 20GiB free and protected source unchanged
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/ci.py preflight
+      - name: Classify actual protected rendering path and test source-bound blocked state
+        id: audit
+        run: python3 -B world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/ci.py audit
+      - name: Run only new CPU bundle tests, explicit fake WebGL2 tests and real-source cross-language check
+        id: test
+        run: python3 -B world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/ci.py test
+      - name: Secret scan new namespace and workflow
+        id: scan
+        run: python3 -B world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/ci.py scan
+      - name: Save CPU evidence without building an unconnected GPU image
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          ASTRA_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","audit":"${{ steps.audit.outcome }}","test":"${{ steps.test.outcome }}","scan":"${{ steps.scan.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/ci.py persist

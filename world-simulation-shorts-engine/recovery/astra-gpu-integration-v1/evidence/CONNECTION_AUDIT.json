@@ -1,0 +1,467 @@
+{
+  "archiveMembersReaudited": false,
+  "auditStatus": "PASS",
+  "baselineCommit": "5269521131059cacdd18de5110ee3aaae302b8b5",
+  "blockingReasons": [
+    "PROTECTED_ACTIVE_CHAIN_HAS_NO_ASTRA_MATERIAL_SELECTION_HOOK",
+    "V4_DISABLES_NATIVE_DEM_AND_UNCONDITIONALLY_DRAWS_ITS_TERRAIN_MATERIAL"
+  ],
+  "classification": [
+    {
+      "feature": "cpu_providers_acquisition_cache_scene_preparation",
+      "state": "IMPLEMENTED_RENDER_UNCONNECTED"
+    },
+    {
+      "feature": "gpu_runtime_encoding_storage_detached_manager",
+      "hardwareEvidence": "USER_REPORTED_EXISTING_PASS_NOT_REEXECUTED",
+      "state": "IMPLEMENTED_CONNECTED_BASELINE"
+    },
+    {
+      "feature": "astra_gpu_source_material",
+      "state": "NOT_IMPLEMENTED_IN_ACTIVE_PATH"
+    },
+    {
+      "feature": "native_gis_screen_coverage_mask",
+      "geographicRasterMaskRequiredForGpuFragmentGating": false,
+      "state": "IMPLEMENTED_BASELINE"
+    },
+    {
+      "feature": "astra_to_native_mask_projection_binding",
+      "state": "IMPLEMENTED_CPU_CONTRACT_RENDER_UNWIRED"
+    },
+    {
+      "feature": "active_astra_selector",
+      "state": "CONFLICTS_WITH_PROTECTED_SELECTOR"
+    },
+    {
+      "feature": "nvidia_upload_visual_coast_performance",
+      "state": "ACTUAL_GPU_ONLY"
+    }
+  ],
+  "connectionConditions": {
+    "activeHeightRouteUnselected": true,
+    "cpuSceneDoesNotActivateGpu": true,
+    "fixedGpuLauncherToOriginalCapture": true,
+    "fixedManagerToOriginalLaunch": true,
+    "fixedRuntimeToV4Adapter": true,
+    "nativeScreenCoverageAvailable": true,
+    "sceneAndLightingLocked": true,
+    "v4DemDisabled": true,
+    "v4TerrainBeforeOwnershipAndFrontier": true
+  },
+  "cpuCommit": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+  "gpuExecuted": false,
+  "gpuPackageCommit": "2f9158b",
+  "imageBuilt": false,
+  "imageInspectionExecuted": false,
+  "imagePackagingEvidence": {
+    "authority": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+    "cpuModulePaths": [
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/__init__.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/acquisition.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/bathymetry.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/cache.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/download_contract.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/model.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/neutral.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/pipeline.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/providers.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/scene.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/surface.py",
+      "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/terrain.py"
+    ],
+    "heightSourcePresent": false,
+    "meaning": "REUSED_PINNED_PACKAGE_CONTRACT_NOT_NEW_CONTAINER_INSPECTION",
+    "neutralArtifacts": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/fixtures/neutral-output/terrain-00.npz",
+        "selectedByOriginalContract": false
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/fixtures/neutral-output/bathymetry-00.npz",
+        "selectedByOriginalContract": false
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/fixtures/neutral-output/surfaceTexture-00.npz",
+        "selectedByOriginalContract": false
+      }
+    ],
+    "originalContractFiles": 140,
+    "originalSampleArchivePackaged": true,
+    "savedDetachedImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7"
+  },
+  "integrationDecision": "BLOCKED_PROTECTED_ACTIVE_SELECTOR",
+  "oldFullTestsExecuted": false,
+  "protectedConnectionReferences": [
+    {
+      "line": 27,
+      "path": "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py",
+      "sourceText": "LAUNCH = Path('/opt/world-engine-storage-fix/launch.py')"
+    },
+    {
+      "line": 203,
+      "path": "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py",
+      "sourceText": "str(LAUNCH), '--render-65422'"
+    },
+    {
+      "line": 413,
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+      "sourceText": "str(HERE / \"hardware_render.mjs\")"
+    },
+    {
+      "line": 154,
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/hardware_runtime.mjs",
+      "sourceText": "await import('/modules/map_engine_unit_gpu_adapter_v4.mjs')"
+    },
+    {
+      "line": 69,
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/hardware_runtime.mjs",
+      "sourceText": "ALL_SCENE_FIELDS_EXCEPT_CURRENT_FRONT_GLOW_ARE_LOCKED"
+    },
+    {
+      "line": 167,
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "sourceText": "factory.renderFrame({mode:5,graphics:false,boundaries:false,glow:false,dem:false,"
+    },
+    {
+      "line": 170,
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "sourceText": "terrain.draw({bounds,coverage,frame,fps:track.fps})"
+    },
+    {
+      "line": 174,
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "sourceText": "actualTerrainTexture:terrain.outputTexture"
+    }
+  ],
+  "renderExecuted": false,
+  "resolution": {
+    "activeIntegrationNeeds": "EXPLICIT_NEW_SIBLING_CAPTURE_RUNTIME_LANE_OR_REVIEWED_SELECTOR_CONTRACT",
+    "compositionOrder": [
+      "native_gis_coverage",
+      "astra_source_material",
+      "territory",
+      "frontier_with_actual_terrain_texture",
+      "presentation",
+      "national_units"
+    ],
+    "forbiddenShortcut": "DO_NOT_REPLACE_PINNED_FILES_OR_PAINT_ASTRA_OVER_FINISHED_FRAME",
+    "newImageMeaningfulWithoutSelection": false,
+    "safeIndependentWork": "ADD_VERSIONED_GPU_UPLOAD_CONTRACT_AND_MASKED_SOURCE_MODULE_WITHOUT_ACTIVATING_OLD_CHAIN"
+  },
+  "savedCoverage": {
+    "actualFrameCountInSavedEvidence": 150,
+    "authority": "world-simulation-shorts-engine/recovery/astra-map-quality-v1/evidence/SAMPLE_PARSE_AUDIT.json",
+    "cameraReevaluatedThisRun": false,
+    "derivativeGuardBandIncluded": false,
+    "envelopeAuthority": "world-simulation-shorts-engine/recovery/astra-map-quality-v1/evidence/CAMERA_SOURCE_ENVELOPE.json",
+    "fullShotAstraClaim": "BLOCKED_INCOMPLETE_SAMPLE_ENVELOPE",
+    "partialFallbackAllowed": true,
+    "partialIntegrationNotBlockedByCoverageAlone": true,
+    "roles": {
+      "bathymetry": {
+        "envelopeDegreeAreaFraction": 0.03281195201888759,
+        "fullEnvelopeCovered": false,
+        "intersectionBBox": [
+          128,
+          37,
+          130,
+          39
+        ],
+        "measureMeaning": "BBOX_DEGREE_COORDINATE_AREA_NOT_RENDERED_PIXEL_OR_GROUND_COVERAGE",
+        "nativeEnvelopeBBox": [
+          122.30838605591185,
+          31.8417974782448,
+          131.5778453458887,
+          44.99324396294251
+        ],
+        "sourceBBox": [
+          128,
+          37,
+          130,
+          39
+        ]
+      },
+      "surfaceTexture": {
+        "envelopeDegreeAreaFraction": 0.621609744739627,
+        "fullEnvelopeCovered": false,
+        "intersectionBBox": [
+          124,
+          33,
+          131.5778453458887,
+          43
+        ],
+        "measureMeaning": "BBOX_DEGREE_COORDINATE_AREA_NOT_RENDERED_PIXEL_OR_GROUND_COVERAGE",
+        "nativeEnvelopeBBox": [
+          122.30838605591185,
+          31.8417974782448,
+          131.5778453458887,
+          44.99324396294251
+        ],
+        "sourceBBox": [
+          124,
+          33,
+          132,
+          43
+        ]
+      },
+      "terrain": {
+        "envelopeDegreeAreaFraction": 0.0020507470011804745,
+        "fullEnvelopeCovered": false,
+        "intersectionBBox": [
+          128.2498611111111,
+          37.25013888888889,
+          128.7498611111111,
+          37.75013888888889
+        ],
+        "measureMeaning": "BBOX_DEGREE_COORDINATE_AREA_NOT_RENDERED_PIXEL_OR_GROUND_COVERAGE",
+        "nativeEnvelopeBBox": [
+          122.30838605591185,
+          31.8417974782448,
+          131.5778453458887,
+          44.99324396294251
+        ],
+        "sourceBBox": [
+          128.2498611111111,
+          37.25013888888889,
+          128.7498611111111,
+          37.75013888888889
+        ]
+      }
+    }
+  },
+  "schema": "ASTRA_GPU_CONNECTION_AUDIT_V1",
+  "selectedOriginalContractChecks": [
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/scene-native.json",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/map-engine-unit-bundle-v1/fixtures/SCENE_PLAN.json",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/RUNTIME_FIXTURE.json",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/fixtures/input-manifest.json",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/scene.py",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/pipeline.py",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/SOURCE_ASSET_MANIFEST.json",
+      "status": "PASS"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/fixtures/neutral-output/CPU_PREPARATION_MANIFEST.json",
+      "status": "PASS"
+    }
+  ],
+  "sourceChecks": [
+    {
+      "expectedSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+      "role": "sourceContract",
+      "sha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "ca6e076b6e1aff6806f61b73e493159b4c705769877775b6afa42b2a80d8553a",
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+      "role": "gpuLauncher",
+      "sha256": "ca6e076b6e1aff6806f61b73e493159b4c705769877775b6afa42b2a80d8553a",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "143379b95bb1ac8ba8035791f938dc1409751442286c31f1dec3746b67eab451",
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/hardware_runtime.mjs",
+      "role": "hardwareRuntime",
+      "sha256": "143379b95bb1ac8ba8035791f938dc1409751442286c31f1dec3746b67eab451",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "b08f988e05aff06e8fd361469b688b45d94d8095e25d7e17e9918dc5c1d8dacb",
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/hardware_render.mjs",
+      "role": "hardwareCapture",
+      "sha256": "b08f988e05aff06e8fd361469b688b45d94d8095e25d7e17e9918dc5c1d8dacb",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "6398967204168e9284a6cc1b5b7f7e2951b996fb7cf5cb3d5f0a785b26047d99",
+      "path": "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py",
+      "role": "jobManager",
+      "sha256": "6398967204168e9284a6cc1b5b7f7e2951b996fb7cf5cb3d5f0a785b26047d99",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c",
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py",
+      "role": "storageLaunch",
+      "sha256": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "db53d26c337e1e2e01b1740c8ef42ac476e3e681589b8c36ad9b7a8b66b4cc40",
+      "path": "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/IMAGE.json",
+      "role": "imageEvidence",
+      "sha256": "db53d26c337e1e2e01b1740c8ef42ac476e3e681589b8c36ad9b7a8b66b4cc40",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "role": "v4Composition",
+      "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+      "role": "nativeRenderer",
+      "sha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "fa44852e518b7e73cea5acaa6493f2ced405883de1ddb362f3251339d1909980",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+      "role": "terrainMaterial",
+      "sha256": "fa44852e518b7e73cea5acaa6493f2ced405883de1ddb362f3251339d1909980",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+      "role": "frontier",
+      "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "d74ffa8fc9884655f543a98d41bead9717d74d467484b99f4c14c18c17ce5bb1",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+      "role": "camera",
+      "sha256": "d74ffa8fc9884655f543a98d41bead9717d74d467484b99f4c14c18c17ce5bb1",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "8dde7d2feb2cd85c073b0edde8eb6d03fc379afa8b462c71966d1e4c73efb8d3",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+      "role": "cameraV5",
+      "sha256": "8dde7d2feb2cd85c073b0edde8eb6d03fc379afa8b462c71966d1e4c73efb8d3",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "e92a958a6d23c76c9a548332d37fa92a5403a7c562c1a56eb6026e2f7fa6cd41",
+      "path": "world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/scene-native.json",
+      "role": "nativeScene",
+      "sha256": "e92a958a6d23c76c9a548332d37fa92a5403a7c562c1a56eb6026e2f7fa6cd41",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json",
+      "role": "scenePlan",
+      "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "73d5ab5bd41e91866227a9174af64c219c46dc001bd570bd7f854c153e1dc09b",
+      "path": "world-simulation-shorts-engine/recovery/map-engine-unit-bundle-v1/fixtures/SCENE_PLAN.json",
+      "role": "originalScenePlan",
+      "sha256": "73d5ab5bd41e91866227a9174af64c219c46dc001bd570bd7f854c153e1dc09b",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "0eed0d9a77721339934e2fa3e35807e0af3725e17b3781f9a1a0a5b92d3e08cf",
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/RUNTIME_FIXTURE.json",
+      "role": "renderFixture",
+      "sha256": "0eed0d9a77721339934e2fa3e35807e0af3725e17b3781f9a1a0a5b92d3e08cf",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "abfd594bc16222d33930c898369367e978b500ef7cb632d3b3f902d2a49e99a2",
+      "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/fixtures/input-manifest.json",
+      "role": "inputManifest",
+      "sha256": "abfd594bc16222d33930c898369367e978b500ef7cb632d3b3f902d2a49e99a2",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "8671d2bc9ca4dc298d3d84e22a684eff36d73651319e750bd2fbf4e44b1720a8",
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/scene.py",
+      "role": "cpuScene",
+      "sha256": "8671d2bc9ca4dc298d3d84e22a684eff36d73651319e750bd2fbf4e44b1720a8",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "22ca9aeb38e9a9c71d8b21f824c52b1ae6f2d4a8b0d9553aac083f5e78d49bc0",
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/pipeline.py",
+      "role": "cpuPipeline",
+      "sha256": "22ca9aeb38e9a9c71d8b21f824c52b1ae6f2d4a8b0d9553aac083f5e78d49bc0",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "c51168d5a238f34661c021dfb616e6f221b36304f9c32a9d40ae6a7dbeadd0c9",
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/SOURCE_ASSET_MANIFEST.json",
+      "role": "cpuManifest",
+      "sha256": "c51168d5a238f34661c021dfb616e6f221b36304f9c32a9d40ae6a7dbeadd0c9",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "c5cc64be88d9a9defceeeb1da5d6d4351139f398978eb6fd1f17ca69dc1fbefe",
+      "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/fixtures/neutral-output/CPU_PREPARATION_MANIFEST.json",
+      "role": "neutralManifest",
+      "sha256": "c5cc64be88d9a9defceeeb1da5d6d4351139f398978eb6fd1f17ca69dc1fbefe",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "72557553d2f3ae9ca2fc830ed648e29baae0ec470807692d2241693a25f69dd1",
+      "path": "world-simulation-shorts-engine/recovery/astra-map-quality-v1/evidence/SAMPLE_PARSE_AUDIT.json",
+      "role": "sampleMetadata",
+      "sha256": "72557553d2f3ae9ca2fc830ed648e29baae0ec470807692d2241693a25f69dd1",
+      "status": "PASS"
+    },
+    {
+      "expectedSha256": "769a5c19ee50deefc4e29198dba8d840babc9f0e62c1b2767bfbe1f28793b9c2",
+      "path": "world-simulation-shorts-engine/recovery/astra-map-quality-v1/evidence/CAMERA_SOURCE_ENVELOPE.json",
+      "role": "cameraEnvelope",
+      "sha256": "769a5c19ee50deefc4e29198dba8d840babc9f0e62c1b2767bfbe1f28793b9c2",
+      "status": "PASS"
+    }
+  ],
+  "sourcePreservation": "PASS"
+}
