@@ -1,0 +1,78 @@
+{
+  "schema": "WORLD_ENGINE_ASTRA_ACTIVATION_RESULT_V1",
+  "decision": "ASTRA_GPU_EXECUTION_PACKAGE_READY_FOR_HARDWARE_VALIDATION",
+  "next": "USER_REVIEW_REQUIRED_BEFORE_SEPARATE_GPU_RUN",
+  "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+  "evidenceCommit": "1b76db4f4b0781c202836947c808ca89c7169b83",
+  "branch": "development/astra-gpu-activation-20261016",
+  "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8aba498e295b45a9cbfa29eeacd6f7779ff3d2ce4482c92215176be1540ff71a",
+  "entrypoint": "/opt/world-engine-astra-activation/job_astra.py",
+  "composition": "native GIS/camera > original terrain > supported ASTRA height/surface/signed-depth > original territory > original terrain lighting/frontier reading combined texture > original presentation > original flags/units",
+  "originalV4Copied": false,
+  "rendererAPIChanged": false,
+  "oldJobClaimReset": false,
+  "commonGpuGuardReused": true,
+  "requiredTempOnlySourceAssetRecipeFiles": 0,
+  "focusedTests": {
+    "PASS": 106,
+    "FAIL": 0,
+    "SKIP": 0,
+    "python": 78,
+    "node": 28
+  },
+  "actualSoftwareDraw": {
+    "status": "PASS",
+    "frames": [
+      0,
+      75,
+      149
+    ],
+    "backend": "SwiftShader",
+    "actualShaderCompile": true,
+    "actualPixelsChanged": true,
+    "sameCameraAndGeometry": true,
+    "testOnly": true,
+    "physicalNvidiaExecuted": false
+  },
+  "data": {
+    "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+    "artifactBytes": 32115808,
+    "bundleManifestSha256": "02495857b20e92b75c5e4f9d60090e2e959b82c677053ef068024a7d5c63261f",
+    "partialSourceCoverage": true,
+    "outsideSource": "UNCHANGED_BASELINE",
+    "noDataReplacement": false,
+    "displacedMesh": false
+  },
+  "protectedOriginalFileChanges": 0,
+  "sourceAssetHashVerification": "PASS_ORIGINAL_160_PLUS_SEPARATE_EXTENSION",
+  "secretScan": {
+    "status": "PASS",
+    "findings": 0,
+    "scannerSHA256": "e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad",
+    "scope": "ACTUAL_NEW_IMAGE_RUNTIME_PLUS_NEW_NAMESPACE_AND_WORKFLOW_PARENT_AUDIT_REUSED"
+  },
+  "imageBuilt": true,
+  "imageRegistered": true,
+  "independentPullVerified": true,
+  "physicalGPUValidation": "PENDING_SEPARATE_AUTHORIZATION",
+  "actualNvidiaVideoGenerated": false,
+  "dropboxExternalDownload": "NOT_EXECUTED",
+  "visualQuality": "NOT_EVALUATED",
+  "warnings": [
+    "Regional DEM/GEBCO samples cover only part of unchanged camera envelope; original material elsewhere.",
+    "Height-based normal illumination and bounded altitude tone, not displaced mesh.",
+    "Encoded surface colors and original vertical metadata preserved; no radiometric or vertical-datum calibration claim.",
+    "Current native flat EPSG4326/non-wrapping projection only; unsupported projections require a verified adapter.",
+    "Container termination/restart can stop workers; no automatic rerun or billing-stop claim."
+  ],
+  "hardwareChecksPending": [
+    "NVIDIA texture upload and same-context actual draw",
+    "Supported-source visual effect, coast/NoData edges and fallback",
+    "Territory/frontier/flags/units preservation and unchanged camera/time",
+    "VRAM/shared-memory/frame cost",
+    "150-frame MP4 encode/full decode and five checkpoint PNGs",
+    "Dropbox remote sync, HTTP200 and source/download SHA equality",
+    "Reference/mobile video-quality review"
+  ],
+  "FINALPromoted": false
+}
