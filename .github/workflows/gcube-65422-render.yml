@@ -1,0 +1,141 @@
+name: WORLD ENGINE bounded 65422 report export image preparation
+
+on:
+  push:
+    branches: [development/gcube-65422-render-prep-20261015]
+    paths:
+      - .github/workflows/gcube-65422-render.yml
+      - world-simulation-shorts-engine/recovery/gcube-65422-render-v1/*.py
+      - world-simulation-shorts-engine/recovery/gcube-65422-render-v1/Dockerfile
+      - world-simulation-shorts-engine/recovery/gcube-65422-render-v1/tests/**
+      - world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py
+  workflow_dispatch:
+
+concurrency:
+  group: world-engine-65422-render-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/gcube-65422-render-prep-20261015'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      digest: ${{ steps.publish.outputs.digest }}
+    env:
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: build
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fetch diagnostic result patches and unchanged verification helpers only
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/gcube-65422-render.yml
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/**
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/ci.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/recover_existing.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/image-manifests/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/records.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/service.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/healthcheck.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/DIAGNOSTIC_FILES.json
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/STORAGE_FILES.json
+      - name: Require public free standard runner, protected sources and disk-backed 20 GiB
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py preflight
+      - name: Check unique tag without writing to registry
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py guard
+      - name: Run only bounded-report export before and after tests and new CI safety
+        id: test
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py test
+      - name: Stage only patched storage.py and consistent manifest chain outside checkout
+        id: stage
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py stage
+      - name: Build bounded-report parsing layer without renderer, startup or dependency changes
+        id: build
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py build
+      - name: Verify fresh source hashes, actual built-image export tests and secret scan
+        id: verify
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py verify
+      - name: Recheck unique tag then publish and inspect remote config digest
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py publish
+      - name: Persist bounded synthetic test evidence to independent branch
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py persist
+
+  verify-pull:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.digest != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: write
+    env:
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: pull
+      RESULT_PUBLISHED_TAG: ${{ needs.build.outputs.tag }}
+      RESULT_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fresh independent checkout of new and unchanged verification helpers
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/gcube-65422-render.yml
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/**
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/ci.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/recover_existing.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/image-manifests/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/records.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/service.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/healthcheck.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/DIAGNOSTIC_FILES.json
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/STORAGE_FILES.json
+      - name: Require free standard runner, source protection and sufficient disk
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py preflight
+      - name: Pull immutable digest and verify original 160, six unchanged helpers and one patched storage source
+        id: pull
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py pull
+      - name: Persist independent pull evidence without changing application files
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py persist
