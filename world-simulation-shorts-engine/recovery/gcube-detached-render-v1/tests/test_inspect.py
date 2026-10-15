@@ -151,6 +151,29 @@ class InspectionTest(unittest.TestCase):
         self.assertEqual(self.inspect()["status"], "EXISTING_RECORDS")
         self.assertEqual(self.inspect()["evidenceCounts"]["sharedCaptureDirectories"], 1)
 
+    def test_original_bootstrap_legacy_captures_block_but_admission_does_not(self):
+        legacy = self.export / "rtx-gpu-package-v1"
+        (legacy / "diagnostics").mkdir(parents=True)
+        self.assertEqual(self.inspect()["status"], "CLEAR")
+        captures = legacy / "captures"
+        captures.mkdir()
+        self.assertEqual(self.inspect()["status"], "CLEAR")
+        (captures / ("a" * 64)).mkdir()
+        result = self.inspect()
+        self.assertEqual(result["status"], "EXISTING_RECORDS")
+        self.assertEqual(result["evidenceCounts"]["legacyCaptureDirectories"], 1)
+
+    def test_original_bootstrap_legacy_malformed_or_symlink_capture_is_rejected(self):
+        legacy = self.export / "rtx-gpu-package-v1"
+        captures = legacy / "captures"
+        captures.mkdir(parents=True)
+        bad = captures / "not-a-signature"
+        bad.mkdir()
+        self.assertEqual(self.inspect()["reason"], "LEGACY_CAPTURE_RECORD_INVALID")
+        bad.rmdir()
+        (captures / ("b" * 64)).symlink_to(self.private, target_is_directory=True)
+        self.assertEqual(self.inspect()["status"], "BLOCKED")
+
     def test_missing_path_bad_proc_and_path_symlinks_block(self):
         self.export.rmdir()
         self.assertEqual(self.inspect()["status"], "BLOCKED")

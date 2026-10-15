@@ -209,6 +209,65 @@ class JobStoreTests(unittest.TestCase):
         path.write_bytes(b"{" + b"x" * (job_store.MAX_RECORD + 1))
         self.assertCode("JOB_RECORD_INVALID", self.store.read)
 
+    def test_read_retries_valid_atomic_job_replacement_only(self):
+        self.store.create(initial())
+        for method in ("_file_info", "_read_fd"):
+            with self.subTest(window=method):
+                previous = self.store.read()
+                next_state = running(previous)
+                original = getattr(job_store.storage, method)
+                fired = False
+                def replace_open_record(descriptor, **options):
+                    nonlocal fired
+                    # _file_info injects after open/before metadata. _read_fd
+                    # injects after metadata/read but before pathname identity.
+                    result = None
+                    if method == "_read_fd":
+                        result = original(descriptor, **options)
+                    if not fired:
+                        fired = True
+                        self.store.save(next_state)
+                    return original(descriptor, **options) if method == "_file_info" else result
+                with patch.object(job_store.storage, method, side_effect=replace_open_record):
+                    observed = self.store.read()
+                self.assertTrue(fired)
+                self.assertEqual(observed["state"], "RUNNING")
+                self.assertEqual(observed["sequence"], previous["sequence"] + 1)
+
+    def test_atomic_overlap_does_not_retry_invalid_replacement(self):
+        queued = self.store.create(initial())
+        job = self.control / "JOB.json"
+        for kind in ("corrupt_json", "hardlink", "symlink"):
+            with self.subTest(kind=kind):
+                job.unlink()
+                job.write_bytes(job_store._encode(queued))
+                job.chmod(0o600)
+                replacement = self.control / (kind + "-replacement")
+                source = self.control / (kind + "-source")
+                valid_new_state = running(queued)
+                valid_new_state["sequence"] = 1
+                source.write_bytes(job_store._encode(valid_new_state))
+                source.chmod(0o600)
+                if kind == "corrupt_json":
+                    replacement.write_bytes(b'{"not":"a-valid-job"}')
+                    replacement.chmod(0o600)
+                elif kind == "hardlink":
+                    os.link(source, replacement)
+                else:
+                    replacement.symlink_to(source)
+                original = job_store.storage._file_info
+                fired = False
+                def replace_open_record(descriptor, **options):
+                    nonlocal fired
+                    if not fired:
+                        fired = True
+                        os.replace(replacement, job)
+                    return original(descriptor, **options)
+                with patch.object(job_store.storage, "_file_info", side_effect=replace_open_record), \
+                        patch.object(job_store.time, "sleep", side_effect=AssertionError("unsafe retry")):
+                    self.assertCode("JOB_RECORD_INVALID", self.store.read)
+                self.assertTrue(fired)
+
     def test_shared_claim_tamper_fails_but_private_failure_is_preserved(self):
         queued = self.store.create(initial())
         shared = self.export / job_store.SHARED_NAME

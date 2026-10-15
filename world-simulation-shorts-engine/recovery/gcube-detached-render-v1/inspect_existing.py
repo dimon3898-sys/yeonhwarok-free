@@ -173,7 +173,8 @@ def _guard(private):
 
 def _capture_records(private, proc, boot, exclude, budget):
     counts = {"captureDirectories": 0, "captureReports": 0, "captureStatusFiles": 0,
-              "captureLockFiles": 0, "sharedCaptureDirectories": 0, "heldCaptureGuards": 0}
+              "captureLockFiles": 0, "sharedCaptureDirectories": 0,
+              "legacyCaptureDirectories": 0, "heldCaptureGuards": 0}
     active = []
     if _guard(private):
         counts["heldCaptureGuards"] += 1
@@ -226,6 +227,25 @@ def _capture_records(private, proc, boot, exclude, budget):
 
 def _shared_records(export, counts, budget):
     for name in _entries(export, budget):
+        if name == "rtx-gpu-package-v1":
+            legacy = _child_directory(export, name)
+            captures = None
+            try:
+                try:
+                    captures = _child_directory(legacy, "captures")
+                except FileNotFoundError:
+                    continue  # Original admission-only root is not capture evidence.
+                for signature in _entries(captures, budget):
+                    if not _SIGNATURE.fullmatch(signature):
+                        raise InspectionBlocked("LEGACY_CAPTURE_RECORD_INVALID")
+                    capture = _child_directory(captures, signature)
+                    os.close(capture)
+                    counts["legacyCaptureDirectories"] += 1
+            finally:
+                if captures is not None:
+                    os.close(captures)
+                os.close(legacy)
+            continue
         if not _EXPORT.fullmatch(name):
             continue
         directory = _child_directory(export, name)
@@ -285,7 +305,8 @@ def inspect(control_root=CONTROL_ROOT, private_base=PRIVATE_BASE, export_root=EX
         result.update(processes=sorted(processes, key=lambda item: item["pid"]), evidenceCounts=counts)
         if processes or counts["heldCaptureGuards"]:
             result.update(status="RUNNING", reason="EXISTING_CAPTURE_ACTIVE")
-        elif counts["captureDirectories"] or counts["sharedCaptureDirectories"]:
+        elif (counts["captureDirectories"] or counts["sharedCaptureDirectories"]
+              or counts["legacyCaptureDirectories"]):
             result.update(status="EXISTING_RECORDS", reason="EXISTING_CAPTURE_REQUIRES_REVIEW")
         else:
             result.update(status="CLEAR", reason="NO_EXISTING_CAPTURE_EVIDENCE")

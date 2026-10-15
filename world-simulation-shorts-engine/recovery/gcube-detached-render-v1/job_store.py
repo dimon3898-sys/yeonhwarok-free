@@ -15,6 +15,7 @@ from pathlib import Path
 import re
 import stat
 import sys
+import time
 from types import SimpleNamespace
 
 HERE = Path(__file__).resolve().parent
@@ -160,19 +161,55 @@ def _unique_object(pairs):
     return value
 
 
-def _load(directory, name, *, private):
+class _RecordReplaced(Exception):
+    """An immutable valid JOB inode was replaced by a newer valid JOB inode."""
+
+
+def _valid_job_replacement(directory, descriptor):
+    """Recognize the specific reader/open versus writer/rename overlap only."""
+    try:
+        before = os.fstat(descriptor)
+        if (not stat.S_ISREG(before.st_mode) or before.st_nlink != 0
+                or before.st_uid != 1000 or before.st_gid != 1000
+                or stat.S_IMODE(before.st_mode) != 0o600 or not 1 <= before.st_size <= MAX_RECORD):
+            return False
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        old = validate_state(json.loads(storage._read_fd(descriptor, limit=MAX_RECORD), object_pairs_hook=_unique_object))
+        after = os.fstat(descriptor)
+        if (before.st_size != after.st_size or before.st_mtime_ns != after.st_mtime_ns
+                or after.st_nlink != 0 or storage._identity(before) != storage._identity(after)):
+            return False
+        # The existing strict loader validates the new path, including nlink=1,
+        # UID/GID/mode, no-follow, bounded JSON and stable pathname identity.
+        newest, current_identity, _ = _load(directory, "JOB.json", private=True)
+        newest = validate_state(newest)
+        return (current_identity != storage._identity(before)
+                and all(newest[key] == old[key] for key in ("jobId", "createdAt", "testOnly"))
+                and old["state"] not in {"COMPLETED", "FAILED"}
+                and newest["sequence"] > old["sequence"]
+                and datetime.fromisoformat(newest["updatedAt"]) >= datetime.fromisoformat(old["updatedAt"]))
+    except (OSError, ValueError, TypeError, RecursionError, JobError, storage.StorageError):
+        return False
+
+
+def _load(directory, name, *, private, retry_replaced=False):
     descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
     try:
-        before = storage._file_info(descriptor, uid=1000 if private else None, private=private)
-        if private and before.st_gid != 1000:
-            raise JobError("JOB_RECORD_INVALID")
-        data = storage._read_fd(descriptor, limit=MAX_RECORD)
-        after = os.fstat(descriptor)
-        if (storage._identity(before) != storage._identity(after) or before.st_size != after.st_size
-                or before.st_mtime_ns != after.st_mtime_ns):
-            raise JobError("JOB_READBACK_FAILED")
-        if storage._identity(os.stat(name, dir_fd=directory, follow_symlinks=False)) != storage._identity(after):
-            raise JobError("JOB_READBACK_FAILED")
+        try:
+            before = storage._file_info(descriptor, uid=1000 if private else None, private=private)
+            if private and before.st_gid != 1000:
+                raise JobError("JOB_RECORD_INVALID")
+            data = storage._read_fd(descriptor, limit=MAX_RECORD)
+            after = os.fstat(descriptor)
+            if (storage._identity(before) != storage._identity(after) or before.st_size != after.st_size
+                    or before.st_mtime_ns != after.st_mtime_ns):
+                raise JobError("JOB_READBACK_FAILED")
+            if storage._identity(os.stat(name, dir_fd=directory, follow_symlinks=False)) != storage._identity(after):
+                raise JobError("JOB_READBACK_FAILED")
+        except (JobError, storage.StorageError):
+            if retry_replaced and private and name == "JOB.json" and _valid_job_replacement(directory, descriptor):
+                raise _RecordReplaced from None
+            raise
         value = json.loads(data, object_pairs_hook=_unique_object)
         return value, storage._identity(after), hashlib.sha256(data).hexdigest()
     finally:
@@ -291,11 +328,17 @@ class Store:
         private = None
         try:
             private = self._private()
-            try:
-                value, _, _ = _load(private, "JOB.json", private=True)
-            except FileNotFoundError:
-                return None
-            return validate_state(value)
+            for attempt in range(8):
+                try:
+                    value, _, _ = _load(private, "JOB.json", private=True, retry_replaced=True)
+                except FileNotFoundError:
+                    return None
+                except _RecordReplaced:
+                    if attempt == 7:
+                        raise JobError("JOB_READBACK_FAILED") from None
+                    time.sleep(0.001)
+                    continue
+                return validate_state(value)
         except JobError:
             raise
         except (OSError, ValueError, TypeError, storage.StorageError):
