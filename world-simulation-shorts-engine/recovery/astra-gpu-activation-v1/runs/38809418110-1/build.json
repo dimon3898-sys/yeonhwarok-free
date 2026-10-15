@@ -1,0 +1,174 @@
+{
+  "schema": "WORLD_ENGINE_ASTRA_ACTIVATION_IMAGE_V1",
+  "status": "ASTRA_ACTIVATION_IMAGE_BLOCKED",
+  "ciCommit": "ef4f86cc16f273992b2daf47072967b8da49c111",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+  "gpuExecuted": false,
+  "gCubeDeployed": false,
+  "paidWorkExecuted": false,
+  "rendererModified": false,
+  "finalModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": false,
+  "imagePushed": false,
+  "pullVerified": false,
+  "videoQualityApproved": false,
+  "builder": {
+    "root": "/var/lib/docker",
+    "freeBytes": 92121071616,
+    "filesystem": "ext2/ext3",
+    "driver": "overlay2"
+  },
+  "tag": "astra-v1-711b232-38809418110-1",
+  "protection": {
+    "status": "PASS",
+    "base": "711b232265aefb1f0f4e368673f7943d86cf03b0",
+    "changedFiles": [
+      ".github/workflows/astra-gpu-activation.yml",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/CHECKPOINT_A.json",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/CI_BROWSER_HOME_RECOVERY.json",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/Dockerfile",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/README.md",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/SCENE_MAP_DATA.json",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_adapter.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_runtime.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/capture_astra.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/ci.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/job_astra.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/launch_astra.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/prepare_activation.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/runs/38809015824-1/build.json",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/serve_astra.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/software_probe.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_capture.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_ci.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_job_astra.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_launch.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_material.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_prepare_activation.py",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_runtime_plan.mjs",
+      "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/tests/test_runtime_server.py"
+    ],
+    "allowedExistingPatches": []
+  },
+  "freeRunner": {
+    "publicRepository": true,
+    "label": "ubuntu-24.04",
+    "largerRunner": false
+  },
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:astra-v1-711b232-38809418110-1",
+  "tagCheck": {
+    "status": "PASS",
+    "stage": "tag_absence",
+    "tag": "astra-v1-711b232-38809418110-1",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:astra-v1-711b232-38809418110-1",
+    "tagAvailable": true,
+    "tagReserved": false,
+    "issuedAccess": {
+      "status": "UNVERIFIED",
+      "pull": null,
+      "push": null,
+      "pushVerified": false
+    },
+    "writeVerified": false
+  },
+  "focusedTests": {
+    "results": [
+      {
+        "name": "ci-safety",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_actual_software_probe_success_must_be_test_only_without_gpu_claim (test_ci.ActivationCISafety.test_actual_software_probe_success_must_be_test_only_without_gpu_claim) ... ok\ntest_context_allowlist_rejects_unexpected_file_before_docker_build (test_ci.ActivationCISafety.test_context_allowlist_rejects_unexpected_file_before_docker_build) ... ok\ntest_docker_preserves_existing_paths_no_autostart_or_extra_dependencies (test_ci.ActivationCISafety.test_docker_preserves_existing_paths_no_autostart_or_extra_dependencies) ... ok\ntest_existing_protected_changes_forbidden_and_unique_astra_tag (test_ci.ActivationCISafety.test_existing_protected_changes_forbidden_and_unique_astra_tag) ... ok\ntest_free_public_standard_exact_branch_required (test_ci.ActivationCISafety.test_free_public_standard_exact_branch_required) ... ok\ntest_image_hash_manifest_must_match_current_source (test_ci.ActivationCISafety.test_image_hash_manifest_must_match_current_source) ... ok\ntest_image_provenance_entrypoint_and_credential_names_rejected (test_ci.ActivationCISafety.test_image_provenance_entrypoint_and_credential_names_rejected) ... ok\ntest_independent_pull_not_ready_on_any_source_mismatch (test_ci.ActivationCISafety.test_independent_pull_not_ready_on_any_source_mismatch) ... ok\ntest_manifest_preserves_new_runtime_and_pinned_upload_parent_sources (test_ci.ActivationCISafety.test_manifest_preserves_new_runtime_and_pinned_upload_parent_sources) ... ok\ntest_publish_requires_verification_and_zero_secrets (test_ci.ActivationCISafety.test_publish_requires_verification_and_zero_secrets) ... ok\ntest_stage_requires_focused_pass_and_real_software_probe (test_ci.ActivationCISafety.test_stage_requires_focused_pass_and_real_software_probe) ... ok\ntest_unique_tag_rechecked_and_only_own_auth_removed (test_ci.ActivationCISafety.test_unique_tag_rechecked_and_only_own_auth_removed) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.027s\n\nOK\n",
+        "scope": "NEW_CI_MOCKS_ONLY",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_job_astra.py",
+        "exitCode": 0,
+        "stdout": "{\"schema\": \"WORLD_ENGINE_ASTRA_MANAGER_ERROR_V1\", \"state\": \"BLOCKED\", \"reason\": \"EXPLICIT_NORMAL_NEW_JOB_CONFIRMATION_REQUIRED\", \"renderAllowed\": false, \"gpuRenderingVerified\": false}\n{\"schema\": \"WORLD_ENGINE_ASTRA_MANAGER_ERROR_V1\", \"state\": \"BLOCKED\", \"reason\": \"EXPLICIT_NORMAL_NEW_JOB_CONFIRMATION_REQUIRED\", \"renderAllowed\": false, \"gpuRenderingVerified\": false}\n{\"schema\": \"WORLD_ENGINE_ASTRA_MANAGER_ERROR_V1\", \"state\": \"BLOCKED\", \"reason\": \"INVALID_MANAGER_ARGUMENTS\", \"renderAllowed\": false, \"gpuRenderingVerified\": false}\n{\"schema\": \"WORLD_ENGINE_ASTRA_MANAGER_ERROR_V1\", \"state\": \"BLOCKED\", \"reason\": \"INVALID_MANAGER_ARGUMENTS\", \"renderAllowed\": false, \"gpuRenderingVerified\": false}\n",
+        "stderr": "test_actual_seven_file_ffprobe_sha_and_astra_receipt_handoff (test_job_astra.ActualCpuExportTests.test_actual_seven_file_ffprobe_sha_and_astra_receipt_handoff)\nA solid-color CPU fixture, not a GPU-rendered WORLD ENGINE frame. ... ok\ntest_astra_native_receipt_binds_profile_plan_and_actual_capture (test_job_astra.AstraReceiptBindingTests.test_astra_native_receipt_binds_profile_plan_and_actual_capture) ... ok\ntest_missing_native_astra_receipt_cannot_finish (test_job_astra.AstraReceiptBindingTests.test_missing_native_astra_receipt_cannot_finish) ... ok\ntest_old_capture_or_wrong_profile_cannot_satisfy_astra_completion (test_job_astra.AstraReceiptBindingTests.test_old_capture_or_wrong_profile_cannot_satisfy_astra_completion) ... ok\ntest_astra_and_original_native_process_roles_are_recognized (test_job_astra.HistoryAndIdentityTests.test_astra_and_original_native_process_roles_are_recognized) ... ok\ntest_cli_refuses_unconfirmed_or_command_selected_start (test_job_astra.HistoryAndIdentityTests.test_cli_refuses_unconfirmed_or_command_selected_start) ... ok\ntest_history_ack_cannot_override_live_legacy_supervisor_identity (test_job_astra.HistoryAndIdentityTests.test_history_ack_cannot_override_live_legacy_supervisor_identity) ... ok\ntest_history_ack_does_not_override_actual_common_gpu_guard (test_job_astra.HistoryAndIdentityTests.test_history_ack_does_not_override_actual_common_gpu_guard) ... ok\ntest_malformed_old_private_job_still_fails_closed_with_ack (test_job_astra.HistoryAndIdentityTests.test_malformed_old_private_job_still_fails_closed_with_ack) ... ok\ntest_old_claim_history_requires_explicit_new_profile_acknowledgement (test_job_astra.HistoryAndIdentityTests.test_old_claim_history_requires_explicit_new_profile_acknowledgement) ... ok\ntest_old_profile_globals_and_source_pins_remain_original (test_job_astra.HistoryAndIdentityTests.test_old_profile_globals_and_source_pins_remain_original) ... ok\ntest_unsafe_path_stays_blocked_even_with_history_ack (test_job_astra.HistoryAndIdentityTests.test_unsafe_path_stays_blocked_even_with_history_ack) ... ok\ntest_actual_pty_disconnect_does_not_stop_new_astra_profile (test_job_astra.ProfileLifecycleTests.test_actual_pty_disconnect_does_not_stop_new_astra_profile) ... ok\ntest_concurrent_repeat_starts_invoke_only_one_cpu_worker (test_job_astra.ProfileLifecycleTests.test_concurrent_repeat_starts_invoke_only_one_cpu_worker) ... ok\ntest_dispatch_authorization_is_bound_immutable_and_not_gpu_evidence (test_job_astra.ProfileLifecycleTests.test_dispatch_authorization_is_bound_immutable_and_not_gpu_evidence) ... ok\ntest_export_verification_failure_is_not_complete (test_job_astra.ProfileLifecycleTests.test_export_verification_failure_is_not_complete) ... ok\ntest_lost_worker_does_not_autorestart_or_erase_new_claim (test_job_astra.ProfileLifecycleTests.test_lost_worker_does_not_autorestart_or_erase_new_claim) ... ok\ntest_native_failure_retained_and_no_retry (test_job_astra.ProfileLifecycleTests.test_native_failure_retained_and_no_retry) ... ok\ntest_new_profile_old_shared_claim_and_results_preserved (test_job_astra.ProfileLifecycleTests.test_new_profile_old_shared_claim_and_results_preserved) ... ok\ntest_production_authorization_bound_to_astra_id_and_published (test_job_astra.ProfileLifecycleTests.test_production_authorization_bound_to_astra_id_and_published) ... ok\ntest_production_cannot_use_missing_or_other_job_authorization (test_job_astra.ProfileLifecycleTests.test_production_cannot_use_missing_or_other_job_authorization) ... ok\n\n----------------------------------------------------------------------\nRan 21 tests in 1.914s\n\nOK\n",
+        "scope": "NEW_PROFILE_COORDINATE_SOURCE_AND_JOB_TESTS_CPU_NO_GPU",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_launch.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_ast_ra_receipt_outside_exact_public_allowlist_readback_verified (test_launch.AstRaReceiptTests.test_ast_ra_receipt_outside_exact_public_allowlist_readback_verified) ... ok\ntest_existing_receipt_never_overwritten (test_launch.AstRaReceiptTests.test_existing_receipt_never_overwritten) ... ok\ntest_old_success_report_without_ast_ra_application_rejected (test_launch.AstRaReceiptTests.test_old_success_report_without_ast_ra_application_rejected) ... ok\ntest_profile_mismatch_has_no_ast_ra_receipt (test_launch.AstRaReceiptTests.test_profile_mismatch_has_no_ast_ra_receipt) ... ok\ntest_shared_receipt_fifo_fails_without_blocking (test_launch.AstRaReceiptTests.test_shared_receipt_fifo_fails_without_blocking) ... ok\ntest_admission_test_seam_cannot_dispatch_production_capture (test_launch.LaunchMonitorTests.test_admission_test_seam_cannot_dispatch_production_capture) ... ok\ntest_deadline_stops_job_and_restores_signal_handlers (test_launch.LaunchMonitorTests.test_deadline_stops_job_and_restores_signal_handlers) ... ok\ntest_diagnostic_mode_blocks_before_preparation_or_gpu (test_launch.LaunchMonitorTests.test_diagnostic_mode_blocks_before_preparation_or_gpu) ... ok\ntest_existing_common_gpu_guard_blocks_before_admission (test_launch.LaunchMonitorTests.test_existing_common_gpu_guard_blocks_before_admission) ... ok\ntest_explicit_render_flag_required (test_launch.LaunchMonitorTests.test_explicit_render_flag_required) ... ok\ntest_export_after_capture_and_receipt_before_locator (test_launch.LaunchMonitorTests.test_export_after_capture_and_receipt_before_locator) ... ok\ntest_fixed_new_capture_with_native_admission_and_original_limits (test_launch.LaunchMonitorTests.test_fixed_new_capture_with_native_admission_and_original_limits) ... ok\ntest_missing_public_export_has_no_success_locator (test_launch.LaunchMonitorTests.test_missing_public_export_has_no_success_locator) ... ok\ntest_nonzero_native_exit_is_never_success (test_launch.LaunchMonitorTests.test_nonzero_native_exit_is_never_success) ... ok\ntest_physical_allocation_change_stops_capture (test_launch.LaunchMonitorTests.test_physical_allocation_change_stops_capture) ... ok\ntest_vram_growth_preserves_native_failure_policy (test_launch.LaunchMonitorTests.test_vram_growth_preserves_native_failure_policy) ... ok\n\n----------------------------------------------------------------------\nRan 16 tests in 0.042s\n\nOK\n",
+        "scope": "NEW_PROFILE_COORDINATE_SOURCE_AND_JOB_TESTS_CPU_NO_GPU",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_prepare_activation.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_bundle_paths_hashes_and_private_files_are_exact (test_prepare_activation.PreparationIntegrationTests.test_bundle_paths_hashes_and_private_files_are_exact) ... ok\ntest_extension_manifest_rejects_modified_runtime_and_dependency (test_prepare_activation.PreparationIntegrationTests.test_extension_manifest_rejects_modified_runtime_and_dependency) ... ok\ntest_full_profile_support_remains_partial_and_original_signed_values (test_prepare_activation.PreparationIntegrationTests.test_full_profile_support_remains_partial_and_original_signed_values) ... ok\ntest_real_existing_three_sources_prepare_without_replacing_scene (test_prepare_activation.PreparationIntegrationTests.test_real_existing_three_sources_prepare_without_replacing_scene) ... ok\ntest_shared_or_symlink_work_root_is_refused_without_modifying_data (test_prepare_activation.PreparationIntegrationTests.test_shared_or_symlink_work_root_is_refused_without_modifying_data) ... ok\ntest_unsupported_region_fails_without_success_activation_or_zero_padding (test_prepare_activation.PreparationIntegrationTests.test_unsupported_region_fails_without_success_activation_or_zero_padding) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.752s\n\nOK\n",
+        "scope": "NEW_PROFILE_COORDINATE_SOURCE_AND_JOB_TESTS_CPU_NO_GPU",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_runtime_server.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_artifact_hash_mismatch_rejected_before_bind (test_runtime_server.RuntimeServerTests.test_artifact_hash_mismatch_rejected_before_bind) ... ok\ntest_baseline_query_serves_exact_original_bytes (test_runtime_server.RuntimeServerTests.test_baseline_query_serves_exact_original_bytes) ... ok\ntest_config_sha_required_and_checked (test_runtime_server.RuntimeServerTests.test_config_sha_required_and_checked) ... ok\ntest_duplicate_route_rejected (test_runtime_server.RuntimeServerTests.test_duplicate_route_rejected) ... ok\ntest_encoded_traversal_forbidden (test_runtime_server.RuntimeServerTests.test_encoded_traversal_forbidden) ... ok\ntest_explicit_software_harness_is_separately_labelled (test_runtime_server.RuntimeServerTests.test_explicit_software_harness_is_separately_labelled) ... ok\ntest_host_rebinding_forbidden (test_runtime_server.RuntimeServerTests.test_host_rebinding_forbidden) ... ok\ntest_loopback_only_and_importmap_installed_before_bootstrap (test_runtime_server.RuntimeServerTests.test_loopback_only_and_importmap_installed_before_bootstrap) ... ok\ntest_no_repository_browse_or_public_render_api (test_runtime_server.RuntimeServerTests.test_no_repository_browse_or_public_render_api) ... ok\ntest_production_bootstrap_never_selects_test_context (test_runtime_server.RuntimeServerTests.test_production_bootstrap_never_selects_test_context) ... ok\ntest_source_change_after_start_fails_closed (test_runtime_server.RuntimeServerTests.test_source_change_after_start_fails_closed) ... ok\ntest_sources_cannot_escape_repo_and_bundle_roots (test_runtime_server.RuntimeServerTests.test_sources_cannot_escape_repo_and_bundle_roots) ... ok\ntest_symlink_source_rejected (test_runtime_server.RuntimeServerTests.test_symlink_source_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 4.031s\n\nOK\n",
+        "scope": "NEW_PROFILE_COORDINATE_SOURCE_AND_JOB_TESTS_CPU_NO_GPU",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_capture.mjs",
+        "exitCode": 0,
+        "stdout": "\u2714 ASTRA signature deterministic and distinct from prior source-only capture (1.328756ms)\n\u2714 ASTRA signature rejects missing bundle or extension hash (0.795757ms)\n\u2714 actual capture contract requires original protected fields and new material selection (1.383617ms)\n\u2714 missing source and existing graphic corruption cannot pass capture (0.76397ms)\n\u2714 approved encoding contract reused for 150 silent frames (0.160187ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 25.036577\n",
+        "stderr": "",
+        "scope": "NEW_CPU_JS_CONTRACTS_NO_NVIDIA",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_material.mjs",
+        "exitCode": 0,
+        "stdout": "\u2714 profile accepts bounded generic controls, rejects scene/camera/unsupported switches (1.651764ms)\n\u2714 source centers retain north-up half-pixel and original row zero (0.224532ms)\n\u2714 south-up source is not silently flipped; source edge/outside uses fallback (0.153346ms)\n\u2714 arbitrary Western/Southern source transforms use same cell mapping (0.177652ms)\n\u2714 native height/validity arrays are not mutated and all five DEM neighbours are mandatory (0.373242ms)\n\u2714 physical normal uses true metres, geographic latitude, signed source row direction (0.1966ms)\n\u2714 fractional native GIS land coverage gates each source without sign-derived ocean (0.137082ms)\n\u2714 shader binds exact source transform and texelFetch validity instead of interpolated/noData zero (0.394754ms)\n\u2714 actual combined RGB8 source snapshot follows baseline then surface/terrain/depth (2.401783ms)\n\u2714 raw source diagnostic skips ASTRA and returns same-frame original snapshot (0.542452ms)\n\u2714 unavailable role is omitted explicitly, never an invented texture (0.332362ms)\n\u2714 draw errors restore caller state and do not publish a successful snapshot frame (3.71096ms)\n\u2714 shader errors release owned construction resources and original state (0.282979ms)\n\u2714 idempotent dispose releases ASTRA plus original pass and forbids stale texture/draw (0.352322ms)\n\u2714 snapshot metadata cannot mutate future frames; no FINAL or hardware quality assertion (0.258363ms)\n\u2714 standard import-map wrapper selects original V4 factory bytes with query bypass (3.050733ms)\n\u2139 tests 16\n\u2139 suites 0\n\u2139 pass 16\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 25.346807\n",
+        "stderr": "",
+        "scope": "NEW_CPU_JS_CONTRACTS_NO_NVIDIA",
+        "gpuExecuted": false
+      },
+      {
+        "name": "test_runtime_plan.mjs",
+        "exitCode": 0,
+        "stdout": "\u2714 CPU plan selects exact original module closure, material decorator, sources and baseline fallback (276.157831ms)\n\u2714 activation bytes must match caller SHA (2.747865ms)\n\u2714 saved scene byte hash prevents altered camera/timing inputs (4.943674ms)\n\u2714 bundle payload must bind the prepared saved scene profile (5.086044ms)\n\u2714 artifact values are SHA checked without numerical conversion (172.072959ms)\n\u2714 artifact source symlink fails before source transmission (162.239302ms)\n\u2714 source change after planning is rejected by retained binding (236.269713ms)\n\u2139 tests 7\n\u2139 suites 0\n\u2139 pass 7\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 877.810117\n",
+        "stderr": "",
+        "scope": "NEW_CPU_JS_CONTRACTS_NO_NVIDIA",
+        "gpuExecuted": false
+      }
+    ],
+    "exitCode": 0
+  },
+  "softwareProbeBeforeBuild": {
+    "exitCode": 1,
+    "report": {
+      "schema": "ASTRA_ACTUAL_SOFTWARE_RENDER_PROBE_V1",
+      "status": "FAIL",
+      "testOnly": true,
+      "gpuRenderingVerified": false,
+      "gpuExecuted": false,
+      "errorType": "Error",
+      "productionRenderAllowed": false
+    },
+    "stdout": "{\"schema\":\"ASTRA_ACTUAL_SOFTWARE_RENDER_PROBE_V1\",\"status\":\"FAIL\",\"testOnly\":true,\"gpuRenderingVerified\":false,\"gpuExecuted\":false,\"errorType\":\"Error\",\"productionRenderAllowed\":false}\n",
+    "stderr": "ASTRA_SOFTWARE_PROBE_ERROR page.evaluate: Error: CONTROL_INTENT_NON_CANONICAL\n    at assertTerritoryControlIntent ([URL_REDACTED]\n    at compileTerritoryControlPlan ([URL_REDACTED]\n    at bootAstraRuntime ([URL_REDACTED]\n    at async <anonymous>:337:30\n    at view (/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/software_probe.mjs:52:26)\n    at async file:///opt/rtx-package/repo/world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/software_probe.mjs:78:11\n",
+    "scope": "ACTUAL_CHROMIUM_SWIFTSHADER_COMPILE_DRAW_CPU_NOT_NVIDIA",
+    "gpuExecuted": false
+  },
+  "failedPhase": "test",
+  "reasonCode": "ACTUAL_SOFTWARE_ACTIVATION_PROBE_REQUIRED",
+  "errorType": "RuntimeError",
+  "stepOutcomes": {
+    "preflight": "success",
+    "guard": "success",
+    "test": "failure",
+    "stage": "skipped",
+    "build": "skipped",
+    "verify": "skipped",
+    "publish": "skipped"
+  }
+}
