@@ -72,6 +72,27 @@ it neither executes nor unmarshals cache contents. Other extra files remain
 failures. The original Dockerfile, runtime and sources are preserved. See
 `RETRY_RECORD.json` and the saved first-run report for the retry's evidence.
 
+Run `38662204399` confirmed six compiled caches, exact 160-file source integrity,
+all CPU dependency/API checks and absent known credential paths. Default
+Gitleaks found one `cache_key` field in the unchanged flat asset source record.
+`NON_CREDENTIAL_EVIDENCE.json` preserves the original public preparation recipe:
+its canonical SHA-256 equals that field, which names content-addressed terrain
+files and is not authentication. The checker does not change the original file.
+It binds the file SHA and exact JSON field and extends only the inherited
+`generic-api-key` rule's legacy `[rules.allowlist]`. Actual scanner tests prove
+that an additional synthetic credential, another field or another filename
+remains detected, and changed source bytes are rejected. Gitleaks 8.24.3's
+global allowlist ignores `AND`; it is deliberately not used.
+
+The actual policy tests can be reproduced with the official Gitleaks 8.24.3
+Linux binary verified against SHA-256
+`e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad`.
+Set `RTX_GITLEAKS_BINARY` to that executable and run only
+`tests/test_secret_policy.py` with this directory on `PYTHONPATH`.
+An unavailable scanner is SKIP; a wrong binary SHA is FAIL. There is no required
+local-only binary asset: the pinned official release and hash are recorded in
+the pipeline, and the original source fixture is already in Git.
+
 ## Permissions and blockers
 
 The workflow needs repository Actions enabled, the ability to save its report

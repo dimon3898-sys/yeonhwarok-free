@@ -5,10 +5,11 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 
 HERE = Path(__file__).resolve().parents[1]
@@ -19,6 +20,10 @@ TAG = "rtx4080s-2f9158b-12345-1"
 SCANNER = b"inert synthetic scanner bytes; never executed"
 HELPER = {"schema": "RTX_BUILT_IMAGE_CPU_CHECK_V1", "status": "PASS", "uid": 1000,
           "gpuExecuted": False, "source": {"files": 160, "derivedBytecodeCount": 8}}
+POLICY = {"schema": "rtx-public-metadata-secret-policy-v1", "metadataFile": "repo/public-fixture.json",
+          "metadataSha256": hashlib.sha256(b"synthetic public policy fixture").hexdigest(),
+          "field": "JSON[1].cache_key", "gitleaksVersion": "8.24.3", "condition": "AND",
+          "ruleId": "generic-api-key", "allowlistScope": "rules.allowlist"}
 
 
 class VerifyEvidenceTests(unittest.TestCase):
@@ -35,6 +40,8 @@ class VerifyEvidenceTests(unittest.TestCase):
         self.download = patch.object(pipeline.urllib.request, "urlopen").start()
         self.download.return_value.__enter__.return_value.read.return_value = b"inert archive fixture"
         patch.object(pipeline, "SCANNER_SHA", hashlib.sha256(SCANNER).hexdigest()).start()
+        self.policy_writer = Mock(side_effect=self.write_policy)
+        patch.dict(sys.modules, {"secret_policy": SimpleNamespace(write_config=self.policy_writer)}).start()
         self.failure = None
         self.credential_absent = True
         self.exit_code = 0
@@ -98,12 +105,20 @@ class VerifyEvidenceTests(unittest.TestCase):
             report.write_text(json.dumps(self.findings))
         return SimpleNamespace(returncode=self.exit_code, stdout="RAW_STDOUT_SENTINEL", stderr="RAW_STDERR_SENTINEL")
 
+    def write_policy(self, scanroot, destination):
+        self.assertEqual(scanroot, self.scanroot)
+        self.assertFalse(destination.exists())
+        destination.write_text("[extend]\nuseDefault = true\n")
+        return POLICY
+
     def assert_false_publication_and_no_raw_secrets(self):
         state = pipeline.read_state()
         self.assertEqual(state["imageChecks"], HELPER)
         self.assertIs(state["imagePushed"], False)
         self.assertIs(state["pullVerified"], False)
         self.assertNotEqual(state["status"], "GPU_IMAGE_READY_FOR_DEPLOYMENT")
+        if self.policy_writer.called:
+            self.assertEqual(state["secretPolicy"], POLICY)
         encoded = json.dumps(state)
         for sentinel in ("RAW_STDOUT_SENTINEL", "RAW_STDERR_SENTINEL", "RAW_MATCH_SENTINEL", "RAW_SECRET_SENTINEL", "RAW_DESCRIPTION_SENTINEL"):
             self.assertNotIn(sentinel, encoded)
@@ -136,6 +151,7 @@ class VerifyEvidenceTests(unittest.TestCase):
         self.assertFalse(any(call.args[0][:2] == ["docker", "create"] for call in self.commands.call_args_list))
         self.scanner_process.assert_not_called()
         self.download.assert_not_called()
+        self.policy_writer.assert_not_called()
         self.assertNotEqual(state.get("secretScan", {}).get("status"), "PASS")
 
     def test_reported_findings_keep_only_bounded_nonsecret_location_evidence(self):

@@ -153,7 +153,7 @@ def check_image(image, *, hashes_only=False):
 
 def verify():
     value = read_state()
-    for key in ("imageChecks", "credentialPathCheck", "secretScan"): value.pop(key,None)
+    for key in ("imageChecks", "credentialPathCheck", "secretScan", "secretPolicy"): value.pop(key,None)
     value["verificationStage"] = "IMAGE_CPU_AND_SOURCE"; save(value)
     value["imageChecks"] = check_image(value["image"])
     value["verificationStage"] = "KNOWN_CREDENTIAL_PATHS"; save(value)
@@ -180,7 +180,9 @@ def verify():
     run(["tar", "-xzf", str(archive), "-C", str(scanner_dir), "gitleaks"])
     scanner = scanner_dir / "gitleaks"
     if hashlib.sha256(scanner.read_bytes()).hexdigest() != SCANNER_SHA: raise RuntimeError("SCANNER_BINARY_SHA_MISMATCH")
-    config = scanner_dir / "trusted.toml"; config.write_text("[extend]\nuseDefault = true\n")
+    from secret_policy import write_config
+    config = scanner_dir / "trusted.toml"
+    value["secretPolicy"] = write_config(scanroot,config); save(value)
     ignore = scanner_dir / "empty-ignore"; ignore.write_text("")
     report = scanner_dir / "findings.json"
     value["verificationStage"] = "ACTUAL_APPLICATION_SECRET_SCAN"; save(value)
