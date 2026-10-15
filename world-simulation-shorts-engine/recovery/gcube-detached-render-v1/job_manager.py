@@ -16,6 +16,7 @@ import signal
 import subprocess
 import sys
 import time
+from types import SimpleNamespace
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
@@ -142,10 +143,19 @@ def verify_export(result, export_root):
             dependency = HERE.parent / 'gcube-65422-render-v1/verify_artifacts.py'
         spec = importlib.util.spec_from_file_location('detached_artifact_verifier', dependency)
         verifier = importlib.util.module_from_spec(spec); spec.loader.exec_module(verifier)
+        def run_with_export_fd(*args, **kwargs):
+            if 'pass_fds' in kwargs:
+                raise ManagerError('RESULT_VERIFICATION_FAILED')
+            return subprocess.run(*args, **kwargs, pass_fds=(unit,))
+        # Pass only the read-only capture directory to the helper's subprocess.
+        # The child resolves its own fd, even after UID drop makes a parent's
+        # /proc/<pid>/fd inaccessible. Do not change dumpability or the helper.
+        verifier.subprocess = SimpleNamespace(run=run_with_export_fd,
+                                              SubprocessError=subprocess.SubprocessError)
         anchor = next(item['sha256'] for item in capture['files'] if item['file'] == 'SHA256SUMS')
         # The pinned directory descriptors keep all untrusted ancestor components
         # outside the verifier's path walk, which then rehashes after FFprobe.
-        checked = verifier.verify_public(Path('/proc') / str(os.getpid()) / 'fd' / str(unit) / 'public-review', anchor)
+        checked = verifier.verify_public(Path('/proc/self/fd') / str(unit) / 'public-review', anchor)
         if sorted(checked['files'], key=lambda x: x['file']) != sorted(capture['files'], key=lambda x: x['file']):
             raise ManagerError('RESULT_VERIFICATION_FAILED')
         return result

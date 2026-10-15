@@ -355,8 +355,29 @@ class ManagerTests(unittest.TestCase):
 
 
 class ExportHandoffTests(unittest.TestCase):
-    def test_actual_cpu_media_handoff_receipt_hash_and_parent_descriptor(self):
-        """FFprobe reads via the manager's pinned parent fd, never /proc/self/fd.
+    def test_nondumpable_cpu_subprocess_uses_own_inherited_descriptor(self):
+        """Reproduce root-to-UID-drop procfs restrictions without relaxing them.
+
+        Only this fresh CPU child is made non-dumpable. The production runtime
+        must pass its pinned fd to FFprobe rather than enabling parent access.
+        """
+        code = """import ctypes, importlib.util, pathlib, sys, unittest
+native = ctypes.CDLL(None, use_errno=True)
+assert native.prctl(4, 0, 0, 0, 0) == 0
+assert native.prctl(3, 0, 0, 0, 0) == 0
+spec = importlib.util.spec_from_file_location('restricted_cpu_media_fixture', pathlib.Path(sys.argv[1]))
+fixture = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(fixture)
+case = fixture.ExportHandoffTests('test_actual_cpu_media_handoff_receipt_hash_and_pinned_descriptor')
+result = unittest.TextTestRunner(verbosity=2).run(unittest.TestSuite([case]))
+raise SystemExit(0 if result.wasSuccessful() else 1)
+"""
+        checked = subprocess.run([sys.executable, "-B", "-c", code, str(Path(__file__).resolve())],
+                                 capture_output=True, text=True, timeout=30, check=False)
+        self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
+
+    def test_actual_cpu_media_handoff_receipt_hash_and_pinned_descriptor(self):
+        """FFprobe inherits its own pinned fd; no parent procfs access is needed.
 
         Reuses the existing PNG fixture builder only, without running old tests.
         The one solid-color 150-frame MP4 is explicitly synthetic CPU encoding.
@@ -396,8 +417,18 @@ class ExportHandoffTests(unittest.TestCase):
                 "externalDownloadVerified": False, "privateDataAllowed": False,
                 "captureId": "b" * 64, "files": capture["files"]})
             receipt.write_text(receipt_body)
-            with self.subTest(case="real_cpu_ffprobe_parent_fd"):
+            with self.subTest(case="real_cpu_ffprobe_inherited_fd"):
+                def source_fingerprint():
+                    values = {}
+                    for path in public.iterdir():
+                        info = path.stat()
+                        values[path.name] = ((info.st_dev, info.st_ino, info.st_uid, info.st_gid,
+                                             info.st_mode, info.st_nlink, info.st_size,
+                                             info.st_mtime_ns, info.st_ctime_ns), path.read_bytes())
+                    return values
+                source_before = source_fingerprint()
                 self.assertEqual(manager.verify_export(result, root), result)
+                self.assertEqual(source_fingerprint(), source_before)
             with self.subTest(case="missing_receipt"):
                 receipt.unlink()
                 with self.assertRaises(FileNotFoundError):

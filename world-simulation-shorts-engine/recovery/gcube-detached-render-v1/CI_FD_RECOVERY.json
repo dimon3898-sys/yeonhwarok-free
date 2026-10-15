@@ -1,0 +1,17 @@
+{
+  "schema": "DETACHED_RENDER_FFPROBE_FD_RECOVERY_V1",
+  "failedRun": "38736136579-1",
+  "phase": "test",
+  "actualError": "FFPROBE_FAILED reading parent proc fd path after UID transition",
+  "imageBuilt": false,
+  "imagePushed": false,
+  "confirmedBefore": "Restrictive CPU child PR_SET_DUMPABLE=0 reproduces actual FFPROBE_FAILED",
+  "fix": "Pass only pinned read-only capture directory fd to original verifier subprocess and use /proc/self/fd; isolated module adapter only, stdlib subprocess and original verifier bytes unchanged",
+  "securityRelaxed": false,
+  "productionPrctlUsed": false,
+  "after": "Default and restrictive CPU media/receipt/hash/FFprobe handoff tests2/2 PASS",
+  "managerFocusedCount": 16,
+  "newUniqueFocusedCount": 69,
+  "originalRuntimeModified": false,
+  "gpuExecuted": false
+}
