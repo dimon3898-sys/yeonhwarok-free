@@ -192,6 +192,16 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(caught.exception.facts["reason"], "EXPORT_IDENTITY_CHANGED")
         self.assertEqual((old / "KEEP.txt").read_bytes(), b"existing replacement")
 
+    def test_preexisting_export_name_collision_never_reused_or_overwritten(self):
+        session = self.session()
+        collision = self.export / session.export_name
+        collision.mkdir()
+        (collision / "KEEP.txt").write_bytes(b"must-remain")
+        with self.assertRaises(storage.StorageError):
+            session.preflight()
+        self.assertEqual((collision / "KEEP.txt").read_bytes(), b"must-remain")
+        self.assertEqual(sorted(item.name for item in collision.iterdir()), ["KEEP.txt"])
+
     def test_safe_record_requires_preflight_and_strips_secrets(self):
         import records
         session = self.session()
@@ -273,6 +283,32 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(caught.exception.facts["reason"], "SOURCE_HASH_MISMATCH")
         self.assertFalse(list((self.export / session.export_name).rglob("EXPORT_COMPLETE.json")))
 
+    def test_destination_readback_corruption_blocks_completion(self):
+        session = self.session()
+        session.preflight()
+        self.public_fixture(session)
+        original_sync = storage._shared_fsync
+        def corrupt(descriptor):
+            if os.readlink(f"/proc/self/fd/{descriptor}").endswith("/public-review/PROOF.mp4"):
+                os.lseek(descriptor, 0, os.SEEK_SET)
+                os.write(descriptor, b"corrupted")
+            return original_sync(descriptor)
+        with mock.patch.object(storage, "_shared_fsync", side_effect=corrupt):
+            with self.assertRaises(storage.StorageError) as caught:
+                session.export_results()
+        self.assertEqual(caught.exception.facts["reason"], "DESTINATION_READBACK_MISMATCH")
+        self.assertFalse(list((self.export / session.export_name).rglob("EXPORT_COMPLETE.json")))
+
+    def test_manifest_traversal_rejected_before_export_copy(self):
+        session = self.session()
+        session.preflight()
+        public = self.public_fixture(session)
+        (public / "SHA256SUMS").write_text("0" * 64 + "  ../REPORT.json\n")
+        with self.assertRaises(storage.StorageError) as caught:
+            session.export_results()
+        self.assertEqual(caught.exception.facts["reason"], "SOURCE_MANIFEST_INVALID")
+        self.assertFalse(list((self.export / session.export_name).glob("capture-*")))
+
     def test_fifo_readback_substitution_rejected_without_blocking(self):
         directory = os.open(self.export, os.O_RDONLY | os.O_DIRECTORY)
         original = storage.os.open
@@ -312,6 +348,9 @@ class StorageTests(unittest.TestCase):
         self.assertEqual(facts, {"stage": "EXPORT", "reason": "IO_UNAVAILABLE", "uid": 1000,
                                 "modeBits": 0o777, "filesystem": "fuse.rclone", "private": {}})
         self.assertEqual(storage.StorageError(code=[]).code, "STORAGE_VALIDATION_FAILED")
+        cyclic = {}
+        cyclic["private"] = cyclic
+        self.assertLess(len(json.dumps(storage.safe_facts(cyclic))), 100)
 
 
 if __name__ == "__main__":

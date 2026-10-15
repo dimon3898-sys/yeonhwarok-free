@@ -47,6 +47,58 @@ def _emit_phase(stage, *, test_only):
     print(json.dumps(event, sort_keys=True), flush=True)
 
 
+def _emit_export_location(session, report, *, test_only):
+    """Print generated basenames and checked hashes, never arbitrary report text."""
+    name = getattr(session, "export_name", None)
+    if (not isinstance(name, str) or not re.fullmatch(r"world-engine-export-[0-9a-f]{24}", name)
+            or not isinstance(report, dict) or report.get("status") != "EXPORTED"
+            or report.get("mountedViewReadbackVerified") is not True
+            or report.get("remotePersistenceVerified") is not False
+            or report.get("externalDownloadVerified") is not False):
+        return False
+
+    def file_record(value, *, safe_log=False):
+        if not isinstance(value, dict):
+            return None
+        filename, digest, size = value.get("file"), value.get("sha256"), value.get("bytes")
+        pattern = r"startup-safe-[0-9a-f]{24}\.json" if safe_log else r"(?:SHA256SUMS|[A-Za-z0-9][A-Za-z0-9_.-]{0,174}\.(?:mp4|png))"
+        if (not isinstance(filename, str) or not re.fullmatch(pattern, filename)
+                or not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)
+                or type(size) is not int or not 1 <= size <= 4 * 1024 ** 3):
+            return None
+        return {"file": filename, "sha256": digest, "bytes": size}
+
+    payload = {"schema": "WORLD_ENGINE_EXPORT_LOCATION_V1", "exportDirectory": name,
+               "testOnly": test_only, "mountedViewReadbackVerified": True,
+               "remotePersistenceVerified": False, "externalDownloadVerified": False}
+    if report.get("schema") == "WORLD_ENGINE_SAFE_RECORD_EXPORT_V1":
+        checked = file_record(report, safe_log=True)
+        if checked is None or report.get("exportName") != name:
+            return False
+        payload["files"] = [checked]
+    elif report.get("schema") == "WORLD_ENGINE_PUBLIC_EXPORT_V1":
+        results = report.get("results")
+        if not isinstance(results, list) or not 1 <= len(results) <= 16:
+            return False
+        captures = []
+        for result in results:
+            if (not isinstance(result, dict) or not isinstance(result.get("directory"), str)
+                    or not re.fullmatch(r"capture-[0-9a-f]{12}-[0-9a-f]{24}", result["directory"])
+                    or result.get("completionReceipt") != "EXPORT_COMPLETE.json"
+                    or not isinstance(result.get("files"), list) or not 2 <= len(result["files"]) <= 64):
+                return False
+            files = [file_record(value) for value in result["files"]]
+            if any(value is None for value in files):
+                return False
+            captures.append({"directory": result["directory"], "publicDirectory": "public-review",
+                             "completionReceipt": "EXPORT_COMPLETE.json", "files": files})
+        payload["captures"] = captures
+    else:
+        return False
+    print(json.dumps(payload, sort_keys=True, allow_nan=False), flush=True)
+    return True
+
+
 def _storage_failure(error, *, mode, test_only):
     code = getattr(error, "code", "STORAGE_UNAVAILABLE")
     if code not in {"STORAGE_VALIDATION_FAILED", "STORAGE_UNAVAILABLE"}:
@@ -150,7 +202,8 @@ def _publish(record, session, *, mode, test_only):
     export_ok = False
     if session is not None:
         try:
-            session.export_safe_record(safe)
+            report = session.export_safe_record(safe)
+            _emit_export_location(session, report, test_only=test_only)
             export_ok = True
         except storage.StorageError as error:
             failure = _storage_failure(error, mode=mode, test_only=test_only)
@@ -192,6 +245,7 @@ def _export_render_results(session, *, test_only=False):
             or report.get("externalDownloadVerified") is not False):
         raise storage.StorageError("STORAGE_VALIDATION_FAILED", {"stage": "EXPORT", "reason": "PUBLIC_SOURCE_INVALID"})
     _emit_facts("PASS", report, test_only=test_only)
+    _emit_export_location(session, report, test_only=test_only)
     return report
 
 

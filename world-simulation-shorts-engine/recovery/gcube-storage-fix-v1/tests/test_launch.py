@@ -308,6 +308,25 @@ class LaunchTests(unittest.TestCase):
                 with native.capture_guard(base):
                     pass
 
+    def test_export_location_prints_only_generated_basenames_and_checked_hashes(self):
+        session = SimpleNamespace(export_name="world-engine-export-" + "a" * 24)
+        flags = {"status": "EXPORTED", "mountedViewReadbackVerified": True,
+                 "remotePersistenceVerified": False, "externalDownloadVerified": False}
+        report = {"schema": "WORLD_ENGINE_SAFE_RECORD_EXPORT_V1", "exportName": session.export_name,
+                  "file": "startup-safe-" + "b" * 24 + ".json", "sha256": "c" * 64, "bytes": 100,
+                  "password": "secret-location-canary", **flags}
+        with captured() as (_, _, output):
+            self.assertTrue(launch._emit_export_location(session, report, test_only=True))
+        payload = json.loads(output.getvalue())
+        self.assertEqual(payload["files"][0]["sha256"], "c" * 64)
+        self.assertEqual(payload["exportDirectory"], session.export_name)
+        self.assertNotIn("secret-location-canary", output.getvalue())
+        self.assertFalse(payload["externalDownloadVerified"])
+        report["file"] = "/private/location/secret.json"
+        with captured() as (_, _, output):
+            self.assertFalse(launch._emit_export_location(session, report, test_only=True))
+        self.assertEqual(output.getvalue(), "")
+
     def test_diagnostic_parent_drops_before_export_or_server_and_keeps_blocked_record(self):
         operations = FakeOperations()
         session = FakeSession(operations)
