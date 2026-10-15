@@ -1,0 +1,161 @@
+{
+  "schema": "REFERENCE_VISUAL_MASTER_V2_B_CAMERA_SOURCE_AUDIT_V1",
+  "stage": "B_READ_ONLY_SOURCE_AUDIT",
+  "implementationStarted": false,
+  "sourceBindings": [
+    {
+      "engineRelativePath": "web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+      "sha256": "d74ffa8fc9884655f543a98d41bead9717d74d467484b99f4c14c18c17ce5bb1"
+    },
+    {
+      "engineRelativePath": "web/map_infographic_v1/reference_presentation_adapter_v2.mjs",
+      "sha256": "9fd7c91f8d49a6dbf469d14b20135453abf9c40131603a667867269f196b7277"
+    },
+    {
+      "engineRelativePath": "web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3"
+    },
+    {
+      "engineRelativePath": "recovery/moving-frontier-glow-fix-v1/reference_runtime.mjs",
+      "sha256": "013d5d4d569e34982f093f8623313c920e645cda5f371783fca27aedd6b1670e"
+    },
+    {
+      "engineRelativePath": "recovery/visual-quality-upgrade-v1/quality_profiles.mjs",
+      "sha256": "ce384415d4a2ce570af70ffb329a76bbc0f13e4f349b959ed7f10dae40225051"
+    },
+    {
+      "engineRelativePath": "recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json",
+      "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159"
+    }
+  ],
+  "confirmedInterfaces": [
+    {
+      "name": "compileReferenceCameraTrack",
+      "source": "web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+      "line": 61,
+      "behavior": "Consumes Scene-owned integer-frame keyframes and the unchanged actual V5 camera plan. Fixed monotone cubic interpolation in center and log extent gives C1 continuity. First frame0 and last frame149 remain mandatory for this fixture. Repeated poses are accepted. The last keyframe must remain the closest extent.",
+      "reuse": "UNCHANGED"
+    },
+    {
+      "name": "evaluateReferenceCameraTrackFrame",
+      "source": "web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+      "line": 102,
+      "behavior": "Random access by output frame. Camera and event state do not share a remapped clock. cameraLocked:false means no arrival/detail lock is forged. It does not promise a nonzero numerical camera velocity on every frame.",
+      "reuse": "UNCHANGED"
+    },
+    {
+      "name": "assessReferenceCameraMotion",
+      "source": "web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+      "line": 122,
+      "behavior": "Checks all150 camera samples and returns step metrics. fakeLockCount:0 is a literal output field, not a sampled detector for pose plateaus. It cannot certify whether an intentional read pause exists.",
+      "reuse": "UNCHANGED; ADD_SEPARATE_NUMERICAL_CADENCE_AUDIT"
+    },
+    {
+      "name": "compileReferencePresentationPlan",
+      "source": "web/map_infographic_v1/reference_presentation_adapter_v2.mjs",
+      "line": 33,
+      "behavior": "Roll follows its own Scene-owned keyframes with C1 interpolation. A real camera-pose read pause must hold roll as well as center and extent. Overscan/no-corner-clipping constraints remain unchanged.",
+      "reuse": "UNCHANGED"
+    },
+    {
+      "name": "nativeFramingFloor",
+      "source": "web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "line": 100,
+      "behavior": "Every native frame must remain wider and taller than the inherited admitted floor. No profile can weaken this guard.",
+      "reuse": "UNCHANGED"
+    },
+    {
+      "name": "eventAndObjectFrameOwnership",
+      "source": "web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+      "line": 168,
+      "behavior": "Territory is evaluated at control.startFrame+frame and units at frame. Camera-only Scene keyframes must not remap either index or change their source arrays.",
+      "reuse": "UNCHANGED"
+    },
+    {
+      "name": "assertQualityDiagnostic",
+      "source": "recovery/moving-frontier-glow-fix-v1/reference_runtime.mjs",
+      "line": 20,
+      "behavior": "Existing geometry, GPU, native floor, safe area, collision and cameraLocked:false checks remain active. A separate declared camera-read pause must not be passed off as DETAIL LOCK.",
+      "reuse": "UNCHANGED"
+    }
+  ],
+  "proposedMinimalGInterface": {
+    "existingCallable": false,
+    "status": "DESIGN_ONLY_WAIT_FOR_STAGE_G",
+    "newNamespaceOnly": true,
+    "input": [
+      "current F derived Scene",
+      "unchanged base V5 camera plan",
+      "unchanged control plan and output frame count",
+      "actual safe area and protected unit layout",
+      "inherited native floor and original native envelope",
+      "CameraSmoothing profile value",
+      "HoldDuration camera-only displayed-frame count"
+    ],
+    "output": [
+      "new Scene-owned camera keyframes only",
+      "camera source/profile hash",
+      "sampled per-frame numerical pose and continuity audit",
+      "explicit camera read-pause run metadata",
+      "unchanged event and object frame indices",
+      "safe fallback to exact original F camera if no candidate passes"
+    ],
+    "invariants": [
+      "Original F regression variant returns identical camera keys and all150 sampled poses.",
+      "Same150 output frames at30fps, same control intent and unit source data.",
+      "Optional read pause lasts9..12 displayed frames, with both position/extent and roll held.",
+      "Camera resumes smoothly; full shot is not globally slowed.",
+      "All150 native floor, original envelope, source support, front visibility, unit safe-area and critical-collision checks pass.",
+      "No new GPU API, camera-core or renderer-core change."
+    ]
+  },
+  "parameterSemantics": {
+    "CameraSmoothing": {
+      "possible": "Bounded new Scene-owned camera cadence or keyframe adjustment through the existing C1 interpolators. Zero/disabled must retain original F exactly.",
+      "notClaimed": [
+        "New V5 algorithm",
+        "C2 acceleration continuity",
+        "Global event-clock slowdown",
+        "Guaranteed reference-quality motion before actual video review"
+      ]
+    },
+    "HoldDuration": {
+      "possible": "Optional camera-pose read pause of0 or9..12 displayed frames, selected after a meaningful change and filtered by all safety/visibility checks.",
+      "unit": "Displayed frames for deterministic30fps capture; exact public parameter unit to be pinned during Stage G.",
+      "unsupported": [
+        "Territory expansion hold or story retiming",
+        "Object motion pause",
+        "Timeline duration change",
+        "Synthetic event completion",
+        "Forged DETAIL LOCK"
+      ],
+      "offByOneRule": "A declared N-frame pause must be verified from N displayed samples, not inferred from a keyframe delta that accidentally yields N+1 samples."
+    }
+  },
+  "actualReferenceConstraint": {
+    "fullReferenceSeconds": 31.813189,
+    "matchingWindowSeconds": [
+      5.181813,
+      10.181813
+    ],
+    "observation": "The selected reference window tracks and changes scale. No long static camera lock is observed. An optional short readability pause is a new bounded visual choice, not a copied measured reference hold.",
+    "wholeShotSlowdown": "NOT_SUPPORTED_BY_REFERENCE_OBSERVATION"
+  },
+  "pendingStageGChecks": [
+    "Select a pause opportunity from actual evaluated control change, not fixed country coordinates or a fixed event name.",
+    "Recompile new Scene camera and presentation with unchanged protected compilers.",
+    "Measure center/log-span/roll equality and transitions over all150 samples.",
+    "Verify controls and object data against the original arrays at every original output frame.",
+    "Reject candidates with source-envelope, native-floor, visibility, unit or collision failures; keep original F if necessary.",
+    "Leave actual NVIDIA video smoothness, performance and quality pending hardware evidence."
+  ],
+  "protection": {
+    "existingFilesModified": 0,
+    "gpuExecuted": false,
+    "paidWorkExecuted": false,
+    "rendererCoreModified": false,
+    "cameraV5Modified": false,
+    "eventClockModified": false,
+    "stageGImplementationAuthorizedYet": false
+  }
+}

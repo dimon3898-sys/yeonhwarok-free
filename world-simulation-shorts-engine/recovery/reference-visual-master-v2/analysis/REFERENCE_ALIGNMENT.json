@@ -95,8 +95,8 @@
       7.681813,
       10.181813
     ],
-    "halfSecondSamplingPurpose": "Review entire storyboard and all major phases; not a claim of visually inspecting all958 individually",
-    "fullDecoderAudit": "Separate Stage A dense-frame audit; no decoded frame copied into public repository"
+    "halfSecondSamplingPurpose": "Review the entire storyboard and all major phases; this does not claim manual visual inspection of all958 individual frames.",
+    "fullDecoderAudit": "analysis/FULL_REFERENCE_METRICS.json and analysis/NATIVE_DECODE_CROSSCHECK.json; no reference frame is copied into the public repository."
   },
   "phoneUIExclusion": {
     "coordinateConvention": "[left,top,right,bottom], half-open, original1080x2520 recorder pixels",
@@ -108,7 +108,7 @@
       1080,
       2131
     ],
-    "embeddingBottomStatus": "INFERRED_FROM1080x1920_ASPECT; OCCLUDED_BY_FOOTER; NOT_A_CLEAN_BOTTOM_MEASUREMENT",
+    "embeddingBottomStatus": "Inferred from the nominal1080x1920 aspect ratio and occluded by footer UI; not a measured clean-content bottom.",
     "excludeRectangles": [
       {
         "role": "STATUS_AND_TOP_NAVIGATION",
@@ -165,7 +165,7 @@
         ]
       }
     ],
-    "exclusionPolicy": "Conservative masks may remove valid map pixels; masked/occluded pixels are UNKNOWN, never scored as terrain/color/front failure",
+    "exclusionPolicy": "Conservative masks may remove valid map pixels. Masked or occluded pixels are unknown and must not count as terrain, color or frontier failures.",
     "forbiddenReproductionContent": [
       "statusbar",
       "YouTube controls",
@@ -186,7 +186,7 @@
         1.5
       ],
       "phase": "ESTABLISH_AND_SUPPORT_UNIT_ENTRY",
-      "observation": "Whole peninsula; existingorange north/texturedpurple south. Supportbadges move in southern approach; framing eases outward/repositions. Existinggold outeredge alreadyvisible.",
+      "observation": "The whole peninsula is visible, with orange northern territory and textured purple southern territory. Support badges enter or reposition during the opening framing change. Gold outer-edge light is already visible.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -195,7 +195,7 @@
         5.0
       ],
       "phase": "POSITIONING_AND_FRONT_ESTABLISHMENT",
-      "observation": "National marker groups clusteronbothsides; camera begins northwardtracking/scalechange. Originalbasepurple stilltextured; newgainis not yet dominant.",
+      "observation": "National marker groups arrange on both sides while the camera gradually tracks and changes scale. The original purple territory remains textured; new gain is not yet dominant.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -204,7 +204,7 @@
         10.5
       ],
       "phase": "FIRST_MAJOR_GAIN_AND_TRACKING",
-      "observation": "Newultrasaturatedviolet band advancesnorth with thinwhite movinginterface. Gold outercountry/coast halo remains a separatevisualrole. Camera pans/zoomswhile markers follow.",
+      "observation": "A highly saturated violet gained band advances north with a thin white leading interface. Gold outer-country and coastline light remains a separate visual role. Camera tracking and scale change continue.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -213,7 +213,7 @@
         13.5
       ],
       "phase": "CONTINUED_ADVANCE",
-      "observation": "Brightgainedband broadens while originalsouthernpurple retains texture; red/orange remainingregion recedes. No fullreplay observed.",
+      "observation": "The bright gained band broadens while the original southern purple retains texture. Remaining orange territory recedes. No replay of the opening is observed.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -222,7 +222,7 @@
         16.5
       ],
       "phase": "WARNING_SYMBOL_BEAT",
-      "observation": "A yellow/blackwarning/radiation-style glyph appears nearfront. It is an authored storysymbol; not proof of physicalsimulation.",
+      "observation": "A yellow and black warning or radiation-style glyph appears near the front. It is an authored story symbol, not proof of a physical simulation.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -231,7 +231,7 @@
         20.5
       ],
       "phase": "AIRCRAFT_AND_LOCAL_IMPACT_BEAT",
-      "observation": "Several aircraft silhouettes traverse view; a brief localized orange/white burst followed by greyremnant appears nearoneposition. Do not add this laterphase to existing5s geometry window.",
+      "observation": "Aircraft silhouettes traverse the view. A short localized orange and white impact effect, then a grey remnant, appear near one position. This later story beat is outside the existing five-second scene.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -240,7 +240,7 @@
         23.5
       ],
       "phase": "POST_IMPACT_CONTINUED_GAIN",
-      "observation": "Aircraft leave; marker groups and northwardcontroladvance remain; no observed resettoopening.",
+      "observation": "Aircraft leave; marker groups and northward control advance remain. No reset to the opening state is observed.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -249,7 +249,7 @@
         28.0
       ],
       "phase": "CLOSING_TAKEOVER_AND_UNIT_FADES",
-      "observation": "Remainingorange strip shrinks; some northernmarkers fade individually as brightpurple fillsnorth. Camera continuesgentletracking.",
+      "observation": "Remaining orange territory shrinks. Some northern markers fade individually while bright purple gains fill the north and camera tracking continues.",
       "boundaryPrecisionSeconds": 0.5
     },
     {
@@ -258,20 +258,35 @@
         31.813189
       ],
       "phase": "NATIONAL_FLAG_FILL_OUTRO",
-      "observation": "A large red/blue/white flag-shaped fill replaces most territorymaterial; this is endtransition, not ordinaryfrontprogress or a replay.",
+      "observation": "A large red, blue and white flag-shaped fill replaces most territorial material. This is an outro transition, not an ordinary territory frontier or replay.",
       "boundaryPrecisionSeconds": 0.5
     }
   ],
   "replayFreezeAssessment": {
     "replaySeenInHalfSecondStoryboard": false,
-    "hardFreezeClaimed": false,
-    "apparentHolds": "Some territory/camera changes are slow or hold while captions/markers change. Whole-frame UI change is not evidence of map motion.",
-    "effectiveAnimationLengthSeconds": null,
-    "reason": "Separate dense temporal analysis must quantify exact holds; storyboard spans full31.813189s, withordinaryterritory phase approximately0..28s andoutro approximately28..31.813189s"
+    "fullDecodeFrames": 958,
+    "exactAdjacentDuplicatePairs": 0,
+    "qualifyingLowMotionRunsAtLeastSeconds": 0.15,
+    "qualifyingLowMotionRunCount": 0,
+    "lowMotionThresholds": {
+      "meanAbsoluteRGBDifferenceMaximum": 0.15,
+      "changedPixelFractionMaximum": 0.002
+    },
+    "endVersusFirstMAD": 33.94,
+    "wholeClipChangingPresentationSeconds": 31.813189,
+    "ordinaryTerritoryPhaseApproximateSeconds": [
+      0,
+      28
+    ],
+    "outroApproximateSeconds": [
+      28,
+      31.813189
+    ],
+    "effectiveAnimationLengthPolicy": "Do not claim an invented short effective length: all958 frames decoded, no qualifying freeze or opening/end loop. Slow map holds and individual unit holds remain possible; global frame change is not proof every map layer moves."
   },
   "matchingExistingF": {
     "actualNvidiaFMP4Available": false,
-    "comparisonEvidenceKind": "SAVED_SWIFTSHADER_CPU_TEST_ONLY_PNG_AND_IMMUTABLE_SCENE_TIMELINE",
+    "comparisonEvidenceKind": "Saved SwiftShader CPU test-only PNG files and immutable Scene timeline; actual NVIDIA F MP4 unavailable.",
     "softwareRun": "38821837659-1",
     "visuallyReviewedFFrames": [
       0,
@@ -305,8 +320,8 @@
       5.181813,
       10.181813
     ],
-    "selectionReason": "Sameinitialgain→earlyadvance→midband→lateadvance phase alreadyrepresentedbyexistingfrozencontrolIntent. Excludeswarning/aircraft/finalflagstorychanges. Keepsapprovedgeometryandtiming.",
-    "alignmentMode": "SEMANTIC_PHASE_MATCH_WITH_SOURCE_PTS_ANCHORS_NOT_WALLCLOCK_OR_PIXEL_EQUALITY",
+    "selectionReason": "The saved control intent already depicts initial gain, early advance, a middle gain band and late advance. This excludes later warning, aircraft and flag-outro story changes.",
+    "alignmentMode": "Semantic phase matching using source PTS anchors; no wall-clock or pixel equality claim.",
     "anchors": [
       {
         "fFrame": 0,
@@ -354,52 +369,52 @@
         "phase": "WINDOW_END_NOT_EVENT_END"
       }
     ],
-    "currentFCameraDiffersFromMeasuredReference": "Newboundedscene-ownedFcamera1.04zoom/.25centering; do not claim originalreferencepixelidentity",
+    "currentFCameraDiffersFromMeasuredReference": "F uses a separate bounded scene camera with1.04 zoom and0.25 centering. No exact reference pixel identity is claimed.",
     "eventContinuesBeyondWindow": true,
     "cameraLockRequired": false
   },
   "observedVisualDifferences": [
     {
       "role": "OUTER_BORDER_AND_COAST",
-      "reference": "Continuouswarmgolden finecorepluswidehalo aroundcountry/coast silhouette; visiblebeforeandduringadvance",
-      "savedFSoftware": "Outercoast mostlydarkedge; existingmovinginternalfront glowswhitegold",
-      "priority": "SEPARATE_STATIC_OUTER_EDGE_FROM_MOVING_CONTROL_FRONT"
+      "reference": "Continuous warm gold fine core and diffuse halo around the outer country and coast silhouette, before and during advance.",
+      "savedFSoftware": "Outer coastline is mostly dark; the internal moving control front has a white and gold glow.",
+      "priority": "Distinguish static outer-edge treatment from the moving control frontier."
     },
     {
       "role": "GAINED_TERRITORY",
-      "reference": "Newgain uses muchmoresaturatedflatviolet thanoriginaltexturedpurple; persists/accumulates acrossselectedwindow; no fade-back proven",
-      "savedFSoftware": "Existingwinningandgainedwinningcolor intentionallysameRGBA; bothcarrysimilarterraintexture",
-      "priority": "NEWLAYERMAYDIFFERENTIATEGainWITHOUTCHANGINGOWNERSHIP_GEOMETRY"
+      "reference": "New gain uses a saturated flat violet band, distinct from older textured purple. It persists across the selected window; no fade-back is proven.",
+      "savedFSoftware": "Existing and gained winning territory intentionally use identical RGBA and similar terrain texture.",
+      "priority": "A new visual layer may distinguish gain without altering ownership geometry or timing."
     },
     {
       "role": "MOVING_FRONT",
-      "reference": "Thinbrightwhite irregularinterface, withlocalsmallbrightdetails; followsadvancingedge",
-      "savedFSoftware": "Actualcontrolscalarboundaryalreadywhite/gold andsynchronized; more angularvisibleknotsegments",
-      "priority": "PRESERVE_SCALARFIELD_AND_SYNC; DO_NOTINVENT_DECORATIVELINE_OR_GEOMETRY"
+      "reference": "A thin bright white irregular interface follows the actual leading edge, with small bright local details.",
+      "savedFSoftware": "The same scalar control boundary is already synchronized and bright; some knot connections appear more angular.",
+      "priority": "Preserve the scalar field and synchronization. Do not invent a decorative line or new geometry."
     },
     {
       "role": "LAND_TEXTURE",
-      "reference": "Ridge/valleydetail readableoutsideandbeneathtexturedterritories; contraststrongerthanF",
-      "savedFSoftware": "RealASTRA/NEtextures visiblebutdarkerandmoremuted",
-      "priority": "COMPARE_MATCHEDMASKEDCROPS_BEFORE_BRIGHTENING_GLOBALMAP"
+      "reference": "Ridge and valley details remain readable outside and below the textured territories.",
+      "savedFSoftware": "ASTRA and Natural Earth textures are visible but darker and more muted.",
+      "priority": "Compare matching semantic land regions with UI exclusions before increasing global contrast."
     },
     {
       "role": "WATER",
-      "reference": "Tealbluecoastalwater withbroaddeepbathymetricfeatures; goldcoastinfluencesnearshoreappearance",
-      "savedFSoftware": "Darkerblue andstrongerdeepblue shapes; sourcecoveragepartial",
-      "priority": "MASKUI_AND_CLIP_SOURCE_SUPPORT; DO_NOTCONFUSEGOLDHALO_WITH_DEPTH"
+      "reference": "Teal-blue coastal water contains broad darker depth features. Gold outer light also changes nearshore appearance.",
+      "savedFSoftware": "Water is darker blue with stronger depth shapes and partial source support.",
+      "priority": "Do not confuse a gold coastal halo with a measured water-depth treatment."
     },
     {
       "role": "MARKERS",
-      "reference": "Highcontrastmultisidedbadges withnationalflagandcartoonhuman center; visiblylargeattargetphase",
-      "savedFSoftware": "Originalroundedtabletflagart, visuallysmaller footprintandstrongdarkcontainer",
-      "priority": "KEEPORIGINALARTWORK; NEVERCOPY_REFERENCEPORTRAIT_ICON"
+      "reference": "Conspicuous multilateral badges combine flags with cartoon human centers.",
+      "savedFSoftware": "Original rounded flag tablets have dark housings and a smaller apparent footprint.",
+      "priority": "Keep original artwork; do not copy reference portraits or badge design."
     },
     {
       "role": "CAMERA",
-      "reference": "Position/scaleandroll trackadvance, nohardcutinselected5s; notstaticlockedshot",
-      "savedFSoftware": "OnlythreeFstillsavailable; deterministicnewcamera sourceexistsbutactualGPUvideo motionnotobserved",
-      "priority": "KEEPSEMANTICALIGNMENT_SEPARATE_FROMPERFORMANCE_ORQUALITYPASS"
+      "reference": "Position, scale and roll follow the advance without a hard cut in the selected window.",
+      "savedFSoftware": "Only three saved F stills were inspected. Deterministic camera source exists, but actual GPU video motion was not available.",
+      "priority": "Keep semantic alignment separate from hardware performance or video-quality approval."
     }
   ],
   "implementationGate": {
@@ -407,6 +422,8 @@
     "sourceOrRendererEdits": 0,
     "paidGpuExecuted": false,
     "actualNvidiaQualityPass": false,
-    "next": "PARENT_STAGE_A_REVIEW_BEFORE_B_IMPLEMENTATION"
-  }
+    "next": "PARENT_STAGE_A_REVIEW_BEFORE_B_SOURCE_AUDIT"
+  },
+  "referenceGainObservation": "Newly gained territory is a highly saturated violet band, distinct from the older textured purple territory. It accumulates during the selected window; no fade-back is established.",
+  "stageAStatus": "COMPLETE_ANALYSIS_ONLY"
 }
