@@ -90,6 +90,15 @@ class ActivationCISafety(unittest.TestCase):
         with patch.object(ci,'sha',side_effect=lambda path:'0'*64 if Path(path).name=='gpu_upload.mjs' else original(path)):
             with self.assertRaisesRegex(RuntimeError,'PINNED_UPLOAD_SOURCE_REQUIRED'):ci.generate_manifest()
 
+    def test_composed_audit_requires_original_helper_hash_and_hashes_only(self):
+        original=ci.sha
+        with patch.object(ci,'sha',side_effect=lambda path:'0'*64 if Path(path).name=='image_checks.py' else original(path)):
+            with self.assertRaisesRegex(RuntimeError,'PINNED_ORIGINAL_IMAGE_AUDITOR_REQUIRED'):
+                ci.composed_image_check('synthetic',hashes_only=True)
+        with self.assertRaisesRegex(RuntimeError,'HASHES_ONLY_AUDIT_REQUIRED'):
+            ci.composed_image_check('synthetic',hashes_only=False)
+        self.process.assert_not_called()
+
     def test_actual_software_probe_success_must_be_test_only_without_gpu_claim(self):
         self.seed()
         for report in [{},{'status':'PASS','testOnly':False,'gpuRenderingVerified':False},
@@ -164,6 +173,79 @@ class ActivationCISafety(unittest.TestCase):
         self.assertIn('test ! -e /var/lib/world-engine-private/engine/job-astra-v1',text)
         self.assertNotIn('/engine/job-control-v1',text)
         self.assertIn('prepare_activation.py --verify-extension',text)
+
+
+class StrictComposedInventory(unittest.TestCase):
+    """Real temporary-file inventory tests; ownership alone uses an explicit CPU seam."""
+    def setUp(self):
+        self.area=tempfile.TemporaryDirectory(prefix='astra-union-inventory-');self.addCleanup(self.area.cleanup)
+        self.root=Path(self.area.name)
+        path=HERE.parent/'rtx-image-build-v1/image_checks.py'
+        specification=importlib.util.spec_from_file_location('_legacy_inventory_fixture',path)
+        self.legacy=importlib.util.module_from_spec(specification);specification.loader.exec_module(self.legacy)
+        # This test runs as the workspace account. The actual image audit keeps
+        # the exact original root-owner/read-only check and runs as UID 1000.
+        def fixture_readonly(path,*,directory=False):
+            if path.is_symlink() or (not path.is_dir() if directory else not path.is_file()):
+                raise self.legacy.ImageCheckError('STAGED_SOURCE_OWNERSHIP_OR_PERMISSIONS')
+        self.legacy._root_owned_readonly=fixture_readonly
+        contract=json.dumps({'files':[{} for _ in range(140)]}).encode()
+        (self.root/'source_contract.json').write_bytes(contract)
+        import hashlib
+        self.legacy.SOURCE_CONTRACT_SHA256=hashlib.sha256(contract).hexdigest()
+        records=[]
+        for number in range(160):
+            relative='original/source_'+str(number)+'.bin';content=('original-'+str(number)).encode()
+            target=self.root/'repo'/relative;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(content)
+            records.append({'repoPath':relative,'sha256':hashlib.sha256(content).hexdigest(),'bytes':len(content)})
+        (self.root/'STAGING_RECEIPT.json').write_text(json.dumps({'files':records}))
+        self.relative='repo/'+ci.NAMESPACE+'/owned-extension.mjs'
+        self.addon=self.root/self.relative;self.addon.parent.mkdir(parents=True);self.addon.write_bytes(b'export const additive=true;')
+        self.extensions={self.relative:hashlib.sha256(self.addon.read_bytes()).hexdigest()}
+
+    def test_known_hashed_extension_and_160_original_files_are_accepted(self):
+        report=ci.composed_source_tree(self.root,self.legacy,self.extensions)
+        self.assertEqual(report['files'],160);self.assertEqual(report['additiveFiles'],1)
+        self.assertEqual(report['composedInventoryFiles'],163);self.assertEqual(report['unexpectedFiles'],0)
+        self.assertIn('NO_MASKING',report['audit'])
+
+    def test_unknown_extension_file_is_rejected_instead_of_hiding_namespace(self):
+        (self.addon.parent/'unlisted.mjs').write_bytes(b'not in extension manifest')
+        with self.assertRaisesRegex(self.legacy.ImageCheckError,'UNEXPECTED_STAGED_FILE'):
+            ci.composed_source_tree(self.root,self.legacy,self.extensions)
+
+    def test_unknown_file_in_original_tree_is_still_rejected(self):
+        (self.root/'repo/original/not-in-receipt.bin').write_bytes(b'unknown')
+        with self.assertRaisesRegex(self.legacy.ImageCheckError,'UNEXPECTED_STAGED_FILE'):
+            ci.composed_source_tree(self.root,self.legacy,self.extensions)
+
+    def test_extension_and_original_bytes_cannot_change(self):
+        for target in [self.addon,self.root/'repo/original/source_0.bin']:
+            prior=target.read_bytes();target.write_bytes(b'tampered')
+            with self.subTest(target=target.name),self.assertRaisesRegex(self.legacy.ImageCheckError,'PACKAGED_SOURCE_VERIFICATION_FAILED'):
+                ci.composed_source_tree(self.root,self.legacy,self.extensions)
+            target.write_bytes(prior)
+
+    def test_credential_path_cannot_be_authorized_by_extension_manifest(self):
+        relative='repo/'+ci.NAMESPACE+'/.env'
+        with self.assertRaisesRegex(self.legacy.ImageCheckError,'STAGED_CREDENTIAL_OR_DUPLICATE_FILE'):
+            ci.composed_source_tree(self.root,self.legacy,{**self.extensions,relative:'0'*64})
+
+    def test_duplicate_original_or_missing_extension_cannot_pass(self):
+        with self.assertRaisesRegex(self.legacy.ImageCheckError,'STAGED_CREDENTIAL_OR_DUPLICATE_FILE'):
+            ci.composed_source_tree(self.root,self.legacy,{**self.extensions,'repo/original/source_0.bin':'0'*64})
+        self.addon.unlink()
+        with self.assertRaisesRegex(self.legacy.ImageCheckError,'STAGED_FILE_MISSING'):
+            ci.composed_source_tree(self.root,self.legacy,self.extensions)
+
+    def test_symlink_extension_is_rejected_before_following_bytes(self):
+        original=self.root/'repo/original/source_0.bin';self.addon.unlink();self.addon.symlink_to(original)
+        with self.assertRaisesRegex(self.legacy.ImageCheckError,'OWNERSHIP_OR_PERMISSIONS'):
+            ci.composed_source_tree(self.root,self.legacy,self.extensions)
+
+    def test_original_image_auditor_source_is_byte_preserved(self):
+        self.assertEqual(ci.sha(HERE.parent/'rtx-image-build-v1/image_checks.py'),
+            'c1ca60b64fe752cdc3b95c892718f4f18f25cb1bcc044f8f6269c017f976f51f')
 
 
 if __name__=='__main__':unittest.main()

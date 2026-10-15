@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import importlib.util
+import inspect
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from types import SimpleNamespace
 import urllib.request
 
 HERE = Path(__file__).resolve().parent
@@ -47,7 +49,15 @@ save = controls.save
 state_path = controls.state_path
 sha = controls.sha
 safe_log = controls.safe_log
-helpers = controls.helpers
+_parent_helpers = controls.helpers
+
+
+def helpers():
+    base = _parent_helpers()
+    return SimpleNamespace(require_space=base.require_space, login=base.login, check_image=composed_image_check)
+
+
+controls.helpers = helpers
 
 
 def state():
@@ -276,6 +286,118 @@ def image_hashes(image):
     expected = hashlib.sha256((json.dumps(generate_manifest(),indent=2)+'\n').encode()).hexdigest()
     if actual.get('manifestSha256') != expected: raise RuntimeError('ACTIVATION_MANIFEST_SOURCE_MISMATCH')
     return actual
+
+
+def composed_source_tree(root, legacy, extensions):
+    """Strict union of original immutable receipt and independently hashed extras.
+
+    The installed npm subtree has the identical exclusion used by the original
+    image auditor. Every other regular file must be in exactly one manifest or
+    be a validated original-source Python bytecode derivative. No directory or
+    source is hidden from the inventory walk.
+    """
+    root = Path(root)
+    for ancestor in [*reversed(root.parents), root]:
+        legacy._root_owned_readonly(ancestor, directory=True)
+    contract, contract_hash = legacy._read_json(root / 'source_contract.json')
+    receipt, receipt_hash = legacy._read_json(root / 'STAGING_RECEIPT.json')
+    if contract_hash != legacy.SOURCE_CONTRACT_SHA256 or not isinstance(contract.get('files'), list) or len(contract['files']) != 140:
+        raise legacy.ImageCheckError('PINNED_SOURCE_CONTRACT_MISMATCH')
+    copied = receipt.get('files')
+    if not isinstance(copied, list) or len(copied) != 160:
+        raise legacy.ImageCheckError('STAGED_INVENTORY_INVALID')
+    expected = {'source_contract.json': contract_hash, 'STAGING_RECEIPT.json': receipt_hash}
+    bytecode_sources = {}
+    for record in copied:
+        if not isinstance(record, dict): raise legacy.ImageCheckError('STAGED_INVENTORY_INVALID')
+        relative = 'repo/' + legacy._canonical(record.get('repoPath'))
+        digest = record.get('sha256')
+        if relative in expected or legacy._credential_path(relative) or not isinstance(digest,str) or not re.fullmatch('[0-9a-f]{64}',digest):
+            raise legacy.ImageCheckError('STAGED_CREDENTIAL_OR_DUPLICATE_FILE')
+        expected[relative] = digest
+        if relative.endswith('.py'):
+            source = root / relative
+            cached = Path(importlib.util.cache_from_source(str(source), optimization=''))
+            bytecode_sources[cached.relative_to(root).as_posix()] = (source,digest)
+    if not isinstance(extensions,dict) or not extensions:
+        raise legacy.ImageCheckError('STAGED_INVENTORY_INVALID')
+    for relative, digest in extensions.items():
+        relative = legacy._canonical(relative)
+        if (relative in expected or legacy._credential_path(relative) or not isinstance(digest,str)
+            or not re.fullmatch('[0-9a-f]{64}',digest)):
+            raise legacy.ImageCheckError('STAGED_CREDENTIAL_OR_DUPLICATE_FILE')
+        expected[relative] = digest
+    installed = root / 'repo/cinematic-world-map/node_modules'
+    observed = set(); bytecode_proofs = []
+    def walk_error(_error):
+        raise legacy.ImageCheckError('STAGED_TREE_UNREADABLE')
+    for parent, directories, filenames in os.walk(root,followlinks=False,onerror=walk_error):
+        parent = Path(parent); legacy._root_owned_readonly(parent,directory=True)
+        for name in list(directories):
+            candidate = parent / name; legacy._root_owned_readonly(candidate,directory=True)
+            if candidate == installed:
+                directories.remove(name)
+            elif legacy._credential_path(candidate.relative_to(root)):
+                raise legacy.ImageCheckError('STAGED_CREDENTIAL_PATH_PRESENT')
+        for name in filenames:
+            candidate=parent/name; relative=candidate.relative_to(root).as_posix()
+            if relative not in expected:
+                if relative in bytecode_sources and not legacy._credential_path(relative):
+                    source,digest=bytecode_sources[relative]
+                    proof=legacy._validate_bytecode(candidate,source,expected_source_sha256=digest)
+                    bytecode_proofs.append({'path':relative,**proof}); continue
+                raise legacy.ImageCheckError('UNEXPECTED_STAGED_FILE',relative_path=relative)
+            if legacy._credential_path(relative): raise legacy.ImageCheckError('UNEXPECTED_STAGED_FILE',relative_path=relative)
+            legacy._root_owned_readonly(candidate)
+            if hashlib.sha256(candidate.read_bytes()).hexdigest() != expected[relative]:
+                raise legacy.ImageCheckError('PACKAGED_SOURCE_VERIFICATION_FAILED',relative_path=relative)
+            observed.add(relative)
+    if observed != set(expected): raise legacy.ImageCheckError('STAGED_FILE_MISSING')
+    proof_body=json.dumps(sorted(bytecode_proofs,key=lambda item:item['path']),sort_keys=True,separators=(',',':')).encode()
+    return {'files':len(copied),'sourceContractSha256':contract_hash,'stagingReceiptSha256':receipt_hash,
+            'derivedBytecodeCount':len(bytecode_proofs),'derivedBytecodeProofSha256':hashlib.sha256(proof_body).hexdigest(),
+            'additiveFiles':len(extensions),'composedInventoryFiles':len(observed),
+            'unexpectedFiles':0,'audit':'STRICT_ORIGINAL_RECEIPT_PLUS_HASHED_ASTRA_EXTENSION_NO_MASKING'}
+
+
+def composed_image_check(image, *, hashes_only=False):
+    if hashes_only is not True: raise RuntimeError('COMPOSED_HASHES_ONLY_AUDIT_REQUIRED')
+    original = HERE.parent / 'rtx-image-build-v1/image_checks.py'
+    if sha(original) != 'c1ca60b64fe752cdc3b95c892718f4f18f25cb1bcc044f8f6269c017f976f51f': raise RuntimeError('PINNED_ORIGINAL_IMAGE_AUDITOR_REQUIRED')
+    manifest = generate_manifest()
+    manifest_hash = hashlib.sha256((json.dumps(manifest,indent=2)+'\n').encode()).hexdigest()
+    extensions = {'repo/'+NAMESPACE+'/'+name:digest for name,digest in manifest['files'].items()}
+    extensions.update({'repo/'+name:digest for name,digest in manifest['repoDependencies'].items()})
+    extensions['repo/'+NAMESPACE+'/ACTIVATION_FILES.json']=manifest_hash
+    extensions['repo/'+NAMESPACE+'/software_probe.mjs']=sha(HERE/'software_probe.mjs')
+    code = ("import hashlib,importlib.util,json,os,pathlib,re; from pathlib import Path; "
+            "s=importlib.util.spec_from_file_location('_immutable_image_audit','/__ci/image_checks.py'); "
+            "legacy=importlib.util.module_from_spec(s); s.loader.exec_module(legacy);\n"
+            + inspect.getsource(composed_source_tree)
+            + "\nlegacy._check_source_tree=lambda root:composed_source_tree(root,legacy,"+repr(extensions)+");\n"
+            + "try:\n result=legacy.run_checks(hashes_only=True)\n"
+            + "except legacy.ImageCheckError as error:\n result={'status':'FAIL','errorCode':str(error),"
+            + "'unexpectedRelativePath':error.relative_path,'gpuExecuted':False}\n"
+            + "print(json.dumps(result)); raise SystemExit(0 if result.get('status')=='PASS' else 1)\n")
+    result = subprocess.run(['docker','run','--rm','--network=none','--user=1000:1000',
+        '--entrypoint=/usr/bin/python3','--mount','type=bind,source='+str(original)+',target=/__ci/image_checks.py,readonly',
+        image,'-B','-c',code],text=True,capture_output=True,check=False,timeout=180)
+    audit_state=state(); audit_state['composedImageAudit']={'exitCode':result.returncode,
+        'stdout':safe_log(result.stdout),'stderr':safe_log(result.stderr),
+        'scope':'IMMUTABLE_ORIGINAL_AUDITOR_WITH_STRICT_ADDITIVE_EXPECTED_INVENTORY_NO_MASKING'}; save(audit_state)
+    try: report=json.loads(result.stdout)
+    except ValueError: raise RuntimeError('COMPOSED_IMAGE_AUDIT_JSON_REQUIRED') from None
+    source=report.get('source',{}) if isinstance(report,dict) else {}
+    if (result.returncode!=0 or report.get('schema')!='RTX_BUILT_IMAGE_CPU_CHECK_V1' or report.get('status')!='PASS'
+        or report.get('uid')!=1000 or report.get('gpuExecuted') is not False or report.get('browserPageOpened') is not False
+        or report.get('networkIsolation')!='LOOPBACK_ONLY' or report.get('mode')!='hashes-only'
+        or source.get('files')!=160 or source.get('originalFiles')!=140
+        or source.get('additiveFiles')!=len(extensions) or source.get('unexpectedFiles')!=0
+        or source.get('sourceContractSha256')!='5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180'
+        or source.get('sourceCommits')!={'cpu':'a002d89492734bfa9d17b98145ee6cb9a3b366a2','glow':'45af879d7417abba58e9ebd59d8e6630a785ac28'}):
+        value=state();value['imageChecks']=report;save(value)
+        raise RuntimeError('COMPOSED_IMAGE_AUDIT_FAILED')
+    return report
 
 
 def secret_scan(image):
