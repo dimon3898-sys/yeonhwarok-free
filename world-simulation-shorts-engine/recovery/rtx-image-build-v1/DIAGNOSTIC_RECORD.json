@@ -1,0 +1,17 @@
+{
+  "schema": "RTX_IMAGE_VERIFICATION_DIAGNOSTIC_V1",
+  "savedRun": 38661132296,
+  "savedReportCommit": "ef4bc0dc40f158676a431e43fbada676aeb37e2e",
+  "ciCommit": "7daf01a72bb901775450c68eaa2d310fb8727984",
+  "actualBuild": "PASS",
+  "registered": false,
+  "failure": {"phase": "verify", "errorType": "CalledProcessError", "specificCommand": "NOT_PERSISTED_BY_PREVIOUS_WRAPPER"},
+  "causeOfInsufficientEvidence": "The wrapper retained successful CPU image checks and scan results only at the end of verify(); a later command error prevented those intermediate facts from being saved.",
+  "safeResolution": "Persist each verification substep and successful result immediately. Save only fixed credential filenames and bounded scanner rule/path/line/file SHA metadata, never findings' Match, Secret, raw lines or command stderr. Reject malformed reports and remove stale verification verdicts at start.",
+  "independentExistingArtifactChecks": {"sameVersionInstalledNpmVendorScan": "PASS_ZERO_FINDINGS", "cachedAlreadyVerifiedGdalBaseKnownCredentialPaths": "ABSENT", "newDataCollected": false},
+  "nextAttemptPurpose": "Reproduce only the existing image and diagnose the evidenced verification failure with intermediate checkpoints; the completed hosted runner's unpublished image cannot be reused after teardown. No runtime change or dependency lowering.",
+  "existingPackageChanged": false,
+  "protectedSourceChanged": false,
+  "gpuExecuted": false,
+  "paidServiceUsed": false
+}

@@ -152,16 +152,25 @@ def check_image(image, *, hashes_only=False):
 
 
 def verify():
-    value = read_state(); value["imageChecks"] = check_image(value["image"])
+    value = read_state()
+    for key in ("imageChecks", "credentialPathCheck", "secretScan"): value.pop(key,None)
+    value["verificationStage"] = "IMAGE_CPU_AND_SOURCE"; save(value)
+    value["imageChecks"] = check_image(value["image"])
+    value["verificationStage"] = "KNOWN_CREDENTIAL_PATHS"; save(value)
     roots = ["/root/.docker/config.json", "/root/.git-credentials", "/home/engine/.docker/config.json", "/opt/rtx-package/repo/.env"]
-    code = "import os,json; paths=" + repr(roots) + "; assert not any(os.path.lexists(p) for p in paths); print(json.dumps({'knownCredentialPathsAbsent':True}))"
+    code = "import os,json; paths=" + repr(roots) + "; present=[p for p in paths if os.path.lexists(p)]; print(json.dumps({'knownCredentialPathsAbsent':not present,'presentPaths':present}))"
     value["credentialPathCheck"] = json.loads(run(["docker", "run", "--rm", "--network=none", "--user=0:0", "--entrypoint=/usr/bin/python3", value["image"], "-c", code]))
+    save(value)
+    if value["credentialPathCheck"].get("knownCredentialPathsAbsent") is not True:
+        raise RuntimeError("IMAGE_KNOWN_CREDENTIAL_PATH_PRESENT")
+    value["verificationStage"] = "COPY_ACTUAL_APPLICATION"; save(value)
     # Scan actual application bytes copied out of the built image. No auth/config
     # directories are copied into its build context or this scan directory.
     temp = Path(os.environ["RUNNER_TEMP"]); scanroot = temp / ("rtx-image-source-" + value["tag"])
     container = run(["docker", "create", "--entrypoint=/bin/true", value["image"]]).strip()
     try: run(["docker", "cp", container + ":/opt/rtx-package", str(scanroot)], timeout=120)
     finally: run(["docker", "rm", container])  # Only this new, never-started inspection container.
+    value["verificationStage"] = "PINNED_SCANNER_SETUP"; save(value)
     scanner_dir = temp / ("rtx-scanner-" + value["tag"]); scanner_dir.mkdir()
     archive = scanner_dir / "gitleaks.tar.gz"
     with urllib.request.urlopen("https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz", timeout=30) as response:
@@ -174,10 +183,47 @@ def verify():
     config = scanner_dir / "trusted.toml"; config.write_text("[extend]\nuseDefault = true\n")
     ignore = scanner_dir / "empty-ignore"; ignore.write_text("")
     report = scanner_dir / "findings.json"
-    run([str(scanner), "dir", str(scanroot), "--config", str(config), "--gitleaks-ignore-path", str(ignore),
-         "--ignore-gitleaks-allow", "--redact=100", "--report-format=json", "--report-path", str(report), "--no-banner"], timeout=180)
-    if json.loads(report.read_text()): raise RuntimeError("SECRET_SCAN_FINDINGS")
-    value["secretScan"] = {"status": "PASS", "findings": 0, "scope": "actual built application tree and known image credential paths/env", "scannerBinarySha256": SCANNER_SHA}
+    value["verificationStage"] = "ACTUAL_APPLICATION_SECRET_SCAN"; save(value)
+    result = subprocess.run([str(scanner), "dir", str(scanroot), "--config", str(config), "--gitleaks-ignore-path", str(ignore),
+         "--ignore-gitleaks-allow", "--redact=100", "--report-format=json", "--report-path", str(report), "--no-banner"],
+         check=False, text=True, capture_output=True, timeout=180)
+    findings = json.loads(report.read_text()) if report.exists() and report.stat().st_size < 64*1024**2 else None
+    if not isinstance(findings,list) or any(not isinstance(item,dict) for item in findings):
+        value["secretScan"] = {"status":"FAIL","findings":None,"reasonCode":"SECRET_SCAN_REPORT_REQUIRED",
+            "scannerExitCode":result.returncode}; save(value)
+        raise RuntimeError("SECRET_SCAN_REPORT_REQUIRED")
+    descriptors = []
+    for finding in findings[:25]:
+        # Save only bounded rule/path/line/hash evidence; never Match/Secret,
+        # raw lines, messages, stdout/stderr, authorization or signed URLs.
+        filename = finding.get("File", "")
+        filename = filename if isinstance(filename,str) else ""
+        candidate = Path(filename)
+        if not candidate.is_absolute(): candidate = scanroot / candidate
+        try: relative = candidate.relative_to(scanroot).as_posix()
+        except ValueError: relative = "UNREPORTED_PATH"
+        if (not re.fullmatch(r"[A-Za-z0-9_./@+ -]{1,240}", relative)
+                or any(part in {".",".."} for part in relative.split("/"))): relative = "UNREPORTED_PATH"
+        rule = finding.get("RuleID", "")
+        if not isinstance(rule,str) or not re.fullmatch(r"[a-z0-9_-]{1,80}", rule): rule = "unknown"
+        line = finding.get("StartLine"); line = line if type(line) is int and 0 < line < 10000000 else None
+        descriptor = {"rule":rule, "path":relative, "line":line}
+        if relative != "UNREPORTED_PATH":
+            try:
+                resolved = candidate.resolve(strict=True); resolved.relative_to(scanroot.resolve(strict=True))
+                parents = [candidate, *candidate.parents]
+                components = parents[:parents.index(scanroot)+1]
+                if not any(p.is_symlink() for p in components) and candidate.is_file() and candidate.stat().st_size < 8*1024**2:
+                    descriptor["fileSha256"] = hashlib.sha256(candidate.read_bytes()).hexdigest()
+            except (OSError,ValueError): pass
+        descriptors.append(descriptor)
+    value["secretScan"] = {"status":"PASS" if result.returncode == 0 and not findings else "FAIL",
+        "findings":len(findings), "descriptors":descriptors, "scannerExitCode":result.returncode,
+        "scope":"actual built application tree and known image credential paths/env", "scannerBinarySha256":SCANNER_SHA}
+    save(value)
+    if findings: raise RuntimeError("SECRET_SCAN_FINDINGS")
+    if result.returncode: raise RuntimeError("SECRET_SCANNER_EXECUTION_FAILED")
+    value["verificationStage"] = "COMPLETE"
     save(value)
 
 
@@ -282,4 +328,5 @@ if __name__ == "__main__":
         if not re.fullmatch(r"[A-Z][A-Z0-9_]{0,79}", code, re.ASCII): code = "OPERATION_FAILED"
         value = read_state(); value.update(status="GPU_IMAGE_PARTIAL_BLOCKED", failedPhase=args.phase,
             errorType=type(error).__name__, reasonCode=code)
+        if isinstance(error,subprocess.CalledProcessError): value["failedCommandExitCode"] = error.returncode
         save(value); print(json.dumps({"status":value["status"],"failedPhase":args.phase,"errorType":type(error).__name__})); raise SystemExit(1)
