@@ -3,8 +3,21 @@
 Use only after separate user authorization for a GPU allocation. This package
 does not deploy, restart or stop Workload #5373 or any paid workload.
 
-Use the new unique tag and immutable digest recorded in the completed image
-report. The older tags/digests remain unchanged. gCube's documented registry UI
+Verified image (source `2799b949cab8c8954f2ac7f2a72f7f9b1a2f7a7d`):
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38676932882-1
+```
+
+Immutable reference:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:3e8611e32860f4ae4f01febda8c4567f069552b111d7628cf0836101bdda9297
+```
+
+Free Actions build, GHCR publication and a separate runner digest pull passed.
+Anonymous manifest GET returned HTTP 200 with the matching SHA-256; gCube itself
+was not accessed. Use the tag form if the provider UI does not support digests. The older tags/digests remain unchanged. gCube's documented registry UI
 format is `ghcr.io/owner/repository:tag`; actual digest UI support is unconfirmed.
 
 For the first diagnostic execution, leave the command override empty and set:
