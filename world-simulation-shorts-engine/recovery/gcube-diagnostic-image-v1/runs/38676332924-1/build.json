@@ -1,0 +1,100 @@
+{
+  "schema": "GCUBE_DIAGNOSTIC_IMAGE_V1",
+  "status": "GPU_DIAGNOSTIC_BLOCKED",
+  "ciCommit": "dfb713539ba98f408b46e97192fcc00894c0e3b7",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:82a4d9086edc2345cd3f00430ff4c354ee3fbaedcef5f0b927a0d5f9c5e16a37",
+  "originalSourceCommit": "2f9158ba2df2a9f58362fb0b17118b8dc19f705a",
+  "gpuExecuted": false,
+  "gCubeDeployed": false,
+  "paidWorkExecuted": false,
+  "finalModified": false,
+  "originalSourceModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": false,
+  "imagePushed": false,
+  "pullVerified": false,
+  "builder": {
+    "root": "/var/lib/docker",
+    "freeBytes": 91397640192,
+    "filesystem": "ext2/ext3",
+    "driver": "overlay2"
+  },
+  "tag": "rtx4080s-2f9158b-38676332924-1",
+  "protection": {
+    "status": "PASS",
+    "base": "a28487dc8c901eb0ca38e0c162fe70dd39294430",
+    "allowedChangedFiles": [
+      ".github/workflows/gcube-diagnostic-image.yml",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/Dockerfile",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/GCUBE_DIAGNOSTIC_SETTINGS.md",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/LOCAL_VALIDATION.json",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/README.md",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/ci.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/healthcheck.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/records.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/service.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/tests/test_ci_safety.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/tests/test_records_service.py",
+      "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/tests/test_startup.py"
+    ]
+  },
+  "freeRunner": {
+    "publicRepository": true,
+    "label": "ubuntu-24.04",
+    "largerRunner": false
+  },
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38676332924-1",
+  "tagCheck": {
+    "status": "PASS",
+    "stage": "tag_absence",
+    "tag": "rtx4080s-2f9158b-38676332924-1",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38676332924-1",
+    "tagAvailable": true,
+    "tagReserved": false,
+    "issuedAccess": {
+      "status": "UNVERIFIED",
+      "pull": null,
+      "push": null,
+      "pushVerified": false
+    },
+    "writeVerified": false
+  },
+  "ciSafetyTests": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_context_extras_block_build (test_ci_safety.CISafety.test_context_extras_block_build) ... ok\ntest_dockerfile_never_rebuilds_approved_sources (test_ci_safety.CISafety.test_dockerfile_never_rebuilds_approved_sources) ... ok\ntest_failed_tests_block_staging (test_ci_safety.CISafety.test_failed_tests_block_staging) ... ok\ntest_free_public_standard_exact_branch_required (test_ci_safety.CISafety.test_free_public_standard_exact_branch_required) ... ok\ntest_image_provenance_and_entrypoint_fail_closed (test_ci_safety.CISafety.test_image_provenance_and_entrypoint_fail_closed) ... ok\ntest_independent_pull_requires_original_and_new_hashes (test_ci_safety.CISafety.test_independent_pull_requires_original_and_new_hashes) ... ok\ntest_logs_are_bounded_and_credential_values_removed (test_ci_safety.CISafety.test_logs_are_bounded_and_credential_values_removed) ... ok\ntest_only_explicit_files_enter_external_context (test_ci_safety.CISafety.test_only_explicit_files_enter_external_context) ... ok\ntest_private_persistence_primary_fallback_and_unsafe_record (test_ci_safety.CISafety.test_private_persistence_primary_fallback_and_unsafe_record) ... ok\ntest_protected_source_and_dirty_checkout_block (test_ci_safety.CISafety.test_protected_source_and_dirty_checkout_block) ... ok\ntest_publish_records_matching_digest_only (test_ci_safety.CISafety.test_publish_records_matching_digest_only) ... ok\ntest_published_config_mismatch_never_ready (test_ci_safety.CISafety.test_published_config_mismatch_never_ready) ... ok\ntest_scanner_archive_is_bounded_and_binary_pinned (test_ci_safety.CISafety.test_scanner_archive_is_bounded_and_binary_pinned) ... ok\ntest_secret_or_verification_failure_prevents_auth_and_push (test_ci_safety.CISafety.test_secret_or_verification_failure_prevents_auth_and_push) ... ok\ntest_source_hash_difference_is_rejected (test_ci_safety.CISafety.test_source_hash_difference_is_rejected) ... ok\ntest_unique_tag_checked_twice_and_conflict_prevents_push (test_ci_safety.CISafety.test_unique_tag_checked_twice_and_conflict_prevents_push) ... ok\n\n----------------------------------------------------------------------\nRan 16 tests in 0.038s\n\nOK\n",
+    "externalOperations": "MOCK_ONLY"
+  },
+  "focusedTests": {
+    "exitCode": 1,
+    "results": [
+      {
+        "pattern": "test_startup.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_actual_fork_reuses_native_shape_and_preserves_parent_identity (test_startup.StartupTests.test_actual_fork_reuses_native_shape_and_preserves_parent_identity) ... ok\ntest_bad_diagnostic_options_stop_before_worker (test_startup.StartupTests.test_bad_diagnostic_options_stop_before_worker) ... ok\ntest_bad_mode_and_args_do_not_echo_values (test_startup.StartupTests.test_bad_mode_and_args_do_not_echo_values) ... ok\ntest_clear_groups_and_identity_are_verified (test_startup.StartupTests.test_clear_groups_and_identity_are_verified) ... ok\ntest_dependency_failure_stops_gpu (test_startup.StartupTests.test_dependency_failure_stops_gpu) ... ok\ntest_diagnostic_failure_record_keeps_service_blocked (test_startup.StartupTests.test_diagnostic_failure_record_keeps_service_blocked) ... ok\ntest_diagnostic_port_matches_healthcheck_environment (test_startup.StartupTests.test_diagnostic_port_matches_healthcheck_environment) ... ok\ntest_diagnostic_privilege_failure_prevents_listening (test_startup.StartupTests.test_diagnostic_privilege_failure_prevents_listening) ... ok\ntest_diagnostic_render_is_rejected_before_checks (test_startup.StartupTests.test_diagnostic_render_is_rejected_before_checks) ... ok\ntest_diagnostic_ttl_boundaries_match_service (test_startup.StartupTests.test_diagnostic_ttl_boundaries_match_service) ... ok\ntest_gpu_absence_preserves_exit_two (test_startup.StartupTests.test_gpu_absence_preserves_exit_two) ... ok\ntest_gpu_phase_classification_is_explicit (test_startup.StartupTests.test_gpu_phase_classification_is_explicit) ... ok\ntest_injected_success_never_dispatches_production (test_startup.StartupTests.test_injected_success_never_dispatches_production) ... ok\ntest_nonroot_inherited_device_groups_refuse_service (test_startup.StartupTests.test_nonroot_inherited_device_groups_refuse_service) ... ok\ntest_profile_observer_is_restored_after_failure (test_startup.StartupTests.test_profile_observer_is_restored_after_failure) ... ok\ntest_sigterm_cancels_worker_reaps_child_and_never_opens_service (test_startup.StartupTests.test_sigterm_cancels_worker_reaps_child_and_never_opens_service) ... ok\ntest_source_failure_stops_dependency_and_gpu (test_startup.StartupTests.test_source_failure_stops_dependency_and_gpu) ... ok\ntest_storage_permission_and_readonly_have_original_exit_one (test_startup.StartupTests.test_storage_permission_and_readonly_have_original_exit_one) ... ok\ntest_uid_failure_does_not_start_native_gpu (test_startup.StartupTests.test_uid_failure_does_not_start_native_gpu) ... ok\ntest_unexpected_failure_and_secret_canary_never_appear (test_startup.StartupTests.test_unexpected_failure_and_secret_canary_never_appear) ... ok\ntest_unexpected_gpu_start_exception_has_its_own_stage (test_startup.StartupTests.test_unexpected_gpu_start_exception_has_its_own_stage) ... ok\ntest_worker_eof_does_not_bypass_exit_deadline (test_startup.StartupTests.test_worker_eof_does_not_bypass_exit_deadline) ... ok\ntest_worker_timeout_is_bounded_and_nonzero (test_startup.StartupTests.test_worker_timeout_is_bounded_and_nonzero) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 0.503s\n\nOK\n"
+      },
+      {
+        "pattern": "test_records_service.py",
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "test_diagnostic_liveness_not_gpu_or_readiness (test_records_service.HealthTests.test_diagnostic_liveness_not_gpu_or_readiness) ... ok\ntest_normal_health_accepts_only_original_verified_native_draw (test_records_service.HealthTests.test_normal_health_accepts_only_original_verified_native_draw) ... ok\ntest_errno_and_exception_type_are_bounded (test_records_service.RecordTests.test_errno_and_exception_type_are_bounded) ... ok\ntest_failed_persistence_leaves_stderr_record_available (test_records_service.RecordTests.test_failed_persistence_leaves_stderr_record_available) ... ok\ntest_gpu_nested_reasons_preserved_without_uuid_or_identity_strings (test_records_service.RecordTests.test_gpu_nested_reasons_preserved_without_uuid_or_identity_strings) ... ERROR\ntest_interrupted_worker_code_survives_safe_normalization (test_records_service.RecordTests.test_interrupted_worker_code_survives_safe_normalization) ... ok\ntest_primary_atomic_private_persistence_does_not_change_parent_permissions (test_records_service.RecordTests.test_primary_atomic_private_persistence_does_not_change_parent_permissions) ... ok\ntest_symlink_and_foreign_owner_primary_refused_without_chmod_chown (test_records_service.RecordTests.test_symlink_and_foreign_owner_primary_refused_without_chmod_chown) ... ok\ntest_unknown_codes_exception_messages_and_env_canaries_never_emitted (test_records_service.RecordTests.test_unknown_codes_exception_messages_and_env_canaries_never_emitted) ... ok\ntest_unwritable_primary_falls_back_and_labels_non_durable_tier (test_records_service.RecordTests.test_unwritable_primary_falls_back_and_labels_non_durable_tier) ... ok\ntest_bounded_service_reports_blocked_denies_render_and_keeps_exit (test_records_service.ServiceTests.test_bounded_service_reports_blocked_denies_render_and_keeps_exit) ... ok\ntest_diagnostic_only_ttl_still_exits_nonzero (test_records_service.ServiceTests.test_diagnostic_only_ttl_still_exits_nonzero) ... ok\ntest_privileged_or_device_group_identity_refuses_service (test_records_service.ServiceTests.test_privileged_or_device_group_identity_refuses_service) ... ok\ntest_service_failure_records_fixed_code_without_traceback (test_records_service.ServiceTests.test_service_failure_records_fixed_code_without_traceback) ... ok\ntest_sigterm_stops_service_and_restores_handlers_without_success_exit (test_records_service.ServiceTests.test_sigterm_stops_service_and_restores_handlers_without_success_exit) ... ok\n\n======================================================================\nERROR: test_gpu_nested_reasons_preserved_without_uuid_or_identity_strings (test_records_service.RecordTests.test_gpu_nested_reasons_preserved_without_uuid_or_identity_strings)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/opt/world-engine-startup-diagnostics/tests/test_records_service.py\", line 64, in test_gpu_nested_reasons_preserved_without_uuid_or_identity_strings\n    self.assertEqual(gpu[\"nvidia_devices\"][0][\"memory_total_mib\"], 16384)\n                     ~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n\n----------------------------------------------------------------------\nRan 15 tests in 1.046s\n\nFAILED (errors=1)\n"
+      }
+    ],
+    "scope": "NEW_TESTS_ONLY_REAL_CPU_AND_EXPLICIT_MOCKS_NO_GPU",
+    "baseImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:82a4d9086edc2345cd3f00430ff4c354ee3fbaedcef5f0b927a0d5f9c5e16a37"
+  },
+  "failedPhase": "test",
+  "reasonCode": "FOCUSED_DIAGNOSTIC_TESTS_FAILED",
+  "errorType": "RuntimeError",
+  "stepOutcomes": {
+    "preflight": "success",
+    "guard": "success",
+    "test": "failure",
+    "stage": "skipped",
+    "build": "skipped",
+    "verify": "skipped",
+    "publish": "skipped"
+  }
+}
