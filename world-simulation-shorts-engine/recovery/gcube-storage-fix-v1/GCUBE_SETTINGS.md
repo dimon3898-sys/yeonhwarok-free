@@ -1,6 +1,21 @@
 # gCube settings after separate GPU deployment authorization
 
-This task does not redeploy #5373 or start paid work. Use only the new unique tag/digest from the final report; preserve the previous image reference for rollback.
+This task does not redeploy #5373 or start paid work.
+
+Verified new image:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38680872082-1
+```
+
+Immutable reference:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825
+```
+
+Build, GHCR publication, independent digest pull and anonymous manifest HTTP 200/hash verification passed. Actual gCube pull/start and NVIDIA rendering remain unexecuted.
+ Use only the new unique tag/digest from the final report; preserve the previous image reference for rollback.
 
 1. Keep Dropbox mounted at `/world-storage`. UID 1000 must be able to create a new export namespace there. Existing `rtx-gpu-package-v1` contents and metadata need not be repaired or removed. The image never changes their permissions/ownership.
 2. Preserve the image default root entry so the original bootstrap can drop to UID 1000 and the diagnostic parent can clear supplementary groups. Do not add a runAsUser override or inherited supplementary groups for this diagnostic-service check. The service itself still runs as UID/GID 1000 with no supplementary groups. A forced nonroot process cannot clear inherited groups and the existing guard correctly refuses the service. If the platform mandates such a conflicting identity, preserve the refusal and inspect the exported safe logs; resolve the platform identity policy before expecting diagnostic keepalive.

@@ -1,0 +1,108 @@
+{
+  "schema": "WORLD_ENGINE_STORAGE_FIX_FINAL_V1",
+  "decision": "STORAGE_FIX_READY_FOR_GPU_VALIDATION",
+  "decisionScope": "CPU-verified storage/diagnostic image, not actual gCube recovery or deployment approval",
+  "branch": "development/gcube-storage-fix-20261015",
+  "checkpointCommit": "9e8c1bb",
+  "runtimeSourceCommit": "97872d4949ad9a0d0c96b96fc418a68f24e67f67",
+  "imageBuildControlCommit": "d07e9469182548b9dee0a4858f85ac850f99b252",
+  "buildEvidenceCommit": "6e90fc9091823357b0dd122a0e7e38fe59f328a7",
+  "independentPullEvidenceCommit": "bec44fe580c219404cf9d667fe40be7cb66160e0",
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38680872082-1",
+  "immutableImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+  "manifestDigest": "sha256:119873aa8515622c3508e934247bd4a18e85d080e3f33696e66acc1bae874825",
+  "configDigest": "sha256:a5431019e55d0590c5bd6ceb4551ba5e2f71fc416e5a5ce9be2d72196485b97c",
+  "platform": "linux/amd64",
+  "storageFilesManifestSha256": "ecee5f20c68bb55ae9d63964befa30fd6209b21d7615bde52847de033ee62b30",
+  "imageSizeBytes": 1570425119,
+  "build": "PASS",
+  "push": "PASS",
+  "independentDigestPull": "PASS",
+  "tests": {
+    "functionalCPU": {
+      "passed": 40,
+      "storage": 24,
+      "launcher": 16,
+      "originRun": "38680285245",
+      "latestRunDisposition": "REUSED_NOT_REEXECUTED",
+      "reuseProof": {
+        "run": "38680285245-1",
+        "sourceCommit": "97872d4949ad9a0d0c96b96fc418a68f24e67f67",
+        "evidenceSha256": "db585124797f17f86949adc04f2ba602da02534f5db883c1a5b1eb3a51371461",
+        "productionModuleHashesMatch": true,
+        "dockerfileHashMatches": true,
+        "testSourceHashesMatch": true,
+        "reusedCPUUnitTests": 40,
+        "observation": "REUSED_NOT_REEXECUTED"
+      }
+    },
+    "freshCISafety": {
+      "passed": 15,
+      "run": "38680872082"
+    },
+    "explicitMocksIncluded": true
+  },
+  "reusedCPUContainerCases": [
+    {
+      "case": "before-original-shared-permission",
+      "code": "STORAGE_VALIDATION_FAILED",
+      "exitCode": 1,
+      "originRun": "38680285245"
+    },
+    {
+      "case": "after-normal-shared-storage",
+      "code": "GPU_HARDWARE_UNAVAILABLE",
+      "exitCode": 2,
+      "originRun": "38680285245"
+    },
+    {
+      "case": "after-normal-default-root",
+      "code": "GPU_HARDWARE_UNAVAILABLE",
+      "exitCode": 2,
+      "originRun": "38680285245"
+    },
+    {
+      "case": "after-normal-readonly-export",
+      "code": "STORAGE_UNAVAILABLE",
+      "exitCode": 1,
+      "originRun": "38680285245"
+    }
+  ],
+  "freshCPUContainerCases": [
+    {
+      "case": "after-diagnostic-shared-default-root",
+      "code": "GPU_HARDWARE_UNAVAILABLE",
+      "exitCode": 2,
+      "originRun": "38680872082"
+    },
+    {
+      "case": "unprivileged-diagnostic-group-guard",
+      "code": "UID_GID_FAILED",
+      "exitCode": 1,
+      "originRun": "38680872082"
+    }
+  ],
+  "forcedUnprivilegedDiagnosticIdentity": {
+    "uid": 1000,
+    "gid": 1000,
+    "groups": [
+      1000
+    ]
+  },
+  "originalPackagedFileHashesVerified": 160,
+  "inheritedDiagnosticFileHashesVerified": 4,
+  "newFileHashesVerified": 2,
+  "existingFinalRendererCameraFrontierChanges": 0,
+  "existingSharedFixtureDataChanges": 0,
+  "secretFindingsNewLayerNamespaceWorkflow": 0,
+  "requiredTempOnlyFiles": 0,
+  "mountedViewReadbackVerified": true,
+  "actualDropboxMountVerified": false,
+  "remotePersistenceVerified": false,
+  "externalDownloadVerified": false,
+  "gCubeDeployed": false,
+  "gpuHardwareVerified": false,
+  "paidWorkExecuted": false,
+  "historicalDropboxLowLevelCause": "UNMEASURED",
+  "next": "USER_REVIEW_THEN_SEPARATELY_AUTHORIZED_GPU_VALIDATION"
+}
