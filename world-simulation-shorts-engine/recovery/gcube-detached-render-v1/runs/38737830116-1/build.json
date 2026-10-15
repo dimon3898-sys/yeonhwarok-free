@@ -1,0 +1,297 @@
+{
+  "schema": "GCUBE_DETACHED_RENDER_IMAGE_V1",
+  "status": "PUBLISHED_INDEPENDENT_PULL_PENDING",
+  "ciCommit": "aaa9347bcb50eaa480dc83e135bc2ebca6f1f5f2",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842",
+  "gpuExecuted": false,
+  "gCubeDeployed": false,
+  "paidWorkExecuted": false,
+  "rendererModified": false,
+  "finalModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": true,
+  "imagePushed": true,
+  "pullVerified": false,
+  "builder": {
+    "root": "/var/lib/docker",
+    "freeBytes": 92121333760,
+    "filesystem": "ext2/ext3",
+    "driver": "overlay2"
+  },
+  "tag": "rtx4080s-2f9158b-38737830116-1",
+  "protection": {
+    "status": "PASS",
+    "base": "b7e50d34b01b52f7ae1683df587010cb2fbb02d3",
+    "changedFiles": [
+      ".github/workflows/gcube-detached-render.yml",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/CI_ATOMIC_READ_RECOVERY.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/CI_FD_RECOVERY.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/CI_FIXTURE_RECOVERY.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/Dockerfile",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/LOCAL_VALIDATION.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/ci.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/inspect_existing.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_store.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/runs/38735648777-1/build.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/runs/38736136579-1/build.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/runs/38736932697-1/build.json",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/tests/test_ci.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/tests/test_inspect.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/tests/test_job_store.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/tests/test_manager.py",
+      "world-simulation-shorts-engine/recovery/gcube-detached-render-v1/tests/test_native_monitor.py"
+    ],
+    "allowedExistingPatches": []
+  },
+  "freeRunner": {
+    "publicRepository": true,
+    "label": "ubuntu-24.04",
+    "largerRunner": false
+  },
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38737830116-1",
+  "tagCheck": {
+    "status": "PASS",
+    "stage": "tag_absence",
+    "tag": "rtx4080s-2f9158b-38737830116-1",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38737830116-1",
+    "tagAvailable": true,
+    "tagReserved": false,
+    "issuedAccess": {
+      "status": "UNVERIFIED",
+      "pull": null,
+      "push": null,
+      "pushVerified": false
+    },
+    "writeVerified": false
+  },
+  "ciSafetyTests": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_actual_manifest_difference_rejects_image (test_ci.DetachedCISafety.test_actual_manifest_difference_rejects_image) ... ok\ntest_bad_unit_result_prevents_staging (test_ci.DetachedCISafety.test_bad_unit_result_prevents_staging) ... ok\ntest_docker_adds_no_automatic_entrypoint_service_or_dependencies (test_ci.DetachedCISafety.test_docker_adds_no_automatic_entrypoint_service_or_dependencies) ... ok\ntest_free_public_standard_exact_branch_required (test_ci.DetachedCISafety.test_free_public_standard_exact_branch_required) ... ok\ntest_image_labels_preserve_all_parent_source_revisions (test_ci.DetachedCISafety.test_image_labels_preserve_all_parent_source_revisions) ... ok\ntest_independent_pull_is_not_ready_on_parent_or_job_hash_mismatch (test_ci.DetachedCISafety.test_independent_pull_is_not_ready_on_parent_or_job_hash_mismatch) ... ok\ntest_manifest_pins_three_new_modules_verifier_and_parent_contracts (test_ci.DetachedCISafety.test_manifest_pins_three_new_modules_verifier_and_parent_contracts) ... ok\ntest_no_existing_runtime_file_changes_are_allowlisted (test_ci.DetachedCISafety.test_no_existing_runtime_file_changes_are_allowlisted) ... ok\ntest_only_explicit_cli_files_and_manifest_enter_context (test_ci.DetachedCISafety.test_only_explicit_cli_files_and_manifest_enter_context) ... ok\ntest_png_builder_fixture_is_pinned_and_staged_outside_checkout (test_ci.DetachedCISafety.test_png_builder_fixture_is_pinned_and_staged_outside_checkout) ... ok\ntest_real_cli_smoke_requires_empty_clear_and_not_started_states (test_ci.DetachedCISafety.test_real_cli_smoke_requires_empty_clear_and_not_started_states) ... ok\ntest_secret_or_verification_failure_prevents_publish (test_ci.DetachedCISafety.test_secret_or_verification_failure_prevents_publish) ... ok\ntest_two_no_overwrite_guards_and_isolated_auth_cleanup (test_ci.DetachedCISafety.test_two_no_overwrite_guards_and_isolated_auth_cleanup) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 0.025s\n\nOK\n",
+    "scope": "NEW_CI_MOCKS_ONLY"
+  },
+  "unitFixture": {
+    "sourceCommit": "b7e50d34b01b52f7ae1683df587010cb2fbb02d3",
+    "fixtureSha256": "8ff45a5972d3e59270c33e186738c225ade3d1161bca852fe9d46848a2a26e61",
+    "verifierSha256": "137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109",
+    "scope": "REUSED_PNG_BUILDER_ONLY_OLD_SUITE_NOT_EXECUTED"
+  },
+  "focusedTests": {
+    "exitCode": 0,
+    "results": [
+      {
+        "pattern": "test_job_store.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_atomic_overlap_does_not_retry_invalid_replacement (test_job_store.JobStoreTests.test_atomic_overlap_does_not_retry_invalid_replacement) ... ok\ntest_corrupt_and_duplicate_json_rejected (test_job_store.JobStoreTests.test_corrupt_and_duplicate_json_rejected) ... ok\ntest_create_claim_private_and_safe_append_readback (test_job_store.JobStoreTests.test_create_claim_private_and_safe_append_readback) ... ok\ntest_existing_private_record_veto_even_if_malformed (test_job_store.JobStoreTests.test_existing_private_record_veto_even_if_malformed) ... ok\ntest_existing_shared_directory_is_veto_never_repaired (test_job_store.JobStoreTests.test_existing_shared_directory_is_veto_never_repaired) ... ok\ntest_foreign_lock_does_not_authorize_old_descriptor (test_job_store.JobStoreTests.test_foreign_lock_does_not_authorize_old_descriptor) ... ok\ntest_inherited_descriptor_can_attach_but_no_new_execution_authority (test_job_store.JobStoreTests.test_inherited_descriptor_can_attach_but_no_new_execution_authority) ... ok\ntest_lock_excludes_real_other_process (test_job_store.JobStoreTests.test_lock_excludes_real_other_process) ... ok\ntest_private_root_replacement_rejected (test_job_store.JobStoreTests.test_private_root_replacement_rejected) ... ok\ntest_private_symlink_and_hardlink_rejected (test_job_store.JobStoreTests.test_private_symlink_and_hardlink_rejected) ... ok\ntest_read_retries_valid_atomic_job_replacement_only (test_job_store.JobStoreTests.test_read_retries_valid_atomic_job_replacement_only) ... ok\ntest_readback_fault_stops_before_private_job_creation (test_job_store.JobStoreTests.test_readback_fault_stops_before_private_job_creation) ... ok\ntest_result_requires_complete_allowlist_and_no_remote_success (test_job_store.JobStoreTests.test_result_requires_complete_allowlist_and_no_remote_success) ... ok\ntest_root_can_only_read_not_write (test_job_store.JobStoreTests.test_root_can_only_read_not_write) ... ok\ntest_shared_claim_prevents_second_job_even_when_private_lost (test_job_store.JobStoreTests.test_shared_claim_prevents_second_job_even_when_private_lost) ... ok\ntest_shared_claim_tamper_fails_but_private_failure_is_preserved (test_job_store.JobStoreTests.test_shared_claim_tamper_fails_but_private_failure_is_preserved) ... ok\ntest_shared_directory_swap_refused (test_job_store.JobStoreTests.test_shared_directory_swap_refused) ... ok\ntest_shared_write_failure_does_not_finalize_completed (test_job_store.JobStoreTests.test_shared_write_failure_does_not_finalize_completed) ... ok\ntest_shared_write_failure_keeps_local_failed_state (test_job_store.JobStoreTests.test_shared_write_failure_keeps_local_failed_state) ... ok\ntest_stale_sequence_and_changed_job_rejected (test_job_store.JobStoreTests.test_stale_sequence_and_changed_job_rejected) ... ok\ntest_strict_safe_schema_and_native_failure_preserved (test_job_store.JobStoreTests.test_strict_safe_schema_and_native_failure_preserved) ... ok\ntest_transitions_sequence_and_terminal_immutable (test_job_store.JobStoreTests.test_transitions_sequence_and_terminal_immutable) ... ok\ntest_unlocked_descriptor_cannot_mutate (test_job_store.JobStoreTests.test_unlocked_descriptor_cannot_mutate) ... ok\n\n----------------------------------------------------------------------\nRan 23 tests in 0.037s\n\nOK\n"
+      },
+      {
+        "pattern": "test_inspect.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_admission_only_session_and_manager_ledger_are_ignored (test_inspect.InspectionTest.test_admission_only_session_and_manager_ledger_are_ignored) ... ok\ntest_clear_is_read_only_and_test_only (test_inspect.InspectionTest.test_clear_is_read_only_and_test_only) ... ok\ntest_cli_has_no_override_or_render_arguments (test_inspect.InspectionTest.test_cli_has_no_override_or_render_arguments) ... ok\ntest_current_manager_exclusion_and_zombies (test_inspect.InspectionTest.test_current_manager_exclusion_and_zombies) ... ok\ntest_empty_capture_directory_is_prior_work_too (test_inspect.InspectionTest.test_empty_capture_directory_is_prior_work_too) ... ok\ntest_existing_capture_never_authorizes_rerender (test_inspect.InspectionTest.test_existing_capture_never_authorizes_rerender) ... ok\ntest_guard_held_and_stale_file_have_different_results (test_inspect.InspectionTest.test_guard_held_and_stale_file_have_different_results) ... ok\ntest_invalid_lock_and_symlink_cannot_clear (test_inspect.InspectionTest.test_invalid_lock_and_symlink_cannot_clear) ... ok\ntest_live_lock_requires_matching_pid_boot_and_start (test_inspect.InspectionTest.test_live_lock_requires_matching_pid_boot_and_start) ... ok\ntest_missing_path_bad_proc_and_path_symlinks_block (test_inspect.InspectionTest.test_missing_path_bad_proc_and_path_symlinks_block) ... ok\ntest_native_role_processes_only_and_no_arguments_leaked (test_inspect.InspectionTest.test_native_role_processes_only_and_no_arguments_leaked) ... ok\ntest_one_global_entry_budget_prevents_unbounded_walks (test_inspect.InspectionTest.test_one_global_entry_budget_prevents_unbounded_walks) ... ok\ntest_original_bootstrap_legacy_captures_block_but_admission_does_not (test_inspect.InspectionTest.test_original_bootstrap_legacy_captures_block_but_admission_does_not) ... ok\ntest_original_bootstrap_legacy_malformed_or_symlink_capture_is_rejected (test_inspect.InspectionTest.test_original_bootstrap_legacy_malformed_or_symlink_capture_is_rejected) ... ok\ntest_real_proc_is_readable_without_gpu_or_native_process (test_inspect.InspectionTest.test_real_proc_is_readable_without_gpu_or_native_process) ... ok\ntest_shared_capture_blocks_but_startup_exports_do_not (test_inspect.InspectionTest.test_shared_capture_blocks_but_startup_exports_do_not) ... ok\ntest_unreadable_proc_and_mount_block (test_inspect.InspectionTest.test_unreadable_proc_and_mount_block) ... ok\n\n----------------------------------------------------------------------\nRan 17 tests in 0.042s\n\nOK\n"
+      },
+      {
+        "pattern": "test_manager.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_actual_cpu_media_handoff_receipt_hash_and_pinned_descriptor (test_manager.ExportHandoffTests.test_actual_cpu_media_handoff_receipt_hash_and_pinned_descriptor)\nFFprobe inherits its own pinned fd; no parent procfs access is needed. ... ok\ntest_nondumpable_cpu_subprocess_uses_own_inherited_descriptor (test_manager.ExportHandoffTests.test_nondumpable_cpu_subprocess_uses_own_inherited_descriptor)\nReproduce root-to-UID-drop procfs restrictions without relaxing them. ... ok\ntest_concurrent_starters_keep_one_native_invocation (test_manager.ManagerTests.test_concurrent_starters_keep_one_native_invocation) ... ok\ntest_existing_native_or_ambiguous_evidence_prevents_dispatch (test_manager.ManagerTests.test_existing_native_or_ambiguous_evidence_prevents_dispatch) ... ok\ntest_first_native_failure_is_preserved_and_no_completion_export (test_manager.ManagerTests.test_first_native_failure_is_preserved_and_no_completion_export) ... ok\ntest_live_renderer_after_supervisor_loss_vetoes_duplicate_start (test_manager.ManagerTests.test_live_renderer_after_supervisor_loss_vetoes_duplicate_start) ... ok\ntest_process_identity_rejects_pid_reuse_and_dead_process (test_manager.ManagerTests.test_process_identity_rejects_pid_reuse_and_dead_process) ... ok\ntest_real_pty_disconnect_does_not_kill_detached_job (test_manager.ManagerTests.test_real_pty_disconnect_does_not_kill_detached_job) ... ok\ntest_repeated_start_during_and_after_job_never_dispatches_twice (test_manager.ManagerTests.test_repeated_start_during_and_after_job_never_dispatches_twice) ... ok\ntest_retained_shared_claim_blocks_replay_after_local_record_loss (test_manager.ManagerTests.test_retained_shared_claim_blocks_replay_after_local_record_loss) ... ok\ntest_shared_claim_exists_before_native_callback (test_manager.ManagerTests.test_shared_claim_exists_before_native_callback) ... ok\ntest_shared_status_write_failure_preserves_private_failure (test_manager.ManagerTests.test_shared_status_write_failure_preserves_private_failure) ... ok\ntest_success_records_real_detached_identity_and_safe_completion (test_manager.ManagerTests.test_success_records_real_detached_identity_and_safe_completion) ... ok\ntest_unexpected_native_exception_fails_closed_without_leaking_message (test_manager.ManagerTests.test_unexpected_native_exception_fails_closed_without_leaking_message) ... ok\ntest_verifier_rejection_cannot_be_completed (test_manager.ManagerTests.test_verifier_rejection_cannot_be_completed) ... ok\ntest_worker_loss_is_terminal_and_never_automatically_restarted (test_manager.ManagerTests.test_worker_loss_is_terminal_and_never_automatically_restarted) ... ok\n\n----------------------------------------------------------------------\nRan 16 tests in 3.255s\n\nOK\n"
+      },
+      {
+        "pattern": "test_native_monitor.py",
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_cpu_subprocess_keeps_first_failure_and_real_identity (test_native_monitor.NativeMonitorTests.test_cpu_subprocess_keeps_first_failure_and_real_identity) ... ok\ntest_deadline_stops_silent_cpu_child (test_native_monitor.NativeMonitorTests.test_deadline_stops_silent_cpu_child) ... ok\ntest_log_limit_terminates_only_this_cpu_child (test_native_monitor.NativeMonitorTests.test_log_limit_terminates_only_this_cpu_child) ... ok\ntest_no_export_is_invented_from_a_zero_exit (test_native_monitor.NativeMonitorTests.test_no_export_is_invented_from_a_zero_exit) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 0.538s\n\nOK\n"
+      }
+    ],
+    "scope": "NEW_STORE_INSPECTION_MANAGER_TESTS_ONLY_REAL_CPU_AND_EXPLICIT_TEST_SEAMS_NO_GPU"
+  },
+  "context": "/home/runner/work/_temp/detached-context-rtx4080s-2f9158b-38737830116-1",
+  "jobManifest": {
+    "schema": "WORLD_ENGINE_DETACHED_JOB_FILES_V1",
+    "sourceCommit": "aaa9347bcb50eaa480dc83e135bc2ebca6f1f5f2",
+    "parentDigest": "sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842",
+    "files": {
+      "job_manager.py": "6398967204168e9284a6cc1b5b7f7e2951b996fb7cf5cb3d5f0a785b26047d99",
+      "job_store.py": "1b8261f59a0b0652dae64fdd1ed040cb24b80743780c40fb141576fe7bb7b5fe",
+      "inspect_existing.py": "23a361ac0da95dad50ae7c2d5a57d2e527c904869b2d8bbf8e99146386cf7b38",
+      "verify_artifacts.py": "137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109"
+    },
+    "reusedVerifier": {
+      "sourceCommit": "b7e50d34b01b52f7ae1683df587010cb2fbb02d3",
+      "sourcePath": "world-simulation-shorts-engine/recovery/gcube-65422-render-v1/verify_artifacts.py",
+      "sha256": "137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109"
+    },
+    "inheritedSources": {
+      "/opt/world-engine-startup-diagnostics/startup.py": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7",
+      "/opt/world-engine-startup-diagnostics/records.py": "d5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080",
+      "/opt/world-engine-startup-diagnostics/service.py": "f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5",
+      "/opt/world-engine-startup-diagnostics/healthcheck.py": "0f49a39d6158ff4012fa2bf172cf23b20cb6a922a20e15fb567942f500c557c5",
+      "/opt/world-engine-storage-fix/launch.py": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c",
+      "/opt/world-engine-diagnostic-result/recover_existing.py": "7a12a58f130a9cdc7c50646a14f5a92cf06030dd0a3f4912f7480988ea8ba039",
+      "/opt/world-engine-storage-fix/storage.py": "4c858e7afe5e912bce63bf03f08c6c98d9430cc91134262710db5bdbd6ca4491"
+    },
+    "inheritedManifests": {
+      "/opt/world-engine-storage-fix/STORAGE_FILES.json": "c6d0d1566d2f6dce221c4c8049aa21dbb638e28ac72d9172a960ec86ccc3a3e3",
+      "/opt/world-engine-diagnostic-result/RESULT_FILES.json": "98c37d4ec021571be39a8148d2cd0aa1a644659b69f903ea3a9f0a82457ef213",
+      "/opt/world-engine-65422-render/RENDER_FILES.json": "25cc691e39760392f85512173ac25a0cc6f25ac92da3767294e84f45c243f722",
+      "/opt/world-engine-startup-diagnostics/DIAGNOSTIC_FILES.json": "1299b2a789ffcff29a69269cdc31801b7261085cc571b35324a59336bfdb658c"
+    }
+  },
+  "jobManifestSha256": "8df0a2248872ed4f568ce9cf9af9fd8994a217a9348127f0e2ed04b48a4c0208",
+  "dockerfileSha256": "c0df0e7434549ce58ef12ace8d8eb0c9b415d94f3efafc0ebe6ddbaf848a9cf8",
+  "explicitContextFiles": [
+    "Dockerfile",
+    "JOB_FILES.json",
+    "inspect_existing.py",
+    "job_manager.py",
+    "job_store.py",
+    "verify_artifacts.py"
+  ],
+  "builderBeforeBuild": {
+    "root": "/var/lib/docker",
+    "freeBytes": 90480521216,
+    "filesystem": "ext2/ext3",
+    "driver": "overlay2"
+  },
+  "configDigest": "sha256:4714835444080900e7874e50bad971347a094198ba6c2530b941f3a8b4df6de6",
+  "imageSizeBytes": 1570745955,
+  "originalSources": {
+    "browserPageOpened": false,
+    "credentials": {
+      "engineHome": "PASS",
+      "processEnvironment": "PASS",
+      "rootHome": "SEPARATE_PRIVILEGED_CI_CHECK_REQUIRED",
+      "stagedSources": "PASS"
+    },
+    "gpuExecuted": false,
+    "mode": "hashes-only",
+    "networkIsolation": "LOOPBACK_ONLY",
+    "schema": "RTX_BUILT_IMAGE_CPU_CHECK_V1",
+    "source": {
+      "derivedBytecodeCount": 6,
+      "derivedBytecodeProofSha256": "866e1138448645e463efd4a068ec88d9c616b8fac40338d5e380ef4b9dbf9222",
+      "files": 160,
+      "originalFiles": 140,
+      "sourceCommits": {
+        "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+        "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+      },
+      "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+      "stagingReceiptSha256": "8f0b2b0795fe7337a5d63c2c721271c9215a4ecd27a192affcf93142fa41f9d1"
+    },
+    "sourceOwnership": "ROOT_OWNED_READABLE_NOT_WRITABLE",
+    "status": "PASS",
+    "uid": 1000
+  },
+  "imageHashes": {
+    "schema": "WORLD_ENGINE_DETACHED_JOB_FILES_V1",
+    "sourceCommit": "aaa9347bcb50eaa480dc83e135bc2ebca6f1f5f2",
+    "parentDigest": "sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842",
+    "files": {
+      "job_manager.py": "6398967204168e9284a6cc1b5b7f7e2951b996fb7cf5cb3d5f0a785b26047d99",
+      "job_store.py": "1b8261f59a0b0652dae64fdd1ed040cb24b80743780c40fb141576fe7bb7b5fe",
+      "inspect_existing.py": "23a361ac0da95dad50ae7c2d5a57d2e527c904869b2d8bbf8e99146386cf7b38",
+      "verify_artifacts.py": "137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109"
+    },
+    "reusedVerifier": {
+      "sourceCommit": "b7e50d34b01b52f7ae1683df587010cb2fbb02d3",
+      "sourcePath": "world-simulation-shorts-engine/recovery/gcube-65422-render-v1/verify_artifacts.py",
+      "sha256": "137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109"
+    },
+    "inheritedSources": {
+      "/opt/world-engine-startup-diagnostics/startup.py": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7",
+      "/opt/world-engine-startup-diagnostics/records.py": "d5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080",
+      "/opt/world-engine-startup-diagnostics/service.py": "f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5",
+      "/opt/world-engine-startup-diagnostics/healthcheck.py": "0f49a39d6158ff4012fa2bf172cf23b20cb6a922a20e15fb567942f500c557c5",
+      "/opt/world-engine-storage-fix/launch.py": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c",
+      "/opt/world-engine-diagnostic-result/recover_existing.py": "7a12a58f130a9cdc7c50646a14f5a92cf06030dd0a3f4912f7480988ea8ba039",
+      "/opt/world-engine-storage-fix/storage.py": "4c858e7afe5e912bce63bf03f08c6c98d9430cc91134262710db5bdbd6ca4491"
+    },
+    "inheritedManifests": {
+      "/opt/world-engine-storage-fix/STORAGE_FILES.json": "c6d0d1566d2f6dce221c4c8049aa21dbb638e28ac72d9172a960ec86ccc3a3e3",
+      "/opt/world-engine-diagnostic-result/RESULT_FILES.json": "98c37d4ec021571be39a8148d2cd0aa1a644659b69f903ea3a9f0a82457ef213",
+      "/opt/world-engine-65422-render/RENDER_FILES.json": "25cc691e39760392f85512173ac25a0cc6f25ac92da3767294e84f45c243f722",
+      "/opt/world-engine-startup-diagnostics/DIAGNOSTIC_FILES.json": "1299b2a789ffcff29a69269cdc31801b7261085cc571b35324a59336bfdb658c"
+    }
+  },
+  "actualImageReadOnlyCLI": [
+    {
+      "action": "inspect",
+      "exitCode": 0,
+      "report": {
+        "evidenceCounts": {
+          "captureDirectories": 0,
+          "captureLockFiles": 0,
+          "captureReports": 0,
+          "captureStatusFiles": 0,
+          "heldCaptureGuards": 0,
+          "legacyCaptureDirectories": 0,
+          "sharedCaptureDirectories": 0
+        },
+        "gpuExecuted": false,
+        "processes": [],
+        "reason": "NO_EXISTING_CAPTURE_EVIDENCE",
+        "renderAllowed": false,
+        "schema": "WORLD_ENGINE_EXISTING_CAPTURE_INSPECTION_V1",
+        "status": "CLEAR",
+        "testOnly": false
+      },
+      "stderr": "",
+      "scope": "REAL_CPU_READ_ONLY_NO_START_COMMAND_NO_GPU"
+    },
+    {
+      "action": "status",
+      "exitCode": 0,
+      "report": {
+        "externalDownloadVerified": false,
+        "gpuRenderingVerified": false,
+        "remotePersistenceVerified": false,
+        "renderAllowed": false,
+        "schema": "WORLD_ENGINE_DETACHED_STATUS_V1",
+        "state": "NOT_STARTED"
+      },
+      "stderr": "",
+      "scope": "REAL_CPU_READ_ONLY_NO_START_COMMAND_NO_GPU"
+    }
+  ],
+  "secretScan": {
+    "status": "PASS",
+    "findings": 0,
+    "scannerExitCode": 0,
+    "scope": "actual new CLI modules and reused verifier, new namespace/workflow; immutable parent audit reused"
+  },
+  "verification": "PASS",
+  "imageDigest": "sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+  "registryVerification": {
+    "status": "PASS",
+    "stage": "remote_digest",
+    "digest": "sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+    "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+    "imageManifestDigest": "sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+    "configDigest": "sha256:4714835444080900e7874e50bad971347a094198ba6c2530b941f3a8b4df6de6",
+    "platform": "linux/amd64",
+    "remotePresenceVerified": true,
+    "manifestAndConfigBytesVerified": true,
+    "layerContentsVerified": false,
+    "issuedAccess": {
+      "status": "UNVERIFIED",
+      "pull": null,
+      "push": null,
+      "pushVerified": false
+    },
+    "writeVerified": false
+  },
+  "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5dc61e9ce0edfc175c4a38fa0a3f559e660761e604b65bb5edfb6704312610b7",
+  "stepOutcomes": {
+    "preflight": "success",
+    "guard": "success",
+    "test": "success",
+    "stage": "success",
+    "build": "success",
+    "verify": "success",
+    "publish": "success"
+  }
+}
