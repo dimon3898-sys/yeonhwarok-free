@@ -1,0 +1,129 @@
+{
+  "schema": "GCUBE_65422_RENDER_PREPARATION_RESULT_V1",
+  "status": "RENDER_PACKAGE_CPU_VERIFIED_PLATFORM_CONFIRMATION_AND_GPU_AUTHORIZATION_REQUIRED",
+  "branch": "development/gcube-65422-render-prep-20261015",
+  "baseline": "51fba453ce2b9a0fc8ed9e9062bd993fe0489ccc",
+  "checkpointCommit": "282e8edcd987f31d6425740dd52372a1ed89a8d4",
+  "sourceCommit": "da01dfa1d19695adbcee7ecb0be6c8ac426a1bba",
+  "remoteEvidenceCommit": "67dd58ff43335e009a9b9b86be915e8397ed3b8d",
+  "image": {
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842",
+    "imageDigest": "sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842",
+    "configDigest": "sha256:768e8c76f9364750241fd50315deb9bfb24acc766796211baff82713e0a0c0a6",
+    "ciCommit": "da01dfa1d19695adbcee7ecb0be6c8ac426a1bba",
+    "pullVerified": true,
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38722819744-1",
+    "schema": "GCUBE_65422_RENDER_EXPORT_IMAGE_V1",
+    "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+    "build": "PASS",
+    "push": "PASS",
+    "independentPull": "PASS",
+    "gpuExecuted": false,
+    "gCubeDeployed": false
+  },
+  "existing5SecondRenderSupport": {
+    "status": "CONFIRMED_IN_EXISTING_SOURCE",
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "frames": 150,
+    "durationSeconds": 5,
+    "audio": false,
+    "movie": "WORLD_ENGINE_RTX_GPU_65422_5S_SILENT.mp4",
+    "checkpoints": [
+      0,
+      38,
+      75,
+      112,
+      149
+    ]
+  },
+  "confirmedDefect": {
+    "file": "gcube-storage-fix-v1/storage.py",
+    "cause": "Completed capture REPORT is larger than prior1MiB read cap",
+    "before": "STORAGE_UNAVAILABLE / EXPORT / IO_UNAVAILABLE; no completion receipt",
+    "fix": "64MiB bounded read admitted by fstat; all previous completion/source/hash/private path checks retained",
+    "smallSafeLogLimitChanged": false
+  },
+  "focusedTests": {
+    "reportExport": 8,
+    "artifactVerifier": 15,
+    "ciSafety": 10,
+    "uniqueTotal": 33,
+    "builtImageReportExport": 8,
+    "oldSuitesRepeated": false
+  },
+  "protection": {
+    "originalPackagedSource160": "PASS",
+    "unchangedHelpers6": "PASS",
+    "liveManifests": "PASS",
+    "existingRuntimeFilesChanged": [
+      "gcube-storage-fix-v1/storage.py"
+    ],
+    "FINALModified": false,
+    "rendererModified": false,
+    "cameraModified": false,
+    "ASTRAModified": false,
+    "frontierModified": false,
+    "oldImagesOverwritten": false
+  },
+  "priorHardwareGpuWebgl2": "USER_REPORTED_PASS_REUSED_NOT_REPEATED",
+  "thisTask": {
+    "actualGPUExecuted": false,
+    "gCubeDeployed": false,
+    "paidWorkExecuted": false,
+    "actual65422VideoRendered": false,
+    "actualDropboxMountedExportVerified": false,
+    "actualDropboxRemoteUploadVerified": false,
+    "actualExternalMediaDownloadsVerified": false,
+    "phonePlaybackVerified": false,
+    "visualQuality": "NOT_REVIEWED"
+  },
+  "execution": {
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "/usr/bin/python3",
+      "/opt/world-engine-storage-fix/launch.py"
+    ],
+    "startupMode": "normal",
+    "renderMode": "gpu-required",
+    "preferred": "Existing normal health-only PID1 plus separately authorized terminal child launch.py --render-65422 --vram-budget-gib 8",
+    "gCubeCommandOverrideSemantics": "UNVERIFIED",
+    "actualTerminalAccess": "UNVERIFIED",
+    "providerRestartHealthPolicy": "UNVERIFIED",
+    "renderDeadlineSeconds": 3600,
+    "automaticProviderStop": false,
+    "concurrentCaptureLock": "EXISTING_NATIVE_FLOCK",
+    "completedJobGlobalDeduplication": false
+  },
+  "dropbox": {
+    "mount": "/world-storage",
+    "path": "world-engine-export-<24hex>/capture-<signature12>-<24hex>/public-review/",
+    "completionReceiptOutsidePublic": "EXPORT_COMPLETE.json",
+    "publicFiles": "MP4+fivePNG+SHA256SUMS only",
+    "externalVerificationTool": "verify_artifacts.py",
+    "sourceAnchor": "SHA256SUMS SHA from source-side export log/receipt, independent of download",
+    "networkTests": "SYNTHETIC_MOCKS_ONLY"
+  },
+  "cost": {
+    "currentRate": "UNAVAILABLE",
+    "absoluteEstimate": null,
+    "formula": "selected hourly rate * total billed seconds /3600 + actual other charges",
+    "note": "Render watchdog does not stop provider billing; rate, increment and authorized budget required"
+  },
+  "secretScan": {
+    "status": "PASS",
+    "findings": 0,
+    "scope": "actual changed image source/new namespace/workflow; immutable parent audit reused"
+  },
+  "requiredTempOnlyFiles": 0,
+  "remainingUserActions": [
+    "Confirm authorized existing normal-container terminal access, or verified one-shot command/probe/restart policy",
+    "Check current RTX4080SUPER rate and explicitly authorize paid GPU execution",
+    "After future render, wait remoteDropbox sync and validate actual externalHTTP200/source-SHA/download-SHA",
+    "Play actual MP4 and compare preserved65422/reference before quality approval"
+  ],
+  "next": "USER_REVIEW_OF_EXECUTION_PREPARATION"
+}

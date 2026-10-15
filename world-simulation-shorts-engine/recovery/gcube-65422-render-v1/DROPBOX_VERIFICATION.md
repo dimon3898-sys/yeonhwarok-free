@@ -37,6 +37,8 @@ No Dropbox credentials are configured in this Codex runtime, and the task did no
 
 ## Verify original versus downloaded bytes
 
+The source verifier is pinned at [this immutable script URL](https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/da01dfa1d19695adbcee7ecb0be6c8ac426a1bba/world-simulation-shorts-engine/recovery/gcube-65422-render-v1/verify_artifacts.py), verified HTTP200 with SHA256 `137bee60cbb242aa83d807a32909752cebb8afdc336aa8310235c68c72e11109`. Verify those bytes before executing on an authorized client; no dependency install or script download is required if the matching checkout is already present.
+
 The prepared standalone `verify_artifacts.py` works on a local public directory or fresh HTTPS Dropbox downloads. Use its `--help` for exact options. It requires the independently preserved source SHA of SHA256SUMS. The report distinguishes artifact integrity from GPU or visual approval.
 
 For a prepared verifier on the downloaded directory, set PUBLIC_DIR to that exact new folder and SOURCE_SUMS_SHA to the independently preserved source SHA256SUMS SHA:

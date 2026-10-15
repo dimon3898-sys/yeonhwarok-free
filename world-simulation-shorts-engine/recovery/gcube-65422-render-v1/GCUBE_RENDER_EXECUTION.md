@@ -8,7 +8,7 @@ User reports the existing GPU/WebGL2 inspection passed. Do not rerun the old dia
 
 | Setting | Value |
 | --- | --- |
-| Image | Use the immutable `imageReference` in `IMAGE.json` / final report, with no image rebuild on gCube |
+| Image | `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38722819744-1` (digest below; no image rebuild on gCube) |
 | GPU | One assigned RTX 4080 SUPER 16GB |
 | Command override | Empty for normal health service plus authorized terminal method below |
 | User | Preserve image root entrypoint and its original UID/GID1000 transition |
@@ -21,6 +21,14 @@ User reports the existing GPU/WebGL2 inspection passed. Do not rerun the old dia
 | `NVIDIA_DRIVER_CAPABILITIES` | `graphics,utility` |
 | `NVIDIA_VISIBLE_DEVICES` | Preserve provider-assigned allocation; do not substitute all devices |
 | `WORLD_ENGINE_GPU_PROFILE` | Leave unset for existing native profile selection |
+
+Verified immutable reference:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:1a0a953d36ed0269a0c99267dd2d2d9e92ac6c50ffb7808e78bfbde24e7e2842
+```
+
+Build and independent CPU pull both passed in Actions38722819744. This is not a hardware or video-quality result.
 
 Do not set diagnostic mode and do not use `--check` or `--check-storage` as a long-running workload. No new HTTP render endpoint or remote command API exists.
 
