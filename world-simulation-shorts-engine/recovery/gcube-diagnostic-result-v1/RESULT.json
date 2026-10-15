@@ -1,0 +1,114 @@
+{
+  "schema": "GCUBE_DIAGNOSTIC_RESULT_FINAL_V1",
+  "status": "DIAGNOSTIC_RESULT_IMAGE_READY_ACTUAL_GCUBE_EVIDENCE_UNVERIFIED",
+  "branch": "development/gcube-diagnostic-result-20261015",
+  "baseline": "d1f6041d4fdb97c5ac1c8245d3b8ce66821b3343",
+  "implementationCheckpoint": "b5b83c4ed93151ee31c94bff09b7668e1789043a",
+  "imageSourceCommit": "eb937ec312cd60af147b7333677c5e5f10bd687e",
+  "evidenceCommit": "4ca935347c7a117b50a864b65553d44c7f67dad4",
+  "actionsRun": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/38713103848",
+  "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:rtx4080s-2f9158b-38713103848-1",
+  "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+  "imageDigest": "sha256:e7245bdd73c99eff806effdfd1f5ba6765fcffdc2d64fbdb52c360e79148dff3",
+  "configDigest": "sha256:456fbf96fc22d8e2ad702de1de8a54a359e449cf9557c6f9ddbe14e5872f24dd",
+  "build": "PASS",
+  "registryPush": "PASS",
+  "independentPull": "PASS",
+  "focusedTests": {
+    "successForwarding": 6,
+    "firstFailureRetention": 4,
+    "existingEvidenceReader": 18,
+    "ciSafety": 12,
+    "total": 40,
+    "gpuSuccessEvidence": "SYNTHETIC_TEST_ONLY"
+  },
+  "realCPUContainerTests": [
+    {
+      "case": "root-diagnostic-gpu-absence",
+      "exitCode": 2,
+      "status": "PASS",
+      "firstRecord": "GPU_HARDWARE_UNAVAILABLE",
+      "recordReadback": {
+        "status": "PASS",
+        "firstFailurePrivateCopies": 1,
+        "secondaryUIDCopies": 0,
+        "firstFailureSharedCopies": [
+          {
+            "sha256": "2d8ede6308732c5d872cd9943bdb3b7a480c8b3954772d080a389fa329fa43a5",
+            "bytes": 404
+          }
+        ],
+        "secondaryUIDSharedCopies": 0,
+        "mountedViewReadbackVerified": true,
+        "remotePersistenceVerified": false,
+        "externalDownloadVerified": false
+      }
+    },
+    {
+      "case": "unprivileged-first-error-preserved",
+      "exitCode": 1,
+      "status": "PASS",
+      "firstRecord": "GPU_HARDWARE_UNAVAILABLE",
+      "recordReadback": {
+        "status": "PASS",
+        "firstFailurePrivateCopies": 1,
+        "secondaryUIDCopies": 1,
+        "firstFailureSharedCopies": [
+          {
+            "sha256": "36877328813549f8a96dbeb817950960fea8521bc85aa3fe523cad9391a9ae94",
+            "bytes": 404
+          }
+        ],
+        "secondaryUIDSharedCopies": 1,
+        "mountedViewReadbackVerified": true,
+        "remotePersistenceVerified": false,
+        "externalDownloadVerified": false
+      }
+    }
+  ],
+  "original160FileHashes": "PASS",
+  "protectedExistingSources": "PASS: only allowed two startup modules changed",
+  "patchedExistingFiles": [
+    "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py",
+    "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py"
+  ],
+  "unchangedDiagnostics": [
+    "records.py",
+    "service.py",
+    "healthcheck.py",
+    "storage.py",
+    "gpu_launcher.py"
+  ],
+  "finalModified": false,
+  "rendererModified": false,
+  "cameraModified": false,
+  "frontierModified": false,
+  "gpuExecuted": false,
+  "gCubeDeployed": false,
+  "paidWorkExecuted": false,
+  "oldImagesModified": false,
+  "actualGcubeFilesVerified": false,
+  "actualGcubeGpuResult": "UNVERIFIED",
+  "safeAdmissionWrittenByNativeCodeOnSuccess": true,
+  "existingEvidenceRecoveryExecutedOnGcube": false,
+  "requiredTempOnlyFiles": 0,
+  "secretScan": {
+    "status": "PASS",
+    "findings": 0,
+    "scannerExitCode": 0,
+    "scannerSha256": "e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad",
+    "scope": "actual patched two modules, new recovery helper, new namespace and workflow; parent audit reused"
+  },
+  "pinnedRecoveryHelper": {
+    "commit": "b5b83c4ed93151ee31c94bff09b7668e1789043a",
+    "sha256": "7a12a58f130a9cdc7c50646a14f5a92cf06030dd0a3f4912f7480988ea8ba039",
+    "downloadHTTP": 200,
+    "downloadShaMatchesLocal": true
+  },
+  "remaining": [
+    "Existing #5373 current image/full diagnostics/surviving safe-admission evidence",
+    "Actual physical GPU/driver, EGL or Vulkan, WebGL2 draw/readPixels, VRAM/shared memory",
+    "gCube restart policy, remote Dropbox durability/download and 65422 render not exercised"
+  ],
+  "next": "Use existing container terminal and README recovery block without restart, redeploy or GPU re-probe; return only safe JSON"
+}
