@@ -2,7 +2,7 @@
 
 2026-10-16, Asia/Seoul. 이 작업은 **원문 접근이 해결되지 않은 부분 구현**이다.
 원본을 읽지 않고 좌표를 만들거나 기존 도식을 실제 점령선으로 승격하지 않았다.
-무료 CI의 최종 수치와 원격 저장 커밋은 해당 실행 증거가 생성된 뒤 갱신한다.
+새 CPU 도구의 실제 무료 CI 검사 74개는 통과했으나 실제 원문·좌표·영상 연결은 미완료다.
 
 ## 1. 공식 자료 목록과 실제 확보
 
@@ -105,7 +105,15 @@ long-area 계약은 영역+전선이 모두 있어야 한다. V3는 기존 5개 
 새 기능만 검사한다. 기존 107개 V3 검사나 과거 168개 전체 검사는 반복하지 않았다.
 실데이터 검사는 원본 미확보로 BLOCKED다. 새 전선의 SwiftShader draw/readPixels는
 자료 연결 전이므로 SKIP이며, 기존 V3의 성공 증거를 V4 전선 검증으로 재사용하지 않는다.
-현재 검사 수치와 CI 결과는 최종 실행 뒤 [TEST_RESULTS.json](TEST_RESULTS.json)에 기록한다.
+실제 무료 CI `38855732760-1`에서 **74 PASS / 0 FAIL / 0 SKIP**였다.
+이는 합성·새 데이터 계약 검사 수치이며, 실제 지도·새 전선 draw의 BLOCKED/SKIP과 다르다.
+고정 V3 이미지의 UID/GID 1000·네트워크 차단·읽기 전용 컨테이너에서 실행했다.
+CI의 source/workflow Secret Scan 0건, 기존 추적 파일 변경 0건을 확인했다.
+최종 전체 산출물 scan은 CI 기록 안의 공개 진단 파일 content SHA 한 값을
+`generic-api-key`로 탐지했다. 실제 파일을 다시 SHA-256 계산해 동일함을 확인했으며,
+credential은 0건이다. 원본 CI 기록이나 scanner 규칙을 바꾸지 않고
+[분류 근거](SECRET_SCAN_CLASSIFICATION.json)에 raw 1건/비밀 아님 1건을 남겼다.
+[TEST_RESULTS.json](TEST_RESULTS.json)과 [실제 CI 증거](runs/38855732760-1/cpu.json)에 기록했다.
 
 ## 10. 기존 기능 보호
 
@@ -158,3 +166,15 @@ python3 -B source_acquisition.py --url https://www.govinfo.gov/content/pkg/GOVPU
 기존 브랜치나 완료 영상을 초기화하지 않고 이번 체크포인트부터 이어간다.
 
 판정은 원문 확보·역사 전선 연결이 미완료임을 유지한다. 실제 영상이나 FINAL을 승인하지 않았다.
+
+
+## 원격 저장 및 판정
+
+브랜치: `development/korean-war-verified-front-v4-20261016`.
+Checkpoint A: `3ab504b`, 구현: `fc6017258e3390f68ff2bb646999930fdb52b0a0`,
+CI 증거: `c12bd22baa9383e82f940ce3674745e11469c703`.
+최종 보고서 저장 커밋은 이 파일의 Git 이력으로 식별한다.
+필수 temp-only 파일은 0개다. 실제 원문은 없으며 모든 도구·계약·합성 검사·진단·재개 절차는 영구 저장한다.
+
+판정: **VERIFIED_FRONT_DATA_V4_PARTIAL_SOURCE_ACCESS_REQUIRED**.
+현재 유료 GPU 실행·새 후보 이미지·80초 MP4·FINAL 승격은 수행하지 않았다.
