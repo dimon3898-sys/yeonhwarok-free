@@ -1,0 +1,72 @@
+{
+  "schema": "WORLD_ENGINE_GCUBE_OPERATIONS_CAPABILITIES_V3",
+  "status": "IMPLEMENTED_MOCK_VERIFIED_REAL_ACCOUNT_BLOCKED",
+  "source": {
+    "provider": "gCube Data-Alliance",
+    "cliVersion": "0.4.2",
+    "wheel": "docs/evidence/gcube_official_sources_v001/gcube_cli-0.4.2-py3-none-any.whl",
+    "wheelSha256": "9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692",
+    "priorAudit": "recovery/universal-auto-video-v2/OPERATIONS_AUDIT.md",
+    "sourcesRefreshedThisTask": false
+  },
+  "authentication": {
+    "apiOrigin": "https://api.gcube.ai",
+    "scheme": "Bearer",
+    "tokenEnvironmentSelector": "GCUBE_API_TOKEN",
+    "accountEnvironmentSelector": "GCUBE_EMAIL",
+    "environmentSelectorPrefix": "GCUBE_",
+    "redirectsAllowed": false,
+    "credentialValuesLogged": false,
+    "rawProviderResponsesLogged": false,
+    "publicUnauthenticatedEndpoint": false,
+    "realAuthenticatedAccountVerified": false,
+    "successfulRequestedUserLookupAloneProvesTokenAccount": false,
+    "authenticatedRequestAndTokenAccountBindingReportedSeparately": true,
+    "localJwtPayloadByteLimit": 4096,
+    "localTokenClaimMismatchRejected": true,
+    "localClaimsCryptographicallyVerified": false,
+    "opaqueProxyCredentialsReadOnlyUntilAccountBindingVerified": true
+  },
+  "operations": {
+    "accountIdentity": {"method": "GET", "path": "/api/users/{email}", "implemented": true, "kind": "authenticated_read"},
+    "workloadDescribe": {"method": "GET", "path": "/api/workloads/gai/{SER}", "implemented": true, "kind": "authenticated_read", "teamWorkloadsSupported": false},
+    "pricing": {"method": "GET", "path": "/api/gpu/available/pricing/list", "implemented": true, "kind": "authenticated_read", "missingRatesAreUnknown": true, "gpuIdentityFieldsRetained": ["gpuName", "productName", "gpuExt", "productCode", "gpu", "vram", "cpu", "memory", "disk", "ppIndex"], "rateBindingVerified": false, "workloadGpuSpecMatchImplemented": false},
+    "points": {"method": "GET", "path": "/api/point/status", "implemented": true, "kind": "authenticated_read"},
+    "schedules": {"method": "GET", "path": "/api/workloads/gai/{SER}/schedule", "implemented": true, "kind": "authenticated_read"},
+    "scheduleHistory": {"method": "GET", "path": "/api/workloads/gai/{SER}/schedule/logs", "implemented": true, "kind": "authenticated_read", "maxEntries": 20, "rawLogBodiesReturned": false},
+    "stop": {"method": "GET", "path": "/api/workloads/gai/{SER}/state/finish", "implemented": true, "kind": "mutation", "explicitApprovalRequired": true, "tokenAccountBindingRequired": true, "opaqueCredentialAccountBindingFailure": "AUTH_ACCOUNT_BINDING_UNVERIFIED", "automaticRetries": 0, "acceptedResponseIsBillingProof": false},
+    "start": {"method": "GET", "path": "/api/workloads/gai/{SER}/state/deploy", "implemented": "plan_only", "kind": "paid_mutation", "executable": false, "reason": "STRICT_PROVIDER_COST_CAP_UNSUPPORTED"},
+    "register": {"method": "POST", "path": "/api/workloads/gai/register", "implemented": false, "executable": false, "reason": "STRICT_PROVIDER_COST_CAP_UNSUPPORTED", "isDeployCanStartBilling": true},
+    "scheduleWrite": {"method": "PUT", "path": "/api/workloads/gai/{SER}/schedule", "implemented": "preserving_plan_only", "executable": false, "reason": "SCHEDULE_ATOMIC_UPDATE_UNSUPPORTED", "semantics": "full_list_replacement", "existingDisabledEntriesPreservedInPlan": true},
+    "scheduleRollback": {"implemented": "conditional_plan_only", "executable": false, "reason": "SCHEDULE_ATOMIC_UPDATE_UNSUPPORTED", "maximumPlannedWrites": 1, "requiresExactCurrentDesiredHash": true},
+    "ssh": {"officialCli": "gcube workload ssh SER --pod N --container N -- command...", "implemented": false, "executable": false, "reason": "APPROVED_SSH_KEY_KNOWN_HOSTS_AND_TCP_GRANT_REQUIRED", "normalCliMayProvisionSshAndChangeIpRules": true}
+  },
+  "costAndTime": {
+    "providerCumulativeHardCostCapDocumented": false,
+    "providerPayloadMaxPriceIsTotalBudget": false,
+    "providerPayloadMaxPriceMeaning": "derived_from_current_hourly_pricing",
+    "localProcessTimeoutStopsBilling": false,
+    "stopScheduleGuaranteesBillingTermination": false,
+    "approvalRequiresAccountWorkloadOperationExpiryCostCurrencyWallTimeRetries": true,
+    "maxAcceptedApprovalRetries": 2,
+    "actualAutomaticMutationRetries": 0,
+    "maxRequestTimeoutSeconds": 30,
+    "responseByteLimit": 2097152
+  },
+  "validation": {
+    "mode": "LOCAL_MOCK_ONLY",
+    "command": "python3 -m unittest discover -s world-simulation-shorts-engine/recovery/universal-production-v3/tests -p test_operations.py -v",
+    "realAccountCallsExecuted": false,
+    "realMutatingCallsExecuted": false,
+    "paidGpuLaunchExecuted": false,
+    "hardwareGpuVerified": false,
+    "billingTerminationVerified": false,
+    "endToEndAutomationComplete": false
+  },
+  "externalRequirements": [
+    "Bind GCUBE_API_TOKEN securely for api.gcube.ai and bind the intended account as GCUBE_EMAIL; never provide token values in chat or repository files.",
+    "Allow api.gcube.ai HTTPS in the managed network configuration before an explicitly authorized read-only account preflight.",
+    "Actual paid launch remains disabled until a documented provider-enforced cumulative cost cap can satisfy the strict budget requirement.",
+    "Actual SSH requires a separately approved existing workload, fixed approved remote command, trusted private-key selector, pinned known_hosts, provider host/port TCP grant, and verified safe stop/budget controls."
+  ]
+}
