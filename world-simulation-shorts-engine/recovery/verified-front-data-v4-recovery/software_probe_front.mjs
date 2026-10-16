@@ -55,7 +55,7 @@ async function rawPixels(page){return Buffer.from(await page.evaluate(()=>{
 function witness(d){return{cameraSha256:hash(d.camera.camera),geometrySha256:hash(d.area.controls),
  dateSha256:hash(d.area.date)};}
 /** The actual native projection is sampled; no geography is moved to make it fit. */
-export async function measureSourceProjection(page,front,{safeArea,width=1080,height=1920}={}){
+export async function measureSourceProjection(page,front,{safeArea,width=1080,height=1920,includeProjectedParts=false}={}){
  const parts=front.geometry.type==='LineString'?[front.geometry.coordinates]:front.geometry.coordinates,
   projected=await page.evaluate(parts=>parts.map(part=>part.map(point=>window.longVideoProof.pipeline.project([...point]))),parts);
  assert.ok(projected.flat().every(point=>Array.isArray(point)&&point.length===2&&point.every(Number.isFinite)),
@@ -74,7 +74,40 @@ export async function measureSourceProjection(page,front,{safeArea,width=1080,he
   projectedPositionsSha256:hash(projected),allRetainedCoordinatesInSafeArea,allRetainedCoordinatesInViewport,
   allRetainedSegmentsInSafeArea:true,allRetainedSegmentsInViewport:true,projectionOwner:'UNCHANGED_NATIVE_FACTORY',
   screenCoverage:{width:(bounds[2]-bounds[0])/width,height:(bounds[3]-bounds[1])/height},
-  minimumCondition:'POSITIVE_RESOLVABLE_SOURCE_LENGTH_NOT_FINAL_MOBILE_QUALITY_APPROVAL'};
+  minimumCondition:'POSITIVE_RESOLVABLE_SOURCE_LENGTH_NOT_FINAL_MOBILE_QUALITY_APPROVAL',
+  ...(includeProjectedParts?{projectedParts:projected}:{})};
+}
+/** Actual AFTER-minus-suppression pixels must belong to the retained source
+ * contour, not an unrelated border/terrain change. This does not certify an
+ * entire line's mobile readability or physical NVIDIA rendering. */
+export function compareSourceFrontPixels(before,after,{safeArea,protectedGraphics=[],projectedParts,
+ frontCoreWidthPixels,frontGlowRadiusPixels}={}){
+ assert.ok(Array.isArray(projectedParts)&&projectedParts.length>0&&projectedParts.length<=64
+  &&projectedParts.every(part=>Array.isArray(part)&&part.length>=2&&part.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite))),
+  'FRONT_V4_ACTUAL_SOURCE_PROJECTED_PARTS_REQUIRED');
+ assert.ok(Number.isFinite(frontCoreWidthPixels)&&frontCoreWidthPixels>0&&Number.isFinite(frontGlowRadiusPixels)&&frontGlowRadiusPixels>=0,
+  'FRONT_V4_ACTUAL_SOURCE_STYLE_SUPPORT_REQUIRED');
+ const sourceSupportRadiusPixels=frontCoreWidthPixels/2+frontGlowRadiusPixels+.5,
+  coreSupportRadiusPixels=frontCoreWidthPixels/2+.5;
+ assert.ok(sourceSupportRadiusPixels<=12.9+1e-9,'FRONT_V4_APPROVED_SOURCE_STYLE_SUPPORT_EXCEEDED');
+ const compared=compareActualPixels(before,after,{safeArea,protectedGraphics}),segments=projectedParts.flatMap(part=>part.slice(1).map((b,i)=>({a:part[i],b})));
+ assert.ok(segments.length>0&&segments.length<=8192,'FRONT_V4_BOUNDED_ACTUAL_SOURCE_SEGMENTS_REQUIRED');
+ const distance=(x,y,{a,b})=>{const dx=b[0]-a[0],dy=b[1]-a[1],length=dx*dx+dy*dy,
+  t=length?Math.max(0,Math.min(1,((x-a[0])*dx+(y-a[1])*dy)/length)):0;return Math.hypot(x-a[0]-t*dx,y-a[1]-t*dy);};
+ let outsideSourceCorridorChangedPixelCount=0,sourceCoreChangedPixelCount=0,maximumChangedPixelDistanceFromSource=0;
+ for(let y=0;y<1920;y++)for(let x=0;x<1080;x++){
+  const i=((1919-y)*1080+x)*4;
+  if(before[i]===after[i]&&before[i+1]===after[i+1]&&before[i+2]===after[i+2]&&before[i+3]===after[i+3])continue;
+  const d=Math.min(...segments.map(segment=>distance(x+.5,y+.5,segment)));
+  if(d>sourceSupportRadiusPixels+1e-6)outsideSourceCorridorChangedPixelCount++;
+  if(d<=coreSupportRadiusPixels)sourceCoreChangedPixelCount++;
+  maximumChangedPixelDistanceFromSource=Math.max(maximumChangedPixelDistanceFromSource,d);
+ }
+ assert.equal(outsideSourceCorridorChangedPixelCount,0,'FRONT_V4_PIXELS_CHANGED_OUTSIDE_ACTUAL_SOURCE_CORRIDOR');
+ assert.ok(sourceCoreChangedPixelCount>0,'FRONT_V4_SOURCE_WHITE_CORE_NOT_VISIBLE');
+ return{...compared,outsideSourceCorridorChangedPixelCount,sourceCoreChangedPixelCount,sourceSupportRadiusPixels,coreSupportRadiusPixels,
+  maximumChangedPixelDistanceFromSource,sourceSegmentCount:segments.length,sourceProjectedPositionsSha256:hash(projectedParts),
+  boundaryPixelChangePolicy:'ONLY_WITHIN_ACTUAL_SOURCE_FRONT_SUPPORT',allNativeMarkerAndTextReservationsPreserved:true};
 }
 export async function runFrontSoftwareProbe({planFile=path.join(root,'../universal-production-v3/fixtures/PLAN_80S.json'),
  frontProfileFile=path.join(root,'FRONT_PROFILE.json'),frontManifestFile=path.join(root,'FRONT_FILES.json')}={}){
@@ -107,7 +140,8 @@ export async function runFrontSoftwareProbe({planFile=path.join(root,'../univers
    const info=await page.evaluate(()=>window.longVideoBoot);assert.equal(info.testOnly,true);assert.match(info.backend,/SwiftShader/i);assert.equal(info.productionEligible,false);
    return{info,errors};};
   const close=async()=>{if(page){await page.evaluate(()=>window.longVideoProof?.dispose()).catch(()=>{});await page.close();page=null;}activeServer?.kill();activeServer=null;};
-  let afterPixels,afterDiagnostic,afterCaptured;const boundaryProof=[];
+  const afterWitnesses=new Map(),representativeSourceIds=new Set(),boundaryProof=[];
+  let afterReadbackBufferHighWaterMark=0;
   for(const frame of temporal.frames){
    const scene=document.scenes.find(row=>frame>=row.startFrame&&frame<row.endFrame),config=softwareConfigFor(plan.serverConfig,scene),opened=await open(config);
    try{
@@ -135,27 +169,49 @@ export async function runFrontSoftwareProbe({planFile=path.join(root,'../univers
       sourceObservedFrontNotExactOccupation:true,sourceDateGlyph:d.area.date.geometry.text,
       unverifiedSchematicAreaSuppressed:true,registrationResidualMeters:front.source.registrationResidualMeters,
       originalCartographicAccuracy:'UNKNOWN_NOT_CERTIFIED'});
-     row.sourceProjection=await measureSourceProjection(page,front,{safeArea:d.camera.safeArea});
+     const {projectedParts,...projection}=await measureSourceProjection(page,front,{safeArea:d.camera.safeArea,includeProjectedParts:true});
+     row.sourceProjection=projection;row.sourceBoundaryPolicy=structuredClone(d.frontV4.boundaryPolicy);
+     assert.equal(row.sourceBoundaryPolicy.policy,'ARCHIVAL_SOURCE_FRONT_ABOVE_STATIC_COUNTRY_BOUNDARY');
+     if(!representativeSourceIds.has(front.frontId)||frame===document.totalFrames-1){
+      representativeSourceIds.add(front.frontId);const pixels=await rawPixels(page);assert.equal(sha(pixels),captured.raw_rgba_sha256);
+      afterWitnesses.set(frame,{pixels,diagnostic:d,projectedParts,...witness(d),rawRgbaSha256:captured.raw_rgba_sha256,pngSha256:captured.png_sha256,
+       frontId:front.frontId,sourceFile:front.sourceFile,sourceMapDate:front.mapDate,sourceGeoJsonSha256:front.geoJsonSha256});
+      afterReadbackBufferHighWaterMark=Math.max(afterReadbackBufferHighWaterMark,afterWitnesses.size);
+      assert.ok(afterWitnesses.size<=11,'FRONT_V4_BOUNDED_SOURCE_READBACK_BUFFERS_REQUIRED');
+     }
     }
     rows.push(row);if(frame===0)boundaryProof.push(await page.evaluate(measureNativeBoundaryPixels,{frame}));
-    if(frame===temporal.abFrame){afterCaptured=captured;afterDiagnostic=d;afterPixels=await rawPixels(page);assert.equal(sha(afterPixels),captured.raw_rgba_sha256);await store('AB_AFTER.png',captured);}
+    if(frame===temporal.abFrame)await store('AB_AFTER.png',captured);
     assert.deepEqual(opened.errors,[],'FRONT_V4_SOFTWARE_BROWSER_ERRORS');
    }finally{await close();}
   }
-  const abScene=document.scenes.find(row=>temporal.abFrame>=row.startFrame&&temporal.abFrame<row.endFrame),
-   beforeConfig=softwareConfigFor(plan.serverConfig,abScene,'SUPPRESS_ARCHIVAL_FRONT'),beforeBoot=await open(beforeConfig);let abComparison;
-  try{
-   const captured=await page.evaluate(frame=>window.longVideoProof.capture(frame,{png:true}),temporal.abFrame),d=captured.diagnostic,
-    pixels=await rawPixels(page),before={...witness(d),rawRgbaSha256:captured.raw_rgba_sha256,pngSha256:captured.png_sha256},
-    after={...witness(afterDiagnostic),rawRgbaSha256:afterCaptured.raw_rgba_sha256,pngSha256:afterCaptured.png_sha256};
-   assert.equal(d.frontV4.softwareProbeVariant,'SUPPRESS_ARCHIVAL_FRONT');assert.equal(sha(pixels),captured.raw_rgba_sha256);
-   assert.equal(before.cameraSha256,after.cameraSha256);assert.equal(before.geometrySha256,after.geometrySha256);assert.equal(before.dateSha256,after.dateSha256);
-   await store('AB_BEFORE.png',captured);
-   const compared=compareActualPixels(pixels,afterPixels,{safeArea:afterDiagnostic.camera.safeArea,protectedGraphics:afterDiagnostic.camera.protectedGraphics});
-   abComparison={status:'PASS',frame:temporal.abFrame,sameFrame:true,sameCamera:true,sameSourceGeometry:true,sameSourceDateGlyph:true,
-    comparisonScope:'TEST_ONLY_FRONT_DRAW_SUPPRESSION_VS_ACTUAL_ARCHIVAL_FRONT_DRAW',...compared,before,after};
-   assert.deepEqual(beforeBoot.errors,[],'FRONT_V4_AB_BROWSER_ERRORS');
-  }finally{await close();}
+  let abComparison;const sourceVisibility=[];
+  for(const [frame,afterWitness]of afterWitnesses){
+   const abScene=document.scenes.find(row=>frame>=row.startFrame&&frame<row.endFrame),beforeConfig=softwareConfigFor(plan.serverConfig,abScene,'SUPPRESS_ARCHIVAL_FRONT'),
+    beforeBoot=await open(beforeConfig);
+   try{
+    const captured=await page.evaluate(frame=>window.longVideoProof.capture(frame,{png:true}),frame),d=captured.diagnostic,
+     pixels=await rawPixels(page),before={...witness(d),rawRgbaSha256:captured.raw_rgba_sha256,pngSha256:captured.png_sha256},
+     after={cameraSha256:afterWitness.cameraSha256,geometrySha256:afterWitness.geometrySha256,dateSha256:afterWitness.dateSha256,
+      rawRgbaSha256:afterWitness.rawRgbaSha256,pngSha256:afterWitness.pngSha256},afterDiagnostic=afterWitness.diagnostic;
+    assert.equal(d.frontV4.softwareProbeVariant,'SUPPRESS_ARCHIVAL_FRONT');assert.equal(sha(pixels),captured.raw_rgba_sha256);
+    assert.equal(before.cameraSha256,after.cameraSha256);assert.equal(before.geometrySha256,after.geometrySha256);assert.equal(before.dateSha256,after.dateSha256);
+    assert.deepEqual(d.frontV4.boundaryPolicy,afterDiagnostic.frontV4.boundaryPolicy);
+    if(frame===temporal.abFrame)await store('AB_BEFORE.png',captured);
+    const protectedGraphics=[...afterDiagnostic.camera.protectedGraphics,afterDiagnostic.area.date.event.reservation,afterDiagnostic.area.date.geometry.reservation],
+     style=afterDiagnostic.area.graphics.productionVisual,compared=compareSourceFrontPixels(pixels,afterWitness.pixels,{safeArea:afterDiagnostic.camera.safeArea,
+      protectedGraphics,projectedParts:afterWitness.projectedParts,frontCoreWidthPixels:style.frontCoreWidthPixels,frontGlowRadiusPixels:style.frontGlowRadiusPixels});
+    const result={status:'PASS',frame,frontId:afterWitness.frontId,sourceFile:afterWitness.sourceFile,sourceMapDate:afterWitness.sourceMapDate,
+     sourceGeoJsonSha256:afterWitness.sourceGeoJsonSha256,sameFrame:true,sameCamera:true,sameSourceGeometry:true,sameSourceDateGlyph:true,
+     comparisonScope:'TEST_ONLY_FRONT_DRAW_SUPPRESSION_VS_ACTUAL_ARCHIVAL_FRONT_DRAW',...compared,before,after};
+    sourceVisibility.push(result);rows.find(row=>row.frame===frame).sourceVisibility=result;
+    if(frame===temporal.abFrame)abComparison=result;
+    assert.deepEqual(beforeBoot.errors,[],'FRONT_V4_AB_BROWSER_ERRORS');
+   }finally{await close();afterWitnesses.delete(frame);}
+  }
+  assert.equal(new Set(sourceVisibility.map(row=>row.frontId)).size,plan.frontProfile.fronts.length,'FRONT_V4_EVERY_SOURCE_FRONT_VISIBILITY_REQUIRED');
+  assert.ok(sourceVisibility.some(row=>row.frame===document.totalFrames-1),'FRONT_V4_FINAL_FRAME_SOURCE_VISIBILITY_REQUIRED');
+  assert.ok(abComparison,'FRONT_V4_PRIMARY_AB_REQUIRED');assert.ok(files.length<=14,'FRONT_V4_BOUNDED_PERSISTED_PNGS_REQUIRED');
   // Fallback is compared against the original V3 compositor, not a mocked renderer.
   const fallbackScene=document.scenes[0],legacyConfig=softwareConfigFor(plan.preservedProductionServerConfig,fallbackScene),legacyBoot=await open(legacyConfig);let preservedFallback;
   const originalCameraComparisons=[];
@@ -187,8 +243,15 @@ export async function runFrontSoftwareProbe({planFile=path.join(root,'../univers
    fullPlan2400Frames:true,twelveChapterPlanSelected:true,nvidiaHardwareVerified:false,physicalNvidiaExecuted:false,gpuRenderingVerified:false,
    full80SecondVideoRendered:false,gpuVideoQualityApproved:false,frontProfileSha256:sha(profileRaw),frontManifestSha256:sha(manifestRaw),
    planSha256:plan.planSha256,sourceSignature:plan.sourceSignature,frontIntegrity:plan.frontIntegrity,
-   frames:temporal.frames,rows,files,abComparison,preservedFallback,continuity,actualBoundaryPair:temporal.cut,originalCameraComparisons,
-   nativeBoundaryProtection:{status:'PASS',actualReadPixelsCompared:true,cases:boundaryProof},
+   frames:temporal.frames,rows,files,abComparison,
+   sourceVisibility:{status:'PASS',policy:'ARCHIVAL_SOURCE_FRONT_ABOVE_STATIC_COUNTRY_BOUNDARY',cases:sourceVisibility},
+   preservedFallback,continuity,actualBoundaryPair:temporal.cut,originalCameraComparisons,
+   allSourceFrontsVisibleInMeasuredSamples:true,finalFrameSourceVisible:true,
+   readbackMemory:{retainedAfterBufferHighWaterMark:afterReadbackBufferHighWaterMark,transientBeforeComparisonBuffers:1,
+    maximumSimultaneousReadbackBuffers:afterReadbackBufferHighWaterMark+1,bytesPerBuffer:1080*1920*4,
+    all2400FramesRetained:false,otherBeforePngsPersisted:false},
+   nativeBoundaryProtection:{status:'PASS',scope:'SOURCE_INACTIVE_FRAME_0_ONLY',actualReadPixelsCompared:true,cases:boundaryProof,
+    sourceActivePolicy:'ARCHIVAL_SOURCE_FRONT_ABOVE_STATIC_COUNTRY_BOUNDARY',allSourceActiveBoundaryPixelsUnchangedClaimed:false},
    shaderBackend:'SWIFTSHADER_ONLY',browserVersion:browser.version(),nodeVersion:process.version,
    playwrightVersion:require('playwright/package.json').version,inputCacheReuseVerified:true,
    historicalMeaning:'SOURCE_REVIEWED_DATED_PARTIAL_UN_FRONTS_APPROXIMATELY_REGISTERED_NOT_EXACT_OCCUPATION_OR_MDL',

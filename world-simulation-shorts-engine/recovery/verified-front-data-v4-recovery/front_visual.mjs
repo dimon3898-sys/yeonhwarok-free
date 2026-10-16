@@ -77,3 +77,18 @@ export function selectFrontSnapshot(profile,globalFrame){
   exactMilitaryDemarcationLineClaimed:false,unverifiedSchematicAreaSuppressed:true,areas:0,coordinatesInterpolated:false,
   unobservedHistoricalMovementInvented:false};
 }
+/** A source-observed front must remain visible when it coincides with a modern
+ * country border. This changes only the new source-front pass input: original
+ * native boundary drawing/restoration and every marker/text mask remain owned
+ * by their existing engines. Schematic fallback keeps its original mask. */
+export function selectSourceFrontBoundaryPolicy({sourceActiveFrame,controls,boundarySegments}={}){
+ if(typeof sourceActiveFrame!=='boolean'||!Array.isArray(boundarySegments))fail('FRONT_V4_EXPLICIT_BOUNDARY_POLICY_INPUT_REQUIRED');
+ if(!sourceActiveFrame)return{policy:'PRESERVED_NATIVE_BOUNDARY_OCCLUSION',boundarySegments,
+  nativeBoundaryRestoreUnchanged:true,protectedGraphicMasksUnchanged:true};
+ if(!controls||!Array.isArray(controls.areas)||controls.areas.length!==0||!Array.isArray(controls.fronts)||controls.fronts.length===0
+  ||(controls.impacts??[]).length||(controls.propagations??[]).length)
+  fail('FRONT_V4_SOURCE_FRONT_ONLY_BOUNDARY_PRIORITY_REQUIRED');
+ return{policy:'ARCHIVAL_SOURCE_FRONT_ABOVE_STATIC_COUNTRY_BOUNDARY',boundarySegments:[],
+  nativeBoundaryRestoreUnchanged:true,protectedGraphicMasksUnchanged:true,
+  changedNativeBoundaryPixelsAllowedOnlyWithinActualSourceFrontSupport:true};
+}

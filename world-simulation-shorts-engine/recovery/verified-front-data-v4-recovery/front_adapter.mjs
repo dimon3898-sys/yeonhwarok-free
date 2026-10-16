@@ -14,7 +14,7 @@ import {normalizeProductionVisualProfile,validateAreaColorBindings,evaluateProdu
  productionEventAnnotationLabels,productionAnnotationAnchors} from '/production-v3/production_visual_profile.mjs';
 import {createProductionNativeCamera} from '/production-v3/production_native_camera.mjs';
 import {createProductionAreaPass} from '/production-v3/production_area_pass.mjs';
-import {FRONT_RUNTIME_PROFILE,normalizeFrontProfile,selectFrontSnapshot,sourceLineChunks} from '/front-v4/front_visual.mjs';
+import {FRONT_RUNTIME_PROFILE,normalizeFrontProfile,selectFrontSnapshot,sourceLineChunks,selectSourceFrontBoundaryPolicy} from '/front-v4/front_visual.mjs';
 
 const clone=value=>structuredClone(value),hex=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value),
  digest=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(b=>b.toString(16).padStart(2,'0')).join(''),
@@ -96,7 +96,8 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
   const terrain=source.draw({coverage,bounds:n.camera.flatBounds,frame:globalFrame,fps:uv.fps});boundary.restore({key,segments:n.boundarySegments});
   const selected=selectFrontSnapshot(frontProfile,globalFrame),clock=evaluateProductionGeometryClock(uv.plan,globalFrame),
    chapter=production.eventChapters.find(row=>globalFrame>=row.startFrame&&globalFrame<row.endFrame);
-  if(!chapter)throw Error('FRONT_V4_NARRATIVE_CHAPTER_REQUIRED');let controls=null,graphics=null,date=null,sourceGeometrySha256=null;
+  if(!chapter)throw Error('FRONT_V4_NARRATIVE_CHAPTER_REQUIRED');let controls=null,graphics=null,date=null,sourceGeometrySha256=null,
+   boundaryPolicy={policy:'PRESERVED_NATIVE_BOUNDARY_OCCLUSION',nativeBoundaryRestoreUnchanged:true,protectedGraphicMasksUnchanged:true};
   if(selected.sourceActiveFrame||clock.eventEnabled){
    if(selected.sourceActiveFrame){
     const front=frontProfile.fronts.find(row=>row.frontId===selected.frontId),base=evaluateAreaFrame(plans.get(front.frontId),0,{project:native.project});
@@ -110,9 +111,13 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
     eventPlacement=place(eventOwner,{kind:'EVENT_DATE_AND_TITLE',preferredAnchor:native.project(controls.origin),protectedGraphics:n.protectedGraphics,n,chapter,clock,globalFrame}),
     snapshotPlacement=place(snapshotOwner,{kind:'SOURCE_GEOMETRY_DATE',preferredAnchor:[m[0],safe[3]-160],
      protectedGraphics:[...n.protectedGraphics,eventPlacement.reservation],n,chapter,clock,globalFrame});
+   boundaryPolicy=selectSourceFrontBoundaryPolicy({sourceActiveFrame:selected.sourceActiveFrame,controls,boundarySegments:n.boundarySegments});
    graphics=area.draw({controls:selected.sourceActiveFrame&&softwareProbeVariant==='SUPPRESS_ARCHIVAL_FRONT'?{...controls,fronts:[]}:controls,
     project:native.project,safeArea:safe,protectedGraphics:[...n.protectedGraphics,eventPlacement.reservation,snapshotPlacement.reservation],
-    primaryMaterialColor:REGIONAL.theme.primary,boundarySegments:n.boundarySegments});
+    primaryMaterialColor:REGIONAL.theme.primary,boundarySegments:boundaryPolicy.boundarySegments});
+   if(selected.sourceActiveFrame)graphics={...graphics,nativeBoundaryGlowPreserved:false,
+    nativeBoundaryPreservationPolicy:boundaryPolicy.policy,
+    nativeBoundaryPixelChangesPermittedOnlyWithinSourceFrontSupport:true};
    const event=eventOwner.draw({id:chapter.chapterId,placement:eventPlacement}),geometry=snapshotOwner.draw({id:selected.sourceActiveFrame?'archival-'+index:clock.scheduleId,placement:snapshotPlacement});
    if(event.text!==labels.find(label=>label.id===chapter.chapterId).expectedText)throw Error('FRONT_V4_EVENT_TITLE_NOT_RENDERED');
    if(selected.sourceActiveFrame&&geometry.text!==selected.sourceLabel)throw Error('FRONT_V4_SOURCE_QUALIFIER_NOT_RENDERED');
@@ -128,6 +133,7 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
    productionV3:{runtimeProfile:production.runtimeProfile,probeVariant:'AFTER',chapter:clone(chapter),geometryClock:clock,
     schematicClockUsedForRendering:!selected.sourceActiveFrame,cameraAdmission:n.productionCamera,integrity:clone(uv.productionV3)},
    frontV4:{runtimeProfile:FRONT_RUNTIME_PROFILE,integrity:clone(integrity),selection:selected,sourceGeometrySha256,softwareProbeVariant,
+    boundaryPolicy:{...boundaryPolicy,boundarySegments:undefined},
     originalParentPlanUnchanged:true,unverifiedSchematicAreaSuppressed:selected.sourceActiveFrame,
     noInferredEnemyComplement:true,noInferredHistoricalUnits:true,originalProjectionUsed:true,originalNativeMarkerStyleAndAnchor:true,
     layerOrder:['NATIVE_GIS_COVERAGE','ASTRA_SUPPORTED_SOURCE',selected.sourceActiveFrame?'NO_UNVERIFIED_OCCUPATION_FILL':'PRESERVED_QUALIFIED_SCHEMATIC_AREAS',

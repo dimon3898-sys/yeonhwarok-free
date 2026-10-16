@@ -3,11 +3,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
-import {FRONT_PROFILE_SCHEMA,FRONT_RUNTIME_PROFILE,normalizeFrontProfile,selectFrontSnapshot,sourceLineChunks} from '../front_visual.mjs';
+import {FRONT_PROFILE_SCHEMA,FRONT_RUNTIME_PROFILE,normalizeFrontProfile,selectFrontSnapshot,sourceLineChunks,selectSourceFrontBoundaryPolicy} from '../front_visual.mjs';
 import {FRONT_BROWSER_BINDINGS,extendFrontServerPlan,validateFrontManifest,validateFrontPlanBinding,assertFrontCapturedFrame,openLongRuntime} from '../front_runtime.mjs';
 import {resolveFrontCapture,originalCaptureURL,frontRuntimeURL} from '../front_capture.mjs';
 import {evaluateProductionGeometryClock} from '../../universal-production-v3/production_visual_profile.mjs';
-import {measureSourceProjection,selectFrontProbeFrames,softwareConfigFor} from '../software_probe_front.mjs';
+import {measureSourceProjection,selectFrontProbeFrames,softwareConfigFor,compareSourceFrontPixels} from '../software_probe_front.mjs';
 const h='a'.repeat(64),g='b'.repeat(64),hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 function fixture(){
  const chapters=[{chapterId:'earlier',startFrame:0,endFrame:30,displayLabel:'1951.01',title:'CONTEXT'},
@@ -127,6 +127,38 @@ test('software harness explicitly marks scene range, probe-only source suppressi
  assert.equal(config.runtimeConfig.testOnlySoftwareProbe,true);assert.equal(config.runtimeConfig.universalVideo.testOnly,true);
  assert.equal(config.runtimeConfig.frontV4ProbeVariant,'SUPPRESS_ARCHIVAL_FRONT');assert.deepEqual(base.runtimeConfig.universalVideo,{});
  assert.throws(()=>softwareConfigFor(base,scene,'NVIDIA_PASS'));
+});
+test('only a source-front-only pass changes border priority; the original native mask and all source coordinates stay unchanged',()=>{
+ const segments=[{a:[10,20],b:[30,40],radiusPx:14}],controls={areas:[],fronts:[{geometry:{type:'LineString',coordinates:[[10,10],[11,11]]}}],impacts:[],propagations:[]},
+  original=structuredClone({segments,controls}),source=selectSourceFrontBoundaryPolicy({sourceActiveFrame:true,controls,boundarySegments:segments}),
+  fallback=selectSourceFrontBoundaryPolicy({sourceActiveFrame:false,controls,boundarySegments:segments});
+ assert.equal(source.policy,'ARCHIVAL_SOURCE_FRONT_ABOVE_STATIC_COUNTRY_BOUNDARY');assert.deepEqual(source.boundarySegments,[]);
+ assert.equal(source.nativeBoundaryRestoreUnchanged,true);assert.equal(source.protectedGraphicMasksUnchanged,true);
+ assert.equal(source.changedNativeBoundaryPixelsAllowedOnlyWithinActualSourceFrontSupport,true);
+ assert.equal(fallback.policy,'PRESERVED_NATIVE_BOUNDARY_OCCLUSION');assert.equal(fallback.boundarySegments,segments);
+ assert.deepEqual({segments,controls},original);
+});
+test('source border-priority policy rejects mixed area/impact/propagation passes and ambiguous activation',()=>{
+ const base={areas:[],fronts:[{id:'SOURCE_ONLY'}],impacts:[],propagations:[]};
+ for(const mutate of [c=>c.areas.push({}),c=>c.fronts=[],c=>c.impacts.push({}),c=>c.propagations.push({})]){
+  const controls=structuredClone(base);mutate(controls);
+  assert.throws(()=>selectSourceFrontBoundaryPolicy({sourceActiveFrame:true,controls,boundarySegments:[]}),/SOURCE_FRONT_ONLY_BOUNDARY_PRIORITY_REQUIRED/);
+ }
+ assert.throws(()=>selectSourceFrontBoundaryPolicy({sourceActiveFrame:'true',controls:base,boundarySegments:[]}));
+});
+test('synthetic readback guard requires visible source core and rejects unrelated pixels, protected text, unsafe pixels or expanded glow',()=>{
+ const before=new Uint8Array(1080*1920*4),after=before.slice(),set=(x,y)=>{const i=((1919-y)*1080+x)*4;after.set([255,255,255,255],i);},
+  options={safeArea:[0,0,1080,1920],protectedGraphics:[],projectedParts:[[[95.5,100.5],[110.5,100.5]]],frontCoreWidthPixels:4.8,frontGlowRadiusPixels:10};
+ set(100,100);const valid=compareSourceFrontPixels(before,after,options);
+ assert.equal(valid.changedPixelCount,1);assert.equal(valid.sourceCoreChangedPixelCount,1);
+ assert.equal(valid.outsideSourceCorridorChangedPixelCount,0);assert.equal(valid.sourceSupportRadiusPixels,12.9);
+ set(130,100);assert.throws(()=>compareSourceFrontPixels(before,after,options),/PIXELS_CHANGED_OUTSIDE_ACTUAL_SOURCE_CORRIDOR/);
+ after.fill(0);set(100,100);
+ assert.throws(()=>compareSourceFrontPixels(before,after,{...options,protectedGraphics:[{kind:'TEXT',box:[99,99,103,103]}]}),/CHANGED_PROTECTED_GRAPHIC_PIXELS/);
+ assert.throws(()=>compareSourceFrontPixels(before,after,{...options,safeArea:[0,0,50,50]}),/CHANGED_OUTSIDE_SAFE_AREA/);
+ assert.throws(()=>compareSourceFrontPixels(before,after,{...options,frontCoreWidthPixels:7}),/APPROVED_SOURCE_STYLE_SUPPORT_EXCEEDED/);
+ after.fill(0);assert.throws(()=>compareSourceFrontPixels(before,after,options),/MUST_CHANGE_ACTUAL_PIXELS/);
+ after.fill(0);set(100,110);assert.throws(()=>compareSourceFrontPixels(before,after,options),/SOURCE_WHITE_CORE_NOT_VISIBLE/);
 });
 test('capture hook changes only the exact frozen capture import edge',()=>{
  let count=0;const next=()=>{count++;return'UNCHANGED';};
