@@ -18,10 +18,34 @@ import stat
 import time
 
 HERE = Path(__file__).resolve().parent
-_STORAGE = HERE.parent / 'gcube-storage-fix-v1/storage.py'
+
+
+def _pinned_path(installed, checkout, expected):
+    """Prefer the existing deployed alias; never hide a corrupt installed file.
+
+    The frozen image keeps some original modules at canonical /opt aliases
+    rather than duplicate paths below its selective repository closure.
+    """
+    installed, checkout = Path(installed), Path(checkout)
+    path = installed if installed.exists() or installed.is_symlink() else checkout
+    for component in (path, *path.parents):
+        if component.is_symlink():
+            raise RuntimeError('PINNED_DEPENDENCY_SYMLINK_FORBIDDEN')
+    if not path.is_file() or not 0 < path.stat().st_size <= 2 * 1024**2:
+        raise RuntimeError('PINNED_DEPENDENCY_UNAVAILABLE')
+    if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+        raise RuntimeError('PINNED_DEPENDENCY_SOURCE_CHANGED')
+    return path
+
+
+_STORAGE = _pinned_path(Path('/opt/world-engine-storage-fix/storage.py'),
+    HERE.parent / 'gcube-storage-fix-v1/storage.py',
+    '4c858e7afe5e912bce63bf03f08c6c98d9430cc91134262710db5bdbd6ca4491')
 _spec = importlib.util.spec_from_file_location('_universal_reused_storage', _STORAGE)
 storage = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(storage)
+if Path(storage.__file__).absolute() != _STORAGE.absolute():
+    raise RuntimeError('PINNED_DEPENDENCY_ORIGIN_INVALID')
 HEX = re.compile(r'[0-9a-f]{64}\Z')
 NAME = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,159}\Z')
 MAX_JSON = 32 * 1024**2

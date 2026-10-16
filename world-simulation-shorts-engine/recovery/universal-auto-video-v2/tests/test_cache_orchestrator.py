@@ -9,6 +9,7 @@ from pathlib import Path
 import pty
 import select
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -18,7 +19,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from cache import CacheError, PrivateTree, SceneCache, canonical_sha256, scene_cache_key
+from cache import CacheError, PrivateTree, SceneCache, canonical_sha256, scene_cache_key, _pinned_path
 from contracts import canonical_sha256 as plan_sha
 from planner import bind_renderer, plan_topic
 import orchestrator as coordinator
@@ -38,9 +39,21 @@ def private_bytes(path, data):
     os.chmod(path, 0o600)
 
 
+def test_temp_parent():
+    """Write tests outside the immutable source tree in image and checkout."""
+    for candidate in (Path(tempfile.gettempdir()), Path('/workspace')):
+        if not candidate.is_dir() or candidate.is_symlink() or not os.access(candidate, os.W_OK):
+            continue
+        info = candidate.stat()
+        root_sticky = info.st_uid == 0 and bool(info.st_mode & stat.S_ISVTX)
+        if info.st_uid in {0, os.geteuid()} and (not info.st_mode & 0o022 or root_sticky):
+            return candidate
+    raise unittest.SkipTest('BLOCKED: no safe writable test temporary parent')
+
+
 class CacheTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(dir=ROOT.parents[2])
+        self.temp = tempfile.TemporaryDirectory(dir=test_temp_parent())
         self.root = Path(self.temp.name)
         self.cache = SceneCache(self.root / 'cache', create=True)
         self.key = '1' * 64
@@ -59,6 +72,37 @@ class CacheTests(unittest.TestCase):
 
     def test_canonical_hash_matches_scene_contract(self):
         self.assertEqual(canonical_sha256({'b': 1, 'a': '지형'}), plan_sha({'b': 1, 'a': '지형'}))
+
+    def test_deployed_alias_preferred_with_exact_hash(self):
+        deployed, checkout = self.root / 'deployed.py', self.root / 'checkout.py'
+        body = b'PINNED_ORIGINAL_FIXTURE'
+        private_bytes(deployed, body)
+        private_bytes(checkout, body)
+        self.assertEqual(_pinned_path(deployed, checkout, hashlib.sha256(body).hexdigest()), deployed)
+
+    def test_checkout_fallback_only_when_deployed_alias_absent(self):
+        deployed, checkout = self.root / 'absent.py', self.root / 'checkout.py'
+        body = b'PINNED_ORIGINAL_FIXTURE'
+        private_bytes(checkout, body)
+        self.assertEqual(_pinned_path(deployed, checkout, hashlib.sha256(body).hexdigest()), checkout)
+
+    def test_corrupt_deployed_alias_does_not_fall_back_to_good_checkout(self):
+        deployed, checkout = self.root / 'deployed.py', self.root / 'checkout.py'
+        body = b'PINNED_ORIGINAL_FIXTURE'
+        private_bytes(deployed, b'CORRUPT_DEPLOYED')
+        private_bytes(checkout, body)
+        with self.assertRaisesRegex(RuntimeError, 'PINNED_DEPENDENCY_SOURCE_CHANGED'):
+            _pinned_path(deployed, checkout, hashlib.sha256(body).hexdigest())
+
+    def test_deployed_symlink_and_missing_dependency_fail_closed(self):
+        deployed, checkout = self.root / 'deployed.py', self.root / 'checkout.py'
+        body = b'PINNED_ORIGINAL_FIXTURE'
+        private_bytes(checkout, body)
+        deployed.symlink_to(checkout)
+        with self.assertRaisesRegex(RuntimeError, 'PINNED_DEPENDENCY_SYMLINK_FORBIDDEN'):
+            _pinned_path(deployed, checkout, hashlib.sha256(body).hexdigest())
+        with self.assertRaisesRegex(RuntimeError, 'PINNED_DEPENDENCY_UNAVAILABLE'):
+            _pinned_path(self.root / 'absent.py', self.root / 'also-absent.py', hashlib.sha256(body).hexdigest())
 
     def test_success_reuse_rehashes_actual_file(self):
         attempt, segment = self.segment()
@@ -161,7 +205,7 @@ class OrchestratorTests(unittest.TestCase):
             'nativePayload': {'path': 'TEST_ONLY_NATIVE.json', 'sha256': '3' * 64, 'validationStatus': 'VERIFIED'}})
 
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(dir=ROOT.parents[2])
+        self.temp = tempfile.TemporaryDirectory(dir=test_temp_parent())
         self.root = Path(self.temp.name)
         self.control = self.root / 'control'
         self.plan = deepcopy(self.__class__.plan)

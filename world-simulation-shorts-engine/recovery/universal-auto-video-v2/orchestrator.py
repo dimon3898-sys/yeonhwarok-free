@@ -26,7 +26,7 @@ import time
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from cache import CacheError, PrivateTree, SceneCache, canonical_sha256
+from cache import CacheError, PrivateTree, SceneCache, canonical_sha256, _pinned_path
 from contracts import validate_plan
 
 CONTROL_ROOT = Path('/var/lib/world-engine-private/engine/universal-video-v2')
@@ -50,11 +50,23 @@ def stamp():
 def manager():
     global _manager
     if _manager is None:
-        directory = HERE.parent / 'gcube-detached-render-v1'
+        path = _pinned_path('/opt/world-engine-detached-render/job_manager.py',
+            HERE.parent / 'gcube-detached-render-v1/job_manager.py',
+            '6398967204168e9284a6cc1b5b7f7e2951b996fb7cf5cb3d5f0a785b26047d99')
+        directory = path.parent
+        for name, expected in (
+            ('job_store.py', '1b8261f59a0b0652dae64fdd1ed040cb24b80743780c40fb141576fe7bb7b5fe'),
+            ('inspect_existing.py', '23a361ac0da95dad50ae7c2d5a57d2e527c904869b2d8bbf8e99146386cf7b38')):
+            _pinned_path(directory / name, directory / name, expected)
         sys.path.insert(0, str(directory))
-        spec = importlib.util.spec_from_file_location('_universal_original_manager', directory / 'job_manager.py')
-        _manager = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(_manager)
+        spec = importlib.util.spec_from_file_location('_universal_original_manager', path)
+        candidate = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(candidate)
+        if (Path(candidate.__file__).absolute() != path.absolute()
+                or Path(candidate.job_store.__file__).absolute() != (directory / 'job_store.py').absolute()
+                or Path(candidate.inspect_existing.__file__).absolute() != (directory / 'inspect_existing.py').absolute()):
+            raise CoordinatorError('PINNED_MANAGER_ORIGIN_INVALID')
+        _manager = candidate
     return _manager
 
 

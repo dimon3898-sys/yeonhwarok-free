@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import stat
 import tempfile
 import types
 import unittest
@@ -17,9 +18,20 @@ import render_adapter as adapter
 from cache import PrivateTree
 
 
+def test_temp_parent():
+    for candidate in (Path(tempfile.gettempdir()), Path('/workspace')):
+        if not candidate.is_dir() or candidate.is_symlink() or not os.access(candidate, os.W_OK):
+            continue
+        info = candidate.stat()
+        root_sticky = info.st_uid == 0 and bool(info.st_mode & stat.S_ISVTX)
+        if info.st_uid in {0, os.geteuid()} and (not info.st_mode & 0o022 or root_sticky):
+            return candidate
+    raise unittest.SkipTest('BLOCKED: no safe writable test temporary parent')
+
+
 class RenderAdapterTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(dir=ROOT.parents[2])
+        self.temp = tempfile.TemporaryDirectory(dir=test_temp_parent())
         self.root = Path(self.temp.name)
         self.allocation = {'uuid': 'GPU-1111', 'model': 'RTX 4080 SUPER', 'driver_version': '1.2',
             'memory_total_mib': 16384, 'memory_free_mib': 15000}

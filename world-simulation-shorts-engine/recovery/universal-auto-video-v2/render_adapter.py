@@ -19,7 +19,7 @@ import time
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from cache import PrivateTree, canonical_sha256, storage
+from cache import PrivateTree, canonical_sha256, storage, _pinned_path
 
 _SESSION = None
 MAX_LOG_BYTES = 32 * 1024**2
@@ -36,6 +36,11 @@ def native_gpu():
     from orchestrator import manager
     manager_module = manager()
     directory = manager_module.job_store.DIAGNOSTIC_HELPERS
+    for name, expected in (
+        ('startup.py', '41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7'),
+        ('records.py', 'd5fb2ba1736a1febf6ff766aa1c3607a4ef6df25be2aacf85f7e2e62e14a4080'),
+        ('service.py', 'f7f0f6c57b8c7e5c856b5f013c615eac8d2cd71d9699dadbdebebe5adb477fd5')):
+        _pinned_path(directory / name, directory / name, expected)
     if str(directory) not in sys.path:
         sys.path.insert(0, str(directory))
     import startup
