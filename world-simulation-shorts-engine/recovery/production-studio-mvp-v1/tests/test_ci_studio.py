@@ -106,6 +106,14 @@ class CISafetyTests(unittest.TestCase):
         workflow = (m.REPO / m.WORKFLOW).read_text(); build, pull = workflow.split('  verify-pull:', 1)
         self.assertIn('packages: write', build); self.assertIn('packages: read', pull)
         self.assertNotIn('packages: write', pull)
+    def test_software_probe_uses_real_parent_path_not_alias(self):
+        import inspect
+        self.assertEqual(m.PARENT_PROBE, '/opt/rtx-package/repo/' + m.files.PARENT_NAMESPACE + '/software_probe_front.mjs')
+        implementation = inspect.getsource(m.software_probe)
+        self.assertIn('repr(PARENT_PROBE)', implementation)
+        self.assertNotIn('/opt/world-engine-front-v4/software_probe_front.mjs', implementation)
+        parent_source = (m.HERE.parent / 'verified-front-data-v4-recovery/software_probe_front.mjs').read_text()
+        self.assertIn('path.resolve(process.argv[1])===fileURLToPath(import.meta.url)', parent_source)
     def test_image_wrong_entrypoint_or_credential_rejected(self):
         config = {'Os': 'linux', 'Architecture': 'amd64', 'Config': {'Labels': {
             'world-engine.studio.parent-digest': m.PARENT_DIGEST,

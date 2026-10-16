@@ -28,8 +28,9 @@ chat, Scene JSON, GitHub, an image or a public folder:
   printable non-space ASCII characters. The application writes it once to a
   local owner-only file and removes it from child environments. It does not
   invent a code, rotate an existing file, or reuse a gCube API token.
-- `WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST`: the actual new immutable image reference
-  from `IMAGE.json`.
+- `WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST`: only the actual `sha256:` digest from
+  `IMAGE.json`, without a repository prefix or `@`. The full immutable image
+  reference belongs in the gCube image field, not this environment variable.
 - `WORLD_ENGINE_STUDIO_OPERATOR_POLICY_JSON`: an actual operator-approved JSON
   object containing `validUntil`, `maxWallSeconds`, `maxRetries`,
   `maxCostAmount`, `currency` and `gpuHourlyRate`. Rates and budgets have no fake

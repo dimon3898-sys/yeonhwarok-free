@@ -27,6 +27,7 @@ IMAGE = 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine'
 PARENT_DIGEST = 'sha256:4f2daf520eed2331a1b6ea0d3644e6f7d65854e7d4f3368d43af5f96d1ff6ab4'
 BASE = IMAGE + '@' + PARENT_DIGEST
 DEST = '/opt/world-engine-production-studio'
+PARENT_PROBE = '/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/software_probe_front.mjs'
 TAG_PATTERN = re.compile(r'studio-v1-344dc2d-[1-9][0-9]*-[1-9][0-9]*', re.ASCII)
 SCANNER_SHA = 'e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad'
 
@@ -193,7 +194,9 @@ def software_probe(image):
     # One existing image-local V4 draw proves inherited rendering, rather than
     # re-running old source/history/full CPU audits. This is never NVIDIA PASS.
     evidence = Path(tempfile.mkdtemp(prefix='studio-v4-draw-', dir=os.environ['RUNNER_TEMP'])); evidence.chmod(0o777)
-    code = "import subprocess;raise SystemExit(subprocess.run(['/usr/local/bin/node','/opt/world-engine-front-v4/software_probe_front.mjs']).returncode)"
+    # Node resolves an imported module's URL through symlinks. The frozen probe
+    # intentionally executes only when argv[1] is that same canonical file.
+    code = "import subprocess;raise SystemExit(subprocess.run(['/usr/local/bin/node'," + repr(PARENT_PROBE) + "]).returncode)"
     command = container() + ['--mount', 'type=bind,source=' + str(evidence) + ',target=/workspace/front-evidence',
         '--env', 'WORLD_ENGINE_FRONT_EVIDENCE_DIR=/workspace/front-evidence', '--entrypoint=/usr/bin/python3', image, '-B', '-c', uid_code(code)]
     result = subprocess.run(command, text=True, capture_output=True, check=False, timeout=1200)
