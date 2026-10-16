@@ -1,6 +1,6 @@
 # Reference Visual Master V2 — implementation record
 
-Status: C–G are implemented and CPU-verified. Integration, software GL and image checks are pending. This is not a video-quality approval or a hardware result.
+Status: C–H are implemented and CPU-verified. Actual software GL and image checks are pending. This is not a video-quality approval or a hardware result.
 
 ## Reference and comparison limits
 
@@ -29,7 +29,8 @@ An actual NVIDIA-rendered F MP4 has not been inspected in this task. Current-F c
 | E | `tests/test_frontier_ref2.mjs` | 9 PASS; GL calls explicitly mocked | 5e6be75 |
 | F | `tests/test_unit_size_profile.mjs`, `STAGE_F_UNIT_AUDIT.json` | 9 PASS; all150 layout samples | 077d1ee |
 | G | `tests/test_camera_profile.mjs`, `STAGE_G_CAMERA_AUDIT.json` | 9 PASS; all150 pose/layout samples | This checkpoint |
-| H–J | Integrated runtime, actual SwiftShader, image/pull | Pending | Pending |
+| H | New runtime/capture/job/profile/manifest/loopback + inherited real-data preparation | 136 focused tests PASS (71 Node +65 Python), Secret Scan0 | Source checkpoint |
+| I–J | Actual SwiftShader, image build/push/independent pull | Pending | Pending |
 
 Branch: `development/reference-visual-master-v2-20261016`. Each checkpoint above was pushed and the remote head confirmed. All changed files so far are additions inside this new namespace. Existing FINAL, V4, parent Quality F, source samples, geometry, artwork, approved videos and images have not been changed. `STAGE_LEDGER.json` is the current ordered record. `PROTECTED_BASELINE.json` records parent image/manifests and exact old F raw-RGBA regression hashes.
 
@@ -37,7 +38,8 @@ No paid job, gCube deployment, NVIDIA render, longer video expansion, Permanent 
 
 ## Pending completion evidence
 
-- H independently bound execution profile, source manifest, job namespace and capture signature.
 - I actual SwiftShader A–F `draw/readPixels`, old-F regression, source/coast/NoData/domain composition probes, job/storage tests and Secret Scan.
 - J unique image build/push and independent immutable digest pull/source verification.
 - Concrete hardware execution and Dropbox download instructions; no hardware or final visual PASS before actual user-approved GPU results.
+
+H confirms actual CPU preparation and all128 source bindings against the persisted 3-role data. The new full Scene SHA is `965d23d07dc1e4691635d408810e85379f9fc2759a3730fec870472505a04eb8`. New independent claim namespaces, original common GPU lease, no-autostart policy and original export verifier are retained. Review caught and fixed a manifest-family mismatch and a source-grade cross-domain white-clipping edge case before software execution. Both were new integration issues; neither required an existing-file change.

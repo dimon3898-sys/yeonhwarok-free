@@ -33,8 +33,10 @@ export function gradeSourceRgb(rgb,{coverage,localAverage,interiorLand=true,inte
  ratio=interiorLand&&interiorSupport?Math.max(.86,Math.min(1.18,Math.pow(Math.max(y,.001)/Math.max(base,.001),p.terrainLocalContrast-1))):1,
  tintY=Math.max(luminance(oceanTint),.001);
  return rgb.map((value,i)=>{
-  const land=Math.max(0,Math.min(.98,value*ratio*p.landExposure)),
-   ocean=Math.max(0,Math.min(.98,((1-p.oceanTealMix)*value+p.oceanTealMix*y*oceanTint[i]/tintY)*p.oceanExposure));
+  // The headroom cap cannot darken a brighter ORIGINAL source channel. A
+  // neutral land/ocean branch stays neutral even when the other is graded.
+  const cap=Math.max(.98,value),land=Math.max(0,Math.min(cap,value*ratio*p.landExposure)),
+   ocean=Math.max(0,Math.min(cap,((1-p.oceanTealMix)*value+p.oceanTealMix*y*oceanTint[i]/tintY)*p.oceanExposure));
   return Math.max(0,Math.min(1,value+coverage*landSupport*(land-value)+(1-coverage)*oceanSupport*(ocean-value)));
  });
 }
@@ -56,9 +58,10 @@ void main(){
   min(texture(supportTexture,n).r,texture(supportTexture,s).r)));
  // Never create a coast outline by contrasting land against neighbouring sea.
  float detail=interior>.999&&supportedInterior>.999?clamp(pow(max(y(source),.001)/max(local,.001),terrainLocalContrast-1.),.86,1.18):1.;
- vec3 gradedLand=clamp(source*detail*landExposure,0.,.98);
+ vec3 sourceHeadroom=max(vec3(.98),source);
+ vec3 gradedLand=clamp(source*detail*landExposure,vec3(0.),sourceHeadroom);
  vec3 teal=y(source)*oceanTint/max(y(oceanTint),.001);
- vec3 gradedOcean=clamp(mix(source,teal,oceanTealMix)*oceanExposure,0.,.98);
+ vec3 gradedOcean=clamp(mix(source,teal,oceanTealMix)*oceanExposure,vec3(0.),sourceHeadroom);
  vec3 graded=source+land*support.r*(gradedLand-source)+(1.-land)*support.g*(gradedOcean-source);
  frag=vec4(clamp(graded,0.,1.),1.);
 }`;

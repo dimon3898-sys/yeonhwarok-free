@@ -32,6 +32,12 @@ test('zero actual source support preserves full white and baseline bytes without
  // Negative-depth availability over native land grants no ocean grade.
  assert.deepEqual(gradeSourceRgb([1,1,1],{coverage:1,landSupport:0,oceanSupport:1},selected),[1,1,1]);
 });
+test('neutral land/ocean branch preserves fully supported original white when the other branch is graded',()=>{
+ assert.deepEqual(gradeSourceRgb([1,1,1],{coverage:1,landSupport:1,oceanSupport:1,oceanTint:tint},
+  {enabled:true,terrainLocalContrast:1,landExposure:1,oceanExposure:1.2,oceanTealMix:0}),[1,1,1]);
+ assert.deepEqual(gradeSourceRgb([1,1,1],{coverage:0,landSupport:1,oceanSupport:1,oceanTint:tint},
+  {enabled:true,terrainLocalContrast:1,landExposure:1.2,oceanExposure:1,oceanTealMix:0}),[1,1,1]);
+});
 test('NoData/support and native land/ocean gates remain independent, fractional and finite',()=>{
  const all=gradeSourceRgb(rgb,{coverage:0,oceanSupport:1,oceanTint:tint},selected),
   half=gradeSourceRgb(rgb,{coverage:0,oceanSupport:.5,oceanTint:tint},selected);
