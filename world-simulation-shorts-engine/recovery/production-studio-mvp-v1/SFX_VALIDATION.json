@@ -1,0 +1,69 @@
+{
+  "assetBytes": 674712,
+  "assetCount": 18,
+  "assetManifestSha256": "b1489894016d18a374baa6b16346a9791e6056f87d2884eefa19c9fa39abd3fb",
+  "audioLicense": "CC0-1.0",
+  "complete80SecondVideoAudioVerification": "NOT_EXECUTED",
+  "currentModuleSha256": "885d0180737fe439acd14256e9ff5de618d0550066bfd32f49e54b83594cd267",
+  "currentTestSha256": "926f04ec42b23c3b9070be9aeae47ed67a84f2373974a1ab1d8ccd4f163880f8",
+  "directHumanListening": "NOT_EXECUTED",
+  "executions": [
+    {
+      "actualOperations": [
+        "All 18 original CC0 WAV and PCM hashes validated",
+        "Six public sound types rendered with no source/reference sampling",
+        "Actual FFmpeg generated synthetic 2-second H.264 test video",
+        "Actual FFmpeg muxed 48kHz stereo AAC and retained 60 identical decoded video frame hashes/timestamps",
+        "AAC effective stream duration verified at 96000 samples; encoder padding reported separately",
+        "SFX OFF produced byte-identical silent MP4",
+        "Actual 600-second WAV streamed 28800000 samples with a maximum 48000-sample mix buffer",
+        "Invalid event bindings, damaged assets, duration mismatch, overwrites, overlap limits and clipped ending checked"
+      ],
+      "actualToolEvidence": {
+        "completionExitCode": 0,
+        "execSessionId": 82383
+      },
+      "command": "/usr/bin/python3 -B -m unittest discover -s world-simulation-shorts-engine/recovery/production-studio-mvp-v1/tests -p test_studio_audio.py -v",
+      "elapsedSeconds": 1.758,
+      "errors": 0,
+      "failures": 0,
+      "result": "PASS",
+      "revisionNote": "Executed before the later additive per-row license/source/sample-format check and nineteenth test. This is not a claim the identical full suite was rerun after hardening.",
+      "skipped": 0,
+      "stage": "INITIAL_IMPLEMENTATION_BEFORE_PER_ASSET_METADATA_HARDENING",
+      "tests": 18
+    },
+    {
+      "actualToolEvidence": {
+        "chunkId": "9dcdc3",
+        "exitCode": 0
+      },
+      "change": "Every asset row must retain CC0-1.0, pinned original source hash, 48000Hz and stereo metadata; tests exercise four mismatch cases and all original categories.",
+      "command": "/usr/bin/python3 -B -m unittest test_studio_audio.SfxContractTests test_studio_audio.SfxRenderTests.test_six_roles_are_audible_and_frame_sample_aligned -v",
+      "elapsedSeconds": 0.032,
+      "errors": 0,
+      "failures": 0,
+      "result": "PASS",
+      "skipped": 0,
+      "stage": "AFFECTED_CONTRACT_AND_ASSET_REGRESSION_AFTER_HARDENING",
+      "tests": 10,
+      "workingDirectory": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/tests"
+    }
+  ],
+  "existingSilentVideoPlanChanged": false,
+  "existingSourceChanged": false,
+  "finalPromotion": false,
+  "nvidiaVerification": "NOT_EXECUTED",
+  "originalLibrarySha256": "95f52e8c384059a1670b063d58bf38decebc63ba28bbdd685400904b5e3e3f02",
+  "recordedAtUTC": "2026-10-16T09:20:57.485823+00:00",
+  "referenceAudioSampled": false,
+  "runtimeDependencies": [
+    "Python standard library",
+    "Existing NumPy",
+    "Existing FFmpeg/FFprobe"
+  ],
+  "schema": "WORLD_ENGINE_STUDIO_SFX_FOCUSED_VALIDATION_V1",
+  "scipyRuntimeRequired": false,
+  "scipyScope": "Only source waveform regeneration using the frozen pre-existing library; all runtime assets are already packaged.",
+  "scope": "CPU original-waveform, structured event/sample contracts, bounded streaming and actual FFmpeg; no NVIDIA or paid workload"
+}
