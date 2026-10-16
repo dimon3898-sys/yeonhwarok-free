@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import struct
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -145,6 +146,45 @@ class CameraCiTests(unittest.TestCase):
         facts['Config']['Labels']['world-engine.reference-v2.source-revision'] = 'a' * 40
         with self.assertRaisesRegex(RuntimeError, 'IMMUTABLE_CAMERA_IMAGE_PROVENANCE_REQUIRED'):
             ci.validate_image_facts(facts)
+
+    def test_real_sparse_checkout_persist_stages_new_evidence_and_rejects_unrelated_index_entries(self):
+        for unrelated in (False, True):
+            with self.subTest(unrelated=unrelated), tempfile.TemporaryDirectory() as folder:
+                root = Path(folder)
+                def git(*args, check=True):
+                    return subprocess.run(['git', *args], cwd=root, text=True,
+                                          capture_output=True, check=check)
+                git('init', '-q')
+                old = ci.NAMESPACE + '/runs/38831714161-1/build.json'
+                old_file = root / old
+                old_file.parent.mkdir(parents=True)
+                old_file.write_text('{}\n')
+                (root / 'preserved.txt').write_text('original\n')
+                git('add', '.')
+                git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', 'commit', '-qm', 'fixture')
+                subprocess.run(['git', 'sparse-checkout', 'set', '--no-cone', '--stdin'], cwd=root,
+                               text=True, input='/' + ci.NAMESPACE + '/**\n!/' + ci.NAMESPACE +
+                               '/runs/**\n/' + old + '\n/preserved.txt\n', capture_output=True, check=True)
+                new = ci.NAMESPACE + '/runs/123-1/camera-followup/result.json'
+                if unrelated:
+                    (root / 'preserved.txt').write_text('unrelated staged change\n')
+                    git('add', '--', 'preserved.txt')
+                original_run = ci.run
+                def local_only(command, **kwargs):
+                    if command[:2] in (['git', 'fetch'], ['git', 'switch'], ['git', 'push']):
+                        return ''
+                    return original_run(command, **kwargs)
+                with patch.object(ci, 'REPO', root), patch.object(ci, 'run', side_effect=local_only), \
+                        patch.object(ci, 'state', return_value={'status': 'REFERENCE_CAMERA_FOLLOWUP_BLOCKED'}), \
+                        patch.object(ci, 'evidence_paths', return_value={new: b'{"testOnly":true}\n'}), \
+                        patch.dict(os.environ, {'RESULT_STEP_OUTCOMES': '{}'}):
+                    if unrelated:
+                        with self.assertRaisesRegex(RuntimeError, 'BOUNDED_CAMERA_EVIDENCE_ONLY_REQUIRED'):
+                            ci.persist()
+                    else:
+                        ci.persist()
+                        self.assertEqual(git('show', 'HEAD:' + new).stdout, '{"testOnly":true}\n')
+                        self.assertEqual(git('show', 'HEAD:preserved.txt').stdout, 'original\n')
 
 
 if __name__ == '__main__':

@@ -322,7 +322,9 @@ def persist():
             stream.write(body)
     run(['git', 'config', 'user.name', 'github-actions[bot]'], cwd=REPO)
     run(['git', 'config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'], cwd=REPO)
-    run(['git', 'add', '--', *sorted(paths)], cwd=REPO)
+    # New run folders are intentionally outside the checkout's old evidence
+    # allowlist. Stage only these explicit paths without expanding the checkout.
+    run(['git', 'add', '--sparse', '--', *sorted(paths)], cwd=REPO)
     if run(['git', 'diff', '--cached', '--name-only'], cwd=REPO).splitlines() != sorted(paths):
         raise RuntimeError('BOUNDED_CAMERA_EVIDENCE_ONLY_REQUIRED')
     run(['git', 'commit', '-m', 'docs: persist immutable image camera hold proof [skip ci]'], cwd=REPO)
