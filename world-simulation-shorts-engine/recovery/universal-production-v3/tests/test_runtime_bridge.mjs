@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {BROWSER_BINDINGS,extendProductionServerPlan,validateLongRuntimeDocument,
- assertProductionCapturedFrame} from '../long_runtime.mjs';
+ assertProductionCapturedFrame,sourceVerificationArguments,sourceVerificationErrorCode} from '../long_runtime.mjs';
 import {resolveProductionCapture,originalCaptureURL,productionRuntimeURL} from '../long_capture.mjs';
 import {evaluateProductionGeometryClock} from '../production_visual_profile.mjs';
 const h='a'.repeat(64),g='b'.repeat(64),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -74,4 +74,19 @@ test('frozen capture and runtime sources remain exact pinned bytes',async()=>{
   'a4a6904dabd9a3306ffeafe0c1b0035f6062af81a56f62a0eb55dd055924d4d0');
  assert.equal(hash(await readFile(new URL('../../universal-auto-video-v2/long_runtime.mjs',import.meta.url))),
   'ee50049ad9967b22d5aa7dae09bd9e5295d22882c5d5c3db2b2cd4dec25dc606');
+});
+test('runtime source verifier always selects actual staged layout',()=>{
+ const args=sourceVerificationArguments();
+ assert.equal(args[0],'-B');assert.match(args[1],/\/universal-production-v3\/source_manifest\.py$/);
+ assert.deepEqual(args.slice(2),['--verify-extension']);
+ assert.ok(!args.includes('--source-only'));
+});
+test('failed source verifier forwards only bounded safe JSON error code',()=>{
+ const stdout=JSON.stringify({status:'FAIL',errorCode:'PRODUCTION_SOURCE_HASH_MISMATCH',gpuExecuted:false});
+ assert.equal(sourceVerificationErrorCode({stdout}),'PRODUCTION_SOURCE_CHECK_FAILED__SOURCE_HASH_MISMATCH');
+ assert.equal(sourceVerificationErrorCode({stdout:Buffer.from(stdout)}),'PRODUCTION_SOURCE_CHECK_FAILED__SOURCE_HASH_MISMATCH');
+ const fallback='PRODUCTION_SOURCE_CHECK_FAILED__NO_SAFE_VERIFIER_CODE';
+ for(const value of ['not JSON with PRIVATE_VALUE',JSON.stringify({status:'FAIL',errorCode:'PRIVATE token=value'}),
+  JSON.stringify({status:'PASS',errorCode:'SOURCE_UNAVAILABLE'}),JSON.stringify({status:'FAIL',errorCode:'A'.repeat(100)}),'x'.repeat(16*1024+1)])
+  assert.equal(sourceVerificationErrorCode({stdout:value,stderr:'PRIVATE_ENV_VALUE',message:'PRIVATE_COMMAND_ARGUMENTS'}),fallback);
 });

@@ -36,10 +36,30 @@ export function validateLongRuntimeDocument(document,sceneId){
  return scene;
 }
 
-async function verifySources(requireStaged){
+export function sourceVerificationArguments(){
+ // Runtime always executes inside the immutable staged image. The checkout
+ // layout is different and must never be selected as a fallback here.
+ return['-B',path.join(root,'source_manifest.py'),'--verify-extension'];
+}
+
+export function sourceVerificationErrorCode(error){
+ const fallback='PRODUCTION_SOURCE_CHECK_FAILED__NO_SAFE_VERIFIER_CODE';
+ try{
+  const raw=Buffer.isBuffer(error?.stdout)?error.stdout.toString('utf8'):error?.stdout;
+  if(typeof raw!=='string'||Buffer.byteLength(raw)>16*1024)return fallback;
+  const payload=JSON.parse(raw);
+  if(payload?.status!=='FAIL'||typeof payload.errorCode!=='string'||!/[A-Z]/.test(payload.errorCode)
+   ||!/^[A-Z][A-Z0-9_]{0,95}$/.test(payload.errorCode))return fallback;
+  return'PRODUCTION_SOURCE_CHECK_FAILED__'+payload.errorCode.replace(/^PRODUCTION_/,'');
+ }catch{return fallback;}
+}
+
+async function verifySources(){
  assert.equal(sha(await boundedSource(path.join(root,'source_manifest.py'))),verifierSHA,'PRODUCTION_SOURCE_VERIFIER_CHANGED');
- const args=['-B',path.join(root,'source_manifest.py'),'--verify-extension',...(requireStaged?[]:['--source-only'])],
-  result=JSON.parse((await execute('/usr/bin/python3',args,{maxBuffer:2*1024*1024})).stdout);
+ let response;
+ try{response=await execute('/usr/bin/python3',sourceVerificationArguments(),{maxBuffer:2*1024*1024});}
+ catch(error){throw Error(sourceVerificationErrorCode(error));}
+ const result=JSON.parse(response.stdout);
  assert.equal(result.status,'PASS','PRODUCTION_SOURCE_CLOSURE_REQUIRED');
  assert.equal(result.profileId,'UNIVERSAL_PRODUCTION_V3');assert.ok(hex(result.manifestSha256));
  return result;
@@ -76,7 +96,7 @@ export function extendProductionServerPlan(inherited,{manifestSha256,browserReco
 }
 
 export async function loadLongRuntimePlan(options={}){
- const verification=await verifySources(false);
+ const verification=await verifySources();
  await validatePythonPlan(options.planFile);
  const inherited=await parent.loadLongRuntimePlan(options);
  validateLongRuntimeDocument(inherited.document,inherited.scene.sceneId);
@@ -121,7 +141,7 @@ export async function assertProductionCapturedFrame(captured,plan){
 }
 
 export async function openLongRuntime({loadedPlan=null,...options}={}){
- await verifySources(true);
+ await verifySources();
  const plan=loadedPlan??await loadLongRuntimePlan(options),seal=verifiedPlans.get(plan);
  assert.ok(seal,'PRODUCTION_LOADED_PLAN_NOT_VERIFIED');
  assert.equal(sha(Buffer.from(JSON.stringify(plan.serverConfig))),seal,'PRODUCTION_SERVER_CONFIG_CHANGED_BEFORE_HARDWARE');

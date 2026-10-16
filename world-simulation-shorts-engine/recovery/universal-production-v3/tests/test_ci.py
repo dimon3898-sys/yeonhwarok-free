@@ -142,6 +142,22 @@ class ProductionCISafety(unittest.TestCase):
         self.assertIn('--network=none', arguments); self.assertIn('--restart=no', arguments)
         self.assertNotIn('--gpus', arguments); self.assertEqual(ci.state()['mockSoftware']['gpuExecuted'], False)
 
+    def test_actual_image_pair_requires_checkout_alias_failure_and_strict_staged_pass(self):
+        self.seed()
+        good = {'status': 'PASS', 'testOnly': True, 'gpuExecuted': False,
+            'checkoutOnly': {'status': 'EXPECTED_MISSING_CHECKOUT_ALIAS', 'errorType': 'FileNotFoundError'},
+            'staged': {'status': 'PASS', 'report': {'status': 'PASS', 'testOnly': False}}}
+        self.process.return_value.stdout = json.dumps(good); ci.parent_layout_probe('TEST_ONLY_IMAGE')
+        arguments = self.process.call_args.args[0]
+        compile(arguments[-1], '<actual-parent-layout-diagnostic-command>', 'exec')
+        self.assertIn('--network=none', arguments); self.assertNotIn('--gpus', arguments)
+        for changes in [{'checkoutOnly': {'status': 'UNEXPECTED_PASS'}},
+                {'staged': {'status': 'PASS', 'report': {'status': 'PASS', 'testOnly': True}}},
+                {'staged': {'status': 'FAIL'}}]:
+            self.process.return_value.stdout = json.dumps({**good, **changes})
+            with self.subTest(changes=changes), self.assertRaisesRegex(RuntimeError, 'ACTUAL_IMAGE_STAGED_LAYOUT_REQUIRED'):
+                ci.parent_layout_probe('TEST_ONLY_IMAGE')
+
     def test_parent_entrypoint_platform_and_both_revision_labels_stay_fixed(self):
         self.command.side_effect = None; self.command.return_value = json.dumps([self.facts()]); ci.inspect_image('TEST_ONLY_IMAGE')
         for name in self.facts()['Config']['Labels']:

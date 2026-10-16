@@ -159,6 +159,39 @@ def uid_code(body):
         "p.mkdir(mode=0o700,exist_ok=True);os.chown(p,1000,1000);os.setgroups([]);os.setgid(1000);os.setuid(1000);" + body)
 
 
+def parent_layout_probe(image, *, context=None):
+    """Prove the real image uses shipped aliases, not checkout-only source paths."""
+    code = ("import sys,json,pathlib;sys.path.insert(0," + repr(DEST) + ");import source_manifest as m;"
+        "result={'schema':'WORLD_ENGINE_PRODUCTION_IMAGE_LAYOUT_PROOF_V1','testOnly':True,'gpuExecuted':False};\n"
+        "try:\n result['checkoutOnly']={'status':'UNEXPECTED_PASS','report':m.verify_sources(require_staged=False)}\n"
+        "except FileNotFoundError as error:\n"
+        " missing=pathlib.Path(error.filename);relative=missing.relative_to(m.REPO).as_posix() if missing.is_relative_to(m.REPO) else None\n"
+        " parent=json.loads((m.REPO/m.PARENT_NAMESPACE/'UNIVERSAL_FILES.json').read_text());known={row['repoPath'] for row in parent['inheritedFiles']}\n"
+        " result['checkoutOnly']={'status':'EXPECTED_MISSING_CHECKOUT_ALIAS' if relative in known else 'FAIL',"
+        "'errorType':'FileNotFoundError','missingRepoPath':relative if relative in known else None}\n"
+        "except Exception as error:\n result['checkoutOnly']={'status':'FAIL','errorType':type(error).__name__}\n"
+        "try:\n result['staged']={'status':'PASS','report':m.verify_sources(require_staged=True)}\n"
+        "except Exception as error:\n result['staged']={'status':'FAIL','errorType':type(error).__name__}\n"
+        "result['status']='PASS' if result['checkoutOnly'].get('status')=='EXPECTED_MISSING_CHECKOUT_ALIAS' and result['staged'].get('status')=='PASS' else 'FAIL'\n"
+        "print(json.dumps(result));raise SystemExit(0 if result['status']=='PASS' else 2)\n")
+    result = subprocess.run(container(context=context) + ['--entrypoint=/usr/bin/python3', image, '-B', '-c', uid_code(code)],
+        text=True, capture_output=True, check=False, timeout=180)
+    try:
+        report = json.loads(result.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        report = None
+    value = state(); value['parentLayoutVerification'] = {'exitCode': result.returncode, 'report': report,
+        'stdout': safe_log(result.stdout), 'stderr': safe_log(result.stderr), 'scope': 'ACTUAL_PARENT_IMAGE_LAYOUT_CPU_NOT_GPU'}; save(value)
+    if (result.returncode or not isinstance(report, dict) or report.get('status') != 'PASS'
+            or report.get('testOnly') is not True or report.get('gpuExecuted') is not False
+            or report.get('checkoutOnly', {}).get('status') != 'EXPECTED_MISSING_CHECKOUT_ALIAS'
+            or report.get('staged', {}).get('status') != 'PASS'
+            or report.get('staged', {}).get('report', {}).get('status') != 'PASS'
+            or report['staged']['report'].get('testOnly') is not False):
+        raise RuntimeError('PRODUCTION_ACTUAL_IMAGE_STAGED_LAYOUT_REQUIRED')
+    return report
+
+
 def _one_at(records, frame, code):
     matches = [row for row in records if row['startFrame'] <= frame < row['endFrame']]
     if len(matches) != 1:
@@ -382,6 +415,7 @@ def test():
     for path in sorted((HERE / 'tests').glob('test_*.mjs')):
         code = "import subprocess;raise SystemExit(subprocess.run(['/usr/local/bin/node','--test','--test-isolation=none','" + DEST + "/tests/" + path.name + "']).returncode)"
         recorder(path.name, common + ['--entrypoint=/usr/bin/python3', BASE, '-B', '-c', uid_code(code)], scope='NEW_PRODUCTION_V3_JS_CPU_ONLY')
+    parent_layout_probe(BASE, context=context)
     software_probe(BASE, context=context, phase='softwareProbeBeforeBuild')
     value = state(); value['focusedTests']['status'] = 'PASS'; save(value)
 

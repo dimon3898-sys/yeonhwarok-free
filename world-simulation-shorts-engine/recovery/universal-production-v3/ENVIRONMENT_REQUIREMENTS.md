@@ -13,7 +13,9 @@ retaining the existing package-manager preset:
 - history.army.mil
 - www.history.navy.mil
 - api.gcube.ai
+- api.github.com (direct Actions status reads; current CONNECT403)
 
+Non-secret account selectors GCUBE_EMAIL and GCUBE_WORKLOAD_SER are declared.
 It also declares GCUBE_API_TOKEN as a secret used only at api.gcube.ai. No token
 value was read, printed or written. The draft save succeeded and requires review,
 save and Publish in environment settings before its application can be verified.
