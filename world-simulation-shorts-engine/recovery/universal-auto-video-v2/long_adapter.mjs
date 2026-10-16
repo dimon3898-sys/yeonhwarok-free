@@ -1,7 +1,6 @@
 /** Additive Area/ASTRA composition. No old renderer, camera or event code is copied. */
 import {createAreaNativeBridge} from '/modules/area_native_bridge_v3.mjs';
-import {compileSceneEngineRequest} from '/modules/planner_engine_adapter_v1.mjs';
-import {evaluateAreaFrame} from '/modules/area_core_v3.mjs';
+import {compileLongAreaRequest,evaluateLongAreaFrame} from './long_area_timeline.mjs';
 import {createAreaOverlayPass} from '/modules/area_overlay_pass_v3.mjs';
 import {createAreaAnnotation} from '/modules/area_annotation_v3.mjs';
 import {createMovingGraphicPass} from '/modules/graphic_motion_pass_v4.mjs';
@@ -9,6 +8,7 @@ import {loadUploadBundle} from '/astra-upload/gpu_upload.mjs';
 import {setReferenceSourceProfile,setQualityMaterialProfile,configureAstraMaterialForCanvas,
  clearAstraMaterialForCanvas,createReferenceTerrainMaterialPassV4} from '/reference/reference_source_material.mjs';
 import {createNativeBoundaryRestore} from './native_boundary_restore.mjs';
+import {normalizePlannerGeometryKeys} from './planner_key_order.mjs';
 
 const clone=value=>structuredClone(value),hex=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
 const digest=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))]
@@ -27,7 +27,9 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
  if(await hash(scenePlan)!==uv.legacySceneSha256||await hash(uv.scene)!==uv.sceneRangeSha256
   ||scenePlan.timing.total_frames!==uv.totalFrames||scenePlan.timing.fps!==uv.fps)
   throw Error('UNIVERSAL_ACTUAL_SCENE_HASH_MISMATCH');
- const request=compileSceneEngineRequest(scenePlan);
+ // Keep raw SHA provenance above; only restore the frozen validator's JSON
+ // geometry-key order lost by Python canonical serialization.
+ const engineScenePlan=normalizePlannerGeometryKeys(scenePlan),request=compileLongAreaRequest(engineScenePlan);
  const [REGIONAL,CONTINENT,scene,cameraPlan,input]=await Promise.all([
   load('/inputs/regional.json'),load('/inputs/continent.json'),load('/inputs/scene.json'),
   load('/inputs/camera-plan.json'),load('/inputs/input-manifest.json')]);
@@ -59,7 +61,7 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
   overlay=createAreaOverlayPass({canvas});
   foreground=await createMovingGraphicPass({renderer:native.renderer,factory:native.factory,width:1080,height:1920});
   annotation=await createAreaAnnotation({renderer:native.renderer,labels:request.annotations,
-   dataMode:request.areaPlan.intent.data_mode,geographicAnchor:request.areaPlan.intent.origin,
+   dataMode:request.dataMode,geographicAnchor:request.origin,
    safeArea:REGIONAL.layout.safe,width:1080,height:1920});
  }catch(error){annotation?.dispose();foreground?.dispose();overlay?.dispose();boundary?.dispose();material?.dispose();native.dispose();throw error;}
  const binding={schema:'WORLD_ENGINE_UNIVERSAL_ACTUAL_FRAME_V2',planSha256:uv.planSha256,
@@ -79,8 +81,7 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
   let controls=null,graphics=null,date=null;
   if(globalFrame>=request.timing.eventStartFrame){
    if(n.cameraLocked!==true||n.settle?.locked!==true)throw Error('UNIVERSAL_EVENT_REQUIRES_NATIVE_DETAIL_LOCK');
-   controls=evaluateAreaFrame(request.areaPlan,request.areaPlan.startFrame+globalFrame-request.timing.eventStartFrame,
-    {project:native.project});
+   controls=evaluateLongAreaFrame(request.timelinePlan,globalFrame,{project:native.project,projectionKey:key});
    const safe=REGIONAL.layout.safe,middle=[(safe[0]+safe[2])/2,(safe[1]+safe[3])/2],
     placement=annotation.place({anchor:native.project(controls.origin),anchorCandidates:[middle,
      [middle[0],safe[1]+180],[middle[0],safe[3]-240],[safe[2]-260,middle[1]],[safe[0]+260,middle[1]]],
@@ -107,7 +108,7 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
  }
  const pipeline={drawFrame,project:native.project,readPixels:native.readPixels,png:()=>canvas.toDataURL('image/png'),
   get diagnostic(){return last;},evidence:{native:native.evidence,source:material.evidence,
-   area:overlay.evidence,composition:'NATIVE_GIS_ASTRA_SUPPORTED_MATERIAL_NATIVE_BOUNDARY_RESTORE_EXISTING_AREA_FRONT_DATE_ORIGINAL_FOREGROUND',
+   area:overlay.evidence,areaClock:request.timelinePlan.ownership,composition:'NATIVE_GIS_ASTRA_SUPPORTED_MATERIAL_NATIVE_BOUNDARY_RESTORE_EXISTING_AREA_FRONT_DATE_ORIGINAL_FOREGROUND',
    originalCodeCopied:false,legacyScalarFrontierReused:false,frontOwner:'UNCHANGED_AREA_V3_FRONT_LINE',
    sourceUploadOwner:'PRESERVED_REFERENCE_V2_FACTORY_AND_OPTIONAL_SUPPORT_PACK_ALLOCATED_ONCE_PER_SCENE_NOT_PER_FRAME',
    totalNvidiaVramMeasured:false},

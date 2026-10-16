@@ -53,6 +53,29 @@ export async function measureNativeBoundaryPixels({frame}){
   support:'ACTUAL_NATIVE_RADIUS_PIXEL_CENTERS',spatialIndexTilePixels:tileSize,testOnly:true,
   sourceInteriorChanged:true,sourceOnlyInteriorClaimed:frame===0,physicalNvidiaExecuted:false};
 }
+/** Actual current projection; bounding summaries do not claim raster-mask
+ * clipping, protected-label holes or photographic historical accuracy. */
+export function measureEventGeometryBounds(){
+ const p=window.longVideoProof.pipeline,d=p.diagnostic,controls=d.area?.controls,safe=d.camera?.safeArea;
+ if(!controls)return {active:false,reason:'BEFORE_EVENT',cameraSafeAreaVerified:false};
+ const allPoints=coordinates=>{if(!Array.isArray(coordinates))throw Error('UNIVERSAL_BOUND_GEOMETRY_REQUIRED');
+  if(coordinates.length===2&&coordinates.every(Number.isFinite))return [coordinates];return coordinates.flatMap(allPoints);},
+  measure=(item,kind)=>{const points=allPoints(item.geometry.coordinates).map(point=>p.project(point));
+   if(!points.length||points.some(point=>!Array.isArray(point)||point.length!==2||!point.every(Number.isFinite)))
+    throw Error('UNIVERSAL_ACTUAL_PROJECTED_EVENT_GEOMETRY_REQUIRED');
+   const box=[Math.min(...points.map(point=>point[0])),Math.min(...points.map(point=>point[1])),
+    Math.max(...points.map(point=>point[0])),Math.max(...points.map(point=>point[1]))],
+    inside=outer=>Array.isArray(outer)&&outer.length===4&&box[0]>=outer[0]-1e-6&&box[1]>=outer[1]-1e-6
+     &&box[2]<=outer[2]+1e-6&&box[3]<=outer[3]+1e-6;
+   return {id:item.id,kind,stateId:item.state_id,alpha:item.alpha,projectedBounds:box,vertexCount:points.length,
+    fullyInViewport:inside([0,0,1080,1920]),fullyInSafeArea:inside(safe)};
+  },objects=[...controls.areas.filter(item=>item.alpha>0).map(item=>measure(item,'AREA')),
+   ...controls.fronts.filter(item=>item.alpha>0).map(item=>measure(item,'FRONT'))];
+ return {active:true,safeArea:safe,objects,wholeEventGeometryInViewport:objects.every(item=>item.fullyInViewport),
+  wholeEventGeometryInSafeArea:objects.every(item=>item.fullyInSafeArea),cameraSafeAreaVerified:Array.isArray(safe),
+  rasterProtectedReservationOverlaps:d.area.graphics?.reservedOverlap?.length??0,
+  rasterReservationMaskingIsSeparateFromGeographicCrop:true};
+}
 async function start(config,file){
  const bytes=Buffer.from(JSON.stringify(config));await writeFile(file,bytes,{flag:'wx',mode:0o600});
  const server=spawn('/usr/bin/python3',['-B',path.join(root,'serve_long.py'),'--config',file,'--expected-config-sha256',sha(bytes)],
@@ -114,6 +137,15 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
     assert.equal(d.universalVideo.legacySceneSha256,plan.legacySceneSha256);assert.equal(d.glError,0);
     assert.equal(d.sourceIntegrity.fictional65422SceneUsed,false);assert.equal(d.sourceIntegrity.actualAstraSelected,true);
     assert.equal(d.sourceIntegrity.sourceBeforeAreaAndFront,true);assert.equal(d.coverageCache.entryLimit,1);
+    const eventActive=frame>=document.legacyScenePlan.timing.event_start_frame+document.legacyScenePlan.timing.initial_reveal_frames;
+    if(eventActive){
+     assert.ok(d.area.graphics.areas.some(item=>item.drawn),'UNIVERSAL_ACTUAL_AREA_DRAW_REQUIRED');
+     assert.ok(d.area.graphics.fronts.some(item=>item.drawn),'UNIVERSAL_ACTUAL_FRONT_DRAW_REQUIRED');
+     assert.ok(document.legacyScenePlan.time_steps.some(item=>item.id===d.area.controls.stateId),'UNIVERSAL_SUPPLIED_STATE_REQUIRED');
+    }
+    const geometryBounds=await page.evaluate(measureEventGeometryBounds);
+    if(geometryBounds.active&&!geometryBounds.wholeEventGeometryInViewport)
+     throw Error('UNIVERSAL_ACTUAL_EVENT_GEOMETRY_CROPPED '+JSON.stringify(geometryBounds));
     assert.equal(info.evidence.source.astra.actualMaterialFactorySelected,true);
     assert.equal(d.terrain.astra.gpuUploadExecuted,true);assert.equal(d.terrain.astra.testOnly,true);
     assert.equal(d.terrain.sourceGrade.gradeDraws,1);
@@ -125,11 +157,13 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
     rows.push({frame,sceneId:scene.sceneId,rawRgbaSha256:captured.raw_rgba_sha256,pngSha256:captured.png_sha256,
      stateId:d.area.controls?.stateId??null,globalFrame:d.universalVideo.globalFrame,
      cameraNativeFrame:d.camera.nativeFrame,cameraClamped:d.camera.frameClamped,
-     actualAstra:d.terrain.astra,sourceGrade:d.terrain.sourceGrade,coverageCache:d.coverageCache,timings:d.timings});
+     actualAstra:d.terrain.astra,sourceGrade:d.terrain.sourceGrade,coverageCache:d.coverageCache,geometryBounds,timings:d.timings});
     if(frame===0||frame===1200)boundaryProof.push(await page.evaluate(measureNativeBoundaryPixels,{frame}));
     assert.deepEqual(errors,[],'UNIVERSAL_SW_PAGE_ERRORS');
    }finally{await close();}
   }
+  assert.ok(new Set(rows.filter(row=>row.stateId!==null).map(row=>row.stateId)).size>=2,'UNIVERSAL_MULTIPLE_ACTUAL_STATES_REQUIRED');
+  assert.ok(new Set(rows.map(row=>row.rawRgbaSha256)).size>=2,'UNIVERSAL_NON_CONSTANT_RENDER_REQUIRED');
   const fullScene={...document.scenes[0],sceneId:'TEST_ONLY_UNSEGMENTED_GLOBAL_CLOCK',startFrame:0,endFrame:document.totalFrames,
    globalFrameOffset:0},fullConfig=configFor(plan.serverConfig,fullScene),{errors}=await open(fullConfig),continuity=[];
   try{for(const frame of [299,300]){
@@ -147,6 +181,9 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
    browserVersion:browser.version(),nodeVersion:process.version,playwrightVersion:require('playwright/package.json').version,
    frames:[...temporalFrames],rows,files,continuity,nativeBoundaryProtection:{status:'PASS',actualReadPixelsCompared:true,cases:boundaryProof},
    productionCpuPreparationSelected:true,inputCacheReuseVerified:prepared.inputCacheReuseVerified,
+   projectedEventGeometryMeasured:true,wholeEventGeometryInViewport:true,
+   wholeEventGeometryInSafeArea:rows.filter(row=>row.geometryBounds.active).every(row=>row.geometryBounds.wholeEventGeometryInSafeArea),
+   warnings:rows.filter(row=>row.geometryBounds.active&&!row.geometryBounds.wholeEventGeometryInSafeArea).map(row=>({code:'EVENT_GEOMETRY_OUTSIDE_SAFE_AREA',frame:row.frame})),
    sourceGeometryMeaning:'PRESERVED_SCHEMATIC_HISTORICAL_STATES_NOT_ARCHIVAL_DAILY_CONTROL',
    shaderBackend:'SWIFTSHADER_ONLY',sampleMp4Generated:false,gpuVideoQualityApproved:false,
    planSha256:plan.planSha256,legacySceneSha256:plan.legacySceneSha256,sourceSignature:plan.sourceSignature};

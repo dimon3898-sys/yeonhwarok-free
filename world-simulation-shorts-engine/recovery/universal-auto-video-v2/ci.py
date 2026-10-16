@@ -29,6 +29,7 @@ TAG_PATTERN = re.compile(r'universal-v2-c1e9c09-[1-9][0-9]*-[1-9][0-9]*', re.ASC
 RUNTIME_FILES = ('contracts.py', 'planner.py', 'cache.py', 'compose.py', 'delivery.py',
     'orchestrator.py', 'render_adapter.py', 'prepare_video.py', 'universal_files.py',
     'long_runtime.mjs', 'long_capture.mjs', 'long_adapter.mjs', 'native_boundary_restore.mjs',
+    'planner_key_order.mjs', 'long_area_timeline.mjs',
     'serve_long.py', 'HISTORY_CATALOG.json', 'SUPPLEMENTAL_SOURCES.json')
 TEST_FILES = ('software_probe_long.mjs',)
 
@@ -199,7 +200,8 @@ def software_probe(image, *, context=None, phase):
             or report.get('testOnly') is not True or report.get('nvidiaHardwareVerified') is not False
             or report.get('full80SecondVideoRendered') is not False
             or any(report.get(key) is not True for key in ('actualDrawReadPixels', 'all5TemporalFrames',
-                'actualHistoricalSceneSelected', 'boundaryContinuityBitExact', 'originalSourcesUnchanged'))
+                'actualHistoricalSceneSelected', 'boundaryContinuityBitExact', 'originalSourcesUnchanged',
+                'productionCpuPreparationSelected', 'inputCacheReuseVerified'))
             or report.get('nativeBoundaryProtection', {}).get('status') != 'PASS'
             or report.get('nativeBoundaryProtection', {}).get('actualReadPixelsCompared') is not True):
         raise RuntimeError('ACTUAL_UNIVERSAL_SOFTWARE_RANGE_PROOF_REQUIRED')

@@ -12,10 +12,18 @@
 
 ## 1. 기존 기능 재사용과 중복 검사
 
-기존 `compileScenePlan`, Scene V1 검증기, Area V3의 polygon state transition과
-front line, V5 native camera, ASTRA CPU 공급자·캐시·업로드·재질, Reference V2
+기존 `compileScenePlan`, Scene V1 검증기, Area V3의 polygon·front 생성/평가와
+GPU overlay, V5 native camera, ASTRA CPU 공급자·캐시·업로드·재질, Reference V2
 source grade, 원래 FFmpeg 인코딩 설정, 저장소 어댑터, GPU admission과 공통
 capture lease를 재사용한다. 기존 renderer나 camera solver를 복사하지 않는다.
+
+통합 경로에서 원래 Area V3 compiler의 계획당 1,200프레임 상한을 확인했다.
+이를 올리거나 장편을 원래 Area plan으로 위장하지 않았다. 새
+`long_area_timeline.mjs`가 공급된 상태별로 원래 compiler/validator의 정적
+1프레임 계획을 만들고, 원래 evaluator의 geometry·projection·line primitive를
+재사용한다. 장편의 전역 Scene clock과 같은 quintic 가중치만 외부 확장으로
+연결한다. 따라서 전체 장편 timeline까지 원래 Area compiler를 그대로 실행한다고
+표시하지 않는다. 원본 geometry, shader, arc-length evaluator와 기존 cap은 유지한다.
 
 기존 one-shot 실행 관리자는 고정 150프레임/7파일 결과 계약을 사용한다.
 여러 장면을 처리하는 ledger만 새 namespace에 추가하고, PID/boot/start-time
@@ -91,6 +99,19 @@ native coverage와 boundary snapshot은 한 항목 캐시를 사용한다. GPU t
 80초 전체에 걸쳐 한 context에서 재사용한다고 주장하지 않는다. 현재 각 장면은
 독립 session이므로 장면 간 GPU upload 비용은 남는다.
 
+장편 clock은 시간을 1,200프레임 안으로 압축하거나 정수 frame으로 재양자화하지
+않는다. 실제 global frame에서 원래의 `(frame-start)/(duration-1)`과 quintic
+식을 사용하고, 초기 전선은 기존 V1 arc-length reveal evaluator로 평가한다.
+후속 전환에서 이미 완료된 line reveal을 다시 시작하지 않는다. 원래 Area 상태
+전환처럼 공급된 두 정적 snapshot의 alpha를 바꾸며, 새로운 전선 좌표나 일별
+점령 경로를 생성하지 않는다. 정적 상태의 projected controls 캐시는 실제
+projection 함수와 key에 묶이고 projection history는 한 항목만 유지한다.
+
+기존 14초 fixture의 event 360프레임 전체에서 원래 Area evaluator와 새 clock의
+area/front geometry·alpha·reveal·선택 상태·날짜·hold가 정확히 일치했다.
+독립 검수에서도 projection 없음/비선형 projection의 추가 56개 비교가 일치했다.
+이 결과는 실제 CPU control 비교이며 GPU pixel BIT_EXACT나 장편 영상 품질 판정은 아니다.
+
 `native_boundary_restore.mjs`는 source 합성이 덮어쓰는 원래 Boundary/Glow를
 실제 native 경계 지지영역 안에서만 복구한다. opaque native canvas에 맞는
 RGB8 GPU snapshot 한 장은 1080×1920에서 6,220,800 bytes다. CPU 전체 이미지
@@ -142,9 +163,9 @@ mock HTTPS 성공은 외부 전달 완료로 표시하지 않는다.
 
 ## 9. 무료 검사와 보안 검사
 
-통합 구현의 집중 검사는 **153개 PASS**다. 이는 최초 Python 130개와 Node 22개에
-추가 planner 1개를 합한 수이며, 변경 후 수행한 planner 46개 부분 재검증을 별도로
-중복 합산하지 않는다. 범위는 자연어/Scene 계약, 80~600초 분할, 캐시·실패·PID/lock·
+수정 후 통합 구현의 집중 검사는 **163개 PASS**다(Python 135개 + Node 28개).
+변경 후 수행한 planner 부분 재검증이나 독립 비교를 별도로 중복 합산하지 않는다.
+범위는 자연어/Scene 계약, 80~600초 분할, 캐시·실패·PID/lock·
 터미널 종료, 짧은 실제 FFmpeg 합성, 저장소 readback, mock GL과 경계 복구다.
 
 CPU mock 검사는 NVIDIA 검사가 아니다. 실제 SwiftShader 통합 draw/readPixels,
@@ -202,6 +223,22 @@ Area 전선의 시각 품질, 전체 2,400프레임과 경계 연속성, VRAM/�
 
 ## 15. 확인한 문제와 해결 또는 제한
 
+- 무료 run `38839536262-1`은 배포 이미지에 원래 저장소의 helper 경로가 그대로
+  존재한다고 가정해 `storage.py` import가 실패했다. 새 adapter에서 실제 배포된
+  frozen helper alias를 찾고 정확한 SHA와 module origin을 확인하도록 수정했다.
+  발견된 배포 파일이 손상되거나 symlink이면 다른 경로로 숨겨 넘어가지 않는다.
+  테스트 임시 출력도 읽기 전용 `/opt` 소스가 아닌 trusted private 경로로 분리했다.
+- 무료 run `38840090587-1`은 실제 browser 경로에서
+  `PLANNER_SCENE_NON_CANONICAL_GEOMETRY`로 실패해 이미지 빌드 전에 차단됐다.
+  Python canonical JSON의 geometry key 순서와 원래 validator의 JSON 순서 비교가
+  충돌한 것이 원인이다. 원래 입력 SHA를 먼저 검증한 뒤 새 serialization adapter가
+  key 순서만 복원한다. 좌표 순서·수치·source·timeline은 바꾸지 않으며 unknown
+  metadata를 버려 통과시키지 않는다. 이 두 실패 run과 build 미실행 기록은 보존한다.
+- key 순서 복구 후 드러난 원래 Area 계획의 1,200프레임 cap은 상한 변경 대신
+  위의 외부 global clock으로 처리했다. 정적 endpoint는 기존 Area 검증을 통과하고,
+  원래의 quintic alpha와 arc-length reveal을 재사용한다. 실제 장편 프레임을
+  단축된 프레임 번호로 매핑하지 않는다. 수정 후 실제 SwiftShader 재검증과
+  신규 이미지 등록은 아직 PENDING이다.
 - 기존 one-shot 150프레임 계약으로 장편을 처리할 수 없어 독립 coordinator와
   범용 scene capture를 추가했다. 기존 one-shot 코드는 변경하지 않았다.
 - 기존 renderer/source 조합에서 source pass가 native Boundary/Glow를 덮는 문제는

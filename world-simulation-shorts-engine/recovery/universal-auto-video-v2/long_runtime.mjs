@@ -114,7 +114,7 @@ export async function loadLongRuntimePlan({planFile,expectedPlanSha256,sceneId,
   else throw Error('LONG_NATIVE_ASSET_MOUNT_UNSUPPORTED');
   await bind(file,asset.url,asset.sha256);
  }
- for(const name of ['long_runtime.mjs','long_capture.mjs','long_adapter.mjs','native_boundary_restore.mjs','serve_long.py'])
+ for(const name of ['long_runtime.mjs','long_capture.mjs','long_adapter.mjs','native_boundary_restore.mjs','planner_key_order.mjs','long_area_timeline.mjs','serve_long.py'])
   await bind(path.join(root,name),name.endsWith('.mjs')?'/universal/'+name:null);
  const legacySceneSha256=sha(Buffer.from(JSON.stringify(document.legacyScenePlan))),
   sceneRangeSha256=sha(Buffer.from(JSON.stringify(scene))),

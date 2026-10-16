@@ -142,10 +142,12 @@ class UniversalCISafety(unittest.TestCase):
             'actualDrawReadPixels': True, 'all5TemporalFrames': True,
             'actualHistoricalSceneSelected': True, 'boundaryContinuityBitExact': True,
             'nativeBoundaryProtection': {'status': 'PASS', 'actualReadPixelsCompared': True},
+            'productionCpuPreparationSelected': True, 'inputCacheReuseVerified': True,
             'originalSourcesUnchanged': True}
         for changes in [{'nvidiaHardwareVerified': True}, {'testOnly': False},
                 {'actualHistoricalSceneSelected': False}, {'boundaryContinuityBitExact': False},
-                {'actualDrawReadPixels': False}, {'nativeBoundaryProtection': {'status': 'FAIL'}}]:
+                {'actualDrawReadPixels': False}, {'nativeBoundaryProtection': {'status': 'FAIL'}},
+                {'productionCpuPreparationSelected': False}, {'inputCacheReuseVerified': False}]:
             self.process.return_value = SimpleNamespace(returncode=0, stdout=json.dumps({**good, **changes}), stderr='')
             with self.subTest(changes=changes), self.assertRaisesRegex(RuntimeError, 'ACTUAL_UNIVERSAL_SOFTWARE_RANGE_PROOF_REQUIRED'):
                 ci.software_probe('synthetic-image', phase='synthetic')
