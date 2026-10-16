@@ -22,6 +22,22 @@ function drawPreflight(record) {
   const budget=record.budget||record.limits||{};$('budget').textContent=record.requiresGpu===false?'기존 완료 장면을 재사용하는 오디오 수정입니다. GPU 렌더링은 시작하지 않습니다.':`실행 한도 · 비용: ${budget.maxCostAmount??budget.maxCost??budget.max_cost??'설정 필요'} ${budget.currency??''} · 시간: ${budget.maxWallSeconds??budget.max_wall_seconds??'설정 필요'}초 · 재시도: ${budget.maxRetries??budget.max_retries??'설정 필요'}회. 워크로드 시작·종료는 사용자가 직접 합니다.`;
 }
 function setJob(record) { const id=record.jobId||record.job_id||record.id;if(id){state.job=id;localStorage.setItem('world-studio-job',id);} }
+function revisionSummary(value) {
+  const impact=value.impact||{};
+  const affected=value.affectedScenes||value.affectedSceneIds||impact.affectedScenes||impact.affectedSceneIds;
+  const adjacent=impact.adjacentSceneIds;
+  const lines=[`수정 계획: ${value.status||value.state||'준비됨'}`,`요청 장면: ${Array.isArray(affected)?affected.join(', ')||'없음':'미보고'}`,`인접 영향 장면: ${Array.isArray(adjacent)?adjacent.join(', ')||'없음':'미보고'}`];
+  const rate=impact.audioImpact?.sampleRate;
+  const intervals=impact.audioChangedSampleIntervals;
+  if(Number.isSafeInteger(rate)&&rate>0&&Array.isArray(intervals)) {
+    const ranges=intervals.filter(pair=>Array.isArray(pair)&&pair.length===2&&pair.every(Number.isSafeInteger)&&pair[0]>=0&&pair[0]<pair[1]);
+    lines.push(ranges.length?`오디오 영향 구간 (${rate} Hz):\n${ranges.map(([start,end])=>`${(start/rate).toFixed(6)}–${(end/rate).toFixed(6)}초 · [${start}, ${end}) 샘플`).join('\n')}`:'오디오 영향 구간: 없음');
+    if(ranges.length!==intervals.length)lines.push('유효하지 않은 영향 구간은 표시하지 않았습니다. 검증 기록을 확인하세요.');
+  } else lines.push('오디오 영향 구간: 미보고');
+  if(impact.audioImpact?.comparison==='CONSERVATIVE_AUTHORED_CUE_SUPPORT')lines.push('큐 잔향·주변 큐 배치가 포함된 보수적 영향 범위입니다. 실제 PCM 비교 전입니다.');
+  else if(impact.audioImpact?.actualPcmCompared===true)lines.push('실제 PCM 비교를 수행한 서버 보고입니다.');
+  return lines.join('\n');
+}
 async function renderResult() {
   const record=await request(`/api/jobs/${encodeURIComponent(state.job)}/result`);$('result-section').hidden=false;$('result-state').textContent=record.state||record.status||'결과 확인';$('downloads').replaceChildren();$('video').hidden=true;
   for(const file of record.downloads||[]){if(!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(file.name))continue;const link=document.createElement('a');link.href=`/api/jobs/${encodeURIComponent(state.job)}/downloads/${encodeURIComponent(file.name)}`;link.textContent=`${file.name} 다운로드`;link.download=file.name;$('downloads').append(link);if(file.name.toLowerCase().endsWith('.mp4')){$('video').src=link.href;$('video').hidden=false;}}
@@ -42,6 +58,6 @@ $('start').addEventListener('click',()=>busy(async()=>{if(!state.submission||!$(
 $('refresh').addEventListener('click',()=>busy(refresh));
 $('retry-consent').addEventListener('change',()=>{$('resume').disabled=state.busy||!state.canResume||!$('retry-consent').checked;});
 $('resume').addEventListener('click',()=>busy(async()=>{if(!state.job||!state.canResume||!$('retry-consent').checked)throw new Error('EXPLICIT_RESUME_CONSENT_REQUIRED');const storageKey=`world-studio-resume-${state.job}`;let key=localStorage.getItem(storageKey);if(!key){key=crypto.randomUUID();localStorage.setItem(storageKey,key);}const record=await request(`/api/jobs/${encodeURIComponent(state.job)}/resume`,{idempotencyKey:key,consent:true});setJob(record);$('retry-consent').checked=false;await refresh();}));
-$('revision-form').addEventListener('submit',event=>{event.preventDefault();busy(async()=>{const data={startSeconds:Number($('revision-start').value),endSeconds:Number($('revision-end').value),prompt:$('revision-prompt').value.trim()};if(!Number.isFinite(data.startSeconds)||!Number.isFinite(data.endSeconds)||data.startSeconds<0||data.endSeconds<=data.startSeconds||!data.prompt)throw new Error('INVALID_REVISION');const value=await request(`/api/jobs/${encodeURIComponent(state.job)}/revisions`,data);$('revision-result').textContent=`수정 계획: ${value.status||value.state||'준비됨'} · ${JSON.stringify(value.affectedScenes||value.affectedSceneIds||value.impact?.affectedScenes||value.impact?.affectedSceneIds||[])}`;if(value.submissionId){state.submission=value.submissionId;$('start-section').hidden=false;$('start-consent').checked=false;drawPreflight({...value.preflight,requiresGpu:value.requiresGpu??value.preflight?.requiresGpu});$('start-section').scrollIntoView({block:'start'});}});});
+$('revision-form').addEventListener('submit',event=>{event.preventDefault();busy(async()=>{const data={startSeconds:Number($('revision-start').value),endSeconds:Number($('revision-end').value),prompt:$('revision-prompt').value.trim()};if(!Number.isFinite(data.startSeconds)||!Number.isFinite(data.endSeconds)||data.startSeconds<0||data.endSeconds<=data.startSeconds||!data.prompt)throw new Error('INVALID_REVISION');const value=await request(`/api/jobs/${encodeURIComponent(state.job)}/revisions`,data);$('revision-result').textContent=revisionSummary(value);if(value.submissionId){state.submission=value.submissionId;$('start-section').hidden=false;$('start-consent').checked=false;drawPreflight({...value.preflight,requiresGpu:value.requiresGpu??value.preflight?.requiresGpu});$('start-section').scrollIntoView({block:'start'});}});});
 $('logout').addEventListener('click',()=>busy(async()=>{await request('/api/logout',{});localStorage.removeItem('world-studio-job');location.assign('/login');}));
 (async()=>{try{const session=await request('/api/session');state.csrf=session.csrf;if(state.job)await refresh();}catch(reason){showError(reason);}})();

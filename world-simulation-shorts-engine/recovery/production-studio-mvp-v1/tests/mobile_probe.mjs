@@ -71,6 +71,7 @@ try{
     assert.equal(await page.isChecked('#start-consent'),false);assert.equal(await page.isDisabled('#start'),true);
     const response=await context.request.get(origin+'/api/jobs/job_test');assert.equal((await response.json()).uniqueStartCount,1);
   });
+  await check('interval_revision_reports_adjacent_audio_tail_support',async()=>{const text=await page.textContent('#revision-result');assert.match(text,/인접 영향 장면: scene_06/);assert.match(text,/48000 Hz/);assert.match(text,/34\.933333–35\.150000초/);assert.match(text,/\[1676800, 1687200\) 샘플/);assert.match(text,/큐 잔향·주변 큐 배치/);assert.match(text,/실제 PCM 비교 전/);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);});
   await check('unsupported_camera_revision_explains_exact_limit',async()=>{await page.fill('#revision-prompt','cameraZoom=1.1');await page.click('#revise');await page.waitForFunction(()=>!document.getElementById('error').hidden);assert.match(await page.textContent('#error-message'),/카메라 수정은 검증된 새 Scene JSON/);assert.match(await page.textContent('#error-message'),/sfx.enabled/);});
   await check('malformed_interval_shows_error',async()=>{await page.fill('#revision-start','35');await page.fill('#revision-end','25');await page.click('#revise');await page.waitForFunction(()=>!document.getElementById('error').hidden);assert.match(await page.textContent('#error-message'),/INVALID_REVISION/);});
   await page.screenshot({path:path.join(out,'02_MOBILE_RESULT_REVISION.png'),fullPage:true});

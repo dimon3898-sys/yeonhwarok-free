@@ -26,7 +26,12 @@ class MobileFakeController(FakeController):
             raise studio_contracts.StudioContractError('STUDIO_VISUAL_REVISION_UNSUPPORTED',
                 '시간 구간 수정은 효과음 ON/OFF·음량을 지원합니다. 카메라 수정은 검증된 새 Scene JSON이 필요합니다.',
                 ['sfx.enabled', 'sfx.gain'], 422)
-        return super().revise(job_id, revision)
+        result = super().revise(job_id, revision)
+        result['impact'] = {'affectedSceneIds': ['scene_04', 'scene_05'], 'adjacentSceneIds': ['scene_06'],
+            'audioRequestedSamples': [1200000, 1680000], 'audioChangedSampleIntervals': [[1676800, 1687200]],
+            'audioImpact': {'sampleRate': 48000, 'comparison': 'CONSERVATIVE_AUTHORED_CUE_SUPPORT', 'actualPcmCompared': False},
+            'requiresGpu': False}
+        return result
 
 
 def main():

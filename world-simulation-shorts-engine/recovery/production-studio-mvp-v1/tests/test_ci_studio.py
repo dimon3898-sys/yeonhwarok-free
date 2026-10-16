@@ -114,6 +114,30 @@ class CISafetyTests(unittest.TestCase):
         self.assertNotIn('/opt/world-engine-front-v4/software_probe_front.mjs', implementation)
         parent_source = (m.HERE.parent / 'verified-front-data-v4-recovery/software_probe_front.mjs').read_text()
         self.assertIn('path.resolve(process.argv[1])===fileURLToPath(import.meta.url)', parent_source)
+    def reuse_state(self):
+        return {'image': 'test-image', 'originalSources': {'status': 'PASS', 'source': {
+            'composedInventoryFiles': 373, 'unexpectedFiles': 0}}, 'imageHashes': {'status': 'PASS',
+            'sourceCommit': os.environ['GITHUB_SHA'], 'parent': {'manifestSha256': m.files.PARENT_MANIFEST_SHA}}}
+    def test_pinned_software_reuse_rechecks_real_pngs_without_claiming_new_draw(self):
+        m.save(self.reuse_state())
+        self.assertTrue(m.reuse_inherited_software_evidence('test-image'))
+        value = m.state(); reused = value['inheritedSoftwareEvidenceReuse']
+        self.assertFalse(reused['executedInThisRun']); self.assertFalse(reused['gpuExecuted'])
+        self.assertEqual(len(reused['actualPngHashesRechecked']), 14)
+        self.assertEqual(reused['audit']['actualTemporalFrames'], 12)
+        self.assertNotIn('inheritedActualSoftwareDraw', value)
+        self.assertNotIn('evidenceFolder', reused)
+    def test_reuse_requires_fresh_current_image373_verification(self):
+        with self.assertRaisesRegex(RuntimeError, 'FRESH_IMAGE_AND_FROZEN_PARENT'):
+            m.reuse_inherited_software_evidence('test-image')
+    def test_reuse_rejects_changed_pinned_report_bytes(self):
+        m.save(self.reuse_state()); original = m.files.read_source
+        def read(root, name):
+            raw = original(root, name)
+            return raw + b' ' if name == 'build.json' else raw
+        with mock.patch.object(m.files, 'read_source', side_effect=read):
+            with self.assertRaisesRegex(RuntimeError, 'PINNED_SOFTWARE_REPORT_SHA_MISMATCH'):
+                m.reuse_inherited_software_evidence('test-image')
     def test_image_wrong_entrypoint_or_credential_rejected(self):
         config = {'Os': 'linux', 'Architecture': 'amd64', 'Config': {'Labels': {
             'world-engine.studio.parent-digest': m.PARENT_DIGEST,

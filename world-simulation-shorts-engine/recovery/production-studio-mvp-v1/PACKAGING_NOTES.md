@@ -58,8 +58,13 @@ stop gCube billing; the user must manually stop the workload.
 The independent workflow runs on public standard `ubuntu-24.04` only. It guards
 20 GiB free disk without deleting existing resources, validates a unique new tag,
 runs focused CPU and real mobile-browser tests, builds from a strictly selected
-payload, checks all 373 old files, performs one existing image-local V4 actual
-SwiftShader draw/readPixels test, scans actual new image/source bytes with pinned
+payload, checks all 373 old files, and either performs the inherited V4 actual
+SwiftShader draw/readPixels test or revalidates its pinned successful CI evidence.
+The latter applies to the unchanged immutable V4 parent: it checks the prior
+build/pull report hashes, actual source bindings and all 14 persisted PNG hashes.
+It explicitly records `executedInThisRun:false`; it does not claim a new image
+draw. Every new image still receives its own strict 373-file and Studio-payload
+verification. CI scans actual new image/source bytes with pinned
 gitleaks/default rules, publishes, then pulls and verifies the immutable digest
 on a separate runner. Existing tags/images/claims are never replaced.
 

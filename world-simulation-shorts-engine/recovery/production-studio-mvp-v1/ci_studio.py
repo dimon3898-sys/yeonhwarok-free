@@ -190,7 +190,59 @@ def mobile_probe(image, *, context=None):
     return report
 
 
+def reuse_inherited_software_evidence(image):
+    """Revalidate pinned original pixels; never claim a new image draw occurred."""
+    pin_path = HERE / 'SOFTWARE_EVIDENCE_REUSE.json'
+    if not pin_path.exists():
+        return False
+    pin = json.loads(files.read_source(HERE, pin_path.name)); value = state()
+    if (pin.get('schema') != 'WORLD_ENGINE_STUDIO_FROZEN_SOFTWARE_REUSE_V1'
+            or not re.fullmatch(r'[1-9][0-9]*-[1-9][0-9]*', str(pin.get('sourceRun')))
+            or pin.get('parentImage') != BASE or pin.get('parentInventoryFiles') != 373
+            or pin.get('scope') != 'UNCHANGED_IMMUTABLE_V4_PARENT_PIXELS_ONLY_NOT_A_CURRENT_STUDIO_IMAGE_DRAW'
+            or pin.get('frontManifestSha256') != files.PARENT_MANIFEST_SHA
+            or value.get('image') != image or value.get('originalSources', {}).get('status') != 'PASS'
+            or value.get('originalSources', {}).get('source', {}).get('composedInventoryFiles') != 373
+            or value.get('originalSources', {}).get('source', {}).get('unexpectedFiles') != 0
+            or value.get('imageHashes', {}).get('status') != 'PASS'
+            or value.get('imageHashes', {}).get('sourceCommit') != os.environ['GITHUB_SHA']
+            or value.get('imageHashes', {}).get('parent', {}).get('manifestSha256') != files.PARENT_MANIFEST_SHA):
+        raise RuntimeError('STUDIO_FRESH_IMAGE_AND_FROZEN_PARENT_PROOF_REQUIRED')
+    folder = HERE / 'runs' / pin['sourceRun']; reports = {}
+    for phase in ('build', 'pull'):
+        raw = files.read_source(folder, phase + '.json')
+        if hashlib.sha256(raw).hexdigest() != pin.get(phase + 'ReportSha256'):
+            raise RuntimeError('STUDIO_PINNED_SOFTWARE_REPORT_SHA_MISMATCH')
+        reports[phase] = json.loads(raw)
+    build, pull = reports['build'], reports['pull']
+    if (build.get('parentImage') != BASE or pull.get('parentImage') != BASE
+            or build.get('ciCommit') != pin.get('sourceCommit') or pull.get('ciCommit') != pin.get('sourceCommit')
+            or build.get('imagePushed') is not True or pull.get('pullVerified') is not True
+            or build.get('imageDigest') != pull.get('imageDigest') or not re.fullmatch(r'sha256:[a-f0-9]{64}', str(build.get('imageDigest')))
+            or build.get('secretScan', {}).get('status') != 'PASS' or build.get('secretScan', {}).get('findings') != 0
+            or any(row.get('originalSources', {}).get('source', {}).get('composedInventoryFiles') != 373 for row in (build, pull))):
+        raise RuntimeError('STUDIO_ACTUAL_PRIOR_IMAGE_AND_INDEPENDENT_PULL_REQUIRED')
+    previous = build.get('inheritedActualSoftwareDraw', {}); report = previous.get('report', {})
+    if (previous.get('exitCode') != 0 or report.get('frontManifestSha256') != files.PARENT_MANIFEST_SHA
+            or report.get('frontProfileSha256') != pin.get('frontProfileSha256')):
+        raise RuntimeError('STUDIO_ACTUAL_FROZEN_SOFTWARE_PIXELS_REQUIRED')
+    audit = parent.validate_software_report(report)
+    bindings = parent.validate_source_bindings(report, HERE.parent / 'verified-front-data-v4-recovery')
+    records = parent.collect_png_evidence(folder / 'inheritedActualSoftwareDraw', report)
+    value['inheritedSoftwareEvidenceReuse'] = {'status': 'PASS', 'executedInThisRun': False,
+        'reusedFrom': str((folder / 'build.json').relative_to(REPO)), 'sourceCI': pin['sourceRun'],
+        'sourceImageReference': IMAGE + '@' + build['imageDigest'], 'sourceCommit': pin['sourceCommit'],
+        'buildReportSha256': pin['buildReportSha256'], 'pullReportSha256': pin['pullReportSha256'],
+        'immutableParentImage': BASE, 'currentImageParent373IndependentlyVerified': True,
+        'scope': pin['scope'], 'audit': audit, 'sourceBindings': bindings, 'actualPngHashesRechecked': records,
+        'gpuExecuted': False, 'nvidiaHardwareVerified': False, 'videoQualityApproved': False}
+    save(value)
+    return True
+
+
 def software_probe(image):
+    if reuse_inherited_software_evidence(image):
+        return
     # One existing image-local V4 draw proves inherited rendering, rather than
     # re-running old source/history/full CPU audits. This is never NVIDIA PASS.
     evidence = Path(tempfile.mkdtemp(prefix='studio-v4-draw-', dir=os.environ['RUNNER_TEMP'])); evidence.chmod(0o777)
