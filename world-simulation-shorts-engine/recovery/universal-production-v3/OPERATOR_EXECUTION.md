@@ -15,9 +15,13 @@ GCUBE_EMAIL and GCUBE_WORKLOAD_SER identify the intended account/workload.
 Opaque proxy credentials allow authenticated reads but do not prove local token
 account binding; stop mutations fail closed when that binding remains unverified.
 
-Read workload, pricing, schedules, spending and operation records through the
-allowlisted operations.py adapter. Price rows are not yet matched to an actual
-RTX 4080 SUPER allocation; reported rates remain unverified until that match.
+Read workload snapshots, GPU pricing, schedule reads and point/balance snapshots
+through the allowlisted operations.py adapter. Its verify_stopped result derives
+only the latest STOP completion from workload state; it does not expose raw
+operation records or detailed spending/billing endpoints. Detailed spending and
+billing cessation require a separately authorized official read. Price rows are
+not yet matched to an actual RTX 4080 SUPER allocation; reported rates remain
+unverified until that match.
 The official evidence does not document an enforced cumulative spend cap, and
 schedule writes lack an atomic revision guard. Thus deploy/start/register and
 schedule-write automation stay blocked. Do not treat rendering timeout as a
