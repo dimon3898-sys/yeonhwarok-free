@@ -1,0 +1,165 @@
+name: WORLD ENGINE opt-in reference visual V2 image
+
+on:
+  push:
+    branches: [development/reference-visual-master-v2-20261016]
+    paths:
+      - .github/workflows/reference-visual-master-v2.yml
+      - world-simulation-shorts-engine/recovery/reference-visual-master-v2/*.py
+      - world-simulation-shorts-engine/recovery/reference-visual-master-v2/*.mjs
+      - world-simulation-shorts-engine/recovery/reference-visual-master-v2/Dockerfile
+      - world-simulation-shorts-engine/recovery/reference-visual-master-v2/tests/**
+  workflow_dispatch:
+
+concurrency:
+  group: world-engine-reference-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/reference-visual-master-v2-20261016'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      digest: ${{ steps.publish.outputs.digest }}
+    env:
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: build
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fetch new reference lane and frozen parent CI contracts
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/reference-visual-master-v2.yml
+            /world-simulation-shorts-engine/recovery/reference-visual-master-v2/**
+            /world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/**
+            /world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/**
+            /world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/upload_bundle.py
+            /world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/gpu_upload.mjs
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/JOB_FILES.json
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_store.py
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/inspect_existing.py
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/verify_artifacts.py
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/tests/test_artifacts.py
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/image-manifests/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/ci.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/recover_existing.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/image-manifests/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/records.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/service.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/healthcheck.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/DIAGNOSTIC_FILES.json
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/STORAGE_FILES.json
+      - name: Require public free standard runner, protected sources and disk-backed 20 GiB
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py preflight
+      - name: Check unique tag without writing to registry
+        id: guard
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py guard
+      - name: Run new reference tests and actual matched-camera A through F software comparisons
+        id: test
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py test
+      - name: Stage explicit new reference lane and frozen parent manifests
+        id: stage
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py stage
+      - name: Build additive reference V2 layer preserving all parent files
+        id: build
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py build
+      - name: Verify strict composed sources, actual reference image software comparisons and zero secrets
+        id: verify
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py verify
+      - name: Recheck unique tag then publish and inspect remote config digest
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py publish
+      - name: Persist bounded run evidence and PNG SHA-only public review with ten own software checkpoints
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py persist
+
+  verify-pull:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.digest != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: write
+    env:
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: pull
+      RESULT_PUBLISHED_TAG: ${{ needs.build.outputs.tag }}
+      RESULT_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Fresh independent checkout of new and unchanged verification helpers
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/reference-visual-master-v2.yml
+            /world-simulation-shorts-engine/recovery/reference-visual-master-v2/**
+            /world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/**
+            /world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/**
+            /world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/upload_bundle.py
+            /world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/gpu_upload.mjs
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/JOB_FILES.json
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_manager.py
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/job_store.py
+            /world-simulation-shorts-engine/recovery/gcube-detached-render-v1/inspect_existing.py
+            /world-simulation-shorts-engine/recovery/rtx-image-build-v1/**
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/ci.py
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/verify_artifacts.py
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/tests/test_artifacts.py
+            /world-simulation-shorts-engine/recovery/gcube-65422-render-v1/image-manifests/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/ci.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/recover_existing.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-result-v1/image-manifests/**
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/records.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/service.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/healthcheck.py
+            /world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/DIAGNOSTIC_FILES.json
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/STORAGE_FILES.json
+      - name: Require free standard runner, source protection and sufficient disk
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py preflight
+      - name: Independently pull digest and verify original 160, frozen parent 31 and new reference closure
+        id: pull
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py pull
+      - name: Persist independent pull evidence without changing application files
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-visual-master-v2/ci.py persist
