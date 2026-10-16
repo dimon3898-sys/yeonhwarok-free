@@ -87,6 +87,23 @@ def inventory(root: Path | None = None):
         raise RuntimeError('FRONT_VERIFIER_AND_INVENTORY_MUST_BE_BOUND')
     if document['testFiles'] != ['software_probe_front.mjs']:
         raise RuntimeError('FRONT_ACTUAL_SOFTWARE_PROBE_MUST_BE_BOUND')
+    # A file can exist in the checkout/test bind while still being omitted from
+    # the image's explicit COPY closure. Follow profile dependencies, regardless
+    # of filename extension, before generating any manifest or running a draw.
+    if 'FRONT_PROFILE.json' not in document['files']:
+        raise RuntimeError('FRONT_PROFILE_MUST_BE_BOUND')
+    profile = json.loads(read_source(root, 'FRONT_PROFILE.json'))
+    if (profile.get('schema') != 'WORLD_ENGINE_VERIFIED_FRONT_PROFILE_V4'
+            or profile.get('runtimeProfile') != PROFILE_ID
+            or not isinstance(profile.get('fronts'), list) or not profile['fronts']):
+        raise RuntimeError('FRONT_PROFILE_SOURCE_CLOSURE_REQUIRED')
+    for front in profile['fronts']:
+        name, expected = front.get('sourceFile'), front.get('geoJsonSha256')
+        if name not in document['files']:
+            raise RuntimeError('FRONT_PROFILE_SOURCE_NOT_IN_RUNTIME_INVENTORY')
+        raw = read_source(root, name)
+        if not HASH.fullmatch(str(expected)) or hashlib.sha256(raw).hexdigest() != expected:
+            raise RuntimeError('FRONT_PROFILE_SOURCE_SHA_MISMATCH')
     return document
 
 

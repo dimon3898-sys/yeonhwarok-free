@@ -1,0 +1,16 @@
+{
+  "schema": "WORLD_ENGINE_V4_MANIFEST_FAILURE_RECOVERY",
+  "failedRun": 38867872905,
+  "observedErrorCode": "FRONT_V4_GEOJSON_NOT_MANIFESTED",
+  "cause": "Six newly admitted profile GeoJSON dependencies were absent from explicit image inventory; files existed in the broad CPU test context but were not hash-manifested. Runtime correctly rejected them.",
+  "fix": "Add six existing source files, then validate all profile sourceFile dependencies and actual source SHA before any software draw or staging.",
+  "focusedTests": {
+    "pythonTests": 23,
+    "status": "PASS",
+    "evidence": "Packaging agent executed 23 tests; root inspected the minimum diff and the unchanged source-profile bytes."
+  },
+  "profileUnchanged": true,
+  "sourceGeometryUnchanged": true,
+  "rendererCameraFrontierUnchanged": true,
+  "next": "ACTUAL_SOFTWARE_DRAW_THEN_ADDITIVE_IMAGE_BUILD_ONLY_ON_PASS"
+}

@@ -105,10 +105,15 @@ class FrontPackagingBoundaries(unittest.TestCase):
                 ci.files.read_source(self.root, path)
 
     def write_inventory(self, **changes):
-        for name in ('source_manifest_recovery.py', 'software_probe_front.mjs', 'FRONT_PROFILE.json'):
+        for name in ('source_manifest_recovery.py', 'software_probe_front.mjs'):
             (self.root / name).write_text('fixture only')
+        raw = b'{"type":"LineString","coordinates":[[12,34],[13,35]]}\n'
+        (self.root / 'source.geojson').write_bytes(raw)
+        profile = {'schema': 'WORLD_ENGINE_VERIFIED_FRONT_PROFILE_V4', 'runtimeProfile': ci.files.PROFILE_ID,
+            'fronts': [{'sourceFile': 'source.geojson', 'geoJsonSha256': hashlib.sha256(raw).hexdigest()}]}
+        (self.root / 'FRONT_PROFILE.json').write_text(json.dumps(profile))
         inventory = {'schema': 'WORLD_ENGINE_FRONT_RUNTIME_INVENTORY_V4',
-            'files': ['FRONT_PROFILE.json', 'RUNTIME_INVENTORY.json', 'source_manifest_recovery.py'],
+            'files': ['FRONT_PROFILE.json', 'RUNTIME_INVENTORY.json', 'source.geojson', 'source_manifest_recovery.py'],
             'testFiles': ['software_probe_front.mjs']}
         inventory.update(changes)
         (self.root / 'RUNTIME_INVENTORY.json').write_text(json.dumps(inventory))
@@ -123,6 +128,29 @@ class FrontPackagingBoundaries(unittest.TestCase):
             self.write_inventory(**patch_fields)
             with self.subTest(fields=patch_fields), self.assertRaises(RuntimeError):
                 ci.files.inventory(self.root)
+
+    def test_profile_source_present_on_disk_but_omitted_from_package_is_rejected(self):
+        inventory = self.write_inventory()
+        inventory['files'].remove('source.geojson')
+        (self.root / 'RUNTIME_INVENTORY.json').write_text(json.dumps(inventory))
+        self.assertTrue((self.root / 'source.geojson').is_file())
+        with self.assertRaisesRegex(RuntimeError, 'FRONT_PROFILE_SOURCE_NOT_IN_RUNTIME_INVENTORY'):
+            ci.files.inventory(self.root)
+
+    def test_profile_source_hash_must_match_the_actual_packaged_geojson(self):
+        self.write_inventory()
+        (self.root / 'source.geojson').write_text('{"type":"LineString","coordinates":[[0,0],[1,1]]}')
+        with self.assertRaisesRegex(RuntimeError, 'FRONT_PROFILE_SOURCE_SHA_MISMATCH'):
+            ci.files.inventory(self.root)
+
+    def test_all_actual_profile_sources_are_in_generated_image_manifest(self):
+        profile = json.loads((HERE / 'FRONT_PROFILE.json').read_text())
+        manifest = ci.generate_manifest()
+        self.assertGreaterEqual(len(profile['fronts']), 1)
+        for source in profile['fronts']:
+            with self.subTest(source=source['sourceFile']):
+                self.assertIn(source['sourceFile'], manifest['files'])
+                self.assertEqual(manifest['files'][source['sourceFile']], source['geoJsonSha256'])
 
     def test_staging_requires_focused_tests_and_actual_connected_software_proof(self):
         ci.save({**ci.state(), 'tag': TAG, 'focusedTests': {'status': 'PASS'}, 'softwareProbeBeforeBuild': {'exitCode': 0},
