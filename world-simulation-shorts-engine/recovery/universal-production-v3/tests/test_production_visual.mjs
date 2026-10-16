@@ -4,7 +4,8 @@ import {readFile} from 'node:fs/promises';
 import {registerHooks} from 'node:module';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {normalizeProductionVisualProfile,validateAreaColorBindings,productionAreaStyle,evaluateProductionGeometryClock} from '../production_visual_profile.mjs';
+import {normalizeProductionVisualProfile,validateAreaColorBindings,productionAreaStyle,evaluateProductionGeometryClock,productionEventAnnotationLabels,productionAnnotationAnchors} from '../production_visual_profile.mjs';
+import {chooseMetricPlacement} from '../../../web/map_infographic_v1/event_layout_adapter_v1.mjs';
 const engine=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..'),
  plan=JSON.parse(await readFile(new URL('../fixtures/PLAN_80S.json',import.meta.url),'utf8')),
  hook=registerHooks({resolve(s,c,next){if(s.startsWith('/modules/'))return{url:new URL('file://'+path.join(engine,'web/map_infographic_v1',s.slice(9))).href,shortCircuit:true};return next(s,c);}});
@@ -26,6 +27,29 @@ test('white core / gold halo and strong fill use original role style without dec
  assert.equal(style.FRONT.width,4.8);assert.deepEqual(style.FRONT.coreColor,[1,.98,.91,1]);assert.deepEqual(style.FRONT.glowColor,[1,.66,.16,1]);
  assert.equal(profile.scalarV2ClassifierReused,false);assert.throws(()=>normalizeProductionVisualProfile({frontCoreWidthPixels:100}));
  assert.throws(()=>normalizeProductionVisualProfile({territoryOpacity:1}));
+});
+test('all twelve actual annotation inputs include the supplied event title and date',()=>{
+ const source=plan.legacyScenePlan.source_notes[0],labels=productionEventAnnotationLabels({chapters:plan.productionV3.eventChapters,source,anchor:[0,0]});
+ assert.equal(labels.length,12);
+ for(const chapter of plan.productionV3.eventChapters){const label=labels.find(row=>row.id===chapter.chapterId),actualMetricText=`${label.display_value} ${label.unit}`;
+  assert.equal(label.unit,chapter.title);assert.equal(label.display_value,chapter.displayLabel);
+  assert.equal(label.expectedText,actualMetricText);assert.ok(actualMetricText.includes(chapter.title));assert.ok(actualMetricText.includes(chapter.displayLabel));
+  assert.notEqual(label.unit,'사건');
+ }
+ assert.throws(()=>productionEventAnnotationLabels({chapters:[{chapterId:'missing',displayLabel:'1950'}],source,anchor:[0,0]}),/PRODUCTION_EVENT_DATE_AND_TITLE_REQUIRED/);
+});
+test('measured free-band candidates recover a valid full-width label without relaxing original layout checks',()=>{
+ const safe=[48,72,1032,1848],measurement={atlasDimensions:[760,70]},protectedBoxes=[[48,160,1032,1848]],
+  preferred=[540,960],old=[preferred,[540,252],[540,1608],[772,960],[308,960]],
+  args={measurement,safeArea:safe,protectedBoxes,markerSize:40,gap:18};
+ for(const anchor of old)assert.throws(()=>chooseMetricPlacement({...args,anchor}),/EVENT_METRIC_LAYOUT_BLOCKED/);
+ const candidates=productionAnnotationAnchors({atlasEnvelope:measurement.atlasDimensions,safeArea:safe,preferredAnchor:preferred,
+  protectedGraphics:protectedBoxes.map(box=>({kind:'TEXT',box}))});
+ assert.ok(candidates.length>0&&candidates.length<=24);
+ const placed=chooseMetricPlacement({...args,anchor:candidates[0]});
+ assert.equal(placed.status,'PLACED');assert.deepEqual(placed.atlasDimensions,[760,70]);assert.ok(placed.roi[1]>=72&&placed.roi[3]<=160);
+ assert.equal(placed.candidates.find(row=>row.eligible).protectedCollisions.length,0);
+ assert.throws(()=>productionAnnotationAnchors({atlasEnvelope:[1000,70],safeArea:safe,preferredAnchor:preferred}),/ATLAS_EXCEEDS_SAFE_AREA/);
 });
 test('all 2400 V3 frames use explicit supplied source clock, arrival/reveal/holds and exact endpoints',()=>{
  let prior=-1;

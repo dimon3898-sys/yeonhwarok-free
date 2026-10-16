@@ -43,6 +43,47 @@ export function productionAreaStyle(profile,territoryColor=[.36,.47,.56]){
    glowColor:[...profile.frontGlowColor,1],glowRadius:profile.frontGlowRadiusPixels,glowGain:profile.frontGlowGain},
   IMPACT:copy(transparent),PROPAGATION:copy(transparent)};
 }
+/** The actual measured glyph must identify the supplied event, not only its date. */
+export function productionEventAnnotationLabels({chapters,source,anchor}){
+ if(!Array.isArray(chapters)||!chapters.length)throw Error('PRODUCTION_EVENT_CHAPTER_LABELS_REQUIRED');
+ return chapters.map(chapter=>{
+  if(typeof chapter.chapterId!=='string'||!chapter.chapterId||typeof chapter.displayLabel!=='string'||!chapter.displayLabel.trim()
+   ||typeof chapter.title!=='string'||!chapter.title.trim())throw Error('PRODUCTION_EVENT_DATE_AND_TITLE_REQUIRED');
+  return{id:chapter.chapterId,display_value:chapter.displayLabel,unit:chapter.title,source:copy(source),anchor:copy(anchor),
+   expectedText:`${chapter.displayLabel} ${chapter.title}`};
+ });
+}
+/** Derive free text bands from actual measured atlases. The original layout
+ * owner still performs the final safe-area/collision decision for every anchor. */
+export function productionAnnotationAnchors({atlasEnvelope,safeArea,preferredAnchor,protectedGraphics=[],boundarySegments=[],markerSize=40,gap=18}){
+ const [width,height]=atlasEnvelope??[],safe=safeArea;
+ if(![width,height].every(v=>Number.isSafeInteger(v)&&v>0)||!Array.isArray(safe)||safe.length!==4
+  ||!safe.every(Number.isFinite)||!Array.isArray(preferredAnchor)||preferredAnchor.length!==2||!preferredAnchor.every(Number.isFinite))
+  throw Error('PRODUCTION_MEASURED_ANNOTATION_INPUT_REQUIRED');
+ if(width>safe[2]-safe[0]||height>safe[3]-safe[1])throw Error('PRODUCTION_ANNOTATION_ATLAS_EXCEEDS_SAFE_AREA');
+ const boxes=[...protectedGraphics.map(row=>row.box),...boundarySegments.map(row=>[
+  Math.min(row.a[0],row.b[0])-row.radiusPx,Math.min(row.a[1],row.b[1])-row.radiusPx,
+  Math.max(row.a[0],row.b[0])+row.radiusPx,Math.max(row.a[1],row.b[1])+row.radiusPx])],
+  overlaps=(a,b)=>a[0]<b[2]&&a[2]>b[0]&&a[1]<b[3]&&a[3]>b[1],
+  left=safe[0]+2,right=safe[2]-width-2,top=safe[1]+2,bottom=safe[3]-height-2,
+  xs=[left,Math.max(left,Math.min(right,preferredAnchor[0]-width/2)),right],ys=new Set([top,bottom]),edgeYs=new Set();
+ // A half-line grid covers free horizontal bands; obstacle-edge positions also
+ // retain thin valid bands without requiring a smaller or truncated glyph.
+ const rowCount=Math.min(96,Math.max(1,Math.ceil((bottom-top)/Math.max(1,height/2))));
+ for(let row=0;row<=rowCount;row++)ys.add(top+(bottom-top)*row/Math.max(1,rowCount));
+ for(const box of boxes){for(const y of [box[1]-height-2,box[3]+2])if(y>=top&&y<=bottom)edgeYs.add(y);}
+ for(const y of [...edgeYs].sort((a,b)=>Math.abs(a+height/2-preferredAnchor[1])-Math.abs(b+height/2-preferredAnchor[1])).slice(0,128))ys.add(y);
+ const candidates=[];
+ for(const y of ys)for(const x of xs){
+  const box=[x,y,x+width,y+height];if(boxes.some(old=>overlaps(box,old)))continue;
+  const distance=markerSize/2+gap,
+   anchor=y+height+distance<=safe[3]?[x+width/2,y+height+distance]:[x+width/2,y-distance];
+  if(anchor[1]<safe[1]||anchor[1]>safe[3])continue;
+  candidates.push({anchor,score:Math.hypot(x+width/2-preferredAnchor[0],y+height/2-preferredAnchor[1])});
+ }
+ const seen=new Set();return candidates.sort((a,b)=>a.score-b.score).flatMap(row=>{
+  const key=JSON.stringify(row.anchor);if(seen.has(key))return[];seen.add(key);return[row.anchor];}).slice(0,24);
+}
 /** Scene output clock remains independent of the explicitly sourced geometry clock. */
 export function evaluateProductionGeometryClock(plan,globalFrame){
  const schedule=plan?.productionV3?.geometrySchedule;

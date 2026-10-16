@@ -8,7 +8,7 @@ import {setReferenceSourceProfile,setQualityMaterialProfile,configureAstraMateri
 import {compileLongAreaRequest,evaluateLongAreaFrame} from '/universal/long_area_timeline.mjs';
 import {normalizePlannerGeometryKeys} from '/universal/planner_geometry_serialization.mjs';
 import {createNativeBoundaryRestore} from '/universal/native_boundary_restore.mjs';
-import {normalizeProductionVisualProfile,validateAreaColorBindings,evaluateProductionGeometryClock} from '/production-v3/production_visual_profile.mjs';
+import {normalizeProductionVisualProfile,validateAreaColorBindings,evaluateProductionGeometryClock,productionEventAnnotationLabels,productionAnnotationAnchors} from '/production-v3/production_visual_profile.mjs';
 import {createProductionNativeCamera} from '/production-v3/production_native_camera.mjs';
 import {createProductionAreaPass} from '/production-v3/production_area_pass.mjs';
 
@@ -43,8 +43,7 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
   gl=canvas.getContext('webgl2'),ext=gl.getExtension('WEBGL_debug_renderer_info'),backend=ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER);
  if(typeof backend!=='string'||(testOnlySoftwareProbe?!/SwiftShader/i.test(backend):/swiftshader|llvmpipe|lavapipe|software/i.test(backend)||!/\bNVIDIA\b/i.test(backend))){native.dispose();throw Error('PRODUCTION_NVIDIA_REQUIRED');}
  let source,area,foreground,boundary,annotation,snapshotAnnotation,nativeCamera,disposed=false,last=null,currentNative=null,coverageKey=null,coverage=null,coverageHits=0,coverageMisses=0;
- const labels=production.eventChapters.map(chapter=>({id:chapter.chapterId,display_value:chapter.displayLabel,
-  unit:'사건',source:request.annotations[0].source,anchor:request.origin})),
+ const labels=productionEventAnnotationLabels({chapters:production.eventChapters,source:request.annotations[0].source,anchor:request.origin}),
   snapshotLabels=production.geometrySchedule.filter(row=>row.mode!=='ARRIVAL_NO_EVENT').map(row=>({id:row.scheduleId,
    display_value:row.snapshotLabel.replace(/ 도식$/,''),unit:'도식',source:request.annotations[0].source,anchor:request.origin}));
  try{
@@ -57,14 +56,32 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
    heightSource:input.heightSource??null,contextTerrain:input.contextTerrain??null,profile});
   boundary=await createNativeBoundaryRestore({gl,width:1080,height:1920});
   area=createProductionAreaPass({canvas,profile,bindings,probeVariant});
-  annotation=await createAreaAnnotation({renderer:native.renderer,labels,dataMode:request.dataMode,geographicAnchor:request.origin,
-   safeArea:REGIONAL.layout.safe,width:1080,height:1920});
-  snapshotAnnotation=await createAreaAnnotation({renderer:native.renderer,labels:snapshotLabels,dataMode:request.dataMode,geographicAnchor:request.origin,
-   safeArea:REGIONAL.layout.safe,width:1080,height:1920});
+  const createAnnotationSet=items=>{
+   const entries=new Map();try{for(const label of items)entries.set(label.id,createAreaAnnotation({renderer:native.renderer,
+    labels:[label],dataMode:request.dataMode,geographicAnchor:request.origin,safeArea:REGIONAL.layout.safe,width:1080,height:1920}));}
+   catch(error){for(const entry of entries.values())entry.dispose();throw error;}
+   return{get(id){const owner=entries.get(id);if(!owner)throw Error('PRODUCTION_CURRENT_ANNOTATION_REQUIRED');return owner;},
+    dispose(){for(const owner of entries.values())owner.dispose();}};
+  };
+  // The old pass already creates one glyph/pass per label. Keeping independent
+  // owners reserves the current full atlas instead of an unrelated widest label.
+  annotation=createAnnotationSet(labels);snapshotAnnotation=createAnnotationSet(snapshotLabels);
  }catch(error){snapshotAnnotation?.dispose();annotation?.dispose();area?.dispose();boundary?.dispose();foreground?.dispose();source?.dispose();native.dispose();throw error;}
  const binding={schema:'WORLD_ENGINE_UNIVERSAL_ACTUAL_FRAME_V2',planSha256:uv.planSha256,legacySceneSha256:uv.legacySceneSha256,
   sceneRangeSha256:uv.sceneRangeSha256,nativePayloadSha256:uv.nativePayloadSha256,testOnly:testOnlySoftwareProbe,productionV3:clone(uv.productionV3)};
  function drawNative(globalFrame){const n=nativeCamera.drawNative(globalFrame);foreground.draw({items:n.layoutItems,reveal:n.reveal});currentNative=n;return n;}
+ function placeAnnotation(owner,{kind,globalFrame,chapter,clock,preferredAnchor,protectedGraphics,n}){
+  const safe=REGIONAL.layout.safe,m=[(safe[0]+safe[2])/2,(safe[1]+safe[3])/2],
+   originalCandidates=kind==='EVENT_DATE_AND_TITLE'?[m,[m[0],safe[1]+180],[m[0],safe[3]-240],[safe[2]-260,m[1]],[safe[0]+260,m[1]]]
+    :[m,[m[0],safe[1]+260],[m[0],safe[3]-160],[safe[2]-260,m[1]],[safe[0]+260,m[1]]];
+  const anchors=productionAnnotationAnchors({atlasEnvelope:owner.evidence.atlasEnvelope,safeArea:REGIONAL.layout.safe,
+   preferredAnchor,protectedGraphics,boundarySegments:n.boundarySegments});
+  try{return owner.place({anchor:preferredAnchor,anchorCandidates:[...originalCandidates,...anchors],safeArea:REGIONAL.layout.safe,protectedGraphics,boundarySegments:n.boundarySegments});}
+  catch(error){if(error.message!=='AREA_ANNOTATION_LAYOUT_BLOCKED')throw error;
+   throw Error('AREA_ANNOTATION_LAYOUT_BLOCKED '+JSON.stringify({kind,globalFrame,chapterId:chapter.chapterId,scheduleId:clock.scheduleId,
+    atlasEnvelope:owner.evidence.atlasEnvelope,safeArea:REGIONAL.layout.safe,candidateCount:anchors.length,
+    nativeReservationCount:protectedGraphics.length,nativeBoundarySegments:n.boundarySegments.length,attempts:error.attempts}));}
+ }
  async function drawFrame(globalFrame){
   if(disposed||!Number.isSafeInteger(globalFrame)||globalFrame<uv.scene.startFrame||globalFrame>=uv.scene.endFrame)throw Error('PRODUCTION_FRAME_OUTSIDE_SELECTED_SCENE');
   const at=performance.now(),n=drawNative(globalFrame),nativeCpuDispatchMs=performance.now()-at,
@@ -77,16 +94,19 @@ export async function bootLongRuntime({testOnlySoftwareProbe=false}={}){
   let controls=null,graphics=null,date=null;
   if(clock.eventEnabled){
    controls=evaluateLongAreaFrame(request.timelinePlan,clock.sourceGeometryFrame,{project:native.project,projectionKey:key});
-   const safe=REGIONAL.layout.safe,m=[(safe[0]+safe[2])/2,(safe[1]+safe[3])/2],
-    placement=annotation.place({anchor:native.project(controls.origin),anchorCandidates:[m,[m[0],safe[1]+180],
-     [m[0],safe[3]-240],[safe[2]-260,m[1]],[safe[0]+260,m[1]]],safeArea:safe,
-     protectedGraphics:n.protectedGraphics,boundarySegments:n.boundarySegments}),
-    snapshotPlacement=snapshotAnnotation.place({anchorCandidates:[m,[m[0],safe[1]+260],[m[0],safe[3]-160],[safe[2]-260,m[1]],[safe[0]+260,m[1]]],
-     anchor:[m[0],safe[3]-160],safeArea:safe,protectedGraphics:[...n.protectedGraphics,placement.reservation],boundarySegments:n.boundarySegments});
+   const safe=REGIONAL.layout.safe,m=[(safe[0]+safe[2])/2,(safe[1]+safe[3])/2],eventOwner=annotation.get(chapter.chapterId),snapshotOwner=snapshotAnnotation.get(clock.scheduleId),
+    placement=placeAnnotation(eventOwner,{kind:'EVENT_DATE_AND_TITLE',globalFrame,chapter,clock,preferredAnchor:native.project(controls.origin),
+     protectedGraphics:n.protectedGraphics,n}),
+    snapshotPlacement=placeAnnotation(snapshotOwner,{kind:'SOURCE_GEOMETRY_DATE',globalFrame,chapter,clock,preferredAnchor:[m[0],safe[3]-160],
+     protectedGraphics:[...n.protectedGraphics,placement.reservation],n});
    graphics=area.draw({controls,project:native.project,safeArea:safe,protectedGraphics:[...n.protectedGraphics,placement.reservation,snapshotPlacement.reservation],
     primaryMaterialColor:REGIONAL.theme.primary,boundarySegments:n.boundarySegments});
-   date={event:annotation.draw({id:chapter.chapterId,placement}),geometry:snapshotAnnotation.draw({id:clock.scheduleId,placement:snapshotPlacement}),
-    eventLabel:chapter.displayLabel,snapshotLabel:clock.snapshotLabel,sourceClockNotNarrativeDate:true};
+   const eventDate=eventOwner.draw({id:chapter.chapterId,placement});
+   if(eventDate.text!==labels.find(label=>label.id===chapter.chapterId).expectedText)throw Error('PRODUCTION_EVENT_TITLE_NOT_RENDERED');
+   date={event:eventDate,geometry:snapshotOwner.draw({id:clock.scheduleId,placement:snapshotPlacement}),
+    eventLabel:eventDate.text,eventDate:chapter.displayLabel,eventTitle:chapter.title,
+    snapshotLabel:clock.snapshotLabel,sourceClockNotNarrativeDate:true,
+    reservationPolicy:'CURRENT_LABEL_FULL_MEASURED_ATLAS_NOT_MAX_OTHER_CHAPTER'};
   }
   const markers=foreground.draw({items:n.layoutItems,reveal:n.reveal});gl.finish();const glError=gl.getError();if(glError)throw Error('PRODUCTION_COMPOSITION_GL_ERROR_'+glError);
   if(JSON.stringify(raw)!==rawBinding)throw Error('PRODUCTION_ORIGINAL_SCENE_MUTATED');
