@@ -35,18 +35,27 @@ SSH host/port/source-IP 허용 및 검증된 host key를 제공한다. 토큰이
 
 ## 고정 실행 경로
 
-아래 명령은 아직 실행하지 않았다. trusted worker가 UID/GID1000으로 사유 작업
-디렉터리를 생성하고 실제 후보 digest를 환경에 설정한 뒤 실행한다.
+아래 GPU 시작 명령은 아직 실행하지 않았다. trusted worker가 UID/GID1000으로 사유 작업
+디렉터리를 생성하고 실제 후보 digest를 환경에 설정한다. 우선 저장된
+`FIRST_PRODUCTION_80S_PLAN.json`을 `/PRIVATE/VIDEO_PLAN.json`으로 byte 그대로
+복사한다. 파일 SHA는 `ca3498ee4221408f3a0cdc47d66e8704786a6312a98db19c4b98e49927c653d3`,
+canonical plan SHA는 `69060bf9269fa091c7e070572f61efe00affa061c56827c9902942d0d4ea0f7b`다.
+계획의 native payload는 이미지 내부 fixture 경로를 사용하므로 private 경로로
+이동해도 원본 binding을 유지한다. `/PRIVATE`는 UID/GID1000·0700이며 파일은0600이어야 한다.
+
+새로 계획을 생성해야 할 경우에만 다음 CPU 준비 명령을 사용한다. 저장된 plan의
+검증이나 기존 데이터 조사를 반복하는 필수 단계가 아니다.
 
 ```bash
 /usr/bin/python3 -B /opt/world-engine-universal-v2/prepare_video.py '한국전쟁의 전선 변화를 80초 영상으로 만들어줘.' --output /PRIVATE/VIDEO_PLAN.json --image-digest sha256:ACTUAL_IMAGE_DIGEST
 ```
 
-명령은 실제 2,400프레임·1080×1920·30FPS 계획과 native payload를 만들고 canonical
+준비 명령은 실제 2,400프레임·1080×1920·30FPS 계획과 native payload를 만들고 canonical
 plan SHA를 출력한다. 원본 5개 도식 상태를 유지하며 미검증 부대 위치를 추가하지 않는다.
-`/PRIVATE`는 UID/GID1000·0700이며 파일은0600이어야 한다. 이 단계는 GPU를 실행하지 않는다.
+새로 생성한 plan의 SHA가 달라지면 해당 새 SHA에 대한 별도 승인이 필요하다.
+이 단계는 GPU를 실행하지 않는다.
 
-출력한 plan SHA와 실제 image digest에 대해 `ORCHESTRATION_AND_RECOVERY.md`의
+검증된 plan SHA와 실제 image digest에 대해 `ORCHESTRATION_AND_RECOVERY.md`의
 정확한 authorization schema로 승인 파일을 작성한다. template의 비용·만료 placeholder는
 유효 승인이 아니다. 승인 파일을 생성한 뒤에만 다음 고정 진입점을 실행한다.
 

@@ -1,11 +1,12 @@
 # WORLD ENGINE — Universal Auto Video V2 구현 상태
 
-이 문서는 통합 구현과 무료 검증 중의 중간 보고다. run `38843019699-1`에서
-실제 SwiftShader draw/readPixels와 이미지 등록·독립 pull은 성공했지만, 당시
-장면 경계 비교의 범위가 잘못되어 그 이미지는 **NOT_FINAL_CANDIDATE**다.
-실제 장면 cut을 통과하는 수정 후 검증과 최종 후보 이미지 확정은 PENDING이다.
-80초 NVIDIA 영상, 60분 제작 목표, Dropbox 외부 전달, 사용자 영상 승인은 아직
-완료되지 않았다. 기술 계약의 성공을 실제 영상이나 시각 품질의 성공으로 해석하지 않는다.
+안전한 장편 실행 후보 구현·무료 검증·신규 이미지 등록·독립 pull을 완료했다.
+최종 후보는 run `38844084599-1`, source `311a921`이다. 집중 검사 168개,
+실제 SwiftShader draw/readPixels, 실제 인접 scene cut 419/420, native 경계 픽셀,
+248개 이미지 파일 무결성 및 Secret Scan 0건을 확인했다.
+**80초 NVIDIA MP4와 완전한 범용 제품은 아직 완료되지 않았다.** 지시서 8·12절의
+유료 GPU 별도 승인 조건과 현재 계정 연결·단가 미확인 때문에 GPU 작업은 실행하지 않았다.
+60분 목표, 외부 Dropbox 전달과 영상 품질 승인은 미검증이다.
 
 기준은 `c1e9c099b22a8db1c5f21e7b029422e82f8efd33`, 작업 브랜치는
 `development/universal-auto-video-v2-20261016`이다. 기존 이미지
@@ -72,7 +73,9 @@ camera·event 시간을 0으로 되돌리지 않는다.
 `fixtures/PLAN_80S.json`은 2,400프레임을 12개 작업 단위로 분할한 실제 첫 기획이다.
 60프레임 도착, 60프레임 초기 표시, 각 555프레임의 네 상태 전환, 60프레임 최종
 hold를 사용한다. 이 배분은 영상 시간이며 역사적 기간이 동일했다는 주장이 아니다.
-최종 이미지 digest가 아직 없으므로 체크인된 fixture는 `IMAGE_BINDING_REQUIRED`다.
+체크인된 이미지 내부 fixture는 자기 image digest 순환 의존을 피하도록
+`IMAGE_BINDING_REQUIRED`를 유지한다. 최종 이미지에 고정한 별도
+`FIRST_PRODUCTION_80S_PLAN.json`과 canonical SHA를 영구 저장했다.
 native 바인딩의 `READY`는 CPU 원본·설정 정합 검사 결과이며 유료 실행 승인이 아니다.
 
 ## 4. 분할 렌더링·캐시·자동 합성
@@ -109,8 +112,9 @@ native coverage와 boundary snapshot은 한 항목 캐시를 사용한다. GPU t
 점령 경로를 생성하지 않는다. 정적 상태의 projected controls 캐시는 실제
 projection 함수와 key에 묶이고 projection history는 한 항목만 유지한다.
 
-기존 14초 fixture의 event 360프레임 전체에서 원래 Area evaluator와 새 clock의
-area/front geometry·alpha·reveal·선택 상태·날짜·hold가 정확히 일치했다.
+초기 로컬 14초 fixture의 event 360프레임에서 원래 Area evaluator와 새 clock을
+비교했고, 최종 CI에서는 동일한 패키지 자료로 생성한 14초 계획의 event 378프레임
+전체를 비교했다. area/front geometry·alpha·reveal·선택 상태·날짜·hold가 정확히 일치했다.
 독립 검수에서도 projection 없음/비선형 projection의 추가 56개 비교가 일치했다.
 이 결과는 실제 CPU control 비교이며 GPU pixel BIT_EXACT나 장편 영상 품질 판정은 아니다.
 
@@ -165,33 +169,35 @@ mock HTTPS 성공은 외부 전달 완료로 표시하지 않는다.
 
 ## 9. 무료 검사와 보안 검사
 
-앞선 수정 checkpoint의 집중 검사는 **163개 PASS**다(Python 135개 + Node 28개).
-변경 후 수행한 planner 부분 재검증이나 독립 비교를 별도로 중복 합산하지 않는다.
-범위는 자연어/Scene 계약, 80~600초 분할, 캐시·실패·PID/lock·
-터미널 종료, 짧은 실제 FFmpeg 합성, 저장소 readback, mock GL과 경계 복구다.
-그 이후 추가한 검증 범위 수정과 새 테스트의 최종 개수는 다음 실제 CI 결과로
-확정한다. 이 문서에서 예상 개수를 더해 성공으로 표시하지 않는다.
+최종 CI는 **168 PASS: Python 137 + Node 31**, 15개 집중 명령 모두 exit0이다.
+부분 재검증·독립 검수를 중복 합산하지 않았다. 기존 완료된 전체 104/151/233개
+suite는 반복하지 않았다. 실제 짧은 CPU FFmpeg·storage readback·PTY 종료 검사와
+mock hardware 검사를 실제 NVIDIA 검사로 표시하지 않는다.
 
-CPU mock 검사는 NVIDIA 검사가 아니다. run `38843019699-1`에서 실제
-SwiftShader 선택 프레임 draw/readPixels, 표본의 native 경계 pixel 보존과
-원본 source hash, 이미지 내부 검사, 독립 digest pull을 확인했고, 해당 이미지
-Secret Scan은 0 findings였다. 다만 이 run의 299/300 비교는 모두 같은
-`scene-0003 [120,420)` 안에 있었다. 그 두 프레임의 segmented/full-timeline
-RGBA 일치는 유효하지만, 실제 scene cut을 지나지 않았으므로 **장면 경계 연속성
-검증으로 한 이전 표현은 철회한다**.
+최종 run의 pre-build 및 built-image 두 환경 모두 실제 Chromium/SwiftShader에서
+0/419/420/1200/2399 프레임을 draw/readPixels했다. 실제 fixture의 서로 다른
+`scene-0003 [120,420)` frame419와 `scene-0004 [420,675)` frame420을 각각
+원래 전체 시간축과 비교하여 RGBA BIT_EXACT를 확인했다. host CI는 원본 plan SHA,
+두 scene ID·범위·활성 전환·pixel hash를 독립 검증한다. native Boundary 지지영역의
+변경 픽셀은 표본 두 frame 모두0이다. active 표본 geometry는 viewport와 safe area에
+모두 들어온다. 전체 2,400프레임의 NVIDIA 영상 검사라는 뜻은 아니다.
 
-수정 probe는 실제 기획에서 인접 장면의 cut을 동적으로 선택한다. 현재 fixture의
-대상은 `scene-0003 [120,420)`의 마지막 frame 419와
-`scene-0004 [420,675)`의 첫 frame 420이다. host CI도 probe가 보고한 수치만
-믿지 않고 실제 plan에서 서로 다른 두 scene ID·범위·인접 cut인지 독립 검증한다.
-이 수정 후 실제 SwiftShader·이미지 검사·등록·pull 결과는 아직 PENDING이다.
-기존 완료된 전체 104개/233개 검사를 반복하지 않았다.
+중간 run `38843019699-1`의299/300은 같은 scene 안이었다. 기존 장면 경계 PASS
+주장을 철회하고 해당 등록 이미지를 `NOT_FINAL_CANDIDATE`로 보존했다.
+`SUPERSEDED_IMAGE_38843019699.json`에 범위를 명시했다. 실패·중간 기록을 삭제하지 않았다.
+
+최종 실제 이미지의 기본 Gitleaks 검사 결과는0건이다. 이전 checksum/파일명 오탐은
+`SECRET_SCAN_CLASSIFICATION.json`에 분리 기록했다. 검사 규칙·ignore·allowlist를
+완화하지 않고 의미에 맞는 모듈 이름으로 수정했다.
+최종 소스·보고서·workflow 검사는 `SOURCE_SECRET_SCAN.json`, 원본 보호와 실제
+이미지 Manifest/실행 계획 대조는 `FINAL_INTEGRITY_CHECK.json`에 기록했다.
+영구 저장 파일 전체의 해시는 `SHA256SUMS`로 확인한다.
 
 ## 10. V2·FINAL 보호와 실제 시각 경로
 
 기존 FINAL·V4·camera·ASTRA·전선·영상 파일은 수정하지 않는다. 구현은 새 recovery
-namespace와 독립 workflow/profile에 추가한다. 최종 보호 hash 결과는 별도 최종
-기록으로 확정하며, 기존 정상 이미지와 과거 claim은 유지한다.
+namespace와 독립 workflow/profile에 추가한다. 최종 strict 이미지 검사에서 원래160개 파일과 frozen V2 57개를 검증했다.
+전체 기존 tracked 파일 변경0건이며 기존 정상 이미지와 과거 claim을 유지한다.
 
 현재 역사 실행 경로는 `REFERENCE_V2_SOURCE_WITH_AREA_V3`다. 기존 ASTRA/V2
 source material을 원래 Area V3 영토·전선에 연결하고, 원래 geographic marker와
@@ -206,17 +212,17 @@ polygon 상태를 현대 가상 장면의 일방향 scalar gain으로 대체하�
 
 ## 11. 신규 이미지 태그와 digest
 
-**최종 후보 PENDING.** 중간 이미지
-`universal-v2-c1e9c09-38843019699-1`은 실제 빌드·등록·독립 pull을 통과했다.
-그 immutable digest는
-`sha256:5580aedfcf880975e18c3c609d8f644fdd6fb45069a862eeb6fa1cc01ef8247c`다.
-하지만 실제 scene cut 증거가 부족하므로 배포 권장 이미지나 최종 개발 완료
-후보로 사용하지 않는다. `SUPERSEDED_IMAGE_38843019699.json`은 유효했던
-검증과 부족했던 검증 범위를 구분한다. 원래 이미지·태그·run 기록은 보존한다.
+태그: `universal-v2-c1e9c09-38844084599-1`
+이미지: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:5f17537fa8e5387de39ed8999e4c8d7ce2fe8a3593a71a5a3c1ae033f22dd014`
+소스: `311a92137d00ba88220c1caa243c9ff0389e4121`
+Manifest SHA: `982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756`
 
-실제 cut 검증을 통과한 후 새 고유 태그와 digest를 확정한다. 그 수정 후보의
-빌드·등록·독립 pull 결과는 아직 PENDING이며 존재하지 않는 digest를 작성하지 않는다.
-기존 부모 이미지도 유지한다.
+빌드·등록 및 별도 runner의 immutable digest pull이 PASS다. 실제 생성된 Manifest
+바이트를 `UNIVERSAL_FILES.json`에 그대로 저장했으며 docs HEAD에서 재생성하지 않았다.
+`IMAGE.json`, `runs/38844084599-1/build.json`, `pull.json`이 근거다.
+
+이전 `universal-v2-c1e9c09-38843019699-1`은 보존하되 최종 후보로 권장하지 않는다.
+사용할 후보는 위388440 digest다. NVIDIA 영상 품질 PASS나 FINAL Baseline은 아니다.
 
 ## 12. 80초 제작시간 추정 근거
 
@@ -266,8 +272,8 @@ Area 전선의 시각 품질, 전체 2,400프레임과 경계 연속성, VRAM/�
 - run `38843019699-1`의 299/300은 같은 `[120,420)` 장면 안의 인접 프레임이다.
   실제로 측정한 pixel 일치를 보존하되 장면 cut 연속성 주장에서는 제외했다.
   probe가 실제 split plan에서 서로 다른 인접 장면을 선택하고, host CI가 다시
-  그 관계를 독립 확인하도록 수정했다. 현재 목표 pair는 419/420이며, 수정 후
-  실제 실행 성공은 다음 CI 증거가 확보될 때만 판정한다.
+  그 관계를 독립 확인하도록 수정했다. 최종 run `38844084599-1`에서 실제
+  419/420 장면 cut의 pre-build·built-image RGBA 일치를 확인했다.
 - 기존 one-shot 150프레임 계약으로 장편을 처리할 수 없어 독립 coordinator와
   범용 scene capture를 추가했다. 기존 one-shot 코드는 변경하지 않았다.
 - 기존 renderer/source 조합에서 source pass가 native Boundary/Glow를 덮는 문제는
@@ -284,7 +290,7 @@ Area 전선의 시각 품질, 전체 2,400프레임과 경계 연속성, VRAM/�
 
 ## 16. 사용자에게 필요한 정확한 다음 행동
 
-무료 검증과 새 이미지 등록이 끝난 뒤, 제공된 immutable image와 최종 plan을 기준으로
+제공된 immutable image와 `FIRST_PRODUCTION_80S_PLAN.json`을 기준으로
 실제 GPU 실행 승인 범위를 정해야 한다. workload/account, 확인된 GPU 단가와 통화,
 최대 비용, 최대 wall time, retry 상한과 승인 만료를 명시해야 한다. 인증은 승인된
 secret 설정으로만 제공하며 채팅·Scene JSON·이미지·공개 폴더에 기록하지 않는다.
@@ -297,3 +303,18 @@ normal startup, NVIDIA graphics/utility 설정을 확인한다. 공식 STOP sche
 
 이번 개발 작업은 유료 GPU 실행을 승인하지 않는다. 실제 80초 완성본과 외부
 다운로드를 확인한 뒤 사용자가 최종 영상을 검수한다. FINAL 승격과 다음 개발은 자동 실행하지 않는다.
+
+## 최종 실행 경계
+
+`FIRST_PRODUCTION_REQUEST.json`은 검증된 fixture와 실제 rendering 입력이 같고
+image 바인딩만 추가됐음을 기록한다. `OPERATOR_APPROVAL_TEMPLATE.json`은
+`approved:false`이며 미확정 단가·비용·만료를 null로 둔다. 실행 승인이 아니다.
+계획 파일을 UID/GID1000의 private 경로로 복사한 뒤 운영자 승인 파일을 설정한다.
+사용자가 GPU 터미널에서 개별 장면을 직접 실행하도록 요구하지 않는다.
+계정 연결 후 trusted control-plane worker의 공식 인증 SSH로 detached start/status를
+실행하는 절차는 `OPERATOR_EXECUTION.md`에 있다. 현재 계정 자동 제어·과금 종료는
+연결되지 않았으며 먼저 read-only 권한·단가·STOP 일정을 확인해야 한다.
+
+판정: **UNIVERSAL_VIDEO_V2_GPU_CANDIDATE_READY_PRODUCT_INCOMPLETE**.
+다음: 보안 계정 연결 및 실제 단가·최대 비용·시간·재시도 상한 승인.
+이번 작업은 여기서 멈추며 유료 GPU 실행·FINAL 승격을 자동 진행하지 않는다.
