@@ -49,6 +49,14 @@ Check their own SHA256SUMS, actual raw-pixel evidence and pre-build versus image
 hashes. Those software checks are not NVIDIA proof, an 80-second finished MP4,
 or final mobile video quality approval.
 
+Every source snapshot and the final frame also require source-suppressed versus
+source-visible A/B. `sourceVisibility.cases` must show visible center-stroke
+changes, unchanged protected graphics and safe area, and no changed pixel
+outside the actual source stroke/halo corridor. Static native country boundaries
+remain beneath the historical source line only in that corridor; the inactive
+fallback retains its original boundary mask. A legacy draw-call diagnostic is
+not a substitute for these actual pixel checks.
+
 ## Hardware boundary
 
 Read `OPERATOR_RUNBOOK.md` for image-local plan binding, a deliberately blocked

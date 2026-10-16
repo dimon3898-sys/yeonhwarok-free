@@ -76,3 +76,5 @@ CMH21–2  347135bd77e764484251c131db15d733063264a68907752e552cdca9597bcd8d
 실행 계획에는 실제 전선 profile과 source manifest의 SHA 및 신규 이미지 digest를 결합한다. 바뀐 자료는 기존 Scene source hash와 캐시 식별자에 반영한다. 기존 claim·완성 영상·캐시를 삭제하거나 이전 승인 기록을 새 자료의 실행 승인으로 재사용하지 않는다.
 
 무료 검증·이미지 등록 결과는 최종 실행 보고서와 해당 CI 기록을 별도로 확인해야 한다. 이 자료 연결 문서만으로 SwiftShader·NVIDIA·80초 MP4·외부 Dropbox 다운로드·사용자 영상 검수 또는 FINAL 승격을 PASS 처리하지 않는다.
+
+실제 PNG 검수에서는 정전 시점 자료 전선의 중심선이 현재 국가 경계 보호 마스크에 가려지는 문제가 확인됐다. 새 V4 합성 정책은 자료 전선만 현재 국가 경계보다 위에 표시하며, 기존 국경 복원·도식 경로와 Marker·Text·Title·Safe Area 보호는 유지한다. 좌표나 선 스타일은 바꾸지 않는다. [FRONT_VISIBILITY_POLICY.md](FRONT_VISIBILITY_POLICY.md)에 변경 범위와 실제 픽셀 A/B 판정 기준을 기록했다. 날짜별 전선 8개와 마지막 프레임에서 가시성을 검사해야 하며, draw 호출 여부만으로 영상 표시 완료를 판정하지 않는다.

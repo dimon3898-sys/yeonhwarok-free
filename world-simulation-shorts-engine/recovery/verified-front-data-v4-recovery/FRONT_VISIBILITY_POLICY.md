@@ -43,3 +43,11 @@ the evidence of whether those requirements actually ran and passed.
 
 Software-visible ink does not certify total historical accuracy, NVIDIA output,
 full80-second rhythm, mobile video quality, delivery or FINAL promotion.
+
+The preserved V3 helper also returns a constant nested legacy diagnostic hint,
+`productionVisual.nativeBoundaryAndReservationsMasked:true`. That hint is not
+evidence of the effective V4 source-active mask policy and is not used as an
+execution, promotion or quality gate. Read `frontV4.boundaryPolicy`, the V4
+`nativeBoundaryGlowPreserved:false` source-active diagnostic and actual A/B
+pixel evidence instead. Static-border overdraw is deliberate only within the
+real source stroke; graphic reservations still apply.
