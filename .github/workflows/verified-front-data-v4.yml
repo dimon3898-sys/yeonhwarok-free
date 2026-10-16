@@ -1,0 +1,57 @@
+name: WORLD ENGINE verified front data V4 free CPU checks
+
+on:
+  push:
+    branches: [development/korean-war-verified-front-v4-20261016]
+    paths:
+      - .github/workflows/verified-front-data-v4.yml
+      - world-simulation-shorts-engine/recovery/verified-front-data-v4/*.py
+      - world-simulation-shorts-engine/recovery/verified-front-data-v4/*.json
+      - world-simulation-shorts-engine/recovery/verified-front-data-v4/tests/**
+      - world-simulation-shorts-engine/recovery/verified-front-data-v4/evidence/**
+  workflow_dispatch:
+
+concurrency:
+  group: world-engine-verified-front-v4-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-only:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/korean-war-verified-front-v4-20261016'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    env:
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Checkout only additive V4 verification inputs
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/verified-front-data-v4.yml
+            /world-simulation-shorts-engine/recovery/verified-front-data-v4/**
+      - name: Require free public runner and immutable preexisting sources
+        id: preflight
+        run: python3 -B world-simulation-shorts-engine/recovery/verified-front-data-v4/ci_verify.py preflight
+      - name: Test only new CPU data processing inside pinned network-isolated V3 image
+        id: test
+        run: python3 -B world-simulation-shorts-engine/recovery/verified-front-data-v4/ci_verify.py test
+      - name: Scan only new source with pinned default Gitleaks rules
+        id: scan
+        if: success()
+        run: python3 -B world-simulation-shorts-engine/recovery/verified-front-data-v4/ci_verify.py scan
+      - name: Persist bounded sanitized CPU record without image build or deployment
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","test":"${{ steps.test.outcome }}","scan":"${{ steps.scan.outcome }}"}
+        run: python3 -B world-simulation-shorts-engine/recovery/verified-front-data-v4/ci_verify.py persist
