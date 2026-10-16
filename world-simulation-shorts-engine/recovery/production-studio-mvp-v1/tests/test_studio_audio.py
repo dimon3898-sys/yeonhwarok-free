@@ -42,8 +42,16 @@ class SfxContractTests(unittest.TestCase):
         self.assertEqual(report["assetCount"], 18)
         self.assertEqual(len(audio.TYPES), 6)
         frozen = ROOT / "dependencies/rhythm_sound.py"
+        # Studio is installed outside the strict parent repository. The old
+        # synthesizer is not a GPU runtime dependency and is not shipped there.
+        # Its reviewed frozen source hash remains mandatory in both layouts.
+        expected_source_sha = "95f52e8c384059a1670b063d58bf38decebc63ba28bbdd685400904b5e3e3f02"
+        self.assertEqual(hashlib.sha256(frozen.read_bytes()).hexdigest(), expected_source_sha)
+        manifest = json.loads((ROOT / "audio/ASSET_MANIFEST.json").read_text())
+        self.assertTrue(all(row["source_sha256"] == expected_source_sha for row in manifest["assets"]))
         original = ROOT.parents[1] / "engine/rhythm_sound.py"
-        self.assertEqual(frozen.read_bytes(), original.read_bytes())
+        if original.is_file():
+            self.assertEqual(frozen.read_bytes(), original.read_bytes())
 
     def test_structured_settings_are_canonical_and_do_not_modify_video_plan(self):
         p = plan(); before = copy.deepcopy(p)
