@@ -3,7 +3,9 @@ from copy import deepcopy
 import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
+import wave
 
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
@@ -235,6 +237,83 @@ class RevisionTests(unittest.TestCase):
         first = plan_revision(self.parent, 25, 35, "SFX OFF")["submission"]
         second = plan_revision(first, 25, 35, "효과음 음량 30%")["submission"]
         self.assertEqual([c["gain"] for c in second["sfx"]["cues"]], [.52, .3, .3, .52, .52])
+
+
+class AudioIntervalImpactTests(unittest.TestCase):
+    """Focused actual audio support at a requested interval/scene boundary."""
+
+    def setUp(self):
+        RevisionTests.setUp(self)
+        self.parent["videoPlan"]["scenes"] = [
+            {"sceneId": "before", "startFrame": 0, "endFrame": 750},
+            {"sceneId": "requested", "startFrame": 750, "endFrame": 1050},
+            {"sceneId": "after", "startFrame": 1050, "endFrame": 2400}]
+
+    # The original four-scene behavior remains covered by RevisionTests. These
+    # cases bind an actual scene boundary to the requested audio interval end.
+    def test_sfx_revision_reuses_all_video_and_keeps_parent_immutable(self):
+        self.assert_audio_tail_is_reported()
+
+    def assert_audio_tail_is_reported(self):
+        before = deepcopy(self.parent)
+        result = plan_revision(self.parent, 25, 35, "SFX OFF")
+        self.assertEqual(self.parent, before)
+        impact = result["impact"]
+        self.assertEqual(impact["affectedSceneIds"], ["requested"])
+        self.assertEqual(impact["adjacentSceneIds"], ["after"])
+        self.assertEqual(impact["audioAffectedSceneIds"], ["requested", "after"])
+        self.assertEqual(impact["invalidatedSceneIds"], [])
+        self.assertEqual(impact["reusedSceneIds"], ["before", "requested", "after"])
+        self.assertFalse(impact["requiresGpu"])
+        self.assertEqual(impact["audioRequestedSamples"], [25 * 48000, 35 * 48000])
+        self.assertEqual(impact["audioImpact"]["comparison"], "CONSERVATIVE_AUTHORED_CUE_SUPPORT")
+        self.assertFalse(impact["audioImpact"]["actualPcmCompared"])
+        self.assertTrue(impact["audioImpact"]["outsideReportedIntervalsUnchangedByConstruction"])
+        intervals = impact["audioChangedSampleIntervals"]
+        self.assertTrue(any(a < 35 * 48000 < b for a, b in intervals))
+        self.assertLess(max(b for _, b in intervals), 36 * 48000)
+        return result
+
+    def test_removed_cues_report_bounded_neighbor_admission(self):
+        result = plan_revision(self.parent, 25, 35, "", {"cues": []})
+        impact = result["impact"]
+        self.assertEqual(impact["adjacentSceneIds"], ["after"])
+        self.assertLess(max(b for _, b in impact["audioChangedSampleIntervals"]), 36 * 48000)
+        self.assertEqual(result["submission"]["videoPlan"], self.parent["videoPlan"])
+
+    def test_actual_pcm_outside_reported_audio_support_is_unchanged(self):
+        import numpy as np
+        from studio_audio import render_sfx
+        result = self.assert_audio_tail_is_reported()
+        intervals = result["impact"]["audioChangedSampleIntervals"]
+        with tempfile.TemporaryDirectory(prefix="studio-contract-audio-interval-") as name:
+            root = Path(name)
+            render_sfx(self.parent["sfx"], self.parent["videoPlan"], root / "old.wav")
+            render_sfx(result["submission"]["sfx"], self.parent["videoPlan"], root / "new.wav")
+            changed = 0
+            with wave.open(str(root / "old.wav"), "rb") as old, wave.open(str(root / "new.wav"), "rb") as new:
+                self.assertEqual(old.getnframes(), 80 * 48000)
+                self.assertEqual(new.getnframes(), old.getnframes())
+                start = 0
+                while True:
+                    a, b = old.readframes(48000), new.readframes(48000)
+                    if not a:
+                        self.assertEqual(b, b"")
+                        break
+                    previous = np.frombuffer(a, dtype="<i2").reshape(-1, 2)
+                    following = np.frombuffer(b, dtype="<i2").reshape(-1, 2)
+                    diff = np.any(previous != following, axis=1)
+                    allowed = np.zeros(len(diff), dtype=bool)
+                    for left, right in intervals:
+                        lo, hi = max(left, start), min(right, start + len(diff))
+                        if hi > lo:
+                            allowed[lo - start:hi - start] = True
+                    self.assertFalse(np.any(diff & ~allowed), f"unreported audio changed at block {start}")
+                    if start >= 36 * 48000:
+                        self.assertEqual(a, b)
+                    changed += int(np.count_nonzero(diff))
+                    start += len(diff)
+            self.assertGreater(changed, 0)
 
 
 class OriginalBackendIntegrationTests(unittest.TestCase):

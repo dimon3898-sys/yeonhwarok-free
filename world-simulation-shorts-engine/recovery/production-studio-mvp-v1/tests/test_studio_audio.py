@@ -224,6 +224,81 @@ class SfxRenderTests(unittest.TestCase):
             self.assertLessEqual(output.stat().st_size, 600 * 48000 * 4 + 44)
 
 
+class SfxIntervalRevisionTests(unittest.TestCase):
+    def _render_pair(self, old, new):
+        p = plan(80)
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            before = audio.render_sfx(old, p, root / "before.wav")
+            after = audio.render_sfx(new, p, root / "after.wav")
+            def read(path):
+                with wave.open(str(path), "rb") as stream:
+                    return np.frombuffer(stream.readframes(stream.getnframes()), dtype="<i2").reshape(-1, 2)
+            first, second = read(root / "before.wav"), read(root / "after.wav")
+            actual_changed = np.any(first != second, axis=1)
+        impact = audio.audio_revision_impact(old, new, p)
+        permitted = np.zeros(80 * 48000, dtype=bool)
+        for start, end in impact["changedSampleIntervals"]:
+            permitted[start:end] = True
+        self.assertFalse(np.any(actual_changed & ~permitted))
+        self.assertEqual(impact["comparison"], "CONSERVATIVE_AUTHORED_CUE_SUPPORT")
+        self.assertFalse(impact["actualPcmCompared"])
+        self.assertTrue(impact["outsideReportedIntervalsUnchangedByConstruction"])
+        return before, after, impact, actual_changed
+
+    def test_removing_25_second_cue_preserves_unchanged_36_second_pcm(self):
+        cues = [{"eventId": "ACTUAL_EVENT", "frame": frame, "type": "CLICK"} for frame in (720, 750, 1080)]
+        old = {"cues": cues}
+        new = {"cues": [cues[0], cues[2]]}
+        before, after, impact, changed = self._render_pair(old, new)
+        self.assertEqual(before["cues"][-1]["variant"], after["cues"][-1]["variant"])
+        self.assertFalse(np.any(changed[:25 * 48000]))
+        self.assertFalse(np.any(changed[35 * 48000:]))
+        self.assertTrue(np.any(changed[25 * 48000:35 * 48000]))
+        self.assertEqual(impact["changedCues"], [{"eventId": "ACTUAL_EVENT", "frame": 750, "type": "CLICK"}])
+
+    def test_dense_cooldown_chain_has_only_bounded_reported_neighbor_impact(self):
+        cues = [{"eventId": "ACTUAL_EVENT", "frame": frame, "type": "CLICK"} for frame in range(747, 1201, 3)]
+        old = {"cues": cues}
+        new = {"cues": [cue for cue in cues if not 750 <= cue["frame"] < 1050]}
+        before, after, impact, changed = self._render_pair(old, new)
+        original = {row["frame"]: row for row in before["cues"]}
+        outside_admission_changes = [row for row in after["cues"] if row["frame"] >= 1050
+                                     and row["status"] != original[row["frame"]]["status"]]
+        # The first remaining authored cue's predecessor changed, so it is
+        # honestly reported. Later decisions cannot inherit that acceptance.
+        self.assertEqual([row["frame"] for row in outside_admission_changes], [1050])
+        self.assertTrue(any(row["frame"] == 1050 for row in impact["changedCues"]))
+        limit = 35 * 48000 + impact["maximumSourceTailSamples"]
+        self.assertFalse(np.any(changed[limit:]))
+        self.assertLessEqual(max(end for _, end in impact["changedSampleIntervals"]), limit)
+
+    def test_overlap_changes_and_cross_boundary_tail_are_reported(self):
+        cues = [
+            {"eventId": "ACTUAL_EVENT", "frame": 1049, "type": "CLICK"},
+            {"eventId": "ACTUAL_EVENT", "frame": 1049, "type": "MARKER_POP"},
+            {"eventId": "ACTUAL_EVENT", "frame": 1049, "type": "MECHANICAL_TICK"},
+            {"eventId": "ACTUAL_EVENT", "frame": 1050, "type": "CAMERA_WHOOSH"},
+            {"eventId": "ACTUAL_EVENT", "frame": 1200, "type": "CAMERA_WHOOSH"},
+        ]
+        old = {"cues": cues}
+        new = {"cues": [cue for cue in cues if cue["frame"] >= 1050]}
+        before, after, impact, changed = self._render_pair(old, new)
+        self.assertEqual(before["cues"][3]["status"], "OMITTED_OVERLAP_LIMIT")
+        self.assertEqual(after["cues"][0]["status"], "RENDERED")
+        self.assertTrue(any(row["frame"] == 1050 for row in impact["changedCues"]))
+        self.assertTrue(np.any(changed[35 * 48000:]))
+        self.assertFalse(np.any(changed[36 * 48000:]))
+
+    def test_export_choice_has_no_pcm_impact_and_global_gain_is_honestly_global(self):
+        old = {"cues": [{"eventId": "ACTUAL_EVENT", "frame": 1200, "type": "CLICK"}], "gain": .5}
+        none = audio.audio_revision_impact(old, {**old, "exportWav": True}, plan(80))
+        self.assertEqual(none["changedSampleIntervals"], [])
+        changed = audio.audio_revision_impact(old, {**old, "gain": 1.}, plan(80))
+        self.assertEqual(changed["changedCues"][0]["frame"], 1200)
+        self.assertEqual(changed["changedSampleIntervals"][0][0], 40 * 48000)
+
+
 @unittest.skipUnless(shutil.which("ffmpeg") and shutil.which("ffprobe"), "BLOCKED: FFmpeg unavailable")
 class SfxRealFfmpegTests(unittest.TestCase):
     def setUp(self):

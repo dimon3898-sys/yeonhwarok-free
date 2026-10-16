@@ -57,8 +57,11 @@ required at playback: SciPy is used only by the recorded asset build recipe.
 
 Three cues may overlap. Further concurrent cues are omitted with a private
 receipt rather than shifted away from their visual event. Same-type cues
-inside 120 ms are omitted similarly. Asset variants avoid immediate repeats
-within their category. Per-cue source gain is at most 0.18, limiting the sum of
+inside 120 ms are omitted similarly. A waveform variant is selected only from
+the cue's stable event ID, frame, and role. It never depends on the preceding
+accepted variant. Admission counts all authored predecessor cues, including
+omitted cues, so removing one cue cannot cascade acceptance changes through
+the rest of the film. Per-cue source gain is at most 0.18, limiting the sum of
 three peak-normalized sources to 0.54 before PCM16 quantization. Clipping
 causes failure rather than success. Cue endings use an 18 ms fade, including
 truncation at the end of the video. Every omission, gain, asset hash, and sample
@@ -80,6 +83,26 @@ The Studio delivery adapter may export the final MP4, SHA256SUMS, safe quality
 summary, and optionally the SFX-only WAV. Mounted readback and external Dropbox
 synchronization remain separate claims. Audio-only changes do not require new
 GPU frames; the controller owns visual-cache invalidation.
+
+## Partial audio revisions
+
+`audio_revision_impact(old_settings, new_settings, video_plan)` uses the same
+cue scheduler as the actual mixer. Its `changedSampleIntervals` are merged
+half-open **conservative authored cue-support bounds**. They include changed
+source tails and any immediately affected neighboring admission; they do not
+claim every enclosed PCM sample differs. The contract reports affected and
+adjacent scenes from these bounds. Outside the reported union, the set,
+variant, gain, timing, and order of audible contributions remain identical.
+
+The former unapproved Studio candidate used chronological accepted-variant
+history and accepted-cue cooldown history. An actual PCM check demonstrated
+that removing a cue at 25 seconds changed 9,059 sample frames at an unchanged
+36-second cue. A dense authored burst also propagated 51 later acceptance
+changes through 40 seconds. Both defects are corrected by stable cue identity
+and local all-authored admission. Focused actual PCM regressions prove the
+unchanged 36-second waveform and show that boundary tails/neighbor effects are
+fully contained in the disclosed conservative intervals. The original frozen
+CC0 library and all 18 WAV assets remain unchanged.
 
 ## Validation boundary
 

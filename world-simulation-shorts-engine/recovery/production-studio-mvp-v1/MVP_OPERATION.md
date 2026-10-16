@@ -86,7 +86,12 @@ for example `효과음 음량 50%`, `효과음 끄기`, or a structured SFX revi
 previews the impact; explicit Start creates a new version, reuses verified silent
 video and GPU scene caches, updates audio and recomposes. Old versions remain.
 An SFX cue is selected by onset frame; an existing sound tail begun before the
-interval is retained. Exact restrictions are in `PROMPT_INPUT_CONTRACT.md`.
+interval is retained. Changed tails or local neighboring cue admission can
+extend past the requested endpoint. The preview reports conservative audio
+sample intervals and adjacent scenes rather than promising that these tails
+stop at the selected second. Focused PCM tests verify unchanged samples outside
+the reported bounds; this is not a claim of identical AAC bytes. Exact
+restrictions are in `PROMPT_INPUT_CONTRACT.md`.
 
 **Camera/territory/frontier interval editing is not implemented by this MVP.**
 The preserved V4 execution contract admits only its exact derived plan, and

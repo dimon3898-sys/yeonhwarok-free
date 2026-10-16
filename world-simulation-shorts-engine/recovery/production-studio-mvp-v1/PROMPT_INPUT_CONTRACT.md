@@ -77,14 +77,31 @@ For example, `25` to `35` with `효과음 꺼줘`, or:
 
 The revision applies to cue onsets inside the interval. A short sound that
 started before the interval retains its tail. It does not claim sample-window
-cutting at both boundaries. Cues outside the interval keep their effective
-gains, and replacement cues must remain inside the selected event/time ranges.
+cutting at both boundaries. A changed cue near the end can extend into the next
+scene. Removing/replacing a cue can also change admission of a nearby authored
+cue because of the fixed cooldown and overlap limit. Replacement cues must
+remain inside the selected event/time ranges.
+
+Cue variants are chosen from stable cue identity. Admission examines the local
+authored cue schedule rather than a chain of previously accepted cues. This
+prevents changing a cue at 25 seconds from cascading through unrelated later
+sounds. `audio_revision_impact` compares the two actual schedules and reports
+merged half-open `changedSampleIntervals`, including changed cue tails and any
+bounded neighboring admission effects. This is a conservative source-support
+bound, **not a claim of an exact changed-sample measurement**. Tests separately
+render real PCM and check that all samples outside the reported support remain
+identical. Cues outside the request preserve their requested gains, while any
+local audible effect crossing the boundary is explicitly reported.
 
 Every revision returns a new submission and an impact report containing exact
 requested frames, touched scenes, invalidated scenes, reusable scenes, and GPU
-requirement. A sound-only edit preserves the complete video plan, invalidates
-zero GPU scenes, and requires audio regeneration/remux only. Existing media,
-claims, and completed source/cache records are not changed by this function.
+requirement. `audioAffectedSceneIds` identifies scenes intersecting the reported
+audio support; `adjacentSceneIds` lists affected scenes outside the requested
+frame interval. `audioRequestedSamples` distinguishes the requested range from
+the conservative `audioChangedSampleIntervals`. A sound-only edit preserves the
+complete video plan, invalidates zero GPU scenes, and requires audio
+regeneration/remux only. Existing media, claims, and completed source/cache
+records are not changed by this function.
 
 Camera zoom/speed, territory, frontier, and other free-text visual edits are
 explicitly **unsupported in this MVP adapter**. They return
@@ -93,5 +110,7 @@ externally verified Scene JSON may be submitted as a new production. This
 module does not claim that partial visual GPU rerendering was implemented or
 tested on NVIDIA hardware.
 
-All tests here are CPU input/contract tests with an explicitly fake validator;
-real source and runtime admission are independently required by the backend.
+Input unit tests use an explicitly fake validator. A separate integration test
+exercises the actual frozen V4 source/image validators and existing scene cache
+keys. Audio interval tests render actual CPU PCM. None is NVIDIA execution;
+real GPU/runtime admission remains independently required by the backend.

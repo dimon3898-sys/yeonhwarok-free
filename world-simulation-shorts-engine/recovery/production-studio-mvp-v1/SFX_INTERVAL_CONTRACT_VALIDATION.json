@@ -1,0 +1,205 @@
+{
+  "schema": "WORLD_ENGINE_STUDIO_SFX_INTERVAL_CONTRACT_VALIDATION_V1",
+  "recordedAt": "2026-10-16T09:45:01.769642+00:00",
+  "result": "PASS_FOR_CPU_AUDIO_INTERVAL_SUPPORT_AND_VIDEO_CACHE_PRESERVATION",
+  "historicalEvidence": {
+    "path": "CONTRACT_VALIDATION.json",
+    "preserved": true,
+    "sha256": "f5d0dd6e649d59d80761586732fdf8df7d50fda157e40d681fdaf15142f3046b",
+    "meaning": "Historical original 33-test checkpoint; not evidence for updated source hashes."
+  },
+  "command": "/usr/bin/python3 -B -m unittest discover -s world-simulation-shorts-engine/recovery/production-studio-mvp-v1/tests -p test_studio_contracts.py -v",
+  "tests": {
+    "total": 36,
+    "passed": 36,
+    "failed": 0,
+    "previousFocusedContractRegressions": 33,
+    "newAudioImpactContractTests": 3,
+    "realPcmIntervalComparisonTests": 1
+  },
+  "actualPcm": {
+    "cpuSynthesis": true,
+    "durationSeconds": 80,
+    "sampleRate": 48000,
+    "channels": 2,
+    "sourceAndRevisedSamplesPerChannel": 3840000,
+    "fullWaveformsComparedInBoundedOneSecondBlocks": true,
+    "outsideReportedConservativeSupportBitExact": true,
+    "allSamplesAtAndAfter36SecondsBitExact": true,
+    "nonzeroChangeInsideReportedSupport": true,
+    "fullWaveformRetainedInMemory": false
+  },
+  "audioImpactGuarantee": {
+    "comparison": "CONSERVATIVE_AUTHORED_CUE_SUPPORT",
+    "actualPcmComparedBySchedulingHelper": false,
+    "sampleIntervalsFromHelperAreNotClaimedExactDiff": true,
+    "stableCueIdentityAndLocalAuthoredAdmission": true
+  },
+  "mutedIntervalExample": {
+    "requestedFrames": [
+      750,
+      1050
+    ],
+    "affectedSceneIds": [
+      "requested"
+    ],
+    "adjacentSceneIds": [
+      "after"
+    ],
+    "invalidatedSceneIds": [],
+    "audioAffectedSceneIds": [
+      "requested",
+      "after"
+    ],
+    "audioImpact": {
+      "schema": "WORLD_ENGINE_STUDIO_AUDIO_REVISION_IMPACT_V1",
+      "sampleRate": 48000,
+      "totalSamples": 3840000,
+      "changedSampleIntervals": [
+        [
+          1200000,
+          1208640
+        ],
+        [
+          1678400,
+          1686392
+        ]
+      ],
+      "changedCues": [
+        {
+          "eventId": "SUPPLIED_EVENT",
+          "frame": 750,
+          "type": "CLICK"
+        },
+        {
+          "eventId": "SUPPLIED_EVENT",
+          "frame": 1049,
+          "type": "CLICK"
+        }
+      ],
+      "comparison": "CONSERVATIVE_AUTHORED_CUE_SUPPORT",
+      "policy": "STABLE_CUE_IDENTITY_LOCAL_AUTHORED_ADMISSION_V1",
+      "maximumSourceTailSamples": 11868,
+      "outsideReportedIntervalsUnchangedByConstruction": true,
+      "actualPcmCompared": false,
+      "requiresGpuRerender": false
+    },
+    "audioRequestedSamples": [
+      1200000,
+      1680000
+    ],
+    "audioChangedSampleIntervals": [
+      [
+        1200000,
+        1208640
+      ],
+      [
+        1678400,
+        1686392
+      ]
+    ],
+    "reusedSceneIds": [
+      "before",
+      "requested",
+      "after"
+    ],
+    "requiresGpu": false,
+    "scope": "SFX_ONLY_RECOMPOSE",
+    "reason": "VIDEO_PLAN_UNCHANGED_ALL_VERIFIED_VIDEO_SCENES_REUSABLE",
+    "audioIntervalPolicy": "CUE_ONSET_EDIT_WITH_REPORTED_TAIL_AND_LOCAL_ADMISSION_IMPACT",
+    "gpuPartialRevisionVerified": false
+  },
+  "removedCuesIntervalExample": {
+    "requestedFrames": [
+      750,
+      1050
+    ],
+    "affectedSceneIds": [
+      "requested"
+    ],
+    "adjacentSceneIds": [
+      "after"
+    ],
+    "invalidatedSceneIds": [],
+    "audioAffectedSceneIds": [
+      "requested",
+      "after"
+    ],
+    "audioImpact": {
+      "schema": "WORLD_ENGINE_STUDIO_AUDIO_REVISION_IMPACT_V1",
+      "sampleRate": 48000,
+      "totalSamples": 3840000,
+      "changedSampleIntervals": [
+        [
+          1200000,
+          1208640
+        ],
+        [
+          1678400,
+          1687992
+        ]
+      ],
+      "changedCues": [
+        {
+          "eventId": "SUPPLIED_EVENT",
+          "frame": 750,
+          "type": "CLICK"
+        },
+        {
+          "eventId": "SUPPLIED_EVENT",
+          "frame": 1049,
+          "type": "CLICK"
+        },
+        {
+          "eventId": "SUPPLIED_EVENT",
+          "frame": 1050,
+          "type": "CLICK"
+        }
+      ],
+      "comparison": "CONSERVATIVE_AUTHORED_CUE_SUPPORT",
+      "policy": "STABLE_CUE_IDENTITY_LOCAL_AUTHORED_ADMISSION_V1",
+      "maximumSourceTailSamples": 11868,
+      "outsideReportedIntervalsUnchangedByConstruction": true,
+      "actualPcmCompared": false,
+      "requiresGpuRerender": false
+    },
+    "audioRequestedSamples": [
+      1200000,
+      1680000
+    ],
+    "audioChangedSampleIntervals": [
+      [
+        1200000,
+        1208640
+      ],
+      [
+        1678400,
+        1687992
+      ]
+    ],
+    "reusedSceneIds": [
+      "before",
+      "requested",
+      "after"
+    ],
+    "requiresGpu": false,
+    "scope": "SFX_ONLY_RECOMPOSE",
+    "reason": "VIDEO_PLAN_UNCHANGED_ALL_VERIFIED_VIDEO_SCENES_REUSABLE",
+    "audioIntervalPolicy": "CUE_ONSET_EDIT_WITH_REPORTED_TAIL_AND_LOCAL_ADMISSION_IMPACT",
+    "gpuPartialRevisionVerified": false
+  },
+  "protection": {
+    "videoPlanUnchanged": true,
+    "invalidatedGpuScenes": 0,
+    "allExistingVideoSceneCacheKeysReusable": true,
+    "gpuRenderExecuted": false,
+    "cameraVisualRevisionImplemented": false,
+    "gpuPartialRevisionVerified": false
+  },
+  "sha256": {
+    "studio_contracts.py": "e8b7a8c43545d8ede614f631824863361d9b5e9ec2d26ae86e857a247fa74c75",
+    "tests/test_studio_contracts.py": "2ec04ad69241e7bafaeef4b615ad0a07b47041627be936f8fe9a3c4b975e5df1",
+    "PROMPT_INPUT_CONTRACT.md": "00148edfd8e2ce0de7a263bddb0367d9a5bad85ef0465cc8333a7975398d2663",
+    "studio_audio.py": "03a9083aa71ac5acbe17806afd8dfb44e1fd155e886237aba6c00ae3552dca5d"
+  }
+}

@@ -14,7 +14,7 @@ import math
 from pathlib import Path
 import re
 
-from studio_audio import AudioError, normalize_sfx
+from studio_audio import AudioError, audio_revision_impact, normalize_sfx
 
 HERE = Path(__file__).resolve().parent
 PROFILES = {"V4_ARCHIVAL_80S", "UNIVERSAL_V3"}
@@ -262,8 +262,10 @@ def plan_revision(parent_submission, startSeconds, endSeconds, prompt, sfx=None)
     """A new SFX revision with [start,end) exact frame semantics, no GPU edits.
 
     A cue belongs to the interval by its event frame; a short sound already
-    started before the interval is retained. Revisions never move a cue to make
-    it fit, modify event data, stretch history, or modify the parent object.
+    started before the interval is retained. Changed cue tails and bounded
+    neighboring authored-cue admission effects may extend beyond the requested
+    interval; all such audio support is reported, including adjacent scenes.
+    Revisions never move a cue, alter event data, or modify the parent object.
     """
     _bounded_json(parent_submission)
     if not isinstance(parent_submission, dict) or parent_submission.get("schema") != SCHEMA:
@@ -314,11 +316,28 @@ def plan_revision(parent_submission, startSeconds, endSeconds, prompt, sfx=None)
             or type(s.get("startFrame")) is not int or type(s.get("endFrame")) is not int for s in scenes):
         _error("STUDIO_REVISION_PARENT_INVALID", "검증된 장면 분할 계획이 필요합니다.")
     affected = [s["sceneId"] for s in scenes if s["startFrame"] < end and start < s["endFrame"]]
+    try:
+        audio_impact = audio_revision_impact(old, revised_audio, plan)
+    except AudioError:
+        _error("STUDIO_REVISION_AUDIO_IMPACT_INVALID", "효과음 수정 영향 구간을 검증하지 못했습니다.", "sfx")
+    sample_rate = audio_impact["sampleRate"]
+    changed_intervals = audio_impact["changedSampleIntervals"]
+    def intersects_audio(scene):
+        # The supported Studio output is 30 fps / 48 kHz: every global frame
+        # boundary is exactly representable on this sample grid.
+        left = scene["startFrame"] * sample_rate // plan["fps"]
+        right = scene["endFrame"] * sample_rate // plan["fps"]
+        return any(a < right and left < b for a, b in changed_intervals)
+    audio_affected = [s["sceneId"] for s in scenes if intersects_audio(s)]
+    adjacent = [scene_id for scene_id in audio_affected if scene_id not in affected]
     result = deepcopy(parent_submission)
     result["sfx"] = revised_audio
     return {"submission": result, "impact": {"requestedFrames": [start, end],
-            "affectedSceneIds": affected, "adjacentSceneIds": [], "invalidatedSceneIds": [],
+            "affectedSceneIds": affected, "adjacentSceneIds": adjacent, "invalidatedSceneIds": [],
+            "audioAffectedSceneIds": audio_affected, "audioImpact": audio_impact,
+            "audioRequestedSamples": [start * sample_rate // plan["fps"], end * sample_rate // plan["fps"]],
+            "audioChangedSampleIntervals": changed_intervals,
             "reusedSceneIds": [s["sceneId"] for s in scenes], "requiresGpu": False,
             "scope": "SFX_ONLY_RECOMPOSE", "reason": "VIDEO_PLAN_UNCHANGED_ALL_VERIFIED_VIDEO_SCENES_REUSABLE",
-            "audioIntervalPolicy": "CUE_ONSET_IN_HALF_OPEN_INTERVAL_PRIOR_SOUND_TAIL_RETAINED",
+            "audioIntervalPolicy": "CUE_ONSET_EDIT_WITH_REPORTED_TAIL_AND_LOCAL_ADMISSION_IMPACT",
             "gpuPartialRevisionVerified": False}}

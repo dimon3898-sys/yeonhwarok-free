@@ -30,6 +30,7 @@ MAX_OVERLAP = 3
 COOLDOWN_SAMPLES = 5760  # 120ms per public cue type, global event clock.
 MAX_CUE_GAIN = .18       # Three peak-normalized layers sum to at most .54.
 FADE_SAMPLES = 864      # 18ms smooth ending, including end-of-video truncation.
+SCHEDULING_POLICY = "STABLE_CUE_IDENTITY_LOCAL_AUTHORED_ADMISSION_V1"
 SOURCE_SHA256 = "95f52e8c384059a1670b063d58bf38decebc63ba28bbdd685400904b5e3e3f02"
 TYPES = {
     "CLICK": "CITY_REVEAL",
@@ -215,6 +216,84 @@ def _publish(temporary: Path, destination: Path) -> None:
     temporary.unlink()
 
 
+def _schedule_sfx(settings: dict | None, video_plan: dict) -> dict:
+    """Local authored-cue admission, independent of earlier accepted results.
+
+    A cue's waveform depends only on its stable identity. Cooldown and voice
+    limits count authored predecessors, including omitted/zero-gain cues. Thus
+    removing an old cue cannot change variant/admission decisions throughout
+    the rest of the film. It can affect a nearby cue or a short source tail;
+    ``audio_revision_impact`` reports those bounded footprints explicitly.
+    """
+    normalized = normalize_sfx(settings, video_plan)
+    _, fps, total_samples = _timing(video_plan)
+    manifest = asset_manifest()
+    catalog = {row["id"]: row for row in manifest["assets"]}
+    last_authored_type, authored_active, records = {}, [], []
+    for cue in normalized["cues"]:
+        offset = _round_fraction(Fraction(cue["frame"] * SR, 1) / fps)
+        category = TYPES[cue["type"]]
+        seed = int(hashlib.sha256(f"{cue['eventId']}:{cue['frame']}:{cue['type']}".encode()).hexdigest()[:8], 16)
+        variant = f"{category}_{seed % 3 + 1:02d}"
+        row = catalog[variant]
+        n = min(row["frames"], total_samples - offset)
+        authored_active = [item for item in authored_active if item["endSample"] > offset]
+        status = "RENDERED"
+        if not normalized["enabled"]:
+            status = "DISABLED"
+        elif offset - last_authored_type.get(cue["type"], -COOLDOWN_SAMPLES) < COOLDOWN_SAMPLES:
+            status = "OMITTED_TYPE_COOLDOWN"
+        elif len(authored_active) >= MAX_OVERLAP:
+            status = "OMITTED_OVERLAP_LIMIT"
+        record = {**cue, "onsetSample": offset, "endSample": offset + n, "status": status,
+                  "variant": variant, "assetSha256": row["sha256"],
+                  "linearGain": normalized["gain"] * cue["gain"] * MAX_CUE_GAIN}
+        records.append(record)
+        # Every authored predecessor participates, even if its sound is omitted.
+        last_authored_type[cue["type"]] = offset
+        authored_active.append(record)
+    return {"settings": normalized, "manifest": manifest, "records": records,
+            "policy": SCHEDULING_POLICY}
+
+
+def audio_revision_impact(old_settings: dict | None, new_settings: dict | None, plan: dict) -> dict:
+    """Conservative cue-support bounds from the exact shared scheduling logic.
+
+    These bounds include changed tails and neighboring cue admissions. They
+    are not a claim that every enclosed sample differs. Outside their union,
+    all audible contributions and the fixed block mixer are unchanged.
+    """
+    old = _schedule_sfx(old_settings, plan)
+    new = _schedule_sfx(new_settings, plan)
+    identity = lambda row: (row["eventId"], row["frame"], row["type"])
+    def audible(rows):
+        return {identity(row): row for row in rows
+                if row["status"] == "RENDERED" and row["linearGain"] > 0}
+    old_rows, new_rows = audible(old["records"]), audible(new["records"])
+    fingerprint = lambda row: None if row is None else tuple(row[key] for key in (
+        "variant", "assetSha256", "onsetSample", "endSample", "linearGain"))
+    changed, intervals = [], []
+    for key in sorted(old_rows.keys() | new_rows.keys(), key=lambda item: (item[1], item[0], item[2])):
+        before, after = old_rows.get(key), new_rows.get(key)
+        if fingerprint(before) == fingerprint(after):
+            continue
+        changed.append({"eventId": key[0], "frame": key[1], "type": key[2]})
+        intervals.extend([row["onsetSample"], row["endSample"]] for row in (before, after) if row is not None)
+    merged = []
+    for start, end in sorted(intervals):
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+    _, _, total = _timing(plan)
+    return {"schema": "WORLD_ENGINE_STUDIO_AUDIO_REVISION_IMPACT_V1", "sampleRate": SR,
+            "totalSamples": total, "changedSampleIntervals": merged, "changedCues": changed,
+            "comparison": "CONSERVATIVE_AUTHORED_CUE_SUPPORT", "policy": SCHEDULING_POLICY,
+            "maximumSourceTailSamples": max(row["frames"] for row in new["manifest"]["assets"]),
+            "outsideReportedIntervalsUnchangedByConstruction": True, "actualPcmCompared": False,
+            "requiresGpuRerender": False}
+
+
 def render_sfx(settings: dict | None, video_plan: dict, output_wav: Path) -> dict:
     """Stream a deterministic PCM16 stereo track in <=one-second blocks.
 
@@ -225,7 +304,7 @@ def render_sfx(settings: dict | None, video_plan: dict, output_wav: Path) -> dic
     """
     started = time.monotonic()
     normalized = normalize_sfx(settings, video_plan)
-    _, fps, total_samples = _timing(video_plan)
+    _, _, total_samples = _timing(video_plan)
     base = {"schema": "WORLD_ENGINE_STUDIO_SFX_RENDER_V1", "enabled": normalized["enabled"],
             "sampleRate": SR, "channels": 2, "totalSamples": total_samples, "sampleWidth": 2,
             "audioDurationSeconds": total_samples / SR, "license": "CC0-1.0", "file": None,
@@ -235,32 +314,16 @@ def render_sfx(settings: dict | None, video_plan: dict, output_wav: Path) -> dic
         return {**base, "status": "DISABLED", "elapsedSeconds": time.monotonic() - started,
                 "mixPolicy": {"blockSamples": BLOCK_SAMPLES, "maximumResidentMixSamples": 0}}
     destination = _new_output(output_wav)
-    manifest = asset_manifest()
+    selection = _schedule_sfx(normalized, video_plan)
+    manifest = selection["manifest"]
     catalog = {row["id"]: row for row in manifest["assets"]}
-    resident_assets, last_variant, last_type, accepted, records = {}, {}, {}, [], []
-    for cue in normalized["cues"]:
-        offset = _round_fraction(Fraction(cue["frame"] * SR, 1) / fps)
-        record = {**cue, "onsetSample": offset, "status": "RENDERED"}
-        if offset - last_type.get(cue["type"], -COOLDOWN_SAMPLES) < COOLDOWN_SAMPLES:
-            records.append({**record, "status": "OMITTED_TYPE_COOLDOWN"})
-            continue
-        category = TYPES[cue["type"]]
-        names = [f"{category}_{i:02d}" for i in range(1, 4)]
-        seed = int(hashlib.sha256(f"{cue['eventId']}:{cue['frame']}:{cue['type']}".encode()).hexdigest()[:8], 16)
-        rotated = names[seed % 3:] + names[:seed % 3]
-        variant = next(n for n in rotated if n != last_variant.get(category))
-        row = catalog[variant]
-        n = min(row["frames"], total_samples - offset)
-        if sum(item["onsetSample"] <= offset < item["endSample"] for item in accepted) >= MAX_OVERLAP:
-            records.append({**record, "status": "OMITTED_OVERLAP_LIMIT"})
-            continue
+    records = selection["records"]
+    accepted = [record for record in records if record["status"] == "RENDERED"]
+    resident_assets = {}
+    for record in accepted:
+        variant = record["variant"]
         if variant not in resident_assets:
-            resident_assets[variant] = _read_asset(row)
-        record.update({"variant": variant, "endSample": offset + n, "assetSha256": row["sha256"],
-                       "linearGain": normalized["gain"] * cue["gain"] * MAX_CUE_GAIN})
-        records.append(record)
-        accepted.append(record)
-        last_type[cue["type"]], last_variant[category] = offset, variant
+            resident_assets[variant] = _read_asset(catalog[variant])
     handle, name = tempfile.mkstemp(prefix=".studio-sfx-", suffix=".wav", dir=destination.parent)
     os.close(handle)
     temporary = Path(name)
@@ -313,6 +376,8 @@ def render_sfx(settings: dict | None, video_plan: dict, output_wav: Path) -> dic
                           "perTypeCooldownSamples": COOLDOWN_SAMPLES, "peakBudget": MAX_CUE_GAIN * MAX_OVERLAP,
                           "measuredPeak": peak, "clippedSamples": clipped,
                           "gain": normalized["gain"], "omissions": dict(Counter(c["status"] for c in records if c["status"] != "RENDERED")),
+                          "schedulingPolicy": SCHEDULING_POLICY,
+                          "admissionBasis": "All authored cue predecessors, including omitted/zero-gain cues; never prior accepted history",
                           "maximumResidentAssetSamples": sum(len(a) for a in resident_assets.values()),
                           "sampleOffsetMethod": "nearest rational sample, half-up; exact frame grid when sampleRate/fps is integral"},
             "elapsedSeconds": time.monotonic() - started}
