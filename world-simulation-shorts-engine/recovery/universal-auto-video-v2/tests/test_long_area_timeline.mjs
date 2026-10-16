@@ -2,7 +2,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {registerHooks} from 'node:module';
-import {readFile} from 'node:fs/promises';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
@@ -14,10 +13,13 @@ const engine=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..
 const hook=registerHooks({resolve(specifier,context,next){if(specifier.startsWith('/modules/'))return {url:new URL('file://'+path.join(engine,'web/map_infographic_v1',specifier.slice('/modules/'.length))).href,shortCircuit:true};return next(specifier,context);}});
 let compileLongAreaRequest,evaluateLongAreaFrame;
 try{({compileLongAreaRequest,evaluateLongAreaFrame}=await import('../long_area_timeline.mjs'));}finally{hook.deregister();}
-const legacy=JSON.parse(await readFile(path.join(engine,'recovery/planner-scene-json-v1/fixtures/SCENE_PLAN.json'))),
- project=geo=>[geo[0]*10,-geo[1]*10],visual=controls=>({areas:controls.areas,fronts:controls.fronts,
+// Use the already-packaged factual catalog and preserved planner. The frozen
+// selective image intentionally does not contain an unused old14sScene fixture.
+const python="import json,sys;sys.path.insert(0,sys.argv[1]);from planner import plan_topic;print(json.dumps([plan_topic('한국전쟁 전선 변화',duration_seconds=d)['legacyScenePlan'] for d in [14,80,120,180,300,600]],ensure_ascii=False))",
+ generatedScenes=JSON.parse((await promisify(execFile)('/usr/bin/python3',['-B','-c',python,root],{maxBuffer:8*1024*1024})).stdout),
+ legacy=generatedScenes[0],project=geo=>[geo[0]*10,-geo[1]*10],visual=controls=>({areas:controls.areas,fronts:controls.fronts,
   origin:controls.origin,stateId:controls.stateId,timeLabel:controls.timeLabel,hold:controls.hold});
-test('all360originaleventframesretainexactAreaV3geometry/frontreveal/alpha/state/date',()=>{
+test(`all ${legacy.timing.total_frames-legacy.timing.event_start_frame} generated14s eventframes retain exact originalAreaV3 geometry/frontreveal/alpha/state/date`,()=>{
  const scene=normalizePlannerGeometryKeys(legacy),before=JSON.stringify(scene),old=compileSceneEngineRequest(scene),next=compileLongAreaRequest(scene);
  for(let frame=scene.timing.event_start_frame;frame<scene.timing.total_frames;frame++){
   const expected=evaluateAreaFrame(old.areaPlan,old.areaPlan.startFrame+frame-old.timing.eventStartFrame,{project}),
@@ -27,9 +29,7 @@ test('all360originaleventframesretainexactAreaV3geometry/frontreveal/alpha/state
  assert.equal(JSON.stringify(scene),before);assert.ok(next.timelinePlan.states.every(row=>row.staticPlan.totalFrames===1));
 });
 test('80–600sglobalclockusesoriginalcoordinates atarbitraryorderedframes andseams',async()=>{
- const python="import json,sys;sys.path.insert(0,sys.argv[1]);from planner import plan_topic;print(json.dumps([plan_topic('한국전쟁 전선 변화',duration_seconds=d)['legacyScenePlan'] for d in [80,120,180,300,600]],ensure_ascii=False))";
- const scenes=JSON.parse((await promisify(execFile)('/usr/bin/python3',['-B','-c',python,root],{maxBuffer:8*1024*1024})).stdout);
- for(const raw of scenes){const scene=normalizePlannerGeometryKeys(raw),before=JSON.stringify(scene),request=compileLongAreaRequest(scene),p=request.timelinePlan,
+ for(const raw of generatedScenes.slice(1)){const scene=normalizePlannerGeometryKeys(raw),before=JSON.stringify(scene),request=compileLongAreaRequest(scene),p=request.timelinePlan,
   frames=new Set([p.eventStartFrame,p.eventStartFrame+1,p.totalFrames-1,p.finalHoldStartFrame,
    ...p.states.slice(1).flatMap(row=>[row.globalStartFrame-1,row.globalStartFrame,row.globalStartFrame+1,
     row.globalStartFrame+Math.floor(row.transitionFrames/2),row.globalStartFrame+row.transitionFrames-1])]);
