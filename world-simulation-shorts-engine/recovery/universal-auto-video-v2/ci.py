@@ -183,6 +183,78 @@ def uid_code(body):
         "p.mkdir(mode=0o700,exist_ok=True);os.chown(p,1000,1000);os.setgroups([]);os.setgid(1000);os.setuid(1000);" + body)
 
 
+def validate_actual_boundary_report(report, fixture_path=None):
+    """Independently bind pixel comparisons to a real production scene cut.
+
+    Adjacent frame numbers alone are insufficient: 299/300 both belonged to
+    scene-0003 in the first published fixture. Never trust the PASS boolean to
+    establish that two different production ranges were actually exercised.
+    """
+    fixture_path = HERE / 'fixtures/PLAN_80S.json' if fixture_path is None else Path(fixture_path)
+    raw = fixture_path.read_bytes()
+    document = json.loads(raw)
+    if report.get('planSha256') != hashlib.sha256(raw).hexdigest():
+        raise RuntimeError('ACTUAL_BOUNDARY_SOURCE_PLAN_SHA_REQUIRED')
+    pair = report.get('actualBoundaryPair')
+    if not isinstance(pair, dict):
+        raise RuntimeError('ACTUAL_SCENE_BOUNDARY_WITNESS_REQUIRED')
+    cut, before, after = (pair.get(key) for key in ('cutFrame', 'beforeFrame', 'afterFrame'))
+    if (any(isinstance(value, bool) or not isinstance(value, int) for value in (cut, before, after))
+            or before != cut - 1 or after != cut):
+        raise RuntimeError('ACTUAL_ADJACENT_BOUNDARY_FRAMES_REQUIRED')
+    scenes = document['scenes']
+    matches = [(left, right) for left, right in zip(scenes, scenes[1:])
+        if left['endFrame'] == cut == right['startFrame']]
+    if len(matches) != 1:
+        raise RuntimeError('REAL_SOURCE_SCENE_CUT_REQUIRED')
+    left, right = matches[0]
+    left_range, right_range = [left['startFrame'], left['endFrame']], [right['startFrame'], right['endFrame']]
+    if (left['sceneId'] == right['sceneId'] or pair.get('leftSceneId') != left['sceneId']
+            or pair.get('rightSceneId') != right['sceneId']
+            or pair.get('leftRange') != left_range or pair.get('rightRange') != right_range):
+        raise RuntimeError('REAL_DISTINCT_SCENE_IDS_AND_RANGES_REQUIRED')
+    timing = document['legacyScenePlan']['timing']
+    after_reveal = timing['event_start_frame'] + timing['initial_reveal_frames']
+    if (cut <= after_reveal or not any(cut > step['start_frame']
+            and cut < step['start_frame'] + step['transition_frames'] - 1
+            for step in document['legacyScenePlan']['time_steps'][1:])):
+        raise RuntimeError('ACTUAL_ACTIVE_EVENT_SCENE_CUT_REQUIRED')
+    expected_frames = [0, before, after, document['totalFrames'] // 2, document['totalFrames'] - 1]
+    if len(set(expected_frames)) != 5 or report.get('frames') != expected_frames:
+        raise RuntimeError('FIVE_SOURCE_BOUND_TEMPORAL_FRAMES_REQUIRED')
+    rows = report.get('rows')
+    if not isinstance(rows, list) or len(rows) != 5 or [row.get('frame') for row in rows] != expected_frames:
+        raise RuntimeError('ACTUAL_SOURCE_BOUND_RENDER_ROWS_REQUIRED')
+    digest = re.compile('[0-9a-f]{64}', re.ASCII)
+    for row in rows:
+        frame = row['frame']
+        selected = [scene for scene in scenes if scene['startFrame'] <= frame < scene['endFrame']]
+        if (len(selected) != 1 or row.get('sceneId') != selected[0]['sceneId']
+                or row.get('globalFrame') != frame
+                or row.get('sceneRange') != [selected[0]['startFrame'], selected[0]['endFrame']]
+                or not isinstance(row.get('rawRgbaSha256'), str) or not digest.fullmatch(row['rawRgbaSha256'])
+                or not isinstance(row.get('sceneRangeSha256'), str) or not digest.fullmatch(row['sceneRangeSha256'])):
+            raise RuntimeError('ACTUAL_RENDERED_FRAME_SCENE_BINDING_REQUIRED')
+    continuity = report.get('continuity')
+    if (not isinstance(continuity, list) or len(continuity) != 2
+            or [row.get('globalFrame') for row in continuity] != [before, after]):
+        raise RuntimeError('ACTUAL_CUT_PIXEL_COMPARISON_ROWS_REQUIRED')
+    for row, scene, bounds in zip(continuity, (left, right), (left_range, right_range)):
+        captured = next(item for item in rows if item['frame'] == row['globalFrame'])
+        if (row.get('sceneId') != scene['sceneId'] or row.get('productionSceneRange') != bounds
+                or row.get('productionSceneRangeSha256') != captured['sceneRangeSha256']
+                or row.get('bitExact') is not True
+                or row.get('segmentedRawRgbaSha256') != captured['rawRgbaSha256']
+                or row.get('fullTimelineRawRgbaSha256') != captured['rawRgbaSha256']):
+            raise RuntimeError('ACTUAL_CUT_SOURCE_AND_PIXEL_EQUALITY_REQUIRED')
+    return {'status': 'PASS', 'sourcePlanSha256': hashlib.sha256(raw).hexdigest(),
+        'cutFrame': cut, 'beforeFrame': before, 'afterFrame': after,
+        'leftSceneId': left['sceneId'], 'rightSceneId': right['sceneId'],
+        'leftRange': left_range, 'rightRange': right_range,
+        'differentActualProductionScenes': True, 'activeEventTransition': True,
+        'actualCutPixelsBitExact': True, 'reportBooleanAloneAccepted': False}
+
+
 def software_probe(image, *, context=None, phase):
     code = "import subprocess;raise SystemExit(subprocess.run(['/usr/local/bin/node','" + DEST + "/software_probe_long.mjs']).returncode)"
     result = subprocess.run(container(context=context) + ['--entrypoint=/usr/bin/python3', image, '-B', '-c', uid_code(code)],
@@ -205,6 +277,16 @@ def software_probe(image, *, context=None, phase):
             or report.get('nativeBoundaryProtection', {}).get('status') != 'PASS'
             or report.get('nativeBoundaryProtection', {}).get('actualReadPixelsCompared') is not True):
         raise RuntimeError('ACTUAL_UNIVERSAL_SOFTWARE_RANGE_PROOF_REQUIRED')
+    try:
+        audit = validate_actual_boundary_report(report)
+    except RuntimeError as error:
+        value = state()
+        value[phase]['actualBoundaryAudit'] = {'status': 'FAIL', 'reasonCode': str(error)}
+        save(value)
+        raise
+    value = state()
+    value[phase]['actualBoundaryAudit'] = audit
+    save(value)
     return report
 
 

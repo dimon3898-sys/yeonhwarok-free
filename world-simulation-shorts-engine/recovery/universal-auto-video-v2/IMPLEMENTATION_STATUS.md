@@ -1,7 +1,9 @@
 # WORLD ENGINE — Universal Auto Video V2 구현 상태
 
-이 문서는 통합 구현과 CPU 검증 직후의 중간 보고다. 실제 SwiftShader 통합 검사
-성공과 새 이미지 등록은 미완료/PENDING 상태이며, 수정 후 결과는 후속 기록으로 확정한다.
+이 문서는 통합 구현과 무료 검증 중의 중간 보고다. run `38843019699-1`에서
+실제 SwiftShader draw/readPixels와 이미지 등록·독립 pull은 성공했지만, 당시
+장면 경계 비교의 범위가 잘못되어 그 이미지는 **NOT_FINAL_CANDIDATE**다.
+실제 장면 cut을 통과하는 수정 후 검증과 최종 후보 이미지 확정은 PENDING이다.
 80초 NVIDIA 영상, 60분 제작 목표, Dropbox 외부 전달, 사용자 영상 승인은 아직
 완료되지 않았다. 기술 계약의 성공을 실제 영상이나 시각 품질의 성공으로 해석하지 않는다.
 
@@ -163,14 +165,27 @@ mock HTTPS 성공은 외부 전달 완료로 표시하지 않는다.
 
 ## 9. 무료 검사와 보안 검사
 
-수정 후 통합 구현의 집중 검사는 **163개 PASS**다(Python 135개 + Node 28개).
+앞선 수정 checkpoint의 집중 검사는 **163개 PASS**다(Python 135개 + Node 28개).
 변경 후 수행한 planner 부분 재검증이나 독립 비교를 별도로 중복 합산하지 않는다.
 범위는 자연어/Scene 계약, 80~600초 분할, 캐시·실패·PID/lock·
 터미널 종료, 짧은 실제 FFmpeg 합성, 저장소 readback, mock GL과 경계 복구다.
+그 이후 추가한 검증 범위 수정과 새 테스트의 최종 개수는 다음 실제 CI 결과로
+확정한다. 이 문서에서 예상 개수를 더해 성공으로 표시하지 않는다.
 
-CPU mock 검사는 NVIDIA 검사가 아니다. 실제 SwiftShader 통합 draw/readPixels,
-후보 이미지 내부 검사, 독립 digest pull, 최종 Secret Scan 결과는 이 중간 문서
-작성 시점에 PENDING이다. 기존 완료된 전체 104개/233개 검사를 반복하지 않았다.
+CPU mock 검사는 NVIDIA 검사가 아니다. run `38843019699-1`에서 실제
+SwiftShader 선택 프레임 draw/readPixels, 표본의 native 경계 pixel 보존과
+원본 source hash, 이미지 내부 검사, 독립 digest pull을 확인했고, 해당 이미지
+Secret Scan은 0 findings였다. 다만 이 run의 299/300 비교는 모두 같은
+`scene-0003 [120,420)` 안에 있었다. 그 두 프레임의 segmented/full-timeline
+RGBA 일치는 유효하지만, 실제 scene cut을 지나지 않았으므로 **장면 경계 연속성
+검증으로 한 이전 표현은 철회한다**.
+
+수정 probe는 실제 기획에서 인접 장면의 cut을 동적으로 선택한다. 현재 fixture의
+대상은 `scene-0003 [120,420)`의 마지막 frame 419와
+`scene-0004 [420,675)`의 첫 frame 420이다. host CI도 probe가 보고한 수치만
+믿지 않고 실제 plan에서 서로 다른 두 scene ID·범위·인접 cut인지 독립 검증한다.
+이 수정 후 실제 SwiftShader·이미지 검사·등록·pull 결과는 아직 PENDING이다.
+기존 완료된 전체 104개/233개 검사를 반복하지 않았다.
 
 ## 10. V2·FINAL 보호와 실제 시각 경로
 
@@ -191,9 +206,17 @@ polygon 상태를 현대 가상 장면의 일방향 scalar gain으로 대체하�
 
 ## 11. 신규 이미지 태그와 digest
 
-**PENDING.** 새 runtime과 무료 통합 검사가 실제 실행 경로에서 통과한 경우에만
-고유 GHCR 태그로 빌드·등록하고 독립 runner에서 immutable digest pull을 검증한다.
-현재 문서에 존재하지 않는 digest를 작성하지 않는다. 기존 부모 이미지는 유지한다.
+**최종 후보 PENDING.** 중간 이미지
+`universal-v2-c1e9c09-38843019699-1`은 실제 빌드·등록·독립 pull을 통과했다.
+그 immutable digest는
+`sha256:5580aedfcf880975e18c3c609d8f644fdd6fb45069a862eeb6fa1cc01ef8247c`다.
+하지만 실제 scene cut 증거가 부족하므로 배포 권장 이미지나 최종 개발 완료
+후보로 사용하지 않는다. `SUPERSEDED_IMAGE_38843019699.json`은 유효했던
+검증과 부족했던 검증 범위를 구분한다. 원래 이미지·태그·run 기록은 보존한다.
+
+실제 cut 검증을 통과한 후 새 고유 태그와 digest를 확정한다. 그 수정 후보의
+빌드·등록·독립 pull 결과는 아직 PENDING이며 존재하지 않는 digest를 작성하지 않는다.
+기존 부모 이미지도 유지한다.
 
 ## 12. 80초 제작시간 추정 근거
 
@@ -237,8 +260,14 @@ Area 전선의 시각 품질, 전체 2,400프레임과 경계 연속성, VRAM/�
 - key 순서 복구 후 드러난 원래 Area 계획의 1,200프레임 cap은 상한 변경 대신
   위의 외부 global clock으로 처리했다. 정적 endpoint는 기존 Area 검증을 통과하고,
   원래의 quintic alpha와 arc-length reveal을 재사용한다. 실제 장편 프레임을
-  단축된 프레임 번호로 매핑하지 않는다. 수정 후 실제 SwiftShader 재검증과
-  신규 이미지 등록은 아직 PENDING이다.
+  단축된 프레임 번호로 매핑하지 않는다. 이 수정 후 실제 SwiftShader와 이미지
+  등록은 run `38843019699-1`에서 실행됐으나, 아래 경계 검증 범위 결함 때문에
+  그 중간 이미지는 최종 후보 자격을 부여하지 않았다.
+- run `38843019699-1`의 299/300은 같은 `[120,420)` 장면 안의 인접 프레임이다.
+  실제로 측정한 pixel 일치를 보존하되 장면 cut 연속성 주장에서는 제외했다.
+  probe가 실제 split plan에서 서로 다른 인접 장면을 선택하고, host CI가 다시
+  그 관계를 독립 확인하도록 수정했다. 현재 목표 pair는 419/420이며, 수정 후
+  실제 실행 성공은 다음 CI 증거가 확보될 때만 판정한다.
 - 기존 one-shot 150프레임 계약으로 장편을 처리할 수 없어 독립 coordinator와
   범용 scene capture를 추가했다. 기존 one-shot 코드는 변경하지 않았다.
 - 기존 renderer/source 조합에서 source pass가 native Boundary/Glow를 덮는 문제는

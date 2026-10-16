@@ -11,7 +11,32 @@ import {tmpdir,userInfo} from 'node:os';
 import path from 'node:path';
 import {loadLongRuntimePlan,sha,repo,engine} from './long_runtime.mjs';
 const execute=promisify(execFile),root=path.dirname(fileURLToPath(import.meta.url));
-export const temporalFrames=Object.freeze([0,299,300,1200,2399]);
+export function assertActualAdjacentScenePair(document,beforeFrame,afterFrame){
+ assert.ok(Number.isSafeInteger(beforeFrame)&&Number.isSafeInteger(afterFrame)&&afterFrame===beforeFrame+1,
+  'UNIVERSAL_ADJACENT_GLOBAL_FRAMES_REQUIRED');
+ const left=document.scenes.find(scene=>beforeFrame>=scene.startFrame&&beforeFrame<scene.endFrame),
+  right=document.scenes.find(scene=>afterFrame>=scene.startFrame&&afterFrame<scene.endFrame);
+ assert.ok(left&&right&&left.sceneId!==right.sceneId,'UNIVERSAL_DISTINCT_ADJACENT_SCENES_REQUIRED');
+ assert.equal(left.endFrame,right.startFrame,'UNIVERSAL_CONTIGUOUS_ACTUAL_SCENE_CUT_REQUIRED');
+ assert.equal(left.endFrame,afterFrame,'UNIVERSAL_WITNESS_MUST_STRADDLE_ACTUAL_CUT');
+ return {cutFrame:afterFrame,beforeFrame,afterFrame,leftSceneId:left.sceneId,rightSceneId:right.sceneId,
+  leftRange:[left.startFrame,left.endFrame],rightRange:[right.startFrame,right.endFrame]};
+}
+/** Select an actual production cut while a supplied state transition is active,
+ * after initial reveal. Fixed adjacent frame numbers can lie in one scene. */
+export function selectTemporalFrames(document){
+ assert.ok(document?.totalFrames>=2&&Array.isArray(document.scenes)&&document.scenes.length>1,
+  'UNIVERSAL_ACTUAL_MULTI_SCENE_PLAN_REQUIRED');
+ const timing=document.legacyScenePlan.timing,steps=document.legacyScenePlan.time_steps,
+  afterReveal=timing.event_start_frame+timing.initial_reveal_frames,
+  cut=document.scenes.slice(1).map(scene=>scene.startFrame).find(frame=>frame>afterReveal
+   &&steps.slice(1).some(step=>frame>step.start_frame&&frame<step.start_frame+step.transition_frames-1));
+ assert.ok(Number.isSafeInteger(cut),'UNIVERSAL_ACTUAL_ACTIVE_SCENE_CUT_REQUIRED');
+ const witness=assertActualAdjacentScenePair(document,cut-1,cut),
+  frames=[0,witness.beforeFrame,witness.afterFrame,Math.floor(document.totalFrames/2),document.totalFrames-1];
+ assert.equal(new Set(frames).size,5,'UNIVERSAL_FIVE_DISTINCT_TEMPORAL_PROBES_REQUIRED');
+ return {frames,witness};
+}
 /** Runs inside the real browser: compare only the original finite native
  * boundary support, excluding its own measured graphics. A 32px spatial index
  * avoids testing millions of pixels against every geography segment. */
@@ -107,6 +132,7 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
    expectedPlanSha256:sha(raw),sceneId:document.scenes[0].sceneId,activationFile:prepared.activationFile,
    expectedActivationSha256:prepared.activationSha256});
   assert.equal(document.totalFrames,2400);assert.equal(document.fps,30);
+  const temporal=selectTemporalFrames(document),temporalFrames=temporal.frames;
   browser=await require('playwright').chromium.launch({executablePath:'/usr/bin/chromium',headless:true,
    env:{...process.env,HOME:userInfo().homedir,XDG_CONFIG_HOME:path.join(temporary,'chromium-config'),XDG_CACHE_HOME:path.join(temporary,'chromium-cache')},
    ignoreDefaultArgs:['--disable-dev-shm-usage'],args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader',
@@ -134,7 +160,8 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
    try{
     const captured=await page.evaluate(frame=>window.longVideoProof.capture(frame,{png:true}),frame),d=captured.diagnostic;
     assert.equal(d.frame,frame);assert.equal(d.universalVideo.globalFrame,frame);assert.equal(d.universalVideo.testOnly,true);
-    assert.equal(d.universalVideo.legacySceneSha256,plan.legacySceneSha256);assert.equal(d.glError,0);
+    assert.equal(d.universalVideo.legacySceneSha256,plan.legacySceneSha256);
+    assert.equal(d.universalVideo.sceneRangeSha256,config.runtimeConfig.universalVideo.sceneRangeSha256);assert.equal(d.glError,0);
     assert.equal(d.sourceIntegrity.fictional65422SceneUsed,false);assert.equal(d.sourceIntegrity.actualAstraSelected,true);
     assert.equal(d.sourceIntegrity.sourceBeforeAreaAndFront,true);assert.equal(d.coverageCache.entryLimit,1);
     const eventActive=frame>=document.legacyScenePlan.timing.event_start_frame+document.legacyScenePlan.timing.initial_reveal_frames;
@@ -154,7 +181,7 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
     const filename='FRAME_'+String(frame).padStart(6,'0')+'.png';
     if(output)await writeFile(path.join(output,filename),bytes,{flag:'wx',mode:0o644});
     files.push({file:filename,sha256:captured.png_sha256,bytes:bytes.length});
-    rows.push({frame,sceneId:scene.sceneId,rawRgbaSha256:captured.raw_rgba_sha256,pngSha256:captured.png_sha256,
+    rows.push({frame,sceneId:scene.sceneId,sceneRange:[scene.startFrame,scene.endFrame],sceneRangeSha256:config.runtimeConfig.universalVideo.sceneRangeSha256,rawRgbaSha256:captured.raw_rgba_sha256,pngSha256:captured.png_sha256,
      stateId:d.area.controls?.stateId??null,globalFrame:d.universalVideo.globalFrame,
      cameraNativeFrame:d.camera.nativeFrame,cameraClamped:d.camera.frameClamped,
      actualAstra:d.terrain.astra,sourceGrade:d.terrain.sourceGrade,coverageCache:d.coverageCache,geometryBounds,timings:d.timings});
@@ -166,10 +193,15 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
   assert.ok(new Set(rows.map(row=>row.rawRgbaSha256)).size>=2,'UNIVERSAL_NON_CONSTANT_RENDER_REQUIRED');
   const fullScene={...document.scenes[0],sceneId:'TEST_ONLY_UNSEGMENTED_GLOBAL_CLOCK',startFrame:0,endFrame:document.totalFrames,
    globalFrameOffset:0},fullConfig=configFor(plan.serverConfig,fullScene),{errors}=await open(fullConfig),continuity=[];
-  try{for(const frame of [299,300]){
+  try{
+   const actualPair=assertActualAdjacentScenePair(document,temporal.witness.beforeFrame,temporal.witness.afterFrame);
+   assert.equal(rows.find(row=>row.frame===actualPair.beforeFrame).sceneId,actualPair.leftSceneId);
+   assert.equal(rows.find(row=>row.frame===actualPair.afterFrame).sceneId,actualPair.rightSceneId);
+   for(const frame of [actualPair.beforeFrame,actualPair.afterFrame]){
    const actual=await page.evaluate(frame=>window.longVideoProof.capture(frame,{png:false}),frame),segmented=rows.find(row=>row.frame===frame);
    assert.equal(actual.raw_rgba_sha256,segmented.rawRgbaSha256,'UNIVERSAL_SEGMENT_RESET_CHANGED_PIXELS');
-   continuity.push({globalFrame:frame,segmentedRawRgbaSha256:segmented.rawRgbaSha256,
+   continuity.push({globalFrame:frame,sceneId:segmented.sceneId,productionSceneRange:segmented.sceneRange,
+    productionSceneRangeSha256:segmented.sceneRangeSha256,segmentedRawRgbaSha256:segmented.rawRgbaSha256,
     fullTimelineRawRgbaSha256:actual.raw_rgba_sha256,bitExact:true});
   }assert.deepEqual(errors,[]);}finally{await close();}
   await plan.assertSourceUnchanged();
@@ -179,7 +211,7 @@ export async function runLongSoftwareProbe({planFile=path.join(root,'fixtures/PL
    nvidiaHardwareVerified:false,physicalNvidiaExecuted:false,gpuRenderingVerified:false,full80SecondVideoRendered:false,
    all5TemporalFrames:true,boundaryContinuityBitExact:true,rangeBoundaryContinuityVerified:true,
    browserVersion:browser.version(),nodeVersion:process.version,playwrightVersion:require('playwright/package.json').version,
-   frames:[...temporalFrames],rows,files,continuity,nativeBoundaryProtection:{status:'PASS',actualReadPixelsCompared:true,cases:boundaryProof},
+   frames:[...temporalFrames],actualBoundaryPair:temporal.witness,rows,files,continuity,nativeBoundaryProtection:{status:'PASS',actualReadPixelsCompared:true,cases:boundaryProof},
    productionCpuPreparationSelected:true,inputCacheReuseVerified:prepared.inputCacheReuseVerified,
    projectedEventGeometryMeasured:true,wholeEventGeometryInViewport:true,
    wholeEventGeometryInSafeArea:rows.filter(row=>row.geometryBounds.active).every(row=>row.geometryBounds.wholeEventGeometryInSafeArea),

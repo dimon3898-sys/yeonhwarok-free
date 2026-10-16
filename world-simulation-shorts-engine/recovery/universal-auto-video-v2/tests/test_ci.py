@@ -1,6 +1,8 @@
 """New free-build safety tests; registry/containers are explicitly mocked."""
 from __future__ import annotations
 import importlib.util
+import hashlib
+from copy import deepcopy
 import json
 import os
 from pathlib import Path
@@ -67,6 +69,44 @@ class UniversalCISafety(unittest.TestCase):
                 'world-engine.reference-v2.source-revision': 'e9feafc785fbd138cbac3ca4db090380968dc37e',
                 'world-engine.universal-v2.source-revision': self.env['GITHUB_SHA'],
                 'world-engine.universal-v2.parent-digest': ci.PARENT_DIGEST}}}
+
+    def software_report(self, before=None, after=None):
+        """Explicit mock pixels with real immutable fixture range metadata."""
+        raw = (HERE / 'fixtures/PLAN_80S.json').read_bytes()
+        document = json.loads(raw)
+        if before is None:
+            timing = document['legacyScenePlan']['timing']
+            after_reveal = timing['event_start_frame'] + timing['initial_reveal_frames']
+            after = next(scene['startFrame'] for scene in document['scenes'][1:]
+                if scene['startFrame'] > after_reveal and any(scene['startFrame'] > step['start_frame']
+                    and scene['startFrame'] < step['start_frame'] + step['transition_frames'] - 1
+                    for step in document['legacyScenePlan']['time_steps'][1:]))
+            before = after - 1
+        select = lambda frame: next(scene for scene in document['scenes'] if scene['startFrame'] <= frame < scene['endFrame'])
+        frames = [0, before, after, document['totalFrames'] // 2, document['totalFrames'] - 1]
+        rows = []
+        for frame in frames:
+            scene = select(frame)
+            rows.append({'frame': frame, 'globalFrame': frame, 'sceneId': scene['sceneId'],
+                'sceneRange': [scene['startFrame'], scene['endFrame']],
+                'sceneRangeSha256': hashlib.sha256(json.dumps(scene, sort_keys=True).encode()).hexdigest(),
+                'rawRgbaSha256': hashlib.sha256(('TEST_ONLY_FRAME_' + str(frame)).encode()).hexdigest()})
+        left, right = select(before), select(after)
+        continuity = [{'globalFrame': row['frame'], 'sceneId': row['sceneId'],
+            'productionSceneRange': row['sceneRange'], 'productionSceneRangeSha256': row['sceneRangeSha256'],
+            'segmentedRawRgbaSha256': row['rawRgbaSha256'], 'fullTimelineRawRgbaSha256': row['rawRgbaSha256'], 'bitExact': True}
+            for row in rows if row['frame'] in (before, after)]
+        return {'schema': 'WORLD_ENGINE_UNIVERSAL_ACTUAL_SOFTWARE_PROBE_V2', 'status': 'PASS',
+            'testOnly': True, 'nvidiaHardwareVerified': False, 'full80SecondVideoRendered': False,
+            'actualDrawReadPixels': True, 'all5TemporalFrames': True,
+            'actualHistoricalSceneSelected': True, 'boundaryContinuityBitExact': True,
+            'nativeBoundaryProtection': {'status': 'PASS', 'actualReadPixelsCompared': True},
+            'productionCpuPreparationSelected': True, 'inputCacheReuseVerified': True,
+            'originalSourcesUnchanged': True, 'planSha256': hashlib.sha256(raw).hexdigest(),
+            'frames': frames, 'rows': rows, 'continuity': continuity,
+            'actualBoundaryPair': {'cutFrame': after, 'beforeFrame': before, 'afterFrame': after,
+                'leftSceneId': left['sceneId'], 'rightSceneId': right['sceneId'],
+                'leftRange': [left['startFrame'], left['endFrame']], 'rightRange': [right['startFrame'], right['endFrame']]}}
 
     def test_free_public_standard_runner_and_exact_branch(self):
         for key, value in [('RUNNER_ENVIRONMENT', 'self-hosted'), ('RESULT_REPOSITORY_PRIVATE', 'true'),
@@ -137,13 +177,7 @@ class UniversalCISafety(unittest.TestCase):
 
     def test_software_probe_requires_real_draw_selected_history_and_range_continuity(self):
         self.seed()
-        good = {'schema': 'WORLD_ENGINE_UNIVERSAL_ACTUAL_SOFTWARE_PROBE_V2', 'status': 'PASS',
-            'testOnly': True, 'nvidiaHardwareVerified': False, 'full80SecondVideoRendered': False,
-            'actualDrawReadPixels': True, 'all5TemporalFrames': True,
-            'actualHistoricalSceneSelected': True, 'boundaryContinuityBitExact': True,
-            'nativeBoundaryProtection': {'status': 'PASS', 'actualReadPixelsCompared': True},
-            'productionCpuPreparationSelected': True, 'inputCacheReuseVerified': True,
-            'originalSourcesUnchanged': True}
+        good = self.software_report()
         for changes in [{'nvidiaHardwareVerified': True}, {'testOnly': False},
                 {'actualHistoricalSceneSelected': False}, {'boundaryContinuityBitExact': False},
                 {'actualDrawReadPixels': False}, {'nativeBoundaryProtection': {'status': 'FAIL'}},
@@ -156,6 +190,35 @@ class UniversalCISafety(unittest.TestCase):
         command = self.process.call_args.args[0]
         self.assertIn('--network=none', command)
         self.assertNotIn('--gpus', command)
+
+    def test_adjacent_frames_in_one_scene_cannot_claim_an_actual_cut(self):
+        self.seed()
+        bad = self.software_report(before=299, after=300)
+        self.assertTrue(bad['boundaryContinuityBitExact'])
+        self.assertEqual(bad['actualBoundaryPair']['leftSceneId'], bad['actualBoundaryPair']['rightSceneId'])
+        self.process.return_value = SimpleNamespace(returncode=0, stdout=json.dumps(bad), stderr='')
+        with self.assertRaisesRegex(RuntimeError, 'REAL_SOURCE_SCENE_CUT_REQUIRED'):
+            ci.software_probe('synthetic-image', phase='synthetic')
+        self.assertEqual(ci.state()['synthetic']['actualBoundaryAudit']['status'], 'FAIL')
+
+    def test_actual_cut_is_independently_bound_to_real_fixture_ids_ranges_and_pixels(self):
+        good = self.software_report()
+        audit = ci.validate_actual_boundary_report(good)
+        self.assertTrue(audit['differentActualProductionScenes'])
+        self.assertFalse(audit['reportBooleanAloneAccepted'])
+        self.assertNotEqual(audit['leftSceneId'], audit['rightSceneId'])
+        mutations = [lambda row: row.__setitem__('planSha256', '0' * 64),
+            lambda row: row['actualBoundaryPair'].__setitem__('rightSceneId', row['actualBoundaryPair']['leftSceneId']),
+            lambda row: row['actualBoundaryPair'].__setitem__('rightRange', [0, 2400]),
+            lambda row: row['rows'][1].__setitem__('globalFrame', 0),
+            lambda row: row['continuity'][0].__setitem__('sceneId', row['actualBoundaryPair']['rightSceneId']),
+            lambda row: row['continuity'][0].__setitem__('productionSceneRange', [0, 2400]),
+            lambda row: row['continuity'][1].__setitem__('fullTimelineRawRgbaSha256', '0' * 64)]
+        for change in mutations:
+            bad = deepcopy(good)
+            change(bad)
+            with self.subTest(change=change), self.assertRaises(RuntimeError):
+                ci.validate_actual_boundary_report(bad)
 
     def test_inherited_entrypoint_platform_and_parent_labels_cannot_change(self):
         self.command.side_effect = None
