@@ -29,7 +29,7 @@ TAG_PATTERN = re.compile(r'universal-v2-c1e9c09-[1-9][0-9]*-[1-9][0-9]*', re.ASC
 RUNTIME_FILES = ('contracts.py', 'planner.py', 'cache.py', 'compose.py', 'delivery.py',
     'orchestrator.py', 'render_adapter.py', 'prepare_video.py', 'universal_files.py',
     'long_runtime.mjs', 'long_capture.mjs', 'long_adapter.mjs', 'native_boundary_restore.mjs',
-    'planner_key_order.mjs', 'long_area_timeline.mjs',
+    'planner_geometry_serialization.mjs', 'long_area_timeline.mjs',
     'serve_long.py', 'HISTORY_CATALOG.json', 'SUPPLEMENTAL_SOURCES.json')
 TEST_FILES = ('software_probe_long.mjs',)
 

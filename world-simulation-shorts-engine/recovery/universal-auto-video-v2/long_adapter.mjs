@@ -8,7 +8,7 @@ import {loadUploadBundle} from '/astra-upload/gpu_upload.mjs';
 import {setReferenceSourceProfile,setQualityMaterialProfile,configureAstraMaterialForCanvas,
  clearAstraMaterialForCanvas,createReferenceTerrainMaterialPassV4} from '/reference/reference_source_material.mjs';
 import {createNativeBoundaryRestore} from './native_boundary_restore.mjs';
-import {normalizePlannerGeometryKeys} from './planner_key_order.mjs';
+import {normalizePlannerGeometryKeys} from './planner_geometry_serialization.mjs';
 
 const clone=value=>structuredClone(value),hex=value=>typeof value==='string'&&/^[a-f0-9]{64}$/.test(value);
 const digest=async bytes=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))]

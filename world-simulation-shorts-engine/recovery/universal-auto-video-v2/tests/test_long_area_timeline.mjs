@@ -6,7 +6,7 @@ import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {normalizePlannerGeometryKeys} from '../planner_key_order.mjs';
+import {normalizePlannerGeometryKeys} from '../planner_geometry_serialization.mjs';
 import {compileSceneEngineRequest} from '../../../web/map_infographic_v1/planner_engine_adapter_v1.mjs';
 import {evaluateAreaFrame} from '../../../web/map_infographic_v1/area_core_v3.mjs';
 const engine=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../../..'),root=path.resolve(engine,'recovery/universal-auto-video-v2');
