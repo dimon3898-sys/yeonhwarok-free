@@ -978,12 +978,42 @@
   },
   "notes": [
     "A/B/C/D frame75 use identical old F camera. E/F share candidate camera.",
-    "E75 and A75 PNGs are byte-identical because selected camera hold occurs96\u2013105; a targeted in-hold software follow-up is separate.",
+    "E75 and A75 PNGs are byte-identical because selected camera hold is96\u2013105. Separate A100/E99\u2013101 actual SW follow-up PASS proves15.106px RMS camera difference, zero projected hold drift, advancing event/pixels.",
     "Source-edge RGB jumps are mixed, including small increases after contrast. No universal seam-reduction PASS is claimed.",
     "Enlarged D unit pixel-width measurement is SKIP due overlapping projected measurement rectangles. It is not a critical-artwork collision; CPU original SAT confirms0 all150.",
     "The actual F NVIDIA MP4 is unavailable for inspection; saved SW baseline/provenance is used.",
     "Reference final approximately3.8s outro is excluded; comparable event window5.181813\u201310.181813s."
   ],
   "physicalNvidiaExecuted": false,
-  "videoQualityApproved": false
+  "videoQualityApproved": false,
+  "cameraFollowup": {
+    "runId": 38834252370,
+    "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:3add2c567190dae3618427befe90d15f0c183bd221c87d16736842bcc6ebb4c5",
+    "rmsProjectedDifferencePixels": 15.106013492500166,
+    "maxProjectedDifferencePixels": 24.814655813054024,
+    "E99to101ProjectionChangePixels": 0,
+    "eventAdvances": true,
+    "sourceAndMaterialAndWorldUnitsEqual": true,
+    "selectedFrame": 100,
+    "files": [
+      {
+        "file": "A_100.png",
+        "sha256": "9e132e0ab8f8042bf086524c4f20946d1359014d1eb7b96debbf2ae2e44feee5",
+        "bytes": 2729538,
+        "width": 1080,
+        "height": 1920,
+        "scope": "CPU_SW_NOT_NVIDIA"
+      },
+      {
+        "file": "E_100.png",
+        "sha256": "326791c98204cdde1bb29fa997fb917a7df32c9378de01492a2d043422387a00",
+        "bytes": 2718446,
+        "width": 1080,
+        "height": 1920,
+        "scope": "CPU_SW_NOT_NVIDIA"
+      }
+    ],
+    "evidence": "runs/38834252370-1/camera-followup/result.json",
+    "scope": "Four additional actual SwiftShader frames, no new image or NVIDIA execution"
+  }
 }

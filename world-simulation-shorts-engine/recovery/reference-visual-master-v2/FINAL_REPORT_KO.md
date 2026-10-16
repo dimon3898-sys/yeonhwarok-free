@@ -1,6 +1,6 @@
 # REFERENCE VISUAL MASTER V2 실행 결과
 
-새 V2 후보의 구현·CPU 검사·실제 SwiftShader 검사·GHCR 등록·별도 runner digest pull을 완료했다. 실제 NVIDIA 실행과 영상 품질 최종 승인은 아직 수행하지 않았다. 카메라 유지 구간의 추가 소프트웨어 증거는 별도 기록한다.
+새 V2 후보의 구현·CPU 검사·실제 SwiftShader 검사·GHCR 등록·별도 runner digest pull을 완료했다. 실제 NVIDIA 실행과 영상 품질 최종 승인은 아직 수행하지 않았다. 카메라 유지 구간의 추가 실제 SwiftShader 증거도 run38834252370에서 검증·저장했다.
 
 ## 1. 레퍼런스와 기존 F의 차이
 
@@ -27,11 +27,11 @@
 
 기본 A=기존 F, B=점령만, C=지도만, D=전선/표식, E=카메라만, F=통합이다. A–D는 같은 기존 카메라, E/F는 같은 후보 카메라를 사용했다. 사건·지리·해상도는 고정했다. 실제 SwiftShader `draw/readPixels`는12개 주 프레임과 표식 제거 ablation2회이며 전체150프레임 영상 검증은 아니다. 실제 이미지 내부에서 다시 검사했다.
 
-- 새 집중 CPU 검사136 PASS,0 FAIL,0 SKIP. 기존104개 전체 suite는 반복하지 않았다.
+- 새 집중 CPU 검사136개와 후속 카메라/저장 검사15개 PASS,0 FAIL,0 SKIP. 아래 픽셀 폭 계측 SKIP은 이 테스트 수와 별개다. 기존104개 전체 suite는 반복하지 않았다.
 - A의0/75/149 원본 RGBA는 저장된 기존 F와 BIT_EXACT.
 - 실제 GL 점령 합성,10개 지원/NoData/음수 육지/수심/해안/graded source 사례,6개 외곽광 사례 PASS. 합성 해안 fixture는 실제 해안 정확도 인증이 아니다.
 - 전150프레임 기존 SAT 기준 표식 충돌·critical collision·Safe Area 위반0. 크기104→118.56px, 실제 아트 CPU bounds 폭105.59–108.08px. 확대 표식의 실제 픽셀 폭 계측은 사각 측정 영역 중첩 때문에 **SKIP**이며 PASS로 바꾸지 않았다.
-- A75/E75는 유지 구간 전이므로 PNG가 동일하다.96–105 구간의 카메라 차이와 사건 진행은 동일 immutable 이미지를 이용한 별도 읽기 전용 SwiftShader 검증으로 보완한다. 재튜닝·재빌드는 하지 않는다.
+- A75/E75는 유지 구간 전이므로 PNG가 동일하다.동일 immutable 이미지의 A100/E99–101 실제 SwiftShader 검증도 PASS했다. 화면 내 고정16점에서 A100/E100 RMS차이15.106px, 최대24.815px였다. E99–101 투영 변화0px인 동안 사건 frame·경계·실제 픽셀은 계속 진행했다. 재튜닝·재빌드는 하지 않았다.
 - Secret Scan0. 무료 표준 public Actions만 사용했으며 유료 GPU 실행0건이다.
 
 실제 비교 PNG에서는 밝은 점령 띠·백색 전선·금빛 외곽선과 더 큰 국기 표식이 구분된다. 지도 대비 변화는 비교적 작다. ASTRA 경계 RGB jump 결과는 감소/유지/증가가 섞여 있어 **전체 seam 개선 PASS를 선언하지 않는다**. 예: terrain rectangle1px .007163→.007967, surface rectangle4px .012885→.012503. NoData/범위 밖 원본 유지와 합성 순서는 별도로 검증됐다.
@@ -71,6 +71,8 @@
 
 완료 `.result`의 고유 새 내보내기 폴더에서 MP4·PNG5장·SHA256SUMS와 별도 receipt를 확인한다.150프레임·1080×1920·30fps·5초·무음과 전체 디코딩을 확인하고 원본 SHA를 검증한다. Dropbox 쓰기 성공과 외부 동기화는 다르므로, GPU 종료 전에 실제 외부 링크 HTTP200·다운로드 SHA 일치·휴대폰 재생을 확인한다. 소스/receipt/diagnostic은 Public Review 밖에 둔다.
 
-현재 Public Review는 실제 소프트웨어 PNG10장과 SHA256SUMS만 포함한다. 외부11개 URL은 HTTP200·원본/다운로드 SHA 동일을 확인했으며 `DOWNLOAD_VERIFICATION.json`에 개별 URL을 기록했다. 새 GPU MP4를 생성했다고 보고하지 않는다.
+현재 두 Public Review 폴더는 실제 소프트웨어 PNG12장과 각각의 SHA256SUMS만 포함한다. 기본11개와 후속3개 URL은 HTTP200·원본/다운로드 SHA 동일을 확인했으며 `DOWNLOAD_VERIFICATION.json`과 `CAMERA_DOWNLOAD_VERIFICATION.json`에 개별 URL을 기록했다. 새 GPU MP4를 생성했다고 보고하지 않는다.
 
 최종 품질 승인과 FINAL 승격은 수행하지 않았다. 사용자 검수와 실제 GPU 실행 승인 대기에서 멈춘다.
+
+카메라 추가 workflow의 context 오류와 sparse 저장 결함은 각각 최소 수정해 복구했다. 실제 성공 결과와 구체적 경계는 `CI_RECOVERY.md`에 기록했다. 사용 가능한 기존 관리형 HTTPS 인증을 재사용했으며 인증정보를 출력/기록/변경하지 않았다. 필수 temp-only 파일0.

@@ -1,6 +1,6 @@
 # Reference Visual Master V2 — implementation record
 
-Status: A–J are implemented and verified through actual SwiftShader, a published image and an independent immutable digest pull. A targeted camera-hold software follow-up is being recorded separately. This is not a video-quality approval or a hardware result.
+Status: A–J are implemented and verified through actual SwiftShader, a published image and an independent immutable digest pull. The targeted camera-hold software follow-up also passed and persisted in run38834252370. This is not a video-quality approval or a hardware result.
 
 ## Reference and comparison limits
 
@@ -42,8 +42,10 @@ No paid job, gCube deployment, NVIDIA render, longer video expansion, Permanent 
 - Actual SwiftShader A–F uses12 selected main frames and2 unit ablation draws, before build and again from the actual built image. It is **not** a full150-frame software movie. All150 camera/layout/ownership checks are CPU checks. Production still rejects SwiftShader.
 - Actual GL fixtures verify cumulative gained-only material,10 support/NoData/sign/coast/graded-source cases, and6 native-union gold/white/safe-area cases. These synthetic fixtures do not certify real geographic coastline accuracy.
 - Source-edge jumps are mixed. For example, terrain rectangle1px RGB jump changes .007163→.007967 and surface rectangle4px .012885→.012503. Source contrast can increase local differences. Neither universal seam reduction nor reference-level terrain quality is declared PASS.
-- A75 and E75 are byte-identical because the selected camera plateau is96–105. This is not meaningful visual proof of that plateau. A separate read-only follow-up renders the same immutable image inside the plateau; production code and image are not rebuilt for this evidence.
+- A75 and E75 are byte-identical because the selected camera plateau is96–105. This is not meaningful visual proof of that plateau. The separate read-only follow-up in run38834252370 renders A100/E99–101 from the same immutable image. Sixteen fixed visible points show15.106px RMS difference at100; E99–101 projection drift is exactly0 while event boundaries/indices/pixels advance. Production code and image were not rebuilt. Fifteen additional focused follow-up tests pass (10 Python +5 Node).
 - Ten own PNGs plus SHA256SUMS are the only Public Review contents. All11 actual external raw URLs returned HTTP200 and downloaded SHA-256 matched their original bytes (`DOWNLOAD_VERIFICATION.json`). They are software engineering evidence, not GPU footage. Reference screenshots/raw video are not published.
 - `GCUBE_EXECUTION.md` records exact future NVIDIA mode, new detached job commands and Dropbox download verification. No actual GPU run, new MP4, remote Dropbox synchronization or mobile video review occurred here.
 
 H confirms actual CPU preparation and all128 source bindings against the persisted 3-role data. The new full Scene SHA is `965d23d07dc1e4691635d408810e85379f9fc2759a3730fec870472505a04eb8`. New independent claim namespaces, original common GPU lease, no-autostart policy and original export verifier are retained. Review caught and fixed a manifest-family mismatch and a source-grade cross-domain white-clipping edge case before software execution. Both were new integration issues; neither required an existing-file change.
+
+The camera proof persistence initially failed under sparse-checkout. A real-Git regression confirmed the staging defect; bounded `git add --sparse` fixed it without relaxing exact-path checks. The successful run and earlier workflow-context correction are recorded in `CI_RECOVERY.md`. Required runtime/source files held only in temporary directories:0.
