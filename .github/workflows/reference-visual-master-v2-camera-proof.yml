@@ -26,10 +26,10 @@ jobs:
       RESULT_RUNNER_LABEL: ubuntu-24.04
       RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
       RESULT_PHASE: camera-followup
-      RESULT_CI_STATE: ${{ runner.temp }}/reference-camera-${{ github.run_id }}-${{ github.run_attempt }}.json
+      RESULT_CI_STATE: /tmp/reference-camera-${{ github.run_id }}-${{ github.run_attempt }}.json
       PYTHONDONTWRITEBYTECODE: '1'
       # Public image pull requires no registry login or package write permission.
-      DOCKER_CONFIG: ${{ runner.temp }}/reference-camera-empty-docker-config
+      DOCKER_CONFIG: /tmp/reference-camera-empty-docker-config-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Fetch new validation tools and frozen image source contracts
         id: checkout
