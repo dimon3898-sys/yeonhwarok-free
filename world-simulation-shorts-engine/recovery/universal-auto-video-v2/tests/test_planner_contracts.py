@@ -135,6 +135,17 @@ class PlannerContractTests(unittest.TestCase):
         with self.assertRaisesRegex(PlanningError, "LEGACY_PLANNER_UNAVAILABLE"):
             plan_topic("한국전쟁", duration_seconds=80, node="/path/that/does/not/exist")
 
+    def test_applied_visual_capabilities_are_source_only_not_full_scalar_v2(self):
+        reuse = self.plan["visualReuse"]
+        self.assertEqual(self.plan["visualStyle"], "REFERENCE_VISUAL_V2")
+        self.assertEqual(self.plan["materialProfile"]["profileId"], "REFERENCE_V2_SOURCE_WITH_AREA_V3")
+        self.assertEqual(self.plan["cameraProfile"]["candidateProfile"], "PRESERVED_V5_NATIVE_ARRIVAL_LOCK")
+        self.assertEqual(reuse["frontier"], "UNCHANGED_AREA_V3_FRONT_LINE")
+        self.assertEqual(reuse["nationalUnitMarkers"], "NOT_AVAILABLE_NOT_GENERATED")
+        for field in ("referenceV2ScalarGainApplied", "referenceV2ScalarWhiteGoldFrontierApplied", "referenceV2UnitScaleApplied", "referenceV2FocusHoldCameraApplied"):
+            self.assertIs(reuse[field], False)
+        self.assertFalse(reuse["visualQualityApproved"])
+
     def test_replanning_is_deterministic(self):
         other = plan_topic("한국전쟁의 전선 변화를 80초 영상으로 만들어줘.")
         self.assertEqual(canonical_sha256(self.plan), canonical_sha256(other))

@@ -1,0 +1,158 @@
+{
+  "schema": "WORLD_ENGINE_UNIVERSAL_PERFORMANCE_BASELINE_V2",
+  "checkedAt": "2026-10-16T01:44:24.328039+00:00",
+  "parentSourceCommit": "c1e9c099b22a8db1c5f21e7b029422e82f8efd33",
+  "parentImageDigest": "sha256:3add2c567190dae3618427befe90d15f0c183bd221c87d16736842bcc6ebb4c5",
+  "hardwareTarget": {
+    "model": "RTX 4080 SUPER",
+    "vramGiB": 16,
+    "measuredThisTask": false
+  },
+  "historical65422": {
+    "userReportsHardwareWebGL2AndMP4Success": true,
+    "auditedPerStageNvidiaTimingRecordAvailable": false,
+    "reason": "Persisted prior V2 report explicitly leaves NVIDIA speed/VRAM/new MP4 pending; existing5s success does not supply stage measurements."
+  },
+  "firstProductionTarget": {
+    "durationSeconds": 80,
+    "fps": 30,
+    "frames": 2400,
+    "wallSecondsTarget": 3600,
+    "targetVerified": false,
+    "upperRenderSecondsPerFrameIfOtherCostsZero": 1.5,
+    "formula": "(3600-measuredPlanningLoadingEncodingCompositionExportDownloadSeconds)/2400",
+    "estimatedActualSeconds": null,
+    "estimatedActualCost": null,
+    "gpuUnitPriceVerified": false
+  },
+  "stageMeasurements": {
+    "planning": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "astraLoading": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "gpuUpload": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "gisTerritoryFrontier": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "drawReadback": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "frameStorage": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "ffmpegEncoding": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "composition": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "dropboxExport": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    },
+    "externalDownloadValidation": {
+      "status": "NOT_MEASURED_ON_NVIDIA",
+      "seconds": null
+    }
+  },
+  "durationContracts": [
+    {
+      "durationSeconds": 80,
+      "fps": 30,
+      "frames": 2400,
+      "actualGpuRunVerified": false,
+      "rawRgb24WholeVideoBytesIfNaivelyBuffered": 14929920000
+    },
+    {
+      "durationSeconds": 120,
+      "fps": 30,
+      "frames": 3600,
+      "actualGpuRunVerified": false,
+      "rawRgb24WholeVideoBytesIfNaivelyBuffered": 22394880000
+    },
+    {
+      "durationSeconds": 180,
+      "fps": 30,
+      "frames": 5400,
+      "actualGpuRunVerified": false,
+      "rawRgb24WholeVideoBytesIfNaivelyBuffered": 33592320000
+    },
+    {
+      "durationSeconds": 300,
+      "fps": 30,
+      "frames": 9000,
+      "actualGpuRunVerified": false,
+      "rawRgb24WholeVideoBytesIfNaivelyBuffered": 55987200000
+    },
+    {
+      "durationSeconds": 600,
+      "fps": 30,
+      "frames": 18000,
+      "actualGpuRunVerified": false,
+      "rawRgb24WholeVideoBytesIfNaivelyBuffered": 111974400000
+    }
+  ],
+  "neutralWorkingSet": {
+    "rgb24FrameBytes": 6220800,
+    "rgba8FrameBytes": 8294400,
+    "policy": "Bound memory by one frame plus browser/encoder buffers; retain completed encoded scenes; never buffer full video."
+  },
+  "optimizationPolicy": [
+    "Reuse existing ASTRA/GPU resources within each scene/session when original API permits.",
+    "Resume valid encoded scenes, invalidate changed dependencies/adjacent boundary states.",
+    "Measure NVIDIA stages before parallelization/readback/encoder changes.",
+    "Do not lower resolution, frames, historical integrity or visuals for speed."
+  ],
+  "officialOperationsEvidence": [
+    {
+      "path": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/REPORT.md",
+      "sha256": "5391cd7d4506be627aceed6f9f7519e55b1de8380a3735ca934fe6c7d7d10ec4"
+    },
+    {
+      "path": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/REPORT.json",
+      "sha256": "94f545edc09f484f79d424d99cbc1d7d7f1ab003c984d701ffc5cc84f113b26d"
+    },
+    {
+      "path": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/api/workload.py",
+      "sha256": "bf4a5b8059528c1928a4f5109e662e0ccba9faa5a87e26be64b6cd62dd354b6e"
+    },
+    {
+      "path": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/commands/workload.py",
+      "sha256": "cfccc7f5bc0551db2727d0fa5e57e2a57e2b6573b7c7b779cd65f1965006a12e"
+    },
+    {
+      "path": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/cli_source/gcube_cli/api/client.py",
+      "sha256": "1c5aaf297156cd2b8027f64762cd2d81a6c35f113b0529c58dfb699f97fd4d27"
+    }
+  ],
+  "actualPaidGpuExecuted": false,
+  "nvidiaQualityPass": false,
+  "availableFreeMeasurements": [
+    {
+      "source": "REAL_CPU_RUNTIME_INTEGRATION.json",
+      "sourceSHA256": "f909bb20959faabf56cc28bbac0f0c4e4a97dc282df14f6fd9df715417b5ea39",
+      "scope": "REAL_SOURCE_CPU_PLAN_LOADING_NO_BROWSER_NO_GPU",
+      "milliseconds": 6276.808141,
+      "sourceRoles": [
+        "bathymetry",
+        "surfaceTexture",
+        "terrain"
+      ],
+      "framesInContract": 2400,
+      "capturedFrames": 0,
+      "doesNotPredictNvidiaFrameThroughput": true
+    }
+  ]
+}

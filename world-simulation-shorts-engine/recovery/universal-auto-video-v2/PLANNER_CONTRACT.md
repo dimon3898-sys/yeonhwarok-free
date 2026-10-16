@@ -82,3 +82,17 @@ validate_plan(plan, require_renderable=True)
 `split_plan(plan, max_scene_frames)` rebuilds dependent scene bindings;
 `canonical_sha256(value)` is the stable JSON hash used by downstream caching.
 CLI output uses exclusive file creation and never overwrites prior plans or jobs.
+
+## Visual capability truthfulness
+
+`REFERENCE_VISUAL_V2` remains the requested input style. The actual historical
+profile is `REFERENCE_V2_SOURCE_WITH_AREA_V3`: the existing ASTRA material, support
+edge blend and V2 source grade feed the unchanged Area V3 polygon transitions and
+front-line overlay. Original native boundary pixels and native foreground remain
+protected. The camera profile is `PRESERVED_V5_NATIVE_ARRIVAL_LOCK`. The one-winner
+scalar V2 gain/white-gold frontier, V2 unit scale and V2 focus-hold camera are not
+applied to reversing historical state timelines. No verified national-unit
+positions exist, so none are generated. `visualReuse` records each applied and
+non-applied component explicitly; this is not a full V2 visual-quality approval.
+The inherited `REFERENCE_VISUAL_MASTER_V2_F` identifier appears only as the frozen
+asset/data-closure profile, never as a claim that all its scene effects run.
