@@ -1,0 +1,69 @@
+{
+  "utc": "2026-10-17T22:12:33.312639+00:00",
+  "results": [
+    {
+      "command": "gcube --version",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_bytes": 12,
+      "stderr_bytes": 0,
+      "version": "gcube 0.4.2"
+    },
+    {
+      "command": "gcube auth status",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_bytes": 55,
+      "stderr_bytes": 0,
+      "auth_status": "NOT_LOGGED_IN"
+    },
+    {
+      "command": "gcube config status",
+      "exit_code": 0,
+      "timed_out": false,
+      "stdout_bytes": 163,
+      "stderr_bytes": 0,
+      "effective_auth_status": "NOT_LOGGED_IN"
+    },
+    {
+      "command": "gcube -o json workload describe 5373",
+      "exit_code": 1,
+      "timed_out": false,
+      "stdout_bytes": 0,
+      "stderr_bytes": 43,
+      "safe_error": "No token configured. Run: gcube auth login"
+    },
+    {
+      "command": "gcube workload logs 5373",
+      "exit_code": 1,
+      "timed_out": false,
+      "stdout_bytes": 0,
+      "stderr_bytes": 43,
+      "safe_error": "No token configured. Run: gcube auth login"
+    },
+    {
+      "command": "gcube -o json workload pods 5373",
+      "exit_code": 1,
+      "safe_error": "No token configured. Run: gcube auth login"
+    }
+  ],
+  "schema": "world-engine-studio-startup-cli-evidence-v1",
+  "workload": 5373,
+  "cli_version": "0.4.2",
+  "official_wheel_sha256": "9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692",
+  "existing_cli_before_task": false,
+  "isolated_installation": true,
+  "gcube_access_token_configured": false,
+  "local_cli_config_exists": false,
+  "runtime_credential_binding_available": false,
+  "stored_actual_studio_workload_logs_found": false,
+  "workload_deployment_status": "UNVERIFIED_AUTH_REQUIRED",
+  "actual_first_container_error": null,
+  "actual_container_exit_code": null,
+  "live_logs_retrieved": false,
+  "api_contacted_by_failed_queries": false,
+  "cli_exit_code_is_not_container_exit_code": true,
+  "paid_gpu_actions": 0,
+  "production_code_changed": false,
+  "raw_auth_outputs_published": false
+}

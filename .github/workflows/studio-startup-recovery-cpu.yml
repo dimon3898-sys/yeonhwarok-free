@@ -1,0 +1,46 @@
+name: WORLD ENGINE Studio immutable startup CPU reproduction
+
+on:
+  push:
+    branches: [development/studio-startup-recovery-20261018]
+    paths:
+      - .github/workflows/studio-startup-recovery-cpu.yml
+      - world-simulation-shorts-engine/recovery/studio-startup-recovery-v1/**
+      - '!world-simulation-shorts-engine/recovery/studio-startup-recovery-v1/runs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-startup-cpu-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  reproduce:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - name: Read only the independent reproduction harness
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-startup-recovery-cpu.yml
+            /world-simulation-shorts-engine/recovery/studio-startup-recovery-v1/**
+      - name: Run actual immutable image on CPU without production credentials or GPU
+        run: python3 -B world-simulation-shorts-engine/recovery/studio-startup-recovery-v1/cpu_reproduce.py studio-startup-cpu-results
+      - name: Preserve sanitized results and SHA only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: studio-startup-cpu-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            studio-startup-cpu-results/results.json
+            studio-startup-cpu-results/SHA256SUMS
+          if-no-files-found: warn
+          retention-days: 30
