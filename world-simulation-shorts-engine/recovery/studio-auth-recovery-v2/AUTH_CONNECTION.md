@@ -84,7 +84,10 @@ report remains `BLOCKED_AUTH_REQUIRED` and no gCube request is attempted.
    supply repository Secret `GCUBE_ACCESS_TOKEN`. Do not delete or rename any
    existing Secret. This raw-secret runner route supports the official WSS
    client without extracting a managed HTTPS proxy Secret.
-3. Resume or manually run the isolated read-only workflow on branch
+3. Re-run the existing free read-only workflow after secure Secret entry:
+   https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/39075887886
+   Use **Re-run all jobs**, or tell Codex that secure entry is complete so it
+   can rerun that workflow. The branch is
    `development/studio-auth-recovery-20261018`. If GitHub does not display a
    dispatch action for a workflow outside the default branch, Codex can push
    a report-free trigger change on that existing branch after the Secret is
@@ -97,3 +100,18 @@ report remains `BLOCKED_AUTH_REQUIRED` and no gCube request is attempted.
 Only actual error/exit evidence can justify a minimal Studio fix and subsequent
 focused CPU reproduction or replacement image. Until then, existing images,
 FINAL, renderer, camera, frontier, and job claims remain unchanged.
+
+## Verified outcome of this run
+
+Run `39075887886` completed the 14 focused tests and checked actual available
+Secret inputs. Its sanitized report records credential source `NONE` and
+`APPROVED_SECRET_CREDENTIAL_NOT_PROVIDED`; it did not send a gCube request.
+This establishes unavailable credentials in that job's execution scope, not
+absence of all credentials from every account or storage system.
+
+The same free run retrieved the old CPU artifact without rerunning its tests
+and verified its SHA256SUMS. Original results SHA:
+`a237740f24c524e2a30cdebce39a5c8f3a06dde53977a1e18db5e0c3e6c7746a`.
+Sanitized receipts were committed by Actions as `90df1ea` and then retrieved
+and SHA-verified in this environment. This resolves the earlier artifact
+evidence-retrieval limitation; it does not resolve gCube account authentication.
