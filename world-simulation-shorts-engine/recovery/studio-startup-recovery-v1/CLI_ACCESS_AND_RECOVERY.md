@@ -8,8 +8,11 @@ PyPI metadata: `9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692
 
 `gcube auth status` and `gcube config status` report no login. No
 `GCUBE_ACCESS_TOKEN`, local `~/.gcube/config.yaml`, or managed gCube credential
-binding was available. Existing repository evidence contains no actual Studio
-workload 5373 crash log. No credential values were displayed or committed.
+binding was available. No actual Studio workload 5373 crash log was found in
+the available checkout's docs/deliverables, the preserved Studio reports, or
+matching workspace log filenames. A wider lazy historical-blob search timed
+out and is not represented as an exhaustive repository search. No credential
+values were displayed or committed.
 
 Executed read-only commands:
 
