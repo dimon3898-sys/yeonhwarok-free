@@ -14,6 +14,26 @@ SPEC.loader.exec_module(rest)
 
 
 class RestTests(unittest.TestCase):
+    def test_public_origin_must_be_an_actual_safe_gcube_root_url(self):
+        self.assertEqual(rest.approved_public_origin('https://service.gcube.ai/'),
+                         'https://service.gcube.ai')
+        for value in ('service.gcube.ai', 'http://service.gcube.ai',
+                      'https://private.invalid', 'https://service.gcube.ai/path',
+                      'https://token@service.gcube.ai', 'https://service.gcube.ai/?token=secret'):
+            self.assertIsNone(rest.approved_public_origin(value))
+
+    def test_configuration_only_never_repeats_unavailable_log_request(self):
+        api, calls = self.api()
+        result = rest.collect({'GCUBE_ACCESS_TOKEN': 'OFFLINE_TEST_ONLY'},
+                              factory=lambda _: api, configuration_only=True)
+        self.assertEqual(calls, [('describe', '5373')])
+        self.assertFalse(result['logs_request_repeated'])
+
+    def test_registry_selector_image_path_is_not_misreported_as_wrong_image(self):
+        row = {'containerEnvs': [], 'containerImage':
+               'dimon3898-sys/world-simulation-shorts-engine:' + rest.APPROVED_TAG}
+        self.assertTrue(rest.environment_summary(row)['configuration_checks']['configured_image_matches_approved'])
+
     def api(self, *, pod="authorized-pod", state="finish", logs="", env=None):
         calls = []
         class API:

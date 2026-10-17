@@ -29,6 +29,22 @@ APPROVED_TAG = "studio-v1-344dc2d-38883417252-1"
 APPROVED_DIGEST = "sha256:5a35e44947aaed3fffe39aad2352ff17c22b9375b4591e635129feed4ec90d94"
 
 
+def approved_public_origin(value):
+    """Accept only an actual root HTTPS URL supplied by gCube, not a guessed host."""
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = urlsplit(value)
+        if (parsed.scheme != 'https' or not parsed.hostname
+                or not (parsed.hostname == 'gcube.ai' or parsed.hostname.endswith('.gcube.ai'))
+                or parsed.path not in ('', '/') or parsed.query or parsed.fragment
+                or parsed.username or parsed.password or parsed.port not in (None, 443)):
+            return None
+        return 'https://' + parsed.hostname
+    except ValueError:
+        return None
+
+
 def official_api(token):
     from importlib.metadata import version
     if version("gcube-cli") != "0.4.2":
@@ -103,6 +119,7 @@ def environment_summary(container):
     image = container.get("containerImage")
     image_match = isinstance(image, str) and (image == APPROVED_TAG
         or image == "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:" + APPROVED_TAG
+        or image == "dimon3898-sys/world-simulation-shorts-engine:" + APPROVED_TAG
         or image == "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@" + APPROVED_DIGEST)
     return {"environment_shape_verified": True, "duplicate_keys_present": False,
         "configuration_checks": {
@@ -146,7 +163,7 @@ def log_documents(value):
     return documents, False
 
 
-def collect(environ=None, *, factory=official_api):
+def collect(environ=None, *, factory=official_api, configuration_only=False):
     environ = os.environ if environ is None else environ
     token = environ.get("GCUBE_ACCESS_TOKEN")
     result = {"schema": "WORLD_ENGINE_OFFICIAL_HTTP_LOG_EVIDENCE_V1", "workload": 5373,
@@ -175,6 +192,15 @@ def collect(environ=None, *, factory=official_api):
                 containers = raw.get("containerArray")
                 if isinstance(containers, list) and len(containers) == 1 and isinstance(containers[0], dict):
                     result["configuration"] = environment_summary(containers[0])
+                    candidates = [approved_public_origin(containers[0].get('serviceUrl')),
+                                  approved_public_origin(getattr(workload, 'svc_url', None))]
+                    origins = sorted({value for value in candidates if value})
+                    result['public_service_origin'] = origins[0] if len(origins) == 1 else None
+                    result['public_service_origin_unambiguous'] = len(origins) == 1
+                if configuration_only:
+                    result['status'] = 'READ_ONLY_CONFIGURATION_EVIDENCE_COLLECTED'
+                    result['logs_request_repeated'] = False
+                    return result
                 operation = "WORKLOAD_PODS"
                 pods = api.pods(WORKLOAD)
                 result["operations"].append({"operation": operation, "status": "SUCCEEDED"})
@@ -214,8 +240,9 @@ def collect(environ=None, *, factory=official_api):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--configuration-only", action='store_true')
     args = parser.parse_args()
-    result = collect()
+    result = collect(configuration_only=args.configuration_only)
     args.output.mkdir(parents=True, exist_ok=True)
     path = args.output / "REST_RESULT.json"
     descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)

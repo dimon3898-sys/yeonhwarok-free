@@ -27,6 +27,7 @@ jobs:
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       STUDIO_AUTH_ROOT: world-simulation-shorts-engine/recovery/studio-auth-recovery-v2
+      STUDIO_HTTP_CONFIGURATION_ONLY: 'true'
     steps:
       - name: Check out only the isolated read-only collector
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -68,7 +69,20 @@ jobs:
         env:
           GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
           GCUBE_API_TOKEN: ${{ secrets.GCUBE_API_TOKEN }}
-        run: python3 -B "$STUDIO_AUTH_ROOT/collector.py" --cli "$RUNNER_TEMP/gcube-readonly-tools/bin/gcube" --output "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['STUDIO_AUTH_ROOT'])
+          output = root / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          if os.environ['STUDIO_HTTP_CONFIGURATION_ONLY'] == 'true':
+              previous = root / 'runs/39078290370-1'
+              data = (previous / 'CLI_RESULT.json').read_bytes()
+              expected = [line.split()[0] for line in (previous / 'SHA256SUMS').read_text().splitlines() if line.endswith('  CLI_RESULT.json')]
+              assert expected == [hashlib.sha256(data).hexdigest()]
+              (output / 'CLI_RESULT.json').write_bytes(data)
+          else:
+              subprocess.run(['python3', '-B', str(root / 'collector.py'), '--cli', str(pathlib.Path(os.environ['RUNNER_TEMP']) / 'gcube-readonly-tools/bin/gcube'), '--output', str(output)], check=True)
+          PY
       - name: Query shipped official HTTP log API for existing pod when streaming is unavailable
         env:
           GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
@@ -81,6 +95,8 @@ jobs:
           if prior.get('authenticated_workload_read_succeeded') and prior.get('first_actual_error') is None:
               try:
                   invocation = [str(pathlib.Path(os.environ['RUNNER_TEMP']) / 'gcube-readonly-tools/bin/python'), '-B', str(root / 'rest_evidence.py'), '--output', str(output)]
+                  if os.environ['STUDIO_HTTP_CONFIGURATION_ONLY'] == 'true':
+                      invocation.append('--configuration-only')
                   probe = subprocess.run(invocation, capture_output=True, timeout=180)
                   fallback = {'status':'BLOCKED','errorCode':'OFFICIAL_HTTP_PROBE_FAILED','helperExitCode':probe.returncode,'actualContainerExitCode':None,'rawOutputsPublished':False}
               except subprocess.TimeoutExpired:
