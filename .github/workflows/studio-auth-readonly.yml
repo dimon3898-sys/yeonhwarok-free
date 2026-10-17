@@ -39,9 +39,18 @@ jobs:
       - name: Focused offline security and parser tests
         run: python3 -B -m unittest discover -s "$STUDIO_AUTH_ROOT/tests" -v
       - name: Reuse previous CPU result without repeating container tests
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 -B "$STUDIO_AUTH_ROOT/recover_cpu_evidence.py" "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib
+          root = pathlib.Path(os.environ['STUDIO_AUTH_ROOT'])
+          previous = root / 'runs/39075887886-2'
+          data = (previous / 'CPU_EVIDENCE.json').read_bytes()
+          expected = [line.split()[0] for line in (previous / 'SHA256SUMS').read_text().splitlines() if line.endswith('  CPU_EVIDENCE.json')]
+          assert expected == [hashlib.sha256(data).hexdigest()]
+          target = root / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          target.mkdir(parents=True, exist_ok=False)
+          (target / 'CPU_EVIDENCE.json').write_bytes(data)
+          PY
       - name: Install exact verified official CLI in isolated tool environment
         run: |
           python3 - <<'PY'
@@ -60,13 +69,35 @@ jobs:
           GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
           GCUBE_API_TOKEN: ${{ secrets.GCUBE_API_TOKEN }}
         run: python3 -B "$STUDIO_AUTH_ROOT/collector.py" --cli "$RUNNER_TEMP/gcube-readonly-tools/bin/gcube" --output "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Query shipped official HTTP log API for existing pod when streaming is unavailable
+        env:
+          GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['STUDIO_AUTH_ROOT'])
+          output = root / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          prior = json.loads((output / 'CLI_RESULT.json').read_text())
+          if prior.get('authenticated_workload_read_succeeded') and prior.get('first_actual_error') is None:
+              try:
+                  invocation = [str(pathlib.Path(os.environ['RUNNER_TEMP']) / 'gcube-readonly-tools/bin/python'), '-B', str(root / 'rest_evidence.py'), '--output', str(output)]
+                  probe = subprocess.run(invocation, capture_output=True, timeout=180)
+                  fallback = {'status':'BLOCKED','errorCode':'OFFICIAL_HTTP_PROBE_FAILED','helperExitCode':probe.returncode,'actualContainerExitCode':None,'rawOutputsPublished':False}
+              except subprocess.TimeoutExpired:
+                  fallback = {'status':'BLOCKED','errorCode':'OFFICIAL_HTTP_PROBE_TIMEOUT','actualContainerExitCode':None,'rawOutputsPublished':False}
+          else:
+              fallback = {'status':'SKIP','reason':'AUTH_REQUIRED_OR_STREAM_EVIDENCE_ALREADY_PRESENT','actualContainerExitCode':None,'rawOutputsPublished':False}
+          target = output / 'REST_RESULT.json'
+          if not target.exists():
+              target.write_text(json.dumps(fallback, indent=2) + '\n')
+          PY
       - name: Persist only sanitized reports and hashes to the isolated branch
         run: |
           python3 - <<'PY'
           import hashlib, json, os, pathlib, re
           root = pathlib.Path(os.environ['STUDIO_AUTH_ROOT']) / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
           files = sorted(root.glob('*.json'))
-          assert {p.name for p in files} == {'CPU_EVIDENCE.json', 'CLI_RESULT.json'}
+          assert {p.name for p in files} == {'CPU_EVIDENCE.json', 'CLI_RESULT.json', 'REST_RESULT.json'}
           for p in files:
               raw = p.read_text()
               json.loads(raw)
@@ -75,7 +106,7 @@ jobs:
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/CPU_EVIDENCE.json" "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/CLI_RESULT.json" "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/SHA256SUMS"
+          git add "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/CPU_EVIDENCE.json" "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/CLI_RESULT.json" "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/REST_RESULT.json" "$STUDIO_AUTH_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/SHA256SUMS"
           git diff --cached --check
           git commit -m 'docs(studio): persist sanitized read-only auth and reused CPU evidence [skip ci]'
           git push origin HEAD:development/studio-auth-recovery-20261018

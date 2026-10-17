@@ -51,7 +51,7 @@ SHARED_MEMORY_INSUFFICIENT STARTUP_EXCEPTION DIAGNOSTIC_ONLY
 STAGES = frozenset(("STORAGE", "SOURCE", "SOURCE_INTEGRITY", "DEPENDENCIES",
     "IDENTITY", "NVIDIA", "GPU", "EGL", "VULKAN", "WEBGL2", "MEMORY",
     "STARTUP", "STUDIO", "BOOTSTRAP", "HEALTH", "SERVICE"))
-STATES = frozenset(("deploy", "stop", "close", "ready", "wait", "error",
+STATES = frozenset(("open", "deploy", "finish", "stop", "close", "ready", "wait", "error",
     "pending", "running", "failed", "stopped", "terminated", "unknown",
     "Pending", "Running", "Succeeded", "Failed", "Unknown", "Waiting",
     "CrashLoopBackOff", "ContainerCreating", "Error", "Completed"))

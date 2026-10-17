@@ -122,6 +122,10 @@ class CollectorTests(unittest.TestCase):
             {"code": "STUDIO_HTTPS_ORIGIN_REQUIRED"}])
         self.assertEqual(error["error_code"], "STUDIO_HTTPS_ORIGIN_REQUIRED")
 
+    def test_official_non_deploy_states_are_preserved_without_success_claim(self):
+        for state in ("open", "finish"):
+            self.assertEqual(collector.safe_workload({"state": state})["state"], state)
+
     def test_ambiguous_terminated_states_never_choose_exit_code(self):
         captures = [self.cap(b"gcube 0.4.2\n"), self.cap({"ser": 5373, "state": "deploy"}),
             self.cap([{"state": {"terminated": {"exitCode": 1}}},
