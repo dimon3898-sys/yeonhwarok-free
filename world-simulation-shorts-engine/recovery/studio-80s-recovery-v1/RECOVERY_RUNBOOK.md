@@ -49,11 +49,11 @@ python3 -B /opt/world-engine-studio-cpu-recovery/recover.py recover \
   --parent-job-id studio-bcd340f797498d7c9fea8181921f91b9 \
   --control-root /var/lib/world-engine-private/engine/production-studio-mvp-v1/production \
   --export-root /world-storage \
-  --grant /확인된/private/CPU_AUTHORIZATION.json \
-  --request-id 승인된-고유-요청ID
+  --grant /confirmed/private/CPU_AUTHORIZATION.json \
+  --request-id recovery-bcd340f7-cpu-v1
 ```
 
-명령의 한글 경로/ID는 자리 표시자이며 실제 승인·경로를 대신하지 않는다. 기존 모바일 ‘재개’ 버튼으로 이 만료된 작업의 승인 한도를 늘리지 않는다. 기존 버튼은 원래 승인과 GPU health를 그대로 검사하므로 CPU-only 도구와 다른 경로다.
+`/confirmed/private/...`는 실제 private 승인 파일 경로로 바꿔야 하는 자리 표시자다. 요청 ID는 ASCII이며 동일 요청을 다시 실행해도 완료 결과를 검증해 재사용한다. 기존 모바일 ‘재개’ 버튼으로 이 만료된 작업의 승인 한도를 늘리지 않는다. 기존 버튼은 원래 승인과 GPU health를 그대로 검사하므로 CPU-only 도구와 다른 경로다.
 
 도구 선택 순서는 검증된 기존 silent export → 전체 private 장면 cache → independently anchored Dropbox scene checkpoint다. 무음 완성본이 있으면 장면 복사·재합성을 건너뛴다. 그 외에는 모든 범위·SHA·출처를 확인하고 새 private 파일로 복사한 후 기존 composer/SFX/stream-copy mux/export를 호출한다. 어느 경우에도 GPU 렌더러·원래 coordinator start/resume를 호출하지 않는다. 불완전한 자료는 GPU 재렌더링으로 자동 대체하지 않는다.
 
