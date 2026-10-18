@@ -1,0 +1,59 @@
+{
+  "readOnlyLocalInspection": true,
+  "sourceWheelSha256": "9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692",
+  "networkCalls": 0,
+  "sshAttempts": 0,
+  "accountMutations": 0,
+  "paidOperations": 0,
+  "finding": "Previous filter ignores official productName user-facing GPU identity; no raw catalogue retained, so target-row absence was not established.",
+  "confirmedDataShape": "top-level pricings or data array; direct row fields, no official nested-row or alias normalization",
+  "rawFieldValidationRequired": [
+    "price",
+    "usagePrice",
+    "currencyUnit"
+  ],
+  "forbiddenFallbacks": [
+    "Missing/null/non-numeric price to 0",
+    "Missing currency to KRW",
+    "Catalogue upper rate claimed as selected-node invoice",
+    "Codes from old response reused without full attributes"
+  ],
+  "sourceExcerpts": [
+    {
+      "source": "gcube_cli/api/workload.py",
+      "start": 56,
+      "end": 108,
+      "text": "56: @dataclass\n57: class GpuPricing:\n58:     \"\"\"One entry from GET /api/gpu/available/pricing/list.\"\"\"\n59: \n60:     gpu_name: str           # JSON: gpuName — internal chip identifier (used in API body)\n61:     gpu_ext: str            # JSON: gpuExt — GPU variant (e.g. \"PCIE\"), can be \"\"\n62:     product_name: str       # JSON: productName — user-facing display name (e.g. \"B200 SXM6\")\n63:     product_code: str       # JSON: productCode (\"tier1\" | \"tier2\" | \"tier3\")\n64:     pp_index: int           # JSON: ppIndex — product provider index (default 1)\n65:     gpu: int                # JSON: gpu — GPU count in the spec (not gpuCount)\n66:     price: float\n67:     usage_price: float      # JSON: usagePrice\n68:     currency_unit: str      # JSON: currencyUnit — \"KRW\" or \"USD\"\n69:     vram: int               # GB\n70:     cpu: int\n71:     memory: int             # GB\n72:     disk: int               # GB\n73:     availability: bool\n74:     nodes: list[dict[str, Any]] = field(default_factory=list)  # node detail list (passthrough)\n75: \n76:     @classmethod\n77:     def from_dict(cls, d: dict[str, Any]) -> GpuPricing:\n78:         return cls(\n79:             gpu_name=d.get(\"gpuName\", \"\"),\n80:             gpu_ext=d.get(\"gpuExt\", \"\"),\n81:             product_name=d.get(\"productName\", \"\"),\n82:             product_code=d.get(\"productCode\", \"\"),\n83:             pp_index=_int(d.get(\"ppIndex\", 1)),\n84:             gpu=_int(d.get(\"gpu\", 1)),\n85:             price=_num(d.get(\"price\", 0)),\n86:             usage_price=_num(d.get(\"usagePrice\", 0)),\n87:             currency_unit=d.get(\"currencyUnit\", \"KRW\"),\n88:             vram=_int(d.get(\"vram\", 0)),\n89:             cpu=_int(d.get(\"cpu\", 0)),\n90:             memory=_int(d.get(\"memory\", 0)),\n91:             disk=_int(d.get(\"disk\", 0)),\n92:             availability=bool(d.get(\"availability\", False)),\n93:             nodes=d.get(\"nodes\") or [],\n94:         )\n95: \n96: \n97: def is_gpu_available(pricing: GpuPricing) -> bool:\n98:     \"\"\"Return True if the GPU has available capacity.\"\"\"\n99:     return pricing.availability is True\n100: \n101: \n102: def match_gpu_pricing(\n103:     spec: dict[str, Any],\n104:     indexed: list[tuple[str, GpuPricing]],\n105: ) -> tuple[str, GpuPricing | None]:\n106:     \"\"\"Reverse-match a gpuSpec's attributes to the CURRENT pricing CODE.\n107: \n108:     Matching criteria — stricter than the web console's ``enrichGpuSpecsWithPrices``"
+    },
+    {
+      "source": "gcube_cli/api/workload.py",
+      "start": 387,
+      "end": 415,
+      "text": "387:     def get_gpu_pricings(\n388:         self, service_code: str | None = None,\n389:     ) -> builtins.list[GpuPricing]:\n390:         \"\"\"Fetch available GPU pricing list.\n391: \n392:         ``GET /api/gpu/available/pricing/list``\n393:         Response envelope: ``{ \"status\": 200, \"pricings\": [...] }``\n394:         \"\"\"\n395:         params: dict[str, str] = {}\n396:         if service_code:\n397:             params[\"serviceCode\"] = service_code\n398:         data = self._client.get(\n399:             \"/api/gpu/available/pricing/list\",\n400:             params=params or None,\n401:         )\n402:         items: builtins.list[dict[str, Any]] = data.get(\"pricings\", data.get(\"data\", []))\n403:         return [GpuPricing.from_dict(item) for item in items]\n404: \n405:     def get_indexed_gpu_pricings(\n406:         self, service_code: str | None = None,\n407:     ) -> builtins.list[tuple[str, GpuPricing]]:\n408:         \"\"\"Fetch pricing list and assign stable 3-digit CODEs.\n409: \n410:         CODE = 1-based sequential index in API response order.\n411:         Both ``gpu list`` and workload register/update use this function to ensure\n412:         the CODE→GPU mapping is always consistent between commands.\n413:         \"\"\"\n414:         pricings = self.get_gpu_pricings(service_code=service_code)\n415:         return [(f\"{i + 1:03d}\", p) for i, p in enumerate(pricings)]"
+    },
+    {
+      "source": "gcube_cli/commands/gpu.py",
+      "start": 24,
+      "end": 52,
+      "text": "24: def _pricing_to_dict(code: str, p: GpuPricing) -> dict[str, Any]:\n25:     return {\n26:         \"code\": code,\n27:         \"gpuName\": p.gpu_name,\n28:         \"gpuExt\": p.gpu_ext,\n29:         \"productName\": p.product_name,\n30:         \"tier\": p.product_code,\n31:         \"ppIndex\": p.pp_index,\n32:         \"gpuCount\": p.gpu,\n33:         \"vram\": p.vram,\n34:         \"cpu\": p.cpu,\n35:         \"mem\": p.memory,\n36:         \"disk\": p.disk,\n37:         \"priceMin\": _num_out(p.price),\n38:         \"priceMax\": _num_out(p.price + p.usage_price),\n39:         \"currencyUnit\": p.currency_unit,\n40:         \"available\": p.availability,\n41:     }\n42: \n43: \n44: def _gpu_display_name(p: GpuPricing) -> str:\n45:     \"\"\"Build user-facing GPU display name.\n46: \n47:     Uses productName (like web console) with NVIDIA prefix stripped.\n48:     Falls back to gpuName + gpuExt if productName is empty.\n49:     \"\"\"\n50:     if p.product_name:\n51:         return re.sub(r\"^NVIDIA GeForce |^NVIDIA \", \"\", p.product_name)\n52:     return f\"{p.gpu_name} {p.gpu_ext}\" if p.gpu_ext else p.gpu_name"
+    },
+    {
+      "source": "gcube_cli/commands/gpu.py",
+      "start": 60,
+      "end": 96,
+      "text": "60: @gpu.command(\"list\")\n61: @click.option(\"--all\", \"show_all\", is_flag=True, default=False,\n62:               help=\"Show all GPUs including unavailable\")\n63: @click.option(\"--service-code\", default=None, envvar=\"GCUBE_SERVICE_CODE\",\n64:               help=\"Service code filter (gcube, edu, katech). [env: GCUBE_SERVICE_CODE]\")\n65: @click.pass_context\n66: def gpu_list(ctx: click.Context, show_all: bool, service_code: str | None) -> None:\n67:     \"\"\"List available GPU types\"\"\"\n68:     try:\n69:         gcube_ctx = ctx.obj\n70:         client = make_client_from_ctx(ctx)\n71:         api = WorkloadAPI(client)\n72: \n73:         if service_code:\n74:             click.echo(f\"Using serviceCode={service_code}\", err=True)\n75: \n76:         # CODE는 전체 목록 기준 순번 — get_indexed_gpu_pricings()가 workload\n77:         # register/update와 동일한 기준으로 CODE를 부여하므로 항상 일치함\n78:         indexed = api.get_indexed_gpu_pricings(service_code=service_code)\n79:         if not show_all:\n80:             indexed = [(code, p) for code, p in indexed if p.availability]\n81: \n82:         # Fetch exchange rate for USD→KRW conversion (display only)\n83:         krw_rate = 0\n84:         if any(p.currency_unit == \"USD\" for _, p in indexed):\n85:             try:\n86:                 pb = api.get_point_base()\n87:                 krw_rate = int(pb.get(\"krw\", 0))\n88:             except Exception:\n89:                 pass\n90: \n91:         def _price_str(p: GpuPricing) -> str:\n92:             price, usage = p.price, p.usage_price\n93:             if p.currency_unit == \"USD\" and krw_rate > 0:\n94:                 price = round(price * krw_rate)\n95:                 usage = round(usage * krw_rate)\n96:             return f\"{round(price):,} ~ {round(price + usage):,}\""
+    },
+    {
+      "source": "gcube_cli/commands/gpu.py",
+      "start": 133,
+      "end": 150,
+      "text": "133:                 ]\n134:             else:\n135:                 headers = [\n136:                     \"CODE\", \"GPU_NAME\", \"TIER\", \"GPUs\", \"VRAM(GB)\",\n137:                     \"CPU(Core)\", \"MEM(GB)\", \"DISK(GB)\", \"PRICE/HR(₩)\",\n138:                 ]\n139:                 rows = [\n140:                     [\n141:                         code,\n142:                         _gpu_display_name(p),\n143:                         p.product_code,\n144:                         str(p.gpu),\n145:                         str(p.vram),\n146:                         str(p.cpu),\n147:                         str(p.memory),\n148:                         str(p.disk),\n149:                         _price_str(p),\n150:                     ]"
+    },
+    {
+      "source": "gcube_cli/api/_util.py",
+      "start": 1,
+      "end": 32,
+      "text": "1: \"\"\"Shared parsing helpers for API response payloads.\n2: \n3: The gcube API is loosely typed: numeric fields arrive as ints, floats, numeric\n4: strings, or ``null`` depending on the endpoint, and timestamps come in two\n5: different shapes.  These helpers give every ``from_dict()`` the same defensive\n6: behaviour so a single odd field cannot crash a command.\n7: \"\"\"\n8: \n9: from __future__ import annotations\n10: \n11: from datetime import datetime, timezone\n12: from typing import Any\n13: \n14: \n15: def to_int(v: Any) -> int:\n16:     \"\"\"Parse an int, falling back to 0 for null / non-numeric input.\"\"\"\n17:     if v is None:\n18:         return 0\n19:     try:\n20:         return int(v)\n21:     except (TypeError, ValueError):\n22:         return 0\n23: \n24: \n25: def to_float(v: Any) -> float:\n26:     \"\"\"Parse a float, falling back to 0.0 (e.g. USD prices: 1.99).\"\"\"\n27:     if v is None:\n28:         return 0.0\n29:     try:\n30:         return float(v)\n31:     except (TypeError, ValueError):\n32:         return 0.0"
+    }
+  ]
+}

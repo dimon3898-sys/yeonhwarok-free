@@ -1,0 +1,55 @@
+name: WORLD ENGINE rebuild approval read-only GPU price
+
+on:
+  push:
+    branches: [development/gpu-rebuild-approval-20261018]
+    paths:
+      - .github/workflows/gpu-rebuild-approval-pricing.yml
+      - world-simulation-shorts-engine/recovery/gpu-rebuild-approval-v1/pricing_display_adapter.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rebuild-approval-price-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  readonly-price:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.ref == 'refs/heads/development/gpu-rebuild-approval-20261018'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: write
+    env:
+      APPROVAL_ROOT: world-simulation-shorts-engine/recovery/gpu-rebuild-approval-v1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: development/gpu-rebuild-approval-20261018
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/recovery/gpu-rebuild-approval-v1/pricing_display_adapter.py
+            /world-simulation-shorts-engine/recovery/gpu-rebuild-preflight-v1/pricing_readonly.py
+      - name: One official catalogue GET, no workload or SSH operations
+        env:
+          GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
+        run: python3 -B "$APPROVAL_ROOT/pricing_display_adapter.py" "$APPROVAL_ROOT/price-runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/PRICING.json"
+      - name: Persist closed catalogue fields only
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          root = pathlib.Path(os.environ['APPROVAL_ROOT']) / 'price-runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          path = root / 'PRICING.json'; raw = path.read_text(); value = json.loads(raw)
+          assert value['method'] == 'GET' and value['requestLimit'] == 1
+          assert value['workloadMutations'] == value['sshAttempts'] == value['paidOperations'] == 0
+          assert not re.search(r'-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|[?&](?:token|sig)=', raw)
+          (root / 'SHA256SUMS').write_text(hashlib.sha256(path.read_bytes()).hexdigest() + '  PRICING.json\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "$APPROVAL_ROOT/price-runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git diff --cached --check
+          git commit -m 'docs(rebuild): persist official display-model price query [skip ci]'
+          git push origin HEAD:development/gpu-rebuild-approval-20261018

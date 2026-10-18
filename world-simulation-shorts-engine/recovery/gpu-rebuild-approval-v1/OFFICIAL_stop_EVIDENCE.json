@@ -1,0 +1,64 @@
+{
+  "schema": "WORLD_ENGINE_REBUILD_STOP_VS_DELETE_READ_ONLY_V1",
+  "checkedDateKST": "2026-10-18",
+  "priorCurrentOfficialDocumentRecheck": "gpu-rebuild-preflight-v1/OFFICIAL_STOP_DOCUMENT_RECHECK.json",
+  "priorOfficialGitBlob": "1a2f227147252bc7ea4f2dd2ea136b22ad3b15f9",
+  "sourceEvidenceReused": true,
+  "networkRecheckThisSubtask": false,
+  "stopExecuted": false,
+  "deleteExecuted": false,
+  "sshAttempted": false,
+  "workloadId": 5373,
+  "GUIStopSteps": [
+    "워크로드 목록에서 #5373 world-engine-test 대상과 현재 상태를 확인한다.",
+    "해당 항목의 배포중지를 누른다. 삭제를 누르지 않는다.",
+    "확인 팝업의 확인을 누른다.",
+    "상태가 배포에서 종료로 변경되는지 확인한다. 상태 변경 전에는 과금 종료가 확인된 것으로 표시하지 않는다."
+  ],
+  "billing": {
+    "officialStatement": "워크로드를 종료하면 포인트 차감이 중단됩니다.",
+    "scope": "GPU workload point deduction after platform stop completion; no claim about prepaid refund, rounding, taxes or independent external storage fees",
+    "applicationTimeoutStopsBilling": false,
+    "closingBrowserStopsBilling": false,
+    "postStopBillingActuallyObserved": false
+  },
+  "stopVsDelete": {
+    "stopCLI": "gcube workload stop 5373",
+    "stopNeedsConfirmation": true,
+    "stopConfirmationBypassDocumented": "--yes / -y (do not execute in this task)",
+    "stopAPI": "GET /api/workloads/gai/5373/state/finish",
+    "deleteCLI": "gcube workload delete 5373",
+    "deleteNeedsConfirmation": true,
+    "deletePrompt": "Delete workload '5373'? This cannot be undone.",
+    "deleteAPI": "DELETE /api/workloads/gai/delete/5373",
+    "stopPreservesWorkloadRecordEvidence": "Official UI says status changes deploy→finished; CLI documents editing stopped workload. The separate delete operation permanently removes workload.",
+    "stopDoesNotGuaranteeContainerFilesystemPreservation": true,
+    "stopDoesNotDeleteGitHubOrGHCR": "No stop source path operates on GitHub or GHCR. Independent remote source/image remain as recorded.",
+    "explicitWholeContainerStateResumeGuarantee": false
+  },
+  "retention": {
+    "officialWarning": "백업 저장소를 설정하지 않은 경우 종료 시 작업 중이던 데이터와 환경이 모두 삭제됩니다.",
+    "officialBackupRequirements": [
+      "개인 Storage를 연결한다.",
+      "워크로드 등록 시 개인 Storage 항목에서 그 저장소를 선택한다."
+    ],
+    "dropboxMountAloneProvesPrivateRootBackup": false,
+    "privateCacheSceneAnchorsPreservedAfterStop": null,
+    "userAcceptedUnverifiedServerOnlyDataLoss": true
+  },
+  "sources": {
+    "stop": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/workload/stop-workload.ko.md",
+    "storage": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/sign-up/storage-management.ko.md",
+    "cli": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/gcube-cli/cli-workload.ko.md",
+    "billing": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/platform-guide/ollama-api.ko.md"
+  },
+  "preservedEvidenceSHA256": {
+    "stop.md": "7f8ea67123b85abb4646198c6f6818225798b015772638034f2f2c473a36d715",
+    "storage.md": "37a15465d2888fba5f209f033c74070d38994698eb853dcff1ed324fea0f2350",
+    "cli_workload_doc.md": "852e7c094cd87c2ee07675853a88c1aaeda1869f35d9019fb86f9d1a262f9ff0",
+    "api_serving.md": "fdd9c984f3d422c2439ec53229bae2ba42016d5079dab2558f6f7c649238e18d",
+    "gcube_cli-0.4.2-py3-none-any.whl": "9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692",
+    "cli_source/gcube_cli/commands/workload.py": "cfccc7f5bc0551db2727d0fa5e57e2a57e2b6573b7c7b779cd65f1965006a12e",
+    "cli_source/gcube_cli/api/workload.py": "bf4a5b8059528c1928a4f5109e662e0ccba9faa5a87e26be64b6cd62dd354b6e"
+  }
+}
