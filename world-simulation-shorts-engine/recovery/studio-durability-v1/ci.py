@@ -34,6 +34,8 @@ ci.BASE = ci.IMAGE + '@' + ci.BASE_DIGEST
 ci.DEST = '/opt/world-engine-studio-durability'
 ci.TAG = re.compile(r'studio-durability-v1-f983adc-[1-9][0-9]*-[1-9][0-9]*\Z')
 VENV_PYTHON = '/opt/world-engine-studio-durability-venv/bin/python'
+DEPENDENCY_BUILDER_DIGEST = 'sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d'
+DEPENDENCY_BUILDER = 'docker.io/library/python@' + DEPENDENCY_BUILDER_DIGEST
 MANIFEST = 'DURABILITY_FILES.json'
 
 
@@ -215,6 +217,7 @@ def inspect_image(image):
     if (row.get('Os') != 'linux' or row.get('Architecture') != 'amd64'
             or config.get('Entrypoint') != entrypoint
             or labels.get('world-engine.studio-durability.parent-digest') != ci.BASE_DIGEST
+            or labels.get('world-engine.studio-durability.dependency-builder-digest') != DEPENDENCY_BUILDER_DIGEST
             or labels.get('world-engine.studio-durability.source-revision') != os.environ['GITHUB_SHA']):
         raise RuntimeError('DURABILITY_IMAGE_PROVENANCE_REQUIRED')
     forbidden = {'GH_TOKEN', 'GITHUB_TOKEN', 'GCUBE_ACCESS_TOKEN', 'GCUBE_API_TOKEN',
@@ -293,6 +296,43 @@ def image_hashes(image, context=None):
 ci.image_hashes = image_hashes
 
 
+def dependency_report(image):
+    """Verify only the newly copied wheels; inherited Python is checked separately."""
+    code = '''import hashlib,json,pathlib,sys
+venv=pathlib.Path('/opt/world-engine-studio-durability-venv')
+root=venv/'lib/python3.12/site-packages'
+raw=(venv/'DEPENDENCIES.json').read_bytes()
+report=json.loads(raw)
+assert report['schema']=='WORLD_ENGINE_STUDIO_DURABILITY_DEPENDENCIES_V1'
+assert report['builderImage']==BUILDER
+assert report['pythonABI']=='3.12' and sys.version_info[:2]==(3,12)
+assert report['scope']=='NEW_ISOLATED_VENV_ONLY'
+assert report['sourceRequirementsSha256']==REQUIREMENTS_SHA
+assert report['installedDistributions']['cryptography']=='50.0.0'
+assert report['files'] and isinstance(report['files'],dict)
+actual={p.relative_to(root).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in root.rglob('*') if p.is_file()}
+assert not any(p.is_symlink() for p in root.rglob('*'))
+assert actual==report['files']
+print(json.dumps({'status':'PASS','manifestSha256':hashlib.sha256(raw).hexdigest(),
+    'builderImage':report['builderImage'],'builderPythonVersion':report['builderPythonVersion'],
+    'pythonABI':report['pythonABI'],'nativePythonVersion':sys.version.split()[0],
+    'sourceRequirementsSha256':report['sourceRequirementsSha256'],
+    'installedDistributions':report['installedDistributions'],'files':len(actual),
+    'scope':report['scope'],'gpuExecuted':False},sort_keys=True))
+'''
+    code = ('BUILDER=' + repr(DEPENDENCY_BUILDER) + ';REQUIREMENTS_SHA='
+            + repr(ci.sha(HERE / 'requirements.txt')) + '\n' + code)
+    result = ci.run(container(image) + ['-c', code])
+    try:
+        report = json.loads(result.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        raise RuntimeError('DURABILITY_ISOLATED_DEPENDENCY_REPORT_REQUIRED') from None
+    if report.get('status') != 'PASS' or report.get('gpuExecuted') is not False:
+        raise RuntimeError('DURABILITY_ISOLATED_DEPENDENCY_SHA_FAILED')
+    return report
+
+
 def verify():
     value = ci.state()
     if value.get('testsStatus') != 'PASS' or not value.get('imageBuilt'):
@@ -301,7 +341,8 @@ def verify():
     deps = frozen_dependency_hash(value['image'])
     if after != value['protectedParentBefore'] or deps != value['parentDependenciesBefore']:
         raise RuntimeError('DURABILITY_PROTECTED_PARENT_CHANGED')
-    value.update(imageHashes=image_hashes(value['image']), protectedParentAfter=after,
+    value.update(imageHashes=image_hashes(value['image']),
+                 dependencyProvenance=dependency_report(value['image']), protectedParentAfter=after,
                  parentDependenciesAfter=deps, secretScan=ci.secret_scan(), verification='PASS')
     ci.save(value)
 
@@ -320,6 +361,7 @@ def pull():
         raise RuntimeError('DURABILITY_INDEPENDENT_PARENT_HASH_MISMATCH')
     value.update(protectedParentBefore=before, protectedParentAfter=after,
                  parentDependenciesBefore=base_deps, parentDependenciesAfter=candidate_deps,
+                 dependencyProvenance=dependency_report(value['imageReference']),
                  protectedParentUnchanged=True)
     ci.save(value)
 

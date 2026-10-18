@@ -1,5 +1,7 @@
 """Real FFmpeg + authenticated vault CPU fixtures, never GPU/storage claims."""
 import copy
+from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
 import hashlib
 import importlib.util
 import json
@@ -191,6 +193,56 @@ class CheckpointTests(unittest.TestCase):
         self.assertFalse(list(output.rglob('JOB.json')))
         self.assertFalse(list(output.rglob('APPROVAL.json')))
         self.assertFalse(list(output.rglob('active.json')))
+
+    def test_frozen_coordinator_reuses_restored_scenes_and_calls_only_missing_scene(self):
+        receipt = self.save(coordinator_root=self.native)
+        shutil.rmtree(self.private)  # Synthetic fixture loss only.
+        self.restore(receipt['checkpointId'])
+        restored = self.base / 'restored/production/render-v3'
+        preserved = {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
+                     for key in self.cache_keys for path in (restored / 'cache' / key).rglob('*') if path.is_file()}
+        source = checkpoint.RECOVERY / 'universal-auto-video-v2/orchestrator.py'
+        self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(),
+                         '2e1e9d76c6ecf760f69fa2204c80d91da251fa0ee2abf8ed7cf3fe2388afcca4')
+        spec = importlib.util.spec_from_file_location('_durability_test_frozen_coordinator', source)
+        coordinator = importlib.util.module_from_spec(spec)
+        # The original coordinator's ordinary imports still resolve to its
+        # unchanged directory. No injected test component enters production.
+        with mock.patch.object(sys, 'path', [str(source.parent), *sys.path]):
+            spec.loader.exec_module(coordinator)
+        rendered, composed = [], []
+        def render(plan, scene, attempt, **_kwargs):
+            rendered.append(scene['sceneId'])
+            target = attempt / 'segment.mp4'
+            shutil.copyfile(self.video, target)
+            target.chmod(0o600)
+            return {**scene, 'path': str(target), 'testOnly': True,
+                    'hardwareVerified': False, 'artifacts': ['segment.mp4']}
+        def compose(_plan, segments, _destination):
+            composed.extend(segments)
+            return {'testOnly': True}
+        approval = {'schema': 'WORLD_ENGINE_UNIVERSAL_GPU_AUTHORIZATION_V1', 'approved': True,
+            'planSHA256': checkpoint.sha(self.plan), 'imageDigest': self.plan['renderProfile']['imageDigest'],
+            'validUntil': (datetime.now(timezone.utc) + timedelta(minutes=5)).isoformat(),
+            'maxWallSeconds': 60, 'maxRetries': 0, 'maxCostAmount': '1', 'currency': 'USD', 'gpuHourlyRate': '1'}
+        components = {'render': render, 'verify': self.compose.verify_segment, 'compose': compose,
+            'export': lambda *_args: {'mountedViewReadbackVerified': True, 'testOnly': True}, 'lease': nullcontext}
+        with mock.patch.object(coordinator, 'validate_plan', return_value=self.plan), \
+                mock.patch.object(coordinator, '_identity', return_value={'pid': os.getpid(), 'synthetic': True}), \
+                mock.patch.dict(sys.modules, {'cache': self.cache}):
+            state = coordinator.run_job(self.plan, control_root=restored, export_root=self.base,
+                                        approval=approval, _test_components=components)
+        self.assertEqual(rendered, ['fixture-1'])
+        self.assertEqual([row['sceneId'] for row in composed], ['fixture-0', 'fixture-1', 'fixture-2'])
+        self.assertTrue(composed[0]['cacheHit'])
+        self.assertTrue(composed[2]['cacheHit'])
+        self.assertEqual(state['progressFrames'], 90)
+        self.assertEqual(len(state['completedScenes']), 3)
+        self.assertEqual(state['state'], 'COMPLETED')
+        self.assertTrue(state['testOnly'])
+        self.assertFalse(state['gpuRenderingVerified'])
+        for path, digest in preserved.items():
+            self.assertEqual(hashlib.sha256(Path(path).read_bytes()).hexdigest(), digest)
 
     def test_missing_cache_entries_do_not_get_created_by_snapshot(self):
         absent = checkpoint._key(self.plan, 1)

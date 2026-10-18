@@ -11,7 +11,7 @@ not start, stop, or deploy a GPU. The parent image is pinned by digest in
 |---|---|---|
 | Live Scene, audio, job records, cache | `/var/lib/world-engine-private/engine/production-studio-mvp-v1/production` | Existing UID/GID 1000, directories 0700 and files 0600 |
 | Existing media exports | `/world-storage` | Shared mount; original readback rules retained |
-| Recoverable encrypted backups | Dropbox API folder `/WORLD_ENGINE_STUDIO_BACKUPS_V1/objects` | AES-GCM authentication and separate retained key |
+| Recoverable encrypted backups | Opaque object IDs directly in Dropbox API folder `/WORLD_ENGINE_STUDIO_BACKUPS_V1` | AES-GCM authentication and separate retained key |
 | Discoverable backup receipts | Dropbox API folder `/WORLD_ENGINE_STUDIO_BACKUPS_V1/receipts` | Append-only encrypted manifest pointers |
 | Backup credentials inside a running container | Private Studio root, `durability-secrets` | UID/GID 1000, mode 0600; never exported |
 
