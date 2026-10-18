@@ -24,7 +24,10 @@ import unittest
 import urllib.request
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
+# The repository checkout is three levels deep; the intentionally shallow
+# /opt extension mount is not. Do not index its nonexistent third ancestor
+# before the container can even enter/report its isolated test phase.
+REPO = (Path('/opt/rtx-package/repo') if str(HERE).startswith('/opt/') else HERE.parents[2])
 IMAGE = 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da'
 TARGET = '/opt/world-engine-studio-cpu-recovery'
 PARENT_MANIFEST = '/opt/world-engine-studio-https-proxy-fix/manifest.py'
@@ -78,11 +81,13 @@ def child_diagnostics(stdout, stderr):
     raw = (stdout[-32768:] if isinstance(stdout, str) else '') + '\n' + (stderr[-32768:] if isinstance(stderr, str) else '')
     tokens = re.findall(r'\b[A-Z][A-Z0-9_]{1,100}\b', raw)
     codes = sorted({token for token in tokens if SAFE_CODE.fullmatch(token)})[:16]
-    types = sorted(set(re.findall(r'\b(AssertionError|RuntimeError|TypeError|ValueError|PermissionError|FileNotFoundError|ModuleNotFoundError|ImportError|KeyError|TimeoutError|CalledProcessError)\b', raw)))
+    types = sorted(set(re.findall(r'\b(AssertionError|RuntimeError|TypeError|ValueError|PermissionError|FileNotFoundError|ModuleNotFoundError|ImportError|KeyError|IndexError|AttributeError|SyntaxError|IndentationError|TimeoutError|CalledProcessError)\b', raw)))
     conditions = {'permission denied': 'PERMISSION_DENIED', 'no space left on device': 'NO_SPACE_LEFT',
                   'no such file or directory': 'PATH_NOT_FOUND', 'read-only file system': 'READ_ONLY_FILESYSTEM',
                   'cannot connect to the docker daemon': 'DOCKER_DAEMON_UNAVAILABLE'}
     return {'errorCodes': codes, 'errorTypes': types,
+            'stdoutBytes': len(stdout.encode()) if isinstance(stdout, str) else 0,
+            'stderrBytes': len(stderr.encode()) if isinstance(stderr, str) else 0,
             'conditions': sorted(label for phrase, label in conditions.items() if phrase in raw.lower()),
             'rawOutputPersisted': False}
 
