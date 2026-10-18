@@ -1,0 +1,124 @@
+name: WORLD ENGINE Studio durable checkpoint candidate
+
+on:
+  push:
+    branches: [development/studio-durability-v1-20261018]
+    paths:
+      - .github/workflows/studio-durability-v1.yml
+      - world-simulation-shorts-engine/recovery/studio-durability-v1/**
+      - '!world-simulation-shorts-engine/recovery/studio-durability-v1/runs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-durability-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/studio-durability-v1-20261018'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      digest: ${{ steps.publish.outputs.digest }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: build
+      DURABILITY_ROOT: world-simulation-shorts-engine/recovery/studio-durability-v1
+    steps:
+      - name: Fetch only isolated extension and pinned packaging helper
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-durability-v1.yml
+            /world-simulation-shorts-engine/recovery/studio-durability-v1/**
+            /world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/ci_package.py
+      - name: Require free public standard runner and 20 GiB free disk
+        id: preflight
+        run: python3 -B "$DURABILITY_ROOT/ci.py" preflight
+      - name: Test exact source provenance staging without Docker or network
+        id: selftest
+        run: python3 -B "$DURABILITY_ROOT/ci.py" selftest
+      - name: Check new tag without registry writes
+        id: guard
+        run: python3 -B "$DURABILITY_ROOT/ci.py" guard
+      - name: Stage only explicitly manifested source and tests
+        id: stage
+        run: python3 -B "$DURABILITY_ROOT/ci.py" stage
+      - name: Build additive local candidate with isolated dependencies
+        id: build
+        run: python3 -B "$DURABILITY_ROOT/ci.py" build
+      - name: Focused UID 1000 CPU checkpoint and recovery tests
+        id: test
+        run: python3 -B "$DURABILITY_ROOT/ci.py" test
+      - name: Verify inherited files and scan new source for secrets
+        id: verify
+        run: python3 -B "$DURABILITY_ROOT/ci.py" verify
+      - name: Publish tested candidate under a unique tag
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B "$DURABILITY_ROOT/ci.py" publish
+      - name: Preserve bounded CPU evidence on development branch
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","selftest":"${{ steps.selftest.outcome }}","guard":"${{ steps.guard.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","test":"${{ steps.test.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+        run: python3 -B "$DURABILITY_ROOT/ci.py" persist
+
+  verify-pull:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.digest != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      packages: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: pull
+      RESULT_PUBLISHED_TAG: ${{ needs.build.outputs.tag }}
+      RESULT_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
+      DURABILITY_ROOT: world-simulation-shorts-engine/recovery/studio-durability-v1
+    steps:
+      - name: Independent fresh checkout
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-durability-v1.yml
+            /world-simulation-shorts-engine/recovery/studio-durability-v1/**
+            /world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/ci_package.py
+      - name: Require free public standard runner and 20 GiB free disk
+        id: preflight
+        run: python3 -B "$DURABILITY_ROOT/ci.py" preflight
+      - name: Pull immutable digest and verify new plus protected parent files
+        id: pull
+        run: python3 -B "$DURABILITY_ROOT/ci.py" pull
+      - name: Optional actual Dropbox CPU upload-download and fresh-root recovery
+        id: external
+        env:
+          WORLD_ENGINE_STUDIO_BACKUP_KEY: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_KEY }}
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_TOKEN: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_TOKEN }}
+        run: python3 -B "$DURABILITY_ROOT/ci.py" external
+      - name: Preserve independent pull evidence
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}","external":"${{ steps.external.outcome }}"}
+        run: python3 -B "$DURABILITY_ROOT/ci.py" persist
