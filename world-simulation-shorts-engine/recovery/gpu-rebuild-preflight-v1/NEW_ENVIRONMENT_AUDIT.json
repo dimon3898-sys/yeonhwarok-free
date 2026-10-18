@@ -1,0 +1,123 @@
+{
+  "schema": "WORLD_ENGINE_GPU_REBUILD_SETTINGS_PREFLIGHT_V1",
+  "scope": "READ_ONLY_SOURCE_AUDIT_NO_GPU_NO_SSH_NO_BUILD_NO_RENDER",
+  "repoHead": "2de34b8",
+  "sourceFilesModified": false,
+  "latestVerifiedRunnableImage": {
+    "tag": "studio-proxy-v1-4589328-39085567166-1",
+    "reference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da",
+    "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+    "buildRun": 39085567166,
+    "recordedBuildRegisteredIndependentPull": true,
+    "hardwareValidationForNewEnvironment": "NOT_EXECUTED",
+    "evidence": "recovery/studio-https-proxy-fix-v1/IMAGE.json"
+  },
+  "nonsecretSettings": {
+    "containerPort": 8080,
+    "commandOverride": "EMPTY",
+    "WORLD_ENGINE_RENDER_MODE": "gpu-required",
+    "WORLD_ENGINE_STARTUP_MODE": "normal",
+    "WORLD_ENGINE_STUDIO_PORT": "8080",
+    "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST": "sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da",
+    "NVIDIA_DRIVER_CAPABILITIES": "graphics,utility",
+    "sharedMemoryGiB": 2,
+    "GPU": "RTX 4080 SUPER 16GB, alternatively existing admitted RTX 4090/5090",
+    "gpuAllocation": "provider-managed actual device; do not invent GPU UUID",
+    "gpuBudgetGiBDefault": 8,
+    "minPhysicalMemoryMiB": 15360,
+    "reservedFreeMemoryGiB": 2,
+    "gpuBudgetConstraint": "budget <= nvidia-smi free memory - 2GiB",
+    "sharedMemoryMinimumGiB": 1,
+    "sharedMemoryRecommendedGiB": 2,
+    "WORLD_ENGINE_STUDIO_STATE_ROOT": "optional override; default /var/lib/world-engine-private/engine/production-studio-mvp-v1",
+    "productionControlRoot": "/var/lib/world-engine-private/engine/production-studio-mvp-v1/production",
+    "privateStorage": "UID/GID 1000:1000; local POSIX dirs0700/files0600; no symlinks; never /world-storage",
+    "DropboxMount": "/world-storage, untrusted shared export only; retain existing contents",
+    "storageModeEnvironmentVariable": "NONE required in storage fix; launch.py composes private local workspace with shared export",
+    "privatePreflightMinimumBytesFor80Seconds": 2147483648,
+    "privateDiskMinimumIsEstimateOnly": true
+  },
+  "secureInputs": [
+    {
+      "name": "WORLD_ENGINE_STUDIO_OWNER_CODE",
+      "requiredForFreshPrivateState": true,
+      "constraint": "16-256 printable non-space ASCII; reuse existing approved secret securely; not present in image/repo; missing current availability not measurable here"
+    },
+    {
+      "name": "WORLD_ENGINE_STUDIO_OPERATOR_POLICY_JSON",
+      "requiredForRendering": true,
+      "missingPolicyBehavior": "Web UI/setup stays alive; Start blocked",
+      "fields": [
+        "validUntil",
+        "maxWallSeconds",
+        "maxRetries",
+        "maxCostAmount",
+        "currency",
+        "gpuHourlyRate"
+      ],
+      "constraints": "timezone-aware future expiry; maxWallSeconds1..86400; retries0..2; real rate/currency; cost >= hours * real hourly rate; no fake values"
+    },
+    {
+      "name": "GCUBE_ACCESS_TOKEN or GCUBE_API_TOKEN",
+      "requiredForManualStudioRender": false,
+      "note": "Existing API tokens remain untouched; not needed inside manual Studio UI. GHCR private pull credential is separate and conditional on actual image access."
+    }
+  ],
+  "httpsSetup": {
+    "PUBLIC_ORIGIN": "optional before provider assigns actual port8080 HTTPS origin; no stale/invented address",
+    "registration": "new actual HTTPS origin incl external port, no path/query; /setup -> owner authentication -> explicit origin confirm -> fresh Studio login",
+    "freshPrivateState": "Recreate setup/session private state safely; do not copy expired cookies",
+    "restoredPrivateState": "Preserve registered origin; mismatch with env blocks production rather than overwrite; new host needs authenticated address change flow",
+    "security": "Origin/CSRF/owner auth unchanged; current backend proxy behavior must pass real setup checks"
+  },
+  "timePolicy": {
+    "requestedFutureSeconds": 10800,
+    "codeSupportsSeconds": 10800,
+    "current180MinutePolicyActivatedOnGcube": "NOT_VERIFIED",
+    "newHelperDeployedInRecordedImage": false,
+    "helperSource": "recovery/studio-80s-recovery-v1/policy.py",
+    "newEnvironment": "Operator explicitly supplies a fresh approved10800-second policy; base controller supports10800 without renderer changes",
+    "existingEnvironment": "helper stage -> inactive revision; explicit activation only; financial/retry caps kept; expiry>=3h; do not overwrite existing policy via env",
+    "priorJobApproval": "Preserve original3600-second job record; do not extend/reset old approval or claims",
+    "billing": "Studio timeout does not stop workload billing; manual provider stop required after authorized execution"
+  },
+  "newProductionInput": {
+    "file": "recovery/production-studio-mvp-v1/examples/STUDIO_PROMPT_V4_80S.json",
+    "preset": "VERIFIED_FRONT_V4_80S",
+    "profile": "V4_ARCHIVAL_80S",
+    "duration": 80,
+    "fps": 30,
+    "frames": 2400,
+    "SFX": "Existing preset enabled gain0.65; keep exact previous submitted AUDIO if exact reconstruction required",
+    "identity": "Fresh job ID/new capture namespace, no deleting old claim. Rebinding image digest is validated existing adapter operation."
+  },
+  "oldWorkNotReconstructibleFromSecretlessPreset": [
+    "Old actual private PLAN/AUDIO/APPROVAL/session and job/capture identifiers may differ from stock preset.",
+    "Recreating verified stock80s input can make a fresh candidate, but cannot prove bit-exact old user job without its private plan/audio/hashes."
+  ],
+  "nextRestartPoint": [
+    "No GPU start in this task. Verify source/asset closure separately before declaring re-render ready.",
+    "Obtain actual rate/cost/expiry and explicit paid execution authorization; securely confirm existing owner code availability.",
+    "Use fixed verified proxy image in a new manual environment; port8080,Command empty,shm2GiB,NVIDIA graphics/utility,Dropbox/world-storage.",
+    "Use private POSIX local or approved private persistent volume; never claim Dropbox exports are private cache/auth backup.",
+    "Leave PUBLIC_ORIGIN absent until new actual HTTPS address; authenticate /setup and register it.",
+    "Supply valid new10800-second policy and same image binding digest; preserve old approvals/claims.",
+    "Paste preserved structured80s preset or exact verified native Scene; Preflight and explicit Start only after user GPU approval.",
+    "After completion full MP4 decode/frame/format/SFX/SHA,Dropbox external download verification; no FINAL promotion."
+  ],
+  "testsThisAudit": "NONE re-run; prior build/pull/tests evidence reused; settings traced directly from preserved source",
+  "evidence": [
+    "studio-https-proxy-fix-v1/GCUBE_SETUP.md:11-30",
+    "studio-https-proxy-fix-v1/Dockerfile:19-20 ENTRYPOINT/CMD",
+    "studio-https-proxy-fix-v1/proxy_bootstrap.py:main -> HTTPS original prepare_configuration",
+    "studio-https-bootstrap-v1/https_bootstrap.py:prepare_configuration,_prepare_policy,supervise",
+    "production-studio-mvp-v1/bootstrap.py:STATE_ROOT,SECRET_ENV,_private_file,_private_directory",
+    "production-studio-mvp-v1/studio_controller.py:101-124 _policy",
+    "production-studio-mvp-v1/studio_runtime.py:217-238 preflight; 497-500 deadline",
+    "gcube-storage-fix-v1/storage.py:PRIVATE_BASE/EXPORT_ROOT,StorageSession.create,preflight",
+    "gcube-storage-fix-v1/launch.py:277-285 args/defaultmode",
+    "rtx-gpu-package-v1/gpu_launcher.py:43-64,134-177 memory/SHM checks",
+    "studio-80s-recovery-v1/policy.py:validate_future_policy,stage_future_policy,activate_future_policy",
+    "studio-80s-recovery-v1/RECOVERY_RUNBOOK.md:next newjob180minute policy"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "schema": "GCUBE_READ_ONLY_PRICING_API_SOURCE_MAP_V1",
+  "wheelSHA256": "9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692",
+  "memberHashes": {
+    "gcube_cli/api/workload.py": "bf4a5b8059528c1928a4f5109e662e0ccba9faa5a87e26be64b6cd62dd354b6e",
+    "gcube_cli/commands/gpu.py": "72cd7d5844a1681401aab2afeeeac8a294e660b5376608716793fbf6ea1b662a",
+    "gcube_cli/api/point.py": "e95e8793cef0f662b22dc9f062a409bf2972005c22b8574836a2399b466df542",
+    "gcube_cli/skills/gcube_skill.md": "5497277e2d825c9d8824ef97800ac0540d38c8581e0c3a1ac28d0bbf6946ddd7"
+  },
+  "networkExecuted": false,
+  "GETs": [
+    {
+      "method": "WorkloadAPI.describe",
+      "path": "/api/workloads/gai/5373",
+      "allowedFields": [
+        "state",
+        "gpuSpecArray",
+        "pods[].node.gpuSpec",
+        "pods[].node.hostSpec",
+        "pods[].node.category"
+      ],
+      "warning": "Never serialize raw containers/envs/owner. Workload.to_public_dict excludes billing fields, so raw evidence requires a minimal explicit price/spec allowlist."
+    },
+    {
+      "method": "WorkloadAPI.get_gpu_pricings",
+      "path": "/api/gpu/available/pricing/list",
+      "responseEnvelope": "pricings[] (data fallback)",
+      "fields": [
+        "gpuName",
+        "gpuExt",
+        "productName",
+        "productCode",
+        "ppIndex",
+        "gpu",
+        "price",
+        "usagePrice",
+        "currencyUnit",
+        "vram",
+        "cpu",
+        "memory",
+        "disk",
+        "availability",
+        "nodes"
+      ],
+      "optionalQuery": "serviceCode",
+      "priceSemantics": "CLI output min=price max=price+usagePrice, hourly cash currency KRW or USD",
+      "warning": "Model is current availability/spec pricing, not guaranteed selected-node historical charge. Unknown/missing values must remain unknown, do not rely on default0/defaultKRW as evidence."
+    },
+    {
+      "method": "WorkloadAPI.get_point_base",
+      "path": "/api/point/base",
+      "response": "pointBase.krw exchange conversion; used only if currencyUnit USD",
+      "warning": "Not an invoice, tax or rounding rule."
+    },
+    {
+      "method": "PointAPI.daily_spends",
+      "path": "/api/point/daily/spends",
+      "query": {
+        "owner": "resolved in memory from authenticated account",
+        "workload": 5373,
+        "startTime": "optional",
+        "endTime": "optional"
+      },
+      "response": "data.pointSpends[]",
+      "allowedFields": [
+        "date",
+        "gpuPoint",
+        "gpuName",
+        "gpuUsage",
+        "workload",
+        "krwGpuAmount",
+        "krwGpuUnitAmount",
+        "krwGpuUsageAmount",
+        "usdGpuAmount",
+        "usdGpuUnitAmount",
+        "usdGpuUsageAmount",
+        "netRx",
+        "netTx"
+      ],
+      "warning": "Actual workload aggregate daily spending; GPU usage unit not established solely by field name. Never dump account identity or provider internal pricing."
+    }
+  ],
+  "matching": "Use match_gpu_pricing: gpuName+gpuExt+ppIndex+gpuCount+vram+cpu+memory+disk+tier. Skip absent dimensions only as CLI backwardcompat; uniqueness is required for a reliable actualquote.",
+  "units": "The package explicitly models currencyUnit KRW/USD. skills source says gpu list hourly cash prices, 1P=1KRW; do not use this alone to infer VAT-inclusive cash replenishment, rounding, network or selected-node contract.",
+  "selectedNodeCaveat": "nodes[] is passthrough and no precise node-entry schema is declared in GpuPricing; inspect keys only with redacted field allowlists if needed."
+}

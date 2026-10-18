@@ -1,0 +1,143 @@
+{
+  "schema": "WORLD_ENGINE_REBUILD_STORAGE_COST_PREFLIGHT_V1",
+  "basis": "REUSED_PERSISTED_EVIDENCE_NO_NEW_NETWORK_OR_GPU_ACTIONS",
+  "storage": {
+    "officialStopWarningVerified": true,
+    "warning": "Without backup storage, working container data and environment are deleted on workload stop.",
+    "configuredBackupIsWholeContainerBackupVerified": false,
+    "dropboxMountUserReported": "/world-storage",
+    "actualExternalSynchronizationVerifiedForFailed80s": false,
+    "actualPrivateFilesRead": false,
+    "existingRegistrationReadOnlyObservation": "2026-10-18T03:21:21.655408+00:00",
+    "privateRiskPaths": [
+      "/var/lib/world-engine-private/engine/production-studio-mvp-v1/production/<job-id>/PLAN.json",
+      "/var/lib/world-engine-private/engine/production-studio-mvp-v1/production/<job-id>/AUDIO.json",
+      "private render-v4 cache/scene MP4 and provenance anchors",
+      "Studio approvals, owner/auth and actual job state"
+    ],
+    "stopCurrentlyProvenLossless": false,
+    "nativePVCExistsInOfficialSource": true,
+    "nativePVCStopRetentionForAccountVerified": false,
+    "doNotDo": [
+      "No SSH retries",
+      "No stop or delete",
+      "No registration change",
+      "No full duplicate backup"
+    ]
+  },
+  "performance": {
+    "production80sCompletedAndDecoded": false,
+    "userReport": {
+      "durationSeconds": 80,
+      "frames": 2400,
+      "scenes": 12,
+      "reportedWallSeconds": 3600,
+      "reportedError": "STUDIO_APPROVED_DEADLINE_EXCEEDED",
+      "completedScenesReported": 12,
+      "processedFramesReported": 2400,
+      "independentMediaVerification": false
+    },
+    "supportedInference": "Prior reported end-to-end attempt did not finish within its 60-minute wall allowance; frame counter does not establish segment integrity or phase timings.",
+    "gpuSecondsPerFrameMeasured": null,
+    "newRebuildDurationEstimateSeconds": null,
+    "futurePolicyMaxWallSeconds": 10800,
+    "futurePolicyRemoteApplied": false,
+    "maxWallIsPrediction": false,
+    "excludedSyntheticPerformance": {
+      "CI": 39091801710,
+      "fixtureResolution": [
+        64,
+        96
+      ],
+      "fixtureDurationSeconds": 80,
+      "composeSFXExportVerifySeconds": 5.211401,
+      "productionPerformanceEvidence": false
+    },
+    "noBenchmarkRunThisTask": true
+  },
+  "cost": {
+    "actualRTX4080SUPERHourlyPrice": null,
+    "currencyConfirmed": null,
+    "livePriceOrInvoiceRetrievedThisTask": false,
+    "billingPersistsWhileDeployedEvenIdle": true,
+    "officialDemo4080RateUsedAsQuote": false,
+    "testFixtureRatesUsedAsQuote": false,
+    "formula": "Selected node actual hourly rate * total deployed billable hours + provider-confirmed network/storage/tax/rounding charges",
+    "threeHourRenderAuthorizationFormula": "maxCostAmount must cover 3 * actual gpuHourlyRate, plus separately accounted platform exposure; no automatic platform stop guarantee",
+    "gpuTimeoutStopsBilling": false,
+    "requiresBeforePaidApproval": [
+      "actual selected-node model and hourly price",
+      "currency, tax, rounding and network/storage rates",
+      "explicit maximum cost and 10800-second application allowance if chosen",
+      "approval expiry, retry limit and manual platform stop plan"
+    ]
+  },
+  "sources": [
+    {
+      "id": "official_stop",
+      "url": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/workload/stop-workload.ko.md",
+      "evidencePath": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/stop.md",
+      "sha256": "7f8ea67123b85abb4646198c6f6818225798b015772638034f2f2c473a36d715",
+      "retrievalUTC": "2026-10-06T09:55:56.098052+00:00",
+      "lines": [
+        3,
+        25
+      ]
+    },
+    {
+      "id": "official_storage",
+      "url": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/sign-up/storage-management.ko.md",
+      "evidencePath": "world-simulation-shorts-engine/docs/evidence/gcube_official_sources_v001/storage.md",
+      "sha256": "37a15465d2888fba5f209f033c74070d38994698eb853dcff1ed324fea0f2350",
+      "retrievalUTC": "2026-10-06T09:55:56.099455+00:00",
+      "lines": [
+        28,
+        50
+      ]
+    },
+    {
+      "id": "official_gpu_prices",
+      "url": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/gcube-cli/cli-gpu.ko.md",
+      "sha256": "2380902d8642fd5b59d79f6b7d04cc5fcf5b72bbd1cdaef9ae7afb57e556fbba",
+      "lines": [
+        8,
+        25
+      ]
+    },
+    {
+      "id": "official_billing",
+      "url": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/platform-guide/ollama-api.ko.md",
+      "sha256": "fdd9c984f3d422c2439ec53229bae2ba42016d5079dab2558f6f7c649238e18d",
+      "lines": [
+        47,
+        50,
+        274,
+        282
+      ]
+    },
+    {
+      "id": "official_network_points",
+      "url": "https://github.com/Data-Alliance/gai-platform-docs/blob/master/docs/user-guide/gcube-cli/cli-point.ko.md",
+      "sha256": "1d4aa340c670619e81f029a26e5fbd35c282feee08ac675be90f5e6ae94bbd40",
+      "lines": [
+        34,
+        40
+      ]
+    }
+  ],
+  "unresolvedChecks": [
+    "Whether actual submitted production PLAN/AUDIO exist outside current container",
+    "Whether failed80s scene outputs and private anchors reached Dropbox",
+    "Actual current selected-node RTX4080SUPER rate and storage/network billing",
+    "Account-specific native/external volume retention and stop semantics beyond documented general backup warning"
+  ],
+  "actionsExecuted": {
+    "gCubeCalls": 0,
+    "SSH": 0,
+    "render": 0,
+    "paidOperations": 0,
+    "sourceChanges": 0,
+    "dataChanges": 0
+  },
+  "note": "A sparse git read encountered a failed implicit promisor fetch through unavailable proxy; subsequent git reads disabled lazy fetching. No server or source mutation."
+}
