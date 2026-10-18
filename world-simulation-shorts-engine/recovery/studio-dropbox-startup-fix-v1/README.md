@@ -14,7 +14,7 @@
 
 `adapter.py`가 SHA 고정 원본 bootstrap과 정확히 같은 외부 proof 명령에만 Docker 인자 `--workdir=/opt/world-engine-studio-dropbox-offline`를 추가한다. 다른 명령이나 실행 이미지에는 적용하지 않는다. 보안·UID·읽기 전용 마운트·capability·GPU 금지 조건을 유지한다.
 
-기존 frozen 파일을 수정하지 않는다. 새 proof adapter는 기존 `proof_ci.py`와 `ci.py`를 SHA로 확인하고 재사용한다. 업로드·다운로드·암호화·fresh-process restore·OAuth 자동 갱신·Secret 파일 취급은 원래 구현이다.
+기존 frozen 파일을 수정하지 않는다. 새 proof adapter는 기존 `proof_ci.py`와 `ci.py`를 SHA로 확인하고 재사용한다. 업로드·다운로드·암호화·새 저장 경로 복구·OAuth 자동 갱신·Secret 파일 취급은 원래 구현이다. 컨테이너 재시작 복구를 검증했다는 뜻은 아니다.
 
 첫 실제 수정 검증 `39111545470`에서 시작 재현 검사는 PASS했고, 다음 단계에서 `DURABILITY_KEY_32_BYTES_REQUIRED`를 확인했다. 브라우저가 저장한 표준 Base64 표현과 frozen reader가 요구하는 canonical URL-safe Base64 표현의 불일치다. 키의 raw32 형식을 요구하는 문제가 아니다.
 
