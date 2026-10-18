@@ -1,0 +1,119 @@
+name: WORLD ENGINE Studio 80s CPU-only recovery validation
+
+on:
+  push:
+    branches: [development/studio-80s-recovery-20261018]
+    paths:
+      - .github/workflows/studio-80s-recovery-cpu.yml
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/validate.py
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/recover.py
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/policy.py
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/tests/test_recover.py
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/tests/test_policy.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-80s-cpu-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/studio-80s-recovery-20261018'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      source: ${{ steps.source.outputs.sha }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RECOVERY_ROOT: world-simulation-shorts-engine/recovery/studio-80s-recovery-v1
+    steps:
+      - name: Check out only additive recovery and existing read-only test helpers
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-80s-recovery-cpu.yml
+            /.github/workflows/studio-80s-recovery-v1.yml
+            /world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/**
+            /world-simulation-shorts-engine/recovery/studio-auth-recovery-v2/collector.py
+            /world-simulation-shorts-engine/recovery/studio-auth-recovery-v2/rest_evidence.py
+      - name: Record exact tested source checkpoint
+        id: source
+        run: printf 'sha=%s\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+      - name: Run real CPU FFmpeg recovery and policy tests without GPU or network
+        run: python3 -B "$RECOVERY_ROOT/validate.py" test
+      - name: Secret Scan only new source and workflows with pinned scanner
+        run: python3 -B "$RECOVERY_ROOT/validate.py" secret-scan
+      - name: Hash bounded success reports
+        id: reports
+        run: python3 -B "$RECOVERY_ROOT/validate.py" bundle
+      - name: Transfer only safe reports to separate write-permission job
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: studio-80s-cpu-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ steps.reports.outputs.report-path }}/CPU_RESULT.json
+            ${{ steps.reports.outputs.report-path }}/SECRET_SCAN.json
+            ${{ steps.reports.outputs.report-path }}/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 7
+
+  persist:
+    needs: test
+    if: needs.test.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      TESTED_SOURCE: ${{ needs.test.outputs.source }}
+      RECOVERY_ROOT: world-simulation-shorts-engine/recovery/studio-80s-recovery-v1
+    steps:
+      - name: Check out latest isolated branch for append-only evidence
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: development/studio-80s-recovery-20261018
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/runs/**
+      - name: Retrieve closed CPU success evidence
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: studio-80s-cpu-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cpu-reports
+      - name: Verify hashes and exact source before append-only branch persistence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, shutil
+          source = pathlib.Path(os.environ['RUNNER_TEMP']) / 'cpu-reports'
+          assert {p.name for p in source.iterdir()} == {'CPU_RESULT.json', 'SECRET_SCAN.json', 'SHA256SUMS'}
+          assert re.fullmatch('[a-f0-9]{40}', os.environ['TESTED_SOURCE'])
+          expected = ''.join(hashlib.sha256((source / name).read_bytes()).hexdigest() + '  ' + name + '\n' for name in ('CPU_RESULT.json', 'SECRET_SCAN.json'))
+          assert (source / 'SHA256SUMS').read_text() == expected
+          for name in ('CPU_RESULT.json', 'SECRET_SCAN.json'):
+              raw = (source / name).read_text()
+              assert len(raw.encode()) <= 1024 * 1024
+              assert not re.search(r'-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|[?&](?:token|sig)=', raw)
+              assert json.loads(raw)['status'] == 'PASS'
+          report = json.loads((source / 'CPU_RESULT.json').read_text())
+          assert report['sourceCommit'] == os.environ['TESTED_SOURCE']
+          assert report['actualNvidiaRenderingVerified'] is False and report['actualWorkloadCacheVerified'] is False
+          assert report['paidOperations'] == report['imageBuilds'] == report['imagePushes'] == 0
+          target = pathlib.Path(os.environ['RECOVERY_ROOT']) / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          assert not target.exists()
+          target.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copytree(source, target)
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "$RECOVERY_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git diff --cached --check
+          git commit -m 'docs(studio): persist CPU-only 80s recovery verification [skip ci]'
+          git push origin HEAD:development/studio-80s-recovery-20261018
