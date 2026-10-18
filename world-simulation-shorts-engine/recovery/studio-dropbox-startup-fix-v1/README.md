@@ -16,6 +16,12 @@
 
 기존 frozen 파일을 수정하지 않는다. 새 proof adapter는 기존 `proof_ci.py`와 `ci.py`를 SHA로 확인하고 재사용한다. 업로드·다운로드·암호화·fresh-process restore·OAuth 자동 갱신·Secret 파일 취급은 원래 구현이다.
 
+첫 실제 수정 검증 `39111545470`에서 시작 재현 검사는 PASS했고, 다음 단계에서 `DURABILITY_KEY_32_BYTES_REQUIRED`를 확인했다. 브라우저가 저장한 표준 Base64 표현과 frozen reader가 요구하는 canonical URL-safe Base64 표현의 불일치다. 키의 raw32 형식을 요구하는 문제가 아니다.
+
+`key_encoding.py`는 기존 Secret의 프로세스 내부 복사본을 엄격히 디코딩해 정확히 32바이트임을 확인하고, **동일 바이트**를 패딩을 유지한 URL-safe Base64로 표현한다. 그 표현만 기존 helper의 이번 실행용 private 파일에 전달한다. GitHub Secret 원문·암호화 키 바이트·기존 백업은 변경하지 않는다. raw32·hex64·패딩 누락·비정규 문자열은 추측해 처리하지 않는다.
+
+이 정규화는 이번 CPU proof 입력 경계에 적용된다. 기존 GPU 생산 이미지의 bootstrap은 이번 작업에서 변경하지 않았다. 향후 생산 실행에도 동일 바이트 보존 입력 어댑터를 연결해야 하며, 이 proof 성공만으로 GPU 시작 성공을 선언하지 않는다.
+
 ## 검증과 저장
 
 - 보호 기준: `1cd8ea4565238bd7d4c8c72c6374f78557b2dc1d`.

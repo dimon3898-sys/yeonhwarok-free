@@ -17,6 +17,7 @@ import re
 import sys
 
 from adapter import IMAGE, DEST, PYTHON, adapt
+from key_encoding import canonical_key
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
@@ -165,8 +166,25 @@ def corrected_external_command(helper):
 def external(mobile, helper):
     if helper.ci.state().get('startupFix', {}).get('status') != 'PASS':
         raise RuntimeError('STARTUP_CPU_REPRODUCTION_PASS_REQUIRED')
-    with corrected_external_command(helper) as calls:
-        mobile.external(helper)
+    # Only this process's copy changes representation; the original GitHub
+    # Secret and the decoded recovery key bytes remain unchanged.
+    name = 'WORLD_ENGINE_STUDIO_BACKUP_KEY'
+    original_key = os.environ.get(name)
+    normalized = canonical_key(original_key)
+    value = helper.ci.state()
+    value['keyEncoding'] = {'canonicalInputForFrozenReader': True,
+                            'decodedKeyBytesPreserved': True,
+                            'githubSecretChanged': False}
+    helper.ci.save(value)
+    try:
+        os.environ[name] = normalized
+        with corrected_external_command(helper) as calls:
+            mobile.external(helper)
+    finally:
+        if original_key is None:
+            os.environ.pop(name, None)
+        else:
+            os.environ[name] = original_key
     value = helper.ci.state()
     report = value.get('externalDurability', {})
     value['externalCommandCorrections'] = calls['corrected']
@@ -185,6 +203,8 @@ def persist(mobile, helper):
         proof['recoveryProfile'] = 'DROPBOX_CPU_PROOF_FIXED_IMPORT_DIRECTORY_V1'
         proof['startupReproductionVerified'] = value.get('startupFix', {}).get('status') == 'PASS'
         proof['externalCommandCorrections'] = value.get('externalCommandCorrections', 0)
+        proof['keyMaterialPreserved'] = value.get('keyEncoding', {}).get('decodedKeyBytesPreserved') is True
+        proof['existingSecretsChanged'] = False
         if proof['status'] == 'PASS' and (not proof['startupReproductionVerified'] or proof['externalCommandCorrections'] != 1):
             raise RuntimeError('STARTUP_VERIFIED_CORRECTION_REQUIRED')
         if proof['status'] != 'PASS':
