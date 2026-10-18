@@ -1,0 +1,113 @@
+name: WORLD ENGINE Studio HTTPS bootstrap candidate
+
+on:
+  push:
+    branches: [development/studio-https-bootstrap-20261018]
+    paths:
+      - .github/workflows/studio-https-bootstrap-v1.yml
+      - world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/**
+      - '!world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/runs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-https-bootstrap-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/studio-https-bootstrap-20261018'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      packages: write
+    outputs:
+      tag: ${{ steps.publish.outputs.tag }}
+      digest: ${{ steps.publish.outputs.digest }}
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: build
+      STUDIO_HTTPS_ROOT: world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1
+    steps:
+      - name: Fetch isolated HTTPS extension only
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-https-bootstrap-v1.yml
+            /world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/**
+      - name: Require free public standard runner and 20 GiB free space
+        id: preflight
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" preflight
+      - name: Check unique candidate tag without registry writes
+        id: guard
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" guard
+      - name: Reproduce original startup and test extension on exact immutable CPU image
+        id: test
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" test
+      - name: Freeze explicitly manifested extension only
+        id: stage
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" stage
+      - name: Build additive candidate without changing protected parent files
+        id: build
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" build
+      - name: Verify all inherited source hashes, extension and Secret Scan
+        id: verify
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" verify
+      - name: Recheck tag collision and publish unique candidate
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" publish
+      - name: Preserve bounded CPU and mobile evidence on development branch
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" persist
+
+  verify-pull:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.digest != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      packages: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RESULT_RUNNER_LABEL: ubuntu-24.04
+      RESULT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+      RESULT_PHASE: pull
+      RESULT_PUBLISHED_TAG: ${{ needs.build.outputs.tag }}
+      RESULT_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
+      STUDIO_HTTPS_ROOT: world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1
+    steps:
+      - name: Independent fresh checkout of extension
+        id: checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-https-bootstrap-v1.yml
+            /world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/**
+      - name: Require free public standard runner and disk space
+        id: preflight
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" preflight
+      - name: Independently pull digest and verify extension plus all Studio51 and parent373
+        id: pull
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" pull
+      - name: Persist independent digest pull evidence
+        if: always() && steps.checkout.outcome == 'success'
+        env:
+          RESULT_STEP_OUTCOMES: >-
+            {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}"}
+        run: python3 -B "$STUDIO_HTTPS_ROOT/ci_package.py" persist

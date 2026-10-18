@@ -1,0 +1,15 @@
+# Studio HTTPS bootstrap candidate — implementation checkpoint
+
+This independent extension preserves the approved Studio image at `sha256:5a35e44947aaed3fffe39aad2352ff17c22b9375b4591e635129feed4ec90d94`. It does not change the original Studio51 or V4/engine373 payloads, rendering, GPU admission, job claims, cached scenes, SFX or Dropbox adapter.
+
+The root supervisor validates all source hashes and the existing private owner credential, drops the UI to UID/GID1000 with the frozen GPU device-group allowlist, and starts the UI without waiting for GPU admission. A missing HTTPS origin enters SETUP, rather than crashing. Missing owner credentials still fail closed. Missing/invalid/expired operating policy keeps the web server alive and blocks production. An exited GPU admission process is logged once and never automatically retried.
+
+The owner manually enters the actual assigned HTTPS origin. The existing password verifier authenticates the owner; a browser-cookie-bound, time-limited challenge and one-use confirmation nonce protect registration. No origin is inferred from Host or forwarded headers. Registration uses the original fixed RequestPolicy against the owner-confirmed origin, requires same-origin JSON, and revokes setup and production sessions before atomically persisting the origin. The unchanged Studio login/application is used afterwards. Changing an origin requires authentication from the previously registered origin and a fresh owner confirmation.
+
+A public health response only establishes that the web service is alive; it always reports renderAllowed=false and GPU verification=false. Every explicit Start/Resume retains the original physical GPU health, source, policy/budget, consent, claim and native render admission checks. Starting the container or visiting a page never starts/resumes rendering.
+
+Private HTTPS origin/authentication state stays outside Dropbox in the existing private Studio directory. Same-container restart persistence is tested; replacing a workload's ephemeral root filesystem does not guarantee persistence. A replacement must use its actual environment origin or repeat authenticated setup unless an approved private POSIX volume is available. Shared Dropbox storage must never be used for private credentials/state.
+
+Local implementation validation: 45 focused Python tests passed. Real immutable-image startup and mobile Chromium validation are required in free CI before building/publishing. Local VFS Docker does not have a safe disk budget for the original image; it is intentionally not pulled locally. CPU/Chromium validation is not NVIDIA or gCube verification. The historical first exit of #5373 remains unconfirmed.
+
+CI builds an additive candidate only after source verification, original/new startup matrix and mobile browser checks. It uses a unique tag, separately pulls the digest on a fresh runner, and preserves evidence on this development branch. No gCube deployment, paid GPU operation, job reset, image overwrite or FINAL promotion is authorized or performed.

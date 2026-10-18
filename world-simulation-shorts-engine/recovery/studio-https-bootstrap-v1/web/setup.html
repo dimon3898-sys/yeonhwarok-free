@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>WORLD ENGINE · HTTPS 연결 설정</title>
+  <link rel="stylesheet" href="/setup.css">
+  <script src="/setup.js" defer></script>
+</head>
+<body>
+<main>
+  <header><p class="eyebrow">WORLD ENGINE</p><h1>Studio 연결 설정</h1></header>
+  <section class="card" aria-labelledby="connection-title">
+    <p class="badge">제작 잠김</p>
+    <h2 id="connection-title">HTTPS 주소를 등록해 주세요</h2>
+    <p>gCube에서 발급한 <strong>포트 8080의 HTTPS 주소</strong>를 등록합니다. 설정 중에는 영상 제작이 시작되지 않습니다.</p>
+    <p class="hint">기존 관리자 접근 코드를 사용합니다. GPU 토큰이나 Dropbox 비밀번호를 입력하지 마세요.</p>
+    <noscript><p role="alert">보안 설정을 진행하려면 브라우저에서 JavaScript를 허용해 주세요.</p></noscript>
+    <form id="setup-login-form">
+      <label for="setup-origin">발급된 HTTPS 주소</label>
+      <input id="setup-origin" name="origin" type="url" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="2048" required aria-describedby="origin-note">
+      <p id="origin-note" class="hint">처음에는 현재 주소창과 같은 주소를 입력하세요. 주소 변경은 기존 Studio에 로그인한 뒤 실제 새 주소를 입력합니다. 경로·쿼리·끝의 /는 포함하지 않습니다.</p>
+      <label for="setup-owner-code">관리자 접근 코드</label>
+      <input id="setup-owner-code" name="password" type="password" autocomplete="current-password" minlength="16" maxlength="256" required>
+      <button id="setup-authenticate" type="submit" disabled>관리자 확인</button>
+    </form>
+    <section id="setup-confirmation" hidden aria-labelledby="confirmation-title">
+      <h2 id="confirmation-title">등록 주소 확인</h2>
+      <p id="confirmed-origin" class="origin"></p>
+      <label class="consent"><input id="setup-origin-confirm" type="checkbox"><span>이 주소가 내 gCube Studio의 실제 HTTPS 주소임을 확인했습니다.</span></label>
+      <p class="hint">주소 등록 후에는 기존 설정 세션이 종료됩니다. 제작 화면에서 다시 로그인하세요.</p>
+      <button id="setup-register" type="button" disabled>주소 등록</button>
+      <button id="setup-back" class="secondary" type="button">다시 입력</button>
+    </section>
+    <section id="setup-complete" hidden aria-labelledby="complete-title">
+      <h2 id="complete-title">HTTPS 주소가 등록되었습니다</h2>
+      <p>관리자 코드로 다시 로그인하면 제작 화면으로 이동합니다. GPU 검사와 운영 정책을 통과한 작업만 시작할 수 있습니다.</p>
+      <a id="studio-login-link" class="button" href="/login">Studio 로그인</a>
+    </section>
+    <p id="setup-progress" class="hint" role="status" aria-live="polite">보안 연결을 확인하고 있습니다.</p>
+    <div id="setup-error" class="error" role="alert" hidden><p id="setup-error-message"></p><button id="setup-retry" class="secondary" type="button" hidden>연결 다시 확인</button></div>
+  </section>
+  <footer>gCube 워크로드의 배포·정지는 사용자가 직접 수행합니다.</footer>
+</main>
+</body>
+</html>
