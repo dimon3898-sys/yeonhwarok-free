@@ -1,0 +1,413 @@
+{
+  "schema": "WORLD_ENGINE_STUDIO_DURABILITY_PACKAGE_V1",
+  "status": "STUDIO_DURABILITY_CANDIDATE_CPU_VERIFIED_HARDWARE_PENDING",
+  "sourceCommit": "6d7d4ce061acefbfa0442828f2ed858e3e8dccf2",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da",
+  "gpuExecuted": false,
+  "nvidiaHardwareVerified": false,
+  "paidWorkExecuted": false,
+  "gCubeDeployed": false,
+  "finalModified": false,
+  "rendererModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": false,
+  "imagePushed": true,
+  "pullVerified": true,
+  "videoQualityApproved": false,
+  "actualExternalBackupVerified": false,
+  "actualContainerRestartRecoveryVerified": false,
+  "builder": {
+    "status": "PASS",
+    "dockerDriver": "overlay2",
+    "freeBytes": 92121321472,
+    "minimumFreeBytes": 21474836480,
+    "existingDataDeleted": false
+  },
+  "tag": "studio-durability-v1-f983adc-39097611749-1",
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:studio-durability-v1-f983adc-39097611749-1",
+  "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:54e7f67627a14755117a3f232c03785f9ceac4ab490a33e8f5834fb9fe114b9b",
+  "imageDigest": "sha256:54e7f67627a14755117a3f232c03785f9ceac4ab490a33e8f5834fb9fe114b9b",
+  "imageConfiguration": {
+    "status": "PASS",
+    "configDigest": "sha256:fac0e905570374113953140216433e004f02d2934ecb8b6386afcdc03d02ab56",
+    "sizeBytes": 1622030484,
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "/opt/world-engine-studio-durability-venv/bin/python",
+      "-B",
+      "/opt/world-engine-studio-durability/bootstrap.py"
+    ],
+    "healthcheck": {
+      "Test": [
+        "CMD",
+        "/opt/world-engine-studio-durability-venv/bin/python",
+        "-B",
+        "-c",
+        "import urllib.request; r=urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8080/healthz',timeout=3); raise SystemExit(0 if r.status==200 else 1)"
+      ],
+      "Interval": 30000000000,
+      "Timeout": 5000000000,
+      "StartPeriod": 1200000000000,
+      "Retries": 3
+    },
+    "platform": "linux/amd64",
+    "secretEnvironmentPresent": false
+  },
+  "imageHashes": {
+    "files": 20,
+    "gpuExecuted": false,
+    "manifestSha256": "8582fa26658854363ad015380c0a2b1f63dc286845d3bdf69cf87510113c6f36",
+    "parentProxy": {
+      "files": 12,
+      "gpuExecuted": false,
+      "manifestSha256": "b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56",
+      "parentHttps": {
+        "files": 21,
+        "gpuExecuted": false,
+        "manifestSha256": "b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665",
+        "parentStudio": {
+          "files": 51,
+          "gpuExecuted": false,
+          "manifestSha256": "1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de",
+          "parent": {
+            "files": 100,
+            "gpuExecuted": false,
+            "manifestSha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93",
+            "parent": {
+              "files": 23,
+              "frozenParentAdditiveFiles": 86,
+              "gpuExecuted": false,
+              "manifestSha256": "e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6",
+              "parent": {
+                "files": 21,
+                "frozenReferenceFiles": 57,
+                "gpuExecuted": false,
+                "manifestSha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756",
+                "parent": {
+                  "files": 56,
+                  "gpuExecuted": false,
+                  "manifestSha256": "28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606",
+                  "parent": {
+                    "files": 28,
+                    "gpuExecuted": false,
+                    "manifestSha256": "cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff",
+                    "parent": {
+                      "files": 23,
+                      "gpuExecuted": false,
+                      "manifestSha256": "8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330",
+                      "parent": {
+                        "files": 160,
+                        "gitQueries": 0,
+                        "gpuExecuted": false,
+                        "networkRequests": 0,
+                        "sourceCommits": {
+                          "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+                          "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+                        },
+                        "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+                        "status": "PASS"
+                      },
+                      "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+                      "schema": "ASTRA_ACTIVATION_FILES_V1",
+                      "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+                      "status": "PASS",
+                      "testOnly": false
+                    },
+                    "profileId": "VISUAL_QUALITY_UPGRADE_V1",
+                    "schema": "WORLD_ENGINE_VISUAL_QUALITY_FILES_V1",
+                    "sourceCommit": "17393dd6a017a06de542a1484686cd8f8f598e60",
+                    "status": "PASS",
+                    "testOnly": false
+                  },
+                  "profileId": "REFERENCE_VISUAL_MASTER_V2",
+                  "schema": "WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2",
+                  "sourceCommit": "e9feafc785fbd138cbac3ca4db090380968dc37e",
+                  "status": "PASS",
+                  "testOnly": false
+                },
+                "profileId": "UNIVERSAL_AUTO_VIDEO_V2",
+                "schema": "WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2",
+                "sourceCommit": "311a92137d00ba88220c1caa243c9ff0389e4121",
+                "status": "PASS",
+                "supplementalFiles": 7,
+                "testOnly": false
+              },
+              "parentInventoryFiles": 248,
+              "profileId": "UNIVERSAL_PRODUCTION_V3",
+              "schema": "WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3",
+              "sourceCommit": "df9a4f414fc4515b11b87258a2daa21d3f4b8e3a",
+              "status": "PASS",
+              "testOnly": false
+            },
+            "parentInventoryFiles": 272,
+            "profileId": "VERIFIED_ARCHIVAL_FRONT_V4",
+            "schema": "WORLD_ENGINE_VERIFIED_FRONT_FILES_V4",
+            "sourceCommit": "30ea53d85df39962822733f44872a303961aedde",
+            "status": "PASS",
+            "testOnly": false
+          },
+          "parentInventoryFiles": 373,
+          "profileId": "PRODUCTION_STUDIO_MVP_V1",
+          "schema": "WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1",
+          "sourceCommit": "147e4f4d0da894ecf35151826890ed4501ee3db8",
+          "status": "PASS",
+          "testOnly": false
+        },
+        "sourceCommit": "62d433b1c8e17b6c237890ade10e2b07e4df1b47",
+        "status": "PASS"
+      },
+      "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+      "status": "PASS"
+    },
+    "sourceCommit": "6d7d4ce061acefbfa0442828f2ed858e3e8dccf2",
+    "status": "PASS"
+  },
+  "registryVerification": {
+    "status": 200,
+    "digest": "sha256:54e7f67627a14755117a3f232c03785f9ceac4ab490a33e8f5834fb9fe114b9b",
+    "configDigest": "sha256:fac0e905570374113953140216433e004f02d2934ecb8b6386afcdc03d02ab56"
+  },
+  "protectedParentBefore": {
+    "files": 12,
+    "gpuExecuted": false,
+    "manifestSha256": "b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56",
+    "parentHttps": {
+      "files": 21,
+      "gpuExecuted": false,
+      "manifestSha256": "b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665",
+      "parentStudio": {
+        "files": 51,
+        "gpuExecuted": false,
+        "manifestSha256": "1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de",
+        "parent": {
+          "files": 100,
+          "gpuExecuted": false,
+          "manifestSha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93",
+          "parent": {
+            "files": 23,
+            "frozenParentAdditiveFiles": 86,
+            "gpuExecuted": false,
+            "manifestSha256": "e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6",
+            "parent": {
+              "files": 21,
+              "frozenReferenceFiles": 57,
+              "gpuExecuted": false,
+              "manifestSha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756",
+              "parent": {
+                "files": 56,
+                "gpuExecuted": false,
+                "manifestSha256": "28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606",
+                "parent": {
+                  "files": 28,
+                  "gpuExecuted": false,
+                  "manifestSha256": "cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff",
+                  "parent": {
+                    "files": 23,
+                    "gpuExecuted": false,
+                    "manifestSha256": "8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330",
+                    "parent": {
+                      "files": 160,
+                      "gitQueries": 0,
+                      "gpuExecuted": false,
+                      "networkRequests": 0,
+                      "sourceCommits": {
+                        "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+                        "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+                      },
+                      "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+                      "status": "PASS"
+                    },
+                    "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+                    "schema": "ASTRA_ACTIVATION_FILES_V1",
+                    "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+                    "status": "PASS",
+                    "testOnly": false
+                  },
+                  "profileId": "VISUAL_QUALITY_UPGRADE_V1",
+                  "schema": "WORLD_ENGINE_VISUAL_QUALITY_FILES_V1",
+                  "sourceCommit": "17393dd6a017a06de542a1484686cd8f8f598e60",
+                  "status": "PASS",
+                  "testOnly": false
+                },
+                "profileId": "REFERENCE_VISUAL_MASTER_V2",
+                "schema": "WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2",
+                "sourceCommit": "e9feafc785fbd138cbac3ca4db090380968dc37e",
+                "status": "PASS",
+                "testOnly": false
+              },
+              "profileId": "UNIVERSAL_AUTO_VIDEO_V2",
+              "schema": "WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2",
+              "sourceCommit": "311a92137d00ba88220c1caa243c9ff0389e4121",
+              "status": "PASS",
+              "supplementalFiles": 7,
+              "testOnly": false
+            },
+            "parentInventoryFiles": 248,
+            "profileId": "UNIVERSAL_PRODUCTION_V3",
+            "schema": "WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3",
+            "sourceCommit": "df9a4f414fc4515b11b87258a2daa21d3f4b8e3a",
+            "status": "PASS",
+            "testOnly": false
+          },
+          "parentInventoryFiles": 272,
+          "profileId": "VERIFIED_ARCHIVAL_FRONT_V4",
+          "schema": "WORLD_ENGINE_VERIFIED_FRONT_FILES_V4",
+          "sourceCommit": "30ea53d85df39962822733f44872a303961aedde",
+          "status": "PASS",
+          "testOnly": false
+        },
+        "parentInventoryFiles": 373,
+        "profileId": "PRODUCTION_STUDIO_MVP_V1",
+        "schema": "WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1",
+        "sourceCommit": "147e4f4d0da894ecf35151826890ed4501ee3db8",
+        "status": "PASS",
+        "testOnly": false
+      },
+      "sourceCommit": "62d433b1c8e17b6c237890ade10e2b07e4df1b47",
+      "status": "PASS"
+    },
+    "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+    "status": "PASS"
+  },
+  "protectedParentAfter": {
+    "files": 12,
+    "gpuExecuted": false,
+    "manifestSha256": "b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56",
+    "parentHttps": {
+      "files": 21,
+      "gpuExecuted": false,
+      "manifestSha256": "b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665",
+      "parentStudio": {
+        "files": 51,
+        "gpuExecuted": false,
+        "manifestSha256": "1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de",
+        "parent": {
+          "files": 100,
+          "gpuExecuted": false,
+          "manifestSha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93",
+          "parent": {
+            "files": 23,
+            "frozenParentAdditiveFiles": 86,
+            "gpuExecuted": false,
+            "manifestSha256": "e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6",
+            "parent": {
+              "files": 21,
+              "frozenReferenceFiles": 57,
+              "gpuExecuted": false,
+              "manifestSha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756",
+              "parent": {
+                "files": 56,
+                "gpuExecuted": false,
+                "manifestSha256": "28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606",
+                "parent": {
+                  "files": 28,
+                  "gpuExecuted": false,
+                  "manifestSha256": "cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff",
+                  "parent": {
+                    "files": 23,
+                    "gpuExecuted": false,
+                    "manifestSha256": "8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330",
+                    "parent": {
+                      "files": 160,
+                      "gitQueries": 0,
+                      "gpuExecuted": false,
+                      "networkRequests": 0,
+                      "sourceCommits": {
+                        "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+                        "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+                      },
+                      "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+                      "status": "PASS"
+                    },
+                    "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+                    "schema": "ASTRA_ACTIVATION_FILES_V1",
+                    "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+                    "status": "PASS",
+                    "testOnly": false
+                  },
+                  "profileId": "VISUAL_QUALITY_UPGRADE_V1",
+                  "schema": "WORLD_ENGINE_VISUAL_QUALITY_FILES_V1",
+                  "sourceCommit": "17393dd6a017a06de542a1484686cd8f8f598e60",
+                  "status": "PASS",
+                  "testOnly": false
+                },
+                "profileId": "REFERENCE_VISUAL_MASTER_V2",
+                "schema": "WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2",
+                "sourceCommit": "e9feafc785fbd138cbac3ca4db090380968dc37e",
+                "status": "PASS",
+                "testOnly": false
+              },
+              "profileId": "UNIVERSAL_AUTO_VIDEO_V2",
+              "schema": "WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2",
+              "sourceCommit": "311a92137d00ba88220c1caa243c9ff0389e4121",
+              "status": "PASS",
+              "supplementalFiles": 7,
+              "testOnly": false
+            },
+            "parentInventoryFiles": 248,
+            "profileId": "UNIVERSAL_PRODUCTION_V3",
+            "schema": "WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3",
+            "sourceCommit": "df9a4f414fc4515b11b87258a2daa21d3f4b8e3a",
+            "status": "PASS",
+            "testOnly": false
+          },
+          "parentInventoryFiles": 272,
+          "profileId": "VERIFIED_ARCHIVAL_FRONT_V4",
+          "schema": "WORLD_ENGINE_VERIFIED_FRONT_FILES_V4",
+          "sourceCommit": "30ea53d85df39962822733f44872a303961aedde",
+          "status": "PASS",
+          "testOnly": false
+        },
+        "parentInventoryFiles": 373,
+        "profileId": "PRODUCTION_STUDIO_MVP_V1",
+        "schema": "WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1",
+        "sourceCommit": "147e4f4d0da894ecf35151826890ed4501ee3db8",
+        "status": "PASS",
+        "testOnly": false
+      },
+      "sourceCommit": "62d433b1c8e17b6c237890ade10e2b07e4df1b47",
+      "status": "PASS"
+    },
+    "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+    "status": "PASS"
+  },
+  "parentDependenciesBefore": "6558c8808883b40ef57fe13a4237d6335e5d5d629c818386506657272f8a6166",
+  "parentDependenciesAfter": "6558c8808883b40ef57fe13a4237d6335e5d5d629c818386506657272f8a6166",
+  "dependencyProvenance": {
+    "builderImage": "docker.io/library/python@sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d",
+    "builderPythonVersion": "3.12.15",
+    "files": 169,
+    "gpuExecuted": false,
+    "installedDistributions": {
+      "cffi": "2.1.1",
+      "cryptography": "50.0.0",
+      "pycparser": "3.11"
+    },
+    "manifestSha256": "2d5751eba67198a7c8d6bde5b1fb479115f5d23ef2c1f576c8cf31d78cdf2905",
+    "nativePythonVersion": "3.12.3",
+    "pythonABI": "3.12",
+    "scope": "NEW_ISOLATED_VENV_ONLY",
+    "sourceRequirementsSha256": "56e6301f491d336997805ec0e824b163ce5797a708440d68f52b6c3e60d63909",
+    "status": "PASS"
+  },
+  "protectedParentUnchanged": true,
+  "externalDurability": {
+    "status": "BLOCKED",
+    "reasonCode": "DURABILITY_EXTERNAL_SECRETS_NOT_BOUND",
+    "scope": "REAL_DROPBOX_CPU_SYNTHETIC_RECOVERY_PROOF",
+    "credentialsAvailable": false,
+    "externalStorageRecoveryVerified": false,
+    "gpuExecuted": false,
+    "nvidiaRenderingVerified": false,
+    "productionRenderingStarted": false,
+    "productionApprovalGranted": false,
+    "rawOutputRecorded": false
+  },
+  "stepOutcomes": {
+    "preflight": "success",
+    "pull": "success",
+    "external": "success"
+  }
+}
