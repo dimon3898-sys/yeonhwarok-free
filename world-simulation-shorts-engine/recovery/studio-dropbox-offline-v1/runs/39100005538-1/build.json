@@ -1,0 +1,502 @@
+{
+  "schema": "WORLD_ENGINE_STUDIO_DROPBOX_OFFLINE_PACKAGE_V1",
+  "status": "STUDIO_DROPBOX_OFFLINE_CANDIDATE_CPU_VERIFIED_HARDWARE_PENDING",
+  "sourceCommit": "86b3a159eec2b3fefc6ee9248e102a61ad34288a",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:54e7f67627a14755117a3f232c03785f9ceac4ab490a33e8f5834fb9fe114b9b",
+  "gpuExecuted": false,
+  "nvidiaHardwareVerified": false,
+  "paidWorkExecuted": false,
+  "gCubeDeployed": false,
+  "finalModified": false,
+  "rendererModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": true,
+  "imagePushed": true,
+  "pullVerified": false,
+  "videoQualityApproved": false,
+  "actualExternalBackupVerified": false,
+  "actualOfflineTokenRefreshVerified": false,
+  "actualContainerRestartRecoveryVerified": false,
+  "builder": {
+    "status": "PASS",
+    "dockerDriver": "overlay2",
+    "freeBytes": 92121595904,
+    "minimumFreeBytes": 21474836480,
+    "existingDataDeleted": false
+  },
+  "tag": "studio-dropbox-offline-v1-165a348-39100005538-1",
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:studio-dropbox-offline-v1-165a348-39100005538-1",
+  "focusedTests": [
+    {
+      "name": "host-cpu-packaging-safety",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "test_all_oauth_values_redacted_from_evidence (test_ci.PackagingTests.test_all_oauth_values_redacted_from_evidence) ... ok\ntest_docker_configuration_is_additive_without_installs (test_ci.PackagingTests.test_docker_configuration_is_additive_without_installs) ... ok\ntest_image_baked_secret_rejected (test_ci.PackagingTests.test_image_baked_secret_rejected) ... ok\ntest_image_config_preserves_provenance_and_health (test_ci.PackagingTests.test_image_config_preserves_provenance_and_health) ... ok\ntest_inherited_helper_is_sha_pinned (test_ci.PackagingTests.test_inherited_helper_is_sha_pinned) ... ok\ntest_manifest_escape_rejected (test_ci.PackagingTests.test_manifest_escape_rejected) ... ok\ntest_missing_offline_secrets_never_launch_probe (test_ci.PackagingTests.test_missing_offline_secrets_never_launch_probe) ... ok\ntest_runtime_and_test_name_overlap_rejected (test_ci.PackagingTests.test_runtime_and_test_name_overlap_rejected) ... ok\ntest_source_commit_required (test_ci.PackagingTests.test_source_commit_required) ... ok\ntest_staging_is_explicit_and_definition_immutable (test_ci.PackagingTests.test_staging_is_explicit_and_definition_immutable) ... ok\ntest_stale_manifest_hash_rejected (test_ci.PackagingTests.test_stale_manifest_hash_rejected) ... ok\ntest_symlink_source_rejected (test_ci.PackagingTests.test_symlink_source_rejected) ... ok\n\n----------------------------------------------------------------------\nRan 12 tests in 0.028s\n\nOK\n",
+      "scope": "CPU_CONTAINER_OR_MOBILE_NOT_NVIDIA",
+      "gpuExecuted": false
+    },
+    {
+      "name": "focused-uid1000-cpu-offline-token",
+      "exitCode": 0,
+      "stdout": "{\"stage\": \"STARTUP_RESTORE_IN_PROGRESS\", \"maximumSeconds\": 600, \"renderAllowed\": false, \"gpuRenderingVerified\": false}\n{\"stage\": \"STARTUP_RESTORE_VERIFIED\", \"renderAllowed\": false, \"gpuRenderingVerified\": false}\n{\"testsRun\": 49, \"failures\": 0, \"errors\": 0, \"skips\": 0, \"gpuExecuted\": false}\n",
+      "stderr": "test_cli_failure_sanitizes_unexpected_exception (test_enroll.EnrollmentTests.test_cli_failure_sanitizes_unexpected_exception) ... ok\ntest_exchange_writes_only_private_refresh_secret_and_safe_receipt (test_enroll.EnrollmentTests.test_exchange_writes_only_private_refresh_secret_and_safe_receipt) ... ok\ntest_existing_secret_never_replaced (test_enroll.EnrollmentTests.test_existing_secret_never_replaced) ... ok\ntest_missing_refresh_scope_or_invalid_response_never_writes_secret (test_enroll.EnrollmentTests.test_missing_refresh_scope_or_invalid_response_never_writes_secret) ... ok\ntest_noninteractive_input_requires_private_file_and_does_not_echo (test_enroll.EnrollmentTests.test_noninteractive_input_requires_private_file_and_does_not_echo) ... ok\ntest_official_no_redirect_url_has_offline_and_exact_required_scopes (test_enroll.EnrollmentTests.test_official_no_redirect_url_has_offline_and_exact_required_scopes) ... ok\ntest_shared_source_and_symlink_secret_destinations_rejected (test_enroll.EnrollmentTests.test_shared_source_and_symlink_secret_destinations_rejected) ... ok\ntest_bounded_response_and_redirect (test_renewal.OAuthTests.test_bounded_response_and_redirect) ... ok\ntest_concurrent_rejected_token_reuses_replacement (test_renewal.OAuthTests.test_concurrent_rejected_token_reuses_replacement) ... ok\ntest_concurrent_requests_only_one_refresh (test_renewal.OAuthTests.test_concurrent_requests_only_one_refresh) ... ok\ntest_credential_file_permissions_symlink_and_shape (test_renewal.OAuthTests.test_credential_file_permissions_symlink_and_shape) ... ok\ntest_enrollment_transport_rejects_extra_fields_or_invalid_grants (test_renewal.OAuthTests.test_enrollment_transport_rejects_extra_fields_or_invalid_grants) ... ok\ntest_file_route_401_refreshes_once (test_renewal.OAuthTests.test_file_route_401_refreshes_once) ... ok\ntest_file_route_injects_token_preserves_app_folder_path (test_renewal.OAuthTests.test_file_route_injects_token_preserves_app_folder_path) ... ok\ntest_file_route_redirect_is_rejected (test_renewal.OAuthTests.test_file_route_redirect_is_rejected) ... ok\ntest_invalid_clock_and_refresh_latency (test_renewal.OAuthTests.test_invalid_clock_and_refresh_latency) ... ok\ntest_missing_scope_is_not_falsely_reported_as_granted (test_renewal.OAuthTests.test_missing_scope_is_not_falsely_reported_as_granted) ... ok\ntest_no_replay_for_forbidden_limit_server_or_ambiguous_upload_failure (test_renewal.OAuthTests.test_no_replay_for_forbidden_limit_server_or_ambiguous_upload_failure) ... ok\ntest_offline_authorization_code_exchange_uses_same_bounded_transport (test_renewal.OAuthTests.test_offline_authorization_code_exchange_uses_same_bounded_transport) ... ok\ntest_refresh_before_expiry_with_monotonic_clock (test_renewal.OAuthTests.test_refresh_before_expiry_with_monotonic_clock) ... ok\ntest_refresh_failure_discards_cached_token_and_does_not_retry (test_renewal.OAuthTests.test_refresh_failure_discards_cached_token_and_does_not_retry) ... ok\ntest_refresh_form_fixed_https_and_memory_cache (test_renewal.OAuthTests.test_refresh_form_fixed_https_and_memory_cache) ... ok\ntest_required_scope_when_present (test_renewal.OAuthTests.test_required_scope_when_present) ... ok\ntest_response_validation (test_renewal.OAuthTests.test_response_validation) ... ok\ntest_safe_errors_never_expose_credentials_or_response (test_renewal.OAuthTests.test_safe_errors_never_expose_credentials_or_response) ... ok\ntest_second_401_propagates_and_never_loops (test_renewal.OAuthTests.test_second_401_propagates_and_never_loops) ... ok\ntest_short_ttl_has_bounded_refresh_lead (test_renewal.OAuthTests.test_short_ttl_has_bounded_refresh_lead) ... ok\ntest_token_endpoint_http_errors_never_retry (test_renewal.OAuthTests.test_token_endpoint_http_errors_never_retry) ... ok\ntest_untrusted_routes_fail_before_credentials_are_requested (test_renewal.OAuthTests.test_untrusted_routes_fail_before_credentials_are_requested) ... ok\ntest_wrong_host_get_request_and_timeout_rejected_before_authentication (test_renewal.OAuthTests.test_wrong_host_get_request_and_timeout_rejected_before_authentication) ... ok\ntest_all_frozen_parent_sources_remain_byte_identical (test_runtime.RuntimeTests.test_all_frozen_parent_sources_remain_byte_identical) ... ok\ntest_already_initialized_frozen_backend_gains_child_redirect_in_fresh_process (test_runtime.RuntimeTests.test_already_initialized_frozen_backend_gains_child_redirect_in_fresh_process) ... ok\ntest_bootstrap_keeps_key_adds_three_secrets_and_drops_only_static_child_values (test_runtime.RuntimeTests.test_bootstrap_keeps_key_adds_three_secrets_and_drops_only_static_child_values) ... ok\ntest_changed_secret_rebinds_provider_and_never_rewrites_key (test_runtime.RuntimeTests.test_changed_secret_rebinds_provider_and_never_rewrites_key) ... ok\ntest_exact_frozen_store_and_crypto_with_memory_token_cache (test_runtime.RuntimeTests.test_exact_frozen_store_and_crypto_with_memory_token_cache) ... ok\ntest_explicit_startup_restore_child_keeps_offline_files_and_private_bindings (test_runtime.RuntimeTests.test_explicit_startup_restore_child_keeps_offline_files_and_private_bindings) ... ok\ntest_four_fixed_children_redirect_but_native_gpu_command_unchanged (test_runtime.RuntimeTests.test_four_fixed_children_redirect_but_native_gpu_command_unchanged) ... ok\ntest_metadata_approximate_page_limit_does_not_block_valid_scope (test_runtime.RuntimeTests.test_metadata_approximate_page_limit_does_not_block_valid_scope) ... ok\ntest_metadata_scope_uses_app_folder_root_without_catalog_count_or_name_output (test_runtime.RuntimeTests.test_metadata_scope_uses_app_folder_root_without_catalog_count_or_name_output) ... ok\ntest_missing_external_proof_still_blocks_unchanged_gpu_preflight (test_runtime.RuntimeTests.test_missing_external_proof_still_blocks_unchanged_gpu_preflight) ... ok\ntest_missing_offline_settings_keep_setup_usable (test_runtime.RuntimeTests.test_missing_offline_settings_keep_setup_usable) ... ok\ntest_nonoffline_mode_cannot_select_static_fallback (test_runtime.RuntimeTests.test_nonoffline_mode_cannot_select_static_fallback) ... ok\ntest_readonly_secret_mount_does_not_receive_ephemeral_access_file (test_runtime.RuntimeTests.test_readonly_secret_mount_does_not_receive_ephemeral_access_file) ... ok\ntest_real_frozen_coordinator_start_and_worker_seams (test_runtime.RuntimeTests.test_real_frozen_coordinator_start_and_worker_seams) ... ok\ntest_real_frozen_coordinator_stops_next_scene_when_refresh_fails (test_runtime.RuntimeTests.test_real_frozen_coordinator_stops_next_scene_when_refresh_fails)\nReal coordinator path; hardware/encoder I/O is explicitly mocked. ... ok\ntest_real_frozen_server_spawn_seam (test_runtime.RuntimeTests.test_real_frozen_server_spawn_seam) ... ok\ntest_real_frozen_worker_seam_keeps_detach_options (test_runtime.RuntimeTests.test_real_frozen_worker_seam_keeps_detach_options) ... ok\ntest_refresh_failure_before_spawn_keeps_failed_state_and_no_child (test_runtime.RuntimeTests.test_refresh_failure_before_spawn_keeps_failed_state_and_no_child) ... ok\ntest_static_token_cannot_replace_missing_offline_secrets (test_runtime.RuntimeTests.test_static_token_cannot_replace_missing_offline_secrets) ... ok\n\n----------------------------------------------------------------------\nRan 49 tests in 0.489s\n\nOK\n",
+      "scope": "CPU_CONTAINER_OR_MOBILE_NOT_NVIDIA",
+      "gpuExecuted": false
+    },
+    {
+      "name": "connected-offline-entry-cli-help",
+      "exitCode": 0,
+      "stdout": "usage: offline_entry.py [-h] {external-check,list-checkpoints,restore} ...\n\nExplicit CPU-only backup transport proof and fresh-root recovery tools. This\nCLI cannot render a production video, start a GPU, restore approvals or delete\nan old job. Secrets are private files, never command arguments/output.\n\npositional arguments:\n  {external-check,list-checkpoints,restore}\n    external-check      free CPU/Dropbox recovery proof, no GPU\n    list-checkpoints    authenticated receipt metadata only\n    restore             CPU-only restore into a fresh private Studio root\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "stderr": "",
+      "scope": "CPU_CONTAINER_OR_MOBILE_NOT_NVIDIA",
+      "gpuExecuted": false
+    }
+  ],
+  "tagGuard": {
+    "status": "PASS",
+    "remoteHTTP": 404,
+    "tag": "studio-dropbox-offline-v1-165a348-39100005538-1"
+  },
+  "extensionManifestSha256": "ef64427925e5c0eb92a3a8f79b0139dd23f14428b4bec79ed1adf8a81a56fa75",
+  "dockerfileSha256": "d22c21b7c9d2dab8f41eb28d0042592b86a671b089ec13f0474a8f59a81f9aca",
+  "protectedParentBefore": {
+    "files": 20,
+    "gpuExecuted": false,
+    "manifestSha256": "8582fa26658854363ad015380c0a2b1f63dc286845d3bdf69cf87510113c6f36",
+    "parentProxy": {
+      "files": 12,
+      "gpuExecuted": false,
+      "manifestSha256": "b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56",
+      "parentHttps": {
+        "files": 21,
+        "gpuExecuted": false,
+        "manifestSha256": "b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665",
+        "parentStudio": {
+          "files": 51,
+          "gpuExecuted": false,
+          "manifestSha256": "1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de",
+          "parent": {
+            "files": 100,
+            "gpuExecuted": false,
+            "manifestSha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93",
+            "parent": {
+              "files": 23,
+              "frozenParentAdditiveFiles": 86,
+              "gpuExecuted": false,
+              "manifestSha256": "e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6",
+              "parent": {
+                "files": 21,
+                "frozenReferenceFiles": 57,
+                "gpuExecuted": false,
+                "manifestSha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756",
+                "parent": {
+                  "files": 56,
+                  "gpuExecuted": false,
+                  "manifestSha256": "28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606",
+                  "parent": {
+                    "files": 28,
+                    "gpuExecuted": false,
+                    "manifestSha256": "cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff",
+                    "parent": {
+                      "files": 23,
+                      "gpuExecuted": false,
+                      "manifestSha256": "8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330",
+                      "parent": {
+                        "files": 160,
+                        "gitQueries": 0,
+                        "gpuExecuted": false,
+                        "networkRequests": 0,
+                        "sourceCommits": {
+                          "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+                          "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+                        },
+                        "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+                        "status": "PASS"
+                      },
+                      "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+                      "schema": "ASTRA_ACTIVATION_FILES_V1",
+                      "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+                      "status": "PASS",
+                      "testOnly": false
+                    },
+                    "profileId": "VISUAL_QUALITY_UPGRADE_V1",
+                    "schema": "WORLD_ENGINE_VISUAL_QUALITY_FILES_V1",
+                    "sourceCommit": "17393dd6a017a06de542a1484686cd8f8f598e60",
+                    "status": "PASS",
+                    "testOnly": false
+                  },
+                  "profileId": "REFERENCE_VISUAL_MASTER_V2",
+                  "schema": "WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2",
+                  "sourceCommit": "e9feafc785fbd138cbac3ca4db090380968dc37e",
+                  "status": "PASS",
+                  "testOnly": false
+                },
+                "profileId": "UNIVERSAL_AUTO_VIDEO_V2",
+                "schema": "WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2",
+                "sourceCommit": "311a92137d00ba88220c1caa243c9ff0389e4121",
+                "status": "PASS",
+                "supplementalFiles": 7,
+                "testOnly": false
+              },
+              "parentInventoryFiles": 248,
+              "profileId": "UNIVERSAL_PRODUCTION_V3",
+              "schema": "WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3",
+              "sourceCommit": "df9a4f414fc4515b11b87258a2daa21d3f4b8e3a",
+              "status": "PASS",
+              "testOnly": false
+            },
+            "parentInventoryFiles": 272,
+            "profileId": "VERIFIED_ARCHIVAL_FRONT_V4",
+            "schema": "WORLD_ENGINE_VERIFIED_FRONT_FILES_V4",
+            "sourceCommit": "30ea53d85df39962822733f44872a303961aedde",
+            "status": "PASS",
+            "testOnly": false
+          },
+          "parentInventoryFiles": 373,
+          "profileId": "PRODUCTION_STUDIO_MVP_V1",
+          "schema": "WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1",
+          "sourceCommit": "147e4f4d0da894ecf35151826890ed4501ee3db8",
+          "status": "PASS",
+          "testOnly": false
+        },
+        "sourceCommit": "62d433b1c8e17b6c237890ade10e2b07e4df1b47",
+        "status": "PASS"
+      },
+      "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+      "status": "PASS"
+    },
+    "sourceCommit": "6d7d4ce061acefbfa0442828f2ed858e3e8dccf2",
+    "status": "PASS"
+  },
+  "parentDependenciesBefore": [
+    {
+      "dependencyManifestSha256": "2d5751eba67198a7c8d6bde5b1fb479115f5d23ef2c1f576c8cf31d78cdf2905",
+      "gpuExecuted": false,
+      "interpreter": "/usr/bin/python3",
+      "inventorySha256": "6558c8808883b40ef57fe13a4237d6335e5d5d629c818386506657272f8a6166",
+      "isolatedFiles": 169,
+      "status": "PASS"
+    },
+    {
+      "dependencyManifestSha256": "2d5751eba67198a7c8d6bde5b1fb479115f5d23ef2c1f576c8cf31d78cdf2905",
+      "gpuExecuted": false,
+      "interpreter": "/opt/world-engine-studio-durability-venv/bin/python",
+      "inventorySha256": "2706d0c317fd6d9c7320306cd2b70703bbd483e2adfad03d05f259dae4a3ff35",
+      "isolatedFiles": 169,
+      "status": "PASS"
+    }
+  ],
+  "dockerBuild": {
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile\n#1 transferring dockerfile: 1.41kB done\n#1 DONE 0.0s\n\n#2 resolve image config for docker-image://docker.io/docker/dockerfile:1\n#2 ...\n\n#3 [auth] docker/dockerfile:pull token for registry-1.docker.io\n#3 DONE 0.0s\n\n#2 resolve image config for docker-image://docker.io/docker/dockerfile:1\n#2 DONE 0.8s\n\n#4 docker-image://docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e\n#4 resolve docker.io/docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e done\n#4 sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e 9.08kB / 9.08kB done\n#4 sha256:7b32114e84ca21aeb2d6f871a0b62b3a0762193f75d9afd048ee4cbe889f3148 1.13kB / 1.13kB done\n#4 sha256:528c92d70d7e39dbb3dd1c6681f6750c565c7e45b70527cda47c1a61495c1b6a 1.41kB / 1.41kB done\n#4 sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62 14.28MB / 14.28MB 0.1s\n#4 sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62 14.28MB / 14.28MB 0.1s done\n#4 extracting sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62 0.1s\n#4 extracting sha256:9d2b4f57f9e20f33279375ce25c6ff14f30f64270ed5c7b613b2b30256754f62 0.1s done\n#4 DONE 0.2s\n\n#5 [internal] load metadata for ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:54e7f67627a14755117a3f232c03785f9ceac4ab490a33e8f5834fb9fe114b9b\n#5 DONE 0.0s\n\n#6 [internal] load .dockerignore\n#6 transferring context: 96B done\n#6 DONE 0.0s\n\n#7 [internal] load build context\n#7 transferring context: 82.90kB done\n#7 DONE 0.0s\n\n#8 [1/4] FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:54e7f67627a14755117a3f232c03785f9ceac4ab490a33e8f5834fb9fe114b9b\n#8 DONE 0.2s\n\n#9 [2/4] RUN test ! -e /opt/world-engine-studio-dropbox-offline     && test ! -L /opt/world-engine-studio-dropbox-offline     && test -x /opt/world-engine-studio-durability-venv/bin/python     && /opt/world-engine-studio-durability-venv/bin/python -B        /opt/world-engine-studio-durability/manifest.py --verify\n#9 0.451 {\"files\": 20, \"gpuExecuted\": false, \"manifestSha256\": \"8582fa26658854363ad015380c0a2b1f63dc286845d3bdf69cf87510113c6f36\", \"parentProxy\": {\"files\": 12, \"gpuExecuted\": false, \"manifestSha256\": \"b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56\", \"parentHttps\": {\"files\": 21, \"gpuExecuted\": false, \"manifestSha256\": \"b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665\", \"parentStudio\": {\"files\": 51, \"gpuExecuted\": false, \"manifestSha256\": \"1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de\", \"parent\": {\"files\": 100, \"gpuExecuted\": false, \"manifestSha256\": \"b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93\", \"parent\": {\"files\": 23, \"frozenParentAdditiveFiles\": 86, \"gpuExecuted\": false, \"manifestSha256\": \"e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6\", \"parent\": {\"files\": 21, \"frozenReferenceFiles\": 57, \"gpuExecuted\": false, \"manifestSha256\": \"982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756\", \"parent\": {\"files\": 56, \"gpuExecuted\": false, \"manifestSha256\": \"28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606\", \"parent\": {\"files\": 28, \"gpuExecuted\": false, \"manifestSha256\": \"cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff\", \"parent\": {\"files\": 23, \"gpuExecuted\": false, \"manifestSha256\": \"8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330\", \"parent\": {\"files\": 160, \"gitQueries\": 0, \"gpuExecuted\": false, \"networkRequests\": 0, \"sourceCommits\": {\"cpu\": \"a002d89492734bfa9d17b98145ee6cb9a3b366a2\", \"glow\": \"45af879d7417abba58e9ebd59d8e6630a785ac28\"}, \"sourceContractSha256\": \"5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180\", \"status\": \"PASS\"}, \"profileId\": \"ASTRA_SOURCE_MATERIAL_V1\", \"schema\": \"ASTRA_ACTIVATION_FILES_V1\", \"sourceCommit\": \"7c4a0b6b4b0074bd06428dc11224a65f7f8fae58\", \"status\": \"PASS\", \"testOnly\": false}, \"profileId\": \"VISUAL_QUALITY_UPGRADE_V1\", \"schema\": \"WORLD_ENGINE_VISUAL_QUALITY_FILES_V1\", \"sourceCommit\": \"17393dd6a017a06de542a1484686cd8f8f598e60\", \"status\": \"PASS\", \"testOnly\": false}, \"profileId\": \"REFERENCE_VISUAL_MASTER_V2\", \"schema\": \"WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2\", \"sourceCommit\": \"e9feafc785fbd138cbac3ca4db090380968dc37e\", \"status\": \"PASS\", \"testOnly\": false}, \"profileId\": \"UNIVERSAL_AUTO_VIDEO_V2\", \"schema\": \"WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2\", \"sourceCommit\": \"311a92137d00ba88220c1caa243c9ff0389e4121\", \"status\": \"PASS\", \"supplementalFiles\": 7, \"testOnly\": false}, \"parentInventoryFiles\": 248, \"profileId\": \"UNIVERSAL_PRODUCTION_V3\", \"schema\": \"WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3\", \"sourceCommit\": \"df9a4f414fc4515b11b87258a2daa21d3f4b8e3a\", \"status\": \"PASS\", \"testOnly\": false}, \"parentInventoryFiles\": 272, \"profileId\": \"VERIFIED_ARCHIVAL_FRONT_V4\", \"schema\": \"WORLD_ENGINE_VERIFIED_FRONT_FILES_V4\", \"sourceCommit\": \"30ea53d85df39962822733f44872a303961aedde\", \"status\": \"PASS\", \"testOnly\": false}, \"parentInventoryFiles\": 373, \"profileId\": \"PRODUCTION_STUDIO_MVP_V1\", \"schema\": \"WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1\", \"sourceCommit\": \"147e4f4d0da894ecf35151826890ed4501ee3db8\", \"status\": \"PASS\", \"testOnly\": false}, \"sourceCommit\": \"62d433b1c8e17b6c237890ade10e2b07e4df1b47\", \"status\": \"PASS\"}, \"sourceCommit\": \"83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b\", \"status\": \"PASS\"}, \"sourceCommit\": \"6d7d4ce061acefbfa0442828f2ed858e3e8dccf2\", \"status\": \"PASS\"}\n#9 DONE 0.5s\n\n#10 [3/4] COPY extension/ /opt/world-engine-studio-dropbox-offline/\n#10 DONE 0.0s\n\n#11 [4/4] RUN find /opt/world-engine-studio-dropbox-offline -type f -exec chmod 0444 {} ;     && /opt/world-engine-studio-durability-venv/bin/python -B        /opt/world-engine-studio-dropbox-offline/offline_manifest.py --verify\n#11 0.505 {\"files\": 11, \"gpuExecuted\": false, \"manifestSha256\": \"ef64427925e5c0eb92a3a8f79b0139dd23f14428b4bec79ed1adf8a81a56fa75\", \"parentDurability\": {\"files\": 20, \"gpuExecuted\": false, \"manifestSha256\": \"8582fa26658854363ad015380c0a2b1f63dc286845d3bdf69cf87510113c6f36\", \"parentProxy\": {\"files\": 12, \"gpuExecuted\": false, \"manifestSha256\": \"b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56\", \"parentHttps\": {\"files\": 21, \"gpuExecuted\": false, \"manifestSha256\": \"b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665\", \"parentStudio\": {\"files\": 51, \"gpuExecuted\": false, \"manifestSha256\": \"1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de\", \"parent\": {\"files\": 100, \"gpuExecuted\": false, \"manifestSha256\": \"b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93\", \"parent\": {\"files\": 23, \"frozenParentAdditiveFiles\": 86, \"gpuExecuted\": false, \"manifestSha256\": \"e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6\", \"parent\": {\"files\": 21, \"frozenReferenceFiles\": 57, \"gpuExecuted\": false, \"manifestSha256\": \"982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756\", \"parent\": {\"files\": 56, \"gpuExecuted\": false, \"manifestSha256\": \"28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606\", \"parent\": {\"files\": 28, \"gpuExecuted\": false, \"manifestSha256\": \"cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff\", \"parent\": {\"files\": 23, \"gpuExecuted\": false, \"manifestSha256\": \"8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330\", \"parent\": {\"files\": 160, \"gitQueries\": 0, \"gpuExecuted\": false, \"networkRequests\": 0, \"sourceCommits\": {\"cpu\": \"a002d89492734bfa9d17b98145ee6cb9a3b366a2\", \"glow\": \"45af879d7417abba58e9ebd59d8e6630a785ac28\"}, \"sourceContractSha256\": \"5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180\", \"status\": \"PASS\"}, \"profileId\": \"ASTRA_SOURCE_MATERIAL_V1\", \"schema\": \"ASTRA_ACTIVATION_FILES_V1\", \"sourceCommit\": \"7c4a0b6b4b0074bd06428dc11224a65f7f8fae58\", \"status\": \"PASS\", \"testOnly\": false}, \"profileId\": \"VISUAL_QUALITY_UPGRADE_V1\", \"schema\": \"WORLD_ENGINE_VISUAL_QUALITY_FILES_V1\", \"sourceCommit\": \"17393dd6a017a06de542a1484686cd8f8f598e60\", \"status\": \"PASS\", \"testOnly\": false}, \"profileId\": \"REFERENCE_VISUAL_MASTER_V2\", \"schema\": \"WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2\", \"sourceCommit\": \"e9feafc785fbd138cbac3ca4db090380968dc37e\", \"status\": \"PASS\", \"testOnly\": false}, \"profileId\": \"UNIVERSAL_AUTO_VIDEO_V2\", \"schema\": \"WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2\", \"sourceCommit\": \"311a92137d00ba88220c1caa243c9ff0389e4121\", \"status\": \"PASS\", \"supplementalFiles\": 7, \"testOnly\": false}, \"parentInventoryFiles\": 248, \"profileId\": \"UNIVERSAL_PRODUCTION_V3\", \"schema\": \"WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3\", \"sourceCommit\": \"df9a4f414fc4515b11b87258a2daa21d3f4b8e3a\", \"status\": \"PASS\", \"testOnly\": false}, \"parentInventoryFiles\": 272, \"profileId\": \"VERIFIED_ARCHIVAL_FRONT_V4\", \"schema\": \"WORLD_ENGINE_VERIFIED_FRONT_FILES_V4\", \"sourceCommit\": \"30ea53d85df39962822733f44872a303961aedde\", \"status\": \"PASS\", \"testOnly\": false}, \"parentInventoryFiles\": 373, \"profileId\": \"PRODUCTION_STUDIO_MVP_V1\", \"schema\": \"WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1\", \"sourceCommit\": \"147e4f4d0da894ecf35151826890ed4501ee3db8\", \"status\": \"PASS\", \"testOnly\": false}, \"sourceCommit\": \"62d433b1c8e17b6c237890ade10e2b07e4df1b47\", \"status\": \"PASS\"}, \"sourceCommit\": \"83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b\", \"status\": \"PASS\"}, \"sourceCommit\": \"6d7d4ce061acefbfa0442828f2ed858e3e8dccf2\", \"status\": \"PASS\"}, \"sourceCommit\": \"86b3a159eec2b3fefc6ee9248e102a61ad34288a\", \"status\": \"PASS\"}\n#11 DONE 0.5s\n\n#12 exporting to image\n#12 exporting layers\n#12 exporting layers 1.3s done\n#12 writing image sha256:f1a0590b6f12a7a3810a797037c6e1c916c5003178dc51249ba953ac8199855b done\n#12 naming to ghcr.io/dimon3898-sys/world-simulation-shorts-engine:studio-dropbox-offline-v1-165a348-39100005538-1 done\n#12 DONE 1.3s\n"
+  },
+  "imageConfiguration": {
+    "status": "PASS",
+    "configDigest": "sha256:f1a0590b6f12a7a3810a797037c6e1c916c5003178dc51249ba953ac8199855b",
+    "sizeBytes": 1622194866,
+    "entrypoint": [
+      "/usr/bin/tini",
+      "-g",
+      "--",
+      "/opt/world-engine-studio-durability-venv/bin/python",
+      "-B",
+      "/opt/world-engine-studio-dropbox-offline/offline_entry.py",
+      "bootstrap"
+    ],
+    "healthcheck": {
+      "Test": [
+        "CMD",
+        "/opt/world-engine-studio-durability-venv/bin/python",
+        "-B",
+        "-c",
+        "import urllib.request; r=urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8080/healthz',timeout=3); raise SystemExit(0 if r.status==200 else 1)"
+      ],
+      "Interval": 30000000000,
+      "Timeout": 5000000000,
+      "StartPeriod": 1200000000000,
+      "Retries": 3
+    },
+    "platform": "linux/amd64",
+    "secretEnvironmentPresent": false
+  },
+  "testsStatus": "PASS",
+  "focusedTestReport": {
+    "testsRun": 49,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "gpuExecuted": false
+  },
+  "testsScope": "CPU_MOCK_OAUTH_AND_RECOVERY_NOT_REAL_DROPBOX_OR_NVIDIA",
+  "inheritedFullTestsRepeated": false,
+  "imageHashes": {
+    "files": 11,
+    "gpuExecuted": false,
+    "manifestSha256": "ef64427925e5c0eb92a3a8f79b0139dd23f14428b4bec79ed1adf8a81a56fa75",
+    "parentDurability": {
+      "files": 20,
+      "gpuExecuted": false,
+      "manifestSha256": "8582fa26658854363ad015380c0a2b1f63dc286845d3bdf69cf87510113c6f36",
+      "parentProxy": {
+        "files": 12,
+        "gpuExecuted": false,
+        "manifestSha256": "b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56",
+        "parentHttps": {
+          "files": 21,
+          "gpuExecuted": false,
+          "manifestSha256": "b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665",
+          "parentStudio": {
+            "files": 51,
+            "gpuExecuted": false,
+            "manifestSha256": "1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de",
+            "parent": {
+              "files": 100,
+              "gpuExecuted": false,
+              "manifestSha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93",
+              "parent": {
+                "files": 23,
+                "frozenParentAdditiveFiles": 86,
+                "gpuExecuted": false,
+                "manifestSha256": "e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6",
+                "parent": {
+                  "files": 21,
+                  "frozenReferenceFiles": 57,
+                  "gpuExecuted": false,
+                  "manifestSha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756",
+                  "parent": {
+                    "files": 56,
+                    "gpuExecuted": false,
+                    "manifestSha256": "28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606",
+                    "parent": {
+                      "files": 28,
+                      "gpuExecuted": false,
+                      "manifestSha256": "cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff",
+                      "parent": {
+                        "files": 23,
+                        "gpuExecuted": false,
+                        "manifestSha256": "8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330",
+                        "parent": {
+                          "files": 160,
+                          "gitQueries": 0,
+                          "gpuExecuted": false,
+                          "networkRequests": 0,
+                          "sourceCommits": {
+                            "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+                            "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+                          },
+                          "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+                          "status": "PASS"
+                        },
+                        "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+                        "schema": "ASTRA_ACTIVATION_FILES_V1",
+                        "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+                        "status": "PASS",
+                        "testOnly": false
+                      },
+                      "profileId": "VISUAL_QUALITY_UPGRADE_V1",
+                      "schema": "WORLD_ENGINE_VISUAL_QUALITY_FILES_V1",
+                      "sourceCommit": "17393dd6a017a06de542a1484686cd8f8f598e60",
+                      "status": "PASS",
+                      "testOnly": false
+                    },
+                    "profileId": "REFERENCE_VISUAL_MASTER_V2",
+                    "schema": "WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2",
+                    "sourceCommit": "e9feafc785fbd138cbac3ca4db090380968dc37e",
+                    "status": "PASS",
+                    "testOnly": false
+                  },
+                  "profileId": "UNIVERSAL_AUTO_VIDEO_V2",
+                  "schema": "WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2",
+                  "sourceCommit": "311a92137d00ba88220c1caa243c9ff0389e4121",
+                  "status": "PASS",
+                  "supplementalFiles": 7,
+                  "testOnly": false
+                },
+                "parentInventoryFiles": 248,
+                "profileId": "UNIVERSAL_PRODUCTION_V3",
+                "schema": "WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3",
+                "sourceCommit": "df9a4f414fc4515b11b87258a2daa21d3f4b8e3a",
+                "status": "PASS",
+                "testOnly": false
+              },
+              "parentInventoryFiles": 272,
+              "profileId": "VERIFIED_ARCHIVAL_FRONT_V4",
+              "schema": "WORLD_ENGINE_VERIFIED_FRONT_FILES_V4",
+              "sourceCommit": "30ea53d85df39962822733f44872a303961aedde",
+              "status": "PASS",
+              "testOnly": false
+            },
+            "parentInventoryFiles": 373,
+            "profileId": "PRODUCTION_STUDIO_MVP_V1",
+            "schema": "WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1",
+            "sourceCommit": "147e4f4d0da894ecf35151826890ed4501ee3db8",
+            "status": "PASS",
+            "testOnly": false
+          },
+          "sourceCommit": "62d433b1c8e17b6c237890ade10e2b07e4df1b47",
+          "status": "PASS"
+        },
+        "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+        "status": "PASS"
+      },
+      "sourceCommit": "6d7d4ce061acefbfa0442828f2ed858e3e8dccf2",
+      "status": "PASS"
+    },
+    "sourceCommit": "86b3a159eec2b3fefc6ee9248e102a61ad34288a",
+    "status": "PASS"
+  },
+  "protectedParentAfter": {
+    "files": 20,
+    "gpuExecuted": false,
+    "manifestSha256": "8582fa26658854363ad015380c0a2b1f63dc286845d3bdf69cf87510113c6f36",
+    "parentProxy": {
+      "files": 12,
+      "gpuExecuted": false,
+      "manifestSha256": "b25c07f5aefdf63c3919f2ab439c978308d9304e92a8e2c6e92c991259ee0d56",
+      "parentHttps": {
+        "files": 21,
+        "gpuExecuted": false,
+        "manifestSha256": "b46b2bff3e8ef5887e1e61b9c0d835d1135b57f2810ddcc94e36e7c461eec665",
+        "parentStudio": {
+          "files": 51,
+          "gpuExecuted": false,
+          "manifestSha256": "1f4129faaeb59027429d4d531da2b7e7b50156ca7c1652e700dd542c935b88de",
+          "parent": {
+            "files": 100,
+            "gpuExecuted": false,
+            "manifestSha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93",
+            "parent": {
+              "files": 23,
+              "frozenParentAdditiveFiles": 86,
+              "gpuExecuted": false,
+              "manifestSha256": "e1efd170f05d297ba222995af2557dc8d5d338f870c7d92c5a82f456f5d804e6",
+              "parent": {
+                "files": 21,
+                "frozenReferenceFiles": 57,
+                "gpuExecuted": false,
+                "manifestSha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756",
+                "parent": {
+                  "files": 56,
+                  "gpuExecuted": false,
+                  "manifestSha256": "28de18a52014ba56e91c31f91af40bc4f81c81b92e0fcf85bd83a651f7da3606",
+                  "parent": {
+                    "files": 28,
+                    "gpuExecuted": false,
+                    "manifestSha256": "cd025141c88f1d5fa196fc58c3026565ceb386b09926f7036638d78ecb3385ff",
+                    "parent": {
+                      "files": 23,
+                      "gpuExecuted": false,
+                      "manifestSha256": "8264f51f52693a0ce80ed167d0d25fa56c6d5505b5cc01712c2d198c6448f330",
+                      "parent": {
+                        "files": 160,
+                        "gitQueries": 0,
+                        "gpuExecuted": false,
+                        "networkRequests": 0,
+                        "sourceCommits": {
+                          "cpu": "a002d89492734bfa9d17b98145ee6cb9a3b366a2",
+                          "glow": "45af879d7417abba58e9ebd59d8e6630a785ac28"
+                        },
+                        "sourceContractSha256": "5938d0f33168daae415d9573701cafe290bcdd9850a14f4cb61c966560640180",
+                        "status": "PASS"
+                      },
+                      "profileId": "ASTRA_SOURCE_MATERIAL_V1",
+                      "schema": "ASTRA_ACTIVATION_FILES_V1",
+                      "sourceCommit": "7c4a0b6b4b0074bd06428dc11224a65f7f8fae58",
+                      "status": "PASS",
+                      "testOnly": false
+                    },
+                    "profileId": "VISUAL_QUALITY_UPGRADE_V1",
+                    "schema": "WORLD_ENGINE_VISUAL_QUALITY_FILES_V1",
+                    "sourceCommit": "17393dd6a017a06de542a1484686cd8f8f598e60",
+                    "status": "PASS",
+                    "testOnly": false
+                  },
+                  "profileId": "REFERENCE_VISUAL_MASTER_V2",
+                  "schema": "WORLD_ENGINE_REFERENCE_VISUAL_FILES_V2",
+                  "sourceCommit": "e9feafc785fbd138cbac3ca4db090380968dc37e",
+                  "status": "PASS",
+                  "testOnly": false
+                },
+                "profileId": "UNIVERSAL_AUTO_VIDEO_V2",
+                "schema": "WORLD_ENGINE_UNIVERSAL_AUTO_VIDEO_FILES_V2",
+                "sourceCommit": "311a92137d00ba88220c1caa243c9ff0389e4121",
+                "status": "PASS",
+                "supplementalFiles": 7,
+                "testOnly": false
+              },
+              "parentInventoryFiles": 248,
+              "profileId": "UNIVERSAL_PRODUCTION_V3",
+              "schema": "WORLD_ENGINE_UNIVERSAL_PRODUCTION_FILES_V3",
+              "sourceCommit": "df9a4f414fc4515b11b87258a2daa21d3f4b8e3a",
+              "status": "PASS",
+              "testOnly": false
+            },
+            "parentInventoryFiles": 272,
+            "profileId": "VERIFIED_ARCHIVAL_FRONT_V4",
+            "schema": "WORLD_ENGINE_VERIFIED_FRONT_FILES_V4",
+            "sourceCommit": "30ea53d85df39962822733f44872a303961aedde",
+            "status": "PASS",
+            "testOnly": false
+          },
+          "parentInventoryFiles": 373,
+          "profileId": "PRODUCTION_STUDIO_MVP_V1",
+          "schema": "WORLD_ENGINE_PRODUCTION_STUDIO_FILES_V1",
+          "sourceCommit": "147e4f4d0da894ecf35151826890ed4501ee3db8",
+          "status": "PASS",
+          "testOnly": false
+        },
+        "sourceCommit": "62d433b1c8e17b6c237890ade10e2b07e4df1b47",
+        "status": "PASS"
+      },
+      "sourceCommit": "83bf1e0c7fc5955d9ff1d06441264f4c0d5a702b",
+      "status": "PASS"
+    },
+    "sourceCommit": "6d7d4ce061acefbfa0442828f2ed858e3e8dccf2",
+    "status": "PASS"
+  },
+  "parentDependenciesAfter": [
+    {
+      "dependencyManifestSha256": "2d5751eba67198a7c8d6bde5b1fb479115f5d23ef2c1f576c8cf31d78cdf2905",
+      "gpuExecuted": false,
+      "interpreter": "/usr/bin/python3",
+      "inventorySha256": "6558c8808883b40ef57fe13a4237d6335e5d5d629c818386506657272f8a6166",
+      "isolatedFiles": 169,
+      "status": "PASS"
+    },
+    {
+      "dependencyManifestSha256": "2d5751eba67198a7c8d6bde5b1fb479115f5d23ef2c1f576c8cf31d78cdf2905",
+      "gpuExecuted": false,
+      "interpreter": "/opt/world-engine-studio-durability-venv/bin/python",
+      "inventorySha256": "2706d0c317fd6d9c7320306cd2b70703bbd483e2adfad03d05f259dae4a3ff35",
+      "isolatedFiles": 169,
+      "status": "PASS"
+    }
+  ],
+  "inheritedDependenciesChanged": false,
+  "secretScan": {
+    "status": "PASS",
+    "findings": 0,
+    "scannerSha256": "e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad",
+    "scope": "all new extension source/tests/docs/workflow; inherited image scan reused"
+  },
+  "verification": "PASS",
+  "imageDigest": "sha256:6d2e87fc8fb7f10edc2ebb7f77b5d666e329904b9c37f7f060b289f943bdd9d0",
+  "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:6d2e87fc8fb7f10edc2ebb7f77b5d666e329904b9c37f7f060b289f943bdd9d0",
+  "registryVerification": {
+    "status": 200,
+    "digest": "sha256:6d2e87fc8fb7f10edc2ebb7f77b5d666e329904b9c37f7f060b289f943bdd9d0",
+    "configDigest": "sha256:f1a0590b6f12a7a3810a797037c6e1c916c5003178dc51249ba953ac8199855b"
+  },
+  "stepOutcomes": {
+    "preflight": "success",
+    "selftest": "success",
+    "packagingtest": "success",
+    "guard": "success",
+    "stage": "success",
+    "build": "success",
+    "test": "success",
+    "verify": "success",
+    "publish": "success"
+  }
+}
