@@ -6,6 +6,7 @@ import io
 import json
 import os
 from pathlib import Path
+import sys
 import tempfile
 from types import SimpleNamespace
 import unittest
@@ -179,18 +180,18 @@ class FilesystemInventoryTests(unittest.TestCase):
         self.lock.unlink()
         self.lock.touch(mode=0o600)
         os.link(self.lock, self.root / 'other-lock')
-        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_METADATA_REQUIRED'):
             probe.inventory(self.cache, self.root)
 
     def test_foreign_owner_and_group_or_nonprivate_permissions_are_rejected(self):
         with patch.object(probe.os, 'geteuid', return_value=os.geteuid() + 1):
-            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_METADATA_REQUIRED'):
                 probe.inventory(self.cache, self.root)
         with patch.object(probe.os, 'getegid', return_value=os.getegid() + 1):
-            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_METADATA_REQUIRED'):
                 probe.inventory(self.cache, self.root)
         self.lock.chmod(0o640)
-        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_METADATA_REQUIRED'):
             probe.inventory(self.cache, self.root)
 
     def test_mutation_during_zero_byte_lock_read_is_rejected(self):
@@ -200,8 +201,70 @@ class FilesystemInventoryTests(unittest.TestCase):
             self.lock.write_bytes(b'changed-during-read')
             return result
         with patch.object(probe.os, 'read', side_effect=mutate):
-            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_(PRIVATE_EMPTY_LOCK_REQUIRED|EMPTY_LOCK_CHANGED)'):
+            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_(PRIVATE_EMPTY_METADATA_REQUIRED|EMPTY_METADATA_CHANGED)'):
                 probe.inventory(self.cache, self.root)
+
+    def test_successful_verification_empty_logs_and_nonempty_rgb_hash_are_inventoried(self):
+        evidence = self.root / 'verification-abcdefgh'
+        evidence.mkdir(mode=0o700)
+        for name in probe.EMPTY_DIAGNOSTICS:
+            (evidence / name).touch(mode=0o600)
+        rgb = evidence / 'rgb24.sha256'
+        rgb.write_text('a' * 64 + '\n', encoding='ascii')
+        rgb.chmod(0o600)
+        before = {p.relative_to(self.root).as_posix(): p.read_bytes()
+                  for p in self.root.rglob('*') if p.is_file()}
+        digest = probe.inventory(self.cache, self.root)
+        self.assertEqual(digest, probe.inventory(self.cache, self.root))
+        self.assertEqual(before, {p.relative_to(self.root).as_posix(): p.read_bytes()
+                                 for p in self.root.rglob('*') if p.is_file()})
+        rgb.write_bytes(b'changed-nonempty-hash-evidence')
+        self.assertNotEqual(digest, probe.inventory(self.cache, self.root))
+
+    def test_empty_diagnostics_outside_exact_verification_context_are_rejected(self):
+        for parent in (self.root, self.root / 'other-evidence', self.root / 'verification-unrecognized'):
+            parent.mkdir(mode=0o700, exist_ok=True)
+            path = parent / 'segment-probe.stderr'
+            path.touch(mode=0o600)
+            with self.assertRaisesRegex(RuntimeError, 'EMPTY_ARTIFACT'):
+                probe.inventory(self.cache, self.root)
+            path.unlink()  # Only this test's newly created synthetic fixture.
+
+    def test_unknown_empty_file_inside_verification_directory_remains_rejected(self):
+        evidence = self.root / 'verification-abcdefgh'
+        evidence.mkdir(mode=0o700)
+        (evidence / 'rgb24.sha256').touch(mode=0o600)
+        with self.assertRaisesRegex(RuntimeError, 'EMPTY_ARTIFACT'):
+            probe.inventory(self.cache, self.root)
+
+    def test_probe_private_umask_is_scoped_and_restored_on_success_and_failure(self):
+        original = os.umask(0o022)
+        runtime = SimpleNamespace(install=lambda: object())
+        try:
+            for index, (should_fail, expected) in enumerate(((False, 0), (True, 2))):
+                def operation(stage, old):
+                    current = os.umask(0o077)
+                    self.assertEqual(current, 0o077)
+                    evidence = self.root / ('verification-' + str(index).zfill(8))
+                    evidence.mkdir(mode=0o700)
+                    for name in probe.EMPTY_DIAGNOSTICS:
+                        with open(evidence / name, 'xb'):
+                            pass
+                        self.assertEqual((evidence / name).stat().st_mode & 0o777, 0o600)
+                    with open(evidence / 'rgb24.sha256', 'x', encoding='ascii') as stream:
+                        stream.write('a' * 64 + '\n')
+                    self.assertEqual((evidence / 'rgb24.sha256').stat().st_mode & 0o777, 0o600)
+                    self.assertRegex(probe.inventory(self.cache, self.root), r'^[a-f0-9]{64}$')
+                    if should_fail:
+                        raise RuntimeError('PRODUCTION_RESTART_TEST_FAILURE')
+                    return {'status': 'PASS', 'gpuExecuted': False}
+                with patch.dict(sys.modules, {'production_runtime': runtime}), \
+                     patch.object(probe, 'operation', side_effect=operation), \
+                     redirect_stdout(io.StringIO()):
+                    self.assertEqual(probe.main(['restore']), expected)
+                self.assertEqual(os.umask(0o022), 0o022)
+        finally:
+            os.umask(original)
 
 
 if __name__ == '__main__':

@@ -27,6 +27,9 @@ CLAIM = {'schema': 'CPU_RESTART_PROBE_INERT_CLAIM_V1',
          'testOnly': True, 'executionAuthorityRestored': False,
          'renderAllowed': False, 'gpuExecuted': False}
 CODE = re.compile(r'[A-Z][A-Z0-9_]{2,95}\Z')
+VERIFICATION_DIRECTORY = re.compile(r'verification-[a-z0-9_]{8}\Z')
+EMPTY_DIAGNOSTICS = frozenset({'segment-probe.stderr', 'segment-timestamps.stderr',
+                               'segment-decode.stderr'})
 
 
 def fail(code):
@@ -54,15 +57,18 @@ def readonly_transport(store):
     return counters
 
 
-def empty_lock_metadata(tree, name, expected):
-    """Inventory only the frozen cache's empty private LOCK bookkeeping file.
+def empty_metadata_file(tree, name, expected, *, parent_name):
+    """Inventory the frozen cache's exact empty private bookkeeping files.
 
     The frozen artifact hasher correctly rejects empty media. Do not weaken it
-    or accept other empty files: a LOCK has no media bytes, but its identity and
-    private ownership must still be stable throughout this read-only check.
+    or accept other empty files: LOCK and successful verification stderr logs
+    carry metadata rather than media bytes. Their identity and private ownership
+    must still be stable throughout this read-only check.
     """
-    if name != 'LOCK' or expected.st_size != 0:
-        fail('PRODUCTION_RESTART_EMPTY_LOCK_METADATA_REQUIRED')
+    allowed = (name == 'LOCK' or name in EMPTY_DIAGNOSTICS
+               and VERIFICATION_DIRECTORY.fullmatch(parent_name))
+    if not allowed or expected.st_size != 0:
+        fail('PRODUCTION_RESTART_EMPTY_METADATA_CONTEXT_REQUIRED')
     descriptor = None
 
     def identity(info):
@@ -73,7 +79,7 @@ def empty_lock_metadata(tree, name, expected):
         if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
                 or info.st_gid != os.getegid() or stat.S_IMODE(info.st_mode) != 0o600
                 or info.st_nlink != 1 or info.st_size != 0):
-            fail('PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED')
+            fail('PRODUCTION_RESTART_PRIVATE_EMPTY_METADATA_REQUIRED')
 
     try:
         descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=tree.fd)
@@ -81,18 +87,18 @@ def empty_lock_metadata(tree, name, expected):
         require_private(expected)
         require_private(before)
         if identity(before) != identity(expected):
-            fail('PRODUCTION_RESTART_EMPTY_LOCK_CHANGED')
+            fail('PRODUCTION_RESTART_EMPTY_METADATA_CHANGED')
         if os.read(descriptor, 1) != b'':
-            fail('PRODUCTION_RESTART_EMPTY_LOCK_CHANGED')
+            fail('PRODUCTION_RESTART_EMPTY_METADATA_CHANGED')
         after = os.fstat(descriptor)
         current = os.stat(name, dir_fd=tree.fd, follow_symlinks=False)
         require_private(after)
         require_private(current)
         if identity(before) != identity(after) or identity(current) != identity(after):
-            fail('PRODUCTION_RESTART_EMPTY_LOCK_CHANGED')
+            fail('PRODUCTION_RESTART_EMPTY_METADATA_CHANGED')
         return {'file': name, 'sha256': hashlib.sha256(b'').hexdigest(), 'bytes': 0}
     except OSError:
-        fail('PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED')
+        fail('PRODUCTION_RESTART_PRIVATE_EMPTY_METADATA_REQUIRED')
     finally:
         if descriptor is not None:
             os.close(descriptor)
@@ -113,8 +119,11 @@ def inventory(cachemod, root):
                 with tree.child(name) as child:
                     walk(child, relative + '/')
             elif stat.S_ISREG(info.st_mode):
-                facts = (empty_lock_metadata(tree, name, info)
-                         if name == 'LOCK' and info.st_size == 0 else tree.hash_file(name))
+                parent_name = prefix.rstrip('/').rsplit('/', 1)[-1]
+                metadata_file = (name == 'LOCK' or name in EMPTY_DIAGNOSTICS
+                                 and VERIFICATION_DIRECTORY.fullmatch(parent_name))
+                facts = (empty_metadata_file(tree, name, info, parent_name=parent_name)
+                         if metadata_file and info.st_size == 0 else tree.hash_file(name))
                 rows.append({**metadata, 'kind': 'file', 'sha256': facts['sha256'],
                              'bytes': facts['bytes']})
             else:
@@ -229,10 +238,15 @@ def operation(stage, old):
 
 
 def main(argv=None):
+    previous_umask = None
     try:
         arguments = list(sys.argv[1:] if argv is None else argv)
         if len(arguments) != 1 or arguments[0] not in {'restore', 'verify'}:
             fail('PRODUCTION_RESTART_FIXED_STAGE_REQUIRED')
+        # Frozen FFmpeg evidence uses ordinary open(..., "x"). Restrict only
+        # this synthetic probe's newly created diagnostics; never chmod an
+        # existing cache or weaken its private-file inventory requirements.
+        previous_umask = os.umask(0o077)
         import production_runtime
         result = operation(arguments[0], production_runtime.install())
         print(json.dumps(result, sort_keys=True, separators=(',', ':')), flush=True)
@@ -245,6 +259,9 @@ def main(argv=None):
                           'renderAllowed': False, 'productionRenderingStarted': False,
                           'gpuExecuted': False}, sort_keys=True), flush=True)
         return 2
+    finally:
+        if previous_umask is not None:
+            os.umask(previous_umask)
 
 
 if __name__ == '__main__':

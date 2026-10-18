@@ -152,7 +152,9 @@ def inspect_image(image):
     config = row.get('Config', {})
     labels = config.get('Labels', {})
     entry = ['/usr/bin/tini', '-g', '--', PYTHON, '-B', DEST + '/production_entry.py', 'bootstrap']
-    forbidden = {*SECRET_NAMES, 'GCUBE_ACCESS_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN',
+    forbidden = {*SECRET_NAMES, *(name + '_FILE' for name in SECRET_NAMES),
+                 'GCUBE_ACCESS_TOKEN', 'GCUBE_API_TOKEN', 'GH_TOKEN', 'GITHUB_TOKEN',
+                 'WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_TOKEN',
                  'WORLD_ENGINE_STUDIO_OWNER_CODE', 'WORLD_ENGINE_STUDIO_OPERATOR_POLICY_JSON'}
     if (row.get('Os') != 'linux' or row.get('Architecture') != 'amd64'
             or config.get('Entrypoint') != entry
