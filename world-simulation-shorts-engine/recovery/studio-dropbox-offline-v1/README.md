@@ -32,12 +32,12 @@
 PC 등의 무료 Docker 환경에서 이 후보 이미지의 immutable digest를 사용한다. 정확한 새 참조는 `RESULT.md` 및 `runs/`에 기록한다. GPU 옵션은 넣지 않는다. 아래 경로는 **새로 만드는 Secret 전용 디렉터리**이며 `/world-storage`, Git 체크아웃, 공개 동기화 폴더로 바꾸지 않는다.
 
 ```bash
-install -d -m 700 "$HOME/world-engine-dropbox-secret"
+mkdir -m 700 "$HOME/world-engine-dropbox-secret-offline-v1"
 docker run --rm -it --user 1000:1000 --read-only --cap-drop ALL \
   --security-opt no-new-privileges --tmpfs /tmp:rw,mode=1777 \
-  --mount "type=bind,src=$HOME/world-engine-dropbox-secret,dst=/run/offline-secret" \
+  --mount "type=bind,src=$HOME/world-engine-dropbox-secret-offline-v1,dst=/run/offline-secret" \
   --entrypoint /opt/world-engine-studio-durability-venv/bin/python \
-  <RESULT.md에 기록된 새 이미지@sha256:...> -B \
+  ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:6d2e87fc8fb7f10edc2ebb7f77b5d666e329904b9c37f7f060b289f943bdd9d0 -B \
   /opt/world-engine-studio-dropbox-offline/consent.py \
   --refresh-secret-file /run/offline-secret/dropbox-refresh-token
 ```
