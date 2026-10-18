@@ -1,0 +1,81 @@
+name: WORLD ENGINE Studio 80s read-only cache recovery evidence
+
+on:
+  push:
+    branches: [development/studio-80s-recovery-20261018]
+    paths:
+      - .github/workflows/studio-80s-recovery-v1.yml
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/remote.py
+      - world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/tests/test_remote.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-80s-readonly-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  readonly:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/studio-80s-recovery-20261018'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      RECOVERY_ROOT: world-simulation-shorts-engine/recovery/studio-80s-recovery-v1
+    steps:
+      - name: Check out only additive collector and audited helpers
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: development/studio-80s-recovery-20261018
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/studio-80s-recovery-v1.yml
+            /world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/remote.py
+            /world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/tests/test_remote.py
+            /world-simulation-shorts-engine/recovery/studio-auth-recovery-v2/collector.py
+            /world-simulation-shorts-engine/recovery/studio-auth-recovery-v2/rest_evidence.py
+      - name: Focused read-only surface and redaction tests
+        run: python3 -B -m unittest discover -s "$RECOVERY_ROOT/tests" -p test_remote.py -v
+      - name: Install previously verified official gcube CLI 0.4.2
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib, urllib.request
+          wheel = pathlib.Path(os.environ['RUNNER_TEMP']) / 'gcube_cli-0.4.2-py3-none-any.whl'
+          url = 'https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl'
+          with urllib.request.urlopen(url, timeout=30) as response:
+              data = response.read(200_000)
+          assert hashlib.sha256(data).hexdigest() == '9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692'
+          wheel.write_bytes(data)
+          PY
+          python3 -m venv "$RUNNER_TEMP/gcube-readonly-tools"
+          "$RUNNER_TEMP/gcube-readonly-tools/bin/python" -m pip install --disable-pip-version-check --no-input "$RUNNER_TEMP/gcube_cli-0.4.2-py3-none-any.whl"
+      - name: Read existing workload and reuse existing SSH only
+        timeout-minutes: 6
+        env:
+          GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
+        run: |
+          "$RUNNER_TEMP/gcube-readonly-tools/bin/python" -B "$RECOVERY_ROOT/remote.py" \
+            --cli "$RUNNER_TEMP/gcube-readonly-tools/bin/gcube" \
+            --output "$RECOVERY_ROOT/remote-runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Persist only closed sanitized evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          root = pathlib.Path(os.environ['RECOVERY_ROOT']) / 'remote-runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          files = sorted(root.glob('*.json'))
+          assert {p.name for p in files} == {'CLI_RESULT.json', 'REMOTE_RESULT.json'}
+          for path in files:
+              raw = path.read_text(); json.loads(raw)
+              assert not re.search(r'-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|[?&](?:token|sig)=', raw)
+          (root / 'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest() + '  ' + p.name + '\n' for p in files))
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "$RECOVERY_ROOT/remote-runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git diff --cached --check
+          git commit -m 'docs(studio): persist read-only 80s job and cache evidence [skip ci]'
+          git push origin HEAD:development/studio-80s-recovery-20261018
