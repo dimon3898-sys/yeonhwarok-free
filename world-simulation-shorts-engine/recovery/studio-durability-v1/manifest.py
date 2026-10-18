@@ -41,7 +41,8 @@ def verify_sources(root=HERE, *, verify_parent=True):
             expected.add(name)
     if not {'manifest.py', 'bootstrap.py', 'runtime_entry.py', 'durable_server.py',
             'durable_backend.py', 'durable_coordinator.py', 'checkpoint.py', 'vault.py',
-            'stores.py', 'preflight.py', 'cli.py', 'parent.py', 'requirements.txt'} <= set(manifest['files']):
+            'stores.py', 'preflight.py', 'cli.py', 'startup_restore.py', 'parent.py',
+            'requirements.txt'} <= set(manifest['files']):
         raise RuntimeError('DURABILITY_CONNECTED_RUNTIME_REQUIRED')
     if root.is_relative_to('/opt'):
         if any(p.is_symlink() for p in root.rglob('*')):

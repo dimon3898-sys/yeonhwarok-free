@@ -100,6 +100,34 @@ state. A new explicit operator cost/time approval and Start action are still
 required. Valid completed cache entries are reused; incomplete scenes render
 only after that approval. Container restart never automatically starts a job.
 
+### Optional cold-container restore without a terminal command
+
+For an explicitly selected backup, the additive bootstrap supports:
+
+| Setting | Value |
+|---|---|
+| `WORLD_ENGINE_STUDIO_RESTORE_CHECKPOINT_ID` | Authenticated checkpoint ID selected from the backup catalog |
+| `WORLD_ENGINE_STUDIO_RESTORE_PLAN_SHA256` | Matching original Scene plan SHA-256 |
+| `WORLD_ENGINE_STUDIO_STATE_ROOT` | A new private local root, for example `/var/lib/world-engine-private/engine/production-studio-restored-v1` |
+| `WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST` | The same immutable image digest used by the backed-up Scene |
+
+Keep the original backup key and a valid scoped Dropbox token. The bootstrap
+restores as UID/GID 1000 before starting Studio; then the existing setup creates
+fresh owner/HTTPS/policy state. On a repeated start it only verifies the matching
+restored input and every retained cache artifact. It never replaces an existing
+unrelated root, deletes claims, or starts a GPU render.
+
+Cold restoration is bounded and can take time to download/verify media. The new
+image allows a 20-minute Docker health start period. gCube's independent startup
+probe/restart grace has **not** been confirmed here; do not assume Docker
+metadata changes that platform policy. If its grace is shorter, resolve that
+platform setting before attempting a long cold restore. The ordinary path with
+no explicit restore ID does not perform a cold restore.
+
+After the two approved backup Repository Secrets have been connected, the
+existing successful CI run's `verify-pull` job can be rerun by itself to obtain
+real external recovery evidence. Rebuilding the same image is unnecessary.
+
 ## Boundaries
 
 CPU fixture recovery and mocked Dropbox tests are separate from actual external

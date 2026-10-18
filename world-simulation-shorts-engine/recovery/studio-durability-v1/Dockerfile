@@ -47,7 +47,10 @@ LABEL world-engine.studio-durability.version="1" \
       world-engine.studio-durability.dependency-builder-digest="sha256:2ed6491b93cd49272ee6de2b5a38440c3448360322c089fc23e370722d74179d" \
       world-engine.studio-durability.parent-digest="sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
 EXPOSE 8080
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+# Optional CPU-only cold restore is bounded before the web service starts.
+# A platform-level startup probe must also allow this grace; Docker metadata
+# alone cannot configure an unverified external restart policy.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20m --retries=3 \
     CMD ["/opt/world-engine-studio-durability-venv/bin/python", "-B", "-c", "import urllib.request; r=urllib.request.build_opener(urllib.request.ProxyHandler({})).open('http://127.0.0.1:8080/healthz',timeout=3); raise SystemExit(0 if r.status==200 else 1)"]
 ENTRYPOINT ["/usr/bin/tini", "-g", "--", "/opt/world-engine-studio-durability-venv/bin/python", "-B", "/opt/world-engine-studio-durability/bootstrap.py"]
 CMD []

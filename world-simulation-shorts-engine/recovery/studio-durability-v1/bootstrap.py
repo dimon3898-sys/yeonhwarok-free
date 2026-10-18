@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import re
 import stat
 import subprocess
 import sys
@@ -70,6 +71,65 @@ def spawn_studio(command, **kwargs):
     return subprocess.Popen(command, **kwargs)
 
 
+def prepare_startup_restore(environ, *, run=subprocess.run):
+    """Explicit optional CPU restore, before the target STATE_ROOT is created."""
+    checkpoint_id = environ.get('WORLD_ENGINE_STUDIO_RESTORE_CHECKPOINT_ID')
+    plan_sha = environ.get('WORLD_ENGINE_STUDIO_RESTORE_PLAN_SHA256')
+    if checkpoint_id is None and plan_sha is None:
+        return dict(environ)
+    image_digest = environ.get('WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST')
+    explicit_root = environ.get('WORLD_ENGINE_STUDIO_STATE_ROOT')
+    if (not isinstance(checkpoint_id, str) or not re.fullmatch(r'[a-f0-9]{64}', checkpoint_id)
+            or not isinstance(plan_sha, str) or not re.fullmatch(r'[a-f0-9]{64}', plan_sha)
+            or not isinstance(image_digest, str) or not re.fullmatch(r'sha256:[a-f0-9]{64}', image_digest)
+            or not isinstance(explicit_root, str) or not explicit_root):
+        raise RuntimeError('DURABILITY_EXPLICIT_STARTUP_RESTORE_BINDINGS_REQUIRED')
+    target = Path(explicit_root)
+    if (not target.is_absolute() or '..' in target.parts or target == Path('/')
+            or target.is_relative_to('/world-storage')
+            or any(p.is_symlink() for p in (target, *target.parents))):
+        raise RuntimeError('DURABILITY_PRIVATE_RESTORE_ROOT_REQUIRED')
+    frozen = proxy().https.bootstrap.original
+    # Keep approved credentials outside the fresh destination. Do not initialize
+    # the destination first or replace any existing root/claim to force restore.
+    aux = Path('/var/lib/world-engine-private/engine/studio-durability-bootstrap')
+    frozen._private_directory(aux, 1000, 1000)
+    environment = prepare_backup_secrets(environ, aux)
+    allowed = {row[1] for row in SECRET_INPUTS} | {'WORLD_ENGINE_STUDIO_BACKUP_MODE',
+               'WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_PREFIX', 'WORLD_ENGINE_STUDIO_BACKUP_PROOF_ID'}
+    allowed |= {'PATH', 'HOME', 'TMPDIR', 'LANG', 'LC_ALL', 'PYTHONDONTWRITEBYTECODE',
+                'SSL_CERT_FILE', 'SSL_CERT_DIR', 'REQUESTS_CA_BUNDLE',
+                'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'NO_PROXY',
+                'http_proxy', 'https_proxy', 'all_proxy', 'no_proxy'}
+    child_environment = {name: value for name, value in environment.items() if name in allowed}
+    command = [sys.executable, '-B', str(HERE / 'startup_restore.py'),
+               '--checkpoint-id', checkpoint_id, '--plan-sha256', plan_sha,
+               '--image-digest', image_digest, '--state-root', str(target)]
+    print(json.dumps({'stage': 'STARTUP_RESTORE_IN_PROGRESS', 'maximumSeconds': 600,
+                      'renderAllowed': False, 'gpuRenderingVerified': False}), flush=True)
+    result = run(command, env=child_environment, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                 stderr=subprocess.DEVNULL, user=1000, group=1000, extra_groups=[],
+                 close_fds=True, timeout=600, check=False)
+    try:
+        if len(result.stdout) > 16384:
+            raise ValueError()
+        receipt = json.loads(result.stdout)
+    except (ValueError, TypeError):
+        raise RuntimeError('DURABILITY_STARTUP_RESTORE_RESPONSE_INVALID') from None
+    if (result.returncode or receipt.get('restoreVerified') is not True
+            or receipt.get('checkpointId') != checkpoint_id or receipt.get('planSHA256') != plan_sha
+            or receipt.get('imageDigest') != image_digest or receipt.get('productionRenderingStarted') is not False
+            or receipt.get('executionAuthorityRestored') is not False
+            or receipt.get('newOperatorApprovalRequired') is not True):
+        code = receipt.get('code', 'DURABILITY_STARTUP_RESTORE_FAILED')
+        if not isinstance(code, str) or not re.fullmatch(r'[A-Z][A-Z0-9_]{2,95}', code):
+            code = 'DURABILITY_STARTUP_RESTORE_FAILED'
+        raise RuntimeError(code)
+    print(json.dumps({'stage': 'STARTUP_RESTORE_VERIFIED', 'renderAllowed': False,
+                      'gpuRenderingVerified': False}), flush=True)
+    return environment
+
+
 def main(argv=None):
     frozen = proxy().https.bootstrap
     try:
@@ -77,8 +137,9 @@ def main(argv=None):
             raise RuntimeError('STUDIO_ROOT_BOOTSTRAP_REQUIRED')
         from manifest import verify_sources
         verify_sources()
-        config = frozen.prepare_configuration(os.environ)
-        environment = prepare_backup_secrets(os.environ, config['root'])
+        environment = prepare_startup_restore(os.environ)
+        config = frozen.prepare_configuration(environment)
+        environment = prepare_backup_secrets(environment, config['root'])
         environment = frozen.child_environment(environment, studio=True, config=config)
         for name in frozen.original.SECRET_ENV | {row[0] for row in SECRET_INPUTS}:
             os.environ.pop(name, None)
