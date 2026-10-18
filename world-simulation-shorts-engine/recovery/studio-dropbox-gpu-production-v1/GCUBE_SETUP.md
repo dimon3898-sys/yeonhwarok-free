@@ -6,6 +6,20 @@
 
 이 프로필의 `RESULT.md`와 독립 pull 기록에서 **새로 검증한 태그와 digest**를 확인합니다. 기존 이미지 태그를 덮어쓰지 않습니다. 이미지가 실제로 발행되기 전에는 digest를 추측해서 입력하지 않습니다.
 
+최종 무료 검증 실행 `39115824691`에서 발행·독립 pull한 이미지:
+
+```text
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine:studio-dropbox-gpu-prod-v1-00cae13-39115824691-1
+```
+
+`WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST`에 넣을 값:
+
+```text
+sha256:c3bdd5107f28ceaaef9c3db2061d8dbe60f4abf17b6d541acc2d18a6462f2692
+```
+
+서로 다른 CPU 컨테이너의 실제 Dropbox 복구 검증은 PASS입니다. 실제 gCube 재시작·NVIDIA 렌더링은 미실행입니다. Secret 전달 방식과 실제 비용 승인이 남아 있으므로 이 결과를 배포 승인으로 사용하지 않습니다.
+
 | gCube 항목 | 입력값 |
 | --- | --- |
 | GPU | RTX 4080 SUPER 16GB × 1; 실제 선택 노드 요금 확인 |
@@ -63,6 +77,8 @@ GitHub Repository Secret이 gCube로 자동 전달되지는 않습니다. GitHub
 ## 4. 240분 지원과 비용 승인
 
 기존 Studio 및 coordinator 검증기는 `maxWallSeconds=14400`을 이미 지원합니다. Camera·렌더러·전선 변경은 필요하지 않습니다. 기존 60분/180분 작업의 승인이나 claim을 늘리지 않고 **다음 새 작업**에만 새 정책을 적용합니다. 180분 전용 `studio-80s-recovery-v1/policy.py` 도구를 240분 설정에 사용하지 않습니다.
+
+이 값은 GPU draw만의 시간이 아니라 새 제작 작업의 전체 wall-time 상한입니다. 실제 deadline은 작업 생성 시각에 상한을 더한 시각과 승인 만료시각 중 이른 값입니다. 준비·렌더링·합성·저장 시간도 상한에 포함되므로 만료시각을 충분히 확보해야 합니다.
 
 필수 정책 필드는 다음 여섯 개입니다. 다음은 값의 의미를 표시하는 **입력 계약이며 실행 가능한 승인값이 아닙니다**.
 
