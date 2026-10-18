@@ -193,6 +193,17 @@ class Application:
                 # Registration and production requests still serialize after
                 # bounded input has arrived; no old-origin Start can race a change.
                 with app.core.lock:
+                    if path == '/setup-font.woff2' and self.command == 'GET':
+                        if app.normal is not None:
+                            self._configured_policy()
+                        return self._send(200, (HERE / 'web/fonts/studio-setup-ko.woff2').read_bytes(), 'font/woff2')
+                    if path == '/style.css' and self.command == 'GET' and app.normal is not None:
+                        self._configured_policy()
+                        # Preserve every original layout/style rule; add only a
+                        # UI-local missing-Hangul fallback, never a video font.
+                        base = (load_originals().root / 'web/style.css').read_bytes()
+                        fallback = (HERE / 'web/studio-font.css').read_bytes()
+                        return self._send(200, base + b'\n' + fallback, 'text/css; charset=utf-8')
                     setup_path = path in {'/setup', '/setup.js', '/setup.css', '/setup/challenge',
                                           '/api/setup/login', '/api/setup/origin'}
                     if app.normal is not None and setup_path:

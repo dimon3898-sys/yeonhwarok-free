@@ -21,6 +21,21 @@ async function check(name, action) {
   await action();
   report.checks.push({name, status: 'PASS'});
 }
+async function waitKoreanFont(page) {
+  const loaded = await page.evaluate(async () => {
+    const font = '16px WorldEngineStudioSetup';
+    const sample = '초기 설정 관리자 영상 제작';
+    const faces = await document.fonts.load(font, sample);
+    await document.fonts.ready;
+    return {faceCount: faces.length, allLoaded: faces.every(face => face.status === 'loaded'),
+      available: document.fonts.check(font, sample),
+      bodyUsesFamily: getComputedStyle(document.body).fontFamily.includes('WorldEngineStudioSetup')};
+  });
+  assert.ok(loaded.faceCount > 0, 'KOREAN_UI_FONT_FACE_REQUIRED');
+  assert.equal(loaded.allLoaded, true, 'KOREAN_UI_FONT_LOAD_REQUIRED');
+  assert.equal(loaded.available, true, 'KOREAN_UI_FONT_AVAILABLE_REQUIRED');
+  assert.equal(loaded.bodyUsesFamily, true, 'KOREAN_UI_FONT_STYLE_REQUIRED');
+}
 try {
   let testURL = process.env.WORLD_ENGINE_HTTPS_TEST_URL;
   let ownerFile = process.env.WORLD_ENGINE_HTTPS_TEST_OWNER_FILE;
@@ -63,6 +78,8 @@ try {
   const context = await browser.newContext({viewport: {width: 390, height: 844}, deviceScaleFactor: 1, isMobile: true, hasTouch: true, ignoreHTTPSErrors: true});
   let page = await context.newPage();
   let renderStartRequests = 0;
+  const fontRequests = [];
+  context.on('request', request => { if (request.resourceType() === 'font') fontRequests.push(new URL(request.url())); });
   context.on('request', request => { if (/\/api\/(?:start|jobs\/[^/]+\/start)(?:\?|$)/.test(request.url()) && request.method() === 'POST') renderStartRequests += 1; });
   activeCheck = 'mobile_browser_navigation';
   await page.goto(origin + '/setup');
@@ -84,6 +101,13 @@ try {
     assert.equal(challenge.sameSite, 'Strict');
     assert.equal(challenge.path, '/');
   });
+  await check('korean_ui_font_loaded_in_actual_mobile_chromium', async () => {
+    await waitKoreanFont(page);
+    assert.ok(fontRequests.some(url => url.origin === origin && url.pathname === '/setup-font.woff2'), 'KOREAN_UI_LOCAL_FONT_REQUEST_REQUIRED');
+    assert.equal(fontRequests.every(url => url.origin === origin), true, 'EXTERNAL_UI_FONT_REQUEST_FORBIDDEN');
+    report.koreanUIFont = {family: 'WorldEngineStudioSetup', status: 'LOADED', externalFontRequest: false};
+  });
+  await page.evaluate(() => document.fonts.ready);
   await page.screenshot({path: path.join(output, '01_MOBILE_HTTPS_SETUP.png'), fullPage: true});
   await check('initial_setup_blocks_unauthenticated_render_start', async () => {
     const status = await page.evaluate(async () => (await fetch('/api/start', {method: 'POST', credentials: 'same-origin', headers: {'Content-Type': 'application/json'}, body: '{}'})).status);
@@ -131,6 +155,7 @@ try {
     assert.equal(session.httpOnly, true);
     assert.equal(session.sameSite, 'Strict');
   });
+  await waitKoreanFont(page);
   await page.screenshot({path: path.join(output, '02_MOBILE_HTTPS_CONFIRMATION.png'), fullPage: true});
   await check('double_activation_commits_once_and_requires_fresh_normal_login', async () => {
     let commits = 0;
@@ -142,6 +167,7 @@ try {
     assert.equal(await page.getAttribute('#studio-login-link', 'href'), '/login');
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   });
+  await waitKoreanFont(page);
   await page.screenshot({path: path.join(output, '03_MOBILE_HTTPS_REGISTERED.png'), fullPage: true});
   // The explicit API denial check is separate from requests made by the UI.
   await check('setup_ui_never_posts_render_start', async () => { assert.equal(renderStartRequests, 0); });
@@ -163,8 +189,10 @@ try {
     assert.equal(await page.locator('#duration').count(), 1);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
   });
+  await waitKoreanFont(page);
   await page.screenshot({path: path.join(output, '04_MOBILE_STUDIO_READY.png'), fullPage: true});
   assert.equal(renderStartRequests, 0);
+  assert.equal(fontRequests.every(url => url.origin === origin), true, 'EXTERNAL_UI_FONT_REQUEST_FORBIDDEN');
   report.status = 'PASS';
 } catch (error) {
   report.status = 'FAIL';

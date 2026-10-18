@@ -165,6 +165,21 @@ class ServerTests(unittest.TestCase):
                 studio_runtime.validate_render_plan({'renderProfile': {'imageDigest': 'sha256:' + 'b' * 64}},
                     'TEST_ONLY', 'sha256:' + 'a' * 64)
 
+    def test_ui_font_is_static_and_original_css_rules_are_preserved(self):
+        status, font, _, headers = self.request('/setup-font.woff2')
+        self.assertEqual(status, 200)
+        self.assertEqual(font[:4], b'wOF2')
+        self.assertIn(('Content-Type', 'font/woff2'), headers)
+        self.assertEqual(self.calls, [])
+        self.register()
+        status, css, *_ = self.request('/style.css')
+        from frozen import load_originals
+        self.assertEqual(status, 200)
+        self.assertTrue(css.startswith((load_originals().root / 'web/style.css').read_bytes()))
+        self.assertIn(b'WorldEngineStudioSetup', css)
+        self.assertIn(b'/setup-font.woff2', css)
+        self.assertEqual(self.calls, [])
+
     def test_registered_setup_page_requires_existing_authentication(self):
         self.register()
         self.assertEqual(self.request('/setup')[0], 401)
