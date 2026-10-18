@@ -54,7 +54,17 @@ def location():
 
 
 ci.location = location
-state, save, run = ci.state, ci.save, ci.run
+previous_state = ci.state
+
+
+def state():
+    value = previous_state()
+    value['schema'] = 'WORLD_ENGINE_DROPBOX_GPU_PRODUCTION_PACKAGE_V1'
+    return value
+
+
+ci.state = state
+save, run = ci.save, ci.run
 require_free = ci.require_free_runner
 
 
@@ -204,7 +214,9 @@ def test():
             'r=unittest.TextTestRunner(verbosity=2).run(s);'
             'print(json.dumps({"testsRun":r.testsRun,"failures":len(r.failures),'
             '"errors":len(r.errors),"skips":len(r.skipped),'
-            '"failedTests":[str(t) for t,_ in r.failures+r.errors],"gpuExecuted":False}));'
+            '"failedTests":[str(t) for t,_ in r.failures+r.errors],'
+            '"errorTypes":[trace.strip().splitlines()[-1].partition(":")[0][:96] for _,trace in r.errors],'
+            '"gpuExecuted":False}));'
             'raise SystemExit(0 if r.testsRun>0 and r.wasSuccessful() and not r.skipped else 1)')
     result = run(container(value['image']) + ['-c', code], timeout=600, check=False)
     report = json.loads(result.stdout.strip().splitlines()[-1])

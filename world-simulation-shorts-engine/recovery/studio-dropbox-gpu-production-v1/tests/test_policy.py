@@ -18,6 +18,10 @@ class FourHourPolicyTests(unittest.TestCase):
     def setUpClass(cls):
         from production_runtime import install
         cls.old = install()
+        # The inherited runtime prepares this exact sibling-import directory.
+        # Loading a .py file by spec alone does not add its parent to sys.path.
+        # Reuse that unchanged setup instead of changing the engine imports.
+        cls.old.parent.runtime()
         cls.controller = cls.old.parent.load_file(
             '_production_four_hour_frozen_controller',
             cls.old.parent.STUDIO / 'studio_controller.py',
