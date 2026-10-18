@@ -32,6 +32,59 @@ SCANNER_SHA = 'e18325d568268b6efb6cd0cc721f8bea5667f4cd1c8d03618ab61987f41269ad'
 WORKFLOWS = ('.github/workflows/studio-80s-recovery-cpu.yml', '.github/workflows/studio-80s-recovery-v1.yml')
 PAYLOAD = ('recover.py', 'policy.py', 'validate.py', 'tests/test_recover.py', 'tests/test_policy.py')
 MAX_REPORT_BYTES = 1024 * 1024
+SAFE_CODE = re.compile(r'(?:CPU_RECOVERY|RECOVERY|STUDIO|CACHE|SYNTHETIC|AUDIO|VIDEO|FFMPEG)_[A-Z0-9_]{1,90}\Z')
+
+
+def safe_exception(error, tb=None):
+    """Closed diagnostics only: never persist an exception message or locals."""
+    kind = type(error).__name__
+    result = {'errorType': kind if re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,79}', kind) else 'Exception',
+              'errorCode': 'CPU_RECOVERY_UNEXPECTED_EXCEPTION'}
+    code = getattr(error, 'code', None) or str(error)
+    if isinstance(code, str) and SAFE_CODE.fullmatch(code):
+        result['errorCode'] = code
+    number = getattr(error, 'errno', None)
+    if isinstance(number, int) and -4096 <= number <= 4096:
+        result['errno'] = number
+    if isinstance(error, ModuleNotFoundError) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_.]{0,127}', str(error.name)):
+        result['missingModule'] = error.name
+    if isinstance(error, ImportError):
+        # unittest wraps import-time errors in ImportError. Extract only the
+        # module identifier, never its arbitrary multiline traceback/message.
+        missing = re.search(r"ModuleNotFoundError: No module named '([A-Za-z_][A-Za-z0-9_.]{0,127})'", str(error))
+        if missing:
+            result['missingModule'] = missing.group(1)
+    if isinstance(error, KeyError) and error.args and isinstance(error.args[0], str) and error.args[0] in {
+            'elapsedSeconds', 'timingsSeconds', 'status', 'files', 'parentStudio', 'parentHttps',
+            'sourceCommit', 'frames', 'scenes', 'durationSeconds', 'state', 'errorCode'}:
+        result['missingSchemaField'] = error.args[0]
+    frames = []
+    current = tb if tb is not None else error.__traceback__
+    while current is not None:
+        name = Path(current.tb_frame.f_code.co_filename).name
+        function = current.tb_frame.f_code.co_name
+        if re.fullmatch(r'[A-Za-z0-9_.-]{1,100}', name) and re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]{0,100}', function):
+            frames.append({'file': name, 'function': function, 'line': current.tb_lineno})
+        current = current.tb_next
+    result['stackLocations'] = frames[-12:]
+    if hasattr(error, 'child_diagnostics'):
+        result['childOutputDiagnostic'] = error.child_diagnostics
+        result['childExitCode'] = error.child_exit_code
+    return result
+
+
+def child_diagnostics(stdout, stderr):
+    """Whitelist error classes/codes from bounded child output; no raw logs."""
+    raw = (stdout[-32768:] if isinstance(stdout, str) else '') + '\n' + (stderr[-32768:] if isinstance(stderr, str) else '')
+    tokens = re.findall(r'\b[A-Z][A-Z0-9_]{1,100}\b', raw)
+    codes = sorted({token for token in tokens if SAFE_CODE.fullmatch(token)})[:16]
+    types = sorted(set(re.findall(r'\b(AssertionError|RuntimeError|TypeError|ValueError|PermissionError|FileNotFoundError|ModuleNotFoundError|ImportError|KeyError|TimeoutError|CalledProcessError)\b', raw)))
+    conditions = {'permission denied': 'PERMISSION_DENIED', 'no space left on device': 'NO_SPACE_LEFT',
+                  'no such file or directory': 'PATH_NOT_FOUND', 'read-only file system': 'READ_ONLY_FILESYSTEM',
+                  'cannot connect to the docker daemon': 'DOCKER_DAEMON_UNAVAILABLE'}
+    return {'errorCodes': codes, 'errorTypes': types,
+            'conditions': sorted(label for phrase, label in conditions.items() if phrase in raw.lower()),
+            'rawOutputPersisted': False}
 
 
 def sha(path):
@@ -47,11 +100,10 @@ def write_json(path, value):
 def command(arguments, *, timeout=900, check=True):
     result = subprocess.run(arguments, capture_output=True, text=True, timeout=timeout, check=False)
     if check and result.returncode:
-        # Docker/test commands do not receive credentials. Still keep arbitrary
-        # child output out of persisted reports; inspect the bounded CI console.
-        print(result.stdout[-24000:], end='')
-        print(result.stderr[-24000:], end='', file=sys.stderr)
-        raise RuntimeError('CPU_RECOVERY_COMMAND_FAILED')
+        error = RuntimeError('CPU_RECOVERY_COMMAND_FAILED')
+        error.child_diagnostics = child_diagnostics(result.stdout, result.stderr)
+        error.child_exit_code = result.returncode
+        raise error
     return result
 
 
@@ -86,10 +138,29 @@ class Counts(unittest.TextTestResult):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.passed_ids = []
+        self.safe_failures = []
 
     def addSuccess(self, test):
         self.passed_ids.append(test.id())
         super().addSuccess(test)
+
+    def record(self, test, error, category):
+        identity = test.id()
+        self.safe_failures.append({'testId': identity if re.fullmatch(r'[A-Za-z0-9_.]{1,240}', identity) else 'UNTRUSTED_TEST_ID',
+                                   'category': category, **safe_exception(error[1], error[2])})
+
+    def addFailure(self, test, err):
+        self.record(test, err, 'FAIL')
+        super().addFailure(test, err)
+
+    def addError(self, test, err):
+        self.record(test, err, 'ERROR')
+        super().addError(test, err)
+
+    def addSubTest(self, test, subtest, err):
+        if err is not None:
+            self.record(test, err, 'SUBTEST_FAIL')
+        super().addSubTest(test, subtest, err)
 
 
 def suite_result(patterns):
@@ -99,15 +170,16 @@ def suite_result(patterns):
         suite.addTests(unittest.defaultTestLoader.discover(str(HERE / 'tests'), pattern=pattern))
     output = io.StringIO()
     result = unittest.TextTestRunner(stream=output, verbosity=2, resultclass=Counts).run(suite)
-    print(output.getvalue(), end='')
     passed = len(result.passed_ids)
     summary = {'status': 'PASS' if result.wasSuccessful() and not result.skipped and passed > 0 else 'FAIL',
                'testsRun': result.testsRun, 'passed': passed, 'failed': len(result.failures),
                'errors': len(result.errors), 'skipped': len(result.skipped),
                'expectedFailures': len(result.expectedFailures), 'elapsedSeconds': round(time.monotonic() - start, 3),
-               'testIds': result.passed_ids, 'gpuExecuted': False}
+               'testIds': result.passed_ids, 'failureDiagnostics': result.safe_failures,
+               'rawTracebacksPersisted': False, 'gpuExecuted': False}
     if summary['status'] != 'PASS' or result.expectedFailures or result.unexpectedSuccesses:
         summary['status'] = 'FAIL'
+    print(json.dumps(summary, sort_keys=True))
     return summary
 
 
@@ -133,24 +205,34 @@ def container_tests(output):
     out.mkdir(mode=0o700, exist_ok=False)
     evidence = out / 'SYNTHETIC_80S.json'
     os.environ['CPU_RECOVERY_EVIDENCE_PATH'] = str(evidence)
-    before = verify_parent()
-    result = suite_result(('test_recover.py', 'test_policy.py'))
-    after = verify_parent()
-    if before != after:
-        raise RuntimeError('CPU_RECOVERY_PARENT_CHANGED')
-    if result['status'] != 'PASS' or result['testsRun'] != 39:
-        raise RuntimeError('CPU_RECOVERY_FOCUSED_CONTAINER_TESTS_REQUIRED')
-    proof = json.loads(evidence.read_text()) if evidence.is_file() and evidence.stat().st_size <= MAX_REPORT_BYTES else None
-    if (not isinstance(proof, dict) or proof.get('testOnly') is not True or proof.get('gpuExecuted') is not False
-            or proof.get('durationSeconds') != 80 or proof.get('frames') != 2400):
-        raise RuntimeError('CPU_RECOVERY_REAL_SYNTHETIC_80S_EVIDENCE_REQUIRED')
-    report = {'status': 'PASS', 'scope': 'SYNTHETIC_CPU_FIXTURES_IN_IMMUTABLE_IMAGE',
+    report = {'status': 'RUNNING', 'scope': 'SYNTHETIC_CPU_FIXTURES_IN_IMMUTABLE_IMAGE',
               'executedAtUTC': datetime.now(timezone.utc).isoformat(), 'uid': os.geteuid(), 'gid': os.getegid(),
-              'tests': result, 'synthetic80SecondProof': proof,
-              'protection': {'before': before, 'after': after, 'unchanged': True},
               'actualWorkloadCacheVerified': False, 'actualNvidiaRenderingVerified': False,
               'actualDropboxExternalDownloadVerified': False, 'gpuExecuted': False, 'paidOperations': 0}
-    write_json(output, report)
+    try:
+        before = verify_parent()
+        report['protection'] = {'before': before, 'after': None, 'unchanged': None}
+        try:
+            report['tests'] = suite_result(('test_recover.py', 'test_policy.py'))
+        finally:
+            # Test failures must not skip the protected-source postcheck.
+            after = verify_parent()
+            report['protection'].update(after=after, unchanged=before == after)
+        if before != after:
+            raise RuntimeError('CPU_RECOVERY_PARENT_CHANGED')
+        if report['tests']['status'] != 'PASS' or report['tests']['testsRun'] != 40:
+            raise RuntimeError('CPU_RECOVERY_FOCUSED_CONTAINER_TESTS_REQUIRED')
+        proof = json.loads(evidence.read_text()) if evidence.is_file() and evidence.stat().st_size <= MAX_REPORT_BYTES else None
+        if (not isinstance(proof, dict) or proof.get('testOnly') is not True or proof.get('gpuExecuted') is not False
+                or proof.get('durationSeconds') != 80 or proof.get('frames') != 2400):
+            raise RuntimeError('CPU_RECOVERY_REAL_SYNTHETIC_80S_EVIDENCE_REQUIRED')
+        report['synthetic80SecondProof'] = proof
+        report['status'] = 'PASS'
+    except Exception as error:
+        report.update(status='FAIL', failureDiagnostic=safe_exception(error))
+        raise
+    finally:
+        write_json(output, report)
 
 
 def test():
@@ -160,15 +242,20 @@ def test():
               'actualNvidiaRenderingVerified': False, 'actualWorkloadCacheVerified': False,
               'paidOperations': 0, 'imageBuilds': 0, 'imagePushes': 0}
     try:
+        report['stage'] = 'FREE_RUNNER_PREFLIGHT'
         report['preflight'] = guard()
+        report['stage'] = 'READ_ONLY_COLLECTOR_TESTS'
         report['readOnlyCollectorTests'] = suite_result(('test_remote.py',))
         if report['readOnlyCollectorTests']['status'] != 'PASS' or report['readOnlyCollectorTests']['testsRun'] != 10:
             raise RuntimeError('CPU_RECOVERY_FOCUSED_READONLY_TESTS_REQUIRED')
+        report['stage'] = 'IMMUTABLE_IMAGE_PULL'
         command(['docker', 'pull', '--platform=linux/amd64', IMAGE], timeout=600)
+        report['stage'] = 'IMMUTABLE_IMAGE_INSPECT'
         image = json.loads(command(['docker', 'image', 'inspect', IMAGE], timeout=30).stdout)[0]
         if IMAGE not in image.get('RepoDigests', []) or image.get('Architecture') != 'amd64' or image.get('Os') != 'linux':
             raise RuntimeError('CPU_RECOVERY_IMMUTABLE_LINUX_AMD64_REQUIRED')
         report['pulledImage'] = {'id': image['Id'], 'repoDigest': IMAGE, 'sizeBytes': image['Size'], 'platform': 'linux/amd64'}
+        report['stage'] = 'ISOLATED_SOURCE_STAGE'
         extension = root / 'extension'
         extension.mkdir(mode=0o700)
         for relative in PAYLOAD:
@@ -189,6 +276,7 @@ def test():
                 '--mount', 'type=bind,src=' + str(extension) + ',dst=' + TARGET,
                 '--workdir', TARGET, '--env=PYTHONDONTWRITEBYTECODE=1', '--entrypoint=/usr/bin/python3',
                 IMAGE, '-B', TARGET + '/validate.py', 'container-tests', '--output', TARGET + '/test-output/CPU_RESULT.json']
+        report['stage'] = 'ISOLATED_CONTAINER_TESTS'
         try:
             result = command(args, timeout=900, check=False)
         finally:
@@ -197,24 +285,31 @@ def test():
             # read private (0700/0600) fixture evidence without widening modes.
             command(['sudo', 'chown', '-R', str(os.getuid()) + ':' + str(os.getgid()), str(extension)], timeout=30)
         report['containerExitCode'] = result.returncode
-        print(result.stdout[-30000:], end='')
-        print(result.stderr[-30000:], end='', file=sys.stderr)
+        report['stage'] = 'CONTAINER_REPORT_COLLECTION'
+        report['containerOutputDiagnostic'] = child_diagnostics(result.stdout, result.stderr)
+        source = extension / 'test-output/CPU_RESULT.json'
+        if source.is_file() and source.stat().st_size <= MAX_REPORT_BYTES:
+            report['container'] = json.loads(source.read_text())
         if result.returncode:
             raise RuntimeError('CPU_RECOVERY_IMMUTABLE_CONTAINER_TESTS_FAILED')
-        source = extension / 'test-output/CPU_RESULT.json'
-        if not source.is_file() or source.stat().st_size > MAX_REPORT_BYTES:
+        if 'container' not in report:
             raise RuntimeError('CPU_RECOVERY_BOUNDED_CONTAINER_REPORT_REQUIRED')
-        report['container'] = json.loads(source.read_text())
         if report['container'].get('status') != 'PASS':
             raise RuntimeError('CPU_RECOVERY_CONTAINER_PASS_REQUIRED')
+        report['stage'] = 'TESTED_SOURCE_UNCHANGED_CHECK'
         for relative, digest in report['testedSourceFiles'].items():
             if sha(extension / relative) != digest or sha(HERE / relative) != digest:
                 raise RuntimeError('CPU_RECOVERY_TESTED_SOURCE_CHANGED')
         report['status'] = 'PASS'
+        report['stage'] = 'COMPLETED'
     except Exception as error:
         report['status'] = 'FAIL'
         code = str(error)
         report['errorCode'] = code if re.fullmatch(r'[A-Z][A-Z0-9_]{0,95}', code) else 'CPU_RECOVERY_VALIDATION_FAILED'
+        report['failureDiagnostic'] = safe_exception(error)
+        if hasattr(error, 'child_diagnostics'):
+            report['childOutputDiagnostic'] = error.child_diagnostics
+            report['childExitCode'] = error.child_exit_code
         raise
     finally:
         write_json(root / 'CPU_RESULT.json', report)
@@ -260,12 +355,23 @@ def secret_scan():
 def bundle():
     root = location()
     files = [root / 'CPU_RESULT.json', root / 'SECRET_SCAN.json']
+    if not files[0].is_file():
+        write_json(files[0], {'schema': 'WORLD_ENGINE_STUDIO_80S_CPU_RECOVERY_VALIDATION_V1',
+                             'status': 'BLOCKED', 'sourceCommit': os.environ['GITHUB_SHA'],
+                             'errorCode': 'CPU_RECOVERY_TEST_REPORT_NOT_CREATED',
+                             'actualNvidiaRenderingVerified': False, 'actualWorkloadCacheVerified': False,
+                             'paidOperations': 0, 'imageBuilds': 0, 'imagePushes': 0})
+    if not files[1].is_file():
+        attempted_failed = os.environ.get('RESULT_SCAN_OUTCOME') == 'failure'
+        write_json(files[1], {'status': 'FAIL' if attempted_failed else 'SKIP',
+                             'reason': 'CPU_RECOVERY_SECRET_SCAN_FAILED_OR_INCOMPLETE' if attempted_failed else 'CPU_RECOVERY_SECRET_SCAN_NOT_EXECUTED',
+                             'findings': None})
     for file in files:
         if not file.is_file() or file.stat().st_size > MAX_REPORT_BYTES:
             raise RuntimeError('CPU_RECOVERY_SAFE_REPORT_REQUIRED')
         value = json.loads(file.read_text())
-        if value.get('status') != 'PASS':
-            raise RuntimeError('CPU_RECOVERY_SUCCESS_REPORTS_REQUIRED')
+        if value.get('status') not in {'PASS', 'FAIL', 'SKIP', 'BLOCKED'}:
+            raise RuntimeError('CPU_RECOVERY_KNOWN_REPORT_STATUS_REQUIRED')
     (root / 'SHA256SUMS').write_text(''.join(sha(p) + '  ' + p.name + '\n' for p in files))
     if os.environ.get('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'], 'a') as stream:

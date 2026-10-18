@@ -401,7 +401,11 @@ def recover(parent_job_id, grant_path, request_id, control_root, export_root, *,
     seconds = min(seconds, grant['maxWallSeconds'] - (time.monotonic() - started))
     cache = loaded['cache']
     identity = 'cpu-recovery-' + _sha({'parentJobId': parent_job_id, 'grant': grant, 'requestId': request_id})[:32]
-    with cache.PrivateTree(Path(control_root).absolute()) as root:
+    # Share the unchanged Studio supervisor's START.lock. Its mobile start
+    # path cannot race a fresh GPU job between our observation and CPU work.
+    # No ACTIVE pointer, approval, or old claim is rewritten for this purpose.
+    with cache.PrivateTree(Path(control_root).absolute()) as root, root.lock('START.lock'):
+        _no_active_studio_process(root)
         with root.child('cpu-recoveries', create=True) as recoveries, recoveries.lock('CPU_RECOVERY.lock'):
             with recoveries.child(identity, create=True) as work, work.lock():
                 old = work.json('STATE.json', optional=True)

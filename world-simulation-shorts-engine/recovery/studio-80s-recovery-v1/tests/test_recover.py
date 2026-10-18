@@ -279,6 +279,12 @@ class RecoveryTests(unittest.TestCase):
                 json.dump(safe, output, indent=2, allow_nan=False)
                 output.write('\n')
 
+    def test_existing_studio_start_lock_blocks_cpu_recovery_without_launch(self):
+        with self.modules['cache'].PrivateTree(self.root) as root, root.lock('START.lock'):
+            with self.assertRaises(self.modules['cache'].CacheError):
+                recovery.recover(self.parent, self.grant_path, 'concurrent-studio-start', self.root, self.export, _test_only=True)
+        self.assertFalse((self.root / 'cpu-recoveries').exists())
+
 
 if __name__ == '__main__':
     unittest.main()

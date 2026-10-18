@@ -26,6 +26,7 @@ jobs:
     timeout-minutes: 30
     outputs:
       source: ${{ steps.source.outputs.sha }}
+      reports: ${{ steps.reports.outcome }}
     env:
       PYTHONDONTWRITEBYTECODE: '1'
       RESULT_RUNNER_LABEL: ubuntu-24.04
@@ -47,13 +48,20 @@ jobs:
         id: source
         run: printf 'sha=%s\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
       - name: Run real CPU FFmpeg recovery and policy tests without GPU or network
+        id: recovery
         run: python3 -B "$RECOVERY_ROOT/validate.py" test
       - name: Secret Scan only new source and workflows with pinned scanner
+        id: scan
+        if: always() && steps.recovery.outcome == 'success'
         run: python3 -B "$RECOVERY_ROOT/validate.py" secret-scan
-      - name: Hash bounded success reports
+      - name: Hash bounded PASS or failure diagnostics without changing test outcome
         id: reports
+        if: always() && steps.source.outcome == 'success'
+        env:
+          RESULT_SCAN_OUTCOME: ${{ steps.scan.outcome }}
         run: python3 -B "$RECOVERY_ROOT/validate.py" bundle
       - name: Transfer only safe reports to separate write-permission job
+        if: always() && steps.reports.outcome == 'success'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: studio-80s-cpu-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -66,7 +74,7 @@ jobs:
 
   persist:
     needs: test
-    if: needs.test.result == 'success'
+    if: always() && needs.test.outputs.source != '' && needs.test.outputs.reports == 'success'
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions:
@@ -83,7 +91,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /world-simulation-shorts-engine/recovery/studio-80s-recovery-v1/runs/**
-      - name: Retrieve closed CPU success evidence
+      - name: Retrieve closed CPU PASS or failure evidence
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: studio-80s-cpu-reports-${{ github.run_id }}-${{ github.run_attempt }}
@@ -101,11 +109,17 @@ jobs:
               raw = (source / name).read_text()
               assert len(raw.encode()) <= 1024 * 1024
               assert not re.search(r'-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|[?&](?:token|sig)=', raw)
-              assert json.loads(raw)['status'] == 'PASS'
+              assert json.loads(raw)['status'] in {'PASS', 'FAIL', 'SKIP', 'BLOCKED'}
           report = json.loads((source / 'CPU_RESULT.json').read_text())
           assert report['sourceCommit'] == os.environ['TESTED_SOURCE']
           assert report['actualNvidiaRenderingVerified'] is False and report['actualWorkloadCacheVerified'] is False
           assert report['paidOperations'] == report['imageBuilds'] == report['imagePushes'] == 0
+          scan = json.loads((source / 'SECRET_SCAN.json').read_text())
+          if report['status'] == 'PASS':
+              assert scan['status'] in {'PASS', 'FAIL'}
+          else:
+              assert report['status'] in {'FAIL', 'BLOCKED'}
+          # Evidence persistence never converts the upstream test job to PASS.
           target = pathlib.Path(os.environ['RECOVERY_ROOT']) / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
           assert not target.exists()
           target.parent.mkdir(parents=True, exist_ok=True)
