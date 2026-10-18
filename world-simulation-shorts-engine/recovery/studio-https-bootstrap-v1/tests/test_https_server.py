@@ -178,6 +178,8 @@ class ServerTests(unittest.TestCase):
         self.assertTrue(css.startswith((load_originals().root / 'web/style.css').read_bytes()))
         self.assertIn(b'WorldEngineStudioSetup', css)
         self.assertIn(b'/setup-font.woff2', css)
+        self.assertIn(b':root{font-family:WorldEngineStudioSetup,', css)
+        self.assertIn(b'font-family:"WorldEngineStudioSetup",system-ui', (HERE / 'web/setup.css').read_bytes())
         self.assertEqual(self.calls, [])
 
     def test_registered_setup_page_requires_existing_authentication(self):

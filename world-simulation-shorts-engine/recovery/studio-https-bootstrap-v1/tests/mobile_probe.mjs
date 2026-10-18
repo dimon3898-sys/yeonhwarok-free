@@ -29,7 +29,7 @@ async function waitKoreanFont(page) {
     await document.fonts.ready;
     return {faceCount: faces.length, allLoaded: faces.every(face => face.status === 'loaded'),
       available: document.fonts.check(font, sample),
-      bodyUsesFamily: getComputedStyle(document.body).fontFamily.includes('WorldEngineStudioSetup')};
+      bodyUsesFamily: [...document.querySelectorAll('body,h1,h2,label,button,p')].every(element => getComputedStyle(element).fontFamily.split(',')[0].trim().replace(/[\"']/g, '') === 'WorldEngineStudioSetup')};
   });
   assert.ok(loaded.faceCount > 0, 'KOREAN_UI_FONT_FACE_REQUIRED');
   assert.equal(loaded.allLoaded, true, 'KOREAN_UI_FONT_LOAD_REQUIRED');
