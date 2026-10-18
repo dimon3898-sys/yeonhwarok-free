@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="referrer" content="no-referrer">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; connect-src https://api.dropboxapi.com https://api.github.com; img-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <script src="callback-scrub.js"></script>
+  <title>WORLD ENGINE · Dropbox 연결</title>
+  <link rel="stylesheet" href="connect.css">
+  <script src="config.js" defer></script>
+  <script src="vendor/libsodium.js" defer></script>
+  <script src="vendor/libsodium-wrappers.js" defer></script>
+  <script src="connect-core.js" defer></script>
+  <script src="connect.js" defer></script>
+</head>
+<body>
+  <main>
+    <p class="brand">WORLD ENGINE</p>
+    <h1>Dropbox 백업 연결</h1>
+    <p class="intro">휴대폰에서 한 번 연결하면 토큰 갱신과 백업 인증을 자동으로 처리합니다.</p>
+    <ol class="steps" aria-label="연결 순서"><li id="step1" aria-current="step">Dropbox 승인</li><li id="step2">안전하게 저장</li><li id="step3">백업 검증</li></ol>
+    <section id="blocked" hidden>
+      <h2>연결 주소를 준비하고 있습니다</h2>
+      <p>안전한 HTTPS 주소와 GitHub 권한이 준비되면 이 화면에서 연결할 수 있습니다. PC나 터미널은 필요하지 않습니다.</p>
+      <p id="blockedReason" class="small"></p>
+    </section>
+    <section id="consent" hidden>
+      <h2>Dropbox 접근 승인</h2>
+      <p>이미 만든 App Folder 앱을 사용합니다. Refresh Token을 복사할 필요가 없습니다.</p>
+      <label for="appKey">Dropbox App key</label>
+      <input id="appKey" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="128" required>
+      <p class="hint">최초 한 번만: Dropbox App Console → 해당 앱 → Settings의 App key. 기존 백업에 사용한 같은 앱이어야 합니다.</p>
+      <button id="connectDropbox" type="button">Dropbox 연결</button>
+      <details><summary>처음 연결할 때만 확인</summary>
+        <p>Dropbox 앱의 Permissions에서 files.content.read, files.content.write, files.metadata.read를 선택하고 Submit을 누릅니다.</p>
+        <p>Settings → OAuth 2 → Redirect URIs에 아래 주소를 추가하고 Add를 누릅니다.</p>
+        <code id="redirectUri"></code><button id="copyRedirect" type="button" class="secondary">주소 복사</button>
+      </details>
+    </section>
+    <section id="saving" hidden>
+      <h2>GitHub에 안전하게 저장</h2>
+      <p>Dropbox 승인을 받았습니다. 발급된 토큰은 이 탭의 메모리에만 있으며 화면에 표시하지 않습니다.</p>
+      <p>현재 연결에는 Secret 저장 권한이 없어, 최초 한 번 GitHub의 정식 권한 승인이 필요합니다.</p>
+      <details id="githubHelp"><summary>휴대폰에서 GitHub 권한 준비</summary>
+        <p>GitHub → 프로필 → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token.</p>
+        <p>짧은 만료일을 선택하고 Repository access는 Only select repositories → yeonhwarok-free만 선택합니다.</p>
+        <p>Repository permissions: Secrets와 Actions를 각각 Read and write로 설정한 뒤 Generate token을 누릅니다. Contents 쓰기나 관리자 권한은 필요하지 않습니다.</p>
+        <p>생성한 값을 아래 비공개 입력칸에만 붙여넣습니다. 채팅이나 소스에 보내지 않습니다. 이 페이지는 그 값을 저장하지 않습니다.</p>
+      </details>
+      <a id="githubPermissionLink" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">GitHub 권한 화면 열기</a>
+      <label for="githubCredential">GitHub 일회 연결 권한</label>
+      <input id="githubCredential" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="256">
+      <button id="checkGithub" type="button" class="secondary">권한 확인</button>
+      <div id="appSecretArea" hidden>
+        <label for="appSecret">Dropbox App secret · 최초 설정만</label>
+        <input id="appSecret" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="256">
+        <p class="hint">기존 실행 코드와 연결하기 위한 앱 설정입니다. App Console → Settings → App secret의 Show에서 확인합니다. GitHub Secret으로 암호화 저장하며 Dropbox 로그인 요청에는 넣지 않습니다.</p>
+      </div>
+      <button id="saveConnection" type="button" disabled>연결 저장 · 무료 백업 검증</button>
+      <p class="hint">기존 암호화 키는 유지합니다. 백업이 이미 있는데 키가 없으면 안전하게 중단합니다. 유료 GPU는 시작하지 않습니다.</p>
+    </section>
+    <section id="verification" hidden>
+      <h2>연결 설정을 저장했습니다</h2>
+      <p>이제 무료 CPU 환경에서 실제 Dropbox 백업과 복구를 검사합니다.</p>
+      <p id="verificationState">검증 작업을 확인하고 있습니다.</p>
+      <a id="runLink" target="_blank" rel="noopener noreferrer" hidden>검증 기록 보기</a>
+      <button id="refreshStatus" type="button" class="secondary">검증 상태 새로 확인</button>
+      <p class="hint">GitHub 작업 완료와 실제 백업 성공은 구분합니다. PASS 기록을 확인하기 전에는 GPU 제작을 시작하지 않습니다.</p>
+    </section>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p id="error" role="alert" hidden></p>
+    <button id="restart" type="button" class="secondary" hidden>연결부터 다시 시작</button>
+    <p class="footer">PC · Docker · 터미널 없이 연결합니다. 이 페이지는 영상을 제작하거나 GPU를 배포하지 않습니다.</p>
+  </main>
+</body>
+</html>

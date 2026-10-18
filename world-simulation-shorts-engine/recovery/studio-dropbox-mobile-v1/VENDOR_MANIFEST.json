@@ -1,0 +1,85 @@
+{
+  "schema": "WORLD_ENGINE_BROWSER_VENDOR_V1",
+  "purpose": "Local browser libsodium sealed-box encryption for GitHub Actions repository Secrets API public keys. This is a mobile setup page dependency, not a renderer dependency.",
+  "retrievedDate": "2026-10-18",
+  "packages": [
+    {
+      "name": "libsodium",
+      "version": "0.7.15",
+      "license": "ISC",
+      "repository": "https://github.com/jedisct1/libsodium.js",
+      "metadataURL": "https://registry.npmjs.org/libsodium/0.7.15",
+      "tarballURL": "https://registry.npmjs.org/libsodium/-/libsodium-0.7.15.tgz",
+      "npmIntegrity": "sha512-sZwRknt/tUpE2AwzHq3jEyUU5uvIZHtSssktXq7owd++3CSgn8RGrv6UZJJBpP7+iBghBqe7Z06/2M31rI2NKw==",
+      "tarballSHA256": "227eab28710bca9f175513b677f4c9d33236f666a1477ca6f4e91d2e4618a59e",
+      "files": {
+        "web/vendor/libsodium.js": {
+          "sha256": "8abec6b42fafb418f58bff3fd665005b3e700ee02dae5042ce5704d27e6fcb23",
+          "sizeBytes": 638900
+        },
+        "web/vendor/libsodium.LICENSE": {
+          "sha256": "051795a65af6a45e1022e56b01123e399d28c4d2680681d3e207df2669da5d85",
+          "sizeBytes": 839
+        }
+      }
+    },
+    {
+      "name": "libsodium-wrappers",
+      "version": "0.7.15",
+      "license": "ISC",
+      "repository": "https://github.com/jedisct1/libsodium.js",
+      "metadataURL": "https://registry.npmjs.org/libsodium-wrappers/0.7.15",
+      "tarballURL": "https://registry.npmjs.org/libsodium-wrappers/-/libsodium-wrappers-0.7.15.tgz",
+      "npmIntegrity": "sha512-E4anqJQwcfiC6+Yrl01C1m8p99wEhLmJSs0VQqST66SbQXXBoaJY0pF4BNjRYa/sOQAxx6lXAaAFIlx+15tXJQ==",
+      "tarballSHA256": "ee8abd3d34c25e612e2a523625c260552b3365323dbf5e00cbb535ab6a401ca4",
+      "files": {
+        "web/vendor/libsodium-wrappers.js": {
+          "sha256": "828884732c06fa4443688b33ceb4ab42e6e1b99200e4749be375faa289e94158",
+          "sizeBytes": 101748
+        },
+        "web/vendor/libsodium-wrappers.LICENSE": {
+          "sha256": "051795a65af6a45e1022e56b01123e399d28c4d2680681d3e207df2669da5d85",
+          "sizeBytes": 839
+        }
+      }
+    }
+  ],
+  "buildRecipe": [
+    "Fetch each exact metadata URL over verified HTTPS using the configured proxy.",
+    "Require exact pinned npmIntegrity shown in this manifest.",
+    "Fetch the exact tarball URL and verify its SHA-512 npm integrity and SHA-256.",
+    "Read only regular package/dist/modules/<name>.js and package/LICENSE members; reject absolute paths, traversal and symlink extraction.",
+    "Copy those bytes unchanged to web/vendor/<name>.js and web/vendor/<name>.LICENSE. No npm install, lifecycle scripts, transpilation, minification or other execution occurs."
+  ],
+  "runtime": [
+    "Serve both JS files locally from the same origin. Never load crypto code from a runtime CDN.",
+    "Load libsodium.js before libsodium-wrappers.js using classic scripts; wait for window.sodium.ready.",
+    "Use sodium.crypto_box_seal(UTF-8 Secret bytes, sodium.from_base64(public_key, sodium.base64_variants.ORIGINAL)); base64 encode result with ORIGINAL variant for GitHub encrypted_value.",
+    "A restrictive Content-Security-Policy needs script-src self plus wasm-unsafe-eval for the embedded WebAssembly module; unsafe-eval is not required.",
+    "Zero plaintext byte arrays with sodium.memzero when no longer needed; never log the plaintext or encrypted request body."
+  ],
+  "verification": {
+    "status": "PASS",
+    "browser": "154.0.8037.57",
+    "viewport": "412x915 mobile",
+    "sodiumVersion": "1.0.20",
+    "localClassicScripts": true,
+    "csp": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'none'; style-src 'none'; img-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'",
+    "browserSealToNativeOpen": "PASS",
+    "tamperedCiphertextRejected": "PASS",
+    "plaintextByteArrayZeroed": "PASS",
+    "ciphertextOverheadBytes": 48,
+    "realGitHubSecretWritten": false,
+    "realDropboxUsed": false,
+    "gpuExecuted": false,
+    "script": "tests/vendor_probe.mjs",
+    "scriptSHA256": "60c53d6c35f3284c7b063ee593acc2c11813cb43fee9e922fd3b542df34fd521",
+    "command": "node tests/vendor_probe.mjs",
+    "requirements": [
+      "Node.js with the existing Playwright module resolvable by require()",
+      "Existing Chromium (CHROMIUM_EXECUTABLE optional; /usr/bin/chromium otherwise Playwright default)",
+      "Python 3 (PYTHON_EXECUTABLE optional)",
+      "Native libsodium discoverable by ctypes.util.find_library(sodium)"
+    ]
+  }
+}
