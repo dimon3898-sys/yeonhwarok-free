@@ -59,6 +59,9 @@ GitHub source, Docker build arguments or reports. The same recovery key is
 needed on a replacement container. A replacement token may be used with the
 same key and account/folder. A lost key cannot be reconstructed from Dropbox.
 Dropbox token lifetime must cover the job; expiry stops progression safely.
+The backup app requires file-content read/write and file-metadata read access
+for upload, download and receipt discovery. Keep its folder scope limited to
+the approved backup namespace. A gCube token is not a Dropbox credential.
 
 Do not set `WORLD_ENGINE_STUDIO_STATE_ROOT=/world-storage`. Leave the existing
 private default in place. `WORLD_ENGINE_STORAGE_MODE` and
@@ -123,6 +126,11 @@ probe/restart grace has **not** been confirmed here; do not assume Docker
 metadata changes that platform policy. If its grace is shorter, resolve that
 platform setting before attempting a long cold restore. The ordinary path with
 no explicit restore ID does not perform a cold restore.
+
+If a cold restore itself is interrupted before its final verified receipt is
+written, the partial root is preserved and refused on the next start. Choose a
+different fresh private root for an explicit retry; do not delete the old root
+or treat an incomplete restore as a usable cache.
 
 After the two approved backup Repository Secrets have been connected, the
 existing successful CI run's `verify-pull` job can be rerun by itself to obtain
