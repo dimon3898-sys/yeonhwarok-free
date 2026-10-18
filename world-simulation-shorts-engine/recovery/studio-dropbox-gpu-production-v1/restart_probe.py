@@ -54,6 +54,50 @@ def readonly_transport(store):
     return counters
 
 
+def empty_lock_metadata(tree, name, expected):
+    """Inventory only the frozen cache's empty private LOCK bookkeeping file.
+
+    The frozen artifact hasher correctly rejects empty media. Do not weaken it
+    or accept other empty files: a LOCK has no media bytes, but its identity and
+    private ownership must still be stable throughout this read-only check.
+    """
+    if name != 'LOCK' or expected.st_size != 0:
+        fail('PRODUCTION_RESTART_EMPTY_LOCK_METADATA_REQUIRED')
+    descriptor = None
+
+    def identity(info):
+        return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
+                info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+    def require_private(info):
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
+                or info.st_gid != os.getegid() or stat.S_IMODE(info.st_mode) != 0o600
+                or info.st_nlink != 1 or info.st_size != 0):
+            fail('PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED')
+
+    try:
+        descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=tree.fd)
+        before = os.fstat(descriptor)
+        require_private(expected)
+        require_private(before)
+        if identity(before) != identity(expected):
+            fail('PRODUCTION_RESTART_EMPTY_LOCK_CHANGED')
+        if os.read(descriptor, 1) != b'':
+            fail('PRODUCTION_RESTART_EMPTY_LOCK_CHANGED')
+        after = os.fstat(descriptor)
+        current = os.stat(name, dir_fd=tree.fd, follow_symlinks=False)
+        require_private(after)
+        require_private(current)
+        if identity(before) != identity(after) or identity(current) != identity(after):
+            fail('PRODUCTION_RESTART_EMPTY_LOCK_CHANGED')
+        return {'file': name, 'sha256': hashlib.sha256(b'').hexdigest(), 'bytes': 0}
+    except OSError:
+        fail('PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED')
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
 def inventory(cachemod, root):
     """Hash all retained bytes/metadata without following links or writing."""
     rows = []
@@ -69,7 +113,8 @@ def inventory(cachemod, root):
                 with tree.child(name) as child:
                     walk(child, relative + '/')
             elif stat.S_ISREG(info.st_mode):
-                facts = tree.hash_file(name)
+                facts = (empty_lock_metadata(tree, name, info)
+                         if name == 'LOCK' and info.st_size == 0 else tree.hash_file(name))
                 rows.append({**metadata, 'kind': 'file', 'sha256': facts['sha256'],
                              'bytes': facts['bytes']})
             else:

@@ -1,9 +1,12 @@
 """Safety-contract tests only; actual Dropbox/container proof is separate CI."""
 from contextlib import redirect_stdout
+import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
+import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
@@ -121,6 +124,84 @@ class ReadOnlyProbeTests(unittest.TestCase):
              patch.object(probe, 'approved_snapshot', return_value=self.snapshot()):
             with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_DISTINCT_CONTAINER_REQUIRED'):
                 probe.operation('verify', old)
+
+
+class FilesystemInventoryTests(unittest.TestCase):
+    """Real files/openat I/O; the full frozen PrivateTree runs in container CI."""
+    class Tree:
+        def __init__(self, root):
+            self.root = Path(root)
+            self.fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            os.close(self.fd)
+        def child(self, name):
+            return self.__class__(self.root / name)
+        def hash_file(self, name):
+            raw = (self.root / name).read_bytes()
+            if not raw:
+                raise RuntimeError('EMPTY_ARTIFACT')
+            return {'file': name, 'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()}
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix='restart-inventory-test-')
+        self.root = Path(self.temporary.name)
+        self.root.chmod(0o700)
+        self.cache = SimpleNamespace(PrivateTree=self.Tree)
+        self.lock = self.root / 'LOCK'
+        self.lock.touch(mode=0o600)
+        self.data = self.root / 'segment.mp4'
+        self.data.write_bytes(b'NONEMPTY_SYNTHETIC_BYTES_NOT_MEDIA_VERIFICATION')
+        self.data.chmod(0o600)
+
+    def tearDown(self):
+        self.temporary.cleanup()
+
+    def test_real_zero_byte_lock_and_nonempty_artifact_have_stable_unchanged_inventory(self):
+        before = {name: (self.root / name).read_bytes() for name in ('LOCK', 'segment.mp4')}
+        first = probe.inventory(self.cache, self.root)
+        self.assertRegex(first, r'^[a-f0-9]{64}$')
+        self.assertEqual(first, probe.inventory(self.cache, self.root))
+        self.assertEqual(before, {name: (self.root / name).read_bytes() for name in before})
+        self.assertEqual(self.lock.stat().st_size, 0)
+
+    def test_zero_byte_media_still_uses_frozen_artifact_rejection(self):
+        self.data.write_bytes(b'')
+        with self.assertRaisesRegex(RuntimeError, 'EMPTY_ARTIFACT'):
+            probe.inventory(self.cache, self.root)
+
+    def test_lock_symlink_and_extra_hardlink_are_not_private_metadata(self):
+        self.lock.unlink()
+        self.lock.symlink_to(self.data)
+        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_UNSAFE_RETAINED_PATH'):
+            probe.inventory(self.cache, self.root)
+        self.lock.unlink()
+        self.lock.touch(mode=0o600)
+        os.link(self.lock, self.root / 'other-lock')
+        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+            probe.inventory(self.cache, self.root)
+
+    def test_foreign_owner_and_group_or_nonprivate_permissions_are_rejected(self):
+        with patch.object(probe.os, 'geteuid', return_value=os.geteuid() + 1):
+            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+                probe.inventory(self.cache, self.root)
+        with patch.object(probe.os, 'getegid', return_value=os.getegid() + 1):
+            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+                probe.inventory(self.cache, self.root)
+        self.lock.chmod(0o640)
+        with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_PRIVATE_EMPTY_LOCK_REQUIRED'):
+            probe.inventory(self.cache, self.root)
+
+    def test_mutation_during_zero_byte_lock_read_is_rejected(self):
+        original_read = os.read
+        def mutate(descriptor, size):
+            result = original_read(descriptor, size)
+            self.lock.write_bytes(b'changed-during-read')
+            return result
+        with patch.object(probe.os, 'read', side_effect=mutate):
+            with self.assertRaisesRegex(RuntimeError, 'PRODUCTION_RESTART_(PRIVATE_EMPTY_LOCK_REQUIRED|EMPTY_LOCK_CHANGED)'):
+                probe.inventory(self.cache, self.root)
 
 
 if __name__ == '__main__':
