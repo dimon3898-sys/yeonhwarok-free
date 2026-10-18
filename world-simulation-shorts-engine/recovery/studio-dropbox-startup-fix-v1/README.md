@@ -29,7 +29,7 @@
 - 새 workflow: `.github/workflows/studio-dropbox-startup-fix-v1.yml`.
 - 새 파일과 workflow만 변경을 허용한다. 기존 FINAL·Candidate·렌더러·기존 백업 파일·키는 변경하지 않는다.
 - 고정 기존 이미지 하나만 pull하고 원본 payload·protected parent manifest를 확인한다. 같은 이미지의 이미 완료된 parent/dependency 감사와 전체 테스트는 반복하지 않는다.
-- 집중 stdlib 검사 11개, 기본 규칙 그대로인 SHA 고정 gitleaks 검사, 자격증명 없는 CPU 시작 재현을 사용한다.
+- 집중 stdlib 검사 23개, 기본 규칙 그대로인 SHA 고정 gitleaks 검사, 자격증명 없는 CPU 시작 재현을 사용한다.
 - `workflow_dispatch`에서만 기존 Repository Secrets 네 개를 일시적인 UID 1000 / 0600 파일로 마운트한다. 이 실행의 새 임시 파일만 제거한다.
 - 기존 Dropbox 객체에는 overwrite/delete를 하지 않는다. 기존 백업 구현의 고유 합성 검증 객체·receipt만 추가한다.
 - 공개 결과는 `runs/<runId>-<attempt>/proof.json`과 SHA256SUMS뿐이다. 원문 로그·Secret·provider body는 기록하지 않는다.

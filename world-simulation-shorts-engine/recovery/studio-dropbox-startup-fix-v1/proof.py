@@ -2,7 +2,7 @@
 """Additive, free CPU proof using the existing immutable image and Secrets.
 
 No backup engine, OAuth, encryption, renderer, image or approved source changes.
-Only the frozen proof container's fixed working directory is corrected.
+The frozen proof container's working directory and key text encoding are adapted.
 """
 from __future__ import annotations
 
@@ -52,7 +52,8 @@ def sources():
     manifest = json.loads((HERE / 'SOURCE_FILES.json').read_bytes())
     if manifest.get('protectedBase') != BASE or manifest.get('schema') != 'WORLD_ENGINE_DROPBOX_STARTUP_FIX_SOURCES_V1':
         raise RuntimeError('STARTUP_SOURCE_MANIFEST_REQUIRED')
-    for name, digest in manifest['files'].items():
+    for entry in manifest['files']:
+        name, digest = entry['path'], entry['sha256']
         path = HERE / name
         if (Path(name).is_absolute() or '..' in Path(name).parts or path.is_symlink()
                 or not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != digest):
