@@ -114,7 +114,15 @@ class Application:
             fail('STUDIO_CONFIGURATION_INVALID')
         self.configuration_error = configuration_error
         self.core = SetupCore(self.state_root, Path(owner_file), port=port)
-        self.core.configure_from_environment(initial_origin)
+        try:
+            self.core.configure_from_environment(initial_origin)
+        except security.SecurityError as error:
+            if getattr(error, 'code', None) != 'STUDIO_CONFIGURED_ORIGIN_CONFLICT' or not self.core.public_origin:
+                raise
+            # Preserve both settings. A confirmed private origin remains the
+            # fixed request authority; mismatched environment blocks production
+            # without restarting the web service or trusting a request header.
+            self.configuration_error = 'STUDIO_CONFIGURED_ORIGIN_CONFLICT'
         self.normal = None
         self.controller = GateController(self, controller_factory or production_controller,
                                          gpu_check or physical_gpu_check)
@@ -158,18 +166,33 @@ class Application:
                 if effective != app.normal.config.public_origin:
                     fail('STUDIO_ORIGIN_MISMATCH', 403)
 
+            def _body(self, maximum=original.MAX_BODY):
+                cached = getattr(self, '_parsed_body', None)
+                if cached is not None:
+                    if cached[0] > maximum:
+                        fail('REQUEST_BODY_TOO_LARGE', 413)
+                    return cached[1]
+                size = security.content_length(self.headers, maximum)
+                value = super()._body(maximum)
+                self._parsed_body = (size, value)
+                return value
+
             def _dispatch(self):
-                # This lock serializes registration/revocation with ALL frozen
-                # production requests, so no old-origin start can race a change.
+                target = urlsplit(self.path)
+                if len(self.path) > 2048 or target.scheme or target.netloc or target.query or target.fragment:
+                    fail('INVALID_TARGET', 400)
+                path = unquote(target.path)
+                # A slow unauthenticated body must not hold the configuration
+                # lock or prevent health probes from observing a live service.
+                if path == '/healthz' and self.command == 'GET':
+                    return self._send(200, {'service': 'WORLD_ENGINE_STUDIO_HTTPS_BOOTSTRAP',
+                        'serviceAlive': True, 'mode': 'CONFIGURED' if app.normal else 'SETUP',
+                        'renderAllowed': False, 'gpuRenderingVerified': False})
+                if self.command == 'POST':
+                    self._body(4096 if path.startswith('/api/setup/') else original.MAX_BODY)
+                # Registration and production requests still serialize after
+                # bounded input has arrived; no old-origin Start can race a change.
                 with app.core.lock:
-                    target = urlsplit(self.path)
-                    if len(self.path) > 2048 or target.scheme or target.netloc or target.query or target.fragment:
-                        fail('INVALID_TARGET', 400)
-                    path = unquote(target.path)
-                    if path == '/healthz' and self.command == 'GET':
-                        return self._send(200, {'service': 'WORLD_ENGINE_STUDIO_HTTPS_BOOTSTRAP',
-                            'serviceAlive': True, 'mode': 'CONFIGURED' if app.normal else 'SETUP',
-                            'renderAllowed': False, 'gpuRenderingVerified': False})
                     setup_path = path in {'/setup', '/setup.js', '/setup.css', '/setup/challenge',
                                           '/api/setup/login', '/api/setup/origin'}
                     if app.normal is not None and setup_path:

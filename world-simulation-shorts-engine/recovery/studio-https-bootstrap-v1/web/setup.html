@@ -17,9 +17,9 @@
     <p>gCube에서 발급한 <strong>포트 8080의 HTTPS 주소</strong>를 등록합니다. 설정 중에는 영상 제작이 시작되지 않습니다.</p>
     <p class="hint">기존 관리자 접근 코드를 사용합니다. GPU 토큰이나 Dropbox 비밀번호를 입력하지 마세요.</p>
     <noscript><p role="alert">보안 설정을 진행하려면 브라우저에서 JavaScript를 허용해 주세요.</p></noscript>
-    <form id="setup-login-form">
+    <form id="setup-login-form" method="post" action="/api/setup/login">
       <label for="setup-origin">발급된 HTTPS 주소</label>
-      <input id="setup-origin" name="origin" type="url" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="2048" required aria-describedby="origin-note">
+      <input id="setup-origin" name="origin" type="url" inputmode="url" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="512" required aria-describedby="origin-note">
       <p id="origin-note" class="hint">처음에는 현재 주소창과 같은 주소를 입력하세요. 주소 변경은 기존 Studio에 로그인한 뒤 실제 새 주소를 입력합니다. 경로·쿼리·끝의 /는 포함하지 않습니다.</p>
       <label for="setup-owner-code">관리자 접근 코드</label>
       <input id="setup-owner-code" name="password" type="password" autocomplete="current-password" minlength="16" maxlength="256" required>

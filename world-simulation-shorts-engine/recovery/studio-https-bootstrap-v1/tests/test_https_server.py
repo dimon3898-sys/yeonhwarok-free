@@ -143,6 +143,28 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.calls, ['construct', 'start'])
         # This is an injected CPU spy, never evidence of actual NVIDIA admission.
 
+    def test_origin_environment_conflict_preserves_private_origin_and_blocks_production(self):
+        self.register()
+        restarted = Application(self.root, self.owner, Path(self.tmp.name) / 'exports',
+            'sha256:' + 'a' * 64, controller_factory=self.factory, gpu_check=lambda: False,
+            initial_origin='https://stale-test.invalid')
+        self.assertEqual(restarted.core.public_origin, ORIGIN)
+        self.assertEqual(restarted.normal.config.public_origin, ORIGIN)
+        self.assertEqual(restarted.configuration_error, 'STUDIO_CONFIGURED_ORIGIN_CONFLICT')
+        with self.assertRaises(security.SecurityError) as caught:
+            restarted.controller.start('test', 'test-only-key-123456', consent=True)
+        self.assertEqual(caught.exception.code, 'STUDIO_CONFIGURED_ORIGIN_CONFLICT')
+        self.assertEqual(self.calls, [])
+
+    def test_unchanged_original_plan_image_binding_mismatch_is_rejected(self):
+        from unittest.mock import patch
+        import studio_runtime
+        # Isolate the unchanged binding check, not source/GPU admission.
+        with patch.object(studio_runtime, '_base'), patch.object(studio_runtime, '_validate_child'):
+            with self.assertRaisesRegex(RuntimeError, 'STUDIO_PLAN_IMAGE_BINDING_MISMATCH'):
+                studio_runtime.validate_render_plan({'renderProfile': {'imageDigest': 'sha256:' + 'b' * 64}},
+                    'TEST_ONLY', 'sha256:' + 'a' * 64)
+
     def test_registered_setup_page_requires_existing_authentication(self):
         self.register()
         self.assertEqual(self.request('/setup')[0], 401)
