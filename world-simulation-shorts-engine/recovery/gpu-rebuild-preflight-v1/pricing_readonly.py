@@ -77,7 +77,8 @@ def collect():
     try:
         opener = urllib.request.build_opener(NoRedirect())
         request = urllib.request.Request(ENDPOINT, method='GET', headers={
-            'Authorization': 'Bearer ' + token, 'Accept': 'application/json'})
+            'Authorization': 'Bearer ' + token, 'Accept': 'application/json',
+            'Content-Type': 'application/json'})
         with opener.open(request, timeout=35) as response:
             out['httpStatus'] = response.status
             body = response.read(4 * 1024**2 + 1)
