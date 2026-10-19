@@ -7,6 +7,7 @@ import path from 'node:path';
 import {suppliedFrontObservations} from '../source_observations.mjs';
 import {extendCompletionServerPlan,COMPLETION_BROWSER_BINDINGS} from '../runtime_binding.mjs';
 import {resolveCapture} from '../long_capture.mjs';
+import {selectCompletionParentInputs} from '../capture_runtime.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),parent=path.join(root,'../universal-integration-v1'),
  hash=v=>createHash('sha256').update(v).digest('hex'),
  read=name=>JSON.parse(readFileSync(path.join(root,'../verified-front-data-v4-recovery',name))),
@@ -52,4 +53,12 @@ test('Node encoder import substitution is restricted to exact preserved entry',(
  const source=readFileSync(path.join(root,'long_capture.mjs'),'utf8');
  assert.ok(source.includes("process.version,'v24.19.0'"));
  assert.ok(source.includes("specifier==='./long_runtime.mjs'"));
+});
+test('real frozen loader document property reaches the completion source evaluator',()=>{
+ const raw=readFileSync(path.join(root,'../universal-auto-video-v2/long_runtime.mjs'),'utf8');
+ assert.ok(raw.includes('document,scene')); // preserved owner exports document, not plan
+ const inherited={document:plan,frontProfile:front},selected=selectCompletionParentInputs(inherited);
+ assert.equal(selected.plan,plan);assert.equal(selected.frontProfile,front);
+ assert.equal(suppliedFrontObservations(selected.plan,selected.frontProfile).length,2400);
+ assert.throws(()=>selectCompletionParentInputs({plan,frontProfile:front}),/ACTUAL_PARENT_DOCUMENT/);
 });

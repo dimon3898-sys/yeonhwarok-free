@@ -8,6 +8,11 @@ import {extendCompletionServerPlan} from './runtime_binding.mjs';
 export const {sha,engine,repo}=native;
 export const root=path.dirname(fileURLToPath(import.meta.url));
 const seals=new WeakMap();
+export function selectCompletionParentInputs(inherited){
+ assert.ok(inherited?.document&&Number.isSafeInteger(inherited.document.totalFrames)&&inherited.frontProfile,
+  'COMPLETION_ACTUAL_PARENT_DOCUMENT_REQUIRED');
+ return{plan:inherited.document,frontProfile:inherited.frontProfile};
+}
 async function sources(directory,name,expected){
  const raw=await native.boundedSource(path.join(directory,name));
  assert.equal(sha(raw),expected,'COMPLETION_SOURCE_MANIFEST_CHANGED');
@@ -31,7 +36,7 @@ export async function loadLongRuntimePlan(options={}){
   completion:request.completionV2,previousRecords:previous.records,previousManifestSha256:request.previousManifestSHA256,
   records:own.records,manifestSha256:request.sourceManifestSHA256,
   sourceCatalog:JSON.parse(await native.boundedSource(path.join(root,'SOURCE_DATA_CATALOG.json'))),
-  plan:inherited.plan,frontProfile:inherited.frontProfile});
+  ...selectCompletionParentInputs(inherited)});
  const old=inherited.assertSourceUnchanged;
  plan.assertSourceUnchanged=async()=>{await old();await sources(root,'COMPLETION_FILES.json',request.sourceManifestSHA256);
   await sources(path.join(root,'../universal-integration-v1'),'INTEGRATION_FILES.json',request.previousManifestSHA256);return true;};

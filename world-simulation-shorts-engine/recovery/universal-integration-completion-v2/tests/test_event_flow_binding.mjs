@@ -17,7 +17,7 @@ function compiled(request=fixture.request,sources=fixture.trustedSources){return
 function context(){return{project:([lon,lat])=>[200+(lon+61)*100,500+(-lat-28)*150],safeArea:[48,72,1032,1848],
  cameraState:{scale:'REGIONAL',projection:'EXISTING_NATIVE_TEST_PROJECTION',cameraLocked:true,settle:{locked:true},
   camera:{flatBounds:[-61,-33,-55,-27]},admission:{status:'LOCAL_NOT_ADMITTED',effectiveScale:'REGIONAL',localUsed:false}},
- scalePlan:{scale:{name:'REGIONAL'}},nativeBoundarySourceVerified:true,boundarySegments:[],protectedGraphics:[{kind:'MARKER',box:[390,640,410,660]},
+ scalePlan:{scale:{name:'REGIONAL'}},nativeBoundarySourceVerified:true,boundarySegments:[],parentGeographicFrontPresent:false,protectedGraphics:[{kind:'MARKER',box:[390,640,410,660]},
   {kind:'TEXT',box:[800,100,950,150]}]};}
 function instrument(){const calls=[],owned=[];const create=kind=>options=>{const pass={draw(value){calls.push({kind,value:JSON.parse(JSON.stringify(value,(_key,item)=>typeof item==='function'?'CPU_NATIVE_PROJECTION_FUNCTION':item))});return{drawn:true,cpuSpy:true};},dispose(){owned.push(kind);}};return pass;};
  return{calls,owned,consumers:{line:create('line'),flow:create('flow'),area:create('area'),metric:({intent})=>({
@@ -143,6 +143,12 @@ test('additional Area draw rejects missing or unverified native boundary masks',
  const instrumentation=instrument(),pass=await createCompletionEventFlowPass({binding:compiled(),theme,consumers:instrumentation.consumers,testOnlyCPU:true});
  for(const changes of [{nativeBoundarySourceVerified:false},{boundarySegments:null}])
   assert.throws(()=>pass.drawFrame(90,{...context(),...changes}),/AREA_NATIVE_BOUNDARY_SUPPORT_REQUIRED/);
+ assert.equal(instrumentation.calls.length,0);pass.dispose();
+});
+test('additional Area cannot cover an existing parent geographic front or assume unknown layering is safe',async()=>{
+ const instrumentation=instrument(),pass=await createCompletionEventFlowPass({binding:compiled(),theme,consumers:instrumentation.consumers,testOnlyCPU:true});
+ for(const value of [true,undefined,null,'false'])assert.throws(()=>pass.drawFrame(90,{...context(),parentGeographicFrontPresent:value}),
+  /AREA_PARENT_FRONT_LAYER_BINDING_REQUIRED/);
  assert.equal(instrumentation.calls.length,0);pass.dispose();
 });
 test('empty current historical selection allocates no GPU owner and infers no events',async()=>{

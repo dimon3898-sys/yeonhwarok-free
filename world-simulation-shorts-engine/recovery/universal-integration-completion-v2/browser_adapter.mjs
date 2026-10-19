@@ -28,7 +28,8 @@ export async function bootLongRuntime(options={}){
   if(hasData&&!Array.isArray(native?.boundarySegments))throw Error('COMPLETION_NATIVE_BOUNDARY_CONTEXT_REQUIRED');
   const result=extra?.drawFrame(frame,{project:pipeline.project,cameraState:native?.native??diagnostic.camera,
     scalePlan:regional,heightSource:input.heightSource??null,safeArea:regional.layout.safe,protectedGraphics:reservations,
-    boundarySegments:native.boundarySegments,nativeBoundarySourceVerified:native.frame===frame&&Array.isArray(native.boundarySegments)})??{frame,events:[],flows:[],areas:[],
+    boundarySegments:native.boundarySegments,nativeBoundarySourceVerified:native.frame===frame&&Array.isArray(native.boundarySegments),
+    parentGeographicFrontPresent:(diagnostic.area?.controls?.fronts?.length??0)>0})??{frame,events:[],flows:[],areas:[],
      reason:'NO_SOURCE_BOUND_ADDITIONAL_EVENTS_REQUESTED',gpuOutputVerified:false};
   const gl=canvas.getContext('webgl2');gl.finish();const error=gl.getError();if(error)throw Error('COMPLETION_COMPOSITION_GL_ERROR_'+error);
   return{...diagnostic,completionV2:{profile:completion.profile,profileSHA256:integrity.profileSHA256,

@@ -118,7 +118,11 @@ def source_code():
 
 
 def image_hashes(image,context=None):
- result=ci.run(container(image,context=context)+['-c',source_code()],timeout=180)
+ result=ci.run(container(image,context=context)+['-c',source_code()],timeout=180,check=False)
+ if result.returncode:
+  value=ci.state();value['sourceContainerFailure']={'exitCode':result.returncode,
+   'stdout':ci.bounded(result.stdout),'stderr':ci.bounded(result.stderr),'gpuExecuted':False};ci.save(value)
+  raise RuntimeError('COMPLETION_CONTAINER_SOURCE_VERIFICATION_FAILED')
  try:report=json.loads(result.stdout.strip().splitlines()[-1])
  except (ValueError,IndexError):raise RuntimeError('COMPLETION_CONTAINER_SOURCE_REPORT_REQUIRED') from None
  expected=ci.sha((context/'completion' if context else HERE)/'COMPLETION_FILES.json')
@@ -149,7 +153,12 @@ ci.inspect_image=inspect_image
 
 
 def test():
- ci.require_free_runner();ci.run(['docker','pull',ci.BASE],timeout=900)
+ ci.require_free_runner()
+ pulled=ci.run(['docker','pull',ci.BASE],timeout=900,check=False)
+ if pulled.returncode:
+  value=ci.state();value['baseImagePullFailure']={'exitCode':pulled.returncode,
+   'stdout':ci.bounded(pulled.stdout),'stderr':ci.bounded(pulled.stderr),'gpuExecuted':False};ci.save(value)
+  raise RuntimeError('COMPLETION_BASE_IMAGE_PULL_FAILED')
  context=payload_context();value=ci.state();value['testContext']=str(context);ci.save(value)
  report=image_hashes(ci.BASE,context)
  # Exercise the actual inherited startup boundary. No owner code is created,

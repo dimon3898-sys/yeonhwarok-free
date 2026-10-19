@@ -214,6 +214,8 @@ export async function createCompletionEventFlowPass({canvas,binding,theme,consum
     owner?.resetState();
     if(selected.areas.length&&(context.nativeBoundarySourceVerified!==true||!Array.isArray(context.boundarySegments)))
      fail('COMPLETION_AREA_NATIVE_BOUNDARY_SUPPORT_REQUIRED');
+    if(selected.areas.length&&(typeof context.parentGeographicFrontPresent!=='boolean'||context.parentGeographicFrontPresent))
+     fail('COMPLETION_AREA_PARENT_FRONT_LAYER_BINDING_REQUIRED');
     const reservations=copy(selected.protectedGraphics),placements=new Map();
     // Reserve complete metric slots before any geographic pass; typography is
     // drawn last. Multiple labels use the original layout rejection policy.

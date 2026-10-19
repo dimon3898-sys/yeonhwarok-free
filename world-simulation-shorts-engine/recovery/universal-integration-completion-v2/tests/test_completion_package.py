@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -93,6 +94,15 @@ class PackageTests(unittest.TestCase):
  def test_failed_pull_cannot_issue_proof(self):
   with patch.object(package.ci,'pull'),patch.object(package.ci,'state',return_value={'pullVerified':False}):
    with self.assertRaisesRegex(RuntimeError,'INDEPENDENT_PULL_PROOF_REQUIRED'):package.pull()
+ def test_container_source_failure_keeps_bounded_first_error(self):
+  saved=[]
+  failed=SimpleNamespace(returncode=7,stdout='source probe failed',stderr='confirmed CPU first error')
+  with patch.object(package.ci,'run',return_value=failed),patch.object(package.ci,'state',return_value={}),\
+   patch.object(package.ci,'save',side_effect=saved.append):
+   with self.assertRaisesRegex(RuntimeError,'CONTAINER_SOURCE_VERIFICATION_FAILED'):package.image_hashes('immutable-fixture')
+  self.assertEqual(saved[-1]['sourceContainerFailure']['exitCode'],7)
+  self.assertIn('confirmed CPU first error',saved[-1]['sourceContainerFailure']['stderr'])
+  self.assertFalse(saved[-1]['sourceContainerFailure']['gpuExecuted'])
 
 
 if __name__=='__main__':unittest.main()
