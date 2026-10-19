@@ -1,0 +1,706 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:world-engine:studio-prompt:v2:overnight-preview-v3",
+  "title": "WORLD ENGINE overnight preview-only Studio profile V3",
+  "description": "Explicit source-bound 150-frame preview over the preserved80s plan; no fact/source/cost/hardware admission is implied.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "preset",
+    "durationSeconds",
+    "completion",
+    "overnight"
+  ],
+  "properties": {
+    "schema": {
+      "const": "WORLD_ENGINE_STUDIO_PROMPT_V2"
+    },
+    "preset": {
+      "const": "VERIFIED_FRONT_V4_80S"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180,
+      "pattern": "^[^\\u0000-\\u001f]+$",
+      "description": "Runtime also rejects whitespace-only titles."
+    },
+    "durationSeconds": {
+      "type": "integer",
+      "const": 80,
+      "x-pythonRuntimeType": "int; JSON lexical 80.0 is rejected by the preserved contract."
+    },
+    "profile": {
+      "const": "V4_ARCHIVAL_80S",
+      "default": "V4_ARCHIVAL_80S"
+    },
+    "visualProfile": {
+      "$ref": "#/$defs/visualProfile"
+    },
+    "sfx": {
+      "$ref": "#/$defs/sfx"
+    },
+    "completion": {
+      "$ref": "#/$defs/completion"
+    },
+    "overnight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "profile"
+      ],
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_OVERNIGHT_SAFE_V3"
+        },
+        "profile": {
+          "const": "OVERNIGHT_SAFE_V3"
+        },
+        "operation": {
+          "const": "PREVIEW_5S",
+          "default": "PREVIEW_5S"
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "visualExtensions": {
+          "$ref": "urn:world-engine:overnight-visual:v1"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "visualProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "territoryOpacity": {
+          "type": "number",
+          "minimum": 0.24,
+          "maximum": 0.8,
+          "default": 0.62,
+          "description": "Preserved Production Area territory opacity; requires verified ownership coverage."
+        },
+        "frontCoreWidthPixels": {
+          "type": "number",
+          "minimum": 2.5,
+          "maximum": 7,
+          "default": 4.8,
+          "description": "Actual authored front core width, CSS output pixels."
+        },
+        "frontGlowRadiusPixels": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 16,
+          "default": 10,
+          "description": "Authored front glow radius, CSS output pixels."
+        },
+        "frontGlowGain": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 0.65,
+          "default": 0.42,
+          "description": "Authored front glow contribution; no fake front generation."
+        },
+        "cameraApproachFrames": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 120,
+          "default": 48,
+          "description": "Existing conservative native camera approach duration in 30fps frames; not roll, arbitrary pose, or new camera engine."
+        }
+      }
+    },
+    "sfx": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.65
+        },
+        "exportWav": {
+          "type": "boolean",
+          "default": false
+        },
+        "cues": {
+          "type": "array",
+          "maxItems": 10000,
+          "description": "Omitted means existing event-bound transition cues. [] means no cue. Runtime verifies event/frame references and duplicate identity. UI outer SFX conflicts are rejected in V2.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "eventId",
+              "frame",
+              "type"
+            ],
+            "properties": {
+              "eventId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "frame": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2399
+              },
+              "type": {
+                "enum": [
+                  "CLICK",
+                  "MECHANICAL_TICK",
+                  "OCCUPATION_COMPLETE",
+                  "MARKER_POP",
+                  "CAMERA_WHOOSH",
+                  "EVENT_TRANSITION"
+                ]
+              },
+              "gain": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "submissionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "Serialized inner V2 JSON, optionally one complete fenced JSON block; duplicate JSON keys rejected."
+        },
+        "durationSeconds": {
+          "type": "integer",
+          "const": 80
+        },
+        "profile": {
+          "const": "V4_ARCHIVAL_80S"
+        },
+        "sfx": {
+          "$ref": "#/$defs/sfx"
+        },
+        "sceneJson": {
+          "type": "null",
+          "description": "A concrete attached Scene conflicts with V2 preset selection."
+        }
+      }
+    },
+    "completion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "profile"
+      ],
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_UNIVERSAL_COMPLETION_V2"
+        },
+        "profile": {
+          "const": "VISUAL_UNIFIED_COMPLETION_V2"
+        },
+        "dataPolicy": {
+          "const": "QUALIFIED_SOURCE_ONLY",
+          "default": "QUALIFIED_SOURCE_ONLY"
+        },
+        "camera": {
+          "$ref": "#/$defs/completionCamera"
+        },
+        "frontier": {
+          "$ref": "#/$defs/completionFrontier"
+        },
+        "eventFlow": {
+          "$ref": "#/$defs/completionEventFlow",
+          "description": "Canonical preserved Event/Flow/Area plans and source references. Runtime requires trusted SHA-matched catalog payloads; source claims alone are not admission. Production routes must remain HIDDEN."
+        }
+      }
+    },
+    "completionCamera": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "const": "PRESERVE_PARENT"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mode": {
+              "const": "V5_EVENT_TRACKING",
+              "default": "V5_EVENT_TRACKING"
+            },
+            "settleFrames": {
+              "type": "integer",
+              "minimum": 6,
+              "maximum": 60,
+              "default": 18
+            },
+            "holdFrames": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 120,
+              "default": 24
+            }
+          }
+        }
+      ],
+      "description": "The entire completion object is opt-in. Its default camera mode is V5_EVENT_TRACKING. holdFrames is a minimum post-lock hold; remaining chapter time holds the final pose. Safety/budget failures block readiness, never silently choose the old camera. No forced roll or closer-than-parent zoom floor."
+    },
+    "completionFrontier": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "enabled"
+          ],
+          "properties": {
+            "profile": {
+              "const": "AUTHORED_FRONT_MOTION_V2",
+              "default": "AUTHORED_FRONT_MOTION_V2"
+            },
+            "enabled": {
+              "const": false
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "motionResponse"
+          ],
+          "properties": {
+            "profile": {
+              "const": "AUTHORED_FRONT_MOTION_V2",
+              "default": "AUTHORED_FRONT_MOTION_V2"
+            },
+            "enabled": {
+              "const": true,
+              "default": true
+            },
+            "motionResponse": {
+              "const": false
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "profile": {
+              "const": "AUTHORED_FRONT_MOTION_V2",
+              "default": "AUTHORED_FRONT_MOTION_V2"
+            },
+            "enabled": {
+              "const": true,
+              "default": true
+            },
+            "motionResponse": {
+              "const": true,
+              "default": true
+            },
+            "settledStrength": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.2
+            },
+            "settleFrames": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120,
+              "default": 18
+            }
+          }
+        }
+      ],
+      "description": "Only actual authored frontier geometry can emit motion-responsive light. Disabling the feature rejects ignored motion settings; disabling motionResponse rejects ignored settle settings. Scalar occupation-front or terrain-lighting equivalence is not implied."
+    },
+    "completionEventFlow": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Bounded completion Event/Flow/Area request",
+      "description": "JSON schema plus mandatory local preserved-core canonical compiler validation; declared source references never establish source authority.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/completionEventFlow/$defs/request"
+        }
+      ],
+      "$defs": {
+        "request": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema": {
+              "const": "WORLD_ENGINE_COMPLETION_EVENT_FLOW_V1"
+            },
+            "events": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "#/$defs/completionEventFlow/$defs/eventEntry"
+              }
+            },
+            "flows": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "#/$defs/completionEventFlow/$defs/flowEntry"
+              }
+            },
+            "areas": {
+              "type": "array",
+              "maxItems": 32,
+              "items": {
+                "$ref": "#/$defs/completionEventFlow/$defs/areaEntry"
+              }
+            }
+          },
+          "required": [
+            "schema",
+            "events",
+            "flows",
+            "areas"
+          ]
+        },
+        "sourceBinding": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "role": {
+              "enum": [
+                "GEOMETRY",
+                "METRIC",
+                "OBJECT_GRAPHIC",
+                "AREA_INTENT",
+                "FLOW_PLAN"
+              ]
+            },
+            "sourceId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "role",
+            "sourceId",
+            "sha256"
+          ]
+        },
+        "eventEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+            },
+            "plan": {
+              "$ref": "#/$defs/completionEventFlow/$defs/eventPlan"
+            },
+            "sourceBindings": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/$defs/completionEventFlow/$defs/sourceBinding"
+              }
+            },
+            "startFrame": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "id",
+            "plan",
+            "sourceBindings",
+            "startFrame"
+          ]
+        },
+        "flowEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+            },
+            "plan": {
+              "$ref": "#/$defs/completionEventFlow/$defs/flowPlan"
+            },
+            "sourceBindings": {
+              "type": "array",
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/completionEventFlow/$defs/sourceBinding"
+              }
+            },
+            "routeVisibility": {
+              "enum": [
+                "HIDDEN",
+                "VISIBLE"
+              ]
+            },
+            "arrivalAreaId": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+            }
+          },
+          "required": [
+            "id",
+            "plan",
+            "sourceBindings",
+            "routeVisibility"
+          ]
+        },
+        "areaEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+            },
+            "plan": {
+              "$ref": "#/$defs/completionEventFlow/$defs/areaPlan"
+            },
+            "sourceBindings": {
+              "type": "array",
+              "maxItems": 2,
+              "items": {
+                "$ref": "#/$defs/completionEventFlow/$defs/sourceBinding"
+              }
+            }
+          },
+          "required": [
+            "id",
+            "plan",
+            "sourceBindings"
+          ]
+        },
+        "eventPlan": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "const": "EVENT_TIMELINE_V1"
+            },
+            "intent": {
+              "type": "object"
+            },
+            "fps": {
+              "const": 30
+            },
+            "seed": {},
+            "profile": {},
+            "totalFrames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "durationSeconds": {},
+            "timeline": {
+              "type": "array"
+            },
+            "ownership": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "version",
+            "intent",
+            "fps",
+            "seed",
+            "profile",
+            "totalFrames",
+            "durationSeconds",
+            "timeline",
+            "ownership"
+          ],
+          "x-runtimeValidation": "normalizeEventFlowRequest reuses original compiler and requires complete canonical semantic equality; unknown nested fields fail."
+        },
+        "flowPlan": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "const": "FLOW_PLAN_V2"
+            },
+            "intent": {
+              "type": "object"
+            },
+            "timing": {},
+            "fps": {
+              "const": 30
+            },
+            "startFrame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "endFrame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "totalFrames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "durationSeconds": {},
+            "arrivalFrame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "holdFrame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "timeline": {
+              "type": "array"
+            },
+            "routeEventPlan": {},
+            "ownership": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "version",
+            "intent",
+            "timing",
+            "fps",
+            "startFrame",
+            "endFrame",
+            "totalFrames",
+            "durationSeconds",
+            "arrivalFrame",
+            "holdFrame",
+            "timeline",
+            "routeEventPlan",
+            "ownership"
+          ],
+          "x-runtimeValidation": "normalizeEventFlowRequest reuses original compiler and requires complete canonical semantic equality; unknown nested fields fail."
+        },
+        "areaPlan": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "version": {
+              "const": "AREA_PLAN_V3"
+            },
+            "intent": {
+              "type": "object"
+            },
+            "fps": {
+              "const": 30
+            },
+            "startFrame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "endFrame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "totalFrames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "durationSeconds": {},
+            "operations": {},
+            "timeline": {
+              "type": "array"
+            },
+            "geometryBinding": {},
+            "sweepGeometries": {},
+            "ownership": {
+              "type": "object"
+            }
+          },
+          "required": [
+            "version",
+            "intent",
+            "fps",
+            "startFrame",
+            "endFrame",
+            "totalFrames",
+            "durationSeconds",
+            "operations",
+            "timeline",
+            "geometryBinding",
+            "sweepGeometries",
+            "ownership"
+          ],
+          "x-runtimeValidation": "normalizeEventFlowRequest reuses original compiler and requires complete canonical semantic equality; unknown nested fields fail."
+        }
+      }
+    }
+  },
+  "x-runtime": {
+    "normalizer": "contract_v3.normalize_submission",
+    "preview": "preview_contract.compile_preview",
+    "sourceCatalog": "backend-owned immutable completion catalog",
+    "full80Allowed": false,
+    "productionGPURequired": true,
+    "softwareValidationPublicInputAllowed": false
+  },
+  "x-runtimeErrors": [
+    "STUDIO_V2_PRESET_REQUIRED",
+    "STUDIO_V2_PROFILE_CONFLICT",
+    "STUDIO_V2_DURATION_80_REQUIRED",
+    "STUDIO_V2_SCENE_CONFLICT",
+    "STUDIO_V2_SFX_CONFLICT",
+    "STUDIO_V2_VISUAL_FIELD_UNSUPPORTED",
+    "STUDIO_V2_VISUAL_VALUE_INVALID",
+    "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+    "STUDIO_COMPLETION_FIELD_UNSUPPORTED",
+    "STUDIO_COMPLETION_PROFILE_REQUIRED",
+    "STUDIO_COMPLETION_DATA_POLICY_UNSUPPORTED",
+    "STUDIO_COMPLETION_CAMERA_FIELD_UNSUPPORTED",
+    "STUDIO_COMPLETION_CAMERA_SETTING_CONFLICT",
+    "STUDIO_COMPLETION_CAMERA_MODE_UNSUPPORTED",
+    "STUDIO_COMPLETION_CAMERA_VALUE_INVALID",
+    "STUDIO_COMPLETION_FRONTIER_FIELD_UNSUPPORTED",
+    "STUDIO_COMPLETION_FRONTIER_PROFILE_UNSUPPORTED",
+    "STUDIO_COMPLETION_FRONTIER_SETTING_CONFLICT",
+    "STUDIO_COMPLETION_FRONTIER_VALUE_INVALID"
+  ],
+  "x-notSupported": [
+    "Full80 rendering",
+    "software GPU bypass",
+    "arbitrary source authority",
+    "automatic unverified historical actors",
+    "unsupported visual roll/detail slots"
+  ],
+  "x-derivedFrom": {
+    "path": "recovery/universal-integration-v1/STUDIO_PROMPT_V2.schema.json",
+    "sha256": "c503aa5e315d0cd60f754f4a78fcfdc390b08f3e144a42805d84e2d6f3bf25fe"
+  }
+}

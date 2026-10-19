@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:world-engine:overnight-visual:v1",
+  "title": "WORLD ENGINE source-bound optional visual owners V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "scalarTerritory", "nationalUnits"],
+  "properties": {
+    "schema": {"const": "WORLD_ENGINE_OVERNIGHT_VISUAL_V1"},
+    "scalarTerritory": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sourceId", "sha256", "gain", "frontier"],
+          "properties": {
+            "sourceId": {"$ref": "#/$defs/sourceId"},
+            "sha256": {"$ref": "#/$defs/sha256"},
+            "gain": {"$ref": "#/$defs/gainProfile"},
+            "frontier": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/frontierProfile"}]}
+          }
+        }
+      ]
+    },
+    "nationalUnits": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sourceId", "sha256", "markerScale"],
+          "properties": {
+            "sourceId": {"$ref": "#/$defs/sourceId"},
+            "sha256": {"$ref": "#/$defs/sha256"},
+            "markerScale": {"type": "number", "minimum": 1, "maximum": 1.25}
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "sourceId": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "rgb": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"type": "number", "minimum": 0, "maximum": 1}
+    },
+    "gainProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {"type": "boolean", "default": false},
+        "gainBrightness": {"type": "number", "minimum": 1, "maximum": 1.25, "default": 1.12},
+        "gainedAlpha": {"type": "number", "minimum": 0, "maximum": 0.9, "default": 0.84}
+      }
+    },
+    "frontierProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {"const": true},
+        "whiteFront": {"type": "boolean", "default": true},
+        "frontierIntensity": {"type": "number", "minimum": 0, "maximum": 1, "default": 1},
+        "frontierWidth": {"type": "number", "minimum": 0.5, "maximum": 2.5, "default": 2.5},
+        "frontierHaloSigma": {"type": "number", "minimum": 0.5, "maximum": 4, "default": 4},
+        "minimumLightingFactor": {"type": "number", "minimum": 0.65, "maximum": 1, "default": 0.76},
+        "outerGoldIntensity": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.75},
+        "outerGoldWidth": {"type": "number", "minimum": 0.5, "maximum": 1.5, "default": 1},
+        "outerGoldSigma": {"type": "number", "minimum": 0.5, "maximum": 3, "default": 2.2},
+        "outerGoldSupport": {"type": "number", "minimum": 4, "maximum": 6, "default": 6},
+        "outerGoldColor": {"$ref": "#/$defs/rgb", "default": [1, 0.83, 0.25]},
+        "outerGoldHaloColor": {"$ref": "#/$defs/rgb", "default": [1, 0.63, 0.12]}
+      }
+    }
+  }
+}
