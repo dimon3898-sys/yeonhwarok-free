@@ -1,0 +1,84 @@
+{
+  "schema": "WORLD_ENGINE_STORY_DIRECTOR_10_CRITERIA_V1",
+  "criteria": [
+    {
+      "id": 1,
+      "criterion": "원본 FINAL 보호",
+      "status": "PASS",
+      "evidence": "reports/ACTUAL_FRAME_REVIEW.json#protection",
+      "detail": "기준 Git commit 대비 새 director namespace 밖의 tracked byte 변경을 검사."
+    },
+    {
+      "id": 2,
+      "criterion": "실제 12장면 시점 일치",
+      "status": "PASS",
+      "evidence": "FRAME_REVIEW_16.csv;STORY_80S_SOURCE_LEDGER.csv",
+      "detail": "16개 전역 프레임의 이벤트 ID/장면 ID가 동결 원본과 일치; 감독 구간과의 충돌은 원본을 우선."
+    },
+    {
+      "id": 3,
+      "criterion": "역사 자료 근거",
+      "status": "UNKNOWN",
+      "evidence": "reports/HISTORY_AND_SCENE.json",
+      "detail": "8개 공식 지도 날짜·부분 선 근거는 보존. 초기 사건 원문 검증 및 원본 투영법/전체 위치 정확도는 미확인; 도식 영역은 정밀 실측 아님."
+    },
+    {
+      "id": 4,
+      "criterion": "16장 각각 진짜 렌더러 출력",
+      "status": "PASS",
+      "evidence": "proof/FRAME_RENDER_REPORT.json;reports/ACTUAL_FRAME_REVIEW.json#renderEvidence",
+      "detail": "16개 actual draw/readPixels PNG의 전역 frame, SHA, 1080×1920, software scope 확인. 이미지 생성/옛 영상 캡처 아님."
+    },
+    {
+      "id": 5,
+      "criterion": "전역 시간축 보존",
+      "status": "PASS",
+      "evidence": "proof/FRAME_RENDER_REPORT.json;CAMERA_AND_FRONT_TRACE.csv",
+      "detail": "하나의 runtime에 원본 0..2399 global clock으로 랜덤 접근; 각 프레임 Scene 초기화 없음."
+    },
+    {
+      "id": 6,
+      "criterion": "카메라 이동/줌 실제 픽셀 증거",
+      "status": "PASS",
+      "evidence": "CAMERA_AND_FRONT_TRACE.csv;reports/ACTUAL_FRAME_REVIEW.json#cameraMeasurements",
+      "detail": "실제 native factory의 고정 지명 투영 위치와 카메라 bounds/scale 변화 측정. 연출 만족도/회전 구현 PASS는 아님."
+    },
+    {
+      "id": 7,
+      "criterion": "전선/영토 자료 일치",
+      "status": "PASS",
+      "evidence": "FRAME_REVIEW_16.csv;reports/HISTORY_AND_SCENE.json",
+      "detail": "기존 clock/Area/front evaluator와 실제 25개 draw의 지리 geometry·alpha·선택 상태를 SHA로 비교. 전환 시작의 이전 상태도 그대로 검증; 정확한 일별 역사 전선이나 전체 양측 점령은 주장하지 않음."
+    },
+    {
+      "id": 8,
+      "criterion": "국가색·모바일 가독성",
+      "status": "UNKNOWN",
+      "evidence": "FRAME_REVIEW_16.csv;public-review/CONTACT_SHEET_4X4.png",
+      "detail": "완전한 양측 영토·역사 군대 좌표 없음. 실제 PNG 모바일 가독성은 사용자 검수 대기; native 레이아웃 체크만으로 품질 PASS 선언 금지."
+    },
+    {
+      "id": 9,
+      "criterion": "품질 PASS 남용 금지",
+      "status": "PASS",
+      "evidence": "proof/FRAME_RENDER_REPORT.json;FRAME_REVIEW_16.csv",
+      "detail": "기술/software 소비자 관측과 시각 품질 승인 분리. 최종 품질 USER_REVIEW_REQUIRED."
+    },
+    {
+      "id": 10,
+      "criterion": "사용자 승인 전 유료/80초/FINAL 금지",
+      "status": "PASS",
+      "evidence": "BASELINE.json;proof/FRAME_RENDER_REPORT.json",
+      "detail": "무료 소프트웨어 정지 프레임만 출력. MP4/유료GPU/FINAL 승격 없음."
+    }
+  ],
+  "counts": {
+    "PASS": 8,
+    "FAIL": 0,
+    "UNKNOWN": 2
+  },
+  "overallCompletePass": false,
+  "visualQualityApproved": false,
+  "userReviewRequired": true,
+  "unknownBlocksOverallCompletionPass": true
+}

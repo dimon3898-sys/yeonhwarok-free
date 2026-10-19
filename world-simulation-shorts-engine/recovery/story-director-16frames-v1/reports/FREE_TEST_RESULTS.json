@@ -1,0 +1,40 @@
+{
+  "schema": "WORLD_ENGINE_DIRECTOR_FREE_FOCUSED_TEST_RESULTS_V1",
+  "status": "PASS",
+  "focusedTestCount": 25,
+  "nodeTestCount": 12,
+  "pythonTestCount": 13,
+  "results": [
+    {
+      "command": [
+        "node",
+        "--test",
+        "world-simulation-shorts-engine/recovery/story-director-16frames-v1/tests/test_runtime_adapter.mjs",
+        "world-simulation-shorts-engine/recovery/story-director-16frames-v1/tests/test_camera_plan.mjs"
+      ],
+      "exitCode": 0,
+      "stdout": "✔ all 12 existing chapters and actual source references are exact, source remains unchanged (11.589898ms)\n✔ actual original reference-camera adapter evaluates global 2400 frames, pan/zoom/holds and boundaries (267.072155ms)\n✔ unchanged real renderer updateCamera guard rejects the observed old target and accepts every floored frame (248.523198ms)\n✔ camera-only reverse velocity matches global bounds and every hold reports zero velocity (309.100013ms)\n✔ unsupported or missing source fields fail, no arbitrary historical coordinate fallback (0.57934ms)\n✔ explicit duplicate headline policy changes only original title reveal, source is immutable (1.72648ms)\n✔ global sampling preserves source chronology and avoids per-chapter resets (2.048488ms)\n✔ a source context change cannot be silently sampled with the earlier context (0.879965ms)\n✔ a chapter gap is rejected rather than filled with invented state (0.57333ms)\n✔ the director adapter never creates production or GPU admission (0.557236ms)\n✔ source mutation after selection is detected before a successful handoff (0.673228ms)\n✔ only the independent camera input edge may replace a preserved browser owner (0.822129ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 944.829673\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "world-simulation-shorts-engine/recovery/story-director-16frames-v1/tests",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": "test_chapter_time_mismatch_is_a_failure (test_actual_frame_review.ActualFrameReviewTests.test_chapter_time_mismatch_is_a_failure) ... ok\ntest_cpu_camera_profile_without_actual_native_projection_is_not_a_pixel_witness (test_actual_frame_review.ActualFrameReviewTests.test_cpu_camera_profile_without_actual_native_projection_is_not_a_pixel_witness) ... ok\ntest_hidden_native_title_is_not_claimed_as_actually_drawn_text (test_actual_frame_review.ActualFrameReviewTests.test_hidden_native_title_is_not_claimed_as_actually_drawn_text) ... ok\ntest_native_location_dot_is_not_a_national_military_unit (test_actual_frame_review.ActualFrameReviewTests.test_native_location_dot_is_not_a_national_military_unit) ... ok\ntest_no_geometry_opening_does_not_invent_event_front (test_actual_frame_review.ActualFrameReviewTests.test_no_geometry_opening_does_not_invent_event_front) ... ok\ntest_partial_line_does_not_authorize_area_fill (test_actual_frame_review.ActualFrameReviewTests.test_partial_line_does_not_authorize_area_fill) ... ok\ntest_factory_call_does_not_claim_national_or_flow_content (test_frame_applicability.FrameApplicabilityTests.test_factory_call_does_not_claim_national_or_flow_content) ... ok\ntest_frame_binding_mismatch_is_rejected (test_frame_applicability.FrameApplicabilityTests.test_frame_binding_mismatch_is_rejected) ... ok\ntest_only_exact_hash_matching_direct_frame_is_accepted (test_frame_applicability.FrameApplicabilityTests.test_only_exact_hash_matching_direct_frame_is_accepted) ... ok\ntest_original_151_and_53_identities_are_preserved (test_frame_applicability.FrameApplicabilityTests.test_original_151_and_53_identities_are_preserved) ... ok\ntest_screenshot_without_direct_runtime_attestation_is_rejected (test_frame_applicability.FrameApplicabilityTests.test_screenshot_without_direct_runtime_attestation_is_rejected) ... ok\ntest_state_transition_does_not_claim_continuous_grow (test_frame_applicability.FrameApplicabilityTests.test_state_transition_does_not_claim_continuous_grow) ... ok\ntest_upload_role_requires_explicit_selection_and_stays_partial (test_frame_applicability.FrameApplicabilityTests.test_upload_role_requires_explicit_selection_and_stays_partial) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 0.279s\n\nOK\n"
+    }
+  ],
+  "existingFullSuiteRepeated": false,
+  "hardwareValidation": false,
+  "visualQualityApproved": false
+}

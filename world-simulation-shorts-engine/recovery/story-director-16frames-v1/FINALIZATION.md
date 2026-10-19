@@ -1,0 +1,12 @@
+# Final review packaging
+
+Only run these steps after the actual single-runtime 16-frame capture is complete and its adjacent samples, visual review tables and contact sheets have been prepared. They do not render any image or video, start a Studio job, build an image, or use a GPU.
+
+1. Run `python3 -B tools/check_protection.py` from this namespace (or supply its full path from the repository root). It compares tracked bytes with baseline `3cd19dafe450666748ee16d4aed45c38b4fc65ed` and validates the actual still-capture/no-video/no-paid-GPU invariants. It writes `reports/PROTECTION_AND_INVARIANTS.json`.
+2. Finish the human-readable validation and result documents. Keep quality status at `VISUAL_REVIEW_REQUIRED` / `USER_REVIEW_REQUIRED`; a completed actual capture is not a visual quality approval.
+3. Run `python3 -B tools/package_review.py`. The packager validates all 16 renderer-PNG hashes/dimensions/global indices and nine adjacent sample proofs, requires the protection receipt to match the exact final capture report, then streams only explicit allowlisted files into the handoff ZIP. It excludes `.private`, original full Scene/asset bodies, source sample archives, raw maps/PDFs, logs and failed/probe PNGs. A different existing ZIP is never overwritten.
+4. The packager writes `public-review/SHA256SUMS`, `handoff/SHA256SUMS`, root `SHA256SUMS` and `reports/PACKAGE_MANIFEST.json`. If a single ZIP would exceed 95 MiB, it produces two frame ZIPs and a separate report ZIP instead.
+5. Commit and push the completed artifacts on the new director branch. Confirm the exact remote commit. Then run the existing `tools/verify_downloads.py --commit <full-40-character-artifact-commit>` helper to check anonymous HTTPS HTTP 200 and downloaded SHA-256 for every public-review and handoff file.
+6. A later `reports/DOWNLOAD_VERIFICATION.json` cannot be included in the immutable ZIP that was already published. Run `python3 -B tools/package_review.py --checksums-only` to cover that receipt in the root checksum set without repackaging or changing the ZIP. Commit/push the new receipt and checksums, and confirm the final remote commit. Use the artifact commit for the already verified mobile ZIP/PNG URLs; use the later commit for the final receipt.
+
+The archive has its own member `SHA256SUMS`. No checksum file hashes itself. Packaging, image metadata, actual software output, NVIDIA validation, visual approval and final-baseline promotion are separate states.

@@ -105,15 +105,15 @@ def frame_number(row):
     return dig(row, 'diagnostic', 'frame')
 
 
-def verified_rows(report_file):
+def verified_rows(report_file, *, row_key='frames', expected_frames=FRAMES):
     if not report_file.is_file():
         return {}, {'state': 'NOT_RENDERED', 'path': str(report_file.relative_to(HERE)) if report_file.is_relative_to(HERE) else str(report_file)}, None
     raw = report_file.read_bytes()
     report = json.loads(raw)
     found = {}
-    for row in report.get('frames', report.get('captures', [])):
+    for row in report.get(row_key, report.get('captures', []) if row_key == 'frames' else []):
         frame = frame_number(row)
-        if frame not in FRAMES:
+        if frame not in expected_frames:
             continue
         if frame in found:
             raise ValueError('FRAME_DUPLICATE_GLOBAL_INDEX')
