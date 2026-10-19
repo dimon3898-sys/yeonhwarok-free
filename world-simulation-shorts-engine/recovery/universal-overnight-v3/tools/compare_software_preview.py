@@ -89,6 +89,10 @@ def decode_preview(path: Path) -> tuple[dict, list[np.ndarray]]:
     video = [row for row in metadata["streams"] if row["codec_type"] == "video"]
     if len(video) != 1 or (video[0]["width"], video[0]["height"]) != (1080, 1920):
         raise RuntimeError("PREVIEW_CANONICAL_DIMENSIONS_REQUIRED")
+    if video[0].get("codec_name") != "h264" or video[0].get("avg_frame_rate") != "30/1":
+        raise RuntimeError("PREVIEW_H264_30FPS_REQUIRED")
+    if abs(float(metadata["format"]["duration"]) - 5.0) > 0.000001:
+        raise RuntimeError("PREVIEW_EXACT_FIVE_SECONDS_REQUIRED")
     process = subprocess.Popen([
         "ffmpeg", "-v", "error", "-threads", "2", "-i", str(path), "-an", "-sn",
         "-f", "rawvideo", "-pix_fmt", "rgb24", "-fps_mode", "passthrough", "pipe:1"
@@ -132,7 +136,7 @@ def decode_preview(path: Path) -> tuple[dict, list[np.ndarray]]:
     }, selected
 
 
-def figure(reference: list[np.ndarray], preview: list[np.ndarray], output: Path) -> None:
+def figure(reference: list[np.ndarray], preview: list[np.ndarray], output: Path, *, global_start: int = 1400) -> None:
     # Matplotlib's default cache may target a read-only home directory. This
     # analysis-only cache is disposable and is never a required result file.
     cache = tempfile.TemporaryDirectory(prefix="world-engine-comparison-plot-")
@@ -146,7 +150,7 @@ def figure(reference: list[np.ndarray], preview: list[np.ndarray], output: Path)
         axes[index, 0].imshow(masked_content(reference[index]))
         axes[index, 1].imshow(preview[index])
         axes[index, 0].set_title(f"65379 reference — {REFERENCE_PTS[index]:.3f}s\nPhone UI/caption excluded", color="white", fontsize=11)
-        axes[index, 1].set_title(f"New software preview — {PREVIEW_FRAMES[index] / 30:.3f}s\nOriginal global frame {1400 + PREVIEW_FRAMES[index]}", color="white", fontsize=11)
+        axes[index, 1].set_title(f"New software preview — {PREVIEW_FRAMES[index] / 30:.3f}s\nOriginal global frame {global_start + PREVIEW_FRAMES[index]}", color="white", fontsize=11)
         for axis in axes[index]:
             axis.axis("off")
     fig.suptitle("STYLE / READABILITY COMPARISON\nDifferent source events and framing; no frame alignment\nSwiftShader CPU preview — NVIDIA quality NOT verified", color="white", fontsize=14, y=.994)
@@ -160,12 +164,48 @@ def figure(reference: list[np.ndarray], preview: list[np.ndarray], output: Path)
     cache.cleanup()
 
 
+def verify_delivery_receipt(receipt: dict, candidate: Path) -> list[int]:
+    """A completed delivery receipt binds this comparison to its actual clip.
+
+    Independent full decoding is still performed below. The receipt does not
+    grant NVIDIA or visual approval, nor can it replace actual source bytes.
+    """
+    span = receipt.get("sourceGlobalRange")
+    if (not isinstance(span, list) or len(span) != 2 or any(type(value) is not int for value in span)
+            or span[0] < 0 or span[1] - span[0] != 150):
+        raise RuntimeError("DELIVERY_EXACT_GLOBAL_150_FRAME_RANGE_REQUIRED")
+    final = receipt.get("finalVideo")
+    if (receipt.get("fullDecode") != "PASS" or receipt.get("frames") != 150 or receipt.get("fps") != 30
+            or receipt.get("durationSeconds") != 5 or not isinstance(final, dict)
+            or final.get("file") != candidate.name or final.get("sha256") != sha256(candidate)
+            or final.get("bytes") != candidate.stat().st_size):
+        raise RuntimeError("DELIVERY_COMPLETED_VIDEO_BINDING_REQUIRED")
+    return span
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--candidate", type=Path)
+    parser.add_argument("--delivery-receipt", type=Path,
+                        help="Completed final delivery receipt; binds sourceGlobalRange and actual MP4 SHA/size.")
+    parser.add_argument("--global-start", type=int,
+                        help="Legacy explicit start when no delivery receipt exists; must agree with a receipt if both are supplied.")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    delivery = None
+    if args.delivery_receipt:
+        if args.candidate is None:
+            raise RuntimeError("DELIVERY_REQUIRES_ACTUAL_CANDIDATE")
+        delivery = json.loads(args.delivery_receipt.read_text())
+        source_range = verify_delivery_receipt(delivery, args.candidate)
+        if args.global_start is not None and args.global_start != source_range[0]:
+            raise RuntimeError("DELIVERY_GLOBAL_START_LABEL_MISMATCH")
+    else:
+        start = 1400 if args.global_start is None else args.global_start
+        if start < 0:
+            raise RuntimeError("PREVIEW_NONNEGATIVE_GLOBAL_START_REQUIRED")
+        source_range = [start, start + 150]
     if sha256(args.reference) != REFERENCE_SHA:
         raise RuntimeError("REFERENCE_SOURCE_SHA_MISMATCH")
     args.output.mkdir(parents=True, exist_ok=True)
@@ -198,10 +238,18 @@ def main() -> None:
     else:
         decoded, preview = decode_preview(args.candidate)
         image = args.output / "REFERENCE_VS_SOFTWARE_PREVIEW.png"
-        figure(references, preview, image)
+        figure(references, preview, image, global_start=source_range[0])
         report.update(candidateState="ACTUAL_SOFTWARE_MP4_DECODED", candidateSHA256=sha256(args.candidate),
-                      candidateOriginalFrameRange=[1400, 1550], candidatePreviewFrames=PREVIEW_FRAMES,
+                      candidateOriginalFrameRange=source_range, candidatePreviewFrames=PREVIEW_FRAMES,
                       candidateDecode=decoded, comparisonPNG={"filename": image.name, "sha256": sha256(image)})
+        if delivery is not None:
+            report["deliveryReceiptBinding"] = {
+                "sha256": sha256(args.delivery_receipt), "sourceCheckpointCommit": delivery.get("sourceCheckpointCommit"),
+                "sourceManifestSHA256": delivery.get("sourceManifestSHA256"), "sourceGlobalRange": source_range,
+                "finalVideoSHA256Verified": True, "independentFull150DecodePerformed": True,
+                "authoredCueCount": delivery.get("authoredCueCount"),
+                "effectiveAudioSilent": delivery.get("effectiveAudioSilent"),
+            }
     report_file = args.output / "REFERENCE_COMPARISON.json"
     report_file.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps({"report": str(report_file), "candidateState": report["candidateState"]}))

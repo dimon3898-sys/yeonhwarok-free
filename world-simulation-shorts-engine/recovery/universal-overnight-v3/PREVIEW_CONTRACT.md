@@ -18,16 +18,25 @@ unknown fields, changed ranges, incomplete source timelines and unsupported
 frame counts. `verify_preview_request_file` additionally verifies actual source
 bytes using bounded, no-follow file reads.
 
-For the preserved source plan, automatic source-schedule ranking selects
-**[1450,1600), 48.333333…–53.333333… seconds**, within original scene-0007.
-The generic ranking first prefers transitions whose endpoints belong to the
-chapter's declared geometry states, then avoids outside-chapter carry-in and
-maximizes existing activity. No country, date, state ID or selected frame is
-hardcoded. This slice contains the original held state, 50 frames of an authored
-schematic transition, and 50 frames of the existing partial dated-front overlay.
-Selection is source coherence, not a visual-quality or historical-accuracy score.
-The source qualifies these as schematic transitions rather than observed daily
-military boundaries. Those qualifications remain visible and unchanged.
+For the preserved source plan, the final automatic selection is
+**[1400,1550), 46.666666…–51.666666… seconds** within original scene-0007.
+The package-owned camera cache contains exactly 200 observed global frames from
+source-bound SwiftShader captures. It is checked against the semantic plan,
+completion profile, and ten unchanged camera/layout module hashes; only the
+thirteen image-digest slots already permitted by the original history authority
+are neutralized in its cache identity. Unknown frames are not static poses.
+
+The selector ranks genuinely observed camera activity jointly with the original
+source transition schedule. The selected interval has 48 measured bounds
+variants, 47 changing pairs and 100 authored active frames. It retains 50 frames
+of source-qualified carry-in context and 50 frames of the chapter's schematic
+transition. Those source qualifications remain visible and unchanged. No
+coordinate, camera pose, event or interpolation is created by the cache.
+
+The experimental coherence-only [1450,1600) selection was actually rendered and
+found to be static. Its media and failure report are preserved in
+`proof-coherent-static`; it is not the final review selection. Neither scoring
+method grants historical accuracy, NVIDIA admission or visual-quality approval.
 
 Production entry: `preview_capture.mjs` with `--request-file`, `--plan-file`,
 `--plan-sha256`, `--admission-file`, and `--output-root`. It calls the separate
@@ -56,7 +65,7 @@ old AAC muxer and verifies unchanged video pixels and timestamps. SFX OFF is
 supported without writing audio.
 
 Focused preview validation: 17 Python tests and 7 Node source-contract tests.
-The integrated overnight CPU receipt separately records all 136 focused tests. These test
+The integrated overnight CPU receipt separately records all 143 focused tests. These test
 actual source-clock selection, the 2,400-frame source-evaluator slice, raw-file
 and scene immutability, exact PCM equality, failure guards, and the original
 encoder contract. They do not assert NVIDIA execution or visual-quality PASS.
@@ -70,3 +79,8 @@ payload SHA checks pass. The same effective catalog reaches Python admission,
 preview binding, the original Event/Flow compiler, and optional visual consumers.
 The shipped extension has **zero** new source records. Synthetic records remain
 CPU-test-only and are refused in Studio production.
+
+Trusted CPU caller: `camera_activity.load_bound_camera_evidence(plan, bindings)`
+then `compile_preview(..., camera_evidence=evidence)`. Studio obtains this from
+its manifested package; client-supplied camera traces are not a prompt field.
+The consumer validates the same authority when reading an exact preview request.
