@@ -1,0 +1,54 @@
+{
+  "schema": "WORLD_ENGINE_OVERNIGHT_IMAGE_CPU_V1",
+  "status": "OVERNIGHT_CANDIDATE_BLOCKED",
+  "sourceCommit": "ed74cae4c7a77f175a6278a95af3ce5ee999e9c5",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:a956c93e4b23bc1f73990d94948c85e4db0c2f18f0bdef301f61ad7882be4886",
+  "gpuExecuted": false,
+  "nvidiaHardwareVerified": false,
+  "paidWorkExecuted": false,
+  "gCubeDeployed": false,
+  "finalModified": false,
+  "rendererModified": false,
+  "oldImagesDeleted": false,
+  "imageBuilt": false,
+  "imagePushed": false,
+  "pullVerified": false,
+  "videoQualityApproved": false,
+  "builder": {
+    "status": "PASS",
+    "dockerDriver": "overlay2",
+    "freeBytes": 92103667712,
+    "minimumFreeBytes": 21474836480,
+    "existingDataDeleted": false
+  },
+  "tag": "overnight-v3-ed74cae4c7-39269385939-1",
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:overnight-v3-ed74cae4c7-39269385939-1",
+  "tagGuard": {
+    "status": "PASS",
+    "remoteHTTP": 404,
+    "tag": "overnight-v3-ed74cae4c7-39269385939-1"
+  },
+  "focusedTests": [
+    {
+      "name": "actual-source-plan-load-no-gl",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "node:internal/errors:985\n  const err = new Error(message);\n              ^\n\nError: Command failed: /usr/bin/python3 -B /opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py --request-file /tmp/overnight-source-plan-probe/OVERNIGHT_REQUEST.json --plan-file /tmp/overnight-source-plan-probe/PLAN.json\nTraceback (most recent call last):\n  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py\", line 84, in <module>\n    result = verify_runtime_sidecars(args.request_file, args.plan_file, preview_file=args.preview_file)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py\", line 43, in verify_runtime_sidecars\n    contract = load('contract', HERE / 'contract_v3.py')\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py\", line 16, in load\n    spec.loader.exec_module(module)\n  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\n  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\n  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/contract_v3.py\", line 17, in <module>\n    from studio_contracts import StudioContractError, _bounded_json\nModuleNotFoundError: No module named 'studio_contracts'\n\n    at genericNodeError (node:internal/errors:985:15)\n    at wrappedFn (node:internal/errors:539:14)\n    at ChildProcess.exithandler (node:child_process:417:12)\n    at ChildProcess.emit (node:events:509:28)\n    at maybeClose (node:internal/child_process:1141:16)\n    at ChildProcess._handle.onexit (node:internal/child_process:306:5) {\n  code: 1,\n  killed: false,\n  signal: null,\n  cmd: '/usr/bin/python3 -B /opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py --request-file /tmp/overnight-source-plan-probe/OVERNIGHT_REQUEST.json --plan-file /tmp/overnight-source-plan-probe/PLAN.json',\n  stdout: '',\n  stderr: 'Traceback (most recent call last):\\n' +\n    '  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py\", line 84, in <module>\\n' +\n    '    result = verify_runtime_sidecars(args.request_file, args.plan_file, preview_file=args.preview_file)\\n' +\n    '             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n' +\n    '  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py\", line 43, in verify_runtime_sidecars\\n' +\n    \"    contract = load('contract', HERE / 'contract_v3.py')\\n\" +\n    '               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n' +\n    '  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py\", line 16, in load\\n' +\n    '    spec.loader.exec_module(module)\\n' +\n    '  File \"<frozen importlib._bootstrap_external>\", line 995, in exec_module\\n' +\n    '  File \"<frozen importlib._bootstrap>\", line 488, in _call_with_frames_removed\\n' +\n    '  File \"/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/universal-overnight-v3/contract_v3.py\", line 17, in <module>\\n' +\n    '    from studio_contracts import StudioContractError, _bounded_json\\n' +\n    \"ModuleNotFoundError: No module named 'studio_contracts'\\n\"\n}\n\nNode.js v24.19.0\n",
+      "scope": "CPU_CONTAINER_OR_MOBILE_NOT_NVIDIA",
+      "gpuExecuted": false
+    }
+  ],
+  "failedPhase": "test",
+  "reasonCode": "HTTPS_FOCUSED_TEST_FAILED",
+  "errorType": "RuntimeError",
+  "stepOutcomes": {
+    "preflight": "success",
+    "guard": "success",
+    "unit": "success",
+    "test": "failure",
+    "stage": "skipped",
+    "build": "skipped",
+    "verify": "skipped",
+    "publish": "skipped"
+  }
+}
