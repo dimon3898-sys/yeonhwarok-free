@@ -13,7 +13,7 @@ assert.ok(options.prepared,'EXISTING_VERIFIED_PREPARATION_RECEIPT_REQUIRED');
 const sources=await loadSourceOptions(options.prepared),sourceBytes=await readFile(sources.planFile),sourceHash=hash(sourceBytes);
 assert.equal(sourceHash,sources.expectedPlanSha256);
 const originalDocument=JSON.parse(sourceBytes),sampleFrames=Array.from({length:16},(_,i)=>i*150),
- adjacentFrames=[599,600,601,1599,1600,1601,2199,2200,2201],allFrames=[...new Set([...sampleFrames,...adjacentFrames])].sort((a,b)=>a-b);
+ adjacentFrames=[1599,1600,1601,1665,1666,1667,1732,1733,1734],allFrames=[...new Set([...sampleFrames,...adjacentFrames])].sort((a,b)=>a-b);
 assert.equal(originalDocument.totalFrames,2400);assert.equal(originalDocument.fps,30);
 const browserBindings=options.bindings?JSON.parse(await readFile(options.bindings,'utf8')):[];
 await Promise.all(['proof','public-review','adjacent','.private'].map(x=>mkdir(path.join(ROOT,x),{recursive:true})));

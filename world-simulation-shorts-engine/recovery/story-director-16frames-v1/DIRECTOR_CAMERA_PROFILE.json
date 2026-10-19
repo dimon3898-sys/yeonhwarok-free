@@ -226,7 +226,9 @@
       "endFrame": 1400,
       "geometryRefs": [
         "HELD_CORE_BUSAN",
-        "FRONT_BUSAN"
+        "FRONT_BUSAN",
+        "HELD_CORE_NORTH_ADVANCE",
+        "FRONT_NORTH_ADVANCE"
       ],
       "locationIds": [
         "PYONGYANG",
@@ -237,7 +239,7 @@
       "holdFrames": 80,
       "contextLocationMeaning": "EXISTING_GEOGRAPHIC_CONTEXT_ONLY_NOT_TROOP_OR_LANDING_COORDINATE",
       "noExactEventDateFrontClaim": true,
-      "cameraPurpose": "CURRENT_CHAPTER_SOURCE_AND_EXISTING_LOCATION_CONTEXT",
+      "cameraPurpose": "CURRENT_SOURCE_PLUS_PRE_TRANSITION_GEOGRAPHIC_CONTEXT",
       "displayedSourceSegments": [
         {
           "startFrame": 1200,
@@ -248,7 +250,16 @@
           ],
           "truthKind": "SCHEMATIC_HELD_CORE"
         }
-      ]
+      ],
+      "preTransitionContext": {
+        "nextChapterId": "chapter-08",
+        "sourceGeometryRefs": [
+          "HELD_CORE_NORTH_ADVANCE",
+          "FRONT_NORTH_ADVANCE"
+        ],
+        "meaning": "CAMERA_FRAMING_CONTEXT_ONLY; UPCOMING_SOURCE_GEOMETRY_IS_NOT_DRAWN_EARLY",
+        "reason": "Actual native preflight found 79 cropped source frames 1400..1478 when the next larger supplied state appeared before the camera approach completed. Anticipate only its geographic view while preserving event/global/source time."
+      }
     },
     {
       "chapterId": "chapter-08",
@@ -474,5 +485,7 @@
   "initialContextLocationIds": [
     "SEOUL"
   ],
-  "initialContextPadding": 1.08
+  "initialContextPadding": 1.08,
+  "hideDuplicateNativeHeadline": true,
+  "headlinePolicyReason": "Actual native EVENT_TITLE boundary-clearance failure on all candidate views; existing chapter date/title and source qualification already provide current-story information. Hide only the redundant legacy headline via existing reveal.title control; preserve source file and every other native role."
 }

@@ -13,11 +13,19 @@ const clone=value=>structuredClone(value),span=b=>[b[2]-b[0],b[3]-b[1]],
   Math.max(...rows.map(b=>b[2])),Math.max(...rows.map(b=>b[3]))],
  center=b=>[(b[0]+b[2])/2,(b[1]+b[3])/2];
 function fail(code){throw Error(code);}
+export function directorVisibleReveal(reveal,profile){
+ if(!reveal||typeof reveal!=='object')fail('DIRECTOR_ORIGINAL_REVEAL_REQUIRED');
+ const result=clone(reveal);
+ if(profile?.hideDuplicateNativeHeadline===true)result.title=0;
+ return result;
+}
 export function validateDirectorCameraProfile(profile,plan){
  if(profile?.schema!=='WORLD_ENGINE_STORY_DIRECTOR_CAMERA_V1'||profile.mode!=='SOFTWARE_PREVIEW'
   ||profile.productionEligible!==false||profile.fps!==plan?.fps||profile.totalFrames!==plan?.totalFrames
   ||!Array.isArray(profile.chapters)||profile.chapters.length!==plan?.productionV3?.eventChapters?.length)
   fail('DIRECTOR_CAMERA_EXPLICIT_BOUND_SOFTWARE_PROFILE_REQUIRED');
+ if(profile.hideDuplicateNativeHeadline!==undefined&&typeof profile.hideDuplicateNativeHeadline!=='boolean')
+  fail('DIRECTOR_CAMERA_HEADLINE_POLICY_BOOLEAN_REQUIRED');
  for(const [index,row]of profile.chapters.entries()){
   const source=plan.productionV3.eventChapters[index];
   if(row.chapterId!==source.chapterId||row.eventId!==source.eventId||row.startFrame!==source.startFrame
@@ -85,7 +93,9 @@ export function compileStoryDirectorCamera({profile,plan,frontProfile,baseCamera
     nativeLayoutValid:native?.valid===true,failures:clone(native?.failures??[])});
    if(native?.valid===true&&safety.wholeSuppliedGeometrySafe){target=candidate;admission={factor,native,safety};break;}
   }
-  if(!target)fail('DIRECTOR_CAMERA_NO_SAFE_SOURCE_VIEW_'+row.chapterId);
+  if(!target)fail('DIRECTOR_CAMERA_NO_SAFE_SOURCE_VIEW_'+row.chapterId+' '+JSON.stringify({
+   desired,sourceGeometryRefs:row.geometryRefs,locationIds:row.locationIds,
+   attempts:attempts.filter(item=>item.chapterId===row.chapterId)}));
   const start=previous??target,approachFrames=Math.min(row.approachFrames,row.endFrame-row.startFrame),
    segment=compileSegment({baseCameraPlan,currentNativeFrame,start,target,totalFrames:approachFrames,
     fps:plan.fps,holdFrames:settings.minimumEndpointHoldFrames??16});

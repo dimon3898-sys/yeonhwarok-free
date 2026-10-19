@@ -28,6 +28,7 @@ test('actual original reference-camera adapter evaluates global 2400 frames, pan
  const compiled=camera.compileStoryDirectorCamera({profile,plan,frontProfile,baseCameraPlan,currentNativeFrame:176,
   safeArea:[48,72,1032,1848],validateBounds:()=>({valid:true})});
  assert.equal(compiled.nativeLayoutPreflight.framesChecked,2400);
+ assert.equal(compiled.nativeLayoutPreflight.sourceCropFrameCount,0);
  const samples=Array.from({length:2400},(_,frame)=>camera.evaluateStoryDirectorCamera(compiled,frame));
  assert.ok(compiled.nativeLayoutPreflight.maximumZoomRatio>1.1);
  assert.ok(compiled.nativeLayoutPreflight.maximumCenterStepPixels>0);
@@ -44,4 +45,11 @@ test('unsupported or missing source fields fail, no arbitrary historical coordin
  assert.throws(()=>camera.validateDirectorCameraProfile(altered,plan),/ORIGINAL_CHAPTER_BINDING/);
  const row=structuredClone(profile.chapters[0]);row.geometryRefs=['UNSOURCED_GEOMETRY'];
  assert.throws(()=>camera.resolveDirectorChapterGeometry({plan,frontProfile,row}),/SOURCE_GEOMETRY_MISSING/);
+});
+test('explicit duplicate headline policy changes only original title reveal, source is immutable',()=>{
+ const original={primary:1,country:1,marker:.75,location:1,title:1,disclosure:1},before=structuredClone(original),
+  visible=camera.directorVisibleReveal(original,{hideDuplicateNativeHeadline:true});
+ assert.deepEqual(original,before);assert.deepEqual(visible,{...original,title:0});
+ assert.deepEqual(camera.directorVisibleReveal(original,{}),original);
+ assert.notEqual(visible,original);
 });
