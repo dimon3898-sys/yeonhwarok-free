@@ -13,7 +13,7 @@ import time
 HERE = Path(__file__).resolve().parent
 TESTS = ['test_contract_completion.py', 'test_history_admission.py', 'test_feature_ledger.py',
          'test_revision_bridge.py', 'test_studio_completion_path.py', 'test_completion_package.py',
-         'test_image_proof.py', 'test_camera_extension.mjs', 'test_frontier_extension.mjs',
+         'test_image_proof.py', 'test_history_source_binding.py', 'test_camera_extension.mjs', 'test_frontier_extension.mjs',
          'test_event_flow_binding.mjs', 'test_runtime_binding.mjs']
 
 

@@ -30,6 +30,18 @@
       "evidence": "CI39258858586 stopped before image build with generic command failure",
       "fix": "Persist bounded redacted exit/stdout/stderr for source-container or base pull failure",
       "result": "LOGGING_REGRESSION_PASS;NEXT_CI_WILL_RESOLVE_ACTUAL_CONTAINER_CAUSE"
+    },
+    {
+      "defect": "BASE_IMAGE_MISSING_CANONICAL_SCENE_FIXTURE",
+      "evidence": "CI39260146736 actual CPU container source probe FileNotFoundError: verified-front-data-v4-recovery/VIDEO_PLAN_80S.json",
+      "fix": "Package only 13 saved original JSON/GeoJSON assets; absent-only installer rejects conflict/symlink/tamper and preserves identical existing files.",
+      "result": "22_FOCUSED_PACKAGE_CPU_TESTS_PASS;FREE_CI_CONTAINER_RECHECK_PENDING"
+    },
+    {
+      "defect": "SOURCE_BYTES_VERIFIED_WITHOUT_BINDING_ASSESSED_OBJECT",
+      "evidence": "Actual runtime CPU call admitted modified chapter title with unchanged source hash claims",
+      "fix": "Compare assessed plan/front to verified original documents; allow only root+12 scene imageDigest rebindings to selected immutable image",
+      "result": "12_SOURCE_BINDING_TESTS_PASS_AND_ACTUAL_RUNTIME_MUTATED_TITLE_REJECTED"
     }
   ],
   "localDockerAttempt": {
@@ -38,7 +50,7 @@
     "reason": "Immutable base pull exhausted layered extraction space; Docker rejected layer and released failed extraction automatically. No image/cache/project deletion performed.",
     "continuedLocalBuild": false
   },
-  "cpuTests": 136,
+  "cpuTests": 157,
   "paidGPUExecuted": false,
   "noCauseGuessed": true
 }

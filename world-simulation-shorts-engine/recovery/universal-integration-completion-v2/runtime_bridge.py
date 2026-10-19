@@ -46,12 +46,16 @@ def data_admission(submission):
     plan = _source_plan(submission)
     history = _load('history_admission', HERE / 'history_admission.py')
     front = json.loads((HERE.parent / 'verified-front-data-v4-recovery/FRONT_PROFILE.json').read_bytes())
-    result = history.assess_history(plan, front)
+    catalog = json.loads(_manifest().read_regular(HERE / 'SOURCE_DATA_CATALOG.json'))
+    authority = _load('history_source_bytes', HERE / 'history_source_binding.py')
+    bindings = authority.verify_bound_history_objects(catalog, HERE.parent, plan=plan,
+        front_profile=front, image_digest=plan.get('renderProfile', {}).get('imageDigest'))
+    result = history.assess_history(plan, front, source_bindings=bindings)
+    result['sourceChecks']['actualSourceBytesVerifiedByThisAssessment'] = True
     # An arbitrary client source binding can never become verification authority.
     request = submission['completionV2']['eventFlow']
     if any(request.get(kind) for kind in ('events', 'flows', 'areas')):
         event = _load('event_flow_bridge', HERE / 'event_flow_contract.py')
-        catalog = json.loads(_manifest().read_regular(HERE / 'SOURCE_DATA_CATALOG.json'))
         event.validate_event_flow(request, fps=plan['fps'], total_frames=plan['totalFrames'],
                                  trusted_sources=catalog['trustedSources'])
     return result

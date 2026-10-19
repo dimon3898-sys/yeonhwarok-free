@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import subprocess
 import sys
 import tempfile
 
@@ -34,6 +35,38 @@ ENGINE_RECOVERY='/opt/rtx-package/repo/world-simulation-shorts-engine/recovery'
 ci.DEST=ENGINE_RECOVERY+'/universal-integration-completion-v2'
 PRIOR_DEST=ENGINE_RECOVERY+'/universal-integration-v1'
 ci.TAG=re.compile(r'completion-v2-[a-f0-9]{7,12}-[1-9][0-9]*-[1-9][0-9]*\Z')
+FIXTURE_COMMIT='61c7fc3a36cc987c3f88844aba98c57bb62fe22e'
+FIXTURE_DEST='/opt/completion-fixture-payload'
+FIXTURE_PREFIX='world-simulation-shorts-engine/recovery/'
+
+
+def build_fixture_manifest():
+ """Bind original fixture bytes to their saved Git commit, never regenerate data."""
+ namespace=FIXTURE_PREFIX+'verified-front-data-v4-recovery/'
+ profile=json.loads((ci.REPO/namespace/'FRONT_PROFILE.json').read_bytes())
+ paths={namespace+name for name in ('VIDEO_PLAN_80S.json','FRONT_PROFILE.json','FRONT_FILES.json','PARENT_PLAN_80S.json')}
+ paths.add(FIXTURE_PREFIX+'universal-auto-video-v2/fixtures/NATIVE_PAYLOAD.json')
+ for front in profile['fronts']:
+  name=front['sourceFile']
+  if not isinstance(name,str) or Path(name).is_absolute() or '..' in Path(name).parts or not name.endswith('.geojson'):
+   raise RuntimeError('COMPLETION_FIXTURE_SOURCE_REFERENCE_INVALID')
+  paths.add(namespace+name)
+ if len(paths)!=13:raise RuntimeError('COMPLETION_EXACT_FIXTURE_CLOSURE_REQUIRED')
+ rows=[]
+ for relative in sorted(paths):
+  file=ci.REPO/relative
+  if any(p.is_symlink() for p in (file,*file.parents)):
+   raise RuntimeError('COMPLETION_ORIGINAL_FIXTURE_REQUIRED')
+  result=subprocess.run(['git','cat-file','blob',FIXTURE_COMMIT+':'+relative],cwd=ci.REPO,capture_output=True,check=False)
+  if result.returncode or not 0<len(result.stdout)<=4*1024**2:raise RuntimeError('COMPLETION_SAVED_FIXTURE_BYTES_REQUIRED')
+  raw=result.stdout
+  if file.exists() and (not file.is_file() or file.read_bytes()!=raw):
+   raise RuntimeError('COMPLETION_SAVED_FIXTURE_BYTES_CHANGED')
+  rows.append({'repoPath':relative,'target':'/opt/rtx-package/repo/'+relative,
+   'sha256':hashlib.sha256(raw).hexdigest(),'sourceCommit':FIXTURE_COMMIT,'bytes':len(raw)})
+ value={'schema':'WORLD_ENGINE_PACKAGED_FIXTURES_V1','sourceCommit':FIXTURE_COMMIT,'files':rows}
+ (HERE/'PACKAGED_FIXTURES.json').write_text(json.dumps(value,indent=2)+'\n')
+ return value
 
 
 def location():
@@ -76,7 +109,7 @@ def _copy_manifested(root,name,destination,extras=()):
  return manifest
 
 
-def payload_context(*,root=HERE,prior=PRIOR):
+def payload_context(*,root=HERE,prior=PRIOR,repo_root=None):
  context=Path(tempfile.mkdtemp(prefix='payload-',dir=location()))
  previous=_copy_manifested(prior,'INTEGRATION_FILES.json',context/'integration',('RUNTIME_SOURCE_MANIFEST.json',))
  completion=_copy_manifested(root,'COMPLETION_FILES.json',context/'completion')
@@ -84,8 +117,33 @@ def payload_context(*,root=HERE,prior=PRIOR):
   raise RuntimeError('COMPLETION_PRIOR_MANIFEST_BINDING_CHANGED')
  if completion.get('baseOperatingImageDigest')!=ci.BASE_DIGEST or previous.get('baseOperatingImageDigest')!=ci.BASE_DIGEST:
   raise RuntimeError('COMPLETION_IMMUTABLE_BASE_CHANGED')
- required={'bootstrap.py','studio_entry.py','studio_controller.py','runtime_bridge.py','capture_runtime.mjs','package_manifest.py'}
+ required={'bootstrap.py','studio_entry.py','studio_controller.py','runtime_bridge.py','capture_runtime.mjs','package_manifest.py',
+  'install_fixtures.py','PACKAGED_FIXTURES.json'}
  if not required<=set(completion['files']):raise RuntimeError('COMPLETION_CONNECTED_RUNTIME_REQUIRED')
+ fixture_raw=(root/'PACKAGED_FIXTURES.json').read_bytes();fixture_manifest=json.loads(fixture_raw)
+ if fixture_manifest.get('schema')!='WORLD_ENGINE_PACKAGED_FIXTURES_V1' or fixture_manifest.get('sourceCommit')!=FIXTURE_COMMIT:
+  raise RuntimeError('COMPLETION_FIXTURE_MANIFEST_REQUIRED')
+ fixture_root=context/'fixtures';fixture_root.mkdir(mode=0o755)
+ (fixture_root/'PACKAGED_FIXTURES.json').write_bytes(fixture_raw)
+ for row in fixture_manifest['files']:
+  relative=row['repoPath'];path=Path(relative)
+  if (not isinstance(relative,str) or path.is_absolute() or '..' in path.parts or '\\' in relative
+      or not relative.startswith(FIXTURE_PREFIX) or not relative.endswith(('.json','.geojson'))
+      or row['sourceCommit']!=FIXTURE_COMMIT or row['target']!='/opt/rtx-package/repo/'+relative):
+   raise RuntimeError('COMPLETION_FIXTURE_PACKAGE_PATH_INVALID')
+  source=Path(repo_root or ci.REPO)/path
+  if any(p.is_symlink() for p in (source,*source.parents)):
+   raise RuntimeError('COMPLETION_FIXTURE_PACKAGE_REGULAR_REQUIRED')
+  if source.exists():
+   if not source.is_file():raise RuntimeError('COMPLETION_FIXTURE_PACKAGE_REGULAR_REQUIRED')
+   raw=source.read_bytes()
+  else:
+   saved=subprocess.run(['git','cat-file','blob',FIXTURE_COMMIT+':'+relative],cwd=Path(repo_root or ci.REPO),capture_output=True,check=False)
+   if saved.returncode:raise RuntimeError('COMPLETION_FIXTURE_SAVED_BLOB_REQUIRED')
+   raw=saved.stdout
+  if hashlib.sha256(raw).hexdigest()!=row['sha256'] or len(raw)!=row['bytes']:
+   raise RuntimeError('COMPLETION_FIXTURE_PACKAGE_SHA_MISMATCH')
+  target=fixture_root/'repo'/path;target.parent.mkdir(mode=0o755,parents=True,exist_ok=True);target.write_bytes(raw)
  shutil.copyfile(root/'Dockerfile',context/'Dockerfile')
  return context
 
@@ -104,12 +162,20 @@ def container(image,*,context=None):
   '--restart=no','--shm-size=2g','--tmpfs','/tmp:rw,mode=1777']
  if context:
   args+=['--mount','type=bind,source='+str(context/'integration')+',target='+PRIOR_DEST+',readonly',
-   '--mount','type=bind,source='+str(context/'completion')+',target='+ci.DEST+',readonly']
+   '--mount','type=bind,source='+str(context/'completion')+',target='+ci.DEST+',readonly',
+   '--mount','type=bind,source='+str(context/'fixtures')+',target='+FIXTURE_DEST+',readonly']
  return args+['--entrypoint=/usr/bin/python3',image,'-B']
 
 
+def fixture_install_code():
+ return ("import importlib.util;"
+  "s=importlib.util.spec_from_file_location('_completion_ci_fixture_install','"+ci.DEST+"/install_fixtures.py');"
+  "m=importlib.util.module_from_spec(s);s.loader.exec_module(m);"
+  "m.install('"+FIXTURE_DEST+"');")
+
+
 def source_code():
- return ("import importlib.util,json,sys,os;os.setgroups([]);os.setgid(1000);os.setuid(1000);"
+ return (fixture_install_code()+"import importlib.util,json,sys,os;os.setgroups([]);os.setgid(1000);os.setuid(1000);"
   "sys.path.insert(0,'/opt/world-engine-studio-https-proxy-fix');"
   "from manifest import verify_sources as frozen_verify;frozen=frozen_verify();"
   "p='"+ci.DEST+"/package_manifest.py';s=importlib.util.spec_from_file_location('_completion_ci_sources',p);"
@@ -163,7 +229,7 @@ def test():
  report=image_hashes(ci.BASE,context)
  # Exercise the actual inherited startup boundary. No owner code is created,
  # no secret is injected, and process spawning is explicitly denied by fixture.
- code=("import importlib.util,os,json;from unittest.mock import patch;"
+ code=(fixture_install_code()+"import importlib.util,os,json;from unittest.mock import patch;"
   "os.environ['WORLD_ENGINE_STUDIO_STATE_ROOT']='/tmp/completion-owner-negative';"
   "os.environ.pop('WORLD_ENGINE_STUDIO_OWNER_CODE',None);"
   "s=importlib.util.spec_from_file_location('_completion_negative_boot','"+ci.DEST+"/bootstrap.py');"
