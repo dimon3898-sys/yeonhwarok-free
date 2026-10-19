@@ -8,10 +8,12 @@
 |---|---|
 | [정확한 80초 prompt](../fixtures/STUDIO_V2_80S_PROMPT.json) | 새 completion runtime용 inner JSON. 검증된 파일을 그대로 사용. |
 | [실제 정규화된 80초 submission](../fixtures/VALIDATED_80S_SUBMISSION.json) | frozen `videoPlan` + sibling metadata. Studio의 Scene 첨부칸에 그대로 넣는 raw Scene 파일은 아님. |
+| [실제 후보 이미지에 바인딩한 submission](../fixtures/CANDIDATE_80S_SUBMISSION.json) | 빌드·독립 pull 이후 새 digest로 실제 검증기를 다시 실행한 결과. 자료와 설정은 보존. raw Scene 첨부용은 아님. |
 | [입력 schema](../STUDIO_PROMPT_V2.schema.json) | strict V2 prompt·completion 필드와 조건. |
 | [Event/Flow/Area schema](../EVENT_FLOW_REQUEST.schema.json) | canonical plan·자료 참조 계약. 추가 Core compiler 검증 필요. |
 | [실행 예제 및 오류](../PROMPT_V2_COOKBOOK.md) | 기본값·범위·정확한 호출·미지원 명령. |
 | [정확한 입력 CPU 검증](EXACT_INPUT_VALIDATION.json) | prompt·submission SHA, 2,400프레임·12장면, `gpuExecuted:false`. |
+| [후보 입력 CPU 검증](CANDIDATE_INPUT_VALIDATION.json) | 새 immutable image·source manifest·capture signature와 실제 객체 대조. `renderReady:false`. |
 
 정확한 prompt receipt의 parser는 `ACTUAL_FROZEN_STUDIO_V4_PLUS_COMPLETION_V2`다. 입력 검증에 사용한 기존 immutable 이미지 참조는 **계약 검증용 바인딩**이며 새 후보 코드가 그 기존 이미지 안에 있다는 주장이 아니다. 새 이미지 tag·digest·독립 pull은 최종 이미지 보고서를 사용한다.
 

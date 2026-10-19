@@ -158,12 +158,23 @@ def build(*, image_proof=None, source_commit=None):
     # Qualified source-only admission accepts known endpoints/held cores without
     # claiming complete opponent ownership or measured daily front observations.
     bind(['TERRITORY.SUPPLIED_AREA_COLOR', 'TERRITORY.ARCHIVAL_FRONT_ONLY', 'PLANNER.V4_PARTIAL_ARCHIVAL_PROFILE'],
-         files=['history_admission.py', 'source_observations.mjs', 'production_area_bridge.mjs', 'SOURCE_DATA_CATALOG.json'],
+         files=['history_admission.py', 'history_source_binding.py', 'runtime_bridge.py',
+                'source_observations.mjs', 'production_area_bridge.mjs', 'SOURCE_DATA_CATALOG.json',
+                'reports/HISTORY_RUNTIME_NEGATIVE.json'],
          fields=['completion.dataPolicy=QUALIFIED_SOURCE_ONLY'],
-         factories=['assess_history', 'suppliedFrontObservations', 'createProductionAreaPass'],
-         consumers=['reviewed held-core/partial-front source selector', 'unchanged qualified Area/front consumer'],
-         tests=['test_history_admission.py', 'test_runtime_binding.mjs', 'test_frontier_extension.mjs'], selected='YES',
-         reason='The qualified source-only fixture admits preserved held-core schematic states and approximate partial official front holds with uncertainty intact. Actual selectors cover 2400 CPU frames; no opposite ownership complement, unobserved daily fronts or measured bilateral occupation is inferred.')
+         factories=['verify_bound_history_objects', 'assess_history', 'suppliedFrontObservations', 'createProductionAreaPass'],
+         consumers=['actual four-file history SHA/object binding', 'reviewed held-core/partial-front source selector', 'unchanged qualified Area/front consumer'],
+         tests=['test_history_admission.py', 'test_history_source_binding.py', 'test_runtime_binding.mjs', 'test_frontier_extension.mjs'], selected='YES',
+         reason='The qualified source-only fixture admits preserved held-core schematic states and approximate partial official front holds with uncertainty intact. The actual runtime verifies four authority files and equality of the assessed plan/front objects, allowing only existing immutable-image digest slots to rebind; a mutated title is rejected. Actual selectors cover 2400 CPU frames; no opposite ownership complement, unobserved daily fronts or measured bilateral occupation is inferred.')
+
+    bind(['PLANNER.SOURCE_MANIFEST'],
+         files=['history_source_binding.py', 'runtime_bridge.py', 'history_admission.py',
+                'SOURCE_DATA_CATALOG.json', 'reports/HISTORY_RUNTIME_NEGATIVE.json'],
+         fields=['server sourceFileBindings', 'internally bound videoPlan and front profile'],
+         factories=['verify_declared_source_files', 'verify_bound_history_objects'],
+         consumers=['runtime_bridge.data_admission -> actual four-file SHA and assessed-object equality'],
+         tests=['test_history_source_binding.py'], exposed='INTERNAL_ONLY', selected='YES', renderer='NONE',
+         reason='Actual canonical historical JSON bytes, roles, authority cross-links and in-memory assessed objects are verified before data admission. Only the existing immutable imageDigest slots may rebind; changed history/title/front objects, stale files and unsafe paths are rejected. This is CPU source-authority proof, not an asset re-audit or GPU output.')
 
     # Strict frontend, source-bound metadata, and actual safe local HTTP tests.
     bind(['STUDIO.STRUCTURED_PRESET', 'PLANNER.V4_FROZEN_80S', 'STUDIO.TITLE_METADATA', 'STUDIO.ADVANCED_VISUAL_PROMPT'],
@@ -212,6 +223,19 @@ def build(*, image_proof=None, source_commit=None):
          factories=['normalize_submission', 'original normalize_sfx'], consumers=['preserved event-bound SFX normalizer'],
          tests=['test_contract_completion.py', 'test_revision_bridge.py'], exposed='YES', addressable='YES', selected='YES', renderer='NONE',
          reason='Structured completion input and SFX-only revisions retain exact normalized audio/cue metadata without dropping completion identity. Source-bound cue scheduling/mixing/mux implementations are preserved; no new WAV/AAC file or listening-quality proof is produced here.')
+
+    for feature_id in ['PLANNER.V4_FROZEN_80S', 'STUDIO.SOURCE_IMAGE_BINDING']:
+        r = rows[feature_id]
+        merged = {item['path']: item for item in r['sourceFiles']}
+        for file in ['history_source_binding.py', 'runtime_bridge.py', 'reports/HISTORY_RUNTIME_NEGATIVE.json',
+                     'tests/test_history_source_binding.py']:
+            item = source(ROOT / file)
+            merged[item['path']] = item
+        r['sourceFiles'] = list(merged.values())
+        r['factories'].append('verify_bound_history_objects')
+        r['consumers'].append('actual assessed history objects equal verified immutable source except imageDigest slots')
+        r['cpuTests'].append({'name': 'test_history_source_binding.py', 'result': suites['test_history_source_binding.py']['status']})
+        r['reason'] += ' Runtime source-object binding rejects a mutated title even when caller-provided declarations look valid; physical authority files and assessed objects are checked independently of image/GPU approval.'
 
     # Native ASTRA/map/Planner owners remain selected by the preserved parent
     # source graph. New CPU tests prove configuration wiring, not these shaders.
