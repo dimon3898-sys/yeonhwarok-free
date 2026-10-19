@@ -1,0 +1,83 @@
+name: WORLD ENGINE current Studio input read-only recovery
+
+on:
+  push:
+    branches: [development/studio-job-input-recovery-20261019]
+    paths:
+      - .github/workflows/studio-job-input-recovery-readonly.yml
+      - world-simulation-shorts-engine/recovery/studio-job-input-recovery-v1/read_current.py
+      - world-simulation-shorts-engine/recovery/studio-job-input-recovery-v1/test_read_current.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: studio-job-input-readonly-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  readonly:
+    if: github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/development/studio-job-input-recovery-20261019'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    permissions:
+      contents: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      INPUT_ROOT: world-simulation-shorts-engine/recovery/studio-job-input-recovery-v1
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: development/studio-job-input-recovery-20261019
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/recovery/studio-job-input-recovery-v1/**
+            /world-simulation-shorts-engine/recovery/studio-auth-recovery-v2/collector.py
+            /world-simulation-shorts-engine/recovery/studio-auth-recovery-v2/rest_evidence.py
+      - name: Check bounded read-only collector without credentials
+        run: |
+          python3 -B - <<'PY'
+          import hashlib, pathlib
+          root = pathlib.Path('world-simulation-shorts-engine/recovery/studio-auth-recovery-v2')
+          for name, digest in [('collector.py', '73eb143729d3ea7d10835e03e29423367d6839238559a53fe10f2a7a90fd313b'), ('rest_evidence.py', 'd79ef527d9a65ea4f3c69e9b126d338eec742ed3f1e727494ae8737feb1441de')]:
+              assert hashlib.sha256((root / name).read_bytes()).hexdigest() == digest
+          PY
+          python3 -B -m unittest discover -s "$INPUT_ROOT" -p test_read_current.py -v
+      - name: Reuse exact verified official CLI package
+        run: |
+          python3 - <<'PY'
+          import hashlib, os, pathlib, urllib.request
+          wheel = pathlib.Path(os.environ['RUNNER_TEMP']) / 'gcube_cli-0.4.2-py3-none-any.whl'
+          with urllib.request.urlopen('https://files.pythonhosted.org/packages/f4/f9/338c8bf874df428db060bc360ab300ac5940abf3ad286ab4ad601d8cbaad/gcube_cli-0.4.2-py3-none-any.whl', timeout=25) as response:
+              body = response.read(200_000)
+          assert hashlib.sha256(body).hexdigest() == '9aafcafdc84b129ff119b4f735c0d56f09ba6898667fa3d6713a5fb85d06d692'
+          wheel.write_bytes(body)
+          PY
+          python3 -m venv "$RUNNER_TEMP/gcube-current-readonly"
+          "$RUNNER_TEMP/gcube-current-readonly/bin/python" -m pip install --disable-pip-version-check --no-input "$RUNNER_TEMP/gcube_cli-0.4.2-py3-none-any.whl"
+      - name: Read existing workload and existing logs only
+        timeout-minutes: 2
+        env:
+          GCUBE_ACCESS_TOKEN: ${{ secrets.GCUBE_ACCESS_TOKEN }}
+        run: |
+          "$RUNNER_TEMP/gcube-current-readonly/bin/python" -B "$INPUT_ROOT/read_current.py" \
+            --output "$INPUT_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT/CURRENT_READ.json"
+      - name: Persist closed safe evidence only
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re
+          root = pathlib.Path(os.environ['INPUT_ROOT']) / 'runs' / (os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
+          path = root / 'CURRENT_READ.json'
+          raw = path.read_text(); value = json.loads(raw)
+          assert value['stateChanges'] == value['paidOperations'] == 0
+          assert value['jobCreated'] is False and value['renderInvoked'] is False
+          assert not re.search(r'-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|[?&](?:token|sig)=', raw)
+          (root / 'SHA256SUMS').write_text(hashlib.sha256(path.read_bytes()).hexdigest() + '  CURRENT_READ.json\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "$INPUT_ROOT/runs/$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          git diff --cached --check
+          git commit -m 'docs(studio): persist current workload read-only input recovery evidence [skip ci]'
+          git push origin HEAD:development/studio-job-input-recovery-20261019
