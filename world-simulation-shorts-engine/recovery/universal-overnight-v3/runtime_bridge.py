@@ -57,8 +57,10 @@ def gate_context(submission,*,image_digest,control_root=None):
             'integration':submission['integration'],'completionV2':submission['completionV2'],
             'visualExtensions':submission['overnightV3']['visualExtensions']})),
         'sourceCatalogSHA256':catalog_sha}
+    camera_evidence=load('camera_activity',HERE/'camera_activity.py').load_bound_camera_evidence(plan,bindings)
     preview=load('preview_contract',HERE/'preview_contract.py').compile_preview(plan,bindings=bindings,
-        start_frame=submission['overnightV3'].get('startFrame'),frame_count=150)
+        start_frame=submission['overnightV3'].get('startFrame'),frame_count=150,
+        camera_evidence=camera_evidence)
     return {'schema':'WORLD_ENGINE_OVERNIGHT_GATE_CONTEXT_V3','sourceClosureVerified':True,
         'sourceManifestSHA256':proof['manifestSHA256'],'imagePackageIncluded':image is not None,
         'preview':preview,'dataAdmitted':history['dataAdmitted'],

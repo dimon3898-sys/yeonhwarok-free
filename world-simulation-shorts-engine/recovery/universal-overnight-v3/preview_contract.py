@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -161,21 +162,43 @@ def _phase_coherence(plan):
     return prefix(coherent), prefix(outside)
 
 
-def select_preview_window(plan):
+def _camera_activity():
+    spec = importlib.util.spec_from_file_location("_overnight_preview_camera_activity", Path(__file__).with_name("camera_activity.py"))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def select_preview_window(plan, *, camera_evidence=None):
     """Rank existing frame windows; never invent a route, state or camera pose."""
     total = validate_plan(plan)
     prefix, chapters = _motion_frames(plan), _chapter_frames(plan)
     coherent, outside = _phase_coherence(plan)
+    camera = _camera_activity()
+    measured = camera.measured_candidate_windows(camera_evidence, FRAME_COUNT)
+    # A package-owned actual trace limits the claim to fully observed windows.
+    # Missing frames are UNKNOWN, never a stationary pose or an interpolation.
+    # If joint movement exists, stationary windows cannot outrank it merely by
+    # avoiding a context snapshot. This does not alter any original source pose.
+    def score(a):
+        observed = camera.camera_window_metrics(camera_evidence, a, a + FRAME_COUNT)
+        motion = observed["motionPairs"] or 0
+        coherent_frames = coherent[a + FRAME_COUNT] - coherent[a]
+        actual = (int(motion > 0 and coherent_frames > 0), min(motion, coherent_frames), motion) if measured else ()
+        activity = prefix[a + FRAME_COUNT] - prefix[a]
+        carry_in = outside[a + FRAME_COUNT] - outside[a]
+        # Once actual joint motion is established, retain the fullest authored
+        # activity before shaving a context-carry-in frame. Otherwise a tied
+        # window can gain an isolated source cut while losing useful movement.
+        source = (coherent_frames, activity, -carry_in) if measured else (coherent_frames, -carry_in, activity)
+        return (*actual, *source,
+                -sum(a < f < a + FRAME_COUNT for f in chapters),
+                sum(a <= f < a + FRAME_COUNT for f in chapters), -a)
     # Prefer a transition whose endpoints both belong to its source-declared
     # chapter, avoid context carried in from another phase, then maximize
     # activity while avoiding a cut into the next chapter. Missing phase
     # metadata falls back to existing activity rather than being made up.
-    start = max(range(total - FRAME_COUNT + 1), key=lambda a: (
-        coherent[a + FRAME_COUNT] - coherent[a],
-        -(outside[a + FRAME_COUNT] - outside[a]),
-        prefix[a + FRAME_COUNT] - prefix[a],
-        -sum(a < f < a + FRAME_COUNT for f in chapters),
-        sum(a <= f < a + FRAME_COUNT for f in chapters), -a))
+    start = max(measured if measured else range(total - FRAME_COUNT + 1), key=score)
     return start
 
 
@@ -185,7 +208,7 @@ def _scene_slices(plan, start, end):
             for row in plan["scenes"] if row["startFrame"] < end and row["endFrame"] > start]
 
 
-def compile_preview(plan, *, bindings, start_frame=None, frame_count=FRAME_COUNT):
+def compile_preview(plan, *, bindings, start_frame=None, frame_count=FRAME_COUNT, camera_evidence=None):
     """Build an inert, exact range request. Trusted callers supply source hashes.
 
     Raw source SHA is checked by ``verify_preview_request_file`` at consumption;
@@ -193,15 +216,22 @@ def compile_preview(plan, *, bindings, start_frame=None, frame_count=FRAME_COUNT
     """
     total = validate_plan(plan)
     bindings = validate_bindings(bindings)
+    camera = _camera_activity()
+    if camera_evidence is not None:
+        camera_evidence = camera.validate_camera_evidence(camera_evidence, plan, bindings)
     if type(frame_count) is not int or frame_count != FRAME_COUNT:
         _fail("PREVIEW_ONLY_150_FRAMES_SUPPORTED")
     automatic = start_frame is None
-    start = select_preview_window(plan) if automatic else start_frame
+    start = select_preview_window(plan, camera_evidence=camera_evidence) if automatic else start_frame
     if type(start) is not int or not 0 <= start <= total - FRAME_COUNT:
         _fail("PREVIEW_GLOBAL_HALF_OPEN_RANGE_INVALID")
     end = start + FRAME_COUNT
     prefix, chapters = _motion_frames(plan), _chapter_frames(plan)
     coherent, outside = _phase_coherence(plan)
+    observed = camera.camera_window_metrics(camera_evidence, start, end)
+    measured_available = bool(camera.measured_candidate_windows(camera_evidence, FRAME_COUNT))
+    method = ("MEASURED_CAMERA_AND_SOURCE_PHASE_ACTIVITY" if camera_evidence is not None and measured_available
+              else "SOURCE_PHASE_COHERENCE_THEN_ACTIVITY")
     result = {"schema": SCHEMA, "bindings": bindings, "planSemanticSHA256": sha256(canonical(plan)),
               "range": {"startFrame": start, "endFrame": end, "fps": FPS, "totalFrames": total,
                         "frameCount": FRAME_COUNT, "frameConvention": "GLOBAL_HALF_OPEN", "localPtsFrameOrigin": 0},
@@ -211,27 +241,36 @@ def compile_preview(plan, *, bindings, start_frame=None, frame_count=FRAME_COUNT
                              "endSample": end * 1600, "sampleCount": FRAME_COUNT * 1600,
                              "policy": "CLIP_ORIGINAL_GLOBAL_SFX_NO_RESEQUENCING"},
               "sceneSlices": _scene_slices(plan, start, end),
-              "selection": {"method": "SOURCE_PHASE_COHERENCE_THEN_ACTIVITY" if automatic else "EXPLICIT_GLOBAL_RANGE",
+              "selection": {"method": method if automatic else "EXPLICIT_GLOBAL_RANGE",
                             "sourceActivityFrames": prefix[end] - prefix[start],
                             "phaseCoherentTransitionFrames": coherent[end] - coherent[start],
                             "outsideChapterTransitionFrames": outside[end] - outside[start],
                             "internalChapterCuts": sum(start < f < end for f in chapters),
                             "existingChapterFocusStarts": sum(start <= f < end for f in chapters),
+                            "explicitSourceEvidence": ({"schema": camera.SCHEMA,
+                                "evidenceSHA256": camera_evidence["evidenceSHA256"],
+                                "measuredScopeOnly": True, "unknownFramesAreStatic": False}
+                                if camera_evidence is not None else None),
+                            "cameraActivity": observed,
+                            "cameraHardwareVerification": "GPU_PENDING",
                             "evidenceBasis": "CPU_SOURCE_SCHEDULE_NOT_VISUAL_QUALITY",
                             "sourceTimelineReset": False, "geometryInterpolationAdded": False},
               "renderAllowedByRequest": False, "hardwareVerified": False, "visualQualityApproved": False}
     return {**result, "requestSHA256": sha256(canonical(result))}
 
 
-def validate_preview(request, plan, *, bindings=None):
+def validate_preview(request, plan, *, bindings=None, camera_evidence=None):
     if not isinstance(request, dict) or request.get("schema") != SCHEMA:
         _fail("PREVIEW_REQUEST_SCHEMA_INVALID")
     if bindings is not None and request.get("bindings") != validate_bindings(bindings):
         _fail("PREVIEW_TRUSTED_BINDINGS_MISMATCH")
-    automatic = request.get("selection", {}).get("method") == "SOURCE_PHASE_COHERENCE_THEN_ACTIVITY"
+    if camera_evidence is None:
+        camera_evidence = _camera_activity().load_bound_camera_evidence(plan, request.get("bindings", {}))
+    automatic = request.get("selection", {}).get("method") in {
+        "SOURCE_PHASE_COHERENCE_THEN_ACTIVITY", "MEASURED_CAMERA_AND_SOURCE_PHASE_ACTIVITY"}
     supplied_start = request.get("range", {}).get("startFrame")
     expected = compile_preview(plan, bindings=request.get("bindings"),
-                               start_frame=None if automatic else supplied_start)
+                               start_frame=None if automatic else supplied_start, camera_evidence=camera_evidence)
     if request != expected:
         _fail("PREVIEW_REQUEST_SOURCE_OR_RANGE_MISMATCH")
     return deepcopy(expected)
@@ -272,12 +311,15 @@ def _read_regular(path):
         os.close(directory)
 
 
-def verify_preview_request_file(request_file, plan_file, *, bindings=None):
+def verify_preview_request_file(request_file, plan_file, *, bindings=None, camera_evidence=None):
     raw = _read_regular(plan_file)
     request = json.loads(_read_regular(request_file))
     if sha256(raw) != request.get("bindings", {}).get("originalPlanSHA256"):
         _fail("PREVIEW_ACTUAL_PLAN_BYTES_MISMATCH")
-    return validate_preview(request, json.loads(raw), bindings=bindings)
+    plan = json.loads(raw)
+    if camera_evidence is None:
+        camera_evidence = _camera_activity().load_bound_camera_evidence(plan, request.get("bindings", {}))
+    return validate_preview(request, plan, bindings=bindings, camera_evidence=camera_evidence)
 
 
 if __name__ == "__main__":

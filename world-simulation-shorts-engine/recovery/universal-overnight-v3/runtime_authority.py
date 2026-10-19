@@ -56,8 +56,9 @@ def verify_runtime_sidecars(request_file, plan_file, *, preview_file=None):
     catalog, catalog_raw, catalog_sha = data.load_effective_catalog()
     data.admit_capture_sources(submission, catalog)  # Actual history AND original supplied subevents.
     preview_owner = load('preview', HERE / 'preview_contract.py')
-    preview_owner.validate_preview(request['preview'], plan)
     bindings = request['preview']['bindings']
+    camera_evidence = load('camera_activity', HERE / 'camera_activity.py').load_bound_camera_evidence(plan, bindings)
+    preview_owner.validate_preview(request['preview'], plan, camera_evidence=camera_evidence)
     if (bindings['originalPlanSHA256'] != manifest.sha(raw_plan)
             or bindings['imageDigest'] != request['imageDigest']
             or bindings['sourceManifestSHA256'] != source['manifestSHA256']):
@@ -68,7 +69,8 @@ def verify_runtime_sidecars(request_file, plan_file, *, preview_file=None):
                 'visualExtensions': request['overnightV3']['visualExtensions']}))):
         raise RuntimeError('OVERNIGHT_PREVIEW_SOURCE_CATALOG_CHANGED')
     expected_preview = preview_owner.compile_preview(plan, bindings=bindings,
-        start_frame=request['overnightV3'].get('startFrame'), frame_count=150)
+        start_frame=request['overnightV3'].get('startFrame'), frame_count=150,
+        camera_evidence=camera_evidence)
     if expected_preview != request['preview']:
         raise RuntimeError('OVERNIGHT_AUTHORED_PREVIEW_SELECTION_CHANGED')
     preview_path = Path(preview_file) if preview_file else plan_path.with_name('PREVIEW_REQUEST.json')

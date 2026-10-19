@@ -51,8 +51,8 @@ class ActualSidecarAuthorityTests(unittest.TestCase):
     def test_actual_prepared_normalized_source_range_and_image_parent_are_bound(self):
         value = self.verify()
         self.assertEqual(value['preview']['range']['frameCount'], 150)
-        self.assertEqual(value['preview']['range']['startFrame'], 1450)
-        self.assertEqual(value['preview']['range']['endFrame'], 1600)
+        self.assertEqual(value['preview']['range']['startFrame'], 1400)
+        self.assertEqual(value['preview']['range']['endFrame'], 1550)
         self.assertTrue(value['globalGPUAdmissionRequired'])
         self.assertFalse(value['rendererOutputVerified'])
 
