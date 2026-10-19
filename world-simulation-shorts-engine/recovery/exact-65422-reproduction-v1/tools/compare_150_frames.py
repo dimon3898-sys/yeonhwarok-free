@@ -62,7 +62,7 @@ def first_difference(a, b, path="$"):
         # JSON numbers may be serialized as 0 or 0.0 without a numeric change.
         if isinstance(a, (int, float)) and not isinstance(a, bool) and isinstance(b, (int, float)) and not isinstance(b, bool) and a == b:
             return None
-        return {"path": path, "reason": "type_or_value", "original": a, "reproduction": b}
+        return {"path": path, "reason": "type_or_value", "original": safe_difference_value(a), "reproduction": safe_difference_value(b)}
     if isinstance(a, dict):
         if set(a) != set(b):
             return {"path": path, "reason": "keys", "onlyOriginal": sorted(set(a) - set(b)), "onlyReproduction": sorted(set(b) - set(a))}
@@ -78,8 +78,15 @@ def first_difference(a, b, path="$"):
             if difference:
                 return difference
     elif a != b:
-        return {"path": path, "reason": "value", "original": a, "reproduction": b}
+        return {"path": path, "reason": "value", "original": safe_difference_value(a), "reproduction": safe_difference_value(b)}
     return None
+
+
+def safe_difference_value(value):
+    """Keep comparison reports small; never embed whole scene/state payloads."""
+    if isinstance(value, (dict, list)) or isinstance(value, str) and len(value) > 256:
+        return {"type": type(value).__name__, "length": len(value), "canonicalSha256": canonical_hash(value)}
+    return value
 
 
 def probe(path: Path) -> dict:

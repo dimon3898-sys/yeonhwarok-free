@@ -10,8 +10,13 @@ const execute=promisify(execFile), root=path.resolve(path.dirname(fileURLToPath(
 const options=Object.fromEntries(process.argv.slice(2).map(x=>{const m=/^--(capsule|original-report|cache)=(.+)$/.exec(x);if(!m)throw Error('UNKNOWN_ARGUMENT');return [m[1],m[2]];}));
 for(const key of ['capsule','original-report','cache'])assert.ok(options[key],key+' required');
 const capsule=path.resolve(options.capsule), cache=path.resolve(options.cache);
-assert.notEqual(capsule,path.resolve(root,'../../..'));
-const original=JSON.parse(await readFile(options['original-report'],'utf8'));
+const repoRoot=path.resolve(root,'../../..');
+const inside=(child,parent)=>child===parent||child.startsWith(parent+path.sep);
+assert.equal(inside(capsule,repoRoot),false,'SOURCE_CAPSULE_MUST_BE_INDEPENDENT');
+assert.equal(inside(cache,repoRoot)||inside(cache,capsule)||cache.split(path.sep).includes('.onboarding'),false,'CACHE_MUST_NOT_USE_PROTECTED_REPO_CAPSULE_OR_OLD_ONBOARDING');
+const originalBytes=await readFile(options['original-report']);
+assert.equal(createHash('sha256').update(originalBytes).digest('hex'),'550c1d7db502b91dc94548284ddfb10ff27f8e52cdf7efac7e7df68bfa768656','ORIGINAL_REPORT_HASH_REQUIRED');
+const original=JSON.parse(originalBytes);
 assert.equal(original.sourceCommit,'2c097df2d02432a3f9ae4dae5d714dbc9eacd434');
 assert.equal(original.frames.length,150);
 const hash=x=>createHash('sha256').update(x).digest('hex');
@@ -20,6 +25,8 @@ const exists=async f=>stat(f).then(()=>true,()=>false);
 const atomic=async(f,x)=>{await writeFile(f+'.writing',JSON.stringify(x)+'\n');await rename(f+'.writing',f);};
 const verifySources=async()=>{for(const item of original.sourceBindings){const bytes=await readFile(path.join(capsule,item.path));assert.equal(hash(bytes),item.sha256,item.path);assert.equal(bytes.length,item.bytes);}};
 await verifySources();
+await Promise.all([mkdir(path.join(root,'proof'),{recursive:true}),mkdir(path.join(root,'public-review'),{recursive:true})]);
+assert.equal(await exists(path.join(root,'public-review/WORLD_ENGINE_65422_EXACT_REPRODUCTION_5S.mp4')),false,'REFUSE_RENDER_WHEN_COMPLETE_VIDEO_ALREADY_EXISTS');
 const framesDir=path.join(cache,'frames'), rowsDir=path.join(cache,'rows');
 await Promise.all([mkdir(framesDir,{recursive:true}),mkdir(rowsDir,{recursive:true})]);
 const lockPath=path.join(cache,'ACTIVE_CAPTURE.json');
@@ -39,6 +46,7 @@ try{
  session=await openQualityRuntime({mode:'VISUAL_REFERENCE_STUDY'});
  report.runtime=session.info;report.runtimeSourceSignature=session.sourceSignature;
  assert.equal(session.sourceSignature,original.runtimeSourceSignature,'ORIGINAL_RUNTIME_SOURCE_SIGNATURE_MISMATCH');
+ assert.equal(session.info.productionEligible,true);assert.equal(session.info.cameraMotion.status,'PASS');assert.equal(session.info.cameraMotion.fakeLockCount,0);
  for(let frame=0;frame<150;frame++){
   const name=String(frame).padStart(3,'0'),rowFile=path.join(rowsDir,name+'.json'),pngFile=path.join(framesDir,name+'.png');
   let row,bytes;
@@ -93,6 +101,7 @@ try{
  report.rawRgbaEqualFrames=report.frames.filter(x=>x.originalRawRgbaEqual).length;
  report.pngEqualFrames=report.frames.filter(x=>x.originalPngEqual).length;
  report.status='CAPTURE_AND_ENCODE_PASS_COMPARISON_REQUIRED';
+ await atomic(path.join(root,'proof/CAPTURE_STATUS.json'),{status:report.status,totalFrames:150,newlyRenderedFrames:report.newlyRenderedFrames,reusedFrames:report.reusedFrames,rawRgbaEqualFrames:report.rawRgbaEqualFrames,pngEqualFrames:report.pngEqualFrames});
 }catch(e){failed=e;report.status='FAIL';report.error=String(e.stack);}
 finally{
  try{await session?.close();}catch(e){failed??=e;report.closeError=String(e.stack);}

@@ -1,0 +1,68 @@
+{
+  "schema": "EXACT_65422_CAPTURE_ADAPTER_REVIEW_V1",
+  "status": "STATIC_REVIEW_PASS_ACTUAL_CAPTURE_PENDING",
+  "originalRendererSourceCommit": "2c097df2d02432a3f9ae4dae5d714dbc9eacd434",
+  "captureAdapterPath": "world-simulation-shorts-engine/recovery/exact-65422-reproduction-v1/tools/capture_original.mjs",
+  "reviewedAdapterSha256": "96f6c53f905c5921ed8c229be8c26ec6f56b419a9822b4a8d2617b4f685f6373",
+  "findings": [
+    {
+      "item": "Rendering implementation",
+      "status": "PASS",
+      "evidence": "Imports unchanged reference_runtime.mjs from independent capsule and calls openQualityRuntime({mode: VISUAL_REFERENCE_STUDY}); no renderer/shader/Scene copied or edited by adapter."
+    },
+    {
+      "item": "Capture sequence",
+      "status": "PASS",
+      "evidence": "Same referenceProof.capture(frame,{png:true}) call for ordered local frames0..149, same1080x1920 output and DPR1 inside unchanged original runtime."
+    },
+    {
+      "item": "Encoder",
+      "status": "PASS",
+      "evidence": "Same FFmpeg framerate30/start0/threads2/libx264/presetfast/crf16/pixfmt yuv420p/faststart/an/150frames; output destination only differs."
+    },
+    {
+      "item": "Cache/output isolation",
+      "status": "PASS_FOR_PARENT_PROVIDED_INDEPENDENT_PATHS",
+      "evidence": "New adapter outputs under exact-65422-reproduction-v1; root instructed to pass a fresh independent cache, never original cache."
+    },
+    {
+      "item": "Original dependency closure",
+      "status": "PASS",
+      "evidence": "73 original report bound files plus7 unbound operational dependencies restored unchanged from sameimmutableGitcommit. Globalearth and topology images included; no DEM loaded because original input heightSource is null."
+    },
+    {
+      "item": "Capsule rerun",
+      "status": "PASS",
+      "evidence": "Second restore completed idempotently; SOURCE_CAPSULE_MANIFEST.json SHA stayed ee15187b78403dc06e62b4b2253a7196f6f64159f8ac7fb8d60344f63ea8496b."
+    }
+  ],
+  "semanticVisualChanges": 0,
+  "existingProtectedFilesWritten": 0,
+  "paidGpuExecuted": false,
+  "nvidiaVerified": false,
+  "notes": [
+    "This is static review, not successful rendering or pixel equality. Capture/comparison report must supply actual evidence.",
+    "Root informed of optional adapter input hardening: originalreportSHA, cache-path isolation, originalproductionEligible/cameraMotion invariant checks."
+  ],
+  "actualCaptureResult": {
+    "frames": 150,
+    "rawAndPngAllEqual": true,
+    "runtimeStatesAllEqual": true,
+    "encodedPixelDecision": "REPRODUCTION_NEEDS_REWORK",
+    "receipt": "proof/CAPTURE_RECEIPT.json"
+  },
+  "postCaptureHardening": {
+    "currentCaptureToolSha256": "fb96f2770780a3cfa1d4c2792cbf5efc22b9cc335d732002733ce0efaf0874bd",
+    "changes": [
+      "Pin immutable original full report SHA",
+      "Reject cache in protected repo/capsule/old onboarding",
+      "Create only new proof/public directories",
+      "Refuse completed-video duplicate before browser startup",
+      "Retain original productionEligible/cameraMotion assertions",
+      "Finalize safe capture status"
+    ],
+    "actualDuplicateGuardResult": "reports/DUPLICATE_RENDER_GUARD.json",
+    "originalRuntimeOrVisualSourcesChanged": false,
+    "newGpuOrFrameCapturePerformed": false
+  }
+}
