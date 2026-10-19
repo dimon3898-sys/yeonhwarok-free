@@ -1,0 +1,19 @@
+{
+  "schema": "WORLD_ENGINE_CPU_TEST_SETUP_RECOVERY_V1",
+  "observedFailure": "Studio test fixtures under the executor default /tmp were rejected with STORAGE_VALIDATION_FAILED",
+  "affectedSuites": [
+    "test_studio_entry.py",
+    "test_real_studio_path.py"
+  ],
+  "confirmedCause": "Executor /tmp is sticky1777 but owned by UID65534. Existing storage validation only trusts root-owned sticky directories or safe owner ancestors.",
+  "safeFix": "The CPU test runner creates its own0700temporary root under the owned repository and passes TMPDIR to its child tests; cleans up only that created root. Removed only the test fixtures hardcoded /tmp override so they use the owned TMPDIR; production permission checks remain identical.",
+  "productionSecurityChanged": false,
+  "existingStorageSourceChanged": false,
+  "retestScope": "Only the two affected suites; unchanged previous passing test results retained by test source hash.",
+  "status": "PASS_AFFECTED_SUITES_RETESTED",
+  "additionalConfirmedCause": "The two newly added Studio test fixture constructors explicitly pinned dir=/tmp, so the runner TMPDIR fix alone could not affect them.",
+  "retestResults": {
+    "test_studio_entry.py": "9 PASS",
+    "test_real_studio_path.py": "3 PASS"
+  }
+}

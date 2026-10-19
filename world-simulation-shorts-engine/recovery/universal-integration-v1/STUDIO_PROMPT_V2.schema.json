@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:world-engine:studio-prompt:v2",
+  "title": "WORLD ENGINE opt-in Studio prompt V2 (candidate runtime only)",
+  "description": "Inner JSON pasted into the prompt field. This schema is not accepted by historical Studio images. It selects the separately versioned integration runtime; frozen V4 videoPlan and historical source limits remain unchanged. Schema validation alone is not source admission, approval, or GPU permission.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "preset",
+    "durationSeconds"
+  ],
+  "properties": {
+    "schema": {
+      "const": "WORLD_ENGINE_STUDIO_PROMPT_V2"
+    },
+    "preset": {
+      "const": "VERIFIED_FRONT_V4_80S"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 180,
+      "pattern": "^[^\\u0000-\\u001f]+$",
+      "description": "Runtime also rejects whitespace-only titles."
+    },
+    "durationSeconds": {
+      "type": "integer",
+      "const": 80,
+      "x-pythonRuntimeType": "int; JSON lexical 80.0 is rejected by the preserved contract."
+    },
+    "profile": {
+      "const": "V4_ARCHIVAL_80S",
+      "default": "V4_ARCHIVAL_80S"
+    },
+    "visualProfile": {
+      "$ref": "#/$defs/visualProfile"
+    },
+    "sfx": {
+      "$ref": "#/$defs/sfx"
+    }
+  },
+  "$defs": {
+    "visualProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "territoryOpacity": {
+          "type": "number",
+          "minimum": 0.24,
+          "maximum": 0.8,
+          "default": 0.62,
+          "description": "Preserved Production Area territory opacity; requires verified ownership coverage."
+        },
+        "frontCoreWidthPixels": {
+          "type": "number",
+          "minimum": 2.5,
+          "maximum": 7,
+          "default": 4.8,
+          "description": "Actual authored front core width, CSS output pixels."
+        },
+        "frontGlowRadiusPixels": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 16,
+          "default": 10,
+          "description": "Authored front glow radius, CSS output pixels."
+        },
+        "frontGlowGain": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 0.65,
+          "default": 0.42,
+          "description": "Authored front glow contribution; no fake front generation."
+        },
+        "cameraApproachFrames": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 120,
+          "default": 48,
+          "description": "Existing conservative native camera approach duration in 30fps frames; not roll, arbitrary pose, or new camera engine."
+        }
+      }
+    },
+    "sfx": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.65
+        },
+        "exportWav": {
+          "type": "boolean",
+          "default": false
+        },
+        "cues": {
+          "type": "array",
+          "maxItems": 10000,
+          "description": "Omitted means existing event-bound transition cues. [] means no cue. Runtime verifies event/frame references and duplicate identity. UI outer SFX conflicts are rejected in V2.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "eventId",
+              "frame",
+              "type"
+            ],
+            "properties": {
+              "eventId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "frame": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2399
+              },
+              "type": {
+                "enum": [
+                  "CLICK",
+                  "MECHANICAL_TICK",
+                  "OCCUPATION_COMPLETE",
+                  "MARKER_POP",
+                  "CAMERA_WHOOSH",
+                  "EVENT_TRANSITION"
+                ]
+              },
+              "gain": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "default": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "submissionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "prompt"
+      ],
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "Serialized inner V2 JSON, optionally one complete fenced JSON block; duplicate JSON keys rejected."
+        },
+        "durationSeconds": {
+          "type": "integer",
+          "const": 80
+        },
+        "profile": {
+          "const": "V4_ARCHIVAL_80S"
+        },
+        "sfx": {
+          "$ref": "#/$defs/sfx"
+        },
+        "sceneJson": {
+          "type": "null",
+          "description": "A concrete attached Scene conflicts with V2 preset selection."
+        }
+      }
+    }
+  },
+  "x-runtime": "contract_v2.normalize_submission(..., parent_normalize=preservedStudioV1)",
+  "x-runtimeErrors": [
+    "STUDIO_V2_PRESET_REQUIRED",
+    "STUDIO_V2_PROFILE_CONFLICT",
+    "STUDIO_V2_DURATION_80_REQUIRED",
+    "STUDIO_V2_SCENE_CONFLICT",
+    "STUDIO_V2_SFX_CONFLICT",
+    "STUDIO_V2_VISUAL_FIELD_UNSUPPORTED",
+    "STUDIO_V2_VISUAL_VALUE_INVALID",
+    "STUDIO_PROMPT_FIELD_UNSUPPORTED"
+  ],
+  "x-notSupported": [
+    "camera roll/rotation",
+    "arbitrary camera position",
+    "unit placement/scale",
+    "generated historical fronts",
+    "route geometry",
+    "owner complement inference",
+    "new historical data",
+    "GPU approval from prompt"
+  ]
+}
