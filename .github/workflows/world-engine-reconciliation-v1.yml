@@ -55,12 +55,51 @@ jobs:
       - name: Verify unique registry tag does not exist
         id: guard
         run: python3 -B "$RECONCILIATION_ROOT/ci_package.py" guard
-      - name: Focused additive CPU and wiring tests
+      - name: Prepare isolated CPU test dependency already used by the preserved Studio
+        id: dependencies
+        run: |
+          python3 -B - <<'PYDEPENDENCIES'
+          import importlib.util, os
+          from pathlib import Path
+          root = Path(os.environ['RECONCILIATION_ROOT']).resolve()
+          spec = importlib.util.spec_from_file_location('_reconciliation_ci_dependencies', root / 'ci_package.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          venv = Path(os.environ['RUNNER_TEMP']) / 'reconciliation-cpu-test-venv'
+          module.ci.record('focused-cpu-test-venv', ['python3', '-m', 'venv', str(venv)], timeout=120)
+          executable = str(venv / 'bin/python')
+          module.ci.record('focused-cpu-test-numpy', [executable, '-m', 'pip', 'install', '--disable-pip-version-check', '--only-binary=:all:', '--no-deps', 'numpy==2.3.5'], timeout=180)
+          with open(os.environ['GITHUB_ENV'], 'a') as output:
+              output.write('RECONCILIATION_TEST_PYTHON=' + executable + '\n')
+          PYDEPENDENCIES
+      - name: Focused additive CPU and wiring tests with persisted safe diagnostics
         id: unit
-        run: python3 -B -m unittest discover -s "$RECONCILIATION_ROOT/tests" -p test_*.py -v
-      - name: Source-bound observer contract tests without browser or GPU
+        run: |
+          python3 -B - <<'PYUNIT'
+          import importlib.util, os
+          from pathlib import Path
+          root = Path(os.environ['RECONCILIATION_ROOT']).resolve()
+          spec = importlib.util.spec_from_file_location('_reconciliation_ci_unit', root / 'ci_package.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          result = module.ci.record('focused-python-unit', [os.environ['RECONCILIATION_TEST_PYTHON'], '-B', '-m', 'unittest', 'discover', '-s', str(root / 'tests'), '-p', 'test_*.py', '-v'], timeout=180)
+          print(module.ci.bounded(result.stdout))
+          print(module.ci.bounded(result.stderr))
+          PYUNIT
+      - name: Source-bound observer contract tests with persisted safe diagnostics
         id: node
-        run: node --test "$RECONCILIATION_ROOT/tests/test_trace_binding.mjs"
+        run: |
+          python3 -B - <<'PYNODE'
+          import importlib.util, os
+          from pathlib import Path
+          root = Path(os.environ['RECONCILIATION_ROOT']).resolve()
+          spec = importlib.util.spec_from_file_location('_reconciliation_ci_node', root / 'ci_package.py')
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          result = module.ci.record('focused-node-observer-contract', ['node', '--test', str(root / 'tests/test_trace_binding.mjs')], timeout=120)
+          print(module.ci.bounded(result.stdout))
+          print(module.ci.bounded(result.stderr))
+          PYNODE
       - name: Actual CPU container Studio import, native guard and fail-closed startup
         id: test
         run: python3 -B "$RECONCILIATION_ROOT/ci_package.py" test
@@ -82,7 +121,7 @@ jobs:
         if: always() && steps.checkout.outcome == 'success'
         env:
           RESULT_STEP_OUTCOMES: >-
-            {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","unit":"${{ steps.unit.outcome }}","node":"${{ steps.node.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
+            {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","dependencies":"${{ steps.dependencies.outcome }}","unit":"${{ steps.unit.outcome }}","node":"${{ steps.node.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
         run: python3 -B "$RECONCILIATION_ROOT/ci_package.py" persist
 
   verify-pull:
