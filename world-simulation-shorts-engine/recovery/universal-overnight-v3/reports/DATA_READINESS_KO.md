@@ -18,3 +18,5 @@
 현재 백엔드의 검증된 카탈로그는 20개 `GEOMETRY` 기록뿐입니다. `FLOW_PLAN`, `OBJECT_GRAPHIC`, `SCALAR_CONTROL_PLAN`, `NATIONAL_UNIT_SCENE`은 각각 0개입니다. 국가별 실제 군대 표식과 이동, 완전한 양측 점령장, 전투 충돌 위치를 요청하면 해당 기능만 데이터 부족으로 차단합니다. 기존에 검증된 부분 전선과 도식 장면의 사용까지 일괄 차단하지 않습니다.
 
 `data_readiness.py`는 원본 4개 JSON 권위와 실제 사용 객체를 먼저 결속하고 기존 History Admission을 호출합니다. Source ID만 바꾸어 도시 좌표를 군대·이동 계획으로 사용하는 요청, SHA가 다른 payload, 중복된 source ID, 지원하지 않는 요청 필드는 거부합니다. 이 판정은 자료 적합성만 확인하며 GPU 실행·요금·이미지 무결성·영상 품질 승인 권한을 부여하지 않습니다.
+
+별도의 새 `EXTENSION_SOURCES.json`과 `load_effective_catalog()`로 기존 카탈로그를 변경하지 않고 다음 검증 자료를 추가할 수 있게 했습니다. 신규 자료는 현재 0개입니다. 원래 JavaScript canonical 함수를 재사용해 수치 80과 80.0의 표기 차이로 SHA가 달라지는 문제를 방지합니다. 실제 제작은 원본 역사 권위 검사와 원래 Event/Flow/Area 컴파일러 검사를 모두 통과해야 하며, 합성 Fixture는 내부 CPU 검사에서만 허용됩니다. 프롬프트가 카탈로그의 권위를 직접 공급하거나 기존 source ID를 덮어쓸 수 없습니다.

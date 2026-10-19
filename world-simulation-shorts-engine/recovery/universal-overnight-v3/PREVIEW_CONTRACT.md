@@ -19,9 +19,13 @@ frame counts. `verify_preview_request_file` additionally verifies actual source
 bytes using bounded, no-follow file reads.
 
 For the preserved source plan, automatic source-schedule ranking selects
-**[1400,1550), 46.666666…–51.666666… seconds**, within original scene-0007. This
-contains 100 frames of existing schematic transitions and the chapter-08 camera
-focus start. Selection is based on source activity, not a visual-quality score.
+**[1450,1600), 48.333333…–53.333333… seconds**, within original scene-0007.
+The generic ranking first prefers transitions whose endpoints belong to the
+chapter's declared geometry states, then avoids outside-chapter carry-in and
+maximizes existing activity. No country, date, state ID or selected frame is
+hardcoded. This slice contains the original held state, 50 frames of an authored
+schematic transition, and 50 frames of the existing partial dated-front overlay.
+Selection is source coherence, not a visual-quality or historical-accuracy score.
 The source qualifies these as schematic transitions rather than observed daily
 military boundaries. Those qualifications remain visible and unchanged.
 
@@ -51,7 +55,18 @@ mixed in full; no full-length video is rendered. `mux_preview_sfx` reuses the
 old AAC muxer and verifies unchanged video pixels and timestamps. SFX OFF is
 supported without writing audio.
 
-Focused validation: 15 Python tests and 6 Node source-contract tests. These test
+Focused preview validation: 17 Python tests and 7 Node source-contract tests.
+The integrated overnight CPU receipt separately records all 136 focused tests. These test
 actual source-clock selection, the 2,400-frame source-evaluator slice, raw-file
 and scene immutability, exact PCM equality, failure guards, and the original
 encoder contract. They do not assert NVIDIA execution or visual-quality PASS.
+
+The production CLI now forwards actual cumulative output frames as bounded
+`SCENE_CAPTURE` JSON; it does not invent progress or an estimated finish time.
+
+Additional source authority: the new package-owned `EXTENSION_SOURCES.json` is
+merged with the immutable parent catalog only after both manifests and canonical
+payload SHA checks pass. The same effective catalog reaches Python admission,
+preview binding, the original Event/Flow compiler, and optional visual consumers.
+The shipped extension has **zero** new source records. Synthetic records remain
+CPU-test-only and are refused in Studio production.

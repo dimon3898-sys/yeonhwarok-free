@@ -28,10 +28,10 @@
   "statusCounts": {
     "BLOCKED": 18,
     "NOT_APPLICABLE": 15,
-    "SUPPORTING": 103,
-    "UNVERIFIED": 15
+    "SUPPORTING": 104,
+    "UNVERIFIED": 14
   },
-  "newCpuConnectionFeatureCount": 0,
+  "newCpuConnectionFeatureCount": 23,
   "actualOutputAppliedCount": 0,
   "gpuProofCount": 0,
   "cpuSoftwareEvidenceIsNvidiaProof": false,
@@ -7221,7 +7221,26 @@
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
-      "outputAppliedThisOvernightTask": false
+      "outputAppliedThisOvernightTask": false,
+      "softwareOutputEvidence": {
+        "receipt": {
+          "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/FEATURE_SOFTWARE_OUTPUT_EVIDENCE.json",
+          "sha256": "87c2f8436f918a4cff974d9155532d40739803bd50cb136a47aee33460bed2a6"
+        },
+        "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+        "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+        "observation": {
+          "featureId": "ASTRA.SURFACE_TEXTURE",
+          "evidenceClass": "ACTUAL_SOFTWARE_SOURCE_UPLOAD_DIAGNOSTIC",
+          "status": "SOFTWARE_OBSERVED_NVIDIA_PENDING",
+          "measuredAssertions": {
+            "actualAstraDiagnosticFrames": 150,
+            "nativeTerrainCameraExactFrames": 150
+          },
+          "scope": "Existing shader path and same-frame source metadata selected. This is not per-role ablation or visual seam/texture quality approval."
+        },
+        "doesNotVerifyCurrentLaterPackage": true
+      }
     },
     {
       "id": "ASTRA.TERRAIN_NORMAL_LIGHTING",
@@ -18982,15 +19001,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "BLOCKED",
-      "reason": "The exact high-grade scalar frontier owner is not selected. The new supplied-polyline alpha envelope is a distinct compatible consumer, not proof that this scalar feature is connected.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "FRONTIER.MOVING_SCALAR_LIGHT",
       "aliasGroup": [
         "FRONTIER.MOVING_SCALAR_LIGHT"
@@ -19094,8 +19113,8 @@
       "overnightReview": {
         "previousStatus": "BLOCKED",
         "reviewed": true,
-        "gapClass": "SOURCE_CONTRACT_AND_HISTORICAL_DATA",
-        "actionOrLimitation": "Exact scalar-light owner needs a compatible complete scalar plan; partial dated fronts cannot be silently converted.",
+        "gapClass": "HISTORICAL_DATA_AND_NATIVE_COMPOSITION",
+        "actionOrLimitation": "Existing scalar motion/core/halo owner and source authority are connected. Need complete source plan and same-frame native slot without conflicting parent front/fill.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
@@ -19118,9 +19137,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "FRONTIER.MOVING_SCALAR_LIGHT",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "SCALAR_CONTROL_PLAN"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -19196,15 +19261,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "SUPPORTING",
       "status": "BLOCKED",
-      "reason": "The outer-domain gold owner requires same-frame registered domain coverage and is not selected by the current long Area adapter; a coastline/domain edge cannot be labelled a military front.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "FRONTIER.OUTER_DOMAIN_GOLD",
       "aliasGroup": [
         "FRONTIER.OUTER_DOMAIN_GOLD"
@@ -19298,8 +19363,8 @@
       "overnightReview": {
         "previousStatus": "BLOCKED",
         "reviewed": true,
-        "gapClass": "SOURCE_CONTRACT_AND_HISTORICAL_DATA",
-        "actionOrLimitation": "Requires same-frame genuine domain coverage; coastline/domain edge must not be mislabeled military front.",
+        "gapClass": "HISTORICAL_DATA_AND_NATIVE_COMPOSITION",
+        "actionOrLimitation": "Existing outer-coverage owner and source authority are connected. Need exact same-frame source domain and genuine native primary/secondary role coverage.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/frontier_ref2.mjs",
@@ -19312,9 +19377,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "FRONTIER.OUTER_DOMAIN_GOLD",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "SCALAR_CONTROL_PLAN"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -19694,15 +19805,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "BLOCKED",
-      "reason": "The preserved Area overlay has no source-terrain sampler input. The exact scalar destination-light shader remains unselected; a narrow compatible source-bound texture/light consumer is still required.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "FRONTIER.TERRAIN_DESTINATION_LIGHT",
       "aliasGroup": [
         "FRONTIER.TERRAIN_DESTINATION_LIGHT"
@@ -19800,8 +19911,8 @@
       "overnightReview": {
         "previousStatus": "BLOCKED",
         "reviewed": true,
-        "gapClass": "SOURCE_CONTRACT_AND_GPU_PENDING",
-        "actionOrLimitation": "Exact destination-light owner needs same-frame genuine sourceTerrainTexture; never relight a completed screen overlay.",
+        "gapClass": "HISTORICAL_DATA_AND_NATIVE_COMPOSITION",
+        "actionOrLimitation": "Existing destination-light consumer and source authority are connected. Need genuine same-frame pre-territory native terrain texture plus admitted scalar plan; no finished-screen replacement.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
@@ -19824,9 +19935,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "FRONTIER.TERRAIN_DESTINATION_LIGHT",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "SCALAR_CONTROL_PLAN"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -21111,7 +21268,27 @@
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
-      "outputAppliedThisOvernightTask": false
+      "outputAppliedThisOvernightTask": false,
+      "softwareOutputEvidence": {
+        "receipt": {
+          "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/FEATURE_SOFTWARE_OUTPUT_EVIDENCE.json",
+          "sha256": "87c2f8436f918a4cff974d9155532d40739803bd50cb136a47aee33460bed2a6"
+        },
+        "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+        "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+        "observation": {
+          "featureId": "MAP.NATIVE_WEBGL_FACTORY",
+          "evidenceClass": "ACTUAL_SOFTWARE_WEBGL_DRAW_READBACK",
+          "status": "SOFTWARE_OBSERVED_NVIDIA_PENDING",
+          "measuredAssertions": {
+            "outputFrames": 150,
+            "uniqueRawFrameHashes": 101,
+            "checkpointsNotBlack": true
+          },
+          "scope": "Real SwiftShader framebuffer output, not NVIDIA/hardware performance or reference-grade quality."
+        },
+        "doesNotVerifyCurrentLaterPackage": true
+      }
     },
     {
       "id": "MAP.PROJECTION",
@@ -25735,15 +25912,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "INTERNAL_ONLY",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "YES",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Exact native inputs and event-after-lock binding remain necessary even when the event data changes.",
+      "reason": "The package-bound additive source catalog now admits independently reviewed source records without editing the frozen parent20 or four-file history authority. The actual original optional Event/Flow/Area request is checked against the merged server catalog after immutable history admission on a copy. Canonical bytes use the original JS owner, not Python float formatting. Current extension has zero new records and grants no historical actor or paid-render approval.",
       "canonicalId": "PLANNER.NATIVE_PAYLOAD_BINDING",
       "aliasGroup": [
         "PLANNER.NATIVE_PAYLOAD_BINDING"
@@ -25847,7 +26024,59 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "PLANNER.NATIVE_PAYLOAD_BINDING",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+              "sha256": "a327f8514d106edcb2020b76a75347afaf5b7cc489843bed121412f2e49b8cc5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/data_readiness.py",
+              "sha256": "c7cce69bae6de386983c9282fc47325a4db26c8032f0d0328dcb8280785a7535"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_authority.py",
+              "sha256": "be5af52c03da909570b95a0e30710a350c0549ed1527d3a87f6a9ca45d99489f"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_data_readiness.py",
+              "sha256": "bdf42cb577f1d53b57d3dde393eb3a68f95b1e5aaee20d10d0bd0214851ad0d1"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/EXTENSION_SOURCES.json",
+              "sha256": "5462f65726f414e5272dca3ea032683d3239347affa914bd29187b931d0ca192"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_source_extension.py",
+              "sha256": "3523cda011f33aec0843e476b6a713f52eb08a913eda8092be2d848037f52b8b"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+            "symbol": "verify_runtime_sidecars / load_effective_catalog / admit_capture_sources / gate_context",
+            "invocationProof": "test_runtime_authority.py:6 PASS exact source objects and sidecars; test_source_extension.py:14 PASS actual package authority, original Event/Flow compiler, same JS canonical bytes, isolated generic source and production synthetic rejection"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "INTERNAL_ONLY",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The package-bound additive source catalog now admits independently reviewed source records without editing the frozen parent20 or four-file history authority. The actual original optional Event/Flow/Area request is checked against the merged server catalog after immutable history admission on a copy. Canonical bytes use the original JS owner, not Python float formatting. Current extension has zero new records and grants no historical actor or paid-render approval."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -26124,15 +26353,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "YES",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Existing work-scene splitting preserves a shared event/camera clock and bounded memory.",
+      "reason": "A continuous 150-frame range is selected from the unchanged 2400-frame parent clock. Original scene objects, source boundaries, absolute frame numbers and capture seals are retained; only encoded output timestamps begin at zero. No 80-second video is rendered by this path.",
       "canonicalId": "PLANNER.SCENE_SPLIT",
       "aliasGroup": [
         "PLANNER.SCENE_SPLIT"
@@ -26247,7 +26476,51 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "PLANNER.SCENE_SPLIT",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_contract.py",
+              "sha256": "9f6ead2e1f75fb3081513a7b25c0fbd5d4f7266e0926a0bcdf9c54e84c1560a5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_capture.mjs",
+              "sha256": "54cea3f9acd5b96ec10339a3cb0dcbbc78b756a4d4854a246a66ca3e5ea084e1"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+              "sha256": "a327f8514d106edcb2020b76a75347afaf5b7cc489843bed121412f2e49b8cc5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_contract.py",
+              "sha256": "cd7e3f2d4a80b3c9242f3084ddbc7f15d4ae2f3eeb5313eba25419057097cb4e"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_capture.mjs",
+              "sha256": "3004d67df90dfa272f7a6824ba251070ff38c0a1ce1869b5a3ab341f9eae9b52"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_contract.py",
+            "symbol": "compile_preview / captureExactPreview / assertRuntimeSlice",
+            "invocationProof": "test_preview_contract.py:11 PASS exact half-open source ranges; test_preview_capture.mjs:6 PASS untouched original scenes and global-frame handoff"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "A continuous 150-frame range is selected from the unchanged 2400-frame parent clock. Original scene objects, source boundaries, absolute frame numbers and capture seals are retained; only encoded output timestamps begin at zero. No 80-second video is rendered by this path."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -26318,15 +26591,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Source geometry clocks deterministically select the known snapshots; transition alpha does not create observed intermediate fronts.",
+      "reason": "A continuous 150-frame range is selected from the unchanged 2400-frame parent clock. Original scene objects, source boundaries, absolute frame numbers and capture seals are retained; only encoded output timestamps begin at zero. No 80-second video is rendered by this path.",
       "canonicalId": "PLANNER.SOURCE_GEOMETRY_CLOCK",
       "aliasGroup": [
         "PLANNER.SOURCE_GEOMETRY_CLOCK"
@@ -26426,11 +26699,78 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "PLANNER.SOURCE_GEOMETRY_CLOCK",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_contract.py",
+              "sha256": "9f6ead2e1f75fb3081513a7b25c0fbd5d4f7266e0926a0bcdf9c54e84c1560a5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_capture.mjs",
+              "sha256": "54cea3f9acd5b96ec10339a3cb0dcbbc78b756a4d4854a246a66ca3e5ea084e1"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+              "sha256": "a327f8514d106edcb2020b76a75347afaf5b7cc489843bed121412f2e49b8cc5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_contract.py",
+              "sha256": "cd7e3f2d4a80b3c9242f3084ddbc7f15d4ae2f3eeb5313eba25419057097cb4e"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_capture.mjs",
+              "sha256": "3004d67df90dfa272f7a6824ba251070ff38c0a1ce1869b5a3ab341f9eae9b52"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_contract.py",
+            "symbol": "compile_preview / captureExactPreview / assertRuntimeSlice",
+            "invocationProof": "test_preview_contract.py:11 PASS exact half-open source ranges; test_preview_capture.mjs:6 PASS untouched original scenes and global-frame handoff"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "A continuous 150-frame range is selected from the unchanged 2400-frame parent clock. Original scene objects, source boundaries, absolute frame numbers and capture seals are retained; only encoded output timestamps begin at zero. No 80-second video is rendered by this path."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
-      "outputAppliedThisOvernightTask": false
+      "outputAppliedThisOvernightTask": false,
+      "softwareOutputEvidence": {
+        "receipt": {
+          "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/FEATURE_SOFTWARE_OUTPUT_EVIDENCE.json",
+          "sha256": "87c2f8436f918a4cff974d9155532d40739803bd50cb136a47aee33460bed2a6"
+        },
+        "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+        "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+        "observation": {
+          "featureId": "PLANNER.SOURCE_GEOMETRY_CLOCK",
+          "evidenceClass": "ACTUAL_SOFTWARE_CAPTURE_FRAME_ORDER",
+          "status": "SUPPORTING",
+          "measuredAssertions": {
+            "sourceRange": [
+              1400,
+              1550
+            ],
+            "halfOpenNoDuplicates": true,
+            "boundedFramesInMemory": 1
+          },
+          "scope": "Original global clock and untouched Scene range, not observed daily historical movement."
+        },
+        "doesNotVerifyCurrentLaterPackage": true
+      }
     },
     {
       "id": "PLANNER.SOURCE_MANIFEST",
@@ -26511,12 +26851,12 @@
       "studioV2Exposed": "INTERNAL_ONLY",
       "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Actual canonical historical JSON bytes, roles, authority cross-links and in-memory assessed objects are verified before data admission. Only the existing immutable imageDigest slots may rebind; changed history/title/front objects, stale files and unsafe paths are rejected. This is CPU source-authority proof, not an asset re-audit or GPU output.",
+      "reason": "The package-bound additive source catalog now admits independently reviewed source records without editing the frozen parent20 or four-file history authority. The actual original optional Event/Flow/Area request is checked against the merged server catalog after immutable history admission on a copy. Canonical bytes use the original JS owner, not Python float formatting. Current extension has zero new records and grants no historical actor or paid-render approval.",
       "canonicalId": "PLANNER.SOURCE_MANIFEST",
       "aliasGroup": [
         "PLANNER.SOURCE_MANIFEST"
@@ -26673,7 +27013,59 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "PLANNER.SOURCE_MANIFEST",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+              "sha256": "a327f8514d106edcb2020b76a75347afaf5b7cc489843bed121412f2e49b8cc5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/data_readiness.py",
+              "sha256": "c7cce69bae6de386983c9282fc47325a4db26c8032f0d0328dcb8280785a7535"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_authority.py",
+              "sha256": "be5af52c03da909570b95a0e30710a350c0549ed1527d3a87f6a9ca45d99489f"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_data_readiness.py",
+              "sha256": "bdf42cb577f1d53b57d3dde393eb3a68f95b1e5aaee20d10d0bd0214851ad0d1"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/EXTENSION_SOURCES.json",
+              "sha256": "5462f65726f414e5272dca3ea032683d3239347affa914bd29187b931d0ca192"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_source_extension.py",
+              "sha256": "3523cda011f33aec0843e476b6a713f52eb08a913eda8092be2d848037f52b8b"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+            "symbol": "verify_runtime_sidecars / load_effective_catalog / admit_capture_sources / gate_context",
+            "invocationProof": "test_runtime_authority.py:6 PASS exact source objects and sidecars; test_source_extension.py:14 PASS actual package authority, original Event/Flow compiler, same JS canonical bytes, isolated generic source and production synthetic rejection"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "INTERNAL_ONLY",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The package-bound additive source catalog now admits independently reviewed source records without editing the frozen parent20 or four-file history authority. The actual original optional Event/Flow/Area request is checked against the merged server catalog after immutable history admission on a copy. Canonical bytes use the original JS owner, not Python float formatting. Current extension has zero new records and grants no historical actor or paid-render approval."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -27642,14 +28034,14 @@
       },
       "implementationExists": "YES",
       "studioV2Exposed": "YES",
-      "sceneJSONAddressable": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "The new strict structured completion profile reaches the real frozen normalizer and authenticated private submission path. Only supported fields/preset are accepted; arbitrary natural-language visual requests remain unsupported. Actual GPU start remains gated. Runtime source-object binding rejects a mutated title even when caller-provided declarations look valid; physical authority files and assessed objects are checked independently of image/GPU approval.",
+      "reason": "A continuous 150-frame range is selected from the unchanged 2400-frame parent clock. Original scene objects, source boundaries, absolute frame numbers and capture seals are retained; only encoded output timestamps begin at zero. No 80-second video is rendered by this path.",
       "canonicalId": "PLANNER.V4_FROZEN_80S",
       "aliasGroup": [
         "PLANNER.V4_FROZEN_80S"
@@ -27840,7 +28232,51 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "PLANNER.V4_FROZEN_80S",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_contract.py",
+              "sha256": "9f6ead2e1f75fb3081513a7b25c0fbd5d4f7266e0926a0bcdf9c54e84c1560a5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_capture.mjs",
+              "sha256": "54cea3f9acd5b96ec10339a3cb0dcbbc78b756a4d4854a246a66ca3e5ea084e1"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+              "sha256": "a327f8514d106edcb2020b76a75347afaf5b7cc489843bed121412f2e49b8cc5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_contract.py",
+              "sha256": "cd7e3f2d4a80b3c9242f3084ddbc7f15d4ae2f3eeb5313eba25419057097cb4e"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_capture.mjs",
+              "sha256": "3004d67df90dfa272f7a6824ba251070ff38c0a1ce1869b5a3ab341f9eae9b52"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_contract.py",
+            "symbol": "compile_preview / captureExactPreview / assertRuntimeSlice",
+            "invocationProof": "test_preview_contract.py:11 PASS exact half-open source ranges; test_preview_capture.mjs:6 PASS untouched original scenes and global-frame handoff"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "A continuous 150-frame range is selected from the unchanged 2400-frame parent clock. Original scene objects, source boundaries, absolute frame numbers and capture seals are retained; only encoded output timestamps begin at zero. No 80-second video is rendered by this path."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -28201,15 +28637,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "INTERNAL_ONLY",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "YES",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Existing catalog/provenance/source file SHA and identity binding is a prerequisite rather than generated historical truth.",
+      "reason": "The package-bound additive source catalog now admits independently reviewed source records without editing the frozen parent20 or four-file history authority. The actual original optional Event/Flow/Area request is checked against the merged server catalog after immutable history admission on a copy. Canonical bytes use the original JS owner, not Python float formatting. Current extension has zero new records and grants no historical actor or paid-render approval.",
       "canonicalId": "PLANNER.VERIFIED_FACT_BINDING",
       "aliasGroup": [
         "PLANNER.VERIFIED_FACT_BINDING"
@@ -28324,7 +28760,59 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "PLANNER.VERIFIED_FACT_BINDING",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+              "sha256": "a327f8514d106edcb2020b76a75347afaf5b7cc489843bed121412f2e49b8cc5"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/data_readiness.py",
+              "sha256": "c7cce69bae6de386983c9282fc47325a4db26c8032f0d0328dcb8280785a7535"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_authority.py",
+              "sha256": "be5af52c03da909570b95a0e30710a350c0549ed1527d3a87f6a9ca45d99489f"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_data_readiness.py",
+              "sha256": "bdf42cb577f1d53b57d3dde393eb3a68f95b1e5aaee20d10d0bd0214851ad0d1"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/EXTENSION_SOURCES.json",
+              "sha256": "5462f65726f414e5272dca3ea032683d3239347affa914bd29187b931d0ca192"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_source_extension.py",
+              "sha256": "3523cda011f33aec0843e476b6a713f52eb08a913eda8092be2d848037f52b8b"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_authority.py",
+            "symbol": "verify_runtime_sidecars / load_effective_catalog / admit_capture_sources / gate_context",
+            "invocationProof": "test_runtime_authority.py:6 PASS exact source objects and sidecars; test_source_extension.py:14 PASS actual package authority, original Event/Flow compiler, same JS canonical bytes, isolated generic source and production synthetic rejection"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "INTERNAL_ONLY",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The package-bound additive source catalog now admits independently reviewed source records without editing the frozen parent20 or four-file history authority. The actual original optional Event/Flow/Area request is checked against the merged server catalog after immutable history admission on a copy. Canonical bytes use the original JS owner, not Python float formatting. Current extension has zero new records and grants no historical actor or paid-render approval."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -29385,15 +29873,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Existing detached supervisor/job identity and duplicate prevention are retained rather than replaced.",
+      "reason": "The new preview has a separate job namespace, exact capture signature, one detached process and per-attempt lock. Duplicate start/status/reconnect does not spawn a second worker or reset an old claim. CPU process-boundary instrumentation does not claim a paid GPU job ran.",
       "canonicalId": "STUDIO.DETACHED_WORKER",
       "aliasGroup": [
         "STUDIO.DETACHED_WORKER"
@@ -29512,7 +30000,47 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.DETACHED_WORKER",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+              "sha256": "cdecf54dd097b501b792e5085c8dd6f3ddb8fbcf11402e2d09f0aea0f7a402a4"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_entry.py",
+              "sha256": "34680d2b41a3565094ce093e1fc394fe2f177375167f8fa4b836fbe4f7456009"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+            "symbol": "start / status / _worker",
+            "invocationProof": "test_studio_overnight.py:test_duplicate_detached_start_preserves_files_and_spawns_once; test_resume_never_automatically_retries_or_resets_claims"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The new preview has a separate job namespace, exact capture signature, one detached process and per-attempt lock. Duplicate start/status/reconnect does not spawn a second worker or reset an old claim. CPU process-boundary instrumentation does not claim a paid GPU job ran."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -30336,15 +30864,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Actual local HTTP authentication/CSRF/Host-Origin and private submission tests preserve the existing security boundaries and completion metadata. This is CPU/service-contract evidence, not mobile NVIDIA rendering or a paid start; preflight correctly keeps rendering blocked without quality/image approval.",
+      "reason": "Authenticated Studio has a preview-only explicit start path with source/history/image proof, original GPU admission and valid operator policy required. Missing optional historical actors do not block the unselected qualified base; selected missing actors fail. Full 80-second start/recovery remains denied.",
       "canonicalId": "STUDIO.EXPLICIT_START",
       "aliasGroup": [
         "STUDIO.EXPLICIT_START"
@@ -30512,7 +31040,51 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.EXPLICIT_START",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+              "sha256": "cdecf54dd097b501b792e5085c8dd6f3ddb8fbcf11402e2d09f0aea0f7a402a4"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_authority.py",
+              "sha256": "be5af52c03da909570b95a0e30710a350c0549ed1527d3a87f6a9ca45d99489f"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+            "symbol": "gate_context / preflight / _authorize_start / start_studio_job",
+            "invocationProof": "test_studio_overnight.py:29 PASS real normalization, private submission, fail-closed image/source/approval gates; test_runtime_authority.py:6 PASS actual sidecars"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "Authenticated Studio has a preview-only explicit start path with source/history/image proof, original GPU admission and valid operator policy required. Missing optional historical actors do not block the unselected qualified base; selected missing actors fail. Full 80-second start/recovery remains denied."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -31896,15 +32468,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "SUPPORTING",
       "status": "SUPPORTING",
-      "reason": "Actual local HTTP authentication/CSRF/Host-Origin and private submission tests preserve the existing security boundaries and completion metadata. This is CPU/service-contract evidence, not mobile NVIDIA rendering or a paid start; preflight correctly keeps rendering blocked without quality/image approval.",
+      "reason": "The new preview has a separate job namespace, exact capture signature, one detached process and per-attempt lock. Duplicate start/status/reconnect does not spawn a second worker or reset an old claim. CPU process-boundary instrumentation does not claim a paid GPU job ran.",
       "canonicalId": "STUDIO.JOB_LOOKUP",
       "aliasGroup": [
         "STUDIO.JOB_LOOKUP"
@@ -32075,7 +32647,47 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.JOB_LOOKUP",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+              "sha256": "cdecf54dd097b501b792e5085c8dd6f3ddb8fbcf11402e2d09f0aea0f7a402a4"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_entry.py",
+              "sha256": "34680d2b41a3565094ce093e1fc394fe2f177375167f8fa4b836fbe4f7456009"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+            "symbol": "start / status / _worker",
+            "invocationProof": "test_studio_overnight.py:test_duplicate_detached_start_preserves_files_and_spawns_once; test_resume_never_automatically_retries_or_resets_claims"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The new preview has a separate job namespace, exact capture signature, one detached process and per-attempt lock. Duplicate start/status/reconnect does not spawn a second worker or reset an old claim. CPU process-boundary instrumentation does not claim a paid GPU job ran."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -32456,14 +33068,14 @@
       },
       "implementationExists": "YES",
       "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Existing real rate/max-cost/time/retry/expiry policy remains separate from quality approval and source admission.",
+      "reason": "The original exact-plan/image, actual-rate budget, duration/retry and expiry policy parser remains authoritative for any paid preview. Old 80-second approvals are not reused and no new paid execution has occurred.",
       "canonicalId": "STUDIO.OPERATOR_POLICY",
       "aliasGroup": [
         "STUDIO.OPERATOR_POLICY"
@@ -32604,7 +33216,47 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.OPERATOR_POLICY",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+              "sha256": "cdecf54dd097b501b792e5085c8dd6f3ddb8fbcf11402e2d09f0aea0f7a402a4"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+            "symbol": "_read_approval / _approval_module.validate_approval / _authorize_start",
+            "invocationProof": "test_studio_overnight.py:test_original_approval_parser_rejects_expired_or_wrong_plan; test_direct_start_cannot_bypass_preflight"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "INTERNAL_ONLY",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The original exact-plan/image, actual-rate budget, duration/retry and expiry policy parser remains authoritative for any paid preview. Old 80-second approvals are not reused and no new paid execution has occurred."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -32698,15 +33350,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Actual local HTTP authentication/CSRF/Host-Origin and private submission tests preserve the existing security boundaries and completion metadata. This is CPU/service-contract evidence, not mobile NVIDIA rendering or a paid start; preflight correctly keeps rendering blocked without quality/image approval.",
+      "reason": "The existing HTTPS, authenticated owner and CSRF/Host/Origin owners serve the new preview profile. Focused actual HTTP handler tests preserve rejection of unauthenticated/cross-origin requests. No anonymous render or software-render API is exposed.",
       "canonicalId": "STUDIO.ORIGIN_CSRF",
       "aliasGroup": [
         "STUDIO.ORIGIN_CSRF"
@@ -32881,7 +33533,43 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.ORIGIN_CSRF",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_entry.py",
+              "sha256": "34680d2b41a3565094ce093e1fc394fe2f177375167f8fa4b836fbe4f7456009"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_entry.py",
+            "symbol": "Application.handler / inherited _authenticate and _configured_policy",
+            "invocationProof": "test_studio_overnight.py:test_profile_requires_owner_auth_and_declares_preview_only; test_submission_csrf_and_overnight_metadata; test_origin_host_protection_and_browser_namespace"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The existing HTTPS, authenticated owner and CSRF/Host/Origin owners serve the new preview profile. Focused actual HTTP handler tests preserve rejection of unauthenticated/cross-origin requests. No anonymous render or software-render API is exposed."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -32973,15 +33661,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Actual local HTTP authentication/CSRF/Host-Origin and private submission tests preserve the existing security boundaries and completion metadata. This is CPU/service-contract evidence, not mobile NVIDIA rendering or a paid start; preflight correctly keeps rendering blocked without quality/image approval.",
+      "reason": "The existing HTTPS, authenticated owner and CSRF/Host/Origin owners serve the new preview profile. Focused actual HTTP handler tests preserve rejection of unauthenticated/cross-origin requests. No anonymous render or software-render API is exposed.",
       "canonicalId": "STUDIO.OWNER_AUTH",
       "aliasGroup": [
         "STUDIO.OWNER_AUTH"
@@ -33150,7 +33838,43 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.OWNER_AUTH",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_entry.py",
+              "sha256": "34680d2b41a3565094ce093e1fc394fe2f177375167f8fa4b836fbe4f7456009"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_entry.py",
+            "symbol": "Application.handler / inherited _authenticate and _configured_policy",
+            "invocationProof": "test_studio_overnight.py:test_profile_requires_owner_auth_and_declares_preview_only; test_submission_csrf_and_overnight_metadata; test_origin_host_protection_and_browser_namespace"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The existing HTTPS, authenticated owner and CSRF/Host/Origin owners serve the new preview profile. Focused actual HTTP handler tests preserve rejection of unauthenticated/cross-origin requests. No anonymous render or software-render API is exposed."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -33439,15 +34163,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Actual local HTTP authentication/CSRF/Host-Origin and private submission tests preserve the existing security boundaries and completion metadata. This is CPU/service-contract evidence, not mobile NVIDIA rendering or a paid start; preflight correctly keeps rendering blocked without quality/image approval.",
+      "reason": "Authenticated Studio has a preview-only explicit start path with source/history/image proof, original GPU admission and valid operator policy required. Missing optional historical actors do not block the unselected qualified base; selected missing actors fail. Full 80-second start/recovery remains denied.",
       "canonicalId": "STUDIO.PREFLIGHT",
       "aliasGroup": [
         "STUDIO.PREFLIGHT"
@@ -33610,7 +34334,51 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.PREFLIGHT",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+              "sha256": "cdecf54dd097b501b792e5085c8dd6f3ddb8fbcf11402e2d09f0aea0f7a402a4"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_authority.py",
+              "sha256": "be5af52c03da909570b95a0e30710a350c0549ed1527d3a87f6a9ca45d99489f"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+            "symbol": "gate_context / preflight / _authorize_start / start_studio_job",
+            "invocationProof": "test_studio_overnight.py:29 PASS real normalization, private submission, fail-closed image/source/approval gates; test_runtime_authority.py:6 PASS actual sidecars"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "Authenticated Studio has a preview-only explicit start path with source/history/image proof, original GPU admission and valid operator policy required. Missing optional historical actors do not block the unselected qualified base; selected missing actors fail. Full 80-second start/recovery remains denied."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -35141,15 +35909,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
-      "status": "UNVERIFIED",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Existing mux can preserve video pixels and add AAC, but no new candidate MP4/audio output is produced here.",
+      "status": "SUPPORTING",
+      "reason": "The original FFmpeg/AAC mux actually produced the initial150-frame software map preview with240000 effective audio samples,640 codec-padding samples and unchanged decoded video pixels/timestamps. This resolves the CPU-media output gap only. The measured output remains bound to source6108509/manifestb98b7961, not the later source1a74227 package, 80-second output, NVIDIA execution or reference visual quality.",
       "canonicalId": "STUDIO.SFX_MUX",
       "aliasGroup": [
         "STUDIO.SFX_MUX"
@@ -35246,8 +36014,8 @@
       "overnightReview": {
         "previousStatus": "UNVERIFIED",
         "reviewed": true,
-        "gapClass": "CPU_MEDIA_PENDING",
-        "actionOrLimitation": "Existing FFmpeg mux can be tested without GPU using exact audio clock and verified synthetic video; do not label synthetic test a map render.",
+        "gapClass": "RESOLVED_CPU_MEDIA",
+        "actionOrLimitation": "Actual 150-frame software map AAC mux is verified; no 80-second/NVIDIA/reference-quality claim. Preserve first-source proof and keep paid execution approval separate.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
@@ -35270,11 +36038,71 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.SFX_MUX",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_audio.py",
+              "sha256": "9d02ad2bf32624d8ba38e97cee039cebaac21af77a4ba7a645397042bc5c0e0d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+              "sha256": "03a9083aa71ac5acbe17806afd8dfb44e1fd155e886237aba6c00ae3552dca5d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_audio.py",
+              "sha256": "ba9d8b6fefae7aba9f2ac8faffd3adf6a3f789808f53a0ed4ecae20fa5d90e95"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_audio.py",
+            "symbol": "mux_preview_sfx / preserved studio_audio.mux_sfx",
+            "invocationProof": "proof-initial/FINAL_DELIVERY_RECEIPT.json actual 150-frame software-map media: video decoded pixels/timestamps unchanged, effective audio240000samples, full decodePASS; test_preview_audio.py:4 PASS clock/clip contract"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The original FFmpeg/AAC mux actually produced the initial150-frame software map preview with240000 effective audio samples,640 codec-padding samples and unchanged decoded video pixels/timestamps. This resolves the CPU-media output gap only. The measured output remains bound to source6108509/manifestb98b7961, not the later source1a74227 package, 80-second output, NVIDIA execution or reference visual quality."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": true,
+        "connectionResolvedThisTask": true
       },
-      "outputAppliedThisOvernightTask": false
+      "outputAppliedThisOvernightTask": false,
+      "softwareOutputEvidence": {
+        "receipt": {
+          "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/FEATURE_SOFTWARE_OUTPUT_EVIDENCE.json",
+          "sha256": "87c2f8436f918a4cff974d9155532d40739803bd50cb136a47aee33460bed2a6"
+        },
+        "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+        "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+        "observation": {
+          "featureId": "STUDIO.SFX_MUX",
+          "evidenceClass": "ACTUAL_CPU_MEDIA_OUTPUT",
+          "status": "SUPPORTING",
+          "measuredAssertions": {
+            "videoDecodedPixelsAndTimestampsPreserved": true,
+            "effectiveAudioSamples": 240000,
+            "sampleRate": 48000,
+            "durationSeconds": 5,
+            "AACPaddingSamples": 640,
+            "fullDecode": "PASS"
+          },
+          "scope": "Actual 150-frame software-produced preview mux; not 80-second output or NVIDIA quality."
+        },
+        "doesNotVerifyCurrentLaterPackage": true
+      }
     },
     {
       "id": "STUDIO.SFX_RENDER",
@@ -35369,15 +36197,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Existing original CC0 effects and frame-to-sample scheduling are reusable without extracting reference audio.",
+      "reason": "The preserved global SFX mixer is reused before clipping exactly 240000 stereo samples for the chosen source interval. Frame/sample origin and cue tails remain tied to original absolute frames. Reference audio is not sampled; actual final media receipt is recorded separately.",
       "canonicalId": "STUDIO.SFX_RENDER",
       "aliasGroup": [
         "STUDIO.SFX_RENDER"
@@ -35507,11 +36335,63 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.SFX_RENDER",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_audio.py",
+              "sha256": "9d02ad2bf32624d8ba38e97cee039cebaac21af77a4ba7a645397042bc5c0e0d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_preview_audio.py",
+              "sha256": "ba9d8b6fefae7aba9f2ac8faffd3adf6a3f789808f53a0ed4ecae20fa5d90e95"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/preview_audio.py",
+            "symbol": "render_preview_sfx / clip_pcm_wav / preserved render_sfx",
+            "invocationProof": "test_preview_audio.py:4 PASS original global cue scheduling, exact sample clip and no resequencing"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "The preserved global SFX mixer is reused before clipping exactly 240000 stereo samples for the chosen source interval. Frame/sample origin and cue tails remain tied to original absolute frames. Reference audio is not sampled; actual final media receipt is recorded separately."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
-      "outputAppliedThisOvernightTask": false
+      "outputAppliedThisOvernightTask": false,
+      "softwareOutputEvidence": {
+        "receipt": {
+          "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/FEATURE_SOFTWARE_OUTPUT_EVIDENCE.json",
+          "sha256": "87c2f8436f918a4cff974d9155532d40739803bd50cb136a47aee33460bed2a6"
+        },
+        "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+        "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+        "observation": {
+          "featureId": "STUDIO.SFX_RENDER",
+          "evidenceClass": "ACTUAL_CPU_AUDIO_OUTPUT",
+          "status": "SUPPORTING",
+          "measuredAssertions": {
+            "globalAudioClockPreserved": true,
+            "clippedAudioSamples": 240000,
+            "referenceAudioCopied": false
+          },
+          "scope": "Existing SFX mixer and clip; original global frame/sample origin preserved."
+        },
+        "doesNotVerifyCurrentLaterPackage": true
+      }
     },
     {
       "id": "STUDIO.SFX_TOGGLE_GAIN",
@@ -35908,15 +36788,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "INTERNAL_ONLY",
-      "sceneJSONAddressable": "NO",
+      "studioV2Exposed": "YES",
+      "sceneJSONAddressable": "CONDITIONAL",
       "runtimeSelected": "YES",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "PASS",
+      "actualRendererConsumer": "SOURCE_BOUND",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "SUPPORTING",
-      "reason": "Actual local HTTP authentication/CSRF/Host-Origin and private submission tests preserve the existing security boundaries and completion metadata. This is CPU/service-contract evidence, not mobile NVIDIA rendering or a paid start; preflight correctly keeps rendering blocked without quality/image approval. Runtime source-object binding rejects a mutated title even when caller-provided declarations look valid; physical authority files and assessed objects are checked independently of image/GPU approval.",
+      "reason": "Authenticated Studio has a preview-only explicit start path with source/history/image proof, original GPU admission and valid operator policy required. Missing optional historical actors do not block the unselected qualified base; selected missing actors fail. Full 80-second start/recovery remains denied.",
       "canonicalId": "STUDIO.SOURCE_IMAGE_BINDING",
       "aliasGroup": [
         "STUDIO.SOURCE_IMAGE_BINDING"
@@ -36095,7 +36975,51 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "STUDIO.SOURCE_IMAGE_BINDING",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+              "sha256": "0e234050f1b2e159dd82d29cb216f660f7ecb906f02a19ee094300c7becae4da"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/studio_controller.py",
+              "sha256": "077aaf597a65b54e76f5314a832f776686b4bec9ab15de1e25f1a6b0caaba01d"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/execution_manager.py",
+              "sha256": "cdecf54dd097b501b792e5085c8dd6f3ddb8fbcf11402e2d09f0aea0f7a402a4"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_studio_overnight.py",
+              "sha256": "cfdf206477567c318e1eb3e4031ba85ef92c2966a042828b8cc34d9e21f07572"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_authority.py",
+              "sha256": "be5af52c03da909570b95a0e30710a350c0549ed1527d3a87f6a9ca45d99489f"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+            "symbol": "gate_context / preflight / _authorize_start / start_studio_job",
+            "invocationProof": "test_studio_overnight.py:29 PASS real normalization, private submission, fail-closed image/source/approval gates; test_runtime_authority.py:6 PASS actual sidecars"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "YES",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "YES",
+            "actualRendererConsumer": "SOURCE_BOUND",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "SUPPORTING",
+          "reason": "Authenticated Studio has a preview-only explicit start path with source/history/image proof, original GPU admission and valid operator policy required. Missing optional historical actors do not block the unselected qualified base; selected missing actors fail. Full 80-second start/recovery remains denied."
+        },
         "newOutputFeatureProof": null,
         "changedStatus": false
       },
@@ -37487,15 +38411,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "BLOCKED",
-      "reason": "The five-second complementary scalar owner requires a compatible complete ownership/domain contract. Partial historical fronts/held-core complements cannot safely supply that field.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "TERRITORY.COMPLEMENTARY_SCALAR_CONTROL",
       "aliasGroup": [
         "TERRITORY.COMPLEMENTARY_SCALAR_CONTROL"
@@ -37605,7 +38529,7 @@
         "previousStatus": "BLOCKED",
         "reviewed": true,
         "gapClass": "HISTORICAL_DATA",
-        "actionOrLimitation": "Complete faction/domain scalar control input is absent; never infer opponent ownership from held-core complement.",
+        "actionOrLimitation": "Need a dated source-backed canonical complete scalar ownership/domain plan. Current effective catalog has zero records; no opponent complement inference.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/web/map_infographic_v1/territory_control_adapter_v1.mjs",
@@ -37618,9 +38542,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "TERRITORY.COMPLEMENTARY_SCALAR_CONTROL",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "SCALAR_CONTROL_PLAN"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -37704,15 +38674,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "BLOCKED",
-      "reason": "Bounded production Area opacity/white-gold controls are connected; the separate advanced scalar gain-brightness owner is not selected by that bridge.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "TERRITORY.GAIN_STYLE",
       "aliasGroup": [
         "TERRITORY.GAIN_STYLE"
@@ -37814,8 +38784,8 @@
       "overnightReview": {
         "previousStatus": "BLOCKED",
         "reviewed": true,
-        "gapClass": "SOURCE_CONNECTION_AND_HISTORICAL_DATA",
-        "actionOrLimitation": "Existing gain-style owner requires actual scalar consumer and source-backed ownership; no fabricated gain region.",
+        "gapClass": "HISTORICAL_DATA",
+        "actionOrLimitation": "Existing gain owner and new source authority are connected; select it only with an admitted complete scalar ownership plan.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/gain_territory.mjs",
@@ -37828,9 +38798,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "TERRITORY.GAIN_STYLE",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "SCALAR_CONTROL_PLAN"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -38381,15 +39397,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "BLOCKED",
-      "reason": "Original national-tablet artwork exists but is not selected by the new current historical route, and no reviewed country/role/date/position anchors are supplied.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "UNITS.NATIONAL_TABLETS",
       "aliasGroup": [
         "UNITS.NATIONAL_TABLETS"
@@ -38499,7 +39515,7 @@
         "previousStatus": "BLOCKED",
         "reviewed": true,
         "gapClass": "HISTORICAL_DATA",
-        "actionOrLimitation": "National artwork exists, but dated country/role/position anchors are absent in historical source authority.",
+        "actionOrLimitation": "Existing national-tablet owner and new source authority are connected. Need reviewed country/role/date/per-frame position anchors; current catalog count zero.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
@@ -38522,9 +39538,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "UNITS.NATIONAL_TABLETS",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "NATIONAL_UNIT_SCENE"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -38804,15 +39866,15 @@
         "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
       },
       "implementationExists": "YES",
-      "studioV2Exposed": "NO",
-      "sceneJSONAddressable": "NO",
-      "runtimeSelected": "NO",
-      "actualRendererConsumer": "NONE",
-      "cpuProof": "NOT_VERIFIED_FOR_COMPLETION",
+      "studioV2Exposed": "CONDITIONAL",
+      "sceneJSONAddressable": "CONDITIONAL",
+      "runtimeSelected": "CONDITIONAL",
+      "actualRendererConsumer": "CPU_INSTRUMENTED",
+      "cpuProof": "PASS_NEW_FOCUSED_CPU",
       "gpuProof": "NOT_VERIFIED",
       "relevantToKoreanWar": "REQUIRED",
       "status": "BLOCKED",
-      "reason": "The old bounded national-tablet scale owner needs admitted per-frame historical anchors and is not selected in the current completion fixture.",
+      "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
       "canonicalId": "UNITS.SAFE_STATIC_SCALE",
       "aliasGroup": [
         "UNITS.SAFE_STATIC_SCALE"
@@ -38910,7 +39972,7 @@
         "previousStatus": "BLOCKED",
         "reviewed": true,
         "gapClass": "HISTORICAL_DATA",
-        "actionOrLimitation": "Bounded scale owner requires admitted per-frame anchors and layout; no guessed national-unit locations.",
+        "actionOrLimitation": "Existing bounded-scale owner and source authority are connected. Need admitted national-unit scene and actual camera/protected-layout safety.",
         "sourceEvidence": [
           {
             "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/unit-size-profile.mjs",
@@ -38923,9 +39985,55 @@
             "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
           }
         ],
-        "newCpuEvidence": null,
+        "newCpuEvidence": {
+          "featureId": "UNITS.SAFE_STATIC_SCALE",
+          "sourceFiles": [
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+              "sha256": "770adb1f498c91ec772b1321b29cdcaee2d1d53cc243aa3917d0cda146e72666"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/browser_adapter.mjs",
+              "sha256": "df89ddc6f6d568d27c3fecf695a93821a5117631432458ae8f59075158fa9590"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_binding.mjs",
+              "sha256": "14843be241007418334f801e84f71240ea063964019a19e9cca4b14fdc5e6870"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_visual_extensions.mjs",
+              "sha256": "59db9c867dd757d8b9449d09be49a98b1ad94c306f05d7ddb1e5b122a0d0e0fc"
+            },
+            {
+              "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/tests/test_runtime_binding.mjs",
+              "sha256": "b599f0c4f7493cf870441b8a6bdd30c0abf570c4d7604e25629d6823773eafab"
+            }
+          ],
+          "cpuReceipt": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/CPU_TEST_RESULTS.json",
+            "sha256": "1dbc561c5ab290aba6843cb7080ebb89df61294f81dd2f0c93382adf195867cc"
+          },
+          "runtimeConsumer": {
+            "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/visual_extensions.mjs",
+            "symbol": "compileVisualExtensions / createVisualExtensionsPass / bootLongRuntime.pipeline.drawFrame",
+            "invocationProof": "test_visual_extensions.mjs:15 PASS actual original compilers/evaluators and explicitly instrumented draw consumers; test_runtime_binding.mjs:5 PASS actual alias and request binding"
+          },
+          "axes": {
+            "implementationExists": "YES",
+            "studioV2Exposed": "CONDITIONAL",
+            "sceneJSONAddressable": "CONDITIONAL",
+            "runtimeSelected": "CONDITIONAL",
+            "actualRendererConsumer": "CPU_INSTRUMENTED",
+            "cpuProof": "PASS_NEW_FOCUSED_CPU",
+            "gpuProof": "NOT_VERIFIED"
+          },
+          "status": "BLOCKED",
+          "reason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed."
+        },
         "newOutputFeatureProof": null,
-        "changedStatus": false
+        "changedStatus": false,
+        "connectionResolvedThisTask": true,
+        "remainingRequiredSourceRole": "NATIONAL_UNIT_SCENE"
       },
       "outputAppliedThisOvernightTask": false
     },
@@ -39298,5 +40406,31 @@
       },
       "outputAppliedThisOvernightTask": false
     }
-  ]
+  ],
+  "overnightSourceCommit": "1a74227afb83e60481ec51a40c8a29d24c596479",
+  "sourceManifestSHA256": "53075c5b3b4a24231c426adca8c7779fcffffcd552e344b945f83f500e41748d",
+  "hardwareValidationStatus": "GPU_PENDING",
+  "softwareOutputEvidence": {
+    "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/reports/FEATURE_SOFTWARE_OUTPUT_EVIDENCE.json",
+    "sha256": "87c2f8436f918a4cff974d9155532d40739803bd50cb136a47aee33460bed2a6"
+  },
+  "candidateImage": {
+    "state": "BUILD_IN_PROGRESS",
+    "digest": null,
+    "sourceCommit": "1a74227afb83e60481ec51a40c8a29d24c596479",
+    "sourceManifestSHA256": "53075c5b3b4a24231c426adca8c7779fcffffcd552e344b945f83f500e41748d",
+    "workflowRun": 39272372786,
+    "hardwareRenderingVerified": false
+  },
+  "previousVerifiedCandidateImage": {
+    "digest": "sha256:922374ba5b74ecdd125774b3adf9f6ea50faba1880bd0ca9360e7f1b346ad0c9",
+    "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+    "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+    "proof": {
+      "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runs/39269996619-1/IMAGE_PROOF.json",
+      "sha256": "f1f0f924608bea26cb46502807f88082d89e460578f902d7a0c010af70b6bca8"
+    },
+    "laterSourceInclusionProven": false
+  },
+  "actual80sOutputFeatureProofs": 0
 }

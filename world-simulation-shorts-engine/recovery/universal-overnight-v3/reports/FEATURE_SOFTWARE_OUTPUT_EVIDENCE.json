@@ -1,0 +1,101 @@
+{
+  "schema": "WORLD_ENGINE_OVERNIGHT_SOFTWARE_OUTPUT_FEATURE_EVIDENCE_V1",
+  "runs": [
+    {
+      "stage": "INITIAL_BEFORE_ADDITIVE_SOURCE_AUTHORITY_EXTENSION",
+      "sourceCommit": "6108509ba36769be62a2f69561e1b50fc4f5366e",
+      "sourceManifestSHA256": "b98b796154a1c6685fd618beb6bc16e4f200a9967193ece12cee368c8b1d2fb2",
+      "globalFrameRange": [
+        1400,
+        1550
+      ],
+      "frameCount": 150,
+      "technicalResult": "PASS_SOFTWARE_ONLY",
+      "renderer": "SwiftShader",
+      "physicalNvidiaExecuted": false,
+      "candidateImageExecutionVerified": false,
+      "full80VideoRendered": false,
+      "visualQualityApproved": false,
+      "referenceEquivalent": false,
+      "video": {
+        "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/proof-initial/public/WORLD_ENGINE_OVERNIGHT_PREVIEW_5S_SOFTWARE_SFX.mp4",
+        "sha256": "3899d87cbacfbb54f9a094ac0a37755b7a3dd5ba941634e37f4555d01de83f66",
+        "bytes": 2053810
+      },
+      "verification": {
+        "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/proof-initial/FREE_RENDER_VERIFICATION.json",
+        "sha256": "ba8e0d6f9f8263cf8c87e922edce99472086a54b3a7c22746bb66941b2cb181a"
+      },
+      "deliveryReceipt": {
+        "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/proof-initial/FINAL_DELIVERY_RECEIPT.json",
+        "sha256": "95ebaba07bd23bab7426280b620fe33e1e8aa1e34b2733f67ebf337b8d7a005e"
+      },
+      "perFeatureEvidence": [
+        {
+          "featureId": "STUDIO.SFX_MUX",
+          "evidenceClass": "ACTUAL_CPU_MEDIA_OUTPUT",
+          "status": "SUPPORTING",
+          "measuredAssertions": {
+            "videoDecodedPixelsAndTimestampsPreserved": true,
+            "effectiveAudioSamples": 240000,
+            "sampleRate": 48000,
+            "durationSeconds": 5,
+            "AACPaddingSamples": 640,
+            "fullDecode": "PASS"
+          },
+          "scope": "Actual 150-frame software-produced preview mux; not 80-second output or NVIDIA quality."
+        },
+        {
+          "featureId": "STUDIO.SFX_RENDER",
+          "evidenceClass": "ACTUAL_CPU_AUDIO_OUTPUT",
+          "status": "SUPPORTING",
+          "measuredAssertions": {
+            "globalAudioClockPreserved": true,
+            "clippedAudioSamples": 240000,
+            "referenceAudioCopied": false
+          },
+          "scope": "Existing SFX mixer and clip; original global frame/sample origin preserved."
+        },
+        {
+          "featureId": "PLANNER.SOURCE_GEOMETRY_CLOCK",
+          "evidenceClass": "ACTUAL_SOFTWARE_CAPTURE_FRAME_ORDER",
+          "status": "SUPPORTING",
+          "measuredAssertions": {
+            "sourceRange": [
+              1400,
+              1550
+            ],
+            "halfOpenNoDuplicates": true,
+            "boundedFramesInMemory": 1
+          },
+          "scope": "Original global clock and untouched Scene range, not observed daily historical movement."
+        },
+        {
+          "featureId": "MAP.NATIVE_WEBGL_FACTORY",
+          "evidenceClass": "ACTUAL_SOFTWARE_WEBGL_DRAW_READBACK",
+          "status": "SOFTWARE_OBSERVED_NVIDIA_PENDING",
+          "measuredAssertions": {
+            "outputFrames": 150,
+            "uniqueRawFrameHashes": 101,
+            "checkpointsNotBlack": true
+          },
+          "scope": "Real SwiftShader framebuffer output, not NVIDIA/hardware performance or reference-grade quality."
+        },
+        {
+          "featureId": "ASTRA.SURFACE_TEXTURE",
+          "evidenceClass": "ACTUAL_SOFTWARE_SOURCE_UPLOAD_DIAGNOSTIC",
+          "status": "SOFTWARE_OBSERVED_NVIDIA_PENDING",
+          "measuredAssertions": {
+            "actualAstraDiagnosticFrames": 150,
+            "nativeTerrainCameraExactFrames": 150
+          },
+          "scope": "Existing shader path and same-frame source metadata selected. This is not per-role ablation or visual seam/texture quality approval."
+        }
+      ]
+    }
+  ],
+  "evidenceScope": "Feature-specific measured software/media assertions are distinct from current 80-second output, NVIDIA proof and reference visual quality. Later package changes cannot relabel an earlier source run.",
+  "actualNvidiaFeatureProofs": 0,
+  "actual80sFeatureOutputProofs": 0,
+  "finalPromotion": false
+}
