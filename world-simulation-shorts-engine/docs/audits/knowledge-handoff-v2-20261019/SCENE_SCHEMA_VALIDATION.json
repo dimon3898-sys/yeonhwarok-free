@@ -1,0 +1,71 @@
+{
+  "schema": "WORLD_ENGINE_SCENE_AUDIT_CPU_VALIDATION_V2",
+  "sourceCommit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+  "status": "PASS",
+  "cases": [
+    {
+      "name": "persisted V4 Scene direct profile",
+      "status": "PASS",
+      "schemaAccepted": true,
+      "expectedAccepted": true
+    },
+    {
+      "name": "default V4 profile direct Scene",
+      "status": "PASS",
+      "schemaAccepted": true,
+      "expectedAccepted": true
+    },
+    {
+      "name": "persisted parent V3 Scene direct profile",
+      "status": "PASS",
+      "schemaAccepted": true,
+      "expectedAccepted": true
+    },
+    {
+      "name": "V4 duration120 rejected",
+      "status": "PASS",
+      "schemaAccepted": false,
+      "expectedAccepted": false
+    },
+    {
+      "name": "unsupported Studio profile rejected",
+      "status": "PASS",
+      "schemaAccepted": false,
+      "expectedAccepted": false
+    },
+    {
+      "name": "legacy portable Scene not a Studio long Scene",
+      "status": "PASS",
+      "schemaAccepted": false,
+      "expectedAccepted": false
+    },
+    {
+      "name": "explicit null SFX normalizes separately",
+      "status": "PASS",
+      "schemaAccepted": true,
+      "expectedAccepted": true
+    },
+    {
+      "name": "actual base validate_plan persisted fixture",
+      "status": "PASS",
+      "scope": "CPU contract only"
+    },
+    {
+      "name": "actual base validate_plan tampered work binding rejected",
+      "status": "PASS",
+      "observedError": "SCENE_BINDING_MISMATCH"
+    },
+    {
+      "name": "actual base validator alone accepts unknown root metadata",
+      "status": "PASS",
+      "scope": "Not V4 admission; whole frozen V4 equality remains mandatory"
+    }
+  ],
+  "count": 10,
+  "schemaMetaValidation": "PASS Draft202012Validator.check_schema",
+  "schemaSHA256": "d05d3bbc0a88b1c3a1d296e2d1e6927222f6569b06d8375977c86ebf2a8df240",
+  "gpuExecuted": false,
+  "rendersExecuted": 0,
+  "actualStudioBackendTests": "See CONTRACT_TEST_RESULTS.json; separate prompt agent ran actual frozen backend normalization.",
+  "runtimeLimit": "Schema structural acceptance does not authorize or certify V4frozen parent identity, sourceclosure, GPU admission, image inclusion, currenthardware outputs, or visualquality."
+}

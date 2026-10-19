@@ -1,0 +1,4211 @@
+[
+  {
+    "id": "CAMERA.MINIMUM_CONTEXT",
+    "domain": "Camera",
+    "name": "V5 Minimum Context",
+    "description": "실제 Safe Area 안에 Primary, Event, 직접 관계 Geometry를 담는 최소 Context를 계산한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileMinimumContextIntent(scene,{relationGeometry}); compileMinimumContextPlan({scene,profile,seed})",
+      "fields": [
+        "primary_region_id",
+        "start_extent",
+        "context_geometry",
+        "event_geometry",
+        "relationGeometry",
+        "profile",
+        "seed"
+      ],
+      "allowedValues": {
+        "coordinates": "WGS84 lon/lat",
+        "context_extent": "legacy evidence only, notrequiredconstraint"
+      },
+      "defaults": {
+        "relationGeometry": [],
+        "profile": {},
+        "seed": 0
+      },
+      "units": {
+        "extents": "degrees",
+        "output": "pixels"
+      },
+      "errors": [
+        "CAMERA_V5_PRIMARY_RECOGNITION_INFEASIBLE",
+        "CAMERA_V5_MINIMUM_CONTEXT_POLAR_LIMIT"
+      ]
+    },
+    "dependencies": [
+      "CameraV4 intent/admission",
+      "Scale.geometryBounds",
+      "SafeArea"
+    ],
+    "constraints": [
+      "Does not admit unsupported local detail",
+      "Optional country geometry not wholecountry fitconstraint"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+        "startLine": 146,
+        "endLine": 177,
+        "symbol": "compileMinimumContextIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Union fits only actual required primary/event/directrelationgeometry."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+        "startLine": 296,
+        "endLine": 306,
+        "symbol": "compileMinimumContextPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Pure V5 compiler/evaluator API."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2440,
+        "endLine": 2453,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "CAMERA.NATURAL_TURNAROUND",
+    "domain": "Camera",
+    "name": "V5 Natural Turnaround",
+    "description": "중심과 로그 축척의 C2 연속 곡선으로 전환하고 pan 선행, 감속, 정착 및 Lock을 계산한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "evaluateMinimumContextCameraFrame(plan,frame)",
+      "fields": [
+        "plan",
+        "frame"
+      ],
+      "allowedValues": {
+        "frame": "integer [0,totalFrames)"
+      },
+      "defaults": {},
+      "units": {
+        "frame": "frames",
+        "derivatives": "seconds"
+      },
+      "errors": [
+        "CAMERA_V5_PLAN_REQUIRED",
+        "CAMERA_REFERENCE_FRAME_OUT_OF_RANGE"
+      ]
+    },
+    "dependencies": [
+      "V5 minimumcontext",
+      "V4 profile compiler"
+    ],
+    "constraints": [
+      "No phasecurveresets",
+      "No forcedcontext ifunneeded",
+      "Not arbitrary camera command from Studio text"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+        "startLine": 208,
+        "endLine": 291,
+        "symbol": "compileNaturalMotion",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "C2 spline and pan/zoom channels."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+        "startLine": 304,
+        "endLine": 333,
+        "symbol": "evaluateMinimumContextCameraFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Pureframeevaluation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2440,
+        "endLine": 2453,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "CAMERA.GUIDED_LAYOUT_SCALE",
+    "domain": "Camera",
+    "name": "V5 measured layout and geographic scale tokens",
+    "description": "기존 Geographic extent에 맞춰 승인된 Scale token과 측정된 Graphic Layout을 평가한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createV5CameraGpuPipeline; geographicScaleVisualTokens",
+      "fields": [
+        "plans.CONTINENT",
+        "plans.REGIONAL",
+        "cameraPlan",
+        "scene",
+        "heightSource"
+      ],
+      "allowedValues": {
+        "output": [
+          1080,
+          1920
+        ]
+      },
+      "defaults": {
+        "width": 1080,
+        "height": 1920
+      },
+      "units": {
+        "tokens": "canonicalpixels"
+      },
+      "errors": [
+        "INVALID_GEOGRAPHIC_SCALE_TOKEN_EXTENTS",
+        "APPROVED_REGIONAL_FRAMING_CHANGED",
+        "FROZEN_SCALE_TOKEN_MISSING"
+      ]
+    },
+    "dependencies": [
+      "Measured glyph layout",
+      "Scale",
+      "GuidedReveal",
+      "Nativefactory"
+    ],
+    "constraints": [
+      "Singlegeographiccamera",
+      "Preview/Finalsamefactory",
+      "Tokens donotgrantdetailadmission"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v5.mjs",
+        "startLine": 17,
+        "endLine": 53,
+        "symbol": "geographicScaleVisualTokens/createV5CameraGpuPipeline",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Scaleinterpolationandmovinglayout."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+        "startLine": 88,
+        "endLine": 114,
+        "symbol": "drawNative",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "CurrentAreaNativeBridge evaluatesV5/layout/scale on everyframe."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2472,
+        "endLine": 2485,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "LAYOUT.UNIVERSAL_MEASURED",
+    "domain": "Layout",
+    "name": "Universal measured Safe Area layout",
+    "description": "실제 glyph 측정과 지리 투영으로 Marker, Location, Country, Title, Disclosure를 배치하고 Safe Area와 경계 충돌을 검사한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "buildMeasuredGraphicLayout({plan,screen,measure})",
+      "fields": [
+        "plan.layout.measured",
+        "plan.layout.safe",
+        "plan.text",
+        "measure",
+        "screen"
+      ],
+      "allowedValues": {
+        "measured.version": "KOREAN_LAYOUT_STAGE3_V1",
+        "canonical": [
+          1080,
+          1920
+        ]
+      },
+      "defaults": {
+        "safe": [
+          48,
+          72,
+          1032,
+          1848
+        ]
+      },
+      "units": {
+        "box": "canonicalpixels"
+      },
+      "errors": [
+        "Unknown measured graphic layout profile",
+        "NO_SAFE_BOUNDARY_CLEAR_LOCATION_PLACEMENT"
+      ]
+    },
+    "dependencies": [
+      "Actualprojection",
+      "Glyphmeasure",
+      "Primarypolygon"
+    ],
+    "constraints": [
+      "Markeranchor nevermoves",
+      "No fabricatedgeometry",
+      "Fonts measured beforeplacement"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+        "startLine": 81,
+        "endLine": 135,
+        "symbol": "buildMeasuredGraphicLayout",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Canonicalmeasuredlayout and markerprotection."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+        "startLine": 137,
+        "endLine": 160,
+        "symbol": "locationCandidates",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Fourlocationlabelcandidates;safe/boundarytests."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2696,
+        "endLine": 2709,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "SCALE.GEOGRAPHIC_ADMISSION",
+    "domain": "Scale",
+    "name": "WORLD / CONTINENT / REGIONAL / LOCAL scale",
+    "description": "WORLD, CONTINENT, REGIONAL, LOCAL 표시 정책과 실제 Raster coverage를 분리해 검증한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "fitGeographicExtent; geographicGroundSpacing; scalecompiler",
+      "fields": [
+        "scale",
+        "extent",
+        "output",
+        "padding",
+        "heightSource",
+        "assetMetadata"
+      ],
+      "allowedValues": {
+        "scale": [
+          "WORLD",
+          "CONTINENT",
+          "REGIONAL",
+          "LOCAL"
+        ]
+      },
+      "defaults": {
+        "output": [
+          1080,
+          1920
+        ],
+        "padding": 1.08
+      },
+      "units": {
+        "extent": "degrees",
+        "groundSpacing": "meters"
+      },
+      "errors": [
+        "SCALE_PROJECTION_POLAR_LIMIT",
+        "SCALE_EXTENT_REQUIRES_GLOBE_OR_POLAR_PROJECTION"
+      ]
+    },
+    "dependencies": [
+      "Terrainmetadata",
+      "LocalDetailAdmission"
+    ],
+    "constraints": [
+      "LOCAL iscertified separately",
+      "Nobboxclampingthatfakescoverage"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+        "startLine": 6,
+        "endLine": 20,
+        "symbol": "SCALE_POLICIES",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Fourdeclaredscaleclasses."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+        "startLine": 44,
+        "endLine": 61,
+        "symbol": "fitGeographicExtent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Geographicaspect/polarlimits."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+        "startLine": 98,
+        "endLine": 120,
+        "symbol": "selectCoveringTerrain",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Selectregisteredverifiednativecoverage."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 3014,
+        "endLine": 3027,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "DETAIL.SURVEY_LOCAL_ADMISSION",
+    "domain": "Detail",
+    "name": "Survey Local Detail Admission",
+    "description": "원본 Terrain, DEM, GIS 품질을 검사하는 엄격한 Local Admission이다. Visual Grade와 별도 결과로 보존한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "LocalDetailAdmission; SafeClosestExtent; assertLocalDetailAdmission",
+      "fields": [
+        "requestedExtent",
+        "heightSource",
+        "terrainSource",
+        "output",
+        "eventGeometry"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {
+        "extent": "degrees",
+        "density": "projectedtexelpixels"
+      },
+      "errors": [
+        "LOCAL_NOT_ADMITTED"
+      ]
+    },
+    "dependencies": [
+      "NativeTerrainMetadata",
+      "DEMcontract"
+    ],
+    "constraints": [
+      "Original surveyfailures arepreserved",
+      "Do notlowerthresholdtopass"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/local_detail_admission.mjs",
+        "startLine": 117,
+        "endLine": 180,
+        "symbol": "LocalDetailAdmission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Strictdataadmissionresult."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/local_detail_admission.mjs",
+        "startLine": 183,
+        "endLine": 227,
+        "symbol": "SafeClosestExtent/assertLocalDetailAdmission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Closestextentandruntimebinding."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2728,
+        "endLine": 2741,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "DETAIL.POST_ARRIVAL_APPROACH",
+    "domain": "Detail",
+    "name": "Admitted post-V5 Detail Approach and Lock",
+    "description": "Visual Detail 인증이 연결된 Framing Request를 받아 V5 도착 후 접근, 정착, Lock을 수행한다. 현재 80초 preset은 이 전체 Adapter를 호출하지 않는다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileCameraDetailApproach; evaluateCameraDetailApproachFrame",
+      "fields": [
+        "currentCamera",
+        "framingRequest",
+        "eventPlan",
+        "eventGeometry",
+        "output",
+        "safeArea",
+        "mode",
+        "timing"
+      ],
+      "allowedValues": {
+        "mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "decision": [
+          "USE_CURRENT_VIEW",
+          "DETAIL_APPROACH_REQUIRED"
+        ]
+      },
+      "defaults": {
+        "output": [
+          1080,
+          1920
+        ],
+        "linePaddingPixels": 5.75,
+        "arrivalFrames": 6,
+        "approachFrames": 42,
+        "settleFrames": 12
+      },
+      "units": {
+        "timing": "frames"
+      },
+      "errors": [
+        "DETAIL_VISUAL_CERTIFICATE_BINDING_REQUIRED",
+        "DETAIL_PRODUCTION_VISUAL_EVIDENCE_REQUIRED",
+        "DETAIL_UNCHANGED_EVENT_GEOMETRY_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "VisualDetailAdmission",
+      "EventTimeline",
+      "Nativeprojection"
+    ],
+    "constraints": [
+      "V5Coreunchanged",
+      "Exactgeometrybinding",
+      "Wholegeometrysafeateveryframe",
+      "Current long-form uses V5/native lock and detailSmootherstep only, not compileCameraDetailApproach."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_detail_approach_adapter_v1.mjs",
+        "startLine": 68,
+        "endLine": 127,
+        "symbol": "compileCameraDetailApproach",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Validatedcertificate,motion,perframesafety."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_detail_approach_adapter_v1.mjs",
+        "startLine": 140,
+        "endLine": 161,
+        "symbol": "evaluateCameraDetailApproachFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Noeventcontrolswhilecameraunlocked."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2376,
+        "endLine": 2389,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "CAMERA.CONSERVATIVE_CHAPTER_FOCUS",
+    "domain": "Camera",
+    "name": "V3 long-form event chapter focus",
+    "description": "장편 사건의 이전 및 다음 Geometry를 안전하게 담도록 pan 또는 더 넓은 framing을 선택한다. 승인된 부모보다 더 가까이 확대하지 않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileProductionFocusPlan; createProductionNativeCamera",
+      "fields": [
+        "chapters",
+        "approvedBounds",
+        "safeArea",
+        "anchor",
+        "geometriesForChapter",
+        "cameraApproachFrames"
+      ],
+      "allowedValues": {
+        "strengthAttempts": [
+          1,
+          0.65,
+          0.4,
+          0.2,
+          0.1
+        ]
+      },
+      "defaults": {
+        "approachFrames": 48
+      },
+      "units": {
+        "timing": "globalframes"
+      },
+      "errors": [
+        "PRODUCTION_FOCUS_NO_SAFE_CURRENT_VIEW",
+        "PRODUCTION_EVENT_REQUIRES_ACTUAL_PARENT_DETAIL_LOCK",
+        "PRODUCTION_ACTUAL_PROTECTED_GRAPHIC_LAYOUT_INVALID"
+      ]
+    },
+    "dependencies": [
+      "V5nativebridge",
+      "DetailSmootherstep",
+      "MovingLayout",
+      "Scale",
+      "Scenechapters"
+    ],
+    "constraints": [
+      "Pan/widenonly; not5scinematiczoomorrotation",
+      "FirstparentDetailLockpreserved",
+      "Safebacktrackingmaykeepcurrentview"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_camera.mjs",
+        "startLine": 30,
+        "endLine": 85,
+        "symbol": "deriveConservativeFocusBounds/compileProductionFocusPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "factor>=1 forbidscloserzoom; backtrackssafety."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_native_camera.mjs",
+        "startLine": 28,
+        "endLine": 77,
+        "symbol": "createProductionNativeCamera",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Factoryredrawandprotectedgraphicsreprojection."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 42,
+        "endLine": 56,
+        "symbol": "bootLongRuntime",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Creates native V5 bridge then chapter focus extension."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 1,
+        "endLine": 20,
+        "symbol": "sourceCommits/ancestry/runtimeRoutes/files",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Fixed package records source paths/hashes; image ancestry and recursive independent pull are audited separately in image lineage report."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "EVENT.INTEGER_TIMELINE",
+    "domain": "Event",
+    "name": "Event V1 line / hold / metric / information timeline",
+    "description": "공급된 Event Intent의 정수 프레임 Timeline을 만들며 Line, Hold, Metric, Information Hold를 순서대로 평가한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileEventIntent; compileEventPlan; evaluateEventFrame",
+      "fields": [
+        "data_mode",
+        "line",
+        "metric",
+        "fps",
+        "profile",
+        "seed"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "profileFields": [
+          "ready_frames",
+          "line_reveal_frames",
+          "line_hold_frames",
+          "metric_reveal_frames",
+          "information_hold_frames"
+        ]
+      },
+      "defaults": {
+        "seed": 0
+      },
+      "units": {
+        "profile": "frames",
+        "fps": "frames/second"
+      },
+      "errors": [
+        "EVENT_UNKNOWN_PROFILE_FIELD",
+        "EVENT_GEOGRAPHIC_ARRIVAL_REQUIRED",
+        "EVENT_GEOMETRY_OUTSIDE_SAFE_AREA"
+      ]
+    },
+    "dependencies": [
+      "V5Lock",
+      "ScaleAdmission",
+      "Nativeprojection"
+    ],
+    "constraints": [
+      "Allprofiledurationsrequired",
+      "Absentprimitivesomittheirbeats",
+      "Metricisnotcomputedfromline"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_contract_v1.mjs",
+        "startLine": 68,
+        "endLine": 82,
+        "symbol": "compileEventIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Lineandormetriccontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_timeline_v1.mjs",
+        "startLine": 26,
+        "endLine": 42,
+        "symbol": "compileEventPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Explicitintegerbeatdurations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_timeline_v1.mjs",
+        "startLine": 64,
+        "endLine": 96,
+        "symbol": "evaluateEventReadiness",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "NativearrivallockandSafeArearequired."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2504,
+        "endLine": 2517,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "EVENT.GEOGRAPHIC_LINE_ARCLENGTH",
+    "domain": "Event",
+    "name": "Geographic arc-length line reveal",
+    "description": "원본 지리 정점을 보존하고 투영된 화면 arc-length를 기준으로 선을 드러낸다. 현재 Area Front에서도 재사용한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileGeographicLinePrimitive; evaluateGeographicLineReveal",
+      "fields": [
+        "intent.line.geometry",
+        "project",
+        "visibleFraction",
+        "paddingPixels"
+      ],
+      "allowedValues": {
+        "geometry": "LineString",
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "visibleFraction": "0..1"
+      },
+      "defaults": {
+        "paddingPixels": 0
+      },
+      "units": {
+        "length": "projectedpixels"
+      },
+      "errors": [
+        "EVENT_LINE_WRAPPED_GEOMETRY_UNSUPPORTED",
+        "EVENT_LINE_ZERO_VISIBLE_LENGTH",
+        "EVENT_LINE_FRACTION_RANGE_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "Existingprojection",
+      "EventIntent"
+    ],
+    "constraints": [
+      "Projectednotphysicaltravelspeed",
+      "NoGIScoordinateinterpolation"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_line_v1.mjs",
+        "startLine": 10,
+        "endLine": 39,
+        "symbol": "compileGeographicLinePrimitive",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Projectedsegmentlengths."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_line_v1.mjs",
+        "startLine": 52,
+        "endLine": 82,
+        "symbol": "evaluateGeographicLineReveal",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Arc-lengthfractiontoROI."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 182,
+        "endLine": 185,
+        "symbol": "compileAreaLinePrimitive",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "AreaFront reusesexistinglineengine."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2552,
+        "endLine": 2565,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "EVENT.METRIC_GLYPH_PRIMITIVE",
+    "domain": "Event",
+    "name": "Measured Metric / Glyph primitive reused for dates",
+    "description": "The original 40px measured Metric/Glyph primitive renders chapter dates/titles and dated-source disclosures. The current path draws full glyphs, not the Suez metric reveal sequence.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileMetricAnnotation; evaluateMetricAnnotation",
+      "fields": [
+        "metric.display_value",
+        "metric.unit",
+        "metric.anchor",
+        "metric.source",
+        "style",
+        "visibleFraction"
+      ],
+      "allowedValues": {
+        "maxLines": 1,
+        "visibleFraction": "0..1"
+      },
+      "defaults": {},
+      "units": {
+        "fontSize": "pixels"
+      },
+      "errors": [
+        "EVENT_METRIC_SINGLE_LINE_REQUIRED",
+        "EVENT_METRIC_CLIPPED_OR_UNREADABLE",
+        "EVENT_METRIC_COMPILED_BROWSER_PRIMITIVE_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "GlyphCanvas",
+      "EventIntent",
+      "MetricLayout"
+    ],
+    "constraints": [
+      "Doesnotderivehistoricalmetricfromgeometry",
+      "Suez193.30kmisfixturemeaningnotgenericdefault"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_metric_v1.mjs",
+        "startLine": 26,
+        "endLine": 61,
+        "symbol": "compileMetricAnnotation",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Measuredsinglelinegraphemeprimitive."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_metric_v1.mjs",
+        "startLine": 63,
+        "endLine": 87,
+        "symbol": "evaluateMetricAnnotation",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Browsercompiledglyphrevealonly."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
+        "startLine": 14,
+        "endLine": 35,
+        "symbol": "createAreaAnnotation",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Reuses compileMetricAnnotation/createEventMetricPass with fixed 40px style."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
+        "startLine": 72,
+        "endLine": 87,
+        "symbol": "draw",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Default visibleFraction=1."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 94,
+        "endLine": 109,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current chapter and source snapshot annotations draw full labels."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2584,
+        "endLine": 2597,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "EVENT.METRIC_LAYOUT",
+    "domain": "Event",
+    "name": "Metric proximity layout candidates",
+    "description": "기존 Graphic을 이동하지 않고 실제 측정된 Metric annotation에 충돌 없는 후보 위치를 선택한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "chooseMetricPlacement; metriclayoutcandidatefunctions",
+      "fields": [
+        "anchor",
+        "measurement",
+        "safeArea",
+        "protectedBoxes",
+        "markerSize",
+        "gap",
+        "lineRoi"
+      ],
+      "allowedValues": {
+        "fallbackSides": [
+          "RIGHT",
+          "LEFT",
+          "ABOVE",
+          "BELOW"
+        ]
+      },
+      "defaults": {
+        "lineRoi": null
+      },
+      "units": {
+        "positions": "canonicalpixels"
+      },
+      "errors": [
+        "EVENT_METRIC_LAYOUT_BLOCKED",
+        "EVENT_LAYOUT_FULL_MEASURED_ATLAS_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "Nativegraphicreservations",
+      "Glyphmeasure",
+      "Projectedline"
+    ],
+    "constraints": [
+      "MoveonlyEventannotation",
+      "Existingmarker/labelpositionsimmutable"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_layout_adapter_v1.mjs",
+        "startLine": 28,
+        "endLine": 60,
+        "symbol": "chooseMetricPlacement",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Fourplacementcandidates andrejectcollision."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_layout_adapter_v1.mjs",
+        "startLine": 68,
+        "endLine": 86,
+        "symbol": "projectedSegments",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Supportfromvisibleunchangedline."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
+        "startLine": 41,
+        "endLine": 70,
+        "symbol": "place",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Actual current Area date labels reuse chooseMetricPlacement."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2520,
+        "endLine": 2533,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "EVENT.MARKER_OCCLUSION",
+    "domain": "Event",
+    "name": "Marker above geographic Event Line",
+    "description": "Event Line이 명시적으로 분류된 Marker 아래를 지나가는 경우만 허용하고 Text 및 Panel 충돌은 거부한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "classifyEventLineProtection",
+      "fields": [
+        "protectedBoxes",
+        "protectedGraphics"
+      ],
+      "allowedValues": {
+        "kind": [
+          "MARKER",
+          "TEXT",
+          "PANEL"
+        ],
+        "markerCapacity": 32
+      },
+      "defaults": {
+        "protectedBoxes": [],
+        "protectedGraphics": []
+      },
+      "units": {
+        "box": "canonicalpixels"
+      },
+      "errors": [
+        "EVENT_MARKER_OCCLUSION_CAPACITY_EXCEEDED",
+        "EVENT_LINE_PROTECTED_KIND_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "Eventlinepass",
+      "NativeReservations"
+    ],
+    "constraints": [
+      "LineunderMarker",
+      "Othercollisionsreject",
+      "NotallAreaorProductionpassesautomaticallysamepolicy"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_occlusion_policy_v1.mjs",
+        "startLine": 4,
+        "endLine": 34,
+        "symbol": "GEOGRAPHIC_OCCLUSION_POLICY/classifyEventLineProtection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Typedmarkerexemption; allotherstrict."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2600,
+        "endLine": 2613,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "EVENT.AUTOMATIC_LINE_CONTRAST",
+    "domain": "Event",
+    "name": "Event accent contrast selection",
+    "description": "원래 배경 샘플과의 대비를 분석하여 여섯 Accent 중 하나를 선택한다. 현재 장편 Front는 별도 고정 White/Gold 스타일을 사용한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectEventLineStyle",
+      "fields": [
+        "role",
+        "theme",
+        "primaryMaterialColor",
+        "backgroundSamples"
+      ],
+      "allowedValues": {
+        "role": [
+          "PRIMARY",
+          "SECONDARY"
+        ],
+        "candidates": [
+          "BRIGHT_CYAN",
+          "BRIGHT_TEAL",
+          "CLEAR_AZURE",
+          "BRIGHT_VIOLET",
+          "BRIGHT_CORAL",
+          "BRIGHT_AMBER"
+        ]
+      },
+      "defaults": {
+        "coreAlpha": 0.94,
+        "maximumGlowGain": 0.1
+      },
+      "units": {
+        "width": "pixels",
+        "colors": "displaysRGB"
+      },
+      "errors": [
+        "EVENT_BACKGROUND_SAMPLES_REQUIRED",
+        "EVENT_NATIVE_STYLE_TOKENS_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "Nativeframesamples",
+      "NativeTheme"
+    ],
+    "constraints": [
+      "ApprovedtealSuezresultisnotuniversalhardcode",
+      "Nativethemeunchanged",
+      "Current AFTER production pass supplies an explicit white/gold style; bundled auto contrast is not selected for that front."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_style_v1.mjs",
+        "startLine": 10,
+        "endLine": 17,
+        "symbol": "EVENT_LINE_COLOR_CANDIDATES_SRGB",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Sixcandidatecolors."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_style_v1.mjs",
+        "startLine": 91,
+        "endLine": 117,
+        "symbol": "selectEventLineStyle",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "width=base+min(2,.4*base);compactglow."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 18,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "AFTER uses explicit productionAreaStyle, not automatic accent selection."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2616,
+        "endLine": 2629,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.ROUTE_REVEAL",
+    "domain": "Flow",
+    "name": "Route reveal",
+    "description": "기존 Event arc-length를 재사용해 공급된 Route를 시작점부터 끝점까지 드러낸다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowIntent; compileFlowPlan; evaluateFlowFrame",
+      "fields": [
+        "route_geometry",
+        "route_source",
+        "start_anchor",
+        "end_anchor",
+        "direction",
+        "object_role",
+        "object_graphic",
+        "timing"
+      ],
+      "allowedValues": {
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "object_graphic": "normalizedpolygonpoints[-.5,.5]andRGBA",
+        "timingFields": [
+          "fps",
+          "start_frame",
+          "reveal_frames",
+          "direction_start_frame",
+          "object_start_frame",
+          "travel_frames",
+          "departure_pulse_frames",
+          "arrival_pulse_frames",
+          "hold_frames"
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "reveal_frames": 32,
+        "direction_start_frame": 12,
+        "object_start_frame": 20,
+        "travel_frames": 108,
+        "departure_pulse_frames": 14,
+        "arrival_pulse_frames": 18,
+        "hold_frames": 34
+      },
+      "units": {
+        "timing": "frames",
+        "graphic": "screenpixels",
+        "heading": "radians"
+      },
+      "errors": [
+        "FLOW_ANCHORS_MUST_MATCH_DIRECTED_ROUTE_ENDPOINTS",
+        "FLOW_OBJECT_CANNOT_OVERTAKE_ROUTE_REVEAL",
+        "FLOW_UNKNOWN_TIMING_FIELD"
+      ]
+    },
+    "dependencies": [
+      "Eventarc-length",
+      "Eventreadiness",
+      "Currentnativeprojection",
+      "Suppliedobjectgraphic",
+      "Occlusion"
+    ],
+    "constraints": [
+      "Noaircraft/shipphysics",
+      "Objecttypeisfixturedata",
+      "ImportedFlow.sampleFlowRoutedoesnotmeanfullFloweventactivein80s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 58,
+        "endLine": 71,
+        "symbol": "compileFlowIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Directedendpointandfixturegraphiccontract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 106,
+        "endLine": 135,
+        "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "DrawsuppliedroutefromdirectedstarttoendusingV1arc-length."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2648,
+        "endLine": 2661,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.DIRECTIONAL_FLOW",
+    "domain": "Flow",
+    "name": "Directional flow",
+    "description": "이미 드러난 Route 안에서 이동 객체보다 조금 앞서는 Highlight를 표시한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowIntent; compileFlowPlan; evaluateFlowFrame",
+      "fields": [
+        "route_geometry",
+        "route_source",
+        "start_anchor",
+        "end_anchor",
+        "direction",
+        "object_role",
+        "object_graphic",
+        "timing"
+      ],
+      "allowedValues": {
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "object_graphic": "normalizedpolygonpoints[-.5,.5]andRGBA",
+        "timingFields": [
+          "fps",
+          "start_frame",
+          "reveal_frames",
+          "direction_start_frame",
+          "object_start_frame",
+          "travel_frames",
+          "departure_pulse_frames",
+          "arrival_pulse_frames",
+          "hold_frames"
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "reveal_frames": 32,
+        "direction_start_frame": 12,
+        "object_start_frame": 20,
+        "travel_frames": 108,
+        "departure_pulse_frames": 14,
+        "arrival_pulse_frames": 18,
+        "hold_frames": 34
+      },
+      "units": {
+        "timing": "frames",
+        "graphic": "screenpixels",
+        "heading": "radians"
+      },
+      "errors": [
+        "FLOW_ANCHORS_MUST_MATCH_DIRECTED_ROUTE_ENDPOINTS",
+        "FLOW_OBJECT_CANNOT_OVERTAKE_ROUTE_REVEAL",
+        "FLOW_UNKNOWN_TIMING_FIELD"
+      ]
+    },
+    "dependencies": [
+      "Eventarc-length",
+      "Eventreadiness",
+      "Currentnativeprojection",
+      "Suppliedobjectgraphic",
+      "Occlusion"
+    ],
+    "constraints": [
+      "Noaircraft/shipphysics",
+      "Objecttypeisfixturedata",
+      "ImportedFlow.sampleFlowRoutedoesnotmeanfullFloweventactivein80s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 58,
+        "endLine": 71,
+        "symbol": "compileFlowIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Directedendpointandfixturegraphiccontract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 202,
+        "endLine": 224,
+        "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Shorttravelinghighlightaheadobjectclampedtorevealedroute."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2648,
+        "endLine": 2661,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.MOVING_OBJECT",
+    "domain": "Flow",
+    "name": "Moving object",
+    "description": "Fixture가 지정한 하나의 Graphic Object를 Route 위에서 부드럽게 가속하고 감속하며 이동한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowIntent; compileFlowPlan; evaluateFlowFrame",
+      "fields": [
+        "route_geometry",
+        "route_source",
+        "start_anchor",
+        "end_anchor",
+        "direction",
+        "object_role",
+        "object_graphic",
+        "timing"
+      ],
+      "allowedValues": {
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "object_graphic": "normalizedpolygonpoints[-.5,.5]andRGBA",
+        "timingFields": [
+          "fps",
+          "start_frame",
+          "reveal_frames",
+          "direction_start_frame",
+          "object_start_frame",
+          "travel_frames",
+          "departure_pulse_frames",
+          "arrival_pulse_frames",
+          "hold_frames"
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "reveal_frames": 32,
+        "direction_start_frame": 12,
+        "object_start_frame": 20,
+        "travel_frames": 108,
+        "departure_pulse_frames": 14,
+        "arrival_pulse_frames": 18,
+        "hold_frames": 34
+      },
+      "units": {
+        "timing": "frames",
+        "graphic": "screenpixels",
+        "heading": "radians"
+      },
+      "errors": [
+        "FLOW_ANCHORS_MUST_MATCH_DIRECTED_ROUTE_ENDPOINTS",
+        "FLOW_OBJECT_CANNOT_OVERTAKE_ROUTE_REVEAL",
+        "FLOW_UNKNOWN_TIMING_FIELD"
+      ]
+    },
+    "dependencies": [
+      "Eventarc-length",
+      "Eventreadiness",
+      "Currentnativeprojection",
+      "Suppliedobjectgraphic",
+      "Occlusion"
+    ],
+    "constraints": [
+      "Noaircraft/shipphysics",
+      "Objecttypeisfixturedata",
+      "ImportedFlow.sampleFlowRoutedoesnotmeanfullFloweventactivein80s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 58,
+        "endLine": 71,
+        "symbol": "compileFlowIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Directedendpointandfixturegraphiccontract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 191,
+        "endLine": 229,
+        "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Onefixturedefinedgraphicfollowsroutewithsmootherstepaccel/decel."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2648,
+        "endLine": 2661,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.HEADING",
+    "domain": "Flow",
+    "name": "Route tangent heading",
+    "description": "Route arc-length 위치 전후의 tangent와 angle unwrap으로 연속적인 Heading을 계산한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowIntent; compileFlowPlan; evaluateFlowFrame",
+      "fields": [
+        "route_geometry",
+        "route_source",
+        "start_anchor",
+        "end_anchor",
+        "direction",
+        "object_role",
+        "object_graphic",
+        "timing"
+      ],
+      "allowedValues": {
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "object_graphic": "normalizedpolygonpoints[-.5,.5]andRGBA",
+        "timingFields": [
+          "fps",
+          "start_frame",
+          "reveal_frames",
+          "direction_start_frame",
+          "object_start_frame",
+          "travel_frames",
+          "departure_pulse_frames",
+          "arrival_pulse_frames",
+          "hold_frames"
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "reveal_frames": 32,
+        "direction_start_frame": 12,
+        "object_start_frame": 20,
+        "travel_frames": 108,
+        "departure_pulse_frames": 14,
+        "arrival_pulse_frames": 18,
+        "hold_frames": 34
+      },
+      "units": {
+        "timing": "frames",
+        "graphic": "screenpixels",
+        "heading": "radians"
+      },
+      "errors": [
+        "FLOW_ANCHORS_MUST_MATCH_DIRECTED_ROUTE_ENDPOINTS",
+        "FLOW_OBJECT_CANNOT_OVERTAKE_ROUTE_REVEAL",
+        "FLOW_UNKNOWN_TIMING_FIELD"
+      ]
+    },
+    "dependencies": [
+      "Eventarc-length",
+      "Eventreadiness",
+      "Currentnativeprojection",
+      "Suppliedobjectgraphic",
+      "Occlusion"
+    ],
+    "constraints": [
+      "Noaircraft/shipphysics",
+      "Objecttypeisfixturedata",
+      "ImportedFlow.sampleFlowRoutedoesnotmeanfullFloweventactivein80s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 58,
+        "endLine": 71,
+        "symbol": "compileFlowIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Directedendpointandfixturegraphiccontract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 169,
+        "endLine": 180,
+        "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Arc-lengthsamplewithlookaheadandangleunwrapgivesstablefront/backorientation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2648,
+        "endLine": 2661,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.ENDPOINT_PULSE",
+    "domain": "Flow",
+    "name": "Endpoint one-shot pulse",
+    "description": "출발 또는 도착에 한 번만 발생하고 사라지는 Pulse를 지원한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowIntent; compileFlowPlan; evaluateFlowFrame",
+      "fields": [
+        "route_geometry",
+        "route_source",
+        "start_anchor",
+        "end_anchor",
+        "direction",
+        "object_role",
+        "object_graphic",
+        "timing"
+      ],
+      "allowedValues": {
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "object_graphic": "normalizedpolygonpoints[-.5,.5]andRGBA",
+        "timingFields": [
+          "fps",
+          "start_frame",
+          "reveal_frames",
+          "direction_start_frame",
+          "object_start_frame",
+          "travel_frames",
+          "departure_pulse_frames",
+          "arrival_pulse_frames",
+          "hold_frames"
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "reveal_frames": 32,
+        "direction_start_frame": 12,
+        "object_start_frame": 20,
+        "travel_frames": 108,
+        "departure_pulse_frames": 14,
+        "arrival_pulse_frames": 18,
+        "hold_frames": 34
+      },
+      "units": {
+        "timing": "frames",
+        "graphic": "screenpixels",
+        "heading": "radians"
+      },
+      "errors": [
+        "FLOW_ANCHORS_MUST_MATCH_DIRECTED_ROUTE_ENDPOINTS",
+        "FLOW_OBJECT_CANNOT_OVERTAKE_ROUTE_REVEAL",
+        "FLOW_UNKNOWN_TIMING_FIELD"
+      ]
+    },
+    "dependencies": [
+      "Eventarc-length",
+      "Eventreadiness",
+      "Currentnativeprojection",
+      "Suppliedobjectgraphic",
+      "Occlusion"
+    ],
+    "constraints": [
+      "Noaircraft/shipphysics",
+      "Objecttypeisfixturedata",
+      "ImportedFlow.sampleFlowRoutedoesnotmeanfullFloweventactivein80s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 58,
+        "endLine": 71,
+        "symbol": "compileFlowIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Directedendpointandfixturegraphiccontract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 182,
+        "endLine": 187,
+        "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Nonrepeatingdepartureandarrivalpulsewithsinamplitudefadeto0."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2648,
+        "endLine": 2661,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.ROUTE_HOLD",
+    "domain": "Flow",
+    "name": "Route hold",
+    "description": "도착한 Route와 Object 상태를 설정한 마지막 Hold 동안 유지한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowIntent; compileFlowPlan; evaluateFlowFrame",
+      "fields": [
+        "route_geometry",
+        "route_source",
+        "start_anchor",
+        "end_anchor",
+        "direction",
+        "object_role",
+        "object_graphic",
+        "timing"
+      ],
+      "allowedValues": {
+        "direction": [
+          "FORWARD",
+          "REVERSE"
+        ],
+        "object_graphic": "normalizedpolygonpoints[-.5,.5]andRGBA",
+        "timingFields": [
+          "fps",
+          "start_frame",
+          "reveal_frames",
+          "direction_start_frame",
+          "object_start_frame",
+          "travel_frames",
+          "departure_pulse_frames",
+          "arrival_pulse_frames",
+          "hold_frames"
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "reveal_frames": 32,
+        "direction_start_frame": 12,
+        "object_start_frame": 20,
+        "travel_frames": 108,
+        "departure_pulse_frames": 14,
+        "arrival_pulse_frames": 18,
+        "hold_frames": 34
+      },
+      "units": {
+        "timing": "frames",
+        "graphic": "screenpixels",
+        "heading": "radians"
+      },
+      "errors": [
+        "FLOW_ANCHORS_MUST_MATCH_DIRECTED_ROUTE_ENDPOINTS",
+        "FLOW_OBJECT_CANNOT_OVERTAKE_ROUTE_REVEAL",
+        "FLOW_UNKNOWN_TIMING_FIELD"
+      ]
+    },
+    "dependencies": [
+      "Eventarc-length",
+      "Eventreadiness",
+      "Currentnativeprojection",
+      "Suppliedobjectgraphic",
+      "Occlusion"
+    ],
+    "constraints": [
+      "Noaircraft/shipphysics",
+      "Objecttypeisfixturedata",
+      "ImportedFlow.sampleFlowRoutedoesnotmeanfullFloweventactivein80s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 58,
+        "endLine": 71,
+        "symbol": "compileFlowIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Directedendpointandfixturegraphiccontract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "startLine": 106,
+        "endLine": 135,
+        "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Preserverouteandarrivedobjectforconfiguredfinalhold."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2648,
+        "endLine": 2661,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.REVEAL",
+    "domain": "Area",
+    "name": "Area Reveal",
+    "description": "공급된 Polygon의 형태를 바꾸지 않고 불투명도를 증가시켜 드러낸다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "REVEAL",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 333,
+        "endLine": 345,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Opacityrevealofsuppliedpolygon;noninventedtopology."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/long_area_timeline.mjs",
+        "startLine": 27,
+        "endLine": 90,
+        "symbol": "compileLongAreaRequest/evaluateLongAreaFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current long-form reuses validated static Area V3 states with external global clock; actual active features are reveal/front/transition/hold."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 92,
+        "endLine": 120,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Evaluates supplied snapshot clock and draws actual Area controls."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.GROW",
+    "domain": "Area",
+    "name": "Area Grow",
+    "description": "원본 Polygon 내부에서 Radial coverage를 확장한다. 실제 관측 경계가 늘어났다는 의미는 아니다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "GROW",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 333,
+        "endLine": 345,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Radialcoveragerevealmaskedinsideoriginalsuppliedpolygon."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.CONTRACT",
+    "domain": "Area",
+    "name": "Area Contract",
+    "description": "원본 Polygon 내부에서 Radial coverage를 줄인다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "CONTRACT",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 333,
+        "endLine": 345,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Reversecoveragefrom1to0insideoriginalpolygon."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.MOVE",
+    "domain": "Area",
+    "name": "Area Move",
+    "description": "공급된 경로를 따라 영역을 평행 이동한다. 기존 Flow arc-length sampling을 재사용한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "MOVE",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 302,
+        "endLine": 312,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "TranslateunchangedareaalongasuppliedtrajectoryusingreusedFlowarc-length."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.HOLD",
+    "domain": "Area",
+    "name": "Area Hold",
+    "description": "모든 작업 뒤 정확히 하나의 Final Hold를 유지한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "HOLD",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 244,
+        "endLine": 261,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exactlyonefinalholdafteralloperations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/long_area_timeline.mjs",
+        "startLine": 27,
+        "endLine": 90,
+        "symbol": "compileLongAreaRequest/evaluateLongAreaFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current long-form reuses validated static Area V3 states with external global clock; actual active features are reveal/front/transition/hold."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 92,
+        "endLine": 120,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Evaluates supplied snapshot clock and draws actual Area controls."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.FRONT_LINE",
+    "domain": "Area",
+    "name": "Front Line",
+    "description": "공급된 Front LineString을 Event arc-length reveal로 표시한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "FRONT_LINE",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 347,
+        "endLine": 351,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "SuppliedfrontLineStringwithEventarc-lengthreveal."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/long_area_timeline.mjs",
+        "startLine": 27,
+        "endLine": 90,
+        "symbol": "compileLongAreaRequest/evaluateLongAreaFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current long-form reuses validated static Area V3 states with external global clock; actual active features are reveal/front/transition/hold."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 92,
+        "endLine": 120,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Evaluates supplied snapshot clock and draws actual Area controls."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.STATE_TRANSITION",
+    "domain": "Area",
+    "name": "State Transition",
+    "description": "기존 공급 상태 사이를 Crossfade한다. 알려지지 않은 역사 전선이나 Boundary Morph를 생성하지 않는다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "STATE_TRANSITION",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 314,
+        "endLine": 324,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Crossfadeexistingobservedstates;doesnotreconstructunknownhistoricfronts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/long_area_timeline.mjs",
+        "startLine": 27,
+        "endLine": 90,
+        "symbol": "compileLongAreaRequest/evaluateLongAreaFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current long-form reuses validated static Area V3 states with external global clock; actual active features are reveal/front/transition/hold."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 92,
+        "endLine": 120,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Evaluates supplied snapshot clock and draws actual Area controls."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.TIME_STEP",
+    "domain": "Area",
+    "name": "Time Step",
+    "description": "공급된 State와 Time Label을 단계별로 선택한다. 날짜 사이의 전선을 임의 생성하지 않는다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "TIME_STEP",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 314,
+        "endLine": 324,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Selectdiscreteprovidedstate/time_label;notarbitrarydatetimeinterpolation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.PROPAGATION_RING",
+    "domain": "Area",
+    "name": "Propagation Ring",
+    "description": "지리적 Angular sweep를 시각적으로 확장한다. 실제 Tsunami Physics가 아니다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "PROPAGATION_RING",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 187,
+        "endLine": 203,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Geodesicvisualangularsweep;notphysicaltsunamisimulation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.PROPAGATION_WAVE",
+    "domain": "Area",
+    "name": "Propagation Wave core",
+    "description": "기본 Core에서는 Angular contour를 평가한다. 자연스러운 비정형 Wave는 별도 Polish 계층에서 구현한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "PROPAGATION_WAVE",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 367,
+        "endLine": 377,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Samecoreangularcontourmechanism;naturalirregularwavevisualisaseparatepolishlayer."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.IMPACT_ZONE",
+    "domain": "Area",
+    "name": "Impact Zone",
+    "description": "명시적으로 공급된 Impact Polygon을 별도 Impact Style로 드러낸다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileAreaIntent; compileAreaPlan; evaluateAreaFrame",
+      "fields": [
+        "source",
+        "data_mode",
+        "origin",
+        "areas",
+        "states",
+        "fronts",
+        "trajectories",
+        "propagations",
+        "impacts",
+        "operations",
+        "fps",
+        "start_frame",
+        "total_frames"
+      ],
+      "allowedValues": {
+        "data_mode": [
+          "PRODUCTION",
+          "SYNTHETIC_TEST"
+        ],
+        "semantic_mode": [
+          "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "SUPPLIED_OBSERVED_STATES"
+        ],
+        "geometry": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "operation": "IMPACT_ZONE",
+        "total_frames": "<=1200 per sourceAreaPlan;longformretimesfrozenSourceClock"
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL"
+      },
+      "units": {
+        "coordinates": "WGS84degrees",
+        "timing": "sourceframes",
+        "propagationradius": "angular displaydegrees"
+      },
+      "errors": [
+        "AREA_VERIFIED_PRODUCTION_SOURCE_REQUIRED",
+        "AREA_OPERATION_TARGET_NOT_FOUND",
+        "AREA_STATE_OPERATION_WINDOWS_OVERLAP",
+        "AREA_FINAL_HOLD_AFTER_OPERATIONS_REQUIRED",
+        "AREA_TOTAL_FRAMES_MUST_BIND_COMPLETE_TIMELINE"
+      ]
+    },
+    "dependencies": [
+      "VerifiedSource",
+      "Eventarc-length",
+      "Flow.sampleFlowRoute",
+      "Nativeprojection",
+      "AreaOverlay"
+    ],
+    "constraints": [
+      "Polygonholes/partsprotected",
+      "Datelinewrappedgeometryunsupported",
+      "Nophysicalsimulation",
+      "Noobservedstateinterpolationclaim",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 137,
+        "endLine": 174,
+        "symbol": "compileAreaIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Suppliedgeometry/sourcecontracts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 214,
+        "endLine": 293,
+        "symbol": "operationsRecord/compileAreaPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "11operationkinds;completefinalholdtimeline<=1200sourceframes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 333,
+        "endLine": 345,
+        "symbol": "evaluateAreaFrame helpers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Explicitlyprovidedimpactpolygonrevealwithseparateimpactstyle."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.POLYGON_VALIDATION",
+    "domain": "Area",
+    "name": "Area polygon topology validation",
+    "description": "닫힌 Ring, Hole, Self-intersection, Multipart 겹침, 데이터 용량을 검증한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "validateAreaGeometry",
+      "fields": [
+        "geometry.type",
+        "geometry.coordinates"
+      ],
+      "allowedValues": {
+        "types": [
+          "Polygon",
+          "MultiPolygon"
+        ],
+        "limits": "fromsourcecheckedcapacity"
+      },
+      "defaults": {},
+      "units": {
+        "coordinates": "degrees"
+      },
+      "errors": [
+        "AREA_RING_SELF_INTERSECTION",
+        "AREA_HOLE_OUTSIDE_OR_TOUCHING_OUTER",
+        "AREA_MULTIPOLYGON_PARTS_OVERLAP",
+        "AREA_WRAPPED_GEOMETRY_UNSUPPORTED"
+      ]
+    },
+    "dependencies": [
+      "GeoJSON"
+    ],
+    "constraints": [
+      "Noarbitraryrepairorinterpolatedhistoricalcoordinates"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "startLine": 67,
+        "endLine": 105,
+        "symbol": "validateAreaGeometry",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Topologyandcapacityrejection."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2296,
+        "endLine": 2309,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.NATIVE_PROTECTION",
+    "domain": "Area",
+    "name": "Native protected graphics and Safe Area",
+    "description": "기존 V5 Map을 매 프레임 다시 그리고 실제 Native Boundary 및 Graphic 예약 영역을 보호한다.",
+    "lifecycle": "FINAL",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createAreaNativeBridge; createAreaGpuAdapter; createAreaOverlayPass",
+      "fields": [
+        "canvas",
+        "plans",
+        "cameraPlan",
+        "scene",
+        "areaPlan",
+        "presentation"
+      ],
+      "allowedValues": {
+        "output": [
+          1080,
+          1920
+        ]
+      },
+      "defaults": {},
+      "units": {
+        "reservations": "screenrectangles"
+      },
+      "errors": [
+        "AREA_REQUIRES_NATIVE_DETAIL_LOCK",
+        "AREA_PIXEL_PROTECTION_FAILED",
+        "AREA_NATIVE_CAMERA_REGIONAL_BINDING_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "V5",
+      "MovingLayout",
+      "Nativefactory",
+      "Areaoverlay"
+    ],
+    "constraints": [
+      "Nofinishedframeblit",
+      "Actualnativeprojection",
+      "Do notassumeproductioncustompassidenticalwithouttrace"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+        "startLine": 30,
+        "endLine": 63,
+        "symbol": "createAreaNativeBridge",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "V5/nativebinding."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+        "startLine": 88,
+        "endLine": 136,
+        "symbol": "drawNative",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Redraweveryframe/reservations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_gpu_adapter_v3.mjs",
+        "startLine": 19,
+        "endLine": 76,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Lock/safe/ROIpixelprotection."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2328,
+        "endLine": 2341,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.AUTOMATIC_CONTRAST",
+    "domain": "Area",
+    "name": "Restrained automatic Area / Impact contrast",
+    "description": "실제 배경 대비를 기준으로 절제된 Area와 Impact Accent를 선택한다. 현재 Production 경로는 별도 공급 스타일을 사용한다.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectAreaStyle",
+      "fields": [
+        "primaryMaterialColor",
+        "backgroundSamples",
+        "profile.fillOpacity",
+        "profile.impactOpacity"
+      ],
+      "allowedValues": {
+        "fillOpacity": [
+          0.08,
+          0.24
+        ],
+        "impactOpacity": [
+          0.12,
+          0.28
+        ]
+      },
+      "defaults": {
+        "fillOpacity": 0.16,
+        "impactOpacity": 0.23
+      },
+      "units": {
+        "opacity": "0..1",
+        "width": "pixels"
+      },
+      "errors": [
+        "AREA_STYLE_RESTRAINED_OPACITY_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "Eventaccentselector",
+      "Nativeframesamples"
+    ],
+    "constraints": [
+      "HistoricalAreaStylemaybereplacedbyproductionoccupationpass;tracebeforeusing",
+      "Not selectable as an operation through current Studio V4_ARCHIVAL_80S preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_style_v3.mjs",
+        "startLine": 9,
+        "endLine": 31,
+        "symbol": "selectAreaStyle",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Twoaccents/translucentfill/finitecontour."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production pass explicitly draws supplied areas/fronts only and removes impacts/propagations."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 2360,
+        "endLine": 2373,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "DETAIL.VISUAL_GRADE_ADMISSION",
+    "domain": "Detail",
+    "name": "FACT_BASED_VISUAL_GRADE candidate admission",
+    "description": "Select least enlargement with adequate readability and native-render evidence, preserving survey result separately.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "generateDetailExtentCandidates; evaluateVisualDetailCandidate; selectVisualDetailExtent; createEventDetailFramingRequest",
+      "fields": [
+        "eventGeometry",
+        "eventAnchor",
+        "currentCameraState",
+        "safeArea",
+        "evidenceByCandidate",
+        "surveyDetailStatus",
+        "desiredScreenCoverageRange"
+      ],
+      "allowedValues": {
+        "visual": [
+          "VISUAL_PASS",
+          "VISUAL_WARNING",
+          "VISUAL_FAIL"
+        ],
+        "certificate": "ACTUAL_NATIVE_RENDER for production"
+      },
+      "defaults": {
+        "desiredScreenCoverageRange": [
+          0.2,
+          0.35,
+          0.5
+        ],
+        "surveyDetailStatus": "NOT_ADMITTED",
+        "linePaddingPixels": 5.75
+      },
+      "units": {
+        "coverage": "screenfraction",
+        "length": "projectedpixels"
+      },
+      "errors": [
+        "EVENT_DETAIL_STALE_ADMISSION",
+        "VISUAL_DETAIL_CANDIDATES_AND_EVIDENCE_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "DetailDataProfile",
+      "FreshNativeProof",
+      "MeasuredLayout",
+      "SemanticIntegrity"
+    ],
+    "constraints": [
+      "WARNINGS do not automatically block",
+      "Does not convert SURVEY_NOT_ADMITTED to survey PASS",
+      "Not wired to current long-form preset",
+      "Not listed in fixed RTX package source_contract; renderer dependencies do not import it. Historical standalone FINAL source is preserved."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/visual_detail_admission_v1.mjs",
+        "startLine": 63,
+        "endLine": 161,
+        "symbol": "evaluateVisualDetailCandidate",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Semantic/native proof/safe geometry/readability checks; survey warnings separated."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/visual_detail_admission_v1.mjs",
+        "startLine": 165,
+        "endLine": 214,
+        "symbol": "selectVisualDetailExtent/createEventDetailFramingRequest",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Least enlargement selection with exact geometry/evidence binding."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "FLOW.VISUAL_POLISH_PROFILE",
+    "domain": "Flow",
+    "name": "Flow mobile object and arrival polish profile",
+    "description": "Role-based size, route lead, directional lead and single-arrival easing preserve original geometry/motion/timing.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileFlowVisualProfile; applyFlowVisualProfile",
+      "fields": [
+        "profileName",
+        "roleGroup",
+        "objectScale",
+        "routeLeadPixels",
+        "directionalLeadBodyRatio",
+        "arrivalRadiusScale",
+        "arrivalPeakProgress"
+      ],
+      "allowedValues": {
+        "roleGroup": [
+          "TRANSPORT",
+          "GENERIC"
+        ],
+        "objectScale": [
+          1,
+          1.35
+        ],
+        "routeLeadPixels": [
+          1,
+          96
+        ],
+        "directionalLeadBodyRatio": [
+          0.55,
+          1.25
+        ],
+        "arrivalRadiusScale": [
+          1,
+          1.35
+        ],
+        "arrivalPeakProgress": [
+          0.1,
+          0.45
+        ]
+      },
+      "defaults": {
+        "profileName": "TRANSPORT_MOBILE",
+        "roleGroup": "TRANSPORT",
+        "objectScale": 1.12,
+        "routeLeadPixels": 55,
+        "directionalLeadBodyRatio": 0.78,
+        "arrivalRadiusScale": 1.18,
+        "arrivalPeakProgress": 0.22
+      },
+      "units": {
+        "size": "canonicalpixels",
+        "profile": "ratio"
+      },
+      "errors": [
+        "FLOW_VISUAL_UNKNOWN_PROFILE_FIELD",
+        "FLOW_VISUAL_RENDERED_OBJECT_WIDTH_RANGE_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "FlowCore",
+      "EventArcLength"
+    ],
+    "constraints": [
+      "Approved fixture selected objectScale1.20 ->62.4x36 from52x30; API default is1.12",
+      "Original motion and authored route unchanged",
+      "Current Studio has no Flow event selector",
+      "Not listed in immutable RTX source_contract closure; current 80s path does not load it."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_visual_profile_v2.mjs",
+        "startLine": 6,
+        "endLine": 39,
+        "symbol": "compileFlowVisualProfile",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Defaults, role groups and allowed ranges."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_visual_profile_v2.mjs",
+        "startLine": 64,
+        "endLine": 107,
+        "symbol": "applyFlowVisualProfile",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Changes render controls only; original route/motion/timing stay."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "WAVE.IRREGULAR_OPEN_FRONTS",
+    "domain": "Area",
+    "name": "Irregular open tsunami wave fronts",
+    "description": "Deterministic nonphysical coast-referenced 2–3 front sequence with birth pulse, local sequential contact and energy fade.",
+    "lifecycle": "FINAL",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileWaveVisualPlan; evaluateWaveVisualFrame; createWaveGpuAdapter",
+      "fields": [
+        "origin",
+        "coastGeometry",
+        "source",
+        "data_mode",
+        "fps",
+        "total_frames",
+        "start_frame",
+        "travel_frames",
+        "stagger_frames",
+        "wave_count",
+        "fade_frames",
+        "contact_frames",
+        "pulse_frames",
+        "profile"
+      ],
+      "allowedValues": {
+        "wave_count": [
+          2,
+          3
+        ],
+        "coastGeometry": "open LineString, >=3points",
+        "sample_count": [
+          9,
+          97
+        ],
+        "contact_count": [
+          3,
+          24
+        ],
+        "curvature_variation": [
+          0.01,
+          0.12
+        ]
+      },
+      "defaults": {
+        "fps": 30,
+        "start_frame": 0,
+        "stagger_frames": 22,
+        "wave_count": 3,
+        "fade_frames": 28,
+        "contact_frames": 20,
+        "pulse_frames": 24,
+        "sample_count": 41,
+        "contact_count": 9,
+        "birth_frames": 12,
+        "curvature_variation": 0.055
+      },
+      "units": {
+        "timing": "frames",
+        "geometry": "WGS84degrees",
+        "pulse": "screenpixels"
+      },
+      "errors": [
+        "WAVE_CLOSED_COAST_RING_FORBIDDEN",
+        "WAVE_TWO_OR_THREE_MAJOR_FRONTS_REQUIRED",
+        "WAVE_NON_POLAR_PRESENTATION_REQUIRED",
+        "WAVE_REQUIRES_SHORT_POST_ARRIVAL_HOLD"
+      ]
+    },
+    "dependencies": [
+      "AreaCore",
+      "EventArcLength",
+      "SuppliedCoast",
+      "WaveGPUAdapter",
+      "V5NativeBridge"
+    ],
+    "constraints": [
+      "No tsunami physics, measured speed or inundation claims",
+      "Closed propagation ring not drawn in approved Wave proof",
+      "wave_visual core is packaged; standalone wave_gpu_adapter not in current image closure; not current WAR runtime"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/wave_visual_v3.mjs",
+        "startLine": 48,
+        "endLine": 117,
+        "symbol": "compileWaveVisualPlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Validated coast-based timing/shape and 2–3 fronts."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/wave_visual_v3.mjs",
+        "startLine": 182,
+        "endLine": 206,
+        "symbol": "evaluateWaveVisualFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Local contact highlights and single pulse, no ring."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/wave_gpu_adapter_v3.mjs",
+        "startLine": 40,
+        "endLine": 81,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Dedicated wave adapter omits closed ring and broad impact polygon."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 3093,
+        "endLine": 3106,
+        "symbol": "files[].repoPath / sha256 / imagePath",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection.",
+    "imageInclusionDetail": {
+      "wave_visual_v3.mjs": "YES",
+      "wave_gpu_adapter_v3.mjs": "NO",
+      "fullStandaloneWaveRuntimeInCurrentStudio": "NO"
+    }
+  },
+  {
+    "id": "AREA.LONG_FORM_SOURCE_CLOCK",
+    "domain": "Area",
+    "name": "Long-form supplied-snapshot clock",
+    "description": "Retimes validated static Area states to global 80–600s Scene clock without changing Area V3 <=1200-frame cap or inventing vertices.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileLongAreaRequest; evaluateLongAreaFrame; evaluateProductionGeometryClock",
+      "fields": [
+        "legacyScenePlan.areas",
+        "front_lines",
+        "time_steps",
+        "timing",
+        "productionV3.geometrySchedule"
+      ],
+      "allowedValues": {
+        "event_type": "WAR",
+        "time_steps": "at least2",
+        "clockMode": [
+          "ARRIVAL_NO_EVENT",
+          "REVEAL_SUPPLIED_SNAPSHOT",
+          "HOLD_SUPPLIED_SNAPSHOT",
+          "TRANSITION_SUPPLIED_SNAPSHOTS"
+        ]
+      },
+      "defaults": {
+        "initial_reveal_frames": 36
+      },
+      "units": {
+        "timeline": "globalhalf-openframes",
+        "geometryClock": "validatedsourceframes"
+      },
+      "errors": [
+        "UNIVERSAL_LONG_AREA_POLYGON_STATE_TIMELINE_REQUIRED",
+        "UNIVERSAL_LONG_ACTUAL_PROJECTION_KEY_REQUIRED",
+        "PRODUCTION_GEOMETRY_CLOCK_OUTSIDE_SUPPLIED_SOURCE"
+      ]
+    },
+    "dependencies": [
+      "AreaV3staticstateplans",
+      "EventLineReveal",
+      "PlannerSceneValidator"
+    ],
+    "constraints": [
+      "Crossfade between supplied states, not topological boundary morph",
+      "Narrative event date is separate from actual source snapshot date",
+      "Source clock uses explicit nearest integer frame; do not claim fully continuous source alpha for600s"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/long_area_timeline.mjs",
+        "startLine": 27,
+        "endLine": 90,
+        "symbol": "compileLongAreaRequest/evaluateLongAreaFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Only reveal/front/transition/hold selected."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_visual_profile.mjs",
+        "startLine": 87,
+        "endLine": 105,
+        "symbol": "evaluateProductionGeometryClock",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Narrative/source dates separate; nearest validated source frame."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 1,
+        "endLine": 20,
+        "symbol": "sourceCommits/ancestry/runtimeRoutes/files",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Fixed package records source paths/hashes; image ancestry and recursive independent pull are audited separately in image lineage report."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "AREA.PRODUCTION_WHITE_GOLD",
+    "domain": "Area",
+    "name": "V3 supplied territory palette and white/gold front",
+    "description": "Draw only explicitly qualified ownership polygons, then exact supplied front with white core and gold halo.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "normalizeProductionVisualProfile; createProductionAreaPass",
+      "fields": [
+        "productionV3.visualProfile",
+        "productionV3.visualBindings.areaStyles",
+        "palette"
+      ],
+      "allowedValues": {
+        "territoryOpacity": [
+          0.24,
+          0.8
+        ],
+        "frontCoreWidthPixels": [
+          2.5,
+          7
+        ],
+        "frontGlowRadiusPixels": [
+          3,
+          16
+        ],
+        "frontGlowGain": [
+          0.1,
+          0.65
+        ],
+        "cameraApproachFrames": [
+          12,
+          120
+        ]
+      },
+      "defaults": {
+        "territoryOpacity": 0.62,
+        "frontCoreWidthPixels": 4.8,
+        "frontCoreColor": [
+          1,
+          0.98,
+          0.91
+        ],
+        "frontGlowColor": [
+          1,
+          0.66,
+          0.16
+        ],
+        "frontGlowRadiusPixels": 10,
+        "frontGlowGain": 0.42,
+        "cameraApproachFrames": 48
+      },
+      "units": {
+        "width": "screenpixels",
+        "color": "RGB0..1",
+        "opacity": "0..1"
+      },
+      "errors": [
+        "PRODUCTION_EXPLICIT_QUALIFIED_AREA_OWNER_REQUIRED",
+        "PRODUCTION_UNBOUND_AREA_OWNER"
+      ]
+    },
+    "dependencies": [
+      "AreaOverlay",
+      "ExplicitSourceProof",
+      "SuppliedAreaBindings"
+    ],
+    "constraints": [
+      "No opposing side inferred as complement",
+      "Scalar fictional5sV2classifier not applicable to historical snapshot polygons",
+      "Current front fade is state alpha, not guaranteed active boundary displacement"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_visual_profile.mjs",
+        "startLine": 7,
+        "endLine": 44,
+        "symbol": "normalizeProductionVisualProfile/productionAreaStyle",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Allowed ranges/defaults and no-complement validation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Only supplied territory/front; no legacy scalar classifier."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+        "startLine": 1,
+        "endLine": 20,
+        "symbol": "sourceCommits/ancestry/runtimeRoutes/files",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Fixed package records source paths/hashes; image ancestry and recursive independent pull are audited separately in image lineage report."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Axes refer to current Studio V4_ARCHIVAL_80S, not historical standalone fixture proof. Individual natural-language invocation is not implied by bundled preset selection."
+  },
+  {
+    "id": "DETAIL.DATA_PROFILE_AUDIT",
+    "domain": "Detail",
+    "name": "Detail Data Profile / Quality Audit / Safe Extent",
+    "description": "원본 출처·해시·위치 품질과 화면 투영 크기를 감사하고 최소 확대 후보에서 인증 가능한 Safe Detail Extent를 선택한다. 현재 Studio 80초 실행 경로와는 연결되지 않았다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "generateDetailExtentCandidates; auditDetailExtent; selectSafeDetailExtent",
+      "fields": [
+        "eventGeometry",
+        "eventAnchor",
+        "currentBounds",
+        "output",
+        "safeArea",
+        "desiredScreenCoverageRange",
+        "linePaddingPixels",
+        "profile.sources",
+        "profile.terrain",
+        "profile.geometries",
+        "profile.dataMode",
+        "profile.evidenceKind"
+      ],
+      "allowedValues": {
+        "coverage": "0 < value < 1",
+        "profile.version": "DETAIL_DATA_PROFILE_V1",
+        "auditStates": [
+          "PASS",
+          "DATA_LIMITED",
+          "FAIL"
+        ],
+        "productionMode": "VERIFIED_PRODUCTION"
+      },
+      "defaults": {
+        "output": [
+          1080,
+          1920
+        ],
+        "desiredScreenCoverageRange": [
+          0.2,
+          0.35,
+          0.5
+        ],
+        "linePaddingPixels": 5.75
+      },
+      "units": {
+        "bbox": "degrees",
+        "length": "projected pixels",
+        "sourceAccuracy": "source-specific units"
+      },
+      "errors": [
+        "DETAIL_GEOGRAPHIC_SCREEN_CONTRACT_REQUIRED",
+        "DETAIL_CANDIDATE_PROFILE_REQUIRED",
+        "DETAIL_CANDIDATES_REQUIRED"
+      ]
+    },
+    "dependencies": [
+      "Unchanged full LineString",
+      "LocalDetailAdmission strict policy",
+      "Verified source payloads and metadata"
+    ],
+    "constraints": [
+      "Candidate generation is not animation authorization.",
+      "Production profile requires source/version/retrieval date/license/URL/SHA/CRS/extent and original payload verification.",
+      "The original strict LOCAL_QUALITY_POLICY is imported; passing only visual warnings does not rewrite its result.",
+      "Module is not in immutable RTX source contract closure."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/detail_data_profile_v1.mjs",
+        "startLine": 47,
+        "endLine": 97,
+        "symbol": "generateDetailExtentCandidates",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Generates candidates from unchanged source vertices and supplied safe area."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/detail_data_profile_v1.mjs",
+        "startLine": 156,
+        "endLine": 189,
+        "symbol": "auditDetailExtent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Checks evidence mode, unchanged strict policy and source payload provenance."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/detail_data_profile_v1.mjs",
+        "startLine": 394,
+        "endLine": 412,
+        "symbol": "selectSafeDetailExtent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Least-enlargement certificate explicitly sets runtimeAnimationAuthorized:false."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Current Studio V4_ARCHIVAL_80S; standalone source capability is separate."
+  }
+]

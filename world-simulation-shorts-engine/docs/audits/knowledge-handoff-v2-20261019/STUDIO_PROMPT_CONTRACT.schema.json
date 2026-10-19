@@ -1,0 +1,394 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://world-engine.invalid/audit/STUDIO_PROMPT_CONTRACT.schema.json",
+  "title": "WORLD ENGINE current Studio HTTP submission envelope — audit V2",
+  "description": "The root is the POST /api/preflight and /api/submissions body. Paste $defs/structuredPrompt as JSON text into the UI prompt field; do not paste this outer envelope there. The audit schema describes existing source, not a new runtime feature.",
+  "$ref": "#/$defs/submissionEnvelope",
+  "x-sourceCommit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+  "x-operatingImageDigest": "sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da",
+  "x-runtime-checks": [
+    {
+      "code": "STUDIO_INPUT_SIZE_LIMIT",
+      "rule": "Entire parsed input must serialize to at most 4 MiB UTF-8; JSON must be finite and UTF-8 encodable; <=200000 visited values/keys and depth <=64."
+    },
+    {
+      "code": "STUDIO_DUPLICATE_JSON_KEY",
+      "rule": "Duplicate JSON object keys rejected when parsing prompt text; JSON Schema cannot recover duplicates lost by an earlier JSON parser."
+    },
+    {
+      "code": "STUDIO_RENDER_PLAN_REJECTED",
+      "rule": "Actual frozen bind_render_image and validate_render_plan must both succeed. V4 requires exact expected source-bound parent plan equality. A schema PASS alone does not admit a scene."
+    },
+    {
+      "code": "STUDIO_IMAGE_DIGEST_REQUIRED",
+      "rule": "image_digest is server configuration, not an allowed submission field. Must match sha256:[a-f0-9]{64}."
+    },
+    {
+      "code": "STUDIO_PROFILE_CONFLICT",
+      "rule": "Outer profile wins only when no conflicting inner profile is explicitly present."
+    },
+    {
+      "code": "STUDIO_DURATION_CONFLICT",
+      "rule": "Outer duration is selected first, then inner duration, then raw plan duration. All explicitly authored durations and plan duration must agree; V4 supports exactly 80 seconds."
+    },
+    {
+      "code": "STUDIO_OUTPUT_SPEC_CONFLICT",
+      "rule": "After real backend binding: fps=30; frames=duration*30; resolution={width:1080,height:1920}; aspectRatio=9:16."
+    },
+    {
+      "code": "UI_SFX_PRECEDENCE",
+      "rule": "UI always sends outer sfx={enabled,gain}; this replaces the whole inner sfx, not a merge. Inner exportWav/cues are therefore not delivered by the existing UI."
+    },
+    {
+      "code": "DIRECT_SCENE_PRECEDENCE",
+      "rule": "Non-null outer sceneJson skips prompt interpretation; prompt remains only bounded recorded text."
+    },
+    {
+      "code": "BARE_PRESET_FLOAT_DURATION",
+      "rule": "Current V4 frozen plan duration is JSON 80.0. API callers must pass integer durationSeconds:80 in envelope or structured prompt; UI sends it automatically."
+    },
+    {
+      "code": "AUTH_AND_EXPLICIT_START",
+      "rule": "Authenticated HTTPS + CSRF + valid policy + preflight + explicit start consent/idempotency required separately; normalization never starts a job."
+    }
+  ],
+  "$defs": {
+    "rawScenePlan": {
+      "$ref": "SCENE_JSON_CONTRACT.schema.json#/$defs/rawScenePlan"
+    },
+    "durationSeconds": {
+      "type": "integer",
+      "enum": [
+        80,
+        120,
+        180,
+        300,
+        600
+      ],
+      "x-runtime-checks": [
+        "Python type must be int: JSON 80.0 is rejected when used as the selected duration, even though JSON Schema considers it an integer."
+      ]
+    },
+    "profile": {
+      "enum": [
+        "V4_ARCHIVAL_80S",
+        "UNIVERSAL_V3"
+      ],
+      "default": "V4_ARCHIVAL_80S"
+    },
+    "sfxCue": {
+      "type": "object",
+      "required": [
+        "eventId",
+        "frame",
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "type": {
+          "enum": [
+            "CLICK",
+            "MECHANICAL_TICK",
+            "OCCUPATION_COMPLETE",
+            "MARKER_POP",
+            "CAMERA_WHOOSH",
+            "EVENT_TRANSITION"
+          ]
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 1
+        }
+      },
+      "x-runtime-checks": [
+        "eventId must exist in productionV3.eventChapters or legacyScenePlan.beats.",
+        "The cue frame must be within one matching event interval [startFrame,endFrame).",
+        "Duplicate (eventId, frame, type) tuples are rejected.",
+        "Python type(frame) must be int, not bool or float."
+      ]
+    },
+    "sfxSettings": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "gain": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 0.65
+            },
+            "exportWav": {
+              "type": "boolean",
+              "default": false
+            },
+            "cues": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "maxItems": 10000,
+                  "items": {
+                    "$ref": "#/$defs/sfxCue"
+                  }
+                }
+              ],
+              "description": "Absent or null: one EVENT_TRANSITION cue at each actual production event chapter start. []: no cues."
+            }
+          }
+        }
+      ]
+    },
+    "structuredPrompt": {
+      "type": "object",
+      "required": [
+        "schema"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_STUDIO_PROMPT_V1"
+        },
+        "preset": {
+          "enum": [
+            "VERIFIED_FRONT_V4_80S",
+            null,
+            false,
+            0,
+            ""
+          ],
+          "description": "Only nonempty supported preset is VERIFIED_FRONT_V4_80S. Falsy values are accepted by current parser only when an explicit valid sceneJson supplies the plan; not recommended."
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 180,
+              "pattern": "^(?![\\s\\S]*[\\u0000-\\u001f])(?=[\\s\\S]*\\S)[\\s\\S]+$"
+            }
+          ]
+        },
+        "durationSeconds": {
+          "$ref": "#/$defs/durationSeconds"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "sceneJson": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/rawScenePlan"
+            }
+          ]
+        },
+        "sfx": {
+          "$ref": "#/$defs/sfxSettings"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "preset"
+          ],
+          "properties": {
+            "preset": {
+              "const": "VERIFIED_FRONT_V4_80S"
+            },
+            "sceneJson": {
+              "type": "null"
+            },
+            "profile": {
+              "const": "V4_ARCHIVAL_80S"
+            },
+            "durationSeconds": {
+              "const": 80
+            }
+          }
+        },
+        {
+          "required": [
+            "sceneJson"
+          ],
+          "properties": {
+            "sceneJson": {
+              "$ref": "#/$defs/rawScenePlan"
+            },
+            "preset": {
+              "enum": [
+                null,
+                false,
+                0,
+                ""
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "submissionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "default": "",
+          "description": "JSON object text, or whole ```json newline ... newline ``` code block. Raw Scene JSON text is also accepted. Not free-form natural language."
+        },
+        "sceneJson": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/rawScenePlan"
+            }
+          ]
+        },
+        "durationSeconds": {
+          "$ref": "#/$defs/durationSeconds"
+        },
+        "profile": {
+          "$ref": "#/$defs/profile"
+        },
+        "sfx": {
+          "$ref": "#/$defs/sfxSettings"
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "sceneJson"
+          ],
+          "properties": {
+            "sceneJson": {
+              "$ref": "#/$defs/rawScenePlan"
+            }
+          }
+        },
+        {
+          "required": [
+            "prompt"
+          ],
+          "properties": {
+            "prompt": {
+              "type": "string",
+              "pattern": "\\S"
+            }
+          }
+        }
+      ]
+    },
+    "revisionCommand": {
+      "type": "object",
+      "required": [
+        "schema",
+        "sfx"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_STUDIO_REVISION_V1"
+        },
+        "sfx": {
+          "$ref": "#/$defs/revisionSfx"
+        }
+      }
+    },
+    "revisionSfx": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "gain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.65
+        },
+        "cues": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "maxItems": 10000,
+              "items": {
+                "$ref": "#/$defs/sfxCue"
+              }
+            }
+          ],
+          "description": "Absent or null: one EVENT_TRANSITION cue at each actual production event chapter start. []: no cues."
+        }
+      }
+    },
+    "revisionRequest": {
+      "type": "object",
+      "required": [
+        "startSeconds",
+        "endSeconds",
+        "prompt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "startSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "endSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "sfx": {
+          "$ref": "#/$defs/revisionSfx"
+        }
+      },
+      "x-runtime-checks": [
+        "Actual completed job required.",
+        "endSeconds > startSeconds and range inside video.",
+        "At 30fps, both decimal seconds times 30 must be exact integers.",
+        "Only SFX OFF/ON, Korean bounded synonyms, SFX volume/gain <percent>, or exact revision JSON command accepted.",
+        "With explicit sfx, prompt must match only sfx or 효과음 with optional only/만 (or be whitespace to direct parser; HTTP still requires at least 1 character).",
+        "Revision cues must start within [startFrame,endFrame). Cue tails/local admission may affect neighboring audio; reported.",
+        "No video plan edits; all verified video scenes reused. GPU partial visual revision unsupported."
+      ]
+    }
+  }
+}

@@ -1,0 +1,371 @@
+{
+  "schema": "WORLD_ENGINE_PROMPT_EXAMPLES_V2",
+  "sourceCommit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+  "executionScope": "Exact frozen CPU normalizer/validators only; no auth API call, preflight, rendering, output or paid work",
+  "submissionExamples": [
+    {
+      "id": "MINIMUM_PRESET",
+      "where": "Studio prompt text (inner JSON); API result shown without UI outer SFX override",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80}"
+      },
+      "actualResult": {
+        "id": "MINIMUM_PRESET",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 12,
+        "exportWav": false
+      }
+    },
+    {
+      "id": "FULL_PRESET_SFX_ALL_SIX_TYPES",
+      "where": "Studio prompt text (inner JSON); API result shown without UI outer SFX override",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "title": "한국전쟁 전선 변화 — 공식 지도 기반 부분·근사 자료",
+        "durationSeconds": 80,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfx": {
+          "enabled": true,
+          "gain": 0.65,
+          "exportWav": true,
+          "cues": [
+            {
+              "eventId": "OUTBREAK",
+              "frame": 0,
+              "type": "CLICK",
+              "gain": 0.8
+            },
+            {
+              "eventId": "OUTBREAK",
+              "frame": 30,
+              "type": "MECHANICAL_TICK",
+              "gain": 0.8
+            },
+            {
+              "eventId": "OUTBREAK",
+              "frame": 60,
+              "type": "OCCUPATION_COMPLETE",
+              "gain": 0.8
+            },
+            {
+              "eventId": "OUTBREAK",
+              "frame": 90,
+              "type": "MARKER_POP",
+              "gain": 0.8
+            },
+            {
+              "eventId": "OUTBREAK",
+              "frame": 120,
+              "type": "CAMERA_WHOOSH",
+              "gain": 0.8
+            },
+            {
+              "eventId": "OUTBREAK",
+              "frame": 150,
+              "type": "EVENT_TRANSITION",
+              "gain": 0.8
+            }
+          ]
+        }
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"title\": \"한국전쟁 전선 변화 — 공식 지도 기반 부분·근사 자료\", \"durationSeconds\": 80, \"profile\": \"V4_ARCHIVAL_80S\", \"sfx\": {\"enabled\": true, \"gain\": 0.65, \"exportWav\": true, \"cues\": [{\"eventId\": \"OUTBREAK\", \"frame\": 0, \"type\": \"CLICK\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 30, \"type\": \"MECHANICAL_TICK\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 60, \"type\": \"OCCUPATION_COMPLETE\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 90, \"type\": \"MARKER_POP\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 120, \"type\": \"CAMERA_WHOOSH\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 150, \"type\": \"EVENT_TRANSITION\", \"gain\": 0.8}]}}"
+      },
+      "actualResult": {
+        "id": "FULL_PRESET_SFX_ALL_SIX_TYPES",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 6,
+        "exportWav": true
+      }
+    },
+    {
+      "id": "UI_SFX_REPLACES_INNER_SFX",
+      "where": "Exact mobile UI envelope shape",
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"title\": \"한국전쟁 전선 변화 — 공식 지도 기반 부분·근사 자료\", \"durationSeconds\": 80, \"profile\": \"V4_ARCHIVAL_80S\", \"sfx\": {\"enabled\": true, \"gain\": 0.65, \"exportWav\": true, \"cues\": [{\"eventId\": \"OUTBREAK\", \"frame\": 0, \"type\": \"CLICK\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 30, \"type\": \"MECHANICAL_TICK\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 60, \"type\": \"OCCUPATION_COMPLETE\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 90, \"type\": \"MARKER_POP\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 120, \"type\": \"CAMERA_WHOOSH\", \"gain\": 0.8}, {\"eventId\": \"OUTBREAK\", \"frame\": 150, \"type\": \"EVENT_TRANSITION\", \"gain\": 0.8}]}}",
+        "durationSeconds": 80,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfx": {
+          "enabled": false,
+          "gain": 0.7
+        }
+      },
+      "actualResult": {
+        "id": "UI_SFX_REPLACES_INNER_SFX",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": false,
+        "sfxGain": 0.7,
+        "sfxCueCount": 12,
+        "exportWav": false
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_renderIntent",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "renderIntent": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"renderIntent\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_renderIntent",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_map",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "map": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"map\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_map",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_territory",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "territory": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"territory\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_territory",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_camera",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "camera": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"camera\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_camera",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_militaryUnits",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "militaryUnits": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"militaryUnits\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_militaryUnits",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_events",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "events": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"events\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_events",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_timeline",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "timeline": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"timeline\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_timeline",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    },
+    {
+      "id": "UNSUPPORTED_INNER_qualityGate",
+      "where": "Unsupported inner prompt field",
+      "innerPrompt": {
+        "schema": "WORLD_ENGINE_STUDIO_PROMPT_V1",
+        "preset": "VERIFIED_FRONT_V4_80S",
+        "durationSeconds": 80,
+        "qualityGate": {}
+      },
+      "httpEnvelope": {
+        "prompt": "{\"schema\": \"WORLD_ENGINE_STUDIO_PROMPT_V1\", \"preset\": \"VERIFIED_FRONT_V4_80S\", \"durationSeconds\": 80, \"qualityGate\": {}}"
+      },
+      "actualResult": {
+        "id": "UNSUPPORTED_INNER_qualityGate",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      }
+    }
+  ],
+  "revisionExamples": [
+    {
+      "id": "REVISION_SFX_OFF",
+      "startSeconds": 25,
+      "endSeconds": 35,
+      "prompt": "효과음 꺼줘",
+      "actualResult": {
+        "id": "REVISION_SFX_OFF",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      }
+    },
+    {
+      "id": "REVISION_GAIN",
+      "startSeconds": 25,
+      "endSeconds": 35,
+      "prompt": "효과음 음량 40%",
+      "actualResult": {
+        "id": "REVISION_GAIN",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      }
+    },
+    {
+      "id": "REVISION_SFX_ON",
+      "startSeconds": 25,
+      "endSeconds": 35,
+      "prompt": "SFX ON",
+      "actualResult": {
+        "id": "REVISION_SFX_ON",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      }
+    }
+  ],
+  "important": "Inner SFX cues/exportWav are accepted by direct contract but existing mobile UI outer SFX replaces them."
+}

@@ -1,0 +1,890 @@
+{
+  "schema": "WORLD_ENGINE_EXECUTABLE_CONTRACT_TEST_RESULTS_V2",
+  "sourceCommit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+  "executedIn": "CPU Python; exact Git blob copies in temporary isolation",
+  "imageDigestUsedForBinding": "sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da",
+  "imageContainerExecuted": false,
+  "gpuExecuted": false,
+  "swiftShaderExecuted": false,
+  "renderingStarted": false,
+  "networkCallsByTests": false,
+  "privateJobStateModified": false,
+  "status": "PASS",
+  "focusedExistingTests": {
+    "executed": 33,
+    "passed": 33,
+    "failed": 0,
+    "skipped": 0,
+    "fakeBackendParserAndRevisionTests": 32,
+    "realFrozenBackendIntegrationTests": 1,
+    "source": "recovery/production-studio-mvp-v1/tests/test_studio_contracts.py",
+    "classes": [
+      "InputTests",
+      "RevisionTests",
+      "OriginalBackendIntegrationTests"
+    ]
+  },
+  "auditRealBackendExamples": {
+    "executed": 42,
+    "passed": 42,
+    "failed": 0,
+    "submissionCases": [
+      {
+        "id": "MINIMUM_PRESET",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 12,
+        "exportWav": false
+      },
+      {
+        "id": "BARE_PRESET_WITHOUT_INTEGER_DURATION_REJECTED",
+        "expected": "STUDIO_DURATION_UNSUPPORTED",
+        "observed": "STUDIO_DURATION_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "durationSeconds"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "FULL_PRESET_SFX_ALL_SIX_TYPES",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 6,
+        "exportWav": true
+      },
+      {
+        "id": "FENCED_JSON",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 12,
+        "exportWav": false
+      },
+      {
+        "id": "UI_SFX_REPLACES_INNER_SFX",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": false,
+        "sfxGain": 0.7,
+        "sfxCueCount": 12,
+        "exportWav": false
+      },
+      {
+        "id": "UNSUPPORTED_INNER_renderIntent",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_renderIntent",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_map",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_map",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_territory",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_territory",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_camera",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_camera",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_militaryUnits",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_militaryUnits",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_events",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_events",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_timeline",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_timeline",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_INNER_qualityGate",
+        "expected": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "observed": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UNSUPPORTED_ENVELOPE_qualityGate",
+        "expected": "STUDIO_SUBMISSION_INVALID",
+        "observed": "STUDIO_SUBMISSION_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [],
+        "httpStatus": 400
+      },
+      {
+        "id": "FREE_NL_REJECTED",
+        "expected": "STUDIO_STRUCTURED_PROMPT_REQUIRED",
+        "observed": "STUDIO_STRUCTURED_PROMPT_REQUIRED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt",
+          "sceneJson"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "EMPTY_REJECTED",
+        "expected": "STUDIO_SCENE_OR_PROMPT_REQUIRED",
+        "observed": "STUDIO_SCENE_OR_PROMPT_REQUIRED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt",
+          "sceneJson"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "DUPLICATE_KEY_REJECTED",
+        "expected": "STUDIO_DUPLICATE_JSON_KEY",
+        "observed": "STUDIO_DUPLICATE_JSON_KEY",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "NONFINITE_REJECTED",
+        "expected": "STUDIO_JSON_VALUE_INVALID",
+        "observed": "STUDIO_JSON_VALUE_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "prompt"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "INNER_UNKNOWN_SCHEMA_IS_SCENE_NOT_PROMPT",
+        "expected": "STUDIO_DURATION_UNSUPPORTED",
+        "observed": "STUDIO_DURATION_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "durationSeconds"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "ARCHIVAL_LENGTH_NOT_STRETCHED",
+        "expected": "STUDIO_DURATION_CONFLICT",
+        "observed": "STUDIO_DURATION_CONFLICT",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "durationSeconds",
+          "sceneJson.durationSeconds"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "PRESET_PROFILE_CONFLICT",
+        "expected": "STUDIO_PRESET_PROFILE_CONFLICT",
+        "observed": "STUDIO_PRESET_PROFILE_CONFLICT",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "profile"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "UI_PROFILE_CONFLICT",
+        "expected": "STUDIO_PROFILE_CONFLICT",
+        "observed": "STUDIO_PROFILE_CONFLICT",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "profile"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "DIRECT_SCENE_SKIPS_FREE_TEXT",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 12,
+        "exportWav": false
+      },
+      {
+        "id": "RAW_SCENE_IN_PROMPT",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 12,
+        "exportWav": false
+      },
+      {
+        "id": "V4_MODIFIED_PLAN_REJECTED",
+        "expected": "STUDIO_RENDER_PLAN_REJECTED",
+        "observed": "STUDIO_RENDER_PLAN_REJECTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "sceneJson",
+          "sourceManifest",
+          "renderProfile"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "INNER_PRESET_SCENE_CONFLICT",
+        "expected": "STUDIO_PRESET_CONFLICT",
+        "observed": "STUDIO_PRESET_CONFLICT",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "preset",
+          "sceneJson"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "SFX_UNKNOWN_EVENT_REJECTED",
+        "expected": "STUDIO_SFX_INVALID",
+        "observed": "STUDIO_SFX_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "sfx"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "SFX_OUTSIDE_EVENT_REJECTED",
+        "expected": "STUDIO_SFX_INVALID",
+        "observed": "STUDIO_SFX_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "fields": [
+          "sfx"
+        ],
+        "httpStatus": 400
+      },
+      {
+        "id": "SFX_EXPLICIT_EMPTY_CUES",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "durationSeconds": 80,
+        "frames": 2400,
+        "scenes": 12,
+        "profile": "V4_ARCHIVAL_80S",
+        "sfxEnabled": true,
+        "sfxGain": 0.65,
+        "sfxCueCount": 0,
+        "exportWav": false
+      }
+    ],
+    "revisionCases": [
+      {
+        "id": "REVISION_SFX_OFF",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      },
+      {
+        "id": "REVISION_GAIN",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      },
+      {
+        "id": "REVISION_SFX_ON",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      },
+      {
+        "id": "REVISION_CAMERA_REJECTED",
+        "expected": "STUDIO_VISUAL_REVISION_UNSUPPORTED",
+        "observed": "STUDIO_VISUAL_REVISION_UNSUPPORTED",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      },
+      {
+        "id": "REVISION_EMPTY_RANGE",
+        "expected": "STUDIO_REVISION_RANGE_EMPTY",
+        "observed": "STUDIO_REVISION_RANGE_EMPTY",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      },
+      {
+        "id": "REVISION_NOT_FRAME_BOUNDARY",
+        "expected": "STUDIO_REVISION_TIME_INVALID",
+        "observed": "STUDIO_REVISION_TIME_INVALID",
+        "status": "PASS",
+        "backend": "REAL_FROZEN_V3_V4",
+        "gpuExecuted": false
+      }
+    ]
+  },
+  "sourceHashes": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/ci.py",
+      "sha256": "38d82c859c94548ccdd387965df3949909717425509dcf6d5a0aea83683d5706"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py",
+      "sha256": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py",
+      "sha256": "4c858e7afe5e912bce63bf03f08c6c98d9430cc91134262710db5bdbd6ca4491"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/audio/ASSET_MANIFEST.json",
+      "sha256": "b1489894016d18a374baa6b16346a9791e6056f87d2884eefa19c9fa39abd3fb"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/bootstrap.py",
+      "sha256": "9791501263fe146de64510a8747619bb0003ea53f296ec12a7b3335a9bba203a"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/ci_studio.py",
+      "sha256": "ae8bdf997094f731f74e3bc393d65e9978dd5b16210cd8ec9c64a35a90a85882"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/examples/STUDIO_PROMPT_V4_80S.json",
+      "sha256": "68bf6157f03c5fdafbf5f5734a1890e4a8c6c9adb0198333ff411cad2069797d"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+      "sha256": "8c8b23b02ff14edf21ab8189821c5c1dec780d148b46ef1f1786dc7a6418d7c7"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+      "sha256": "03a9083aa71ac5acbe17806afd8dfb44e1fd155e886237aba6c00ae3552dca5d"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_common.py",
+      "sha256": "ea93f4e32de0529f8dab81c0a3d823f2f6e7902a67fda4af4b96b09fbf758671"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "sha256": "e8b7a8c43545d8ede614f631824863361d9b5e9ec2d26ae86e857a247fa74c75"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+      "sha256": "c2e0d94a31cd90569d29f944da1a538c9efcf77d15cd0f2bfacbe99396ae053c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_delivery.py",
+      "sha256": "26841e62659946cc3ec58f89f75cb9c9375005ab98c3c74d67022800a09081c7"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_manifest.py",
+      "sha256": "da05df2807e126da1a59f02b19526e4acfd117a62bb218d7ccf0bb4c5be49031"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+      "sha256": "79f8a58a3bf99b6edfc73f9fc7266b23ebd7b6646257f3ffeed08afd68a00f1e"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/tests/test_studio_contracts.py",
+      "sha256": "2ec04ad69241e7bafaeef4b615ad0a07b47041627be936f8fe9a3c4b975e5df1"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/HISTORY_CATALOG.json",
+      "sha256": "f99a36485801835155e003d298056dc7154b23e092c6f6026411245797799d58"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/UNIVERSAL_FILES.json",
+      "sha256": "982cf2c0a5f435afe936605c0aeb76cbf40b6990da41d27c0ea0bd5ef22eb756"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py",
+      "sha256": "4ad9dc03c11ccb39df027cb39dc31715525f2eb7be6da76bedbccfaefd5984fd"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/ci.py",
+      "sha256": "cb9087efd9073e143848ee3b43c6319580273f4afb6d27dbd8efa4a5d6aad113"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/compose.py",
+      "sha256": "d4478f758988923a18620a07b0dcf0e0883c99b6ef419d4bffac5999e65d5245"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+      "sha256": "42774c1e9761c56453ab864ef70f4c965bfad99df1b612ea649c8b6a50e9cc5e"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/delivery.py",
+      "sha256": "b41022ec747c6cd0683dccb3cd0fa94619c5e1badff82015ad0ec29d17dcffcf"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/orchestrator.py",
+      "sha256": "2e1e9d76c6ecf760f69fa2204c80d91da251fa0ee2abf8ed7cf3fe2388afcca4"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+      "sha256": "32e6afd26b773a6b88e16be390b97d9d8c85853d2ee293335be63605b1c43442"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/prepare_video.py",
+      "sha256": "6b8bf815342aeeebd410bae188f61682cc63ee2af4f0835489033d2078201fa3"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/render_adapter.py",
+      "sha256": "669073cbd6f3fa9fbfae0a1472fd141a87c6616f1d25acf935a4173dfd32136d"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/serve_long.py",
+      "sha256": "4eb47e46f87a3386c0140e14ffaea0558753926d4a7019b9c406f5d5654003bc"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/universal_files.py",
+      "sha256": "8790af5568fab37e4901974d8e47acacaf57136db46498fe2b443d18365ac70c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/ci.py",
+      "sha256": "0282af16e175855b8c45b0771a4091a467e4ad7def3b71558c26086d7693a05f"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/fixtures/PLAN_80S.json",
+      "sha256": "e5858f8f1bb1d3e0863ed8c3614263f838ddf4071951be8e237fd6fd8afed585"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/fixtures/VISUAL_PROFILE.json",
+      "sha256": "eec16305a585d86aeba0306a164d8f5ba33cad2b0ebcc92140d63e256314415a"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/history/AREA_OWNERSHIP.json",
+      "sha256": "a5fb78d95a4a9ca0dc7f205008eda3217359af138460c4acc4ec5d7872bc4695"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/history/CHRONOLOGY_12.json",
+      "sha256": "c2fc87756fc137635ba2db4bd42df5893ed46007ae2033f1f06f2effcc1b6287"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/history/EXISTING_GEOMETRY_MANIFEST.json",
+      "sha256": "cfbbb80d78d5838532b2696c628ecbb36e8b32f14766338374cd02e5736dbd3c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/history/OFFICIAL_RETRIEVAL_ATTEMPTS.json",
+      "sha256": "ce9f6ad1bb50bea5f7f821676f7bf6152a0c7889db2491c4d546dbf4eaeb45e8"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/history/VALIDATION.json",
+      "sha256": "74dd86d22a1d00eb9ab844fe779568a77d0fd1e3f9a7a5faea6fc776644ece50"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/operations.py",
+      "sha256": "a5c001049318ad7f2609135b18c94f49cd8d477b9d1b2544a2305b7c2a68d965"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/orchestrator.py",
+      "sha256": "d9ea3ddca051c80ff2811928dcd0c480926e671014691c16ea6a2ede845ccbed"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/render_adapter.py",
+      "sha256": "a8b4dd862f458fb4e5c5cd262db7f26779c9f2b7690e77763ed3552ee7a1186f"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+      "sha256": "7b7bfbe132903714279f5308d32827fe80a34578fbb5a3bd7f6747e584919f62"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/source_manifest.py",
+      "sha256": "c63757663cba3c3e8efd4f9606be5a78ef8ac5e6d9c54a18c1adfab8f6e8ca42"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/FRONT_FILES.json",
+      "sha256": "b9353fadf6c93484e3c6e2723991db98439678b87eff5360371039aa4beadb93"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/FRONT_PROFILE.json",
+      "sha256": "24dbac43ad45095d66dfa88edf00d33d1ed7162b1ddfaa9b32b4f2aff36d19e3"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/PARENT_PLAN_80S.json",
+      "sha256": "6fb40abd4970c2595877c4bfb469d8ad0d62e552a03651748b8a1c41a993c28b"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/VIDEO_PLAN_80S.json",
+      "sha256": "2632f9106962bb126bf333422bce2be5094d4af7b25c5701acdf4455a2829dc6"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/build_front_profile.py",
+      "sha256": "d7f3f5b09dc75fab58b7885fb6de41658c436c7ded1a9ddee9ef6972c95b8e26"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/ci_recovery.py",
+      "sha256": "935e74d25e43596d66576215478e3d4dbdfd827ef88f769e9c817451b083abe9"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/control_registration.py",
+      "sha256": "14356a069c7d3ae6141e524d2b583c6a5b58e0184d889d54f85749f0c76cc265"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/orchestrator.py",
+      "sha256": "7d1deb4fb2493821d2ce89895b8334f17ffb9cac465f97e21651312299ee0fb7"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/render_adapter.py",
+      "sha256": "5593c6a637813e1ce3d6ce71e19e8cfe9c3e16624e3f28964f40647ffe309811"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/scene_binding.py",
+      "sha256": "15e61204681cd90a3458b629b2ce3f64aee84807312eb6d20974435b16289829"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/source_manifest_recovery.py",
+      "sha256": "ed1daeac023bce50cce2ce7e1a8902550c671a1ef2cd782211fcf51c3b849cce"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/dependencies/rhythm_sound.py",
+      "sha256": "95f52e8c384059a1670b063d58bf38decebc63ba28bbdd685400904b5e3e3f02"
+    }
+  ],
+  "limits": [
+    "No actual NVIDIA GPU or current gCube output verification.",
+    "API/auth/Origin/CSRF policy not exercised by direct normalize_submission tests.",
+    "No preflight, job start, FFmpeg, audio waveform render or Dropbox network request invoked."
+  ],
+  "harnessRecovery": {
+    "initialRun": "33 tests; 6 errors caused by omitted frozen rhythm_sound.py in temporary audit layout",
+    "resolution": "Copied original source with verified Git blob and required SHA; no source or runtime change.",
+    "finalRerun": "33/33 PASS"
+  },
+  "jsonSchemaValidation": {
+    "draft": "2020-12",
+    "metaschema": "PASS",
+    "externalRefs": "Resolved offline from audit-local schemas; no network retrieval",
+    "executed": 22,
+    "passed": 22,
+    "failed": 0,
+    "cases": [
+      {
+        "id": "SCHEMA_MINIMUM_STRUCTURED",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "errorCount": 0
+      },
+      {
+        "id": "SCHEMA_FULL_STRUCTURED",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "errorCount": 0
+      },
+      {
+        "id": "SCHEMA_ENVELOPE",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "errorCount": 0
+      },
+      {
+        "id": "SCHEMA_REVISION",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "errorCount": 0
+      },
+      {
+        "id": "SCHEMA_REVISION_JSON",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "errorCount": 0
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_renderIntent",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_renderIntent",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_map",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_map",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_territory",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_territory",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_camera",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_camera",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_militaryUnits",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_militaryUnits",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_events",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_events",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_timeline",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_timeline",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_INNER_qualityGate",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_REJECT_ENVELOPE_qualityGate",
+        "expected": "REJECTED",
+        "observed": "REJECTED",
+        "status": "PASS",
+        "errorCount": 1
+      },
+      {
+        "id": "SCHEMA_DIRECT_SCENE",
+        "expected": "ACCEPTED",
+        "observed": "ACCEPTED",
+        "status": "PASS",
+        "errorCount": 0
+      }
+    ]
+  }
+}

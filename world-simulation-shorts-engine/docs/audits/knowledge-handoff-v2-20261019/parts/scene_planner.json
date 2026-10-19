@@ -1,0 +1,1625 @@
+[
+  {
+    "id": "PLANNER.BOUNDED_TOPIC_PARSER",
+    "domain": "PLANNER_SCENE",
+    "name": "parse_request",
+    "description": "Offline duration/FPS/aspect/resolution parser, not a general AI planner.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "parse_request",
+      "fields": [
+        "topic",
+        "duration_seconds",
+        "fps",
+        "resolution",
+        "aspect_ratio",
+        "visual_style"
+      ],
+      "allowedValues": [
+        "REFERENCE_VISUAL_V2"
+      ],
+      "defaults": {
+        "fps": 30,
+        "portraitResolution": [
+          1080,
+          1920
+        ]
+      },
+      "units": {
+        "duration_seconds": "seconds",
+        "fps": "frames/s",
+        "resolution": "pixels"
+      },
+      "errors": [
+        "INVALID_TOPIC",
+        "DURATION_REQUIRED",
+        "DURATION_CONFLICT",
+        "AMBIGUOUS_DURATION",
+        "FPS_CONFLICT",
+        "UNSUPPORTED_VISUAL_STYLE"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Current Studio free-form natural-language new production is rejected; this standalone/CLI parser is not a Studio prompt command."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 37,
+        "endLine": 102,
+        "symbol": "parse_request",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Parses duration and basic format; externalAIConnected false."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Standalone universal-auto-video-v2 Python API/CLI; not current Studio free-text entry"
+  },
+  {
+    "id": "PLANNER.CATALOG_TOPIC_SELECTION",
+    "domain": "PLANNER_SCENE",
+    "name": "_entry / HISTORY_CATALOG",
+    "description": "One persisted topic catalog entry; recognized generic families do not imply arbitrary topics are available.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_entry / HISTORY_CATALOG",
+      "fields": [
+        "topic",
+        "catalog.entries"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "FACT_CATALOG_TOPIC_REQUIRED",
+        "AMBIGUOUS_TOPIC",
+        "SOURCE_UNAVAILABLE",
+        "HISTORICAL_PRECISION_NOT_SUPPORTED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Historical catalog entry is schematic; precision requests fail closed.",
+      "Catalog additions require actual bound facts/provenance/sourceReferences/native fixture, not alias-only registration."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 105,
+        "endLine": 127,
+        "symbol": "_entry",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Requires unique supplied alias and admissible catalog status."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/HISTORY_CATALOG.json",
+        "startLine": 1,
+        "endLine": 41,
+        "symbol": "entries",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "One KOREAN_WAR AVAILABLE_SCHEMATIC_ONLY entry; no free historical data acquisition."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Offline planner catalog selection"
+  },
+  {
+    "id": "PLANNER.VERIFIED_FACT_BINDING",
+    "domain": "PLANNER_SCENE",
+    "name": "plan_topic / _bound_file",
+    "description": "Binds catalog files by SHA and identity before compiling Scene.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "plan_topic / _bound_file",
+      "fields": [
+        "factsPath",
+        "factsSHA256",
+        "provenancePath",
+        "provenanceSHA256",
+        "sourceReferencesPath",
+        "sourceReferencesSHA256"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "CATALOG_SOURCE_HASH_MISMATCH",
+        "CATALOG_FILE_MISSING",
+        "CATALOG_FACT_IDENTITY_MISMATCH"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "VERIFIED label may mean established chronology review; original article body retrieval/accuracy is recorded separately."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 105,
+        "endLine": 115,
+        "symbol": "_bound_file",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Engine-relative bounded paths and exact file SHA."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 170,
+        "endLine": 198,
+        "symbol": "plan_topic",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Binds facts/provenance/references and semantic policy."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.LEGACY_FACT_DATASET",
+    "domain": "PLANNER_SCENE",
+    "name": "validateFactDataset",
+    "description": "Validates supplied facts for four event families, source IDs, geometries, dates, markers, metrics and causal tracks.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "validateFactDataset",
+      "fields": [
+        "version",
+        "data_mode",
+        "subject",
+        "source_notes",
+        "geometries",
+        "locations",
+        "time_range",
+        "stages",
+        "routes",
+        "geographic_lines",
+        "impacts",
+        "propagations",
+        "metrics",
+        "markers",
+        "text",
+        "camera",
+        "scale",
+        "scene_timing",
+        "causal_tracks"
+      ],
+      "allowedValues": [
+        "PLANNER_FACTS_V1",
+        "PRODUCTION",
+        "SYNTHETIC_TEST",
+        "TRANSPORT",
+        "LINE_METRIC",
+        "DISASTER",
+        "WAR"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DATA_REQUIRED",
+        "PLANNER_FACTS_VERSION_REQUIRED",
+        "PLANNER_CHRONOLOGICAL_STAGES_REQUIRED",
+        "PLANNER_DUPLICATE_DATA_ID"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "This fact dataset is not a direct Studio long Scene input.",
+      "Unknown facts fields generally normalize away; native_context, complete supplied scene_timing and causal_tracks explicitly reject unknown keys."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 194,
+        "endLine": 333,
+        "symbol": "validateFactDataset",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Facts normalize only supplied data and existing Final contracts."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.TOPIC_INTENT",
+    "domain": "PLANNER_SCENE",
+    "name": "topicIntent",
+    "description": "Matches supplied subject aliases and supplied event family keywords; exposes no general reasoning model.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "topicIntent",
+      "fields": [
+        "topic",
+        "facts"
+      ],
+      "allowedValues": [
+        "SHOW_EVENT",
+        "EXPLAIN_CHANGE"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DATA_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 335,
+        "endLine": 353,
+        "symbol": "topicIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Topic must contain supplied matching subject and known family intent."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Standalone legacy Planner API"
+  },
+  {
+    "id": "PLANNER.FAMILY_TRANSPORT",
+    "domain": "PLANNER_SCENE",
+    "name": "selectFeatures TRANSPORT",
+    "description": "Selects existing Flow Route/Directional/Object/Pulse/Hold only when supplied route/object-role data justify them.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectFeatures TRANSPORT",
+      "fields": [
+        "facts.routes",
+        "moving_objects.graphic"
+      ],
+      "allowedValues": [
+        "ROUTE_REVEAL",
+        "DIRECTIONAL_FLOW",
+        "MOVING_OBJECT",
+        "ENDPOINT_PULSE",
+        "ROUTE_HOLD"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Portable compiler mapping exists; current Studio V3/V4 long path remains supplied historical WAR Area plan. No transport long-video Studio preset/router supplied."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 355,
+        "endLine": 365,
+        "symbol": "selectFeatures",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "TRANSPORT feature selection requires supplied routes."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+        "startLine": 75,
+        "endLine": 94,
+        "symbol": "compileExistingEnginePlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Binds route geometry, object graphic and timing into existing Flow V2."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Standalone Planner/Flow compiler; not current Studio selected profile"
+  },
+  {
+    "id": "PLANNER.FAMILY_LINE_METRIC",
+    "domain": "PLANNER_SCENE",
+    "name": "selectFeatures LINE_METRIC",
+    "description": "Selects geographic line, metric and information hold from supplied geometry plus sourced display values.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectFeatures LINE_METRIC",
+      "fields": [],
+      "allowedValues": [
+        "GEOGRAPHIC_LINE_REVEAL",
+        "METRIC_ANNOTATION",
+        "INFORMATION_HOLD"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No direct currentStudio LINE_METRIC preset or long-video profile."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 365,
+        "endLine": 367,
+        "symbol": "selectFeatures",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Requires supplied geographic line and metric."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+        "startLine": 96,
+        "endLine": 110,
+        "symbol": "compileExistingEnginePlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Compiles to existing Event V1."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Standalone Planner/Event compiler"
+  },
+  {
+    "id": "PLANNER.FAMILY_DISASTER",
+    "domain": "PLANNER_SCENE",
+    "name": "selectFeatures DISASTER",
+    "description": "Selects existing propagation, impact zone and hold; irregular coast-bound wave mapping exists separately from physics.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectFeatures DISASTER",
+      "fields": [],
+      "allowedValues": [
+        "PROPAGATION_WAVE",
+        "IMPACT_ZONE",
+        "AREA_HOLD"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No fluid/tsunami/weather physics and no currentStudio disaster long preset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 368,
+        "endLine": 370,
+        "symbol": "selectFeatures",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Requires supplied propagation and impact geography."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+        "startLine": 111,
+        "endLine": 135,
+        "symbol": "compileExistingEnginePlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Maps geometry-bound propagation to irregular WaveVisual V3, radial data to existing Area plan."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Standalone Planner/Area/Wave compiler"
+  },
+  {
+    "id": "PLANNER.FAMILY_WAR",
+    "domain": "PLANNER_SCENE",
+    "name": "selectFeatures WAR / compileSceneEngineRequest",
+    "description": "Maps supplied chronological front/area states to existing Area reveal, front line, state transition, time step and hold.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectFeatures WAR / compileSceneEngineRequest",
+      "fields": [],
+      "allowedValues": [
+        "FRONT_LINE",
+        "STATE_TRANSITION",
+        "TIME_STEP",
+        "AREA_HOLD"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Actual 80s route uses this WAR polygon-state engine, not the scalar one-winner F route."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 371,
+        "endLine": 375,
+        "symbol": "selectFeatures",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Requires at least2 supplied states with fronts and polygons."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+        "startLine": 30,
+        "endLine": 72,
+        "symbol": "compileSceneEngineRequest",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Constructs actual Area plan from supplied state IDs and geometry records."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.LEGACY_SCENE_COMPILE",
+    "domain": "PLANNER_SCENE",
+    "name": "compileScenePlan",
+    "description": "Produces portable PLANNER_SCENE_JSON_V1 from supplied facts with existing camera/scale owners and deterministic beats.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileScenePlan",
+      "fields": [
+        "topic",
+        "facts",
+        "output.width",
+        "output.height",
+        "output.fps"
+      ],
+      "allowedValues": [],
+      "defaults": {
+        "fps": 30,
+        "width": 1080,
+        "height": 1920
+      },
+      "units": {
+        "output.width": "pixels",
+        "output.height": "pixels",
+        "output.fps": "frames/s"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Silent legacy GPU plan; Studio SFX is separate postproduction.",
+      "Standalone SceneV1 itself cannot be pasted as a current Studio long Scene."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 417,
+        "endLine": 474,
+        "symbol": "compileScenePlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Compiles family-specific data; does not create geometry or renderer."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.LEGACY_SCENE_VALIDATE",
+    "domain": "PLANNER_SCENE",
+    "name": "validateScenePlan",
+    "description": "Checks strict root whitelist, source/geometry references, beats, chronological states and Final Event/Area/Flow contracts.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "validateScenePlan",
+      "fields": [],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "PLANNER_SCENE_UNKNOWN_FIELD",
+        "PLANNER_CONTIGUOUS_BEATS_REQUIRED",
+        "PLANNER_EVENT_MUST_FOLLOW_CAMERA_LOCK",
+        "PLANNER_FINAL_HOLD_REQUIRED",
+        "PLANNER_UNUSED_CATEGORY_MUST_BE_OMITTED",
+        "PLANNER_CHRONOLOGICAL_STATE_TIMELINE_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Nested rules differ: geometry normalized equality; causal unknown keys rejected; sourceRecord selects known fields; no universal nested additionalProperties policy."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 477,
+        "endLine": 608,
+        "symbol": "validateScenePlan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Rejects unknown root keys and unsupported family/category combinations."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.CAUSAL_TRACKS",
+    "domain": "PLANNER_SCENE",
+    "name": "causal_tracks / validateCausalTracks",
+    "description": "Optional schematic causal binding of supplied actor route/contact/control/state timing.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "causal_tracks / validateCausalTracks",
+      "fields": [
+        "source_id",
+        "action_kind",
+        "from_state_id",
+        "to_state_id",
+        "motion_start_frame",
+        "contact_frame",
+        "control_start_frame",
+        "control_end_frame",
+        "end_frame",
+        "contact_kind",
+        "semantic_mode",
+        "represents_historical_unit",
+        "route_id",
+        "object_id",
+        "target_front_line_id",
+        "contact_anchor"
+      ],
+      "allowedValues": [
+        "SCHEMATIC_FRONT_CONTACT",
+        "ARRIVAL",
+        "NONE",
+        "SCHEMATIC_STATE_TRANSITION"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "represents_historical_unit must false. Current 80s fixed archival plan contains no actor tracks; do not fabricate unit movement."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "startLine": 120,
+        "endLine": 192,
+        "symbol": "causalTrackRecord / validateCausalTracks",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Frame ordering, adjacent states and exact supplied front contact required."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Legacy/night-run standalone composition"
+  },
+  {
+    "id": "PLANNER.LONG_DURATION_ALLOCATOR",
+    "domain": "PLANNER_SCENE",
+    "name": "_timing / total_frames",
+    "description": "One deterministic allocator for durations and FPS with exact integral frame accounting.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_timing / total_frames",
+      "fields": [
+        "durationSeconds",
+        "fps"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {
+        "durationSeconds": "seconds",
+        "fps": "frames/s",
+        "totalFrames": "frames"
+      },
+      "errors": [
+        "DURATION_NOT_INTEGER_FRAMES",
+        "LONG_TIMING_FAMILY_NOT_SUPPORTED",
+        "DURATION_TOO_SHORT_FOR_SUPPLIED_STATES"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "CurrentStudio narrows to80/120/180/300/600 and30fps; V4preset exact80.",
+      "600s structural support is not evidence of actualGPU600s output."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+        "startLine": 44,
+        "endLine": 55,
+        "symbol": "total_frames",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact Fraction arithmetic, fps1..120, totalFrames<=10000000."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 130,
+        "endLine": 151,
+        "symbol": "_timing",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Long allocator currently WAR state-family only."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.LONG_SCENE_SCHEMA",
+    "domain": "PLANNER_SCENE",
+    "name": "WORLD_ENGINE_UNIVERSAL_VIDEO_V2 / validate_plan",
+    "description": "Renderer-neutral wrapper with global half-open work scenes, bound legacy Scene, immutable source/native profiles and boundary signatures.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "WORLD_ENGINE_UNIVERSAL_VIDEO_V2 / validate_plan",
+      "fields": [
+        "durationSeconds",
+        "fps",
+        "resolution",
+        "aspectRatio",
+        "totalFrames",
+        "sourceManifest",
+        "renderProfile",
+        "legacyScenePlan",
+        "cameraProfile",
+        "materialProfile",
+        "scenes"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {
+        "scene interval": "[startFrame,endFrame), global frames"
+      },
+      "errors": [
+        "TOTAL_FRAME_MISMATCH",
+        "SCENE_BINDING_MISMATCH",
+        "SCENE_GAP_OVERLAP_OR_RESET",
+        "SCENE_BOUNDARY_DISCONTINUITY"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Unknown root keys may pass structural validation but are not renderer commands; V4 exactfrozen equality rejects them.",
+      "Boundary signatures certify semantic contract; GPU pose/pixel continuity must be independently verified."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+        "startLine": 15,
+        "endLine": 19,
+        "symbol": "SCHEMA / REQUIRED_SCENE",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Declares required work Scene contract."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+        "startLine": 179,
+        "endLine": 239,
+        "symbol": "validate_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Checks exact total, format, audio, source, render and regenerated Scene binding."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.SOURCE_MANIFEST",
+    "domain": "PLANNER_SCENE",
+    "name": "sourceManifest / _source",
+    "description": "Nonempty verified/synthetic records with required facts/catalog/planner SHA and no invented history; production files subsequently rebound by SHA.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "sourceManifest / _source",
+      "fields": [
+        "records",
+        "factsSHA256",
+        "catalogSHA256",
+        "legacyPlannerSHA256",
+        "semanticPolicy.inventMissingHistory",
+        "productionSources"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Required SHA syntax differs from proving source content: parent/native/source validators perform real byte checks.",
+      "The article-body/source accuracy limitations remain in records; schema will not turn review labels into surveyed control."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+        "startLine": 73,
+        "endLine": 84,
+        "symbol": "_source",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Required records and three SHA strings; inventMissingHistory=false."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 336,
+        "endLine": 351,
+        "symbol": "validate_production_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "productionSources paths and SHA checked before exact metadata regeneration."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.NATIVE_PAYLOAD_BINDING",
+    "domain": "PLANNER_SCENE",
+    "name": "build_native_payload / validate_native_binding",
+    "description": "Binds exact5 native input files, output, primary geography, V5FPS and event-afterLOCK.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "build_native_payload / validate_native_binding",
+      "fields": [
+        "nativeFiles.regionalPlan",
+        "nativeFiles.continentPlan",
+        "nativeFiles.scene",
+        "nativeFiles.cameraPlan",
+        "nativeFiles.inputManifest",
+        "cameraStartFrame"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "EXACT_FIVE_NATIVE_FILES_REQUIRED",
+        "NATIVE_PRIMARY_GEOMETRY_MISMATCH",
+        "EVENT_BEFORE_NATIVE_CAMERA_LOCK",
+        "NATIVE_INPUT_HASH_MISMATCH"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Not a generic arbitrary country camera pipeline merely by changing coordinates; a compatible validated native bundle is required."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/prepare_video.py",
+        "startLine": 101,
+        "endLine": 175,
+        "symbol": "build_native_payload / validate_native_binding",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact nativeFiles keys and source/camera identity checks before READY."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.SCENE_SPLIT",
+    "domain": "PLANNER_SCENE",
+    "name": "split_plan / _work_scenes",
+    "description": "Splits metadata into work scenes without frame buffers, preserving global timeline; V3 splits independent from event chapters.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "split_plan / _work_scenes",
+      "fields": [
+        "splitPolicy.maxSceneFrames"
+      ],
+      "allowedValues": [],
+      "defaults": {
+        "maxSceneFrames": "fps*10"
+      },
+      "units": {
+        "maxSceneFrames": "frames"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Chapter count and work-scene count are different concepts; current80s originalfixture has12 workscenes.",
+      "No reset of event/geometry/camera state at workcuts."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+        "startLine": 154,
+        "endLine": 176,
+        "symbol": "split_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Semantic beat boundaries and max budget."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 256,
+        "endLine": 294,
+        "symbol": "_work_scenes",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Chapter boundaries plus independent active-transition workcut; exact regeneration."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.CACHE_IDENTITIES",
+    "domain": "PLANNER_SCENE",
+    "name": "scene_cache_key / SceneCache",
+    "description": "SHA binds complete scene, shared renderer/source/timeline/context and neighboring boundary states; immutable failed attempts never become success.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "scene_cache_key / SceneCache",
+      "fields": [
+        "sourceManifest",
+        "renderProfile",
+        "encoder",
+        "legacyScenePlan",
+        "cameraProfile",
+        "materialProfile",
+        "scene",
+        "previousBoundaryEnd",
+        "followingBoundaryStart"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Private local POSIX cache, shared/world-storage rejected; sharedMP4 plus SHA alone does not replace private trusted native-provenance receipt.",
+      "Runtime GPU admission remains separate from cache hit."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py",
+        "startLine": 241,
+        "endLine": 259,
+        "symbol": "scene_cache_key",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Keys include whole scene, context and previous/following boundary."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py",
+        "startLine": 275,
+        "endLine": 310,
+        "symbol": "SceneCache.lookup",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Validates receipt and all artifact hashes before reusable hit."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.DATED_CHAPTERS",
+    "domain": "PLANNER_SCENE",
+    "name": "build_scene_plan / _metadata",
+    "description": "Adds12 source-bound narrative chapters over five supplied schematic states; narrative dates are separate from geometry snapshot dates.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "build_scene_plan / _metadata",
+      "fields": [
+        "productionV3.eventChapters",
+        "productionV3.geometrySchedule",
+        "sourceManifest.productionSources"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No historical unit positions generated.",
+      "A date label does not certify exact event-date front coordinates.",
+      "V3 on-screen active snapshot dates disclose schematic geometry."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 87,
+        "endLine": 131,
+        "symbol": "_validated_inputs",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Requires chronology/source/presentation policy and existing states."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 148,
+        "endLine": 235,
+        "symbol": "_metadata",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Chapter/schedule construction forbids new geometry/unit positions."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 297,
+        "endLine": 327,
+        "symbol": "build_scene_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Builds actual production profile and derived scenes."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.SOURCE_GEOMETRY_CLOCK",
+    "domain": "PLANNER_SCENE",
+    "name": "source_geometry_frame",
+    "description": "Maps global narrative frames to supplied source geometry frames with JS-compatible deterministic rounding and monotonic transitions.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "source_geometry_frame",
+      "fields": [
+        "globalFrame",
+        "productionV3.geometrySchedule"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {
+        "globalFrame": "frames"
+      },
+      "errors": [
+        "V3_GLOBAL_FRAME_OUT_OF_RANGE",
+        "V3_GEOMETRY_SCHEDULE_COVERAGE_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Inter-state visual alpha transitions are not newly observed daily historical fronts."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 238,
+        "endLine": 252,
+        "symbol": "source_geometry_frame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Single schedule coverage per frame and Math.round equivalent."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.V3_EXACT_METADATA_ADMISSION",
+    "domain": "PLANNER_SCENE",
+    "name": "validate_production_plan",
+    "description": "Validates whole production metadata and scenes against source JSON and current generator; arbitrary authored copies must retain exact generated identities.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "validate_production_plan",
+      "fields": [],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "V3_CHAPTER_OR_GEOMETRY_METADATA_MISMATCH",
+        "V3_ACTUAL_PRODUCTION_BOUNDARY_OR_SPLIT_MISMATCH",
+        "V3_PRODUCTION_SOURCE_HASH_MISMATCH"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Source data profiles may support separately derived plans; Studio does not rewrite sourcefiles, generate history or interpret arbitrary visual commands."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+        "startLine": 330,
+        "endLine": 355,
+        "symbol": "validate_production_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Full equality of productionV3 and scenes after file SHA verification."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.V4_FROZEN_80S",
+    "domain": "PLANNER_SCENE",
+    "name": "derive_execution_plan / validate_execution_plan",
+    "description": "CurrentStudioV4 admits exactly immutable parent80s plan plus archival binding and current image identity; no camera/material/timing customization.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "derive_execution_plan / validate_execution_plan",
+      "fields": [
+        "preset=VERIFIED_FRONT_V4_80S",
+        "profile=V4_ARCHIVAL_80S"
+      ],
+      "allowedValues": [
+        "80s",
+        "2400frames",
+        "1080x1920",
+        "30fps"
+      ],
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "FRONT_EXECUTION_PLAN_DATA_OR_TIMELINE_MISMATCH",
+        "STUDIO_V4_SOURCE_PLAN_CHANGED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Title and Studio postproduction SFX do not edit frozenvideo plan.",
+      "Current80s actual output not inspected in this read-onlyaudit; GPU/quality not newlyverified."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/scene_binding.py",
+        "startLine": 67,
+        "endLine": 115,
+        "symbol": "parent_plan / derive_execution_plan / validate_execution_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact parent source hash and wholeplan equality."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 101,
+        "endLine": 118,
+        "symbol": "_VALIDATOR",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Validates suppliedV4 before image rebinding; no genericScene override."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.V4_PARTIAL_ARCHIVAL_PROFILE",
+    "domain": "PLANNER_SCENE",
+    "name": "FRONT_PROFILE / source_binding",
+    "description": "Hash-binds8 dated partial approximate UNfronts to specific chapter frame windows; doesnot infer occupied areas.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "FRONT_PROFILE / source_binding",
+      "fields": [
+        "sourceManifest.archivalFrontV4.profileId",
+        "profileSha256",
+        "sourceManifestSha256"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Original projections and whole-source positional accuracy not certified.",
+      "Lines only during mappedwindows; no red-purple occupation partition fabricated from archival openfronts."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/scene_binding.py",
+        "startLine": 76,
+        "endLine": 104,
+        "symbol": "source_binding / derive_execution_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Profile+manifest SHAs attached to exactparent plan."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/FRONT_PROFILE.json",
+        "startLine": 1801,
+        "endLine": 1885,
+        "symbol": "runtimeProfile / semanticPolicy / schedule",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "8 partial approximation records with inferOccupiedAreas=false and interpolateUnobservedDates=false."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.STUDIO_DIRECT_SCENE",
+    "domain": "PLANNER_SCENE",
+    "name": "normalize_submission / bind_render_image",
+    "description": "Accepts directlongScene dictionary without free-text reinterpretation, but independently validates exactV4 orsourceboundV3 profile.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "normalize_submission / bind_render_image",
+      "fields": [
+        "sceneJson",
+        "profile",
+        "durationSeconds",
+        "sfx"
+      ],
+      "allowedValues": [
+        "V4_ARCHIVAL_80S",
+        "UNIVERSAL_V3"
+      ],
+      "defaults": {
+        "profile": "V4_ARCHIVAL_80S"
+      },
+      "units": {},
+      "errors": [
+        "STUDIO_RENDER_PLAN_REJECTED",
+        "STUDIO_DURATION_CONFLICT",
+        "STUDIO_OUTPUT_SPEC_CONFLICT"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "LegacySceneV1,factsdataset,FlowIntent,AreaIntent are not accepted in place of longScene wrapper.",
+      "Any input leaving a parameter inJSON is not proof a renderer reads thatparameter."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 147,
+        "endLine": 229,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Explicit Scene precedence, boundedJSON, format/profile/duration checks."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 147,
+        "endLine": 170,
+        "symbol": "bind_render_image / validate_render_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Separate backend binding+profile validation."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.ADVANCED_F_NOT_SELECTED",
+    "domain": "PLANNER_SCENE",
+    "name": "visualReuse compatibility flags",
+    "description": "Longhistoricalroute deliberatelyusesArea polygonstatetransitions ratherthan separateone-winner scalarFgain/frontier/unit/camera profile.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "visualReuse compatibility flags",
+      "fields": [
+        "visualReuse.referenceV2ScalarGainApplied",
+        "referenceV2ScalarWhiteGoldFrontierApplied",
+        "referenceV2UnitScaleApplied",
+        "referenceV2FocusHoldCameraApplied"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Source asset closure profile REFERENCE_VISUAL_MASTER_V2_F is included source identity, not selection of allFadvanced effects.",
+      "ExactcurrentV4 validator rejects modifying frozenflags/profile fields. Separateintegrationwouldbe required; notimplementedinthisaudit."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 209,
+        "endLine": 229,
+        "symbol": "plan_topic visualReuse",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Explicitfalse flags for gain,whitegoldfrontier,unitscale,focus-holdcamera; no nationalunitdata."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.V3_VISUAL_PROFILE",
+    "domain": "PLANNER_SCENE",
+    "name": "normalizeProductionVisualProfile / productionAreaStyle",
+    "description": "Separate V3 presentation provides source-owned territory fill, white front core and gold glow over exact supplied Area contours; this is not the F scalar classifier.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "normalizeProductionVisualProfile / productionAreaStyle",
+      "fields": [
+        "productionV3.visualProfile.territoryOpacity",
+        "frontCoreWidthPixels",
+        "frontCoreColor",
+        "frontGlowColor",
+        "frontGlowRadiusPixels",
+        "frontGlowGain",
+        "cameraApproachFrames"
+      ],
+      "allowedValues": [],
+      "defaults": {
+        "territoryOpacity": 0.62,
+        "frontCoreWidthPixels": 4.8,
+        "frontCoreColor": [
+          1,
+          0.98,
+          0.91
+        ],
+        "frontGlowColor": [
+          1,
+          0.66,
+          0.16
+        ],
+        "frontGlowRadiusPixels": 10,
+        "frontGlowGain": 0.42,
+        "cameraApproachFrames": 48
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "These are bound source-profile settings; no Studio prompt override fields.",
+      "V4 archival active windows suppress unverified filled Area, so front-only sections may intentionally show no territory fill.",
+      "Do not read parent visualReuse false flags as proof all V3 white/gold frontier or conservative camera additions are absent."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_visual_profile.mjs",
+        "startLine": 7,
+        "endLine": 47,
+        "symbol": "normalizeProductionVisualProfile / productionAreaStyle",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Explicit bounded presentation values and defaults."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 31,
+        "endLine": 68,
+        "symbol": "bootLongRuntime",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Selects production visual profile and Area pass."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_adapter.mjs",
+        "startLine": 90,
+        "endLine": 128,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Actual ASTRA then Area/front then native marker draw; scalarV2 reuse false."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "PLANNER.NIGHT_RUN_SCHEMATIC_COMPOSITION",
+    "domain": "PLANNER_SCENE",
+    "name": "openNightRuntime / NIGHT_TIMING",
+    "description": "Standalone14s causal Area+Flow demonstration with schematic directional actors; not historical unit positions and not currentStudio80s integration.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "openNightRuntime / NIGHT_TIMING",
+      "fields": [
+        "causal_tracks",
+        "NIGHT_PHASES"
+      ],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Do not paste night-run fixture as currentStudio80s Scene or infer its arrows/actors are production historical military markers."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/planner-night-run-v1/night_runtime.mjs",
+        "startLine": 12,
+        "endLine": 74,
+        "symbol": "openNightRuntime",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Builds causal renderer in explicit SwiftShader proof path."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/planner-night-run-v1/build_fixture.mjs",
+        "startLine": 30,
+        "endLine": 56,
+        "symbol": "NIGHT_TIMING / NIGHT_SCHEMATIC_SOURCE",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "14s420frames; direction cues explicitly not units/battleroutes."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Standalone legacy14s night-run Candidate; image membership absent from current recursiveclosure"
+  },
+  {
+    "id": "PLANNER.GENERAL_AI_RESEARCH",
+    "domain": "PLANNER_SCENE",
+    "name": "General-purpose natural-language historical research AI",
+    "description": "No externalAI connector or free-topic historical data generation wired; boundedcatalog parser is the implemented path.",
+    "lifecycle": "NOT_IMPLEMENTED",
+    "classification": "NOT_IMPLEMENTED",
+    "axes": {
+      "SOURCE_EXISTS": "NO",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "General-purpose natural-language historical research AI",
+      "fields": [],
+      "allowedValues": [],
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Do not advertise natural-language topic→anyworldevent executable without a supplied verifiedfacts/native/source profile."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 3,
+        "endLine": 5,
+        "symbol": "module contract",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "No external LLM; unknown facts failclosed."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+        "startLine": 100,
+        "endLine": 102,
+        "symbol": "parse_request result",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "externalAIConnected false."
+      }
+    ],
+    "confidence": "HIGH"
+  }
+]

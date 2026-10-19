@@ -1,0 +1,261 @@
+{
+  "schema": "WORLD_ENGINE_PROMPT_LINT_RULES_V2",
+  "sourceCommit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+  "scope": "Current operating Studio prompt and submission parser; not future product requirements.",
+  "allow": {
+    "submissionEnvelope": [
+      "prompt",
+      "sceneJson",
+      "durationSeconds",
+      "profile",
+      "sfx"
+    ],
+    "structuredPrompt": [
+      "schema",
+      "preset",
+      "title",
+      "durationSeconds",
+      "profile",
+      "sceneJson",
+      "sfx"
+    ],
+    "preset": [
+      "VERIFIED_FRONT_V4_80S"
+    ],
+    "profiles": [
+      "V4_ARCHIVAL_80S",
+      "UNIVERSAL_V3"
+    ],
+    "durationSeconds": [
+      80,
+      120,
+      180,
+      300,
+      600
+    ],
+    "sfx": [
+      "enabled",
+      "gain",
+      "exportWav",
+      "cues"
+    ],
+    "revisionSfx": [
+      "enabled",
+      "gain",
+      "cues"
+    ],
+    "sfxTypes": [
+      "CLICK",
+      "MECHANICAL_TICK",
+      "OCCUPATION_COMPLETE",
+      "MARKER_POP",
+      "CAMERA_WHOOSH",
+      "EVENT_TRANSITION"
+    ]
+  },
+  "deny": [
+    {
+      "field": "renderIntent",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "map",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "territory",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "camera",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "militaryUnits",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "events",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "timeline",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    },
+    {
+      "field": "qualityGate",
+      "context": "structuredPrompt",
+      "error": "STUDIO_PROMPT_FIELD_UNSUPPORTED",
+      "envelopeError": "STUDIO_SUBMISSION_INVALID",
+      "consequence": "No mapping to renderer or Scene is performed."
+    }
+  ],
+  "rules": [
+    {
+      "id": "STRUCTURED_NOT_NL",
+      "severity": "ERROR",
+      "condition": "Free natural language in new production prompt with no outer sceneJson",
+      "error": "STUDIO_STRUCTURED_PROMPT_REQUIRED"
+    },
+    {
+      "id": "WRONG_SCHEMA_IS_RAW_PLAN",
+      "severity": "ERROR",
+      "condition": "schema differs from WORLD_ENGINE_STUDIO_PROMPT_V1",
+      "behavior": "Parsed object treated as raw Scene plan; not a new prompt version. Backend/duration validation rejects incomplete objects."
+    },
+    {
+      "id": "NO_AUTOMATIC_QUALITY_INFERENCE",
+      "severity": "ERROR",
+      "condition": "Requests such as reference quality, detailed terrain, bright frontier, moving army, camera follow",
+      "behavior": "Not a supported Studio natural-language command. Use independently validated supported Scene/profile; do not claim applied."
+    },
+    {
+      "id": "INTEGER_DURATION",
+      "severity": "ERROR",
+      "condition": "Selected duration uses JSON 80.0 instead of 80",
+      "error": "STUDIO_DURATION_UNSUPPORTED"
+    },
+    {
+      "id": "EXPLICIT_PRESET_DURATION",
+      "severity": "WARNING",
+      "condition": "Bare V4 preset without UI outer duration or inner integer duration",
+      "error": "STUDIO_DURATION_UNSUPPORTED",
+      "fix": "Include durationSeconds:80."
+    },
+    {
+      "id": "NO_PRESET_STRETCH",
+      "severity": "ERROR",
+      "condition": "V4 preset length changed",
+      "error": "STUDIO_DURATION_CONFLICT or STUDIO_ARCHIVAL_PRESET_80S_ONLY"
+    },
+    {
+      "id": "PROFILE_MATCH",
+      "severity": "ERROR",
+      "condition": "UI and prompt profile differ",
+      "error": "STUDIO_PROFILE_CONFLICT"
+    },
+    {
+      "id": "PRESET_AND_SCENE_EXCLUSIVE",
+      "severity": "ERROR",
+      "condition": "Truthy preset plus non-null inner sceneJson",
+      "error": "STUDIO_PRESET_CONFLICT"
+    },
+    {
+      "id": "DIRECT_SCENE_WINS",
+      "severity": "WARNING",
+      "condition": "Outer sceneJson supplied with free text or structured prompt",
+      "behavior": "Prompt is not interpreted; no text-requested visual edits."
+    },
+    {
+      "id": "OUTER_SFX_REPLACES",
+      "severity": "WARNING",
+      "condition": "Outer sfx and inner sfx both present",
+      "behavior": "Outer object replaces all inner SFX. No field merge."
+    },
+    {
+      "id": "UI_OVERRIDES_AUDIO",
+      "severity": "WARNING",
+      "condition": "Pasted prompt includes cues or exportWav",
+      "behavior": "Existing UI always supplies only enabled/gain; pasted cues/exportWav are not sent to normalizer as selected settings."
+    },
+    {
+      "id": "TITLE_METADATA_ONLY",
+      "severity": "INFO",
+      "condition": "Structured title supplied",
+      "behavior": "Submission metadata, not on-screen title/glyph command."
+    },
+    {
+      "id": "SFX_EVENT_BINDING",
+      "severity": "ERROR",
+      "condition": "Cue event missing or frame outside actual event range",
+      "error": "STUDIO_SFX_INVALID"
+    },
+    {
+      "id": "SFX_EMPTY_VS_MISSING",
+      "severity": "INFO",
+      "condition": "cues absent/null versus []",
+      "behavior": "Absent/null auto-selects actual event chapter-start transitions; [] explicitly emits no cues."
+    },
+    {
+      "id": "NO_VISUAL_INTERVAL_EDITS",
+      "severity": "ERROR",
+      "condition": "Camera, territory, frontier or marker interval edit in revision prompt",
+      "error": "STUDIO_VISUAL_REVISION_UNSUPPORTED"
+    },
+    {
+      "id": "VALIDATION_NOT_EXECUTION",
+      "severity": "INFO",
+      "condition": "Parser/JSON Schema accepts input",
+      "behavior": "Does not prove GPU admission, image selection, frame output or user visual approval."
+    },
+    {
+      "id": "NO_SECRET_INPUT",
+      "severity": "ERROR",
+      "condition": "Access tokens, owner codes, backup encryption keys or approval values in production prompt",
+      "behavior": "Not supported fields; never publish or send as Scene data."
+    }
+  ],
+  "precedence": [
+    "Outer non-null sceneJson skips prompt parsing.",
+    "Otherwise prompt object with exact prompt schema is structured; any other schema is treated as raw Scene.",
+    "Outer profile -> inner profile -> V4_ARCHIVAL_80S, with explicit inner mismatch rejected.",
+    "Outer duration -> inner duration -> raw plan duration, with all declared lengths required to agree.",
+    "Outer sfx if key present -> inner sfx -> defaults, replacing whole object.",
+    "Inner title -> plan.titleCandidates[0] -> plan.topic; direct outer sceneJson means inner title is not interpreted."
+  ],
+  "inputLimits": {
+    "parsedMaxBytes": 4194304,
+    "maxNodes": 200000,
+    "maxDepth": 64,
+    "uiPromptMaxCharacters": 100000,
+    "uiFileSelectMaxBytes": 8388608,
+    "note": "UI permits selecting an 8 MiB file, but backend 4 MiB serialized submission bound remains authoritative."
+  },
+  "evidence": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "startLine": 151,
+      "endLine": 217,
+      "symbol": "normalize_submission"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "startLine": 233,
+      "endLine": 343,
+      "symbol": "_revision_command and plan_revision"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+      "startLine": 16,
+      "endLine": 16,
+      "symbol": "submission"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+      "startLine": 111,
+      "endLine": 153,
+      "symbol": "normalize_sfx"
+    }
+  ]
+}

@@ -1,0 +1,2415 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "SCENE_JSON_CONTRACT.schema.json",
+  "title": "Actual Studio V1 direct Scene submission contract, with profile-specific runtime constraints",
+  "description": "Read-only audit artifact, not an installed validator. Root shape is the EXISTING direct Studio submission {profile,sceneJson,...}; choose $defs/rawScenePlan for a raw long Scene object. Both profiles share plan.schema WORLD_ENGINE_UNIVERSAL_VIDEO_V2, so the real discriminator is the sibling Studio profile.",
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "Ignored for scene interpretation when sceneJson is supplied; preserved as promptText."
+    },
+    "sceneJson": {
+      "$ref": "#/$defs/universalPlan"
+    },
+    "durationSeconds": {
+      "enum": [
+        80,
+        120,
+        180,
+        300,
+        600
+      ]
+    },
+    "profile": {
+      "enum": [
+        "V4_ARCHIVAL_80S",
+        "UNIVERSAL_V3"
+      ]
+    },
+    "sfx": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "x-reference": "STUDIO_PROMPT_CONTRACT.schema.json owns detailed SFX schema; this artifact audits Scene data only."
+    }
+  },
+  "required": [
+    "sceneJson"
+  ],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "profile": {
+          "const": "V4_ARCHIVAL_80S"
+        },
+        "sceneJson": {
+          "$ref": "#/$defs/v4FrozenPlan"
+        },
+        "durationSeconds": {
+          "const": 80
+        }
+      },
+      "x-defaultProfile": "V4_ARCHIVAL_80S"
+    },
+    {
+      "properties": {
+        "profile": {
+          "const": "UNIVERSAL_V3"
+        },
+        "sceneJson": {
+          "$ref": "#/$defs/productionPlan"
+        }
+      },
+      "required": [
+        "profile"
+      ]
+    }
+  ],
+  "$defs": {
+    "sourceReference": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "additionalProperties": true
+    },
+    "anchor": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2,
+      "x-units": "EPSG:4326 [longitude,latitude], degrees"
+    },
+    "geometry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "Point"
+            },
+            "coordinates": {
+              "$ref": "#/$defs/anchor"
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "LineString",
+                "Polygon",
+                "MultiPolygon"
+              ]
+            },
+            "coordinates": {
+              "type": "array",
+              "minItems": 1
+            }
+          },
+          "required": [
+            "type",
+            "coordinates"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "x-runtime": [
+        "LineString validated by existing Event line contract; Polygon/MultiPolygon validated by existing Area geometry contract. Structural JSON Schema is not a geometry-admission certificate.",
+        "No coordinate repair, interpolation, invented fronts, or coercion."
+      ]
+    },
+    "geometryRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "geometry": {
+          "$ref": "#/$defs/geometry"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "geometry",
+        "source_id"
+      ],
+      "additionalProperties": false
+    },
+    "sourceRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "source_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification_status": {
+          "enum": [
+            "VERIFIED",
+            "SYNTHETIC_TEST"
+          ]
+        },
+        "note": {
+          "type": "string"
+        },
+        "verification_basis": {
+          "type": "string"
+        },
+        "live_access": {
+          "type": "string"
+        },
+        "retrieval_date": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "original_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "source_wrapper_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "crs": {
+          "type": "string"
+        },
+        "resolution": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source_type",
+        "source_reference",
+        "verification_status"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "PRODUCTION legacy planner rejects SYNTHETIC_TEST or REFERENCE_DISPLAY_VALUE source types and requires VERIFIED. SYNTHETIC_TEST mode requires both source_type and verification_status SYNTHETIC_TEST.",
+        "Universal Python _source checks nonempty records and verification_status; it does not independently certify an article body or map accuracy. Native/source binding validators perform separate file SHA verification.",
+        "Unknown source fields are retained in long-plan sourceManifest records; legacy fact normalizer selects known fields. A verification_status string alone does not prove archival geometry."
+      ]
+    },
+    "universalSourceRecord": {
+      "type": "object",
+      "properties": {
+        "verification_status": {
+          "enum": [
+            "VERIFIED",
+            "SYNTHETIC_TEST"
+          ]
+        }
+      },
+      "required": [
+        "verification_status"
+      ],
+      "additionalProperties": true,
+      "description": "Exact minimum Python _source predicate. Compiler-produced public records also contain id/source_type/source_reference and may carry nullable original_body_sha256, accuracy, access and review fields; those additional metadata keys are not independently interpreted by this predicate."
+    },
+    "semanticPolicy": {
+      "type": "object",
+      "properties": {
+        "inventMissingHistory": {
+          "const": false
+        },
+        "mode": {
+          "type": "string"
+        },
+        "permittedVisualizations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0
+        },
+        "historicalInterpolation": {
+          "type": "string"
+        },
+        "sourceArticleBodiesVerified": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "inventMissingHistory"
+      ],
+      "additionalProperties": true
+    },
+    "productionSources": {
+      "type": "object",
+      "properties": {
+        "chronology": {
+          "$ref": "#/$defs/sourceReference"
+        },
+        "ownership": {
+          "$ref": "#/$defs/sourceReference"
+        },
+        "visualProfile": {
+          "$ref": "#/$defs/sourceReference"
+        },
+        "parentManifest": {
+          "$ref": "#/$defs/sourceReference"
+        }
+      },
+      "required": [
+        "chronology",
+        "ownership",
+        "visualProfile",
+        "parentManifest"
+      ],
+      "additionalProperties": true
+    },
+    "sourceManifest": {
+      "type": "object",
+      "properties": {
+        "records": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/universalSourceRecord"
+          },
+          "minItems": 1
+        },
+        "factsSHA256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "catalogSHA256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "legacyPlannerSHA256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "factsPath": {
+          "type": "string"
+        },
+        "provenancePath": {
+          "type": "string"
+        },
+        "provenanceSHA256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceReferencesPath": {
+          "type": "string"
+        },
+        "sourceReferencesSHA256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "legacyPlannerPath": {
+          "type": "string"
+        },
+        "semanticPolicy": {
+          "$ref": "#/$defs/semanticPolicy"
+        },
+        "productionSources": {
+          "$ref": "#/$defs/productionSources"
+        },
+        "archivalFrontV4": {
+          "type": "object",
+          "properties": {
+            "profileId": {
+              "const": "VERIFIED_ARCHIVAL_FRONT_V4"
+            },
+            "profileSha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "sourceManifestSha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "profileId",
+            "profileSha256",
+            "sourceManifestSha256"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "records",
+        "factsSHA256",
+        "catalogSHA256",
+        "legacyPlannerSHA256",
+        "semanticPolicy"
+      ],
+      "additionalProperties": true
+    },
+    "nativePayload": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "validationStatus": {
+          "const": "VERIFIED"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "validationStatus"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "Bound file must decode WORLD_ENGINE_UNIVERSAL_NATIVE_INPUT_V1 with exact five nativeFiles keys regionalPlan,continentPlan,scene,cameraPlan,inputManifest.",
+        "Every file SHA, canonical output, FPS, preserved camera LOCK, event anchor, primary country and primary geometry must match existing inputs."
+      ]
+    },
+    "renderProfile": {
+      "type": "object",
+      "properties": {
+        "adapter": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "gpuMode": {
+          "const": "gpu-required"
+        },
+        "status": {
+          "enum": [
+            "READY",
+            "BLOCKED_NATIVE_PAYLOAD_REQUIRED",
+            "BLOCKED_RENDERER_BINDING_REQUIRED"
+          ]
+        },
+        "nativePayload": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/nativePayload"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "productionAdapter": {
+          "const": "UNIVERSAL_PRODUCTION_V3"
+        },
+        "imageDigest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "imageBindingStatus": {
+          "type": "string"
+        },
+        "qualityProfile": {
+          "type": "string"
+        },
+        "assetClosureProfile": {
+          "type": "string"
+        },
+        "rendererCapability": {
+          "type": "string"
+        },
+        "hardwareValidation": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "adapter",
+        "gpuMode",
+        "status"
+      ],
+      "additionalProperties": true,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "READY"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "nativePayload"
+            ],
+            "properties": {
+              "nativePayload": {
+                "$ref": "#/$defs/nativePayload"
+              }
+            }
+          }
+        }
+      ],
+      "x-runtime": [
+        "Studio requires READY and current immutable imageDigest through bind_render_image/validate_render_plan; READY never means NVIDIA or visual-quality PASS."
+      ]
+    },
+    "nativeContext": {
+      "type": "object",
+      "properties": {
+        "country_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        },
+        "primary_country_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "secondary_country_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        },
+        "context_location_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "legacyCameraIntent": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "const": "CAMERA_DIRECTOR_V5_WITH_DETAIL_ADAPTER"
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "target_geometry_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        },
+        "minimum_context_geometry_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        },
+        "detail_policy": {
+          "const": "FACT_BASED_VISUAL_GRADE"
+        },
+        "arrival_required": {
+          "type": "boolean"
+        },
+        "native_context": {
+          "$ref": "#/$defs/nativeContext"
+        }
+      },
+      "required": [
+        "owner",
+        "anchor",
+        "target_geometry_refs",
+        "detail_policy"
+      ],
+      "additionalProperties": true
+    },
+    "cameraProfile": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "type": "string"
+        },
+        "intent": {
+          "$ref": "#/$defs/legacyCameraIntent"
+        },
+        "continuityPolicy": {
+          "type": "string"
+        },
+        "candidateProfile": {
+          "type": "string"
+        },
+        "referenceV2FocusHoldApplied": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": true,
+      "x-runtime": [
+        "This is an intent/identity descriptor, not arbitrary camera keyframes. Native preparation pins the preserved V5 camera; V4 runtime rejects modifications to the frozen descriptor."
+      ]
+    },
+    "materialProfile": {
+      "type": "object",
+      "properties": {
+        "profileId": {
+          "type": "string"
+        },
+        "sourceAssetClosureProfile": {
+          "type": "string"
+        },
+        "fallback": {
+          "type": "string"
+        },
+        "rebuildRenderer": {
+          "type": "boolean"
+        }
+      },
+      "required": [],
+      "additionalProperties": true,
+      "x-runtime": [
+        "Current historical path selects REFERENCE_V2_SOURCE_WITH_AREA_V3; merely naming a different material profile is not a supported renderer command."
+      ]
+    },
+    "marker": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "anchor"
+      ],
+      "additionalProperties": true
+    },
+    "legacyTiming": {
+      "type": "object",
+      "properties": {
+        "total_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "camera_lock_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "event_start_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "initial_reveal_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state_transition_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "final_hold_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "action_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blank_interstage_frames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duration_seconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "frame_policy": {
+          "const": "INTEGER_DETERMINISTIC"
+        }
+      },
+      "required": [
+        "total_frames",
+        "camera_lock_frame",
+        "event_start_frame",
+        "initial_reveal_frames",
+        "state_transition_frames",
+        "final_hold_frames",
+        "action_frames",
+        "blank_interstage_frames",
+        "fps",
+        "duration_seconds",
+        "frame_policy"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "fps equals metadata.output.fps; duration_seconds = total_frames / fps; camera_lock_frame = event_start_frame; blank_interstage_frames = 0.",
+        "Supplied FACT_DATA.scene_timing has an exact whitelist; portable scene timing validator permits extra keys but checks invariants."
+      ]
+    },
+    "legacyBeat": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "type": {
+          "type": "string"
+        },
+        "start_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end_frame": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "duration_frames": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "geometry_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        },
+        "camera_intent": {
+          "type": "string"
+        },
+        "state_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "start_frame",
+        "end_frame",
+        "duration_frames",
+        "geometry_refs"
+      ],
+      "additionalProperties": true
+    },
+    "legacyTimeStep": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "date": {
+          "type": "string",
+          "format": "date"
+        },
+        "label": {
+          "type": "string"
+        },
+        "area_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 1
+        },
+        "front_line_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 1
+        },
+        "start_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "transition_frames": {
+          "type": "integer",
+          "minimum": 2
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "label",
+        "area_ids",
+        "front_line_ids",
+        "start_frame",
+        "transition_frames"
+      ],
+      "additionalProperties": true
+    },
+    "legacyArea": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "geometry_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "stage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "role": {
+          "type": "string"
+        },
+        "style_role": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "geometry_ref"
+      ],
+      "additionalProperties": true
+    },
+    "legacyFront": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "geometry_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "stage_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "role": {
+          "type": "string"
+        },
+        "style_role": {
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "FORWARD",
+            "REVERSE"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "geometry_ref"
+      ],
+      "additionalProperties": true
+    },
+    "legacyRoute": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "geometry_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "direction": {
+          "enum": [
+            "FORWARD",
+            "REVERSE"
+          ]
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        }
+      },
+      "required": [
+        "id",
+        "geometry_ref"
+      ],
+      "additionalProperties": true
+    },
+    "legacyObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "route_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "role": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "graphic": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "route_id",
+        "role",
+        "profile"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "compileExistingEnginePlan requires supplied graphic; an object role string alone does not create a renderable unit or historical location."
+      ]
+    },
+    "legacyMetric": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "display_value": {
+          "type": [
+            "string",
+            "number"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "anchor": {
+          "$ref": "#/$defs/anchor"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        }
+      },
+      "required": [
+        "id",
+        "display_value",
+        "unit",
+        "anchor",
+        "source_id"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "Original Event metric contract remains authoritative for display_value/unit/source acceptance; source must resolve to a supplied source record."
+      ]
+    },
+    "legacyPropagation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "origin": {
+          "$ref": "#/$defs/anchor"
+        },
+        "source_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "visual_only": {
+          "const": true
+        },
+        "physical_simulation": {
+          "const": false
+        },
+        "geometry_ref": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "radius_start_degrees": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "radius_end_degrees": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 60
+        },
+        "angular_range_degrees": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        }
+      },
+      "required": [
+        "id",
+        "origin",
+        "source_id",
+        "visual_only",
+        "physical_simulation"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "Must supply a LineString geometry_ref or radius_end_degrees > radius_start_degrees; geometry binding selects irregular wave presentation, not physics."
+      ]
+    },
+    "legacyScenePlan": {
+      "type": "object",
+      "properties": {
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "schema": {
+              "const": "PLANNER_SCENE_JSON_V1"
+            },
+            "planner_version": {
+              "type": "string"
+            },
+            "fact_dataset_version": {
+              "const": "PLANNER_FACTS_V1"
+            },
+            "data_mode": {
+              "enum": [
+                "PRODUCTION",
+                "SYNTHETIC_TEST"
+              ]
+            },
+            "topic": {
+              "type": "string"
+            },
+            "policy": {
+              "const": "FACT_BASED_VISUAL_GRADE"
+            },
+            "deterministic": {
+              "const": true
+            },
+            "user_video_review_required": {
+              "const": true
+            },
+            "semantic_mode": {
+              "type": "string"
+            },
+            "output": {
+              "type": "object",
+              "properties": {
+                "width": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "fps": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "audio": {
+                  "const": false
+                }
+              },
+              "required": [
+                "width",
+                "height",
+                "fps",
+                "audio"
+              ],
+              "additionalProperties": true
+            }
+          },
+          "required": [
+            "schema",
+            "data_mode",
+            "topic",
+            "policy",
+            "deterministic",
+            "user_video_review_required",
+            "output"
+          ],
+          "additionalProperties": true
+        },
+        "subject": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+            },
+            "label": {
+              "type": "string"
+            },
+            "aliases": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 0
+            },
+            "event_family": {
+              "enum": [
+                "TRANSPORT",
+                "LINE_METRIC",
+                "DISASTER",
+                "WAR"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "event_family"
+          ],
+          "additionalProperties": true
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marker"
+          },
+          "minItems": 1
+        },
+        "time_range": {
+          "type": "object",
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "additionalProperties": true
+        },
+        "topic_intent": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "const": "TOPIC_INTENT_V1"
+            },
+            "topic": {
+              "type": "string"
+            },
+            "subject_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+            },
+            "event_family": {
+              "enum": [
+                "TRANSPORT",
+                "LINE_METRIC",
+                "DISASTER",
+                "WAR"
+              ]
+            },
+            "question": {
+              "enum": [
+                "EXPLAIN_CHANGE",
+                "SHOW_EVENT"
+              ]
+            }
+          },
+          "required": [
+            "version",
+            "topic",
+            "subject_id",
+            "event_family"
+          ],
+          "additionalProperties": true
+        },
+        "event_type": {
+          "enum": [
+            "TRANSPORT",
+            "LINE_METRIC",
+            "DISASTER",
+            "WAR"
+          ]
+        },
+        "selected_features": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "ROUTE_REVEAL",
+              "DIRECTIONAL_FLOW",
+              "MOVING_OBJECT",
+              "ENDPOINT_PULSE",
+              "ROUTE_HOLD",
+              "GEOGRAPHIC_LINE_REVEAL",
+              "METRIC_ANNOTATION",
+              "INFORMATION_HOLD",
+              "PROPAGATION_WAVE",
+              "IMPACT_ZONE",
+              "AREA_HOLD",
+              "FRONT_LINE",
+              "STATE_TRANSITION",
+              "TIME_STEP"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "camera_intent": {
+          "$ref": "#/$defs/legacyCameraIntent"
+        },
+        "scale_intent": {
+          "type": "object",
+          "properties": {
+            "owner": {
+              "const": "EXISTING_SCALE_CORE"
+            },
+            "preferred": {
+              "enum": [
+                "CONTINENT",
+                "REGIONAL",
+                "LOCAL"
+              ]
+            },
+            "target_geometry_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+              },
+              "minItems": 0
+            }
+          },
+          "required": [
+            "owner",
+            "target_geometry_refs"
+          ],
+          "additionalProperties": true
+        },
+        "beats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyBeat"
+          },
+          "minItems": 1
+        },
+        "geometries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/geometryRecord"
+          },
+          "minItems": 0
+        },
+        "markers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marker"
+          },
+          "minItems": 0
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyRoute"
+          },
+          "minItems": 0
+        },
+        "moving_objects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyObject"
+          },
+          "minItems": 0
+        },
+        "areas": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyArea"
+          },
+          "minItems": 0
+        },
+        "front_lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyFront"
+          },
+          "minItems": 0
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyMetric"
+          },
+          "minItems": 0
+        },
+        "time_steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyTimeStep"
+          },
+          "minItems": 0
+        },
+        "text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+              },
+              "content": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "content",
+              "role"
+            ],
+            "additionalProperties": true
+          },
+          "minItems": 0
+        },
+        "visual_roles": {
+          "type": "object"
+        },
+        "timing": {
+          "$ref": "#/$defs/legacyTiming"
+        },
+        "source_notes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceRecord"
+          },
+          "minItems": 1
+        },
+        "propagations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyPropagation"
+          },
+          "minItems": 0
+        },
+        "impact_zones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyArea"
+          },
+          "minItems": 0
+        },
+        "geographic_lines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacyRoute"
+          },
+          "minItems": 0
+        },
+        "causal_tracks": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "minItems": 0
+        }
+      },
+      "required": [
+        "metadata",
+        "subject",
+        "locations",
+        "time_range",
+        "topic_intent",
+        "event_type",
+        "selected_features",
+        "camera_intent",
+        "scale_intent",
+        "beats",
+        "geometries",
+        "timing",
+        "source_notes"
+      ],
+      "additionalProperties": false,
+      "x-runtime": [
+        "Actual validateScenePlan additionally enforces family-specific categories, known references, uniqueness, exact geometry normalization, chronological states, contiguous half-open beats, final HOLD, Event/Area/Flow contracts and causal track data.",
+        "This is an existing standalone portable Planner Scene V1. It is not accepted as a direct Studio sceneJson because Studio expects the long-video wrapper below.",
+        "Nested JSON Schema documents known fields; runtime is stricter where specified. Do not treat schema-only PASS as render admission."
+      ]
+    },
+    "silentAudio": {
+      "const": {
+        "enabled": false,
+        "mode": "SILENT"
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "properties": {
+        "territorySignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "frontierSignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "cameraSignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "effectSignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "timelineSignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "validationBasis": {
+          "const": "SEMANTIC_CONTRACT_ONLY_GPU_CONTINUITY_PENDING"
+        }
+      },
+      "required": [
+        "frame",
+        "territorySignature",
+        "frontierSignature",
+        "cameraSignature",
+        "effectSignature",
+        "timelineSignature",
+        "validationBasis"
+      ],
+      "additionalProperties": false
+    },
+    "productionBoundary": {
+      "type": "object",
+      "properties": {
+        "frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sourceGeometryFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "geometrySignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "cameraContractSignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "effectContractSignature": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "validationBasis": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "frame",
+        "sourceGeometryFrame",
+        "geometrySignature",
+        "cameraContractSignature",
+        "effectContractSignature",
+        "validationBasis"
+      ],
+      "additionalProperties": false
+    },
+    "clippedEvent": {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "type": {
+          "type": "string"
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrame": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sourceStartFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sourceEndFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stateId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "eventId",
+        "type",
+        "startFrame",
+        "endFrame",
+        "sourceStartFrame",
+        "sourceEndFrame",
+        "stateId"
+      ],
+      "additionalProperties": false
+    },
+    "stateBinding": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "const": "LEGACY_TIME_STEPS"
+        },
+        "legacySceneSHA256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "globalStartFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "globalEndFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resetAtSceneStart": {
+          "const": false
+        }
+      },
+      "required": [
+        "mode",
+        "legacySceneSHA256",
+        "globalStartFrame",
+        "globalEndFrame",
+        "resetAtSceneStart"
+      ],
+      "additionalProperties": false
+    },
+    "workScene": {
+      "type": "object",
+      "properties": {
+        "sceneId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrame": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "globalFrameOffset": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eventTimeline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/clippedEvent"
+          },
+          "minItems": 0
+        },
+        "territoryState": {
+          "$ref": "#/$defs/stateBinding"
+        },
+        "frontierState": {
+          "$ref": "#/$defs/stateBinding"
+        },
+        "cameraProfile": {
+          "$ref": "#/$defs/cameraProfile"
+        },
+        "materialProfile": {
+          "$ref": "#/$defs/materialProfile"
+        },
+        "unitMarkers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marker"
+          },
+          "minItems": 0
+        },
+        "audioSettings": {
+          "$ref": "#/$defs/silentAudio"
+        },
+        "sourceManifest": {
+          "type": "object",
+          "properties": {
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "sha256"
+          ],
+          "additionalProperties": false
+        },
+        "renderProfile": {
+          "$ref": "#/$defs/renderProfile"
+        },
+        "boundaryStart": {
+          "$ref": "#/$defs/boundary"
+        },
+        "boundaryEnd": {
+          "$ref": "#/$defs/boundary"
+        },
+        "chapterId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "chapterRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 0
+        },
+        "chapterSelectionPolicy": {
+          "const": "PER_FRAME_GLOBAL_CHAPTER_NOT_WORK_UNIT_START"
+        },
+        "productionBoundaryStart": {
+          "$ref": "#/$defs/productionBoundary"
+        },
+        "productionBoundaryEnd": {
+          "$ref": "#/$defs/productionBoundary"
+        }
+      },
+      "required": [
+        "sceneId",
+        "startFrame",
+        "endFrame",
+        "globalFrameOffset",
+        "eventTimeline",
+        "territoryState",
+        "frontierState",
+        "cameraProfile",
+        "materialProfile",
+        "unitMarkers",
+        "audioSettings",
+        "sourceManifest",
+        "renderProfile",
+        "boundaryStart",
+        "boundaryEnd"
+      ],
+      "additionalProperties": true,
+      "x-units": "All frame fields are absolute GLOBAL frame indices; interval is [startFrame,endFrame).",
+      "x-runtime": [
+        "Work scenes are generated by contracts._scene and V3 _work_scenes. These dictionaries are not independent authored control tracks: duplicated fields must exactly equal their regenerated values.",
+        "Every scene starts at prior scene end; globalFrameOffset equals startFrame; end > start; sum covers totalFrames; neighboring boundary records equal. SourceManifest SHA and legacyScene SHA are canonical JSON SHA256, not necessarily file byte SHA."
+      ]
+    },
+    "productionVisualProfile": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_PRODUCTION_VISUAL_PROFILE_V3"
+        },
+        "palette": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minItems": 3,
+            "maxItems": 3
+          }
+        },
+        "ownershipPolicy": {
+          "type": "string"
+        },
+        "measuredMilitaryControl": {
+          "const": false
+        },
+        "newUnitPositionsAllowed": {
+          "const": false
+        },
+        "geometryTransitionDurationSeconds": {
+          "type": "number",
+          "minimum": 0.25,
+          "maximum": 5
+        },
+        "geometryTransitionPolicy": {
+          "type": "string"
+        },
+        "territoryOpacity": {
+          "type": "number",
+          "minimum": 0.24,
+          "maximum": 0.8,
+          "default": 0.62
+        },
+        "frontCoreWidthPixels": {
+          "type": "number",
+          "minimum": 2.5,
+          "maximum": 7,
+          "default": 4.8
+        },
+        "frontCoreColor": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "default": [
+            1,
+            0.98,
+            0.91
+          ]
+        },
+        "frontGlowColor": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "default": [
+            1,
+            0.66,
+            0.16
+          ]
+        },
+        "frontGlowRadiusPixels": {
+          "type": "number",
+          "minimum": 3,
+          "maximum": 16,
+          "default": 10
+        },
+        "frontGlowGain": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 0.65,
+          "default": 0.42
+        },
+        "cameraApproachFrames": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 120,
+          "default": 48
+        }
+      },
+      "required": [
+        "palette",
+        "geometryTransitionDurationSeconds"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "These are normalizeProductionVisualProfile source-profile fields, not accepted Studio free-text or preset overrides. In V3 the whole visual profile is source-file-SHA-bound; in V4 immutable whole-plan equality also applies."
+      ]
+    },
+    "geometryScheduleRow": {
+      "type": "object",
+      "properties": {
+        "scheduleId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "chapterId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "mode": {
+          "enum": [
+            "ARRIVAL_NO_EVENT",
+            "REVEAL_SUPPLIED_SNAPSHOT",
+            "HOLD_SUPPLIED_SNAPSHOT",
+            "TRANSITION_SUPPLIED_SNAPSHOTS"
+          ]
+        },
+        "sourceStateId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "fromStateId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "toStateId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "sourceStartFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sourceEndFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "snapshotDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "snapshotLabel": {
+          "type": "string"
+        },
+        "geometryStatus": {
+          "type": "string"
+        },
+        "eventDateMatchesSnapshot": {
+          "type": "boolean"
+        },
+        "sourceClock": {
+          "const": "SOURCE_CLOCK_RETIMER"
+        },
+        "newGeometryCreated": {
+          "const": false
+        },
+        "measuredMilitaryControl": {
+          "const": false
+        }
+      },
+      "required": [
+        "scheduleId",
+        "chapterId",
+        "startFrame",
+        "endFrame",
+        "mode",
+        "sourceStateId",
+        "fromStateId",
+        "toStateId",
+        "sourceStartFrame",
+        "sourceEndFrame",
+        "snapshotDate",
+        "snapshotLabel",
+        "geometryStatus",
+        "eventDateMatchesSnapshot",
+        "sourceClock",
+        "newGeometryCreated",
+        "measuredMilitaryControl"
+      ],
+      "additionalProperties": true
+    },
+    "eventChapter": {
+      "type": "object",
+      "properties": {
+        "chapterId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "eventId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "title": {
+          "type": "string"
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "displayLabel": {
+          "type": "string"
+        },
+        "eventTimeWindow": {
+          "type": "object"
+        },
+        "presentationPolicy": {
+          "type": "object"
+        },
+        "geometryStateIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 1
+        },
+        "onScreenGeometryLabel": {
+          "type": "string"
+        },
+        "geometryLabelPolicy": {
+          "type": "string"
+        },
+        "geometryStatus": {
+          "type": "string"
+        },
+        "sourceIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+          },
+          "minItems": 1
+        },
+        "narration": {
+          "type": "object"
+        },
+        "cameraIntent": {
+          "type": "object"
+        },
+        "styleIntent": {
+          "type": "object"
+        },
+        "newUnitPositions": {
+          "const": []
+        },
+        "historicalUnitPositionsVerified": {
+          "const": false
+        }
+      },
+      "required": [
+        "chapterId",
+        "eventId",
+        "title",
+        "startFrame",
+        "endFrame",
+        "geometryStateIds",
+        "sourceIds",
+        "newUnitPositions",
+        "historicalUnitPositionsVerified"
+      ],
+      "additionalProperties": true
+    },
+    "productionV3": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_PRODUCTION_SCENE_V3"
+        },
+        "runtimeProfile": {
+          "const": "UNIVERSAL_PRODUCTION_V3"
+        },
+        "eventChapters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/eventChapter"
+          },
+          "minItems": 1
+        },
+        "geometrySchedule": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/geometryScheduleRow"
+          },
+          "minItems": 1
+        },
+        "visualProfile": {
+          "$ref": "#/$defs/productionVisualProfile"
+        },
+        "visualBindings": {
+          "type": "object"
+        },
+        "sourceBindings": {
+          "$ref": "#/$defs/productionSources"
+        },
+        "chapterCount": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "chapterOrderMeaning": {
+          "type": "string"
+        },
+        "chapterFramePolicy": {
+          "type": "string"
+        },
+        "chronology": {
+          "type": "object"
+        },
+        "ownershipEvidence": {
+          "type": "object"
+        },
+        "narrativeClockSeparateFromGeometryClock": {
+          "const": true
+        },
+        "onScreenSnapshotDateAlwaysRequired": {
+          "const": true
+        },
+        "officialSourceBodiesVerified": {
+          "type": "boolean"
+        },
+        "newGeometryCreated": {
+          "const": false
+        },
+        "newHistoricalUnitPositionsCreated": {
+          "const": false
+        },
+        "visualQualityApproved": {
+          "const": false
+        }
+      },
+      "required": [
+        "schema",
+        "runtimeProfile",
+        "eventChapters",
+        "geometrySchedule",
+        "visualProfile",
+        "visualBindings",
+        "sourceBindings",
+        "chapterCount",
+        "chronology",
+        "ownershipEvidence"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "ENTIRE productionV3 object must equal scene_planner._metadata(plan, decoded chronology, ownership, visual, sourceBindings).",
+        "sourceBindings must equal sourceManifest.productionSources, contain immutable parentManifest path/hash, and each chronology/ownership/visualProfile file must match SHA.",
+        "Geometry clock is monotonic and separate from narrative clock. Crossfades between supplied snapshots are infographic transitions, not observed daily control."
+      ]
+    },
+    "universalPlan": {
+      "type": "object",
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_UNIVERSAL_VIDEO_V2"
+        },
+        "durationSeconds": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 120
+        },
+        "totalFrames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        },
+        "resolution": {
+          "type": "object",
+          "properties": {
+            "width": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 8192,
+              "multipleOf": 2
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 8192,
+              "multipleOf": 2
+            }
+          },
+          "required": [
+            "width",
+            "height"
+          ],
+          "additionalProperties": true
+        },
+        "aspectRatio": {
+          "type": "string",
+          "pattern": "^[1-9]\\d{0,3}:[1-9]\\d{0,3}$"
+        },
+        "topic": {
+          "type": "string"
+        },
+        "subjectId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.:-]{1,160}$"
+        },
+        "titleCandidates": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0
+        },
+        "sourceManifest": {
+          "$ref": "#/$defs/sourceManifest"
+        },
+        "renderProfile": {
+          "$ref": "#/$defs/renderProfile"
+        },
+        "cameraProfile": {
+          "$ref": "#/$defs/cameraProfile"
+        },
+        "materialProfile": {
+          "$ref": "#/$defs/materialProfile"
+        },
+        "visualReuse": {
+          "type": "object"
+        },
+        "audioSettings": {
+          "$ref": "#/$defs/silentAudio"
+        },
+        "encoder": {
+          "type": "object",
+          "properties": {
+            "codec": {
+              "const": "h264"
+            },
+            "pixelFormat": {
+              "const": "yuv420p"
+            },
+            "fps": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "container": {
+              "type": "string"
+            },
+            "audio": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "codec",
+            "pixelFormat",
+            "fps"
+          ],
+          "additionalProperties": true
+        },
+        "legacyScenePlan": {
+          "$ref": "#/$defs/legacyScenePlan"
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/workScene"
+          },
+          "minItems": 1
+        },
+        "splitPolicy": {
+          "type": "object",
+          "properties": {
+            "maxSceneFrames": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "halfOpen": {
+              "type": "boolean"
+            },
+            "globalTimeline": {
+              "type": "boolean"
+            },
+            "eventChapters": {
+              "type": "boolean"
+            },
+            "productionGeometryClockSeparate": {
+              "type": "boolean"
+            },
+            "workCutsIndependentOfChapters": {
+              "type": "boolean"
+            },
+            "activeGeometryTransitionCutRequired": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "maxSceneFrames"
+          ],
+          "additionalProperties": true
+        },
+        "productionV3": {
+          "$ref": "#/$defs/productionV3"
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0
+        },
+        "gpuValidation": {
+          "type": "string"
+        },
+        "qualityStatus": {
+          "type": "string"
+        },
+        "plannerMode": {
+          "type": "string"
+        },
+        "externalAIConnected": {
+          "type": "boolean"
+        },
+        "visualStyle": {
+          "type": "string"
+        },
+        "performanceTarget": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "schema",
+        "durationSeconds",
+        "fps",
+        "totalFrames",
+        "resolution",
+        "aspectRatio",
+        "sourceManifest",
+        "renderProfile",
+        "cameraProfile",
+        "materialProfile",
+        "audioSettings",
+        "encoder",
+        "legacyScenePlan",
+        "scenes"
+      ],
+      "additionalProperties": true,
+      "x-runtime": [
+        "durationSeconds*fps must be EXACT integer totalFrames (Fraction of decimal string), not rounded. Width:height must equal aspectRatio; encoder fps equals plan fps.",
+        "This structural contract is weaker than current Studio profile validators. Unknown top-level long-plan fields are not globally rejected by contracts.validate_plan; acceptance does not imply those fields are renderer controls.",
+        "Every scene generated binding equals its exact expected value. Plan camera/material fields are mirrored descriptors; no free-form scalar-effect commands exist here."
+      ]
+    },
+    "rawScenePlan": {
+      "$ref": "#/$defs/universalPlan"
+    },
+    "productionPlan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/universalPlan"
+        },
+        {
+          "properties": {
+            "durationSeconds": {
+              "enum": [
+                80,
+                120,
+                180,
+                300,
+                600
+              ]
+            },
+            "fps": {
+              "const": 30
+            },
+            "resolution": {
+              "const": {
+                "width": 1080,
+                "height": 1920
+              }
+            },
+            "aspectRatio": {
+              "const": "9:16"
+            },
+            "renderProfile": {
+              "properties": {
+                "status": {
+                  "const": "READY"
+                },
+                "productionAdapter": {
+                  "const": "UNIVERSAL_PRODUCTION_V3"
+                },
+                "imageDigest": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "status",
+                "productionAdapter",
+                "imageDigest"
+              ]
+            },
+            "productionV3": {
+              "$ref": "#/$defs/productionV3"
+            },
+            "sourceManifest": {
+              "required": [
+                "productionSources"
+              ]
+            },
+            "splitPolicy": {
+              "required": [
+                "maxSceneFrames"
+              ]
+            }
+          },
+          "required": [
+            "productionV3",
+            "splitPolicy"
+          ]
+        }
+      ],
+      "x-runtime": [
+        "CurrentStudio UNIVERSAL_V3 performs V3 metadata/source validation and exact regenerated scene equality; it does not expose a free-form prompt-to-plan builder.",
+        "A separately generated new-length V3 plan can be supplied if all native/source/timing/format constraints hold. Changing durationSeconds alone fails. No GPU execution is implied."
+      ]
+    },
+    "v4FrozenPlan": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/productionPlan"
+        },
+        {
+          "properties": {
+            "durationSeconds": {
+              "const": 80
+            },
+            "totalFrames": {
+              "const": 2400
+            },
+            "sourceManifest": {
+              "required": [
+                "archivalFrontV4"
+              ]
+            }
+          }
+        }
+      ],
+      "x-runtime": [
+        "CurrentStudio V4_ARCHIVAL_80S supplied plan must equal derive_execution_plan(parent_plan(), supplied image digest, installed front profile SHA, installed front manifest SHA) BEFORE image rebinding; then current image digest is rebound and scenes regenerated.",
+        "Immutable parent file byte SHA256: 6fb40abd4970c2595877c4bfb469d8ad0d62e552a03651748b8a1c41a993c28b. No camera/material/territory/timeline/Scene control edit is accepted, including unknown extra fields.",
+        "V4 is partial approximate front-only archival data; it never infers occupied territory from an open line, creates missing unit positions, or interpolates unobserved historical fronts."
+      ]
+    }
+  },
+  "x-runtime": [
+    "normalize_submission checks finite JSON, max4MiB, max200000 nodes, max64 depth; enclosing submission profile defaults V4_ARCHIVAL_80S.",
+    "Direct sceneJson bypasses prompt interpretation but NOT source/image/native/profile validation. Outer durationSeconds must equal inner plan.durationSeconds and Studio format is fixed1080x1920/30fps/9:16.",
+    "GPU/source/storage/approval/CSRF/owner/cost admission are separate gates. Schema PASS is never authorization or actual GPU/quality PASS."
+  ],
+  "x-evidence": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "lines": [
+        147,
+        229
+      ]
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+      "lines": [
+        83,
+        170
+      ]
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+      "lines": [
+        179,
+        239
+      ]
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-production-v3/scene_planner.py",
+      "lines": [
+        330,
+        355
+      ]
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/scene_binding.py",
+      "lines": [
+        67,
+        115
+      ]
+    }
+  ]
+}

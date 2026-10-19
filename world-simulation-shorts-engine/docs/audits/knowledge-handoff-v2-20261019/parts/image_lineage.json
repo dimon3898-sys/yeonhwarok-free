@@ -1,0 +1,143 @@
+[
+  {
+    "id": "IMAGE.CURRENT_SOURCE_CLOSURE",
+    "domain": "IMAGE",
+    "name": "Immutable Studio source closure",
+    "description": "Current8ef393 inherits V2 advanced runtimes, V3/V4 production route and Studio/HTTPS/proxy extensions; inclusion is distinct from selected execution.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "proxy_bootstrap.py → frozen Studio runtime",
+      "fields": [
+        "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST"
+      ],
+      "allowedValues": [
+        "sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+      ],
+      "defaults": null,
+      "units": null,
+      "errors": [
+        "PROXY_FROZEN_PARENT_CHANGED",
+        "STUDIO_PARENT_SOURCE_VERIFICATION_FAILED"
+      ]
+    },
+    "dependencies": [
+      "Reference V2",
+      "Universal V2/V3",
+      "Verified Front V4",
+      "Studio MVP"
+    ],
+    "constraints": [
+      "Not a prompt-level capability.",
+      "Current80s output not reviewed by this audit.",
+      "457 declared image paths do not equal total OS filesystem files."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 58,
+        "endLine": 158,
+        "symbol": "imageHashes recursive verification",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Frozen inherited core and extensions passed on independent digest pull; GPU false.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/ci_package.py",
+        "startLine": 73,
+        "endLine": 126,
+        "symbol": "payload_context/image_hashes",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact added files, SHA-bound parentHTTPS21/Studio51/engine373.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_manifest.py",
+        "startLine": 86,
+        "endLine": 130,
+        "symbol": "verify_payload/verify_sources",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Studio inventory and V4 parent SHA closure verified separately from execution.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/universal_files.py",
+        "startLine": 32,
+        "endLine": 97,
+        "symbol": "frozen_parent_files/verify_files",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Preserves exact57 Reference V2 files and supplemental additions.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E4",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/source_manifest_recovery.py",
+        "startLine": 47,
+        "endLine": 145,
+        "symbol": "parent_closure/inventory/verify_sources",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "110 inherited additions and exact100+test V4 entries bound; profile dependencies checked.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E5",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 25,
+        "endLine": 30,
+        "symbol": "PROFILES",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Actual Studio selects V4 orV3 production namespaces, not five-second boot.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E6",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/render_adapter.py",
+        "startLine": 25,
+        "endLine": 73,
+        "symbol": "production/prepare_job/render_segment",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "V4 extends fixed V3 hardware adapter; original source remains immutable.",
+        "evidenceId": "IMAGE.CURRENT_SOURCE_CLOSURE:E7",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "detail": {
+      "lineageDocument": "IMAGE_AND_BASELINE_LINEAGE.json",
+      "classificationScope": "Infrastructure integrity contract; not a missing integration claim."
+    },
+    "explicitScope": "System image integrity/source-closure stage, not a user-editable Scene field or missing integration.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E1",
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E2",
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E3",
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E4",
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E5",
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E6",
+        "IMAGE.CURRENT_SOURCE_CLOSURE:E7"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  }
+]

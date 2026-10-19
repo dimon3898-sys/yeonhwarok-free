@@ -1,0 +1,2094 @@
+[
+  {
+    "id": "STUDIO.MOBILE_UI",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "모바일 제작·진행·결과 UI",
+    "description": "입력/Scene 파일, 길이·프로필, SFX, 사전검사, 명시적 시작, 실제 장면·프레임 진행, 결과 다운로드와 구간 효과음 수정을 연결한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "production-form / job-section / revision-section",
+      "fields": [
+        "prompt",
+        "sceneJson",
+        "durationSeconds",
+        "profile",
+        "sfx"
+      ],
+      "allowedValues": {
+        "durationSeconds": [
+          80,
+          120,
+          180,
+          300,
+          600
+        ],
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "화면 표시가 실제 GPU 제작 성공이나 미지원 자유 자연어 이해를 뜻하지 않는다.",
+      "V4 프리셋은 정확히 80초이고 다른 길이는 검증된 V3 계획이 필요하다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/index.html",
+        "startLine": 6,
+        "endLine": 15,
+        "symbol": "production-form / job-section / revision-section",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "실제 모바일 입력 요소와 지원 범위 문구."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 16,
+        "endLine": 63,
+        "symbol": "submission, refresh, form handlers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "동일 Origin 인증 API에 연결; 측정값만 상태 표시."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.OWNER_AUTH",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "관리자 인증과 세션",
+    "description": "소유자 코드의 기존 인증기를 사용하고 Secure/HttpOnly/SameSite=Strict 세션 쿠키와 로그인 제한을 적용한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "StudioSessions / StudioApplication.token_csrf",
+      "fields": [
+        "password"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "AUTH_REQUIRED",
+        "LOGIN_FAILED",
+        "LOGIN_RATE_LIMIT",
+        "CSRF_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "관리자 코드나 세션 비밀값은 이 공개 인수인계에 포함하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 84,
+        "endLine": 106,
+        "symbol": "StudioSessions / StudioApplication.token_csrf",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 OwnerSessions를 재사용한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 218,
+        "endLine": 235,
+        "symbol": "Handler._cookie / _authenticate",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "서버 측 세션과 변경 요청 CSRF 검증."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 306,
+        "endLine": 322,
+        "symbol": "login/session/logout handlers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "로그인 5회 제한과 인증된 세션 경로."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.ORIGIN_CSRF",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "고정 HTTPS Origin·CSRF 보호",
+    "description": "등록된 단일 HTTPS authority와 요청 Origin을 검사하고 POST에 세션별 CSRF 토큰을 요구한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "Handler._authenticate",
+      "fields": [
+        "Host",
+        "Origin",
+        "X-Studio-CSRF"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "CSRF_REQUIRED",
+        "STUDIO_ORIGIN_MISMATCH",
+        "INVALID_FORWARDED_HEADERS"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "임의 Host/Forwarded로 Origin을 자동 신뢰하지 않는다.",
+      "웹 health 성공은 GPU 확인이 아니다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 224,
+        "endLine": 235,
+        "symbol": "Handler._authenticate",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "인증된 변경 요청은 X-Studio-CSRF 일치 필요."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 292,
+        "endLine": 298,
+        "symbol": "Handler._dispatch",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "요청 정책과 설정 Origin의 정확한 일치 검사."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/proxy_policy.py",
+        "startLine": 88,
+        "endLine": 128,
+        "symbol": "FixedHTTPSProxyPolicy._checked",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "HTTP 프록시 hop 호환은 독립 등록된 Host/XFH 일치에만 한정."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.HTTPS_SETUP",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "인증된 HTTPS 초기 등록",
+    "description": "Origin 미설정 시 초기 설정 화면을 제공하고 관리자 인증·일회 challenge·확인 단계로 HTTPS 주소를 영속 등록한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "SetupCore.challenge / begin",
+      "fields": [
+        "candidate_origin",
+        "password",
+        "csrf"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "STUDIO_HTTPS_ORIGIN_REQUIRED",
+        "STUDIO_SETUP_CHALLENGE_REQUIRED",
+        "STUDIO_SETUP_SAME_ORIGIN_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "실제 운영 주소, 관리자 코드, 등록 상태는 이번 정적 감사에서 읽지 않았다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/setup_core.py",
+        "startLine": 171,
+        "endLine": 224,
+        "symbol": "SetupCore.challenge / begin",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "TTL과 일회 challenge 소비 후 소유자 인증을 수행한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/setup_core.py",
+        "startLine": 229,
+        "endLine": 250,
+        "symbol": "SetupCore._revoke_all / _persist",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Origin 변경 시 기존 세션 폐기 및 설정 보존."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/proxy_server.py",
+        "startLine": 17,
+        "endLine": 41,
+        "symbol": "ProxySetupCore / Application",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 초기 설정·로그인 상태를 보존하는 proxy 확장."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.PREFLIGHT",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "제작 전 통합 사전검사",
+    "description": "계획·소스 해시·개인 POSIX 상태·작업 충돌·결과 마운트 읽기쓰기·디스크·GPU health·SFX 자산·운영 승인 정책을 검사한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "preflight",
+      "fields": [
+        "videoPlan",
+        "profile",
+        "imageDigest"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "STUDIO_PREFLIGHT_BLOCKED",
+        "STUDIO_PRIVATE_DISK_BUDGET_INSUFFICIENT",
+        "STUDIO_PHYSICAL_GPU_HEALTH_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "사전검사는 렌더링 시작이 아니다.",
+      "health는 startup native admission 상태 재확인이며 각 장면의 실제 admission은 다시 수행한다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 199,
+        "endLine": 238,
+        "symbol": "preflight",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "원본 GPU 조정기를 호출하기 전 입력/소스/저장소/디스크/health 검사."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+        "startLine": 226,
+        "endLine": 242,
+        "symbol": "StudioController._preflight_record",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "SFX/소유자 운영 정책을 추가한다."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.EXPLICIT_START",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "명시적 동의·중복 방지 제작 시작",
+    "description": "사전검사 및 승인 정책 통과 후 submissionId와 idempotencyKey를 고정하여 기존 GPU 작업 관리자에 단일 작업을 위임한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "preflight/submissions/start/resume handlers",
+      "fields": [
+        "submissionId",
+        "idempotencyKey",
+        "consent"
+      ],
+      "allowedValues": {
+        "consent": [
+          true
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "EXPLICIT_START_CONSENT_REQUIRED",
+        "STUDIO_IDEMPOTENCY_CONFLICT",
+        "STUDIO_UNRESOLVED_START_CLAIM",
+        "STUDIO_PREFLIGHT_BLOCKED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "새 브라우저 키도 동일 submission을 몰래 재실행하지 않는다.",
+      "시작 영수증이 불확실하면 기존 claim을 보존하고 차단한다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 326,
+        "endLine": 348,
+        "symbol": "preflight/submissions/start/resume handlers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Start와 Resume는 별도 consent=true가 필요하다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+        "startLine": 272,
+        "endLine": 340,
+        "symbol": "StudioController.start",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 submission 실행·요청 claim 재사용과 unresolved claim 보존."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.DETACHED_WORKER",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "연결 독립 실행·정확한 작업 상태",
+    "description": "새 세션 detached supervisor, 실제 프로세스 identity, SIGHUP 무시, 파일 잠금과 상태 파일로 브라우저 종료와 작업 실행을 분리한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_start_supervisor",
+      "fields": [
+        "request_id"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "컨테이너 자체 삭제/재생성 시 개인 상태의 영속성을 보장하는 기능은 아니다.",
+      "컨테이너 재시작 후 무단 자동 재렌더하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 333,
+        "endLine": 363,
+        "symbol": "_start_supervisor",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "start_new_session=True와 실제 process_identity 보존."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 411,
+        "endLine": 420,
+        "symbol": "studio_status",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "죽은 supervisor는 자동 재렌더 대신 INTERRUPTED로 표시."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 481,
+        "endLine": 520,
+        "symbol": "_worker",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "SIGHUP 무시와 실제 장면/프레임 상태 업데이트."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.OPERATOR_POLICY",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "시간·비용·만료 승인 경계",
+    "description": "실제 요금, 최대 비용, 시간, 재시도, 통화, 시간대 포함 만료시각을 검증하고 작업별 image+plan 결합 승인서를 만든다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "StudioController._policy",
+      "fields": [
+        "validUntil",
+        "maxWallSeconds",
+        "maxRetries",
+        "maxCostAmount",
+        "gpuHourlyRate",
+        "currency"
+      ],
+      "allowedValues": {
+        "maxWallSeconds": "integer 1..86400",
+        "maxRetries": "integer 0..2",
+        "currency": "three uppercase letters"
+      },
+      "defaults": {},
+      "units": {
+        "maxWallSeconds": "seconds",
+        "gpuHourlyRate": "currency/hour"
+      },
+      "errors": [
+        "STUDIO_OPERATOR_POLICY_REQUIRED",
+        "STUDIO_OPERATOR_POLICY_EXPIRED",
+        "STUDIO_COST_LIMIT_EXCEEDED",
+        "STUDIO_APPROVED_DEADLINE_EXCEEDED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "14400초는 허용 범위지만 자동 기본값이 아니다.",
+      "정책의 현재 값·가격·사용자 비용 승인은 이 공개 감사에 포함하지 않는다.",
+      "앱 타임아웃은 gCube 과금 종료와 다르다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+        "startLine": 101,
+        "endLine": 124,
+        "symbol": "StudioController._policy",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기간·재시도·통화·만료·상한 산술 검증."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+        "startLine": 313,
+        "endLine": 323,
+        "symbol": "StudioController.start",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "계획 SHA와 이미지 digest에 묶인 작업 승인 생성."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 493,
+        "endLine": 501,
+        "symbol": "_worker deadline",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "생성시각+승인 시간과 승인 만료시각 중 빠른 한도를 적용."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.SOURCE_IMAGE_BINDING",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "소스·이미지 무결성 결합",
+    "description": "동결된 검증기와 이미지 digest를 사용해 선택한 계획·프로필·출력 규격·필수 소스 closure를 검사한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_base / _validate_child / validate_render_plan",
+      "fields": [
+        "profile",
+        "renderProfile.imageDigest"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "STUDIO_PLAN_IMAGE_BINDING_MISMATCH",
+        "STUDIO_FROZEN_VALIDATOR_CHANGED",
+        "STUDIO_IMMUTABLE_IMAGE_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "저장소에서 파일 존재와 실제 운영 이미지 포함은 별도 증거로 기록한다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 83,
+        "endLine": 168,
+        "symbol": "_base / _validate_child / validate_render_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "허용 프로필·규격·원본 검증기 해시와 image binding."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_manifest.py",
+        "startLine": 85,
+        "endLine": 132,
+        "symbol": "verify_payload / verify_sources",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Studio51파일과 부모373파일의 명시적 closure 검증."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.PRIVATE_STATE",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "개인 상태와 공유 결과 저장 분리",
+    "description": "개인 작업/승인/캐시는 소유권·모드·symlink·local POSIX 조건으로 보호하며 공유 결과 마운트를 개인 상태로 인정하지 않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "StudioConfig.validate",
+      "fields": [
+        "WORLD_ENGINE_STUDIO_STATE_ROOT"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "STUDIO_STATE_MUST_BE_PRIVATE",
+        "SHARED_STORAGE_IS_NOT_PRIVATE_CACHE",
+        "LOCAL_POSIX_CACHE_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "이 공개 문서는 사용자 개인 상태 절대경로를 공개하지 않는다.",
+      "공유 저장소 권한을 강제로 변경하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 73,
+        "endLine": 80,
+        "symbol": "StudioConfig.validate",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "공유 export 하위 개인 state 금지."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py",
+        "startLine": 85,
+        "endLine": 118,
+        "symbol": "_owned / PrivateTree.__init__",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "개인 소유권·접근모드·local POSIX 검사와 공유 경로 금지."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.GPU_NATIVE_ADMISSION",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "실제 NVIDIA WebGL2 admission",
+    "description": "모델·드라이버·실제 가용 VRAM·공유메모리와 EGL/Vulkan native pixel draw 결과를 검사하고 software/test admission은 제작에 사용하지 않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "query_allocation / _check_limits",
+      "fields": [
+        "WORLD_ENGINE_RENDER_MODE"
+      ],
+      "allowedValues": {
+        "WORLD_ENGINE_RENDER_MODE": [
+          "gpu-required"
+        ],
+        "models": [
+          "RTX 4080 SUPER",
+          "RTX 4090",
+          "RTX 5090"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "GPU_REQUIRED_CPU_MODE_REJECTED",
+        "GPU_WEBGL_UNVERIFIED",
+        "GPU_HARDWARE_UNAVAILABLE",
+        "SHARED_MEMORY_INSUFFICIENT"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "소스 지원은 현재 RTX 5090 렌더 출력의 검증 증거가 아니다.",
+      "이번 작업에서 NVIDIA, SwiftShader draw, 유료 실행을 하지 않았다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+        "startLine": 133,
+        "endLine": 177,
+        "symbol": "query_allocation / _check_limits",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "실제 nvidia-smi 장치와 가용메모리·공유메모리 한도."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+        "startLine": 227,
+        "endLine": 311,
+        "symbol": "admit_gpu",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "gpu-required와 동일 장치 fingerprint·native graphics 검사; 주입 모의는 testOnly."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 181,
+        "endLine": 194,
+        "symbol": "_health",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "허용 RTX 모델과 startup GPU health를 확인하되 native recheck 필요를 표시."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.PER_SCENE_EXPORT",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "완료 장면 즉시 결과 마운트 저장",
+    "description": "검증된 장면 MP4와 SHA를 다음 장면 전 공유 결과 마운트에 내보내고 mount readback을 확인한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "run_job scene checkpoint barrier",
+      "fields": [
+        "plan",
+        "scene",
+        "segment"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "VERIFIED_SCENE_CHECKPOINT_REQUIRED",
+        "SCENE_CHECKPOINT_MOUNTED_READBACK_FAILED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "마운트 readback은 외부 Dropbox sync/다운로드 확인이 아니다.",
+      "개인 anchor 유실 후 공유 MP4+SHA만으로 NVIDIA provenance를 복구할 수 없다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/orchestrator.py",
+        "startLine": 355,
+        "endLine": 376,
+        "symbol": "run_job scene checkpoint barrier",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "장면 완료 기록 전에 checkpoint export/readback을 요구한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/delivery.py",
+        "startLine": 263,
+        "endLine": 305,
+        "symbol": "export_scene_checkpoint",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "MP4+SHA와 개인 trust anchor를 분리한다."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.SCENE_CACHE",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "해시 기반 장면 캐시·부분 재사용",
+    "description": "Scene과 렌더/자료/타임라인/재질/카메라/이웃 경계 맥락을 키로 하며 성공 영수증과 모든 artifact 해시를 확인한 세그먼트만 재사용한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "scene_cache_key",
+      "fields": [
+        "scene",
+        "sourceManifest",
+        "renderProfile",
+        "cameraProfile",
+        "materialProfile"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "CACHE_ARTIFACT_CORRUPT",
+        "NATIVE_VERIFICATION_OR_EXPLICIT_TEST_PROVENANCE_REQUIRED",
+        "APPROVED_RETRY_LIMIT_REACHED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "코어가 캐시 무효화를 제공해도 Studio의 자유문장 카메라 부분 수정은 현재 지원하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py",
+        "startLine": 242,
+        "endLine": 256,
+        "symbol": "scene_cache_key",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "원본·공통 컨텍스트·앞뒤 경계가 캐시에 결합된다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py",
+        "startLine": 280,
+        "endLine": 336,
+        "symbol": "SceneCache.lookup / complete",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "완료 영수증·파일·하드웨어 provenance 확인."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/orchestrator.py",
+        "startLine": 302,
+        "endLine": 353,
+        "symbol": "scene loop",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "손상 캐시 거부와 승인 재시도 상한 유지."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.EXPLICIT_RECOVERY",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "실패 작업의 명시적 재개",
+    "description": "살아 있는 supervisor를 중복 실행하지 않고 보존된 원래 계획·SFX·승인 한도와 검증 캐시를 사용해 새 recovery 작업을 만든다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "resume endpoint",
+      "fields": [
+        "idempotencyKey",
+        "consent"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "STUDIO_RECOVERY_PARENT_STILL_RUNNING",
+        "STUDIO_RECOVERY_ORIGINAL_APPROVAL_CAPS_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "만료된 원래 작업을 새 정책으로 몰래 연장하지 않는다.",
+      "현재 원격 개인 작업/캐시는 읽지 않았으므로 특정 실패 작업의 복구 가능성은 NOT_VERIFIED."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 344,
+        "endLine": 348,
+        "symbol": "resume endpoint",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "별도 owner consent와 idempotency key 필수."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 391,
+        "endLine": 408,
+        "symbol": "start_studio_recovery",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 승인 한도와 exact 승인 일치 유지."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.FFMPEG_COMPOSE",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "장면 연결·프레임 및 전체 디코딩 검사",
+    "description": "모든 장면을 반열린 전역 범위로 검증하고 H.264 규격·PTS·전체 RGB framehash를 확인하며 상수 메모리로 합성한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "video_contract",
+      "fields": [
+        "durationSeconds",
+        "fps",
+        "resolution",
+        "scenes"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "FRAME_TIMESTAMP_GAP_OR_DUPLICATE",
+        "COMPOSED_DECODED_FRAME_CHANGED_OR_REORDERED",
+        "NEAR_BLACK_MAP_FRAME_DETECTED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "기술 검사와 사용자 시각 품질 승인은 분리된다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/compose.py",
+        "startLine": 64,
+        "endLine": 78,
+        "symbol": "video_contract",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "fps/길이/해상도와 정수 프레임 계약."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/compose.py",
+        "startLine": 105,
+        "endLine": 165,
+        "symbol": "_probe / _timestamps",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "프레임 수·H.264·PTS 누락/중복을 검사한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/compose.py",
+        "startLine": 168,
+        "endLine": 216,
+        "symbol": "_framehashes",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "전체 소프트웨어 디코딩과 blackframe 검사를 스트리밍한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/orchestrator.py",
+        "startLine": 377,
+        "endLine": 398,
+        "symbol": "composition/export sequence",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "모든 장면 확인 후 기존 FFmpeg 합성과 결과 내보내기."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.SFX_CONTROLS",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "SFX ON/OFF·음량·이벤트 큐",
+    "description": "구조화 prompt/API/Scene wrapper에서 SFX 활성·gain·WAV 출력과 실제 eventId/전역 frame에 결합된 큐를 정규화한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "normalize_sfx",
+      "fields": [
+        "sfx.enabled",
+        "sfx.gain",
+        "sfx.exportWav",
+        "sfx.cues[].eventId",
+        "sfx.cues[].frame",
+        "sfx.cues[].type",
+        "sfx.cues[].gain"
+      ],
+      "allowedValues": {
+        "sfx.gain": "number 0..1",
+        "sfx.cues[].type": [
+          "CLICK",
+          "MECHANICAL_TICK",
+          "OCCUPATION_COMPLETE",
+          "MARKER_POP",
+          "CAMERA_WHOOSH",
+          "EVENT_TRANSITION"
+        ]
+      },
+      "defaults": {
+        "enabled": true,
+        "gain": 0.65,
+        "exportWav": false,
+        "cues": "one EVENT_TRANSITION at each productionV3 eventChapter start when omitted",
+        "mobileSliderGain": 0.7
+      },
+      "units": {
+        "sfx.cues[].frame": "global integer video frame"
+      },
+      "errors": [
+        "SFX_EVENT_REFERENCE_MISSING",
+        "SFX_FRAME_OUTSIDE_BOUND_EVENT",
+        "SFX_DUPLICATE_CUE",
+        "SFX_TYPE_UNSUPPORTED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "UI는 enabled/gain만 편집하고 매번 outer sfx를 전송하므로 prompt 내부 custom cues/exportWav는 UI 입력에서 우선권을 잃는다.",
+      "빈 cues=[]는 기본 자동 큐와 다르게 무음 큐 목록이다.",
+      "기본 자동 배치는 챕터 전환이며 모든 점령·전선·표식 변화에 자동 세부 클릭을 추론하는 기능이 아니다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 111,
+        "endLine": 153,
+        "symbol": "normalize_sfx",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "6개 cue type, 실제 event range, gain, 중복 검사와 기본 챕터 전환 큐."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 210,
+        "endLine": 217,
+        "symbol": "normalize_submission audio selection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "outer submission sfx가 prompt sfx보다 우선."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 16,
+        "endLine": 16,
+        "symbol": "submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "UI는 항상 checkbox와 slider의 outer sfx를 전송."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.SFX_RENDER",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "자체 SFX 자산·안전한 샘플 동기화",
+    "description": "18개 CC0 WAV를 6개 종류와 결정적 3변형에 매핑하여 48kHz stereo PCM16을 최대 1초 블록으로 혼합한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "TYPES",
+      "fields": [
+        "sfx"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "sampleRate": 48000,
+        "channels": 2,
+        "sampleWidthBytes": 2,
+        "perTypeCooldownMilliseconds": 120,
+        "maximumOverlap": 3
+      },
+      "units": {
+        "offset": "audio samples; 1600 samples/video frame at30fps"
+      },
+      "errors": [
+        "SFX_UNEXPECTED_CLIPPING",
+        "SFX_OUTPUT_SAMPLE_COUNT_MISMATCH"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "레퍼런스 음원을 추출하거나 복제하는 기능이 아니다.",
+      "소리별 WAV shape/최종 실제 음질은 현재 GPU80s 결과에서 미검증이다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 35,
+        "endLine": 42,
+        "symbol": "TYPES",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "6개 Studio cue type의 원본 자산 카테고리 매핑."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 219,
+        "endLine": 256,
+        "symbol": "_schedule_sfx",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "고정 cue identity·variant·쿨다운·최대 동시성에 따른 admission."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 297,
+        "endLine": 378,
+        "symbol": "render_sfx",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "샘플 정합·블록 스트리밍·클리핑 차단과 asset SHA 영수증."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.SFX_MUX",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "영상 픽셀 보존 AAC mux·선택 WAV",
+    "description": "기존 검증된 무음 H.264를 바꾸지 않고 SFX AAC 트랙을 추가하며 비활성화 시 무음 원본 그대로 보존한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "mux_sfx",
+      "fields": [
+        "sfx.enabled",
+        "sfx.exportWav"
+      ],
+      "allowedValues": {
+        "sfx.exportWav": [
+          true,
+          false
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "SFX_MUX_CHANGED_VIDEO_FRAMES_OR_TIMESTAMPS",
+        "SFX_EFFECTIVE_AUDIO_DURATION_MISMATCH",
+        "STUDIO_FINAL_MEDIA_VERIFICATION_FAILED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "AAC 코덱 패딩과 실제 유효 오디오 길이를 구분한다.",
+      "TTS/BGM/자막은 현재 Studio mux 경로에 포함되지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 434,
+        "endLine": 495,
+        "symbol": "mux_sfx",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "H.264 copy+Aac192k/48kHz stereo, 유효 오디오 길이·전체 영상 signature 일치."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 436,
+        "endLine": 478,
+        "symbol": "finalize",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "SFX/선택 WAV/품질요약/SHA와 새 버전 export."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.INTERVAL_SFX_REVISION",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "시간 구간 효과음 수정·기존 영상 재사용",
+    "description": "[startSeconds,endSeconds) 구간 큐를 수정하고 잔향·주변 cue admission 영향까지 계산한다. 완성된 hardware parent의 무음 영상을 재사용하며 GPU 시각 재렌더는 하지 않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_revision_command",
+      "fields": [
+        "startSeconds",
+        "endSeconds",
+        "prompt",
+        "sfx"
+      ],
+      "allowedValues": {
+        "promptExamples": [
+          "효과음 끄기",
+          "효과음 켜기",
+          "효과음 음량 70%",
+          "sfx off",
+          "sfx volume 70%"
+        ],
+        "revisionSchema": "WORLD_ENGINE_STUDIO_REVISION_V1"
+      },
+      "defaults": {},
+      "units": {
+        "startSeconds/endSeconds": "video seconds; exact frame aligned"
+      },
+      "errors": [
+        "STUDIO_VISUAL_REVISION_UNSUPPORTED",
+        "STUDIO_REVISION_CUE_OUTSIDE_RANGE",
+        "STUDIO_REVISION_PARENT_NOT_COMPLETED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "25~35초 카메라 확대/영토/전선 변경이라는 자유문장은 이 MVP 수정 경로에서 지원하지 않는다.",
+      "새 영상 version을 저장하고 기존 완성본을 유지한다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 233,
+        "endLine": 258,
+        "symbol": "_revision_command",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "정확한 ON/OFF/음량 문법과 revision JSON만 허용."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 261,
+        "endLine": 340,
+        "symbol": "plan_revision",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "프레임/샘플 영향과 인접 장면을 계산; videoPlan 변경 없음."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 379,
+        "endLine": 388,
+        "symbol": "start_studio_revision",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "완료 hardware parent와 검증 silentResult를 재사용."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+        "startLine": 427,
+        "endLine": 447,
+        "symbol": "revise",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "시각 계획 변경이나 requiresGpu 변경 거부."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.AUTH_DOWNLOAD",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "인증된 결과 재생·다운로드·SHA",
+    "description": "완성 영수증 allowlist와 SHA에 맞는 결과만 인증 API를 통해 재생/Range 다운로드하며 민감한 로그나 원본 자료를 배포하지 않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "Handler._download / _download_locked",
+      "fields": [
+        "jobId",
+        "fileName"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DOWNLOAD_NOT_ALLOWED",
+        "DOWNLOAD_NOT_FOUND",
+        "DOWNLOAD_BUSY"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "외부 공개 다운로드 URL은 별도 전달 경로이다.",
+      "실제80s 결과 파일·다운로드 SHA는 이번 정적 감사에서 미검증이다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 237,
+        "endLine": 290,
+        "symbol": "Handler._download / _download_locked",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "정확한 allowlist·SHA snapshot·단일 download slot·Range 처리."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_delivery.py",
+        "startLine": 129,
+        "endLine": 175,
+        "symbol": "export_media / verify_export",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "새 결과 폴더와 media-only allowlist 및 readback."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 41,
+        "endLine": 44,
+        "symbol": "renderResult",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "결과 MP4 링크와 mount/external delivery를 분리해 표시."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.JOB_LOOKUP",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "작업 조회와 STUDIO_JOB_NOT_FOUND",
+    "description": "브라우저 localStorage의 이전 job ID가 현재 선택한 서버 상태에 없으면 404를 반환한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "state.job initialization",
+      "fields": [
+        "jobId"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "STUDIO_JOB_NOT_FOUND"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "이 오류만으로 전체 서버 작업 부재·작업 소실 원인을 확정하지 않는다.",
+      "실제 기존80s 작업의 input/로그/개인 상태는 이번 감사에서 읽지 않았다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 3,
+        "endLine": 3,
+        "symbol": "state.job initialization",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "이전 브라우저 job ID를 초기 복원."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 62,
+        "endLine": 63,
+        "symbol": "logout / startup refresh",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "로그아웃은 브라우저 job ID만 제거하며 서버 작업은 삭제하지 않는다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+        "startLine": 149,
+        "endLine": 155,
+        "symbol": "_job_record",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "현재 개인 state의 정확한 job ID 조회 실패를 구분."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "BACKUP.ENCRYPTED_CHECKPOINT",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "암호화 Scene·오디오·완료 캐시 체크포인트",
+    "description": "별도 durability 확장에서 원본 숫자/Scene/오디오/검증 cache artifact를 인증 암호화해 opaque 저장소 객체로 보존한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "Checkpoints.save",
+      "fields": [
+        "WORLD_ENGINE_STUDIO_BACKUP_MODE",
+        "WORLD_ENGINE_STUDIO_BACKUP_KEY_FILE"
+      ],
+      "allowedValues": {
+        "WORLD_ENGINE_STUDIO_BACKUP_MODE": [
+          "dropbox-api"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DURABILITY_EXTERNAL_ROUNDTRIP_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "현재 no-backup 이미지에 없다고 전체 저장소에서 미구현인 것은 아니다.",
+      "공개 문서에는 암호화 키·Secret 값·사용자 백업 위치를 포함하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/checkpoint.py",
+        "startLine": 161,
+        "endLine": 247,
+        "symbol": "Checkpoints.save",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "계획·오디오·완료 장면 cache와 provenance를 snapshot한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/vault.py",
+        "startLine": 80,
+        "endLine": 127,
+        "symbol": "Vault",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "HKDF 분리 key와 AES-GCM envelope·인증 후 readback."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "별도 후기 durability/offline/production 이미지 계층; 현재8ef393 Studio에는 선택되지 않음"
+  },
+  {
+    "id": "BACKUP.FAIL_CLOSED_BARRIER",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "백업 실패 시 다음 장면 차단",
+    "description": "별도 durability backend는 최초 worker spawn 전과 각 장면 checkpoint 시 외부 인증 readback을 요구하며 실패 상태를 보존한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "ProcessAdapter.Popen",
+      "fields": [
+        "WORLD_ENGINE_STUDIO_BACKUP_PROOF_ID"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DURABILITY_EXTERNAL_ROUNDTRIP_REQUIRED"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "오리지널 no-backup 이미지에는 backup=off 파라미터를 추가/추정하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/durable_backend.py",
+        "startLine": 84,
+        "endLine": 107,
+        "symbol": "ProcessAdapter.Popen",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "최초 backup 실패는 detached child 생성 전 차단."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/durable_backend.py",
+        "startLine": 137,
+        "endLine": 151,
+        "symbol": "preflight",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "최신 외부 restore proof를 렌더 readiness에 결합."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/durable_coordinator.py",
+        "startLine": 42,
+        "endLine": 61,
+        "symbol": "checkpoint_barriers",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 mount export 다음에 authenticated external checkpoint."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "별도 후기 durability/offline/production 이미지 계층; 현재8ef393 Studio에는 선택되지 않음"
+  },
+  {
+    "id": "BACKUP.FRESH_ROOT_RESTORE",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "새 컨테이너의 검증 복구",
+    "description": "별도 durability restore는 암호화된 Scene·오디오·장면 cache를 인증·hash·decode 검증으로 새 개인 루트에 복구하되 실행 승인과 자동 재시작 권한을 복구하지 않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "restore",
+      "fields": [
+        "checkpoint_id",
+        "expected_plan_sha",
+        "expected_image_digest"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DURABILITY_CHECKPOINT_MANIFEST_INVALID",
+        "DURABILITY_CHECKPOINT_BINDING_MISMATCH"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "복구는 자동 유료 실행 허가가 아니다.",
+      "현 운영 no-backup profile의 새로운 volatile Scene/cache를 이 후기 기능으로 이미 보호한다고 표시하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/checkpoint.py",
+        "startLine": 257,
+        "endLine": 336,
+        "symbol": "restore",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Scene·source·cache key·native provenance·file/decode 확인."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/startup_restore.py",
+        "startLine": 120,
+        "endLine": 135,
+        "symbol": "ensure_restore",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "처음 복구와 반복 부팅 재검증을 분리."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "별도 후기 durability/offline/production 이미지 계층; 현재8ef393 Studio에는 선택되지 않음"
+  },
+  {
+    "id": "BACKUP.DROPBOX_OFFLINE_OAUTH",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "Dropbox App Folder offline OAuth·안전한 갱신",
+    "description": "별도 offline 계층이 세부 content/metadata 권한과 고정 OAuth endpoint로 refresh token을 이용해 메모리 내 access token을 갱신한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "TokenProvider",
+      "fields": [
+        "WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_AUTH_MODE",
+        "WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY_FILE",
+        "WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_SECRET_FILE",
+        "WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_REFRESH_TOKEN_FILE"
+      ],
+      "allowedValues": {
+        "WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_AUTH_MODE": [
+          "offline"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Secret 값은 출력하지 않으며 기존 암호화/backup prefix를 바꾸지 않는다.",
+      "현재8ef393 운영 컨테이너에 연결되어 있지 않다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-offline-v1/renewal.py",
+        "startLine": 148,
+        "endLine": 227,
+        "symbol": "TokenProvider",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "동시401 refresh 직렬화·만료 선행 갱신·오류시 기존token 제거."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-offline-v1/renewal.py",
+        "startLine": 230,
+        "endLine": 276,
+        "symbol": "OfflineOpener",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "허용 Dropbox route와401일 때 단1회 갱신 재요청."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-offline-v1/offline_runtime.py",
+        "startLine": 82,
+        "endLine": 116,
+        "symbol": "make_vault_from_env",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 Dropbox store와 Vault를 재사용하며 static fallback 없음."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "별도 후기 durability/offline/production 이미지 계층; 현재8ef393 Studio에는 선택되지 않음"
+  },
+  {
+    "id": "BACKUP.PRODUCTION_INPUT_ADAPTER",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "검증된 후기 GPU 백업 운영 어댑터",
+    "description": "별도 production 계층은 기존 offline runtime을 pinning해 재사용하고 기존 key 인코딩만 비파괴 canonical reader로 연결한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "frozen",
+      "fields": [],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "별도 이미지의 존재/검증을 현재 운영 profile의 선택·실행 증거로 혼동하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-gpu-production-v1/production_runtime.py",
+        "startLine": 27,
+        "endLine": 42,
+        "symbol": "frozen",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "동결된 offline source 해시 확인."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-gpu-production-v1/production_runtime.py",
+        "startLine": 45,
+        "endLine": 91,
+        "symbol": "canonical_reader / install",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "원본 Secret 파일 재작성 없이 private scratch 변환과 기존 경로 재사용."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-gpu-production-v1/Dockerfile",
+        "startLine": 1,
+        "endLine": 14,
+        "symbol": "additive production image",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존offline이미지에 독립 adapter entrypoint만 추가."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "별도 c3bdd5107f28ceaaef9c3db2061d8dbe60f4abf17b6d541acc2d18a6462f2692 이미지; 현8ef393와 별개"
+  },
+  {
+    "id": "BACKUP.MOBILE_PKCE_CONNECT",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "독립 모바일 Dropbox 연결·GitHub Secret 등록",
+    "description": "별도 연결 사이트는 HTTPS allowlist, S256 PKCE, state TTL, offline consent와 GitHub sealed-box Secret 등록·metadata 재확인을 제공한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "callbackURL / makePkce",
+      "fields": [
+        "appKey",
+        "redirectUri",
+        "one-time GitHub credential"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "GitHub Secret 등록 성공과 gCube 컨테이너 Secret 전달·실제 백업 연결은 다른 단계다.",
+      "이번 감사에서는 로그인/Secret 등록/실제 Dropbox 접근을 하지 않았다.",
+      "현재 별도 Pages 저장소의 최신 배포 구현까지 확인한 것으로 주장하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-mobile-v1/web/connect-core.js",
+        "startLine": 38,
+        "endLine": 62,
+        "symbol": "callbackURL / makePkce",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "등록redirectallowlist와 암호학적PKCE."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-mobile-v1/web/connect-core.js",
+        "startLine": 124,
+        "endLine": 176,
+        "symbol": "begin / finish",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "offline scope·state·code verifier를 검증한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-dropbox-mobile-v1/web/connect-core.js",
+        "startLine": 218,
+        "endLine": 265,
+        "symbol": "configure",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 key/AppSecret 보존과 sealedbox Secret 저장."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "독립 world-engine-connect 웹 사이트 코드; Studio8ef393 내장 UI/API 아님"
+  },
+  {
+    "id": "AUDIO.LEGACY_TTS",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "기존 엔진의 TTS·외부 내레이션",
+    "description": "전체 저장소의 구형 제작 엔진에는 espeak-ng 오프라인 provider와 제공된 내레이션 파일을 처리하는 코드가 실제로 존재한다.",
+    "lifecycle": "LEGACY",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NOT_VERIFIED",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "TTSProvider / ESpeakProvider",
+      "fields": [
+        "options.tts",
+        "options.narration_file",
+        "request.narration_audio",
+        "scenes[].narration"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "전역 NOT_IMPLEMENTED가 아니다. 현재 Studio prompt/V4에서 호출되는 기능은 아니다.",
+      "구형 전체 코드의Git blob은 감사base와 직접 일치 확인했다.",
+      "현재 운영 이미지 포함 여부는 별도 원본 엔진 file closure까지 확인되지 않아 NOT_VERIFIED다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 52,
+        "endLine": 96,
+        "symbol": "TTSProvider / ESpeakProvider",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "오프라인 TTS provider와 language/voice/rate 처리."
+      },
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 116,
+        "endLine": 166,
+        "symbol": "_narration",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "외부 narrationfile·명시 cue·TTS 경로."
+      },
+      {
+        "path": "world-simulation-shorts-engine/engine/rendering.py",
+        "startLine": 367,
+        "endLine": 384,
+        "symbol": "render_project audio preflight",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 엔진은 create_audio와 create_subtitles 호출."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 94,
+        "endLine": 95,
+        "symbol": "_base",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "현 Studio GPU 계획은 SILENT만 허용."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "기존 engine.* 제작 경로; 현재production-studio-mvp-v1 원본 경로와 분리"
+  },
+  {
+    "id": "AUDIO.LEGACY_BGM",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "기존 엔진의 절차적 BGM·ducking",
+    "description": "구형 엔진에는 music 생성·production/rhythm energy·narration ducking·mix/loudness 후처리가 실제로 있으나 Studio는 이를 호출하지 않는다.",
+    "lifecycle": "LEGACY",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NOT_VERIFIED",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_music",
+      "fields": [
+        "options.bgm"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "현 Studio의SFX ON은 이 BGM 기능을 켜지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 181,
+        "endLine": 201,
+        "symbol": "_music",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "절차적 music 생성."
+      },
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 246,
+        "endLine": 288,
+        "symbol": "_production_music / _production_ducking",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "production 음악 및 내레이션 activity 기반 ducking."
+      },
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 296,
+        "endLine": 367,
+        "symbol": "create_audio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "구형 엔진 audio mix 경로."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "기존 engine.* 제작 경로; 현재production-studio-mvp-v1 원본 경로와 분리"
+  },
+  {
+    "id": "AUDIO.LEGACY_SUBTITLES",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "기존 엔진의 ASS 자막·지도 보호 레이아웃",
+    "description": "구형 엔진은 명시 내레이션 cue 또는 scene caption으로 ASS를 생성하고 flat map 보호 영역에 맞게 배치·합성할 수 있다.",
+    "lifecycle": "LEGACY",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "NOT_VERIFIED",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "create_subtitles",
+      "fields": [
+        "options.subtitles",
+        "narration_timing",
+        "narration_cues"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "현재 Studio UI·prompt·GPU 계획은 자막을 제공하지 않는다.",
+      "기존 코드의 존재와 현재 80초 자막 출력을 혼동하지 않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 548,
+        "endLine": 613,
+        "symbol": "create_subtitles",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "TTS timing과 명시 cue/scene-caption을 구분해 ASS 생성."
+      },
+      {
+        "path": "world-simulation-shorts-engine/engine/flat_subtitles.py",
+        "startLine": 201,
+        "endLine": 240,
+        "symbol": "adapt_flat_subtitles",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "기존 원본 자막을 보존하며 map-safe 후보 생성."
+      },
+      {
+        "path": "world-simulation-shorts-engine/engine/audio.py",
+        "startLine": 619,
+        "endLine": 642,
+        "symbol": "finish_video",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "구형 FFmpeg 자막/audio 후처리."
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "기존 engine.* 제작 경로; 현재production-studio-mvp-v1 원본 경로와 분리"
+  },
+  {
+    "id": "STUDIO.STARTUP_DIAGNOSTICS",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "시작 오류 기록·제한적 진단 모드",
+    "description": "기존 시작 계층은 실패 단계·고정 코드·종료 사유·시각·민감정보 제거 기록을 보존하며 진단 모드에서 렌더링을 차단한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "make_record / safe_record",
+      "fields": [
+        "WORLD_ENGINE_STARTUP_MODE",
+        "WORLD_ENGINE_DIAGNOSTIC_TTL_SECONDS"
+      ],
+      "allowedValues": {
+        "WORLD_ENGINE_STARTUP_MODE": [
+          "normal",
+          "diagnostic"
+        ],
+        "WORLD_ENGINE_DIAGNOSTIC_TTL_SECONDS": "integer1..900"
+      },
+      "defaults": {},
+      "units": {},
+      "errors": [
+        "DIAGNOSTIC_RENDER_FORBIDDEN",
+        "INVALID_STARTUP_MODE"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "진단 서비스가 살아 있어도 정상 GPU 상태를 반환하지 않는다.",
+      "이번 정적 감사에서 실제 사용자 종료 로그는 조회하지 않았다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/records.py",
+        "startLine": 195,
+        "endLine": 222,
+        "symbol": "make_record / safe_record",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "허용 코드와 안전한 필드만 재구성한다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py",
+        "startLine": 357,
+        "endLine": 415,
+        "symbol": "_publish / main diagnostic branch",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "stdout/stderr 기록 후 선택적인 보존과 진단 분리."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/service.py",
+        "startLine": 27,
+        "endLine": 61,
+        "symbol": "diagnostic_handler",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "healthz는 서비스 유지, readyz는503, POST는405; GPU 준비와 다르다."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py",
+        "startLine": 281,
+        "endLine": 318,
+        "symbol": "main startup selection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "normal/diagnostic 분리와 실패 최초 기록 보존."
+      }
+    ],
+    "confidence": "HIGH"
+  },
+  {
+    "id": "STUDIO.ACTUAL_80S_INPUT_OUTPUT",
+    "domain": "STUDIO_OPERATIONS",
+    "name": "실제80초 작업 입력·출력 접근 범위",
+    "description": "저장소 계약·선택 가능한 preset·고정 이미지 closure는 조사했으나 원격 개인 job PLAN/AUDIO/로그와 실제80s MP4는 이번 감사에서 확보하지 않았다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_VERIFIED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NOT_VERIFIED",
+      "RENDERER_CALLED": "NOT_VERIFIED",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "_start_supervisor private records",
+      "fields": [],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "저장소예제입력을실제사용자입력으로단정하지않는다.",
+      "5초와80초결과의시각적차이는원격실제input/output미확보구간에서는추정만으로확정하지않는다."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 349,
+        "endLine": 351,
+        "symbol": "_start_supervisor private records",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "실제실행계획·오디오·승인이작업개인기록에저장됨."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 436,
+        "endLine": 472,
+        "symbol": "finalize",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "최종기술·사용자검수상태를구분한다."
+      }
+    ],
+    "confidence": "HIGH"
+  }
+]

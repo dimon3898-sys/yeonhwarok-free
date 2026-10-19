@@ -1,0 +1,894 @@
+[
+  {
+    "id": "STUDIO.STRUCTURED_PRESET",
+    "domain": "STUDIO_PROMPT",
+    "name": "V4 80초 구조화 preset",
+    "description": "정확한 schema와 preset을 실제 V4 source-bound plan으로 선택한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "prompt.schema",
+        "prompt.preset",
+        "prompt.durationSeconds",
+        "prompt.profile",
+        "prompt.title"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 151,
+        "endLine": 217,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact submission/inner fields; source-bound preset and validated plans only.",
+        "evidenceId": "STUDIO.STRUCTURED_PRESET:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 98,
+        "endLine": 169,
+        "symbol": "_VALIDATOR, bind_render_image, default_plan, validate_render_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Real frozen V3/V4 plan and image binding; no arbitrary visual prompt mapping.",
+        "evidenceId": "STUDIO.STRUCTURED_PRESET:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.STRUCTURED_PRESET:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.STRUCTURED_PRESET:E1",
+        "STUDIO.STRUCTURED_PRESET:E2",
+        "STUDIO.STRUCTURED_PRESET:E3"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.DIRECT_SCENE_INPUT",
+    "domain": "STUDIO_PROMPT",
+    "name": "검증된 Scene 직접 입력",
+    "description": "원본 Scene은 prompt 재해석 없이 보호된 backend로 검증한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "sceneJson",
+        "durationSeconds",
+        "profile"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 151,
+        "endLine": 217,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact submission/inner fields; source-bound preset and validated plans only.",
+        "evidenceId": "STUDIO.DIRECT_SCENE_INPUT:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+        "startLine": 98,
+        "endLine": 169,
+        "symbol": "_VALIDATOR, bind_render_image, default_plan, validate_render_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Real frozen V3/V4 plan and image binding; no arbitrary visual prompt mapping.",
+        "evidenceId": "STUDIO.DIRECT_SCENE_INPUT:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.DIRECT_SCENE_INPUT:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "notes": [
+      "V4 exact-parent equality; UNIVERSAL_V3 derived source-bound validators."
+    ],
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.DIRECT_SCENE_INPUT:E1",
+        "STUDIO.DIRECT_SCENE_INPUT:E2",
+        "STUDIO.DIRECT_SCENE_INPUT:E3"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.DURATION_SELECTION",
+    "domain": "STUDIO_PROMPT",
+    "name": "80~600초 길이 선택",
+    "description": "동일 계약의80/120/180/300/600초; V4 preset은80초만, 나머지는 해당검증된V3plan 필요.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "Studio duration selector / envelope / inner prompt",
+      "fields": [
+        "durationSeconds"
+      ],
+      "allowedValues": [
+        80,
+        120,
+        180,
+        300,
+        600
+      ],
+      "defaults": {
+        "ui": 80
+      },
+      "units": {
+        "durationSeconds": "seconds"
+      },
+      "errors": [
+        "STUDIO_DURATION_UNSUPPORTED",
+        "STUDIO_DURATION_CONFLICT",
+        "STUDIO_ARCHIVAL_PRESET_80S_ONLY"
+      ]
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 151,
+        "endLine": 217,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact submission/inner fields; source-bound preset and validated plans only.",
+        "evidenceId": "STUDIO.DURATION_SELECTION:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 16,
+        "endLine": 16,
+        "symbol": "submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Always sends outer duration/profile/SFX(enabled,gain); inner SFX entirely replaced.",
+        "evidenceId": "STUDIO.DURATION_SELECTION:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.DURATION_SELECTION:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.DURATION_SELECTION:E1",
+        "STUDIO.DURATION_SELECTION:E2",
+        "STUDIO.DURATION_SELECTION:E3"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.SFX_TOGGLE_GAIN",
+    "domain": "STUDIO_PROMPT",
+    "name": "효과음 ON/OFF·음량",
+    "description": "실제 Scene 이벤트에 연결된 SFX를선택한다. 현재UI외곽설정이inner프롬프트보다우선.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "sfx.enabled",
+        "sfx.gain"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 151,
+        "endLine": 217,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact submission/inner fields; source-bound preset and validated plans only.",
+        "evidenceId": "STUDIO.SFX_TOGGLE_GAIN:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 16,
+        "endLine": 16,
+        "symbol": "submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Always sends outer duration/profile/SFX(enabled,gain); inner SFX entirely replaced.",
+        "evidenceId": "STUDIO.SFX_TOGGLE_GAIN:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 111,
+        "endLine": 153,
+        "symbol": "normalize_sfx",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Enabled bool, gain[0,1], defaults and event cue validation.",
+        "evidenceId": "STUDIO.SFX_TOGGLE_GAIN:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.SFX_TOGGLE_GAIN:E4",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "notes": [
+      "Audio post-production is called after protected video; this is not WebGL renderer selection.",
+      "API normalizer gain default0.65, UI default0.7."
+    ],
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.SFX_TOGGLE_GAIN:E1",
+        "STUDIO.SFX_TOGGLE_GAIN:E2",
+        "STUDIO.SFX_TOGGLE_GAIN:E3",
+        "STUDIO.SFX_TOGGLE_GAIN:E4"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    },
+    "axisScopeClarification": "Alias of STUDIO.SFX_CONTROLS; axes reflect end-to-end current selected route, not only the parser function. No new renderer execution observed."
+  },
+  {
+    "id": "STUDIO.SFX_AUTHORED_CUES",
+    "domain": "STUDIO_PROMPT",
+    "name": "기존 이벤트의 구조화 SFX 큐·WAV",
+    "description": "직접API계약은6유형큐및WAV옵션을허용한다. 현재UI는innercues/exportWav를전달하지않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "sfx.cues",
+        "sfx.exportWav"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 151,
+        "endLine": 217,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact submission/inner fields; source-bound preset and validated plans only.",
+        "evidenceId": "STUDIO.SFX_AUTHORED_CUES:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/web/app.js",
+        "startLine": 16,
+        "endLine": 16,
+        "symbol": "submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Always sends outer duration/profile/SFX(enabled,gain); inner SFX entirely replaced.",
+        "evidenceId": "STUDIO.SFX_AUTHORED_CUES:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_audio.py",
+        "startLine": 111,
+        "endLine": 153,
+        "symbol": "normalize_sfx",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Six types, actual eventId/frame range and gain validation.",
+        "evidenceId": "STUDIO.SFX_AUTHORED_CUES:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.SFX_AUTHORED_CUES:E4",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Direct authenticated HTTP submission; NOT existing mobile prompt path due outer SFX replacement.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.SFX_AUTHORED_CUES:E1",
+        "STUDIO.SFX_AUTHORED_CUES:E2",
+        "STUDIO.SFX_AUTHORED_CUES:E3",
+        "STUDIO.SFX_AUTHORED_CUES:E4"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.SFX_INTERVAL_REVISION",
+    "domain": "STUDIO_PROMPT",
+    "name": "시간 구간 효과음 수정",
+    "description": "완성 작업에서SFX만수정하며모든영상Scene을재사용한다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/jobs/{completedJobId}/revisions / interval revision UI",
+      "fields": [
+        "startSeconds",
+        "endSeconds",
+        "prompt",
+        "sfx"
+      ],
+      "allowedValues": [
+        "효과음 꺼줘",
+        "SFX OFF",
+        "SFX ON",
+        "효과음 음량 40%",
+        "WORLD_ENGINE_STUDIO_REVISION_V1"
+      ],
+      "defaults": {},
+      "units": {
+        "startSeconds": "seconds on exact frame boundary",
+        "endSeconds": "seconds, exclusive"
+      },
+      "errors": [
+        "STUDIO_VISUAL_REVISION_UNSUPPORTED",
+        "STUDIO_REVISION_TIME_INVALID",
+        "STUDIO_REVISION_RANGE_EMPTY"
+      ]
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 233,
+        "endLine": 343,
+        "symbol": "_revision_command and plan_revision",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Bounded Korean/English commands or exact SFX JSON only; reports audio tails.",
+        "evidenceId": "STUDIO.SFX_INTERVAL_REVISION:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+        "startLine": 349,
+        "endLine": 355,
+        "symbol": "revisions POST",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Numeric frame-bound times, required prompt, actual controller path.",
+        "evidenceId": "STUDIO.SFX_INTERVAL_REVISION:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.SFX_INTERVAL_REVISION:E3",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "notes": [
+      "Requires completed parent; GPU is not required by SFX recompose."
+    ],
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.SFX_INTERVAL_REVISION:E1",
+        "STUDIO.SFX_INTERVAL_REVISION:E2",
+        "STUDIO.SFX_INTERVAL_REVISION:E3"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    },
+    "axisScopeClarification": "Alias of STUDIO.INTERVAL_SFX_REVISION; axes reflect end-to-end current selected route, not only the parser function. No new renderer execution observed."
+  },
+  {
+    "id": "STUDIO.FREE_NL_GENERATION",
+    "domain": "STUDIO_PROMPT",
+    "name": "Studio 자유 자연어 기획",
+    "description": "현재Studio는자유문장으로자료조사·Scene생성을수행하지않는다. 별도boundedPlanner의존재와구분한다.",
+    "lifecycle": "NOT_IMPLEMENTED",
+    "classification": "NOT_IMPLEMENTED",
+    "axes": {
+      "SOURCE_EXISTS": "NO",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "prompt"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 77,
+        "endLine": 100,
+        "symbol": "_parse_json",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Free text rejected; no LLM call.",
+        "evidenceId": "STUDIO.FREE_NL_GENERATION:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.FREE_NL_GENERATION:E1"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.ADVANCED_VISUAL_PROMPT",
+    "domain": "STUDIO_PROMPT",
+    "name": "고급 시각 연출 자연어·임의 field 호출",
+    "description": "camera/territory/map/militaryUnits등의임의prompt제어는매핑이없고거절된다.",
+    "lifecycle": "NOT_IMPLEMENTED",
+    "classification": "NOT_IMPLEMENTED",
+    "axes": {
+      "SOURCE_EXISTS": "NO",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "renderIntent",
+        "map",
+        "territory",
+        "camera",
+        "militaryUnits",
+        "events",
+        "timeline",
+        "qualityGate"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 151,
+        "endLine": 217,
+        "symbol": "normalize_submission",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Exact submission/inner fields; source-bound preset and validated plans only.",
+        "evidenceId": "STUDIO.ADVANCED_VISUAL_PROMPT:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.ADVANCED_VISUAL_PROMPT:E1"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.VISUAL_INTERVAL_REVISION",
+    "domain": "STUDIO_PROMPT",
+    "name": "카메라·영토·전선 부분 수정",
+    "description": "현재MVP의시간구간수정은SFX전용이다. 영상부분재렌더수정은지원하지않는다.",
+    "lifecycle": "NOT_IMPLEMENTED",
+    "classification": "NOT_IMPLEMENTED",
+    "axes": {
+      "SOURCE_EXISTS": "NO",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "prompt"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 233,
+        "endLine": 258,
+        "symbol": "_revision_command",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Camera/free visual edit rejected with422; no protected visual changes.",
+        "evidenceId": "STUDIO.VISUAL_INTERVAL_REVISION:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.VISUAL_INTERVAL_REVISION:E1"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  },
+  {
+    "id": "STUDIO.TITLE_METADATA",
+    "domain": "STUDIO_PROMPT",
+    "name": "영상 제목 메타데이터",
+    "description": "구조화prompttitle은작업제목을설정하며화면글자를그리지않는다.",
+    "lifecycle": "CANDIDATE",
+    "classification": "PROMPT_CALLABLE",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "YES",
+      "PARSER_ACCEPTED": "YES",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "POST /api/preflight; POST /api/submissions (authenticated + CSRF)",
+      "fields": [
+        "prompt.title"
+      ],
+      "allowedValues": {
+        "profile": [
+          "V4_ARCHIVAL_80S",
+          "UNIVERSAL_V3"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "production-studio-mvp-v1/studio_contracts.py",
+      "production-studio-mvp-v1/studio_runtime.py"
+    ],
+    "constraints": [
+      "Schema acceptance is not GPU or visual output proof.",
+      "Current operating image sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da"
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+        "startLine": 206,
+        "endLine": 217,
+        "symbol": "normalize_submission title",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Inner title then firsttitleCandidates then topic; trim and lengthvalidation.",
+        "evidenceId": "STUDIO.TITLE_METADATA:E1",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/studio-https-proxy-fix-v1/runs/39085567166-1/pull.json",
+        "startLine": 57,
+        "endLine": 70,
+        "symbol": "imageHashes.parentHttps.parentStudio",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Independent digest pull recorded parent Studio 51-file manifest verification; image inclusion separate from renderer selection.",
+        "evidenceId": "STUDIO.TITLE_METADATA:E2",
+        "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+      }
+    ],
+    "confidence": "HIGH",
+    "explicitScope": "Eight axes describe the current Studio V4 route; entrypoint may also describe independent existing APIs. Static source path selection is not observed GPU execution.",
+    "axesEvidencePolicy": {
+      "sharedSourceEvidenceIds": [
+        "STUDIO.TITLE_METADATA:E1",
+        "STUDIO.TITLE_METADATA:E2"
+      ],
+      "builtInImageBasis": "IMAGE_AND_BASELINE_LINEAGE.json declared image closure + historical independent digest pull where YES; NO means absent entry/extension; NOT_VERIFIED means not established.",
+      "outputEvidence": "Current80s full artifact unavailable; source/historical receipt does not verify current output."
+    },
+    "auditTests": {
+      "sourceEvidence": "PASS",
+      "gpuExecution": "NOT_EXECUTED",
+      "visualQuality": "NOT_VERIFIED",
+      "contractTests": "See CONTRACT_TEST_RESULTS.json and SCENE_SCHEMA_VALIDATION.json; these tests are not a claim that this feature rendered."
+    }
+  }
+]

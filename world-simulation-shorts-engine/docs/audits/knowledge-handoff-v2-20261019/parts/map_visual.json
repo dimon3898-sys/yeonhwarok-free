@@ -1,0 +1,2552 @@
+[
+  {
+    "id": "MAP.NATIVE_WEBGL_FACTORY",
+    "domain": "MAP_VISUAL",
+    "name": "Native GIS/WebGL2 map factory",
+    "description": "Shared Three.js/native factory draws source raster, role coverage, region material, boundaries and protected graphics; the current V4 long path invokes it through AreaNativeBridge.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createMapInfographicRenderer",
+      "fields": [
+        "canvas",
+        "plan",
+        "heightSource",
+        "contextTerrain",
+        "contextGeometries",
+        "layoutPlan"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "WebGL2 required, no fake preview fallback.",
+      "Factory availability is not a claim of hardware output quality."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "startLine": 345,
+        "endLine": 375,
+        "symbol": "createMapInfographicRenderer",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Shared Three.js/native factory draws source raster, role coverage, region material, boundaries and protected graphics; the current V4 long path invokes it through AreaNativeBridge."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+        "startLine": 30,
+        "endLine": 51,
+        "symbol": "createAreaNativeBridge",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current V4 route uses one preserved native factory and existing graphic pass."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.GIS_LAND_COVERAGE",
+    "domain": "MAP_VISUAL",
+    "name": "Native land/coast coverage",
+    "description": "Native GIS geometry triangulation and a separate AA coverage target supply per-frame land fractions to source materials and ocean gating.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createMapInfographicRenderer coverage targets",
+      "fields": [
+        "plan.geometries",
+        "contextGeometries"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "A negative DEM sample is not an ocean mask.",
+      "Current ASTRA source blend does not blur native coastline coverage."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "startLine": 382,
+        "endLine": 408,
+        "symbol": "createMapInfographicRenderer coverage targets",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Native GIS geometry triangulation and a separate AA coverage target supply per-frame land fractions to source materials and ocean gating."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+        "startLine": 92,
+        "endLine": 96,
+        "symbol": "drawFrame",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Native coverage is cached only when actual camera/reveal/geometry key is equal; terrain receives current coverage."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.PROJECTION",
+    "domain": "MAP_VISUAL",
+    "name": "Native projection reuse",
+    "description": "Projected geometry and graphic anchors use the existing native factory; current long map uses the admitted flat geographic path.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createMapInfographicRenderer projection",
+      "fields": [
+        "plan.framing.projection",
+        "plan.framing.bounds",
+        "plan.framing.center"
+      ],
+      "allowedValues": {
+        "projection": [
+          "WORLD_GLOBE_ORTHOGRAPHIC",
+          "admitted flat geographic map"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Continuous context terrain LOD rejects globe projection.",
+      "ASTRA uploader currently requires rectilinear EPSG:4326, not arbitrary projected rasters."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "startLine": 355,
+        "endLine": 375,
+        "symbol": "createMapInfographicRenderer projection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Projected geometry and graphic anchors use the existing native factory; current long map uses the admitted flat geographic path."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.TERRAIN_LOD",
+    "domain": "MAP_VISUAL",
+    "name": "Geographic base-terrain LOD",
+    "description": "Native wide/regional terrain weight is recalculated from actual framing; ASTRA source support remains separate and does not invent extra detail.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "drawNative / geographicTerrainLod",
+      "fields": [
+        "contextTerrain",
+        "plans.REGIONAL.assets.terrain",
+        "camera.flatBounds"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+        "startLine": 88,
+        "endLine": 114,
+        "symbol": "drawNative / geographicTerrainLod",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Native wide/regional terrain weight is recalculated from actual framing; ASTRA source support remains separate and does not invent extra detail."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_native_camera.mjs",
+        "startLine": 58,
+        "endLine": 64,
+        "symbol": "drawNative",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Changed admitted framing updates original factory camera, scale tokens and LOD before redraw."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.BAKED_RELIEF",
+    "domain": "MAP_VISUAL",
+    "name": "Registered baked terrain source",
+    "description": "Baseline reference terrain samples SHA-verified registered RGB and applies bounded baked hillshade tone treatment; it is not a DEM reconstructed from color.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createReferenceTerrainMaterialPassV4",
+      "fields": [
+        "source.url",
+        "source.sha256",
+        "source.bounds",
+        "source.dimensions",
+        "profile"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Outside original raster bounds is rejected.",
+      "Baked relief is not physical height."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+        "startLine": 110,
+        "endLine": 128,
+        "symbol": "createReferenceTerrainMaterialPassV4",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Baseline reference terrain samples SHA-verified registered RGB and applies bounded baked hillshade tone treatment; it is not a DEM reconstructed from color."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+        "startLine": 166,
+        "endLine": 180,
+        "symbol": "evidence / draw",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "No synthetic land detail, new elevation or physical normals are claimed by baseline material."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.WARM_TERRAIN_TREATMENT",
+    "domain": "MAP_VISUAL",
+    "name": "Warm/gold terrain material lighting",
+    "description": "Preserved terrain profile warms real bright baked features; ASTRA terrain normal lighting additionally reuses warmHighlightColor/Strength before occupation overlay.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "DEFAULT_REFERENCE_TERRAIN_PROFILE_V4",
+      "fields": [
+        "warmHighlightColor",
+        "warmHighlightStrength",
+        "landContrast",
+        "bakedShadeLocalContrast"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "warmHighlightColor": [
+          1,
+          0.72,
+          0.32
+        ],
+        "warmHighlightStrength": 0.15
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Not an all-terrain glowing contour network.",
+      "Current Studio does not accept these profile fields as free-text commands."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+        "startLine": 8,
+        "endLine": 15,
+        "symbol": "DEFAULT_REFERENCE_TERRAIN_PROFILE_V4",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Preserved terrain profile warms real bright baked features; ASTRA terrain normal lighting additionally reuses warmHighlightColor/Strength before occupation overlay."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+        "startLine": 79,
+        "endLine": 87,
+        "symbol": "buildAstraFragment terrain",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Genuine elevation-normal diffuse lighting and restrained warm component feed the source material."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.SOURCE_OCEAN_TONE",
+    "domain": "MAP_VISUAL",
+    "name": "Baseline source-derived ocean tone",
+    "description": "Registered source RGB and real GIS coastal proximity produce restrained ocean tones; procedural ripples/glints/phase drift are explicitly removed.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "validateReferenceOceanProfileV4",
+      "fields": [
+        "deepTint",
+        "midTint",
+        "nearshoreTint",
+        "sourceLumaRange",
+        "sourceContrast",
+        "microStrength",
+        "glintStrength",
+        "driftRadiansPerSecond"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "microStrength": 0,
+        "glintStrength": 0,
+        "driftRadiansPerSecond": 0
+      },
+      "units": {},
+      "errors": [
+        "OCEAN_V4_PROCEDURAL_PATTERN_REMOVED_<field>"
+      ]
+    },
+    "dependencies": [],
+    "constraints": [
+      "Baseline source tone is not measured depth.",
+      "ASTRA separately adds measured depth color only inside supported ocean."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_ocean_material_v4.mjs",
+        "startLine": 8,
+        "endLine": 38,
+        "symbol": "validateReferenceOceanProfileV4",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Registered source RGB and real GIS coastal proximity produce restrained ocean tones; procedural ripples/glints/phase drift are explicitly removed."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA.GPU_UPLOAD_CONTRACT",
+    "domain": "ASTRA",
+    "name": "Lossless ASTRA WebGL2 upload",
+    "description": "Opaque SHA-bound bundle carries Float32 terrain, signed Int16 bathymetry, RGBA8 surface and validity masks into actual WebGL2 texture allocation.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "loadUploadBundle / createUploadTextures",
+      "fields": [
+        "manifestURL",
+        "expectedManifestSha256",
+        "maxBytes",
+        "origin"
+      ],
+      "allowedValues": {
+        "CRS": [
+          "EPSG:4326"
+        ],
+        "roles": [
+          "terrain",
+          "bathymetry",
+          "surfaceTexture"
+        ],
+        "sampling": [
+          "NEAREST",
+          "texelFetch",
+          "SOURCE_PRESERVED"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Upload alone does not draw, authorize rendering or prove hardware visual quality.",
+      "Original values and pixel-center/transform metadata are checked."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/gpu_upload.mjs",
+        "startLine": 44,
+        "endLine": 99,
+        "symbol": "loadUploadBundle / createUploadTextures",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Opaque SHA-bound bundle carries Float32 terrain, signed Int16 bathymetry, RGBA8 surface and validity masks into actual WebGL2 texture allocation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-gpu-integration-v1/gpu_upload.mjs",
+        "startLine": 160,
+        "endLine": 201,
+        "symbol": "createUploadTextures",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Actual MAX_TEXTURE_SIZE, texture format and allocation checks; explicit fake contexts remain test-only."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA.TERRAIN_NORMAL_LIGHTING",
+    "domain": "ASTRA",
+    "name": "Actual elevation-based source lighting",
+    "description": "Valid genuine height neighbours supply metre-based finite-difference normals, diffuse light and bounded altitude tint; NoData and polar metric limits fall back.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "buildQualityFragment(terrain) selected by createQualityCompositionPass",
+      "fields": [
+        "reliefStrength"
+      ],
+      "allowedValues": {
+        "reliefStrength": [
+          0,
+          1
+        ]
+      },
+      "defaults": {
+        "reliefStrength": 0.65
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Fragment material lighting; no assertion of displaced 3D mesh.",
+      "Current V4 front selects the same upstream source factory."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+        "startLine": 62,
+        "endLine": 87,
+        "symbol": "buildAstraFragment terrain",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Valid genuine height neighbours supply metre-based finite-difference normals, diffuse light and bounded altitude tint; NoData and polar metric limits fall back."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+        "startLine": 28,
+        "endLine": 42,
+        "symbol": "buildQualityFragment terrain",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current boundary-enabled material executes this same genuine-source treatment; the cited earlier ASTRA fragment is its preserved baseline counterpart, not a claim that boundary-enabled path calls that earlier program."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA.SURFACE_TEXTURE",
+    "domain": "ASTRA",
+    "name": "Actual surface texture composition",
+    "description": "Original encoded surface RGB is mixed over base material only where its authentic valid/alpha support and native land fraction apply.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "buildQualityFragment surfaceTexture",
+      "fields": [
+        "surfaceMix",
+        "surfaceGain"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "surfaceMix": 0.85,
+        "surfaceGain": 1
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Current image uses the pinned sample archive/profile; arbitrary worldwide topic does not automatically acquire a new source."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+        "startLine": 20,
+        "endLine": 42,
+        "symbol": "buildQualityFragment surfaceTexture",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Original encoded surface RGB is mixed over base material only where its authentic valid/alpha support and native land fraction apply."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA.BATHYMETRY_COLOR",
+    "domain": "ASTRA",
+    "name": "Signed bathymetry material",
+    "description": "Signed negative elevation becomes depth tone only when the same-frame native GIS coverage says ocean; below-sea-level land is protected.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "buildQualityFragment(bathymetry) selected by createQualityCompositionPass",
+      "fields": [
+        "depthMix",
+        "depthScaleMeters"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "depthMix": 0.75,
+        "depthScaleMeters": 4000
+      },
+      "units": {
+        "depthScaleMeters": "metres"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No depth inference from base RGB.",
+      "No hydrodynamics or wave simulation."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+        "startLine": 88,
+        "endLine": 95,
+        "symbol": "buildAstraFragment bathymetry",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Signed negative elevation becomes depth tone only when the same-frame native GIS coverage says ocean; below-sea-level land is protected."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+        "startLine": 43,
+        "endLine": 48,
+        "symbol": "buildQualityFragment bathymetry",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current boundary-enabled material executes this same genuine-source treatment; the cited earlier ASTRA fragment is its preserved baseline counterpart, not a claim that boundary-enabled path calls that earlier program."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA.NODATA_FALLBACK",
+    "domain": "ASTRA",
+    "name": "Per-source support/NoData fallback",
+    "description": "Each role validates support and native cell bounds; invalid/outside data returns unchanged base material rather than fabricated samples or zero elevation.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "buildQualityFragment support",
+      "fields": [],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [
+      "MAP.GIS_LAND_COVERAGE"
+    ],
+    "constraints": [
+      "Terrain needs valid finite-neighbour support; surface alpha and bathymetry sign have distinct masks.",
+      "Native coastline fractions are not blurred by support filtering."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+        "startLine": 52,
+        "endLine": 74,
+        "symbol": "buildQualityFragment support",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Each role validates support and native cell bounds; invalid/outside data returns unchanged base material rather than fabricated samples or zero elevation."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA.SUPPORT_DISTANCE_BLEND",
+    "domain": "ASTRA",
+    "name": "Source-support boundary blending",
+    "description": "Per-role Euclidean distance to invalid/source-edge support controls screen-pixel blending; sample values remain native and no geographic support is expanded.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "supportMaskForRole / buildSupportDistance",
+      "fields": [
+        "screenFeatherPixels",
+        "boundary"
+      ],
+      "allowedValues": {
+        "screenFeatherPixels": [
+          8,
+          96
+        ]
+      },
+      "defaults": {
+        "screenFeatherPixels": 32,
+        "boundary": true
+      },
+      "units": {
+        "screenFeatherPixels": "screen pixels"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/distance_support.mjs",
+        "startLine": 7,
+        "endLine": 48,
+        "symbol": "supportMaskForRole / buildSupportDistance",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Per-role Euclidean distance to invalid/source-edge support controls screen-pixel blending; sample values remain native and no geographic support is expanded."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+        "startLine": 64,
+        "endLine": 67,
+        "symbol": "bootLongRuntime source selection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current long route passes quality boundary configuration to the preserved source factory."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "MAP.SOURCE_GRADE",
+    "domain": "MAP_VISUAL",
+    "name": "Supported source color/contrast grade",
+    "description": "Reference V2 source grade modifies authentic material inside valid support, protecting coast edges and falling back outside source. It is called by current V4.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "setReferenceSourceProfile / createReferenceTerrainMaterialPassV4",
+      "fields": [
+        "enabled",
+        "terrainLocalContrast",
+        "landExposure",
+        "oceanExposure",
+        "oceanTealMix",
+        "screenFeatherPixels"
+      ],
+      "allowedValues": {
+        "terrainLocalContrast": [
+          1,
+          1.4
+        ],
+        "landExposure": [
+          1,
+          1.2
+        ],
+        "oceanExposure": [
+          1,
+          1.5
+        ],
+        "oceanTealMix": [
+          0,
+          0.3
+        ],
+        "screenFeatherPixels": [
+          8,
+          96
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Current source profile comes from prepared Reference F closure, not arbitrary Studio prompt values.",
+      "Encoded-RGB grading is not new topography."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/reference_source_material.mjs",
+        "startLine": 14,
+        "endLine": 43,
+        "symbol": "setReferenceSourceProfile / createReferenceTerrainMaterialPassV4",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Reference V2 source grade modifies authentic material inside valid support, protecting coast edges and falling back outside source. It is called by current V4."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "TERRITORY.SUPPLIED_AREA_COLOR",
+    "domain": "TERRITORY",
+    "name": "Explicit supplied occupation/core color",
+    "description": "Production Area pass groups only explicitly sourced area polygons by faction color and draws bounded opacity before front. No opposing-side complement is inferred.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createProductionAreaPass",
+      "fields": [
+        "productionV3.visualBindings.areaStyles",
+        "productionV3.visualProfile.palette",
+        "territoryOpacity"
+      ],
+      "allowedValues": {
+        "territoryOpacity": [
+          0.24,
+          0.8
+        ]
+      },
+      "defaults": {
+        "territoryOpacity": 0.62
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Preset uses qualified schematic held core, not complete measured bilateral occupation.",
+      "Scalar V2 complementary classifier is not reused."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_area_pass.mjs",
+        "startLine": 4,
+        "endLine": 27,
+        "symbol": "createProductionAreaPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Production Area pass groups only explicitly sourced area polygons by faction color and draws bounded opacity before front. No opposing-side complement is inferred."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "TERRITORY.ARCHIVAL_FRONT_ONLY",
+    "domain": "TERRITORY",
+    "name": "Reviewed archival front display",
+    "description": "Hash-bound reviewed approximate partial front snapshots use fixed held Area FRONT plans; archival intervals explicitly suppress unsourced occupation fill and interpolation.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "archival Area plans",
+      "fields": [
+        "sourceManifest.archivalFrontV4",
+        "FRONT_PROFILE.fronts",
+        "FRONT_PROFILE.schedule"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No arbitrary historic front points or closed occupation polygon inferred from an open line.",
+      "Current schedule8rows covers850/2400frames; no continuous historical movement is claimed."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+        "startLine": 52,
+        "endLine": 56,
+        "symbol": "archival Area plans",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Hash-bound reviewed approximate partial front snapshots use fixed held Area FRONT plans; archival intervals explicitly suppress unsourced occupation fill and interpolation."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+        "startLine": 102,
+        "endLine": 107,
+        "symbol": "drawFrame archival selection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Evaluated fixed front data is held at frame0 with areas empty; current global output frame is recorded independently."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "TERRITORY.COMPLEMENTARY_SCALAR_CONTROL",
+    "domain": "TERRITORY",
+    "name": "Five-second complementary control field",
+    "description": "Standalone control engine evaluates one monotone longitudinal boundary over supplied land and classifies complementary winner/loser ownership. Current 80-second archival adapter does not call it.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileTerritoryControlIntent",
+      "fields": [
+        "domain",
+        "factions",
+        "longitudinal_knots",
+        "base_boundary_latitudes",
+        "boundary_keyframes",
+        "advance_direction",
+        "start_frame",
+        "total_frames",
+        "fps",
+        "interpolation"
+      ],
+      "allowedValues": {
+        "advance_direction": [
+          "POSITIVE_LATITUDE",
+          "NEGATIVE_LATITUDE"
+        ],
+        "interpolation": [
+          "LINEAR",
+          "SMOOTHERSTEP"
+        ],
+        "maximumKnots": 64
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Geometry must admit the monotone scalar profile; arbitrary historical multipart fronts are not equivalent.",
+      "Source-image inclusionYES; current Studio80s factoryselectionNO."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/territory_control_adapter_v1.mjs",
+        "startLine": 61,
+        "endLine": 108,
+        "symbol": "compileTerritoryControlIntent",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Standalone control engine evaluates one monotone longitudinal boundary over supplied land and classifies complementary winner/loser ownership. Current80s archival adapter does not call it."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "TERRITORY.GAIN_STYLE",
+    "domain": "TERRITORY",
+    "name": "Five-second gained territory style",
+    "description": "Reference decorator changes the existing territory material using bounded gained opacity/brightness without changing boundary geometry/timing; not called by current 80-second compositor.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "setReferenceTerritoryProfile / createTerritoryControlPass",
+      "fields": [
+        "referenceV2.parameters.territoryColorStrength",
+        "referenceV2.parameters.gainBrightness"
+      ],
+      "allowedValues": {
+        "territoryColorStrength": [
+          0.72,
+          0.9
+        ],
+        "gainBrightness": [
+          1,
+          1.25
+        ]
+      },
+      "defaults": {
+        "territoryColorStrength": 0.84,
+        "gainBrightness": 1.12
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No per-pixel gain age, new history or retiming."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/gain_territory.mjs",
+        "startLine": 14,
+        "endLine": 37,
+        "symbol": "setReferenceTerritoryProfile / createTerritoryControlPass",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Reference decorator changes the existing territory material using bounded gained opacity/brightness without changing boundary geometry/timing; not called by current80s compositor."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "FRONTIER.MOVING_SCALAR_LIGHT",
+    "domain": "FRONTIER",
+    "name": "Moving white/gold ownership frontier",
+    "description": "Same scalar ownership boundary supplies screen-pixel core/halo and displacement-driven energy; finite temporal window settles strength when the supplied boundary stops. Included but not selected by current 80-second route.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileControlFrontierLightMotion / evaluateControlFrontierLightMotion",
+      "fields": [
+        "centerColor",
+        "haloColor",
+        "centerWidthPixels",
+        "haloSigmaPixels",
+        "haloSupportPixels",
+        "centerAlpha",
+        "haloAlpha",
+        "settledStrength",
+        "velocityWindowFrames"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {
+        "centerWidthPixels": "screen pixels",
+        "haloSigmaPixels": "screen pixels",
+        "velocityWindowFrames": "frames"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Only exact evaluated boundary; no decorative path.",
+      "Current Area FRONT gold/white color is a different renderer path."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+        "startLine": 46,
+        "endLine": 74,
+        "symbol": "compileControlFrontierLightMotion / evaluateControlFrontierLightMotion",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Same scalar ownership boundary supplies screen-pixel core/halo and displacement-driven energy; finite temporal window settles strength when the supplied boundary stops. Included but not selected by current80s route."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+        "startLine": 119,
+        "endLine": 130,
+        "symbol": "frontierFragment",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Pixel distance uses same trusted scalar boundary, derivatives and finite halo support."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "FRONTIER.TERRAIN_DESTINATION_LIGHT",
+    "domain": "FRONTIER",
+    "name": "Frontier/occupation terrain destination light",
+    "description": "The five-second compositor passes the actual ASTRA-combined terrain texture into a destination-light multiplier so terrain relief survives occupation fill. The current 80-second Area overlay has no corresponding texture input.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "drawFrame frontier.draw",
+      "fields": [
+        "actualTerrainTexture",
+        "luminanceAnchor",
+        "minimumLightingFactor",
+        "reliefLightingEnabled"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Current terrain itself remains active; this finding concerns the later occupation/front destination multiplier."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+        "startLine": 170,
+        "endLine": 175,
+        "symbol": "drawFrame frontier.draw",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "The five-second compositor passes the actual ASTRA-combined terrain texture into a destination-light multiplier so terrain relief survives occupation fill. The current80s Area overlay has no corresponding texture input."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+        "startLine": 100,
+        "endLine": 106,
+        "symbol": "lightingFragment",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Samples actualTerrain and computes the destination lighting factor."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "FRONTIER.PRODUCTION_FRONT_STYLE",
+    "domain": "FRONTIER",
+    "name": "Current Area V3 white/gold FRONT style",
+    "description": "Current V3/V4 front uses preserved Area overlay with explicit white core/gold halo parameters on supplied front geometry. This is structurally wired but current output quality is not verified.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "normalizeProductionVisualProfile / productionAreaStyle",
+      "fields": [
+        "frontCoreWidthPixels",
+        "frontCoreColor",
+        "frontGlowColor",
+        "frontGlowRadiusPixels",
+        "frontGlowGain"
+      ],
+      "allowedValues": {
+        "frontCoreWidthPixels": [
+          2.5,
+          7
+        ],
+        "frontGlowRadiusPixels": [
+          3,
+          16
+        ],
+        "frontGlowGain": [
+          0.1,
+          0.65
+        ]
+      },
+      "defaults": {
+        "frontCoreWidthPixels": 4.8,
+        "frontCoreColor": [
+          1,
+          0.98,
+          0.91
+        ],
+        "frontGlowColor": [
+          1,
+          0.66,
+          0.16
+        ],
+        "frontGlowRadiusPixels": 10,
+        "frontGlowGain": 0.42
+      },
+      "units": {
+        "frontCoreWidthPixels": "screen pixels",
+        "frontGlowRadiusPixels": "screen pixels"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Separate from scalarV2 classifier and its motion/stop/destination-light behavior.",
+      "Archival snapshots are held source observations, not newly simulated advances."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-production-v3/production_visual_profile.mjs",
+        "startLine": 7,
+        "endLine": 44,
+        "symbol": "normalizeProductionVisualProfile / productionAreaStyle",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current V3/V4 front uses preserved Area overlay with explicit white core/gold halo parameters on supplied front geometry. This is structurally wired but current output quality is not verified."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "FRONTIER.OUTER_DOMAIN_GOLD",
+    "domain": "FRONTIER",
+    "name": "Reference actual-domain outer gold",
+    "description": "Five-second ReferenceV2 decoration reuses registered native domain coverage and validates domainSHA before drawing a restrained outer glow. Current long route explicitly disables registration.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "setReferenceFrontierProfile / createControlFrontierLightPassV3",
+      "fields": [
+        "registerDomainCoverage",
+        "outerGoldIntensity",
+        "outerGoldWidth",
+        "outerGoldSigma",
+        "outerGoldSupport"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "An outer domain edge is not automatically a historical front.",
+      "Current long_runtime andfront_adapter force registerDomainCoverage:false."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/frontier_ref2.mjs",
+        "startLine": 12,
+        "endLine": 52,
+        "symbol": "setReferenceFrontierProfile / createControlFrontierLightPassV3",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Five-second ReferenceV2 decoration reuses registered native domain coverage and validates domainSHA before drawing a restrained outer glow. Current long route explicitly disables registration."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "MAP.REFERENCE_PRESENTATION_ROLL",
+    "domain": "MAP_VISUAL",
+    "name": "Five-second coherent map roll",
+    "description": "Original five-second adapter applies authored camera roll/overscan coherently to the geographic framebuffer and projects national tablets into it. Not used by current chapter camera.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileReferencePresentationPlan / expandNativeBounds",
+      "fields": [
+        "cameraKeyframes[].rotationDegrees",
+        "presentationProfile.overscan"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Current V4 uses separate conservative pan/widen profile; no prompt toggles between graphs."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+        "startLine": 91,
+        "endLine": 108,
+        "symbol": "compileReferencePresentationPlan / expandNativeBounds",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Original five-second adapter applies authored camera roll/overscan coherently to the geographic framebuffer and projects national tablets into it. Not used by current chapter camera."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "UNITS.NATIONAL_TABLETS",
+    "domain": "UNITS",
+    "name": "Original national flag/role tablets",
+    "description": "Vector flag panels in original rounded tablets use supplied resolved per-frame anchors, sizes and rotations; rolesGROUND/AVIATION/SUPPORT. Current 80-second V4 calls native markers instead.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "validateNationalFlagProfiles / validateNationalUnitBadgeFixture",
+      "fields": [
+        "combatProfile.units[].profile_id",
+        "anchor_frames",
+        "size_frames",
+        "rotation_frames",
+        "role",
+        "combatProfile.profiles"
+      ],
+      "allowedValues": {
+        "role": [
+          "GROUND",
+          "AVIATION",
+          "SUPPORT"
+        ],
+        "size_frames": [
+          72,
+          140
+        ]
+      },
+      "defaults": {},
+      "units": {
+        "size_frames": "pixels"
+      },
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No country/date inference or unit motion/physics engine.",
+      "Not 3D tank/ship models; historical positions must be supplied and verified."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
+        "startLine": 34,
+        "endLine": 62,
+        "symbol": "validateNationalFlagProfiles / validateNationalUnitBadgeFixture",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Vector flag panels in original rounded tablets use supplied resolved per-frame anchors, sizes and rotations; rolesGROUND/AVIATION/SUPPORT. Current80s V4 calls native markers instead."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
+        "startLine": 149,
+        "endLine": 171,
+        "symbol": "createNationalUnitBadgeArtwork",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Original vector flag tablet and abstract role art; no source-frame extraction."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "UNITS.SAFE_STATIC_SCALE",
+    "domain": "UNITS",
+    "name": "Reference national-unit readability scaling",
+    "description": "Existing all-frame layout/measurement checks safely select one bounded static national-unit scale; camera/anchors/art/design/timing are unchanged. Not selected in 80 seconds.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "selectReferenceUnitScale",
+      "fields": [
+        "referenceV2.parameters.unitMarkerScale"
+      ],
+      "allowedValues": {
+        "unitMarkerScale": [
+          1,
+          1.25
+        ]
+      },
+      "defaults": {
+        "unitMarkerScale": 1.14
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Per-frame resolved national unit data is required.",
+      "Decrements scale in1% safety steps, no screen-size pumping."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/unit-size-profile.mjs",
+        "startLine": 75,
+        "endLine": 115,
+        "symbol": "selectReferenceUnitScale",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Existing all-frame layout/measurement checks safely select one bounded static national-unit scale; camera/anchors/art/design/timing are unchanged. Not selected in80s."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "UNITS.HISTORICAL_PARTICIPATION_GATE",
+    "domain": "UNITS",
+    "name": "Data-driven historical participation validator",
+    "description": "Optional private fixture validator checks declared date/role/location and flag validity; it does not place units or turn a counterfactual scene into history. Not part of current 80-second unit render selection.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "compileUnitParticipationPolicy / validateHistoricalFlagProfile",
+      "fields": [
+        "event_time_range",
+        "countries.role_rules",
+        "flag_profiles",
+        "accepted_scene_semantics"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Validation of declared design traits is not pixel certification or unit spatial evidence."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/unit_participation_policy_v1.mjs",
+        "startLine": 38,
+        "endLine": 98,
+        "symbol": "compileUnitParticipationPolicy / validateHistoricalFlagProfile",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Optional private fixture validator checks declared date/role/location and flag validity; it does not place units or turn a counterfactual scene into history. Not part of current80s unit render selection."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "UNITS.NATIVE_MARKERS",
+    "domain": "UNITS",
+    "name": "Current native protected markers and labels",
+    "description": "Current V4 redraws the unchanged native moving-graphic layout after source/area/front/date composition; it is not a call to national-unit badge overlay.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "bootLongRuntime foreground owner",
+      "fields": [
+        "native.layoutItems",
+        "native.reveal"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Original art/anchor/scale tokens are preserved.",
+      "The variable name markers/units in diagnostics must not be interpreted as historical force positions."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+        "startLine": 64,
+        "endLine": 76,
+        "symbol": "bootLongRuntime foreground owner",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Current V4 redraws the unchanged native moving-graphic layout after source/area/front/date composition; it is not a call to national-unit badge overlay."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+        "startLine": 121,
+        "endLine": 140,
+        "symbol": "drawFrame foreground.draw",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Native foreground is placed above event/source annotations and front composition."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "COMBAT.LEGACY_BADGE_OVERLAY",
+    "domain": "COMBAT",
+    "name": "Legacy soldier badge overlay",
+    "description": "Older authored soldier/flag octagon overlay remains in source/closure and supplies reused layout evaluation, but its old artwork factory is not selected by current national-tablet or80-second routes.",
+    "lifecycle": "LEGACY",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "createReferenceCombatOverlay",
+      "fields": [
+        "units",
+        "profiles"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "No explosions/smoke/weapon simulation is inferred by the namecombat.",
+      "NationalUnitBadge imports layout logic, not the legacy soldierart factory."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_combat_overlay_v2.mjs",
+        "startLine": 127,
+        "endLine": 179,
+        "symbol": "createReferenceCombatOverlay",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Older authored soldier/flag octagon overlay remains in source/closure and supplies reused layout evaluation, but its old artwork factory is not selected by current national-tablet or80s routes."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "COMBAT.PHYSICS_SIMULATION",
+    "domain": "COMBAT",
+    "name": "Scientific combat/unit simulation",
+    "description": "No combat, traffic, weapon, vessel/aircraft physics or fluid simulation is exposed by the audited map/unit render path. Vector role artwork and supplied anchor playback do not implement those systems.",
+    "lifecycle": "NOT_IMPLEMENTED",
+    "classification": "NOT_IMPLEMENTED",
+    "axes": {
+      "SOURCE_EXISTS": "NO",
+      "BUILT_IN_IMAGE": "NO",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "audited national-unit capability limit",
+      "fields": [],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Scope is the audited WORLD ENGINE runtime graph; no generalized military simulation capability claimed."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
+        "startLine": 1,
+        "endLine": 11,
+        "symbol": "audited national-unit capability limit",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "No combat, traffic, weapon, vessel/aircraft physics or fluid simulation is exposed by the audited map/unit render path. Vector role artwork and supplied anchor playback do not implement those systems."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    },
+    "standaloneValidatorExists": "NO"
+  },
+  {
+    "id": "ASTRA_CPU.TERRAIN_PARSER",
+    "domain": "ASTRA_CPU",
+    "name": "Float32 GeoTIFF terrain parser",
+    "description": "CPU parser preserves original Float32 metre values, transform,PixelIsPoint registration,NoData,CRS,declared vertical datum and row order; used by active pinned archive extraction.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "parse_terrain",
+      "fields": [
+        "data",
+        "expected_sha256",
+        "vertical_datum"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Single-band unscaled Float32 geographic rectilinear TIFF; rotated/projected/packed rasters rejected.",
+      "No implicit resampling or synthetic zero NoData."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/terrain.py",
+        "startLine": 26,
+        "endLine": 38,
+        "symbol": "parse_terrain",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "CPU parser preserves original Float32 metre values, transform,PixelIsPoint registration,NoData,CRS,declared vertical datum and row order; used by active pinned archive extraction."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/terrain.py",
+        "startLine": 68,
+        "endLine": 126,
+        "symbol": "parse_terrain validation andmetadata",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Preserves source datatype and builds pixelcentre axes once."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA_CPU.BATHYMETRY_PARSER",
+    "domain": "ASTRA_CPU",
+    "name": "Signed NetCDF bathymetry parser",
+    "description": "CPU libnetcdf reads raw positive-up metre elevations and genuine coordinate vectors, preserving fill validity and north/south source row order.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "parse_bathymetry",
+      "fields": [
+        "data",
+        "expected_sha256",
+        "vertical_datum"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Signed elevation, not an automatic ocean mask.",
+      "Projected/packed/unresolvedCRS unsupported."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/bathymetry.py",
+        "startLine": 235,
+        "endLine": 255,
+        "symbol": "parse_bathymetry",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "CPU libnetcdf reads raw positive-up metre elevations and genuine coordinate vectors, preserving fill validity and north/south source row order."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/bathymetry.py",
+        "startLine": 298,
+        "endLine": 345,
+        "symbol": "_parse_bathymetry_unlocked",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Cellcentres, transform,sign,NoData,source dtype and unresolved-ocean metadata preserved."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA_CPU.EXPLICIT_OCEAN_DEPTH",
+    "domain": "ASTRA_CPU",
+    "name": "CPU depth with explicit ocean mask",
+    "description": "Optional CPU depth derivation requires caller-supplied aligned ocean mask; absent mask raises rather than classifying all negative elevations as sea. Current GPU uses native GIS gate instead.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "depth_with_ocean_mask",
+      "fields": [
+        "raster",
+        "ocean_mask"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Mask alignment must be established by caller.",
+      "Land/invalid derived cells remainNaN/unsupported."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/bathymetry.py",
+        "startLine": 375,
+        "endLine": 404,
+        "symbol": "depth_with_ocean_mask",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Optional CPU depth derivation requires caller-supplied aligned ocean mask; absent mask raises rather than classifying all negative elevations as sea. Current GPU uses native GIS gate instead."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "ASTRA_CPU.SURFACE_PARSER",
+    "domain": "ASTRA_CPU",
+    "name": "PNG/worldfile/projection parser",
+    "description": "CPU parses original PNG,color metadata and SHA-boundpgw/prj sidecars; pixel centre worldfile origins become GDAL corners once.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "parse_surface",
+      "fields": [
+        "data",
+        "worldfile",
+        "projection",
+        "expected_sha256",
+        "expected_sidecar_sha256"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Rotated/sheared/projected/westward/nondegree grids rejected explicitly.",
+      "Encoded color is not decoded into false heights."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/surface.py",
+        "startLine": 159,
+        "endLine": 233,
+        "symbol": "parse_surface",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "CPU parses original PNG,color metadata and SHA-boundpgw/prj sidecars; pixelcentre worldfile origins become GDAL corners once."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/surface.py",
+        "startLine": 53,
+        "endLine": 106,
+        "symbol": "_worldfile / _projection",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Handles centre/corner andtraditional geographic axis order explicitly."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA_CPU.PROVIDER_INTERFACE",
+    "domain": "ASTRA_CPU",
+    "name": "Three role providers and versioned catalog",
+    "description": "TerrainSource,BathymetrySource,SurfaceTextureSource return version/license/SHA/source metadata and distinct status results; active Studio consumes the existing pinnedArchiveCatalog.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "DataRequest / SourceSpec / ProviderResult",
+      "fields": [
+        "bbox",
+        "crs",
+        "target_ground_resolution",
+        "source_version"
+      ],
+      "allowedValues": {
+        "crs": [
+          "EPSG:4326"
+        ],
+        "status": [
+          "available",
+          "unavailable",
+          "auth_required",
+          "version_changed",
+          "license_unverified",
+          "invalid_data"
+        ]
+      },
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "targetGroundResolution does not itself create/resample detail.",
+      "Availability of a provider API is not activeStudio automaticworldwide acquisition."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/providers.py",
+        "startLine": 18,
+        "endLine": 105,
+        "symbol": "DataRequest / SourceSpec / ProviderResult",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "TerrainSource,BathymetrySource,SurfaceTextureSource return version/license/SHA/source metadata and distinct status results; activeStudio consumes the existing pinnedArchiveCatalog."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA_CPU.MAPDATA_CONFIG",
+    "domain": "ASTRA_CPU",
+    "name": "Optional neutral mapData configuration",
+    "description": "CPU prepare_scene validates explicitbbox/role sourceId/version/cache; absent/disabled fields preserve previous renderer input and do not trigger download orGPU activation.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "YES",
+      "SCENE_VALIDATED": "YES",
+      "RENDERER_CALLED": "YES",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "prepare_scene",
+      "fields": [
+        "mapData.enabled",
+        "bbox",
+        "crs",
+        "targetGroundResolution",
+        "terrain",
+        "bathymetry",
+        "surfaceTexture",
+        "cache"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Current production uses pinned source profile; library configuration is not an arbitraryStudio promptmapcontrol.",
+      "Requires caller source catalog; does not infer country,license,network grant or camera."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/scene.py",
+        "startLine": 140,
+        "endLine": 218,
+        "symbol": "prepare_scene",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "CPU prepare_scene validates explicitbbox/role sourceId/version/cache; absent/disabled fields preserve previous renderer input and do not trigger download orGPU activation."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": false,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": false
+    }
+  },
+  {
+    "id": "ASTRA_CPU.COPERNICUS_REQUESTS",
+    "domain": "ASTRA_CPU",
+    "name": "Copernicus regional/COG request planning",
+    "description": "Selects intersecting entries in supplied source index and plans bounded exact object ranges from suppliedIFD metadata. Does not independently discover allCOG layouts or prove actual remote download.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "plan_copernicus_tiles",
+      "fields": [
+        "request",
+        "indexed_tiles",
+        "source_id",
+        "source_version",
+        "allow_full_tile",
+        "max_tiles",
+        "max_total_bytes"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "allow_full_tile": false,
+        "max_tiles": 256,
+        "max_total_bytes": 536870912
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Global general coordinates supported within explicitcontracts; not called by current pinnedArchiveCatalog route.",
+      "Unknown tile URLs and overview detail are not fabricated."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/acquisition.py",
+        "startLine": 257,
+        "endLine": 305,
+        "symbol": "plan_copernicus_tiles",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Selects intersecting entries in supplied source index and plans bounded exact object ranges from suppliedIFD metadata. Does not independently discover allCOG layouts or prove actual remote download."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/acquisition.py",
+        "startLine": 374,
+        "endLine": 406,
+        "symbol": "plan_cog_ranges",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Requires supplied object-bound layout, checksRange/ETag downstream; does notdecode arbitraryTIFF blocks."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "ASTRA_CPU.GEBCO_SUBSET_REQUESTS",
+    "domain": "ASTRA_CPU",
+    "name": "GEBCO regional subset planning",
+    "description": "Pinned source metadata plus actual complete1Daxes determine bounded DAP subsets while retaining source latitude direction; missing axes request coordinates only.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "plan_gebco_subset",
+      "fields": [
+        "request",
+        "metadata",
+        "longitude",
+        "latitude",
+        "max_cells",
+        "max_bytes"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Request generation isnotactualserveracceptance/download.",
+      "CurrentStudio usesexistingarchive subset."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/acquisition.py",
+        "startLine": 653,
+        "endLine": 688,
+        "symbol": "plan_gebco_subset",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Pinned source metadata plus actual complete1Daxes determine bounded DAP subsets while retaining source latitude direction; missing axes request coordinates only."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "ASTRA_CPU.WMS_WMTS_REQUESTS",
+    "domain": "ASTRA_CPU",
+    "name": "NASA WMS/WMTS metadata request adapters",
+    "description": "Metadata/config-bound WMS 1.3 EPSG4326requests use LATITUDE_LONGITUDEserviceBBOX; internalbbox remainswest,south,east,north. WMTS parsesactualtilematrices andplansboundedtiles.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "build_wms13_plan",
+      "fields": [
+        "request",
+        "endpoint",
+        "layer",
+        "source_id",
+        "source_version",
+        "width",
+        "height",
+        "source_metadata_sha256"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Output size is not extra native detail.",
+      "Datelineparts split; unsupported CRSes/matrices reject rather than guess.",
+      "No currentStudio automaticremoteacquisition path."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/acquisition.py",
+        "startLine": 1216,
+        "endLine": 1281,
+        "symbol": "build_wms13_plan",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Metadata/config-bound WMS1.3 EPSG4326requests use LATITUDE_LONGITUDEserviceBBOX; internalbbox remainswest,south,east,north. WMTS parsesactualtilematrices andplansboundedtiles."
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/acquisition.py",
+        "startLine": 970,
+        "endLine": 989,
+        "symbol": "parse_wmts_metadata",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "WMTSmetadata parser exists independently ofproductiondownload execution."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "ASTRA_CPU.RAW_TRANSFORM_CACHE",
+    "domain": "ASTRA_CPU",
+    "name": "CPU raw/transformed source cache",
+    "description": "Version/source/bbox/CRS/resolution/hash/metadata/range/ETag identities address raw and transformeddata; integrity and strict file operations reject corruption.",
+    "lifecycle": "CANDIDATE",
+    "classification": "SCENE_ONLY",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "CacheRequest / FileCache",
+      "fields": [
+        "source_id",
+        "source_version",
+        "bbox",
+        "crs",
+        "resolution",
+        "source_sha256",
+        "transform_version",
+        "source_metadata_sha256",
+        "url_sha256",
+        "byte_range",
+        "expected_etag"
+      ],
+      "allowedValues": {},
+      "defaults": {},
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "Distinct from existing renderedscene cache andDropboxdurability.",
+      "Currentactivearchivepreparation doesnot implythiscache automaticallypersistsworlddata."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/cache.py",
+        "startLine": 122,
+        "endLine": 185,
+        "symbol": "CacheRequest / FileCache",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "Version/source/bbox/CRS/resolution/hash/metadata/range/ETag identities address raw and transformeddata; integrity and strict file operations reject corruption."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  },
+  {
+    "id": "ASTRA_CPU.BOUNDED_DOWNLOAD_RECOVERY",
+    "domain": "ASTRA_CPU",
+    "name": "Bounded download/single-flight/resume",
+    "description": "DownloadManager offers explicit network grants/allowedhosts, concurrency/retry/deadline bounds, checked partialresume andfailedartifact rejection; default networkingdisabled.",
+    "lifecycle": "CANDIDATE",
+    "classification": "NOT_WIRED",
+    "axes": {
+      "SOURCE_EXISTS": "YES",
+      "BUILT_IN_IMAGE": "YES",
+      "UI_EXPOSED": "NO",
+      "PARSER_ACCEPTED": "NO",
+      "PLANNER_MAPPED": "NO",
+      "SCENE_VALIDATED": "NO",
+      "RENDERER_CALLED": "NO",
+      "OUTPUT_VERIFIED": "NOT_VERIFIED"
+    },
+    "input": {
+      "entrypoint": "DownloadManager",
+      "fields": [
+        "network_enabled",
+        "allowed_hosts",
+        "max_concurrency",
+        "timeout_seconds",
+        "deadline_seconds",
+        "max_retries",
+        "chunk_bytes"
+      ],
+      "allowedValues": {},
+      "defaults": {
+        "network_enabled": false,
+        "max_concurrency": 2,
+        "timeout_seconds": 10,
+        "deadline_seconds": 30,
+        "max_retries": 2
+      },
+      "units": {},
+      "errors": []
+    },
+    "dependencies": [],
+    "constraints": [
+      "DefaulttransportperformsliveHTTP onlywhen explicitlyenabled.",
+      "Existingoffline/mocked tests do notproveactualproviderdownload; no externaldownload performed in thisaudit."
+    ],
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/astra-cpu-data-v1/astra_cpu/cache.py",
+        "startLine": 671,
+        "endLine": 705,
+        "symbol": "DownloadManager",
+        "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+        "finding": "DownloadManager offers explicit network grants/allowedhosts, concurrency/retry/deadline bounds, checked partialresume andfailedartifact rejection; default networkingdisabled."
+      }
+    ],
+    "confidence": "HIGH",
+    "scope": "Current operating Studio V4_ARCHIVAL_80S unless historicalStandaloneBehavior is stated; source APIs described separately from exposed prompt controls.",
+    "historicalStandaloneBehavior": true,
+    "imageInclusionEvidence": "IMAGE_AND_BASELINE_LINEAGE.json::flatDeclaredImagePaths; immutable current digest 8ef393 and historical independent pull, not a new pull",
+    "verificationNote": "RENDERER_CALLED means an exact source-connected invocation, never GPU execution or full 80-second output quality. UI/PARSER flags describe this feature control, not merely selecting a bundle preset.",
+    "explicitScope": {
+      "axes": "CURRENT_STUDIO_V4_ARCHIVAL_80S",
+      "standaloneSourceCapabilitiesDescribed": true
+    },
+    "standaloneValidatorExists": "YES"
+  }
+]
