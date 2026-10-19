@@ -1,0 +1,943 @@
+{
+  "schema": "WORLD_ENGINE_RECONCILIATION_REMAINING_32_V1",
+  "featureCount": 151,
+  "originalUnwiredCount": 53,
+  "statusCounts": {
+    "BLOCKED": 18,
+    "NOT_APPLICABLE": 15,
+    "SUPPORTING": 104,
+    "UNVERIFIED": 14
+  },
+  "APPLIEDCount": 0,
+  "NVIDIAProofCount": 0,
+  "features": [
+    {
+      "id": "ASTRA.BATHYMETRY_COLOR",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. The current material uses signed depth only under native ocean coverage; no new candidate NVIDIA output is available.",
+      "knownOutputFinding": "All150 frames report terrain/bathymetry/surfaceTexture and6uploadedtextures; original material path draws. No per-role ablation, NVIDIA or seam/quality approval.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+          "startLine": 88,
+          "endLine": 95,
+          "symbol": "buildAstraFragment bathymetry",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Signed negative elevation becomes depth tone only when the same-frame native GIS coverage says ocean; below-sea-level land is protected.",
+          "evidenceId": "ASTRA.BATHYMETRY_COLOR:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+          "startLine": 43,
+          "endLine": 48,
+          "symbol": "buildQualityFragment bathymetry",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Current boundary-enabled material executes this same genuine-source treatment; the cited earlier ASTRA fragment is its preserved baseline counterpart, not a claim that boundary-enabled path calls that earlier program.",
+          "evidenceId": "ASTRA.BATHYMETRY_COLOR:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "ASTRA.SUPPORT_DISTANCE_BLEND",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. Existing support-distance blending is reused; visible seam quality for the candidate is not observed.",
+      "knownOutputFinding": "All150 frames report terrain/bathymetry/surfaceTexture and6uploadedtextures; original material path draws. No per-role ablation, NVIDIA or seam/quality approval.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/distance_support.mjs",
+          "startLine": 7,
+          "endLine": 48,
+          "symbol": "supportMaskForRole / buildSupportDistance",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Per-role Euclidean distance to invalid/source-edge support controls screen-pixel blending; sample values remain native and no geographic support is expanded.",
+          "evidenceId": "ASTRA.SUPPORT_DISTANCE_BLEND:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+          "startLine": 64,
+          "endLine": 67,
+          "symbol": "bootLongRuntime source selection",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Current long route passes quality boundary configuration to the preserved source factory.",
+          "evidenceId": "ASTRA.SUPPORT_DISTANCE_BLEND:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "ASTRA.SURFACE_TEXTURE",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. Actual surface RGB composition exists only within valid source support; the partial sample must not be reported as global coverage.",
+      "knownOutputFinding": "All150 frames report terrain/bathymetry/surfaceTexture and6uploadedtextures; original material path draws. No per-role ablation, NVIDIA or seam/quality approval.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+          "startLine": 20,
+          "endLine": 42,
+          "symbol": "buildQualityFragment surfaceTexture",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Original encoded surface RGB is mixed over base material only where its authentic valid/alpha support and native land fraction apply.",
+          "evidenceId": "ASTRA.SURFACE_TEXTURE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "ASTRA.TERRAIN_NORMAL_LIGHTING",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. Elevation-neighbor normal lighting exists and is reused, but no candidate frame verifies its final composed appearance.",
+      "knownOutputFinding": "All150 frames report terrain/bathymetry/surfaceTexture and6uploadedtextures; original material path draws. No per-role ablation, NVIDIA or seam/quality approval.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+          "startLine": 62,
+          "endLine": 87,
+          "symbol": "buildAstraFragment terrain",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Valid genuine height neighbours supply metre-based finite-difference normals, diffuse light and bounded altitude tint; NoData and polar metric limits fall back.",
+          "evidenceId": "ASTRA.TERRAIN_NORMAL_LIGHTING:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/visual-quality-upgrade-v1/quality_material_core.mjs",
+          "startLine": 28,
+          "endLine": 42,
+          "symbol": "buildQualityFragment terrain",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Current boundary-enabled material executes this same genuine-source treatment; the cited earlier ASTRA fragment is its preserved baseline counterpart, not a claim that boundary-enabled path calls that earlier program.",
+          "evidenceId": "ASTRA.TERRAIN_NORMAL_LIGHTING:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "BACKUP.DROPBOX_OFFLINE_OAUTH",
+      "status": "UNVERIFIED",
+      "originalUnwired53": true,
+      "baselineReason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Offline token renewal is implemented in a later optional backup layer, not proven selected in the current immutable image or candidate runtime.",
+      "knownOutputFinding": "Existing separate durability proof/code preserved. Source-checkout render is not proof that no-backup operatingprofile usedDropbox/externalrestore.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-dropbox-offline-v1/renewal.py",
+          "startLine": 148,
+          "endLine": 227,
+          "symbol": "TokenProvider",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "동시401 refresh 직렬화·만료 선행 갱신·오류시 기존token 제거.",
+          "evidenceId": "BACKUP.DROPBOX_OFFLINE_OAUTH:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-dropbox-offline-v1/renewal.py",
+          "startLine": 230,
+          "endLine": 276,
+          "symbol": "OfflineOpener",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "허용 Dropbox route와401일 때 단1회 갱신 재요청.",
+          "evidenceId": "BACKUP.DROPBOX_OFFLINE_OAUTH:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-dropbox-offline-v1/offline_runtime.py",
+          "startLine": 82,
+          "endLine": 116,
+          "symbol": "make_vault_from_env",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "기존 Dropbox store와 Vault를 재사용하며 static fallback 없음.",
+          "evidenceId": "BACKUP.DROPBOX_OFFLINE_OAUTH:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "BACKUP.ENCRYPTED_CHECKPOINT",
+      "status": "UNVERIFIED",
+      "originalUnwired53": true,
+      "baselineReason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Encrypted checkpoints exist in a separate durability extension; this audit does not read private backup data or prove candidate durability.",
+      "knownOutputFinding": "Existing separate durability proof/code preserved. Source-checkout render is not proof that no-backup operatingprofile usedDropbox/externalrestore.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/checkpoint.py",
+          "startLine": 161,
+          "endLine": 247,
+          "symbol": "Checkpoints.save",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "계획·오디오·완료 장면 cache와 provenance를 snapshot한다.",
+          "evidenceId": "BACKUP.ENCRYPTED_CHECKPOINT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/vault.py",
+          "startLine": 80,
+          "endLine": 127,
+          "symbol": "Vault",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "HKDF 분리 key와 AES-GCM envelope·인증 후 readback.",
+          "evidenceId": "BACKUP.ENCRYPTED_CHECKPOINT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "BACKUP.FRESH_ROOT_RESTORE",
+      "status": "UNVERIFIED",
+      "originalUnwired53": true,
+      "baselineReason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. A restore implementation exists, but no fresh-root restore for this new candidate is executed and a restore never grants paid restart approval.",
+      "knownOutputFinding": "Existing separate durability proof/code preserved. Source-checkout render is not proof that no-backup operatingprofile usedDropbox/externalrestore.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/checkpoint.py",
+          "startLine": 257,
+          "endLine": 336,
+          "symbol": "restore",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Scene·source·cache key·native provenance·file/decode 확인.",
+          "evidenceId": "BACKUP.FRESH_ROOT_RESTORE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/startup_restore.py",
+          "startLine": 120,
+          "endLine": 135,
+          "symbol": "ensure_restore",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "처음 복구와 반복 부팅 재검증을 분리.",
+          "evidenceId": "BACKUP.FRESH_ROOT_RESTORE:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "BACKUP.PRODUCTION_INPUT_ADAPTER",
+      "status": "UNVERIFIED",
+      "originalUnwired53": true,
+      "baselineReason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. The later backup production adapter is separate from the old operating image; its existence is not current runtime selection evidence.",
+      "knownOutputFinding": "Existing separate durability proof/code preserved. Source-checkout render is not proof that no-backup operatingprofile usedDropbox/externalrestore.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-dropbox-gpu-production-v1/production_runtime.py",
+          "startLine": 27,
+          "endLine": 42,
+          "symbol": "frozen",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "동결된 offline source 해시 확인.",
+          "evidenceId": "BACKUP.PRODUCTION_INPUT_ADAPTER:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-dropbox-gpu-production-v1/production_runtime.py",
+          "startLine": 45,
+          "endLine": 91,
+          "symbol": "canonical_reader / install",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "원본 Secret 파일 재작성 없이 private scratch 변환과 기존 경로 재사용.",
+          "evidenceId": "BACKUP.PRODUCTION_INPUT_ADAPTER:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/studio-dropbox-gpu-production-v1/Dockerfile",
+          "startLine": 1,
+          "endLine": 14,
+          "symbol": "additive production image",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "기존offline이미지에 독립 adapter entrypoint만 추가.",
+          "evidenceId": "BACKUP.PRODUCTION_INPUT_ADAPTER:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "DETAIL.POST_ARRIVAL_APPROACH",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The protected parent native Detail lock is preserved, but the separate full post-arrival visual Detail adapter and its native-render admission certificate are not selected.",
+      "knownOutputFinding": "This exact feature is not selected by the known preview profile; preserved implementation exists separately.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_detail_approach_adapter_v1.mjs",
+          "startLine": 68,
+          "endLine": 127,
+          "symbol": "compileCameraDetailApproach",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Validatedcertificate,motion,perframesafety.",
+          "evidenceId": "DETAIL.POST_ARRIVAL_APPROACH:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_detail_approach_adapter_v1.mjs",
+          "startLine": 140,
+          "endLine": 161,
+          "symbol": "evaluateCameraDetailApproachFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Noeventcontrolswhilecameraunlocked.",
+          "evidenceId": "DETAIL.POST_ARRIVAL_APPROACH:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2376,
+          "endLine": 2389,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "DETAIL.POST_ARRIVAL_APPROACH:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "DETAIL.VISUAL_GRADE_ADMISSION",
+      "status": "UNVERIFIED",
+      "originalUnwired53": true,
+      "baselineReason": "Preserved source/audit evidence only; no new feature-specific CPU consumer execution is claimed. Visual-grade admission needs real static/native-render evidence; CPU metadata alone cannot certify the new framing's quality.",
+      "knownOutputFinding": "This exact feature is not selected by the known preview profile; preserved implementation exists separately.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/visual_detail_admission_v1.mjs",
+          "startLine": 63,
+          "endLine": 161,
+          "symbol": "evaluateVisualDetailCandidate",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Semantic/native proof/safe geometry/readability checks; survey warnings separated.",
+          "evidenceId": "DETAIL.VISUAL_GRADE_ADMISSION:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/visual_detail_admission_v1.mjs",
+          "startLine": 165,
+          "endLine": 214,
+          "symbol": "selectVisualDetailExtent/createEventDetailFramingRequest",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Least enlargement selection with exact geometry/evidence binding.",
+          "evidenceId": "DETAIL.VISUAL_GRADE_ADMISSION:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.DIRECTIONAL_FLOW",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The historical fixture has no admitted actor identity/role/date/position/route plan; generic Flow CPU support cannot establish historical movement.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 58,
+          "endLine": 71,
+          "symbol": "compileFlowIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Directedendpointandfixturegraphiccontract.",
+          "evidenceId": "FLOW.DIRECTIONAL_FLOW:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 202,
+          "endLine": 224,
+          "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Shorttravelinghighlightaheadobjectclampedtorevealedroute.",
+          "evidenceId": "FLOW.DIRECTIONAL_FLOW:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2648,
+          "endLine": 2661,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "FLOW.DIRECTIONAL_FLOW:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.ENDPOINT_PULSE",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The historical fixture has no admitted actor identity/role/date/position/route plan; generic Flow CPU support cannot establish historical movement.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 58,
+          "endLine": 71,
+          "symbol": "compileFlowIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Directedendpointandfixturegraphiccontract.",
+          "evidenceId": "FLOW.ENDPOINT_PULSE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 182,
+          "endLine": 187,
+          "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Nonrepeatingdepartureandarrivalpulsewithsinamplitudefadeto0.",
+          "evidenceId": "FLOW.ENDPOINT_PULSE:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2648,
+          "endLine": 2661,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "FLOW.ENDPOINT_PULSE:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.HEADING",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The historical fixture has no admitted actor identity/role/date/position/route plan; generic Flow CPU support cannot establish historical movement.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 58,
+          "endLine": 71,
+          "symbol": "compileFlowIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Directedendpointandfixturegraphiccontract.",
+          "evidenceId": "FLOW.HEADING:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 169,
+          "endLine": 180,
+          "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Arc-lengthsamplewithlookaheadandangleunwrapgivesstablefront/backorientation.",
+          "evidenceId": "FLOW.HEADING:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2648,
+          "endLine": 2661,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "FLOW.HEADING:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.MOVING_OBJECT",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The historical fixture has no admitted actor identity/role/date/position/route plan; generic Flow CPU support cannot establish historical movement.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 58,
+          "endLine": 71,
+          "symbol": "compileFlowIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Directedendpointandfixturegraphiccontract.",
+          "evidenceId": "FLOW.MOVING_OBJECT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 191,
+          "endLine": 229,
+          "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Onefixturedefinedgraphicfollowsroutewithsmootherstepaccel/decel.",
+          "evidenceId": "FLOW.MOVING_OBJECT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2648,
+          "endLine": 2661,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "FLOW.MOVING_OBJECT:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.ROUTE_HOLD",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The historical fixture has no admitted actor identity/role/date/position/route plan; generic Flow CPU support cannot establish historical movement.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 58,
+          "endLine": 71,
+          "symbol": "compileFlowIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Directedendpointandfixturegraphiccontract.",
+          "evidenceId": "FLOW.ROUTE_HOLD:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 106,
+          "endLine": 135,
+          "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Preserverouteandarrivedobjectforconfiguredfinalhold.",
+          "evidenceId": "FLOW.ROUTE_HOLD:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2648,
+          "endLine": 2661,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "FLOW.ROUTE_HOLD:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.ROUTE_REVEAL",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The historical fixture has no admitted actor identity/role/date/position/route plan; generic Flow CPU support cannot establish historical movement.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 58,
+          "endLine": 71,
+          "symbol": "compileFlowIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Directedendpointandfixturegraphiccontract.",
+          "evidenceId": "FLOW.ROUTE_REVEAL:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+          "startLine": 106,
+          "endLine": 135,
+          "symbol": "compileFlowPlan/sampleFlowRoute/evaluateFlowFrame",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "DrawsuppliedroutefromdirectedstarttoendusingV1arc-length.",
+          "evidenceId": "FLOW.ROUTE_REVEAL:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/source_contract.json",
+          "startLine": 2648,
+          "endLine": 2661,
+          "symbol": "files[].repoPath / sha256 / imagePath",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Exact source file is an explicit member of the immutable RTX package contract. Image ancestry/pull verification is recorded separately.",
+          "evidenceId": "FLOW.ROUTE_REVEAL:E3",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FLOW.VISUAL_POLISH_PROFILE",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The generic Flow core is source-bound, but this distinct approved mobile polish profile is not imported by the new binding and historical actor/route inputs are absent.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_visual_profile_v2.mjs",
+          "startLine": 6,
+          "endLine": 39,
+          "symbol": "compileFlowVisualProfile",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Defaults, role groups and allowed ranges.",
+          "evidenceId": "FLOW.VISUAL_POLISH_PROFILE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_visual_profile_v2.mjs",
+          "startLine": 64,
+          "endLine": 107,
+          "symbol": "applyFlowVisualProfile",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Changes render controls only; original route/motion/timing stay.",
+          "evidenceId": "FLOW.VISUAL_POLISH_PROFILE:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FRONTIER.MOVING_SCALAR_LIGHT",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.scalarTerritory is null; catalog contains0SCALAR_CONTROL_PLAN. No scalar/light owner draw in known150frames. Same-frame native texture/role coverage and empty parent Area/front slots are additional conditional prerequisites.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+          "startLine": 46,
+          "endLine": 74,
+          "symbol": "compileControlFrontierLightMotion / evaluateControlFrontierLightMotion",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Same scalar ownership boundary supplies screen-pixel core/halo and displacement-driven energy; finite temporal window settles strength when the supplied boundary stops. Included but not selected by current80s route.",
+          "evidenceId": "FRONTIER.MOVING_SCALAR_LIGHT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+          "startLine": 119,
+          "endLine": 130,
+          "symbol": "frontierFragment",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Pixel distance uses same trusted scalar boundary, derivatives and finite halo support.",
+          "evidenceId": "FRONTIER.MOVING_SCALAR_LIGHT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FRONTIER.OUTER_DOMAIN_GOLD",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.scalarTerritory is null; catalog contains0SCALAR_CONTROL_PLAN. No scalar/light owner draw in known150frames. Same-frame native texture/role coverage and empty parent Area/front slots are additional conditional prerequisites.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/frontier_ref2.mjs",
+          "startLine": 12,
+          "endLine": 52,
+          "symbol": "setReferenceFrontierProfile / createControlFrontierLightPassV3",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Five-second ReferenceV2 decoration reuses registered native domain coverage and validates domainSHA before drawing a restrained outer glow. Current long route explicitly disables registration.",
+          "evidenceId": "FRONTIER.OUTER_DOMAIN_GOLD:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "FRONTIER.TERRAIN_DESTINATION_LIGHT",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.scalarTerritory is null; catalog contains0SCALAR_CONTROL_PLAN. No scalar/light owner draw in known150frames. Same-frame native texture/role coverage and empty parent Area/front slots are additional conditional prerequisites.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+          "startLine": 170,
+          "endLine": 175,
+          "symbol": "drawFrame frontier.draw",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "The five-second compositor passes the actual ASTRA-combined terrain texture into a destination-light multiplier so terrain relief survives occupation fill. The current80s Area overlay has no corresponding texture input.",
+          "evidenceId": "FRONTIER.TERRAIN_DESTINATION_LIGHT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+          "startLine": 100,
+          "endLine": 106,
+          "symbol": "lightingFragment",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Samples actualTerrain and computes the destination lighting factor.",
+          "evidenceId": "FRONTIER.TERRAIN_DESTINATION_LIGHT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "MAP.NATIVE_WEBGL_FACTORY",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. The protected native factory is reused by the additive path; no new actual WebGL draw is executed in this CPU stage.",
+      "knownOutputFinding": "Same original native factory/GIS/ASTRA/material route produces real150readPixels frames. It is not a silent replacement by an unused basic renderer; per-feature quality and NVIDIA remain unverified.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+          "startLine": 345,
+          "endLine": 375,
+          "symbol": "createMapInfographicRenderer",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Shared Three.js/native factory draws source raster, role coverage, region material, boundaries and protected graphics; the current V4 long path invokes it through AreaNativeBridge.",
+          "evidenceId": "MAP.NATIVE_WEBGL_FACTORY:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+          "startLine": 30,
+          "endLine": 51,
+          "symbol": "createAreaNativeBridge",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Current V4 route uses one preserved native factory and existing graphic pass.",
+          "evidenceId": "MAP.NATIVE_WEBGL_FACTORY:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "MAP.REFERENCE_PRESENTATION_ROLL",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Actual V5 event tracking is connected, but the five-second coherent roll/overscan owner is not. No rotation input is exposed or silently ignored.",
+      "knownOutputFinding": "No roll slot selected in protected V5/native long route. Old five-second presentation/overscan cannot safely be copied onto complete foreground without matching projection/layout contracts.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+          "startLine": 91,
+          "endLine": 108,
+          "symbol": "compileReferencePresentationPlan / expandNativeBounds",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Original five-second adapter applies authored camera roll/overscan coherently to the geographic framebuffer and projects national tablets into it. Not used by current chapter camera.",
+          "evidenceId": "MAP.REFERENCE_PRESENTATION_ROLL:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "MAP.SOURCE_GRADE",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. The current long route already calls the supported source grade, so it is reused rather than reimplemented.",
+      "knownOutputFinding": "Same original native factory/GIS/ASTRA/material route produces real150readPixels frames. It is not a silent replacement by an unused basic renderer; per-feature quality and NVIDIA remain unverified.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/reference_source_material.mjs",
+          "startLine": 14,
+          "endLine": 43,
+          "symbol": "setReferenceSourceProfile / createReferenceTerrainMaterialPassV4",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Reference V2 source grade modifies authentic material inside valid support, protecting coast edges and falling back outside source. It is called by current V4.",
+          "evidenceId": "MAP.SOURCE_GRADE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "MAP.SOURCE_OCEAN_TONE",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. Source-derived ocean tones exist without fabricated ripple physics; actual candidate appearance is not measured.",
+      "knownOutputFinding": "Same original native factory/GIS/ASTRA/material route produces real150readPixels frames. It is not a silent replacement by an unused basic renderer; per-feature quality and NVIDIA remain unverified.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_ocean_material_v4.mjs",
+          "startLine": 8,
+          "endLine": 38,
+          "symbol": "validateReferenceOceanProfileV4",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Registered source RGB and real GIS coastal proximity produce restrained ocean tones; procedural ripples/glints/phase drift are explicitly removed.",
+          "evidenceId": "MAP.SOURCE_OCEAN_TONE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "MAP.WARM_TERRAIN_TREATMENT",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "The unchanged native/ASTRA source owner remains in the inherited source-bound render graph. New completion alias/config tests do not execute this feature shader or establish GPU output; authentic regional support/NoData fallback is retained. Existing bounded gold/warm relief treatment is reused but final candidate gold/front separation is not observed.",
+      "knownOutputFinding": "Same original native factory/GIS/ASTRA/material route produces real150readPixels frames. It is not a silent replacement by an unused basic renderer; per-feature quality and NVIDIA remain unverified.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+          "startLine": 8,
+          "endLine": 15,
+          "symbol": "DEFAULT_REFERENCE_TERRAIN_PROFILE_V4",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Preserved terrain profile warms real bright baked features; ASTRA terrain normal lighting additionally reuses warmHighlightColor/Strength before occupation overlay.",
+          "evidenceId": "MAP.WARM_TERRAIN_TREATMENT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/astra-gpu-activation-v1/astra_material_core.mjs",
+          "startLine": 79,
+          "endLine": 87,
+          "symbol": "buildAstraFragment terrain",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Genuine elevation-normal diffuse lighting and restrained warm component feed the source material.",
+          "evidenceId": "MAP.WARM_TERRAIN_TREATMENT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "PLANNER.CAUSAL_TRACKS",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The original optional schematic causal_tracks validator is not a factual historical unit source. The new source-bound arrivalAreaId cue is different; no historical route/contact track is fabricated.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+          "startLine": 120,
+          "endLine": 192,
+          "symbol": "causalTrackRecord / validateCausalTracks",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Frame ordering, adjacent states and exact supplied front contact required.",
+          "evidenceId": "PLANNER.CAUSAL_TRACKS:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "PLANNER.FAMILY_TRANSPORT",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "The portable TRANSPORT family compiler remains separate from the strict frozen WAR preset. Generic canonical Flow inputs now have a consumer, but the current historical fixture supplies no admitted transport subevent.",
+      "knownOutputFinding": "Known completion.eventFlow.flows/events/areas are empty; actual flowFrames0. Existing generic Flow compilers/consumer CPU checks do not provide dated historical tracks.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+          "startLine": 355,
+          "endLine": 365,
+          "symbol": "selectFeatures",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "TRANSPORT feature selection requires supplied routes.",
+          "evidenceId": "PLANNER.FAMILY_TRANSPORT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+          "startLine": 75,
+          "endLine": 94,
+          "symbol": "compileExistingEnginePlan",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Binds route geometry, object graphic and timing into existing Flow V2.",
+          "evidenceId": "PLANNER.FAMILY_TRANSPORT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "STUDIO.ACTUAL_80S_INPUT_OUTPUT",
+      "status": "UNVERIFIED",
+      "originalUnwired53": false,
+      "baselineReason": "Actual 66430/eighty-second private input/output remains unavailable. Source selection/CPU tests cannot replace a real artifact comparison.",
+      "knownOutputFinding": "66430.mp4 and exactprivate80sjob input absent; no sourceexample can substitute for actualoutput.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+          "startLine": 349,
+          "endLine": 351,
+          "symbol": "_start_supervisor private records",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "실제실행계획·오디오·승인이작업개인기록에저장됨.",
+          "evidenceId": "STUDIO.ACTUAL_80S_INPUT_OUTPUT:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+          "startLine": 436,
+          "endLine": 472,
+          "symbol": "finalize",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "최종기술·사용자검수상태를구분한다.",
+          "evidenceId": "STUDIO.ACTUAL_80S_INPUT_OUTPUT:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "TERRITORY.COMPLEMENTARY_SCALAR_CONTROL",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.scalarTerritory is null; catalog contains0SCALAR_CONTROL_PLAN. No scalar/light owner draw in known150frames. Same-frame native texture/role coverage and empty parent Area/front slots are additional conditional prerequisites.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/territory_control_adapter_v1.mjs",
+          "startLine": 61,
+          "endLine": 108,
+          "symbol": "compileTerritoryControlIntent",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Standalone control engine evaluates one monotone longitudinal boundary over supplied land and classifies complementary winner/loser ownership. Current80s archival adapter does not call it.",
+          "evidenceId": "TERRITORY.COMPLEMENTARY_SCALAR_CONTROL:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "TERRITORY.GAIN_STYLE",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.scalarTerritory is null; catalog contains0SCALAR_CONTROL_PLAN. No scalar/light owner draw in known150frames. Same-frame native texture/role coverage and empty parent Area/front slots are additional conditional prerequisites.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/gain_territory.mjs",
+          "startLine": 14,
+          "endLine": 37,
+          "symbol": "setReferenceTerritoryProfile / createTerritoryControlPass",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Reference decorator changes the existing territory material using bounded gained opacity/brightness without changing boundary geometry/timing; not called by current80s compositor.",
+          "evidenceId": "TERRITORY.GAIN_STYLE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "UNITS.NATIONAL_TABLETS",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.nationalUnits null;0NATIONAL_UNIT_SCENE/dated actorpositions. Existing native geographic markers are not historical national unit tablets.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
+          "startLine": 34,
+          "endLine": 62,
+          "symbol": "validateNationalFlagProfiles / validateNationalUnitBadgeFixture",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Vector flag panels in original rounded tablets use supplied resolved per-frame anchors, sizes and rotations; rolesGROUND/AVIATION/SUPPORT. Current80s V4 calls native markers instead.",
+          "evidenceId": "UNITS.NATIONAL_TABLETS:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        },
+        {
+          "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
+          "startLine": 149,
+          "endLine": 171,
+          "symbol": "createNationalUnitBadgeArtwork",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Original vector flag tablet and abstract role art; no source-frame extraction.",
+          "evidenceId": "UNITS.NATIONAL_TABLETS:E2",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    },
+    {
+      "id": "UNITS.SAFE_STATIC_SCALE",
+      "status": "BLOCKED",
+      "originalUnwired53": true,
+      "baselineReason": "Existing advanced owner is now selected by a source-bound optional Studio/browser path and exercised at the CPU consumer boundary. Current historical scalar/national-unit source counts are zero; required genuine native composition/terrain/role slots remain conditional. No historical movement/occupation, actual optional output or NVIDIA verification is claimed.",
+      "knownOutputFinding": "Actual visualExtensions.nationalUnits null;0NATIONAL_UNIT_SCENE/dated actorpositions. Existing native geographic markers are not historical national unit tablets.",
+      "sourceReferences": [
+        {
+          "path": "world-simulation-shorts-engine/recovery/reference-visual-master-v2/unit-size-profile.mjs",
+          "startLine": 75,
+          "endLine": 115,
+          "symbol": "selectReferenceUnitScale",
+          "commit": "c0f2868e9cab8a269c2bd8552dc09920e5e53863",
+          "finding": "Existing all-frame layout/measurement checks safely select one bounded static national-unit scale; camera/anchors/art/design/timing are unchanged. Not selected in80s.",
+          "evidenceId": "UNITS.SAFE_STATIC_SCALE:E1",
+          "inspectionResult": "PASS_PINNED_SOURCE_BODY_AND_LINE_RANGE"
+        }
+      ]
+    }
+  ]
+}
