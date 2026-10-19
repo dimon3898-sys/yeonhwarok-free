@@ -31,6 +31,8 @@ export function extendOvernightServerPlan(inherited,{request,records,manifestSHA
  assert.equal(request.sourceManifestSHA256,manifestSHA256,'OVERNIGHT_SOURCE_MANIFEST_BINDING_REQUIRED');
  assert.equal(inherited.completionIntegrity?.profileSHA256,hash(request.parentCaptureRequest.completionV2),
   'OVERNIGHT_ACTUAL_COMPLETION_PARENT_REQUIRED');
+ assert.equal(request.preview.bindings?.sourceCatalogSHA256,hash(sourceCatalog),
+  'OVERNIGHT_PACKAGE_SOURCE_CATALOG_BINDING_REQUIRED');
  const config=structuredClone(inherited.serverConfig),bindings=new Map(config.bindings.map(row=>[row.url,row])),
   byName=new Map(records.map(row=>[row.name,row]));
  assert.equal(byName.size,records.length,'OVERNIGHT_SOURCE_DUPLICATE');
@@ -54,8 +56,13 @@ export function extendOvernightServerPlan(inherited,{request,records,manifestSHA
  config.runtimeConfig.overnightV3=structuredClone(request.overnightV3);
  config.runtimeConfig.overnightPreview=structuredClone(request.preview);
  config.runtimeConfig.overnightSourceCatalog=structuredClone(sourceCatalog);
+ // Only this new, source-sealed server config adopts the additive authority.
+ // The frozen parent request, history bytes and parent manifests stay intact.
+ config.runtimeConfig.completionSourceCatalog=structuredClone(sourceCatalog);
+ config.runtimeConfig.completionIntegrity={...config.runtimeConfig.completionIntegrity,catalogSHA256:hash(sourceCatalog)};
  config.runtimeConfig.overnightIntegrity=identity;config.bindings=[...bindings.values()];
- return{...inherited,serverConfig:config,overnightRequest:structuredClone(request),overnightIntegrity:identity,
+ return{...inherited,serverConfig:config,completionIntegrity:structuredClone(config.runtimeConfig.completionIntegrity),
+  overnightRequest:structuredClone(request),overnightIntegrity:identity,
   sourceBindings:[...inherited.sourceBindings,...records,...existingRecords].map(row=>row.file?
    {path:row.file,bytes:row.bytes,sha256:row.sha256}:row),
   sourceSignature:hash({parent:inherited.sourceSignature,overnight:identity,existingRecords}),

@@ -28,7 +28,8 @@ export async function extendLoadedOvernightPlan(inherited,options={}){
    '--request-file',requestFile,'--plan-file',options.planFile],{maxBuffer:8*1024*1024,timeout:45000}),
   request=JSON.parse(checked.stdout),records=await ownSources(request.sourceManifestSHA256),
   existingRecords=await existingVisualSourceRecords({readSource:native.boundedSource}),
-  catalog=JSON.parse(await native.boundedSource(path.join(root,'../universal-integration-completion-v2/SOURCE_DATA_CATALOG.json'))),
+  catalogResult=await execute('/usr/bin/python3',['-B',path.join(root,'data_readiness.py'),'--catalog'],
+   {maxBuffer:4*1024*1024,timeout:45000}),catalog=JSON.parse(catalogResult.stdout),
   plan=extendOvernightServerPlan(inherited,{request,records,manifestSHA256:request.sourceManifestSHA256,
    sourceCatalog:catalog,existingRecords}),old=inherited.assertSourceUnchanged;
  const requestHash=sha(await native.boundedSource(requestFile));

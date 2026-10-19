@@ -45,8 +45,9 @@ def _visual_admission(value,catalog,plan):
 
 def gate_context(submission,*,image_digest,control_root=None):
     plan=_source_plan(submission);manifest=_manifest();proof=manifest.verify_sources()
-    catalog_raw=manifest.read_regular(PARENT/'SOURCE_DATA_CATALOG.json');catalog=json.loads(catalog_raw)
-    history=load('qualified_history',PARENT/'runtime_bridge.py').data_admission(submission)
+    data=load('qualified_data',HERE/'data_readiness.py')
+    catalog,catalog_raw,catalog_sha=data.load_effective_catalog()
+    history=data.admit_capture_sources(submission,catalog)
     visual=_visual_admission(submission['overnightV3']['visualExtensions'],catalog,plan)
     image=manifest.read_image_proof(control_root,source_manifest_sha256=proof['manifestSHA256'],image_digest=image_digest)
     bindings={'sourceCommit':image['sourceCommit'] if image else proof['sourceCommit'],
@@ -55,7 +56,7 @@ def gate_context(submission,*,image_digest,control_root=None):
         'completionProfileSHA256':manifest.sha(manifest.canonical({
             'integration':submission['integration'],'completionV2':submission['completionV2'],
             'visualExtensions':submission['overnightV3']['visualExtensions']})),
-        'sourceCatalogSHA256':manifest.sha(catalog_raw)}
+        'sourceCatalogSHA256':catalog_sha}
     preview=load('preview_contract',HERE/'preview_contract.py').compile_preview(plan,bindings=bindings,
         start_frame=submission['overnightV3'].get('startFrame'),frame_count=150)
     return {'schema':'WORLD_ENGINE_OVERNIGHT_GATE_CONTEXT_V3','sourceClosureVerified':True,

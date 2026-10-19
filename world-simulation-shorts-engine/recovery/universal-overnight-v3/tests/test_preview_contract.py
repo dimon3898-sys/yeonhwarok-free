@@ -27,9 +27,12 @@ class PreviewContractTests(unittest.TestCase):
         plan = original()
         before = preview.canonical(plan)
         result = preview.compile_preview(plan, bindings=bindings())
-        self.assertEqual(result["range"], {"startFrame": 1400, "endFrame": 1550, "fps": 30,
+        self.assertEqual(result["range"], {"startFrame": 1450, "endFrame": 1600, "fps": 30,
             "totalFrames": 2400, "frameCount": 150, "frameConvention": "GLOBAL_HALF_OPEN", "localPtsFrameOrigin": 0})
-        self.assertEqual(result["selection"]["sourceActivityFrames"], 100)
+        self.assertEqual(result["selection"]["sourceActivityFrames"], 50)
+        self.assertEqual(result["selection"]["phaseCoherentTransitionFrames"], 50)
+        self.assertEqual(result["selection"]["outsideChapterTransitionFrames"], 0)
+        self.assertEqual(result["selection"]["internalChapterCuts"], 0)
         self.assertEqual(result["sceneSlices"][0]["sceneId"], "scene-0007")
         self.assertEqual(result["audioClock"]["sampleCount"], 240000)
         self.assertFalse(result["hardwareVerified"])
@@ -54,6 +57,43 @@ class PreviewContractTests(unittest.TestCase):
         self.assertEqual(result["range"]["endFrame"], 18000)
         self.assertEqual(result["sceneSlices"][0]["sceneId"], "other-event")
         self.assertFalse(result["selection"]["geometryInterpolationAdded"])
+
+    def test_generic_phase_selector_excludes_other_phase_carry_in_without_country_rule(self):
+        plan = {"schema": "WORLD_ENGINE_UNIVERSAL_VIDEO_V2", "durationSeconds": 30, "fps": 30,
+            "totalFrames": 900, "resolution": {"width": 1080, "height": 1920}, "aspectRatio": "9:16",
+            "legacyScenePlan": {"timing": {"total_frames": 900, "fps": 30},
+                                "camera_intent": {"anchor": [-70, -33]}},
+            "scenes": [{"sceneId": "other-region", "startFrame": 0, "endFrame": 900}],
+            "productionV3": {"eventChapters": [
+                {"chapterId": "before", "startFrame": 0, "geometryStateIds": ["alpha"]},
+                {"chapterId": "change", "startFrame": 300,
+                 "presentationPolicy": {"geometryStateIds": ["gamma", "delta"]}},
+                {"chapterId": "after", "startFrame": 600, "geometryStateIds": ["delta"]}],
+                "geometrySchedule": [
+                    {"chapterId": "change", "startFrame": 300, "endFrame": 340,
+                     "mode": "TRANSITION_SUPPLIED_SNAPSHOTS", "fromStateId": "alpha", "toStateId": "gamma"},
+                    {"chapterId": "change", "startFrame": 390, "endFrame": 440,
+                     "mode": "TRANSITION_SUPPLIED_SNAPSHOTS", "fromStateId": "gamma", "toStateId": "delta"}]}}
+        request = preview.compile_preview(plan, bindings=bindings())
+        self.assertEqual(request["range"]["startFrame"], 340)
+        self.assertEqual(request["range"]["endFrame"], 490)
+        self.assertEqual(request["selection"]["phaseCoherentTransitionFrames"], 50)
+        self.assertEqual(request["selection"]["outsideChapterTransitionFrames"], 0)
+        self.assertEqual(plan["legacyScenePlan"]["camera_intent"]["anchor"], [-70, -33])
+        # Without declared phase states, use authored activity without claiming
+        # a known phase relationship or inventing state metadata.
+        for chapter in plan["productionV3"]["eventChapters"]:
+            chapter.pop("geometryStateIds", None)
+            chapter.pop("presentationPolicy", None)
+        fallback = preview.compile_preview(plan, bindings=bindings())
+        self.assertEqual(fallback["range"]["startFrame"], 300)
+        self.assertEqual(fallback["selection"]["phaseCoherentTransitionFrames"], 0)
+
+    def test_invalid_declared_phase_metadata_is_not_silently_ignored(self):
+        plan = original()
+        plan["productionV3"]["eventChapters"][0]["presentationPolicy"]["geometryStateIds"] = "unsupported"
+        with self.assertRaisesRegex(preview.PreviewError, "PHASE_STATES_INVALID"):
+            preview.compile_preview(plan, bindings=bindings())
 
     def test_range_cannot_request_full_scene_or_full_80s(self):
         for count in (0, True, 149, 151, 200, 2400):

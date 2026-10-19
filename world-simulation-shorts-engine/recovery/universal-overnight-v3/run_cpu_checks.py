@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent
 TESTS = ['test_package.py', 'test_data_readiness.py', 'test_ledger.py', 'test_preview_contract.py',
          'test_preview_audio.py', 'test_studio_overnight.py', 'test_visual_extensions.mjs',
          'test_preview_capture.mjs', 'test_free_preview_runner.mjs', 'test_runtime_binding.mjs',
-         'test_runtime_authority.py']
+         'test_runtime_authority.py', 'test_source_extension.py']
 
 
 def main(only=None):

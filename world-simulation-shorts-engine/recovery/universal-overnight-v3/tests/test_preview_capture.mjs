@@ -7,7 +7,7 @@ import {createHash} from 'node:crypto';
 import path from 'node:path';
 import {tmpdir} from 'node:os';
 import {fileURLToPath} from 'node:url';
-import {validatePreviewRange,loadVerifiedPreview,assertRuntimeSlice,capturePreviewWithRuntime} from '../preview_capture.mjs';
+import {validatePreviewRange,loadVerifiedPreview,assertRuntimeSlice,capturePreviewWithRuntime,writePreviewProgress} from '../preview_capture.mjs';
 import {longEncodingArgs,assertEncodedSegment} from '../../universal-auto-video-v2/long_capture.mjs';
 import {evaluateProductionGeometryClock} from '../../universal-production-v3/production_visual_profile.mjs';
 import {suppliedFrontObservations} from '../../universal-integration-completion-v2/source_observations.mjs';
@@ -15,11 +15,11 @@ import {suppliedFrontObservations} from '../../universal-integration-completion-
 const here=fileURLToPath(new URL('../',import.meta.url)),execute=promisify(execFile),
  sourceFile=path.resolve(here,'../verified-front-data-v4-recovery/VIDEO_PLAN_80S.json'),
  raw=await readFile(sourceFile),plan=JSON.parse(raw),digest=createHash('sha256').update(raw).digest('hex'),
- range={startFrame:1400,endFrame:1550,fps:30,totalFrames:2400,frameCount:150,frameConvention:'GLOBAL_HALF_OPEN',localPtsFrameOrigin:0};
+ range={startFrame:1450,endFrame:1600,fps:30,totalFrames:2400,frameCount:150,frameConvention:'GLOBAL_HALF_OPEN',localPtsFrameOrigin:0};
 
 test('exact150 global range retains source clock while local encoded PTS start atzero',()=>{
  assert.equal(validatePreviewRange(range),range);
- for(const change of [{frameCount:2400},{endFrame:1551},{startFrame:-1},{localPtsFrameOrigin:1400},{fps:60},{unknown:true}])
+ for(const change of [{frameCount:2400},{endFrame:1601},{startFrame:-1},{localPtsFrameOrigin:1450},{fps:60},{unknown:true}])
   assert.throws(()=>validatePreviewRange({...range,...change}));
 });
 
@@ -36,22 +36,22 @@ test('original FFmpeg settings select150 sequential local images without seeking
 test('actual2400-frame source geometry slice equals originalglobal evaluation; no recreated initial state',async()=>{
  const front=JSON.parse(await readFile(path.resolve(here,'../verified-front-data-v4-recovery/FRONT_PROFILE.json'))),
   complete=suppliedFrontObservations(plan,front),selected=complete.slice(range.startFrame,range.endFrame);
- assert.equal(selected.length,150);assert.equal(selected[0].frame,1400);assert.equal(selected.at(-1).frame,1549);
+ assert.equal(selected.length,150);assert.equal(selected[0].frame,1450);assert.equal(selected.at(-1).frame,1599);
  assert.notDeepEqual(selected[0],complete[0]);
  for(let local=0;local<150;local++){
-  const global=1400+local,clock=evaluateProductionGeometryClock(plan,global);
+  const global=1450+local,clock=evaluateProductionGeometryClock(plan,global);
   assert.equal(clock.globalFrame,global);assert.equal(selected[local],complete[global]);
   assert.equal(clock.coordinatesInterpolated,false);assert.equal(clock.eventDateFrontPrecisionClaimed,false);
  }
- assert.equal(evaluateProductionGeometryClock(plan,1400).fromStateId,'BUSAN');
- assert.equal(evaluateProductionGeometryClock(plan,1549).toStateId,'SEOUL_WITHDRAWAL');
+ assert.equal(evaluateProductionGeometryClock(plan,1450).fromStateId,'NORTH_ADVANCE');
+ assert.equal(evaluateProductionGeometryClock(plan,1599).toStateId,'SEOUL_WITHDRAWAL');
 });
 
 test('runtime cannot mutateoriginalScene or presentsoftware asNVIDIA',()=>{
  const sourceScene=plan.scenes.find(row=>row.sceneId==='scene-0007'),
   loaded={document:plan,scene:sourceScene,planSha256:digest,assertSourceUnchanged:async()=>true},
   runtime={info:{backend:'ANGLE (SwiftShader Device)',testOnly:true},page:{evaluate(){}},errors:[],close(){}},
-  request={bindings:{originalPlanSHA256:digest}},slice={sceneId:sourceScene.sceneId,startFrame:1400,endFrame:1550},
+  request={bindings:{originalPlanSHA256:digest}},slice={sceneId:sourceScene.sceneId,startFrame:1450,endFrame:1600},
   input={plan:loaded,runtime,slice,request,planDocument:plan,softwareProbe:true};
  assert.equal(assertRuntimeSlice(input),true);
  assert.throws(()=>assertRuntimeSlice({...input,softwareProbe:false}),/SOFTWARE_FORBIDDEN/);
@@ -83,4 +83,25 @@ test('softwareharness requires explicitmode andnever fallsbackfromproduction',as
  assert.ok(source.includes('source.loadLongRuntimePlan({...options,sceneId})'));
  assert.ok(source.includes('source.openLongRuntime({...options,loadedPlan:plan})'));
  assert.ok(source.includes("hardwareVerified=!softwareProbe"));
+});
+
+test('CLI stdoutJSON publishes actualaggregate SCENE_CAPTURE progress acrossworkunits',async()=>{
+ const entry=new URL('../preview_capture.mjs',import.meta.url).href,
+  code=`import {writePreviewProgress} from ${JSON.stringify(entry)};
+   writePreviewProgress({globalFrame:444,completedFrames:45,previewCompletedFrames:45,privateDetail:'NEVER_PUBLISH'});
+   writePreviewProgress({globalFrame:474,completedFrames:30,previewCompletedFrames:75});
+   writePreviewProgress({globalFrame:549,completedFrames:105,previewCompletedFrames:150});`;
+ const childEnv={...process.env};delete childEnv.NODE_TEST_CONTEXT;
+ // The managed Codex Node->Node pipe loses child stdout; a standard-library
+ // relay captures the real child bytes without fabricating progress records.
+ const relay="import subprocess,sys; r=subprocess.run([sys.argv[1],'--input-type=module','-e',sys.argv[2]],capture_output=True); sys.stdout.buffer.write(r.stdout); sys.stderr.buffer.write(r.stderr); sys.exit(r.returncode)";
+ const result=await execute('/usr/bin/python3',['-B','-c',relay,process.execPath,code],{env:childEnv}),
+  rows=result.stdout.trim().split('\n').map(line=>JSON.parse(line));
+ assert.deepEqual(rows.map(row=>row.completedFrames),[45,75,150]);
+ assert.ok(rows.every(row=>row.phase==='SCENE_CAPTURE'&&row.totalFrames===150));
+ assert.deepEqual(rows.map(row=>row.globalFrame),[444,474,549]);assert.doesNotMatch(result.stdout,/NEVER_PUBLISH|privateDetail/);
+ const source=await readFile(path.join(here,'preview_capture.mjs'),'utf8');
+ assert.ok(source.includes('options.progress=value=>writePreviewProgress(value)'));
+ assert.throws(()=>writePreviewProgress({globalFrame:4,completedFrames:151},{write(){}}),/ACTUAL_PROGRESS_COUNT/);
+ assert.throws(()=>writePreviewProgress({globalFrame:4,completedFrames:1.5},{write(){}}),/ACTUAL_PROGRESS_COUNT/);
 });

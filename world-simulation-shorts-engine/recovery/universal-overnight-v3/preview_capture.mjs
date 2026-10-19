@@ -30,6 +30,17 @@ export function validatePreviewRange(range){
  'PREVIEW_EXACT_GLOBAL_HALF_OPEN_RANGE_REQUIRED');return range;
 }
 
+/** Only measured capture counters are published. No estimate or invented ETA.
+ * Aggregate previewCompletedFrames retains monotonic progress across original
+ * work-unit boundaries rather than restarting a second fragment at zero. */
+export function writePreviewProgress(value,stream=process.stdout){
+ const completed=value?.previewCompletedFrames??value?.completedFrames;
+ assert.ok(Number.isSafeInteger(completed)&&completed>=0&&completed<=150,'PREVIEW_ACTUAL_PROGRESS_COUNT_REQUIRED');
+ assert.ok(Number.isSafeInteger(value?.globalFrame)&&value.globalFrame>=0,'PREVIEW_ACTUAL_PROGRESS_FRAME_REQUIRED');
+ const record={phase:'SCENE_CAPTURE',globalFrame:value.globalFrame,completedFrames:completed,totalFrames:150};
+ stream.write(JSON.stringify(record)+'\n');return record;
+}
+
 export async function loadVerifiedPreview({requestFile,planFile,expectedPlanSha256}){
  assert.ok(typeof expectedPlanSha256==='string'&&/^[a-f0-9]{64}$/.test(expectedPlanSha256),'PREVIEW_PLAN_SHA_REQUIRED');
  for(const file of [requestFile,planFile])assert.ok(typeof file==='string'&&path.isAbsolute(file)&&path.resolve(file)===file,
@@ -184,6 +195,7 @@ if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.ur
    '--plan-sha256':'expectedPlanSha256','--admission-file':'admissionFile','--output-root':'outputRoot'};
   while(args.length){const key=args.shift();assert.ok(mapping[key]&&args.length&&!Object.hasOwn(options,mapping[key]),'PREVIEW_ARGUMENT_INVALID');options[mapping[key]]=args.shift();}
   assert.equal(Object.keys(options).length,5,'PREVIEW_EXACT_ARGUMENTS_REQUIRED');
+  options.progress=value=>writePreviewProgress(value);
   const report=await capturePreview(options);console.log(JSON.stringify({status:report.status,range:report.range,
    video:report.video,hardwareVerified:report.hardwareVerified,visualQualityApproved:false}));
  }catch(error){console.error(JSON.stringify({status:'BLOCKED',errorCode:/^[A-Z][A-Z0-9_]{2,95}$/.test(error?.message??'')?

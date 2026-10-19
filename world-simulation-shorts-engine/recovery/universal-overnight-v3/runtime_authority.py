@@ -52,7 +52,9 @@ def verify_runtime_sidecars(request_file, plan_file, *, preview_file=None):
     actual_parent = json.loads(manifest.read_regular(plan_path.with_name('INTEGRATION_REQUEST.json')))
     if parent_request != expected_parent or actual_parent != expected_parent:
         raise RuntimeError('OVERNIGHT_PRESERVED_CAPTURE_REQUEST_CHANGED')
-    old.data_admission(submission)  # Actual source bytes AND assessed objects.
+    data = load('qualified_data', HERE / 'data_readiness.py')
+    catalog, catalog_raw, catalog_sha = data.load_effective_catalog()
+    data.admit_capture_sources(submission, catalog)  # Actual history AND original supplied subevents.
     preview_owner = load('preview', HERE / 'preview_contract.py')
     preview_owner.validate_preview(request['preview'], plan)
     bindings = request['preview']['bindings']
@@ -60,8 +62,7 @@ def verify_runtime_sidecars(request_file, plan_file, *, preview_file=None):
             or bindings['imageDigest'] != request['imageDigest']
             or bindings['sourceManifestSHA256'] != source['manifestSHA256']):
         raise RuntimeError('OVERNIGHT_PREVIEW_CAPTURE_BINDING_MISMATCH')
-    catalog_raw = manifest.read_regular(HERE.parent / 'universal-integration-completion-v2/SOURCE_DATA_CATALOG.json')
-    if (bindings['sourceCatalogSHA256'] != manifest.sha(catalog_raw)
+    if (bindings['sourceCatalogSHA256'] != catalog_sha
             or bindings['completionProfileSHA256'] != manifest.sha(manifest.canonical({
                 'integration': submission['integration'], 'completionV2': submission['completionV2'],
                 'visualExtensions': request['overnightV3']['visualExtensions']}))):

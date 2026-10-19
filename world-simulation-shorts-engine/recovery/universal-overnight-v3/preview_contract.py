@@ -125,14 +125,56 @@ def _chapter_frames(plan):
     return result
 
 
+def _phase_coherence(plan):
+    """Count only source-declared within-chapter transitions as coherent.
+
+    Missing phase metadata remains unknown. No date, state, country or motion
+    is invented to improve the score, and the selected source state is not
+    changed by this ranking.
+    """
+    total = plan["totalFrames"]
+    chapters = plan.get("productionV3", {}).get("eventChapters", [])
+    known = {}
+    for chapter in chapters:
+        declared = chapter.get("presentationPolicy", {}).get("geometryStateIds", chapter.get("geometryStateIds"))
+        if declared is not None and (not isinstance(declared, list)
+                or any(not isinstance(state, str) or not state for state in declared)):
+            _fail("PREVIEW_DECLARED_PHASE_STATES_INVALID")
+        if declared:
+            known[chapter.get("chapterId")] = set(declared)
+    coherent, outside = bytearray(total), bytearray(total)
+    for row in plan.get("productionV3", {}).get("geometrySchedule", []):
+        if row.get("mode") != "TRANSITION_SUPPLIED_SNAPSHOTS":
+            continue
+        states = known.get(row.get("chapterId"))
+        endpoints = (row.get("fromStateId"), row.get("toStateId"))
+        if states is None or any(not isinstance(value, str) or not value for value in endpoints):
+            continue
+        destination = coherent if all(value in states for value in endpoints) else outside
+        start, end = row["startFrame"], row["endFrame"]
+        destination[start:end] = b"\1" * (end - start)
+    def prefix(flags):
+        result = [0]
+        for flag in flags:
+            result.append(result[-1] + flag)
+        return result
+    return prefix(coherent), prefix(outside)
+
+
 def select_preview_window(plan):
     """Rank existing frame windows; never invent a route, state or camera pose."""
     total = validate_plan(plan)
     prefix, chapters = _motion_frames(plan), _chapter_frames(plan)
-    # Prefer source-authored geometry activity, then an existing chapter focus,
-    # then the earliest equally informative window. No country/coordinate rule.
+    coherent, outside = _phase_coherence(plan)
+    # Prefer a transition whose endpoints both belong to its source-declared
+    # chapter, avoid context carried in from another phase, then maximize
+    # activity while avoiding a cut into the next chapter. Missing phase
+    # metadata falls back to existing activity rather than being made up.
     start = max(range(total - FRAME_COUNT + 1), key=lambda a: (
+        coherent[a + FRAME_COUNT] - coherent[a],
+        -(outside[a + FRAME_COUNT] - outside[a]),
         prefix[a + FRAME_COUNT] - prefix[a],
+        -sum(a < f < a + FRAME_COUNT for f in chapters),
         sum(a <= f < a + FRAME_COUNT for f in chapters), -a))
     return start
 
@@ -159,6 +201,7 @@ def compile_preview(plan, *, bindings, start_frame=None, frame_count=FRAME_COUNT
         _fail("PREVIEW_GLOBAL_HALF_OPEN_RANGE_INVALID")
     end = start + FRAME_COUNT
     prefix, chapters = _motion_frames(plan), _chapter_frames(plan)
+    coherent, outside = _phase_coherence(plan)
     result = {"schema": SCHEMA, "bindings": bindings, "planSemanticSHA256": sha256(canonical(plan)),
               "range": {"startFrame": start, "endFrame": end, "fps": FPS, "totalFrames": total,
                         "frameCount": FRAME_COUNT, "frameConvention": "GLOBAL_HALF_OPEN", "localPtsFrameOrigin": 0},
@@ -168,8 +211,11 @@ def compile_preview(plan, *, bindings, start_frame=None, frame_count=FRAME_COUNT
                              "endSample": end * 1600, "sampleCount": FRAME_COUNT * 1600,
                              "policy": "CLIP_ORIGINAL_GLOBAL_SFX_NO_RESEQUENCING"},
               "sceneSlices": _scene_slices(plan, start, end),
-              "selection": {"method": "SOURCE_SCHEDULE_ACTIVITY_THEN_CHAPTER_FOCUS" if automatic else "EXPLICIT_GLOBAL_RANGE",
+              "selection": {"method": "SOURCE_PHASE_COHERENCE_THEN_ACTIVITY" if automatic else "EXPLICIT_GLOBAL_RANGE",
                             "sourceActivityFrames": prefix[end] - prefix[start],
+                            "phaseCoherentTransitionFrames": coherent[end] - coherent[start],
+                            "outsideChapterTransitionFrames": outside[end] - outside[start],
+                            "internalChapterCuts": sum(start < f < end for f in chapters),
                             "existingChapterFocusStarts": sum(start <= f < end for f in chapters),
                             "evidenceBasis": "CPU_SOURCE_SCHEDULE_NOT_VISUAL_QUALITY",
                             "sourceTimelineReset": False, "geometryInterpolationAdded": False},
@@ -182,7 +228,7 @@ def validate_preview(request, plan, *, bindings=None):
         _fail("PREVIEW_REQUEST_SCHEMA_INVALID")
     if bindings is not None and request.get("bindings") != validate_bindings(bindings):
         _fail("PREVIEW_TRUSTED_BINDINGS_MISMATCH")
-    automatic = request.get("selection", {}).get("method") == "SOURCE_SCHEDULE_ACTIVITY_THEN_CHAPTER_FOCUS"
+    automatic = request.get("selection", {}).get("method") == "SOURCE_PHASE_COHERENCE_THEN_ACTIVITY"
     supplied_start = request.get("range", {}).get("startFrame")
     expected = compile_preview(plan, bindings=request.get("bindings"),
                                start_frame=None if automatic else supplied_start)
