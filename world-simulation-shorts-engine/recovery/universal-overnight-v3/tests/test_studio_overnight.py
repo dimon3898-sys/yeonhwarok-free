@@ -214,6 +214,19 @@ class DetachedManagerSpyTests(unittest.TestCase):
             root.write_json('approval.json',expired,replace=True)
         with self.assertRaisesRegex(Exception,'GPU_APPROVAL_EXPIRED'):
             manager._read_approval(self.root/'approval.json',self.plan)
+    def test_generated_media_permissions_are_sealed_without_modifying_shared_links(self):
+        import os,stat
+        with self.cache.PrivateTree(self.root) as root:
+            file=self.root/'new.mp4';file.write_bytes(b'CPU_FIXTURE_ONLY');file.chmod(0o644)
+            with self.assertRaises(Exception):root.hash_file('new.mp4')
+            manager._seal_created_media(root,'new.mp4')
+            self.assertEqual(stat.S_IMODE(file.stat().st_mode),0o600)
+            self.assertEqual(root.hash_file('new.mp4')['bytes'],len(b'CPU_FIXTURE_ONLY'))
+            link=self.root/'shared-link.mp4';os.link(file,link)
+            with self.assertRaisesRegex(RuntimeError,'ARTIFACT_OWNER_INVALID'):
+                manager._seal_created_media(root,'shared-link.mp4')
+            with self.assertRaisesRegex(RuntimeError,'NEW_MEDIA_NAME_INVALID'):
+                manager._seal_created_media(root,'../old.mp4')
     def test_start_source_denial_happens_before_worker(self):
         denied=SimpleNamespace(_authorize_start=lambda *a:(_ for _ in ()).throw(RuntimeError('STUDIO_OVERNIGHT_IMAGE_PROOF_REQUIRED')))
         with patch.object(manager,'_bridge',return_value=denied),patch.object(manager.subprocess,'Popen') as child:

@@ -6,7 +6,8 @@ import json
 import sys
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / 'production-studio-mvp-v1'))
+ORIGINAL = Path('/opt/world-engine-production-studio') if HERE.is_relative_to('/opt') else HERE.parent / 'production-studio-mvp-v1'
+sys.path.insert(0, str(ORIGINAL))
 
 
 def load(name, file):

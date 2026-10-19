@@ -17,7 +17,8 @@ import wave
 from preview_contract import validate_preview, sha256, canonical, PreviewError
 
 HERE = Path(__file__).resolve().parent
-PRESERVED_AUDIO = HERE.parent / "production-studio-mvp-v1/studio_audio.py"
+PRESERVED_AUDIO = (Path('/opt/world-engine-production-studio/studio_audio.py') if HERE.is_relative_to('/opt')
+                   else HERE.parent / "production-studio-mvp-v1/studio_audio.py")
 PRESERVED_AUDIO_SHA256 = "03a9083aa71ac5acbe17806afd8dfb44e1fd155e886237aba6c00ae3552dca5d"
 
 

@@ -11,7 +11,7 @@ import subprocess
 import sys
 HERE = Path(__file__).resolve().parent
 PARENT = HERE.parent / 'universal-integration-completion-v2'
-ORIGINAL = HERE.parent / 'production-studio-mvp-v1'
+ORIGINAL = Path('/opt/world-engine-production-studio') if HERE.is_relative_to('/opt') else HERE.parent / 'production-studio-mvp-v1'
 if str(ORIGINAL) not in sys.path:
     sys.path.insert(0, str(ORIGINAL))
 from studio_contracts import StudioContractError, _bounded_json

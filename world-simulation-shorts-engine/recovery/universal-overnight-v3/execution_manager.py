@@ -12,6 +12,7 @@ import json
 import os
 import re
 import subprocess
+import stat
 import sys
 import time
 HERE=Path(__file__).resolve().parent
@@ -29,7 +30,7 @@ def load(name,path):
 def runtime():
     global _RUNTIME
     if _RUNTIME is None:
-        path=RECOVERY/'production-studio-mvp-v1'
+        path=Path('/opt/world-engine-production-studio') if HERE.is_relative_to('/opt') else RECOVERY/'production-studio-mvp-v1'
         if str(path) not in sys.path:sys.path.insert(0,str(path))
         _RUNTIME=load('frozen_runtime',path/'studio_runtime.py')
     return _RUNTIME
@@ -172,6 +173,20 @@ def _worker(job_id,control_root,export_root):
     return 0
 
 
+def _seal_created_media(tree,name):
+    # Exactly the original finalize policy, confined to this new job's files.
+    if not isinstance(name,str) or Path(name).name!=name:
+        raise RuntimeError('STUDIO_OVERNIGHT_NEW_MEDIA_NAME_INVALID')
+    descriptor=os.open(name,os.O_RDONLY|os.O_NOFOLLOW|os.O_NONBLOCK,dir_fd=tree.fd)
+    try:
+        info=os.fstat(descriptor)
+        if (not stat.S_ISREG(info.st_mode) or info.st_uid!=os.geteuid()
+                or info.st_gid!=os.getegid() or info.st_nlink!=1):
+            raise RuntimeError('STUDIO_OVERNIGHT_ARTIFACT_OWNER_INVALID')
+        os.fchmod(descriptor,0o600)
+    finally:os.close(descriptor)
+
+
 def _finish(job,submission,request,export_root,remaining,save):
     """Reuse original audio scheduling/export; crop samples on the global clock."""
     import studio_delivery
@@ -186,12 +201,7 @@ def _finish(job,submission,request,export_root,remaining,save):
         silent=Path(receipt.get('video',{}).get('path',''))
         if silent!=capture.path/'preview.mp4':
             raise RuntimeError('STUDIO_OVERNIGHT_PREVIEW_HASH_MISMATCH')
-        descriptor=os.open(silent.name,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=capture.fd)
-        try:
-            info=os.fstat(descriptor)
-            if info.st_uid!=os.geteuid() or info.st_nlink!=1:raise RuntimeError('STUDIO_OVERNIGHT_ARTIFACT_OWNER_INVALID')
-            os.fchmod(descriptor,0o600)
-        finally:os.close(descriptor)
+        _seal_created_media(capture,silent.name)
         if capture.hash_file(silent.name)['sha256']!=receipt.get('video',{}).get('sha256'):
             raise RuntimeError('STUDIO_OVERNIGHT_PREVIEW_HASH_MISMATCH')
         with job.child('post',create=True) as post,job.child('public',create=True) as public:
@@ -200,6 +210,8 @@ def _finish(job,submission,request,export_root,remaining,save):
                 preview_audio.render_preview_sfx(submission['sfx'],plan,request['preview'],post.path/'preview-sfx.wav')
                 remaining();wav=post.path/'preview-sfx.wav'
             audio=preview_audio.mux_preview_sfx(silent,wav,public.path/'WORLD_ENGINE_STUDIO_VIDEO.mp4',plan,request['preview'])
+            _seal_created_media(public,'WORLD_ENGINE_STUDIO_VIDEO.mp4')
+            if wav is not None:_seal_created_media(post,wav.name)
             summary={'schema':'WORLD_ENGINE_STUDIO_SAFE_QA_V1','technicalVerification':'PASS','frames':150,
                 'fps':30,'width':1080,'height':1920,'durationSeconds':5,'audioStreams':1 if wav else 0,
                 'sfxEnabled':wav is not None,'videoDecodedPixelsUnchanged':True,'fullDecode':True,
