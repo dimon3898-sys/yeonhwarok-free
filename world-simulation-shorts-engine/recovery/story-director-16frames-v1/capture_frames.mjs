@@ -1,6 +1,6 @@
 /** Actual random-access still capture. No encoder, movie input, or image synthesis. */
 import assert from 'node:assert/strict';
-import {readFile,writeFile,mkdir,open,unlink,rename} from 'node:fs/promises';
+import {readFile,writeFile,mkdir,open,unlink,rename,stat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
@@ -70,10 +70,12 @@ try{
   assert.equal(png.readUInt32BE(16),1080);assert.equal(png.readUInt32BE(20),1920);
   const index=sampleFrames.indexOf(frame),file=index>=0?'FRAME_'+String(index).padStart(2,'0')+'_T'+String(frame/30).padStart(3,'0')+'.png':
    'ADJACENT_GLOBAL_'+String(frame).padStart(4,'0')+'.png',directory=index>=0?'public-review':'adjacent';
-  await writeFile(path.join(ROOT,directory,file),png,{flag:'wx'});
+  const destination=path.join(ROOT,directory,file),existing=await stat(destination).then(()=>true,()=>false);
+  if(existing)assert.deepEqual(await readFile(destination),png,'EXISTING_PNG_DIFFERS_REFUSE_OVERWRITE');
+  else await writeFile(destination,png,{flag:'wx'});
   const row={sampleIndex:index>=0?index:null,frame,globalFrame:frame,timeSeconds:frame/30,
    file:directory+'/'+file,bytes:png.length,png_sha256:captured.png_sha256,raw_rgba_sha256:captured.raw_rgba_sha256,
-   directRendererOutput:true,captureWallMilliseconds:performance.now()-at,
+   directRendererOutput:true,newDrawExecuted:true,existingIdenticalPngPreserved:existing,captureWallMilliseconds:performance.now()-at,
    directorSample:captured.directorSample,diagnostic:diagnostic(captured.diagnostic)};
   full.push({...row,diagnostic:captured.diagnostic});
   if(index>=0)report.frames.push(row);if(adjacentFrames.includes(frame))report.adjacentFrames.push(row);

@@ -53,6 +53,13 @@ function paddedBounds(bounds,factor){
  const c=center(bounds),s=span(bounds).map(v=>v*factor);
  return[c[0]-s[0]/2,c[1]-s[1]/2,c[0]+s[0]/2,c[1]+s[1]/2];
 }
+export function directorBoundsAtAdmittedFloor(bounds,minimumBounds){
+ if(!Array.isArray(minimumBounds)||minimumBounds.length!==4||!minimumBounds.every(Number.isFinite)
+  ||minimumBounds[0]>=minimumBounds[2]||minimumBounds[1]>=minimumBounds[3])
+  fail('DIRECTOR_CAMERA_ACTUAL_NATIVE_CLOSEST_EXTENT_REQUIRED');
+ const actual=span(bounds),minimum=span(minimumBounds),factor=Math.max(1,minimum[0]/actual[0],minimum[1]/actual[1]);
+ return factor===1?[...bounds]:paddedBounds(bounds,factor);
+}
 function compileSegment({baseCameraPlan,currentNativeFrame,start,target,totalFrames,fps,holdFrames}){
  // The existing reference adapter requires its last endpoint to be closest.
  // Preserve that contract and reverse only the camera sampler when widening.
@@ -68,7 +75,7 @@ function compileSegment({baseCameraPlan,currentNativeFrame,start,target,totalFra
  return{track,reverse,totalFrames:duration};
 }
 export function compileStoryDirectorCamera({profile,plan,frontProfile,baseCameraPlan,currentNativeFrame,
- safeArea,validateBounds=()=>({valid:true}),output=[1080,1920]}={}){
+ safeArea,minimumBounds,validateBounds=()=>({valid:true}),output=[1080,1920]}={}){
  const settings=validateDirectorCameraProfile(profile,plan),entries=[],attempts=[],
   padding=Math.max(output[0]/(safeArea[2]-safeArea[0]-48),output[1]/(safeArea[3]-safeArea[1]-48));
  let previous=null;
@@ -76,13 +83,13 @@ export function compileStoryDirectorCamera({profile,plan,frontProfile,baseCamera
   const initial=resolveDirectorChapterGeometry({plan,frontProfile,row:{
    geometryRefs:settings.initialContextGeometryRefs,locationIds:settings.initialContextLocationIds??[]}}),
    required=union([...initial.geometries.map(geometryBounds),...initial.locations.map(item=>[...item.anchor,...item.anchor])]);
-  previous=fitGeographicExtent(required,{output,padding:padding*(settings.initialContextPadding??1.08)});
+  previous=directorBoundsAtAdmittedFloor(fitGeographicExtent(required,{output,padding:padding*(settings.initialContextPadding??1.08)}),minimumBounds);
   if(validateBounds(previous,0)?.valid!==true)fail('DIRECTOR_CAMERA_INITIAL_CONTEXT_NATIVE_LAYOUT_UNSAFE');
  }
  for(const row of settings.chapters){
   const source=resolveDirectorChapterGeometry({plan,frontProfile,row}),
    required=union([...source.geometries.map(geometryBounds),...source.locations.map(item=>[...item.anchor,...item.anchor])]),
-   desired=fitGeographicExtent(required,{output,padding:padding*row.padding});
+   desired=directorBoundsAtAdmittedFloor(fitGeographicExtent(required,{output,padding:padding*row.padding}),minimumBounds);
   let target=null,admission=null;
   // Existing native layout is the admission owner. Wider source views are
   // tried; no original text, marker or layout item is repositioned or hidden.
@@ -104,7 +111,7 @@ export function compileStoryDirectorCamera({profile,plan,frontProfile,baseCamera
   previous=[...target];
  }
  const compiled={schema:'WORLD_ENGINE_COMPILED_STORY_DIRECTOR_CAMERA_V1',entries,attempts,
-  totalFrames:plan.totalFrames,fps:plan.fps,output:[...output],safeArea:[...safeArea],
+  totalFrames:plan.totalFrames,fps:plan.fps,output:[...output],safeArea:[...safeArea],minimumBounds:[...minimumBounds],
   originalV5SourceChanged:false,originalReferenceAdapterChanged:false,newCameraMath:false,
   productionEligible:false,nvidiaHardwareVerified:false,visualAdmission:'ACTUAL_SOFTWARE_FRAME_REVIEW_REQUIRED'};
  // Native layout checks cover every original frame, including transitions.
@@ -141,10 +148,13 @@ export function evaluateStoryDirectorCamera(compiled,frame){
   activeSourceGeometryRefs=sourceSegment?.geometryRefs??row.geometryRefs,
   actualSource=activeSourceGeometryRefs.map(id=>row.source.geometries[row.source.geometryRefs.indexOf(id)]),
   sourceSafety=actualSource.length?geometryScreenSafety({geometries:actualSource,bounds:sample.flatBounds,
-   safeArea:compiled.safeArea,output:compiled.output}):{wholeSuppliedGeometrySafe:true,projectedBounds:null,noEventGeometry:true};
+   safeArea:compiled.safeArea,output:compiled.output}):{wholeSuppliedGeometrySafe:true,projectedBounds:null,noEventGeometry:true},
+  velocity=Object.fromEntries(Object.entries(sample.velocity).map(([key,value])=>[key,
+   !inside||locked?0:row.segment.reverse?-value:value]));
  return{...clone(sample),frame,globalFrame:frame,timeSeconds:frame/compiled.fps,chapterId:row.chapterId,eventId:row.eventId,
   camera:{...clone(sample.camera),flatBounds:[...sample.flatBounds]},flatBounds:[...sample.flatBounds],
   cameraLocked:locked,settle:{phase:locked?'DIRECTOR_SOURCE_CONTEXT_HOLD':'DIRECTOR_CAMERA_APPROACH',settled:locked,locked},
+  velocity,
   cameraOnlySampleFrame:sampleFrame,cameraOnlyLocalClockReversed:row.segment.reverse,
   sceneClockReset:false,sourceGeometryRefs:[...row.geometryRefs],contextLocations:clone(row.source.locations),
   activeSourceGeometryRefs:[...activeSourceGeometryRefs],sourceSafety,
@@ -152,6 +162,9 @@ export function evaluateStoryDirectorCamera(compiled,frame){
   geographicToPixelMatrix:[compiled.output[0]/s[0],0,-sample.flatBounds[0]*compiled.output[0]/s[0],
    0,-compiled.output[1]/s[1],sample.flatBounds[3]*compiled.output[1]/s[1],0,0,1],
   rotationDegrees:0,rotationStatus:'BLOCKED_CURRENT_HISTORICAL_COMPOSITOR_HAS_NO_ROLL_CONSUMER',
+  preservedNativeMinimumBounds:[...compiled.minimumBounds],
+  closerThanOriginalNativeFloor:s.some((value,index)=>value<span(compiled.minimumBounds)[index]-1e-9),
+  closerZoomStatus:'BLOCKED_NATIVE_LOCAL_NOT_ADMITTED; PAN_AND_WIDER_TO_REGIONAL_ONLY',
   admission:{visual:'SOFTWARE_PREVIEW_USER_REVIEW_REQUIRED',local:'NOT_ADMITTED',nvidia:'NOT_RUN'},
   productionEligible:false,visualQualityApproved:false};
 }

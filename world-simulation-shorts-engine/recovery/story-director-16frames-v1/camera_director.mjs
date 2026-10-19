@@ -18,14 +18,20 @@ export function createProductionNativeCamera(input){
   reference=native.drawNative(native.cameraPlan.totalFrames-1),safeArea=plans.REGIONAL.layout.safe,
   visibleReferenceReveal=directorVisibleReveal(reference.reveal,config.storyDirector.profile),
   validateBounds=bounds=>{
+   const minimum=plans.REGIONAL.framing.bounds;
+   if(bounds[2]-bounds[0]<minimum[2]-minimum[0]-1e-9||bounds[3]-bounds[1]<minimum[3]-minimum[1]-1e-9)
+    return{valid:false,failures:[{code:'LOCAL_NOT_ADMITTED',category:'DATA_ADMISSION'}]};
    const visual=geographicScaleVisualTokens(bounds,plans),state={...reference,camera:{...reference.camera,flatBounds:bounds}},
     layout=evaluateMovingLayout(native.layoutContract,state,{markerSize:visual.markerSize,boundaryTokens:visual});
    return validateVisibleMovingLayout(layout,visibleReferenceReveal);
   },tracking=compileStoryDirectorCamera({profile:config.storyDirector.profile,plan,frontProfile,
-   baseCameraPlan:native.cameraPlan,currentNativeFrame:Math.min(cameraStartFrame,native.cameraPlan.totalFrames-1),safeArea,validateBounds});
+   baseCameraPlan:native.cameraPlan,currentNativeFrame:Math.min(cameraStartFrame,native.cameraPlan.totalFrames-1),
+   safeArea,minimumBounds:plans.REGIONAL.framing.bounds,validateBounds});
  return{directorCameraPlan:tracking,evidence:{version:'SOURCE_BOUND_SOFTWARE_STORY_DIRECTOR_V1',
   originalV5BaseConsumed:true,originalReferenceCameraAdapterConsumed:true,nativeFactoryAndProjectionUnchanged:true,
   allTimelineCameraFloorModified:false,oldCompletionCameraModified:false,
+  nativeClosestExtentPreserved:true,minimumBounds:clone(plans.REGIONAL.framing.bounds),
+  closerZoomStatus:'BLOCKED_NATIVE_LOCAL_NOT_ADMITTED; PAN_AND_WIDER_TO_REGIONAL_ONLY',
   directorProfileSHA256:config.storyDirector.profileSHA256,actualNativeLayoutPreflight:tracking.nativeLayoutPreflight,
   nativeHeadlinePolicy:{hideDuplicateNativeHeadline:config.storyDirector.profile.hideDuplicateNativeHeadline===true,
    originalNativeTitle:'PRESERVED_SOURCE_UNUSED_WHEN_REPLACED_BY_CHAPTER_TITLE',
@@ -36,7 +42,7 @@ export function createProductionNativeCamera(input){
    const base=native.drawNative(cameraStartFrame+globalFrame),selected=evaluateStoryDirectorCamera(tracking,globalFrame),
     reveal=directorVisibleReveal(base.reveal,config.storyDirector.profile),
     bounds=selected.flatBounds,visual=geographicScaleVisualTokens(bounds,plans),
-    state={...base,camera:{...base.camera,flatBounds:[...bounds]},cameraLocked:selected.cameraLocked,settle:clone(selected.settle)},
+    state={...base,camera:{...base.camera,...clone(selected.camera),flatBounds:[...bounds]},cameraLocked:selected.cameraLocked,settle:clone(selected.settle)},
     layout=evaluateMovingLayout(native.layoutContract,state,{markerSize:visual.markerSize,boundaryTokens:visual}),
     validation=validateVisibleMovingLayout(layout,reveal);
    if(validation.valid!==true)throw Error('DIRECTOR_CAMERA_ACTUAL_LAYOUT_UNSAFE_FRAME_'+globalFrame);
