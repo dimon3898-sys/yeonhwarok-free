@@ -1,0 +1,178 @@
+{
+  "allOptionalCapabilitiesAvailable": false,
+  "gpuRenderingOrQualityPass": false,
+  "items": [
+    {
+      "candidateAvailabilityOrContentNewlyVerified": false,
+      "currentAlternative": "Use existing source-qualified held core. Preserve 850 partial-front-only frames with no occupation fill.",
+      "id": "BILATERAL_OCCUPATION",
+      "licensing": "Use existing official Army map authorship evidence only for corresponding maps; verify any new map/third-party content separately.",
+      "minimumInput": {
+        "admission": "Verify the map describes actual military control; attack axes and planned phase lines are inadmissible.",
+        "geometry": "Dated closed Polygon/MultiPolygon for each explicitly claimed faction, with real scope, holes and coast relation. Never close partial front traces or infer enemy complement.",
+        "provenanceFields": [
+          "sourceURL",
+          "documentSHA256",
+          "mapDate",
+          "pageIndex0",
+          "classification",
+          "factionId",
+          "sourceGeometryRef",
+          "uncertainty",
+          "licenseBasis"
+        ]
+      },
+      "officialCandidates": [
+        "https://www.govinfo.gov/content/pkg/GOVPUB-D114-PURL-gpo111422/pdf/GOVPUB-D114-PURL-gpo111422.pdf",
+        "https://www.govinfo.gov/content/pkg/GOVPUB-D114-PURL-gpo84815/pdf/GOVPUB-D114-PURL-gpo84815.pdf"
+      ],
+      "requiredForQualifiedExisting80s": false,
+      "requiredIfRequested": [
+        "completeOccupation"
+      ]
+    },
+    {
+      "candidateAvailabilityOrContentNewlyVerified": false,
+      "currentAlternative": "Keep native geographic markers; do not copy modern counterfactual units into historical scenes.",
+      "id": "HISTORICAL_UNIT_POSITIONS_AND_ROLE",
+      "licensing": "Map-specific government work/third-party rights check required; do not assume whole-book blanket license.",
+      "minimumInput": {
+        "geometry": [
+          "datedPointOrRoute",
+          "coordinateReference",
+          "positionUncertainty",
+          "sourceObservationDate"
+        ],
+        "guard": "A participation date or national flag alone supplies no unit location. Verify air/naval/support/ground role; never create fictional Soviet ground forces.",
+        "identity": [
+          "unitId",
+          "factionId",
+          "objectRole",
+          "historicalParticipationWindow",
+          "roleEvidence"
+        ],
+        "provenance": [
+          "sourceURL",
+          "sourceSHA256",
+          "pageOrMapId",
+          "licenseBasis"
+        ]
+      },
+      "officialCandidates": [
+        "https://www.history.navy.mil/research/library/online-reading-room/title-list-alphabetically/h/history-us-naval-operations-korea/list-maps-history-us-naval-operations-korea.html",
+        "https://history.army.mil/Research/Reference-Topics/Army-Campaigns/Korean-War-Commemorative-Brochures/"
+      ],
+      "requiredForQualifiedExisting80s": false,
+      "requiredIfRequested": [
+        "nationalUnits",
+        "movingUnits",
+        "routes"
+      ]
+    },
+    {
+      "candidateAvailabilityOrContentNewlyVerified": false,
+      "currentAlternative": "Admit source-endpoint infographic alpha transition or hold original partial source lines, with dates and uncertainty. Never label intermediate animation as observed daily history.",
+      "id": "OBSERVED_DAILY_FRONT_SEQUENCE",
+      "minimumInput": {
+        "geometry": "Dated intermediate observed fronts with explicit coverage and source roles; source map endpoint continuity/correspondence reviewed before any morph.",
+        "guard": "No gap bridging, occupation closure or unobserved vertex path inferred from two snapshots.",
+        "provenanceFields": [
+          "date",
+          "sourceDocumentSHA256",
+          "mapId",
+          "sourceRole",
+          "partialExtent",
+          "registrationEvidence",
+          "uncertainty"
+        ]
+      },
+      "officialCandidates": [
+        "https://www.govinfo.gov/content/pkg/GOVPUB-D114-PURL-gpo84815/pdf/GOVPUB-D114-PURL-gpo84815.pdf"
+      ],
+      "requiredForQualifiedExisting80s": false,
+      "requiredIfRequested": [
+        "observedDailyFronts"
+      ]
+    },
+    {
+      "affectedChapters": [
+        "chapter-05",
+        "chapter-07"
+      ],
+      "candidateAvailabilityOrContentNewlyVerified": false,
+      "currentAlternative": "Retain partial evidence disclosure or use reviewed event phase/range; preserved display labels are not promoted to new exact-day source proof.",
+      "id": "EXACT_DAY_EVIDENCE",
+      "minimumInput": {
+        "evidence": "Official original passage explicitly establishing the claimed recapture day or first-combat day, separate from larger operation phases.",
+        "provenanceFields": [
+          "sourceURL",
+          "documentSHA256",
+          "pageIndex0",
+          "quotedPassage",
+          "eventMeaning",
+          "datePrecision"
+        ]
+      },
+      "officialCandidates": [
+        "https://www.govinfo.gov/content/pkg/GOVPUB-D114-PURL-gpo111422/pdf/GOVPUB-D114-PURL-gpo111422.pdf",
+        "https://history.army.mil/Research/Reference-Topics/Army-Campaigns/Korean-War-Commemorative-Brochures/"
+      ],
+      "requiredForQualifiedExisting80s": false,
+      "requiredIfRequested": [
+        "exactEventDates"
+      ]
+    },
+    {
+      "candidateAvailabilityOrContentNewlyVerified": false,
+      "currentAlternative": "Use existing regional ASTRA sources only on valid support, with unchanged base material elsewhere.",
+      "id": "FULL_SCENE_HIGH_DETAIL_TERRAIN_DEPTH",
+      "minimumInput": {
+        "guard": "NoData is not zero; signed elevation is not a land/ocean classifier. Preserve existing native coverage.",
+        "selection": "Only tiles/subsets intersecting required source footprint, with original version/hash/CRS/transform/NoData/license."
+      },
+      "officialCandidates": [
+        "https://registry.opendata.aws/copernicus-dem/",
+        "https://www.gebco.net/data-products/gridded-bathymetry/",
+        "https://gibs.earthdata.nasa.gov/"
+      ],
+      "requiredForQualifiedExisting80s": false,
+      "requiredIfRequested": [
+        "fullSceneHighDetail"
+      ]
+    },
+    {
+      "candidateAvailabilityOrContentNewlyVerified": false,
+      "currentAlternative": "No unsourced battle/explosion overlays. Event title/dated source front remains usable.",
+      "id": "COMBAT_IMPACT_LOCATIONS",
+      "minimumInput": {
+        "event": "Source-backed dated event location/geometry and effect meaning; participant identity alone is insufficient.",
+        "provenanceFields": [
+          "sourceURL",
+          "documentSHA256",
+          "eventDate",
+          "eventGeometry",
+          "uncertainty",
+          "licenseBasis"
+        ]
+      },
+      "officialCandidates": [
+        "https://history.army.mil/Research/Reference-Topics/Army-Campaigns/Korean-War-Commemorative-Brochures/"
+      ],
+      "requiredForQualifiedExisting80s": false,
+      "requiredIfRequested": [
+        "combatImpacts"
+      ]
+    }
+  ],
+  "noBroadResearchPerformed": true,
+  "qualifiedBasePlanDataStatus": "QUALIFIED_DATA_ADMITTED",
+  "qualifiedBasePlanNeedsNewAcquisition": false,
+  "requiredRuntimeConditions": [
+    "SOURCE_AND_IMAGE_HASH_GATES",
+    "QUALIFICATION_CONSUMER_ENFORCEMENT",
+    "SUPPORTED_RENDERER_CONSUMER",
+    "5S_REFERENCE_COMPARISON_AND_EXPLICIT_USER_VIDEO_APPROVAL_BEFORE80S",
+    "SEPARATE_PAID_GPU_APPROVAL"
+  ],
+  "schema": "WORLD_ENGINE_MINIMUM_MISSING_DATA_V2"
+}

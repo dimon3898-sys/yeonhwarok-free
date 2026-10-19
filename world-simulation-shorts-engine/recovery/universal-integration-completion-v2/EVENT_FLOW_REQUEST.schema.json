@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "EVENT_FLOW_REQUEST.schema.json",
+  "title": "Bounded completion Event/Flow/Area request",
+  "description": "JSON schema plus mandatory local preserved-core canonical compiler validation; declared source references never establish source authority.",
+  "allOf": [
+    {
+      "$ref": "#/$defs/request"
+    }
+  ],
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "const": "WORLD_ENGINE_COMPLETION_EVENT_FLOW_V1"
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/eventEntry"
+          }
+        },
+        "flows": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/flowEntry"
+          }
+        },
+        "areas": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/areaEntry"
+          }
+        }
+      },
+      "required": [
+        "schema",
+        "events",
+        "flows",
+        "areas"
+      ]
+    },
+    "sourceBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "role": {
+          "enum": [
+            "GEOMETRY",
+            "METRIC",
+            "OBJECT_GRAPHIC",
+            "AREA_INTENT",
+            "FLOW_PLAN"
+          ]
+        },
+        "sourceId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "role",
+        "sourceId",
+        "sha256"
+      ]
+    },
+    "eventEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/eventPlan"
+        },
+        "sourceBindings": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/sourceBinding"
+          }
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "id",
+        "plan",
+        "sourceBindings",
+        "startFrame"
+      ]
+    },
+    "flowEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/flowPlan"
+        },
+        "sourceBindings": {
+          "type": "array",
+          "maxItems": 3,
+          "items": {
+            "$ref": "#/$defs/sourceBinding"
+          }
+        },
+        "routeVisibility": {
+          "enum": [
+            "HIDDEN",
+            "VISIBLE"
+          ]
+        },
+        "arrivalAreaId": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        }
+      },
+      "required": [
+        "id",
+        "plan",
+        "sourceBindings",
+        "routeVisibility"
+      ]
+    },
+    "areaEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "plan": {
+          "$ref": "#/$defs/areaPlan"
+        },
+        "sourceBindings": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {
+            "$ref": "#/$defs/sourceBinding"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "plan",
+        "sourceBindings"
+      ]
+    },
+    "eventPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "EVENT_TIMELINE_V1"
+        },
+        "intent": {
+          "type": "object"
+        },
+        "fps": {
+          "const": 30
+        },
+        "seed": {},
+        "profile": {},
+        "totalFrames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "durationSeconds": {},
+        "timeline": {
+          "type": "array"
+        },
+        "ownership": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "intent",
+        "fps",
+        "seed",
+        "profile",
+        "totalFrames",
+        "durationSeconds",
+        "timeline",
+        "ownership"
+      ],
+      "x-runtimeValidation": "normalizeEventFlowRequest reuses original compiler and requires complete canonical semantic equality; unknown nested fields fail."
+    },
+    "flowPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "FLOW_PLAN_V2"
+        },
+        "intent": {
+          "type": "object"
+        },
+        "timing": {},
+        "fps": {
+          "const": 30
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalFrames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "durationSeconds": {},
+        "arrivalFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "holdFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeline": {
+          "type": "array"
+        },
+        "routeEventPlan": {},
+        "ownership": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "intent",
+        "timing",
+        "fps",
+        "startFrame",
+        "endFrame",
+        "totalFrames",
+        "durationSeconds",
+        "arrivalFrame",
+        "holdFrame",
+        "timeline",
+        "routeEventPlan",
+        "ownership"
+      ],
+      "x-runtimeValidation": "normalizeEventFlowRequest reuses original compiler and requires complete canonical semantic equality; unknown nested fields fail."
+    },
+    "areaPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "AREA_PLAN_V3"
+        },
+        "intent": {
+          "type": "object"
+        },
+        "fps": {
+          "const": 30
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "endFrame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalFrames": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "durationSeconds": {},
+        "operations": {},
+        "timeline": {
+          "type": "array"
+        },
+        "geometryBinding": {},
+        "sweepGeometries": {},
+        "ownership": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "intent",
+        "fps",
+        "startFrame",
+        "endFrame",
+        "totalFrames",
+        "durationSeconds",
+        "operations",
+        "timeline",
+        "geometryBinding",
+        "sweepGeometries",
+        "ownership"
+      ],
+      "x-runtimeValidation": "normalizeEventFlowRequest reuses original compiler and requires complete canonical semantic equality; unknown nested fields fail."
+    }
+  }
+}
