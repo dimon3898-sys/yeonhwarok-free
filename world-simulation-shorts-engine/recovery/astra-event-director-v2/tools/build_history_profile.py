@@ -96,6 +96,7 @@ def build(plan_file):
     profile = {'schema': 'WORLD_ENGINE_QUALIFIED_EVENT_PROFILE_V2', 'version': 2,
         'subjectId': edits['subjectId'], 'sourcePlanSHA256': digest(raw), 'editsSHA256': digest(edits_raw),
         'totalFrames': plan['totalFrames'], 'fps': plan['fps'], 'factions': edits['factions'],
+        'presentation': edits['presentation'],
         'locations': [{**x, 'role': 'GEOGRAPHIC_CONTEXT_ONLY', 'troopPosition': False} for x in plan['legacyScenePlan']['locations']],
         'chapters': chapters, 'sourceSchedule': schedule, 'fullControlStates': [], 'controlTransitions': [],
         'audio': {'enabled': False, 'gain': 0, 'cues': [], 'status': 'BLOCKED_AUDIO_SEMANTIC_REVIEW'},
