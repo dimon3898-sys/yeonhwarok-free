@@ -1,6 +1,6 @@
 # ASTRA V2 remaining blockers
 
-This is a source/CPU audit with two directly inspected software-render probes: global frames 0 and 300. Both `proof/PROBE_0000.json` and `proof/PROBE_0300.json` record `ACTUAL_SOURCE_REVIEW_DRAW_COMPLETE`, actual draw/readPixels and a Chromium SwiftShader backend. The complete 16-frame/continuous-window capture is a separate P5 operation and is not declared complete here. Neither this document nor the 151-row table approves video quality, a deployed Studio version, NVIDIA execution, or an 80-second production render.
+This is a source/CPU audit with two directly inspected software-render probes: global frames 0 and 300. Both `proof/PROBE_0000.json` and `proof/PROBE_0300.json` record `ACTUAL_SOURCE_REVIEW_DRAW_COMPLETE`, actual draw/readPixels and a Chromium SwiftShader backend. The complete 16-still / three-window source-review capture is now recorded in proof/ACTUAL_CAPTURE.json (348 actual draws); clean and burned-in videos pass technical decoding only. Boundary review covers 51 indices, including 44 additional actual draws and 7 explicitly reused main-frame proofs. Neither this document nor the 151-row table approves video quality, a deployed Studio version, NVIDIA execution, or an 80-second production render.
 
 ## Historical control and continuous frontier movement
 
@@ -24,7 +24,7 @@ A future Local admission needs a real source with sufficient native color/coastl
 
 ## ASTRA texture identity and historical lighting
 
-The new material decorator preserves the old ASTRA factory and privately carries its actual composed `outputTexture` with canvas, owner, frame and bounds identity. It does not overlay a finished image. Both actual software probes select the ASTRA upload/material path and read the matching composed texture context. The full P5 sequence still needs its own frame-specific receipts; software texture upload is not NVIDIA verification.
+The new material decorator preserves the old ASTRA factory and privately carries its actual composed `outputTexture` with canvas, owner, frame and bounds identity. It does not overlay a finished image. Both actual software probes select the ASTRA upload/material path and read the matching composed texture context. The full P5 sequence now records matching composed texture frame/bounds context on all 348 main draws; software texture upload is not NVIDIA verification.
 
 Historical LightV3 is still blocked by `SCALAR_CONTROL_SOURCE_REQUIRED`: no complete trusted historical scalar/ownership field exists. Its draw count remains zero. A valid terrain texture handle is not evidence that historical scalar lighting or moving ownership is connected.
 
@@ -46,6 +46,14 @@ An image build or deployment is not required by the current ASTRA MASTER impleme
 
 `FEATURE_STATUS_151.csv` preserves all 151 original IDs and original classifications. The master independently classifies 53 as REQUIRED, 70 as SUPPORTING and 28 as NOT_APPLICABLE. Of the old 53 NOT_WIRED entries, five are REQUIRED. Internal/supporting or unrelated modules are not force-enabled to inflate completion.
 
-Current source binding, CPU validation, actual rendering and visual approval are separate columns/evidence levels. Existing historical frame counts are retained only as past evidence. Root P5 must update actual draw witnesses per feature; a successful import or a clip with no requested ownership effect cannot approve that feature.
+Current source binding, CPU validation, actual rendering and visual approval are separate columns/evidence levels. Existing historical frame counts are retained only as past evidence. The current table now includes feature-specific actual software-consumer witnesses; a successful import or a clip with no requested ownership effect cannot approve that feature.
 
 Final visual approval remains `USER_REVIEW_REQUIRED`.
+
+## Observed source-review visual failures
+
+M1 title placement moves from ROI [311,1646,769,1701] at frame 641 to [311,159,769,214] at frame 642: 1,487 pixels in one frame. The new per-frame annotation placement changes safe bands. This is a confirmed defect, not a camera jump. A generic chapter-wide fixed reservation must be validated across the actual camera, boundary and protected-marker trajectory; a cached previous slot or bypassing occlusion would be unsafe substitutes.
+
+The new June 28 fragments are only about 41.47 / 11.83 / 2.63 screen pixels at global frame 300 and overlap protected native marker/text masks. Three fragment draw records do not establish visible/readable source fronts. The modern gold coastline/border dominates them. Requested Local source admission and safe context LOD remain necessary; protected markers are not disabled to inflate visibility.
+
+The three delivered MP4s are explicitly diagnostic source-review clips. They do not demonstrate the unavailable historical owner expansion or mask-derived moving frontier. Overall requested visual contract: NEEDS_REWORK.

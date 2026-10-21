@@ -18,7 +18,7 @@ def verify():
     manifest = ENGINE / 'recovery/story-director-16frames-v1/reports/SOURCE_ASSET_MANIFEST.json'
     parent = json.loads(manifest.read_bytes())
     replay = json.loads((ROOT / 'reports/ORIGINAL_SOURCE_REPLAY.json').read_bytes())
-    verified, errors, generated = [], [], []
+    verified, errors, generated, unique_files = [], [], [], set()
     for row in parent['files']:
         name = row['path']
         if name.startswith('@'):
@@ -46,6 +46,7 @@ def verify():
             errors.append({'path': name, 'error': 'PARENT_BYTES_CHANGED'})
         else:
             verified.append(name)
+            unique_files.add(str(file))
     return {
         'schema': 'ASTRA_V2_IMMUTABLE_PARENT_PRESERVATION_V1',
         'status': 'PASS' if not outside and not errors else 'FAIL',
@@ -53,6 +54,9 @@ def verify():
         'parentManifestSHA256': hashlib.sha256(manifest.read_bytes()).hexdigest(),
         'outsideNamespaceChanges': outside,
         'verifiedParentFiles': len(verified),
+        'verifiedParentManifestEntries': len(verified),
+        'verifiedUniqueParentFiles': len(unique_files),
+        'countingNote': 'The retained parent manifest contains duplicate entries; entry count is not a unique-file count.',
         'parentFileErrors': errors,
         'generatedInputAliasesCheckedBySeparateSourceReplay': generated,
         'sourceReplayEvidence': 'reports/ORIGINAL_SOURCE_REPLAY.json',
