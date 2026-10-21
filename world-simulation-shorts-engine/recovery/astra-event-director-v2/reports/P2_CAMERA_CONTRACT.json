@@ -1,0 +1,495 @@
+{
+  "schema": "WORLD_ENGINE_ASTRA_P2_CAMERA_CONTRACT_V2",
+  "status": "CPU_CAMERA_CONTRACT_EVALUATED; ACTUAL_NATIVE_RENDER_PENDING",
+  "tests": {
+    "python": {
+      "command": "python3 -B -m unittest discover -s recovery/astra-event-director-v2/tests -p test_camera_admission.py -v",
+      "passed": 5
+    },
+    "javascript": {
+      "command": "node recovery/astra-event-director-v2/tests/test_camera_plan.mjs --write-report",
+      "passed": 9
+    },
+    "testsAreCPUContractsOnly": true
+  },
+  "sourcePlanSHA256": "33596c97b433887afb7ced6847d4ef63d099a9b6633546d541890a45c9c6289e",
+  "eventProfileSHA256": "21030c51ec52a716aa39ec2a10cc2bcfc1b315812351c328bb8745f99d2387c1",
+  "cameraProfileSHA256": "6e1fb7e0211f36ae5636356a5d1b83302abc50071d67e4044352c89da9f54077",
+  "cameraAdmissionSHA256": "9af30aceb380dfc68905d224dac8ad493aa87ed454db31fb45b789b599c1eedb",
+  "cameraPlanModuleSHA256": "af10e5ccf3644a792658502c95fed39e2236479d4f4b1e3ae8d478c01c4c52c6",
+  "cameraBridgeModuleSHA256": "dcd73d1360353eefccbe67b9ca9be27e7f0d10d34fd26bbadaee364d4dfbd311",
+  "requestedLocalCamera": {
+    "status": "BLOCKED_REQUESTED_LOCAL",
+    "admitted": false,
+    "automaticWideningAllowed": false,
+    "localCertificate": false,
+    "reasons": [
+      "NATIVE_REGIONAL_MINIMUM_UNCHANGED",
+      "NATIVE_SOURCE_SAMPLING_INSUFFICIENT_FOR_REQUESTED_LOCAL_EXTENTS",
+      "LOCAL_GIS_POSITIONAL_ACCURACY_UNVERIFIED",
+      "FULL_EVENT_CONTROL_GEOMETRY_MISSING"
+    ]
+  },
+  "separatelySelectedReviewPurpose": "REGIONAL_SOURCE_REVIEW",
+  "originalRegionalFloorPreserved": true,
+  "originalReferenceCameraAdapterReused": true,
+  "originalCameraDirectorV5Reused": true,
+  "originalProjectionAndRendererUnchanged": true,
+  "nativeMinimumBounds": [
+    123.50992032913398,
+    32.31981721,
+    131.77298967086602,
+    43.87984179
+  ],
+  "sourceSafety": "CURRENT_SOURCE_WITH_EXPLICIT_GEOGRAPHIC_CONTEXT;NO_FUTURE_SOURCE_DRAW;NO_PREVIOUS_UNKNOWN_FALLBACK",
+  "preflight": {
+    "framesChecked": 2400,
+    "nativeLayoutViolations": [],
+    "sourceClipFrames": [],
+    "maximumCenterStepPixels": 14.762140471649914,
+    "maximumZoomRatio": 1.2999999999999998,
+    "actual2400FramesRendered": false,
+    "visualQualityApproved": false
+  },
+  "chapters": [
+    {
+      "chapterId": "chapter-01",
+      "eventId": "OUTBREAK",
+      "startFrame": 0,
+      "endFrame": 200,
+      "startBounds": [
+        122.27045992787417,
+        30.585813522999995,
+        133.01245007212583,
+        45.613845477
+      ],
+      "focusBounds": [
+        123.14927632913398,
+        30.22680124767193,
+        131.41234567086602,
+        42.087456752328066
+      ],
+      "endBounds": [
+        122.65349216863007,
+        29.51516191739256,
+        131.90812983136993,
+        42.799096082607434
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "HELD_CORE_START",
+        "FRONT_START"
+      ]
+    },
+    {
+      "chapterId": "chapter-02",
+      "eventId": "NORTH_KOREAN_ADVANCE",
+      "startFrame": 200,
+      "endFrame": 400,
+      "startBounds": [
+        122.65349216863007,
+        29.51516191739256,
+        131.90812983136993,
+        42.799096082607434
+      ],
+      "focusBounds": [
+        123.78213628607355,
+        30.51737486472514,
+        132.0452056278056,
+        42.337043994236865
+      ],
+      "endBounds": [
+        123.28635212556964,
+        29.80819471695444,
+        132.5409897883095,
+        43.04622414200757
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        },
+        {
+          "id": "BUSAN_LOCATION",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "cmh-appleman-map-i-1950-06-28"
+      ]
+    },
+    {
+      "chapterId": "chapter-03",
+      "eventId": "NAKDONG_DEFENSE",
+      "startFrame": 400,
+      "endFrame": 600,
+      "startBounds": [
+        123.28635212556964,
+        29.80819471695444,
+        132.5409897883095,
+        43.04622414200757
+      ],
+      "focusBounds": [
+        124.67739666663397,
+        29.789223273238356,
+        132.940466008366,
+        41.71113772676164
+      ],
+      "endBounds": [
+        124.18161250613005,
+        29.07390840602696,
+        133.43625016886992,
+        42.42645259397304
+      ],
+      "contextLocations": [
+        {
+          "id": "BUSAN_LOCATION",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "HELD_CORE_BUSAN",
+        "FRONT_BUSAN"
+      ]
+    },
+    {
+      "chapterId": "chapter-04",
+      "eventId": "INCHON_LANDING",
+      "startFrame": 600,
+      "endFrame": 800,
+      "startBounds": [
+        124.18161250613005,
+        29.07390840602696,
+        133.43625016886992,
+        42.42645259397304
+      ],
+      "focusBounds": [
+        122.09559986204737,
+        31.120080480999995,
+        131.18497613795262,
+        43.836107519
+      ],
+      "endBounds": [
+        121.55023728549305,
+        30.357118858719993,
+        131.73033871450693,
+        44.599069141280005
+      ],
+      "contextLocations": [
+        {
+          "id": "INCHEON",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": []
+    },
+    {
+      "chapterId": "chapter-05",
+      "eventId": "SEOUL_RECAPTURE",
+      "startFrame": 800,
+      "endFrame": 1000,
+      "startBounds": [
+        121.55023728549305,
+        30.357118858719993,
+        131.73033871450693,
+        44.599069141280005
+      ],
+      "focusBounds": [
+        122.43331186204736,
+        31.208486480999994,
+        131.52268813795263,
+        43.924513519
+      ],
+      "endBounds": [
+        121.88794928549305,
+        30.445524858719992,
+        132.06805071450694,
+        44.687475141280004
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": []
+    },
+    {
+      "chapterId": "chapter-06",
+      "eventId": "ALLIED_NORTH_ADVANCE",
+      "startFrame": 1000,
+      "endFrame": 1200,
+      "startBounds": [
+        121.88794928549305,
+        30.445524858719992,
+        132.06805071450694,
+        44.687475141280004
+      ],
+      "focusBounds": [
+        122.2271784628259,
+        32.52283771,
+        130.51332153717408,
+        44.08286229
+      ],
+      "endBounds": [
+        121.73000987836502,
+        31.829236235199996,
+        131.01049012163497,
+        44.7764637648
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        },
+        {
+          "id": "PYONGYANG",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": []
+    },
+    {
+      "chapterId": "chapter-07",
+      "eventId": "CHINESE_INTERVENTION",
+      "startFrame": 1200,
+      "endFrame": 1400,
+      "startBounds": [
+        121.73000987836502,
+        31.829236235199996,
+        131.01049012163497,
+        44.7764637648
+      ],
+      "focusBounds": [
+        121.21781186204737,
+        32.681186481,
+        130.30718813795264,
+        45.397213519000005
+      ],
+      "endBounds": [
+        120.67244928549306,
+        31.918224858719995,
+        130.85255071450695,
+        46.16017514128001
+      ],
+      "contextLocations": [
+        {
+          "id": "PYONGYANG",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": []
+    },
+    {
+      "chapterId": "chapter-08",
+      "eventId": "FRONT_SOUTHWARD",
+      "startFrame": 1400,
+      "endFrame": 1600,
+      "startBounds": [
+        120.67244928549306,
+        31.918224858719995,
+        130.85255071450695,
+        46.16017514128001
+      ],
+      "focusBounds": [
+        122.92569182913397,
+        32.07615539632008,
+        131.188761170866,
+        43.67181826867992
+      ],
+      "endBounds": [
+        122.42990766863005,
+        31.380415623978493,
+        131.68454533136992,
+        44.36755804102151
+      ],
+      "contextLocations": [
+        {
+          "id": "PYONGYANG",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        },
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "HELD_CORE_NORTH_ADVANCE",
+        "FRONT_NORTH_ADVANCE",
+        "cmh-front-1950-12-31",
+        "HELD_CORE_SEOUL_WITHDRAWAL",
+        "FRONT_SEOUL_WITHDRAWAL"
+      ]
+    },
+    {
+      "chapterId": "chapter-09",
+      "eventId": "ALLIED_COUNTEROFFENSIVE",
+      "startFrame": 1600,
+      "endFrame": 1800,
+      "startBounds": [
+        122.42990766863005,
+        31.380415623978493,
+        131.68454533136992,
+        44.36755804102151
+      ],
+      "focusBounds": [
+        123.69954087179889,
+        31.8232826316339,
+        131.96261021353092,
+        43.455754320577896
+      ],
+      "endBounds": [
+        123.20375671129497,
+        31.12533433029726,
+        132.45839437403484,
+        44.15370262191453
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "cmh-front-1951-01-24",
+        "cmh-front-1951-02-28",
+        "cmh-front-1951-04-21"
+      ]
+    },
+    {
+      "chapterId": "chapter-10",
+      "eventId": "STALEMATE_NEAR_38",
+      "startFrame": 1800,
+      "endFrame": 2000,
+      "startBounds": [
+        123.20375671129497,
+        31.12533433029726,
+        132.45839437403484,
+        44.15370262191453
+      ],
+      "focusBounds": [
+        123.53235782506866,
+        32.18208267005038,
+        131.7954271668007,
+        43.76227297016801
+      ],
+      "endBounds": [
+        123.03657366456474,
+        31.487271252043318,
+        132.2912113273046,
+        44.45708438817507
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "cmh-front-1951-05-19",
+        "cmh-front-1951-06-24"
+      ]
+    },
+    {
+      "chapterId": "chapter-11",
+      "eventId": "FRONT_CHANGES_1951_1953",
+      "startFrame": 2000,
+      "endFrame": 2200,
+      "startBounds": [
+        123.03657366456474,
+        31.487271252043318,
+        132.2912113273046,
+        44.45708438817507
+      ],
+      "focusBounds": [
+        123.37944290313033,
+        32.20192469662139,
+        131.6425122448624,
+        43.779213207268484
+      ],
+      "endBounds": [
+        122.8836587426264,
+        31.507287385982565,
+        132.1382964053663,
+        44.47385051790731
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "cmh-front-1951-11-12"
+      ]
+    },
+    {
+      "chapterId": "chapter-12",
+      "eventId": "ARMISTICE",
+      "startFrame": 2200,
+      "endFrame": 2400,
+      "startBounds": [
+        122.8836587426264,
+        31.507287385982565,
+        132.1382964053663,
+        44.47385051790731
+      ],
+      "focusBounds": [
+        122.84969304946827,
+        32.52283771,
+        131.1358361238165,
+        44.08286229
+      ],
+      "endBounds": [
+        122.27045992787417,
+        30.585813522999995,
+        133.01245007212583,
+        45.613845477
+      ],
+      "contextLocations": [
+        {
+          "id": "SEOUL",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        },
+        {
+          "id": "PYONGYANG",
+          "role": "GEOGRAPHIC_CONTEXT_ONLY",
+          "troopPosition": false
+        }
+      ],
+      "sourceGeometryIds": [
+        "cmh-front-1953-07-27"
+      ]
+    }
+  ],
+  "chapterHandoffContinuous": true,
+  "cameraGlobalClockPreserved": true,
+  "rollDegrees": 0,
+  "nativeLayoutValidation": "ACTUAL_NATIVE_VALIDATE_VISIBLE_MOVING_LAYOUT_CALLED_AT_BOOT_AND_EVERY_DRAW; P5_PENDING",
+  "sourceClipValidation": "CPU PROJECTED_SOURCE_FOOTPRINT_ONLY; ACTUAL_PIXELS_PENDING",
+  "actual2400FramesRendered": false,
+  "actualNvidiaHardwareVerified": false,
+  "visualQualityApproved": false,
+  "requestedLocalContractSatisfied": false,
+  "productionEligible": false
+}

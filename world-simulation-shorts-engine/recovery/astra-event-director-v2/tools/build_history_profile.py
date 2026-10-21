@@ -51,6 +51,8 @@ def build(plan_file):
     fronts_raw = (ENGINE / 'recovery/verified-front-data-v4-recovery/FRONT_PROFILE.json').read_bytes()
     fronts = json.loads(fronts_raw)
     catalog = {'MASTER_OFFICIAL_CHRONOLOGY_REVIEW': edits['chronologyBasis']}
+    additional_file = ROOT / 'source-review/ADDITIONAL_FRONT_BINDINGS.json'
+    additional = json.loads(additional_file.read_bytes()).get('fronts', []) if additional_file.exists() else []
     for item in edits['sourceSchedule']:
         row = dict(item)
         if row['startFrame'] != next_frame or row['endFrame'] <= next_frame:
@@ -70,6 +72,26 @@ def build(plan_file):
             row.update(sourceIds=[], missingReason='EVENT_SPECIFIC_CONTROL_AND_FRONT_SOURCE_MISSING',
                        visibleQualifier='전선·점령 자료 없음')
         elif row['kind'] == 'OBSERVED_PARTIAL_FRONT':
+            extra = next((x for x in additional if x['frontId'] == row['stateId']), None)
+            if extra is not None:
+                geo_path = ROOT / extra['sourceFile']
+                if digest(geo_path.read_bytes()) != extra['geoJsonSha256'] or extra['mapDate'] != date:
+                    raise ValueError('ADDITIONAL_FRONT_ACTUAL_SOURCE_SHA_OR_DATE_MISMATCH')
+                if extra.get('runtimeAdmission') != 'QUALIFIED_SOURCE_REVIEW_ONLY' or extra.get('fullControlPolygon') is not False:
+                    raise ValueError('ADDITIONAL_FRONT_EXPLICIT_SOURCE_ONLY_REVIEW_REQUIRED')
+                geo = json.loads(geo_path.read_bytes())
+                expected_geometry = {'type': 'MultiLineString', 'coordinates': [x['geometry']['coordinates'] for x in geo['features']]}
+                if extra.get('geometry') != expected_geometry:
+                    raise ValueError('ADDITIONAL_FRONT_SOURCE_COORDINATES_CHANGED')
+                for proof in [extra['source']['registrationReport'], extra['source']['supportedTraceReport'], extra['source']['sourcePixelTrace']]:
+                    if digest((ROOT / proof['path']).read_bytes()) != proof['sha256']:
+                        raise ValueError('ADDITIONAL_FRONT_REGISTRATION_OR_TRACE_SHA_MISMATCH')
+                row.update(sourceIds=[extra['frontId']], visibleQualifier=date.replace('-', '.') + ' 근사 부분선')
+                catalog[extra['frontId']] = {**extra, 'truthKind': 'observed',
+                    'renderConsumer': 'DIRECTOR_ADDITIONAL_PARTIAL_FRONT'}
+                schedule.append(row)
+                next_frame = row['endFrame']
+                continue
             front = next(x for x in fronts['fronts'] if x['frontId'] == row['stateId'])
             geo = ENGINE / 'recovery/verified-front-data-v4-recovery' / front['sourceFile']
             if digest(geo.read_bytes()) != front['geoJsonSha256'] or front['mapDate'] != date:

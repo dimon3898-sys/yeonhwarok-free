@@ -327,7 +327,7 @@ class ActualSourceAndControllerTests(unittest.TestCase):
         chapters, schedule = contract._profile_semantics(profile, catalog, request)
         self.assertEqual(len(chapters), 12)
         self.assertEqual(sum(x['endFrame']-x['startFrame'] for x in schedule), 2400)
-        self.assertEqual(sum(x['endFrame']-x['startFrame'] for x in schedule if x['truthKind']=='unknown'), 1060)
+        self.assertEqual(sum(x['endFrame']-x['startFrame'] for x in schedule if x['truthKind']=='unknown'), 860)
         self.assertFalse(any(x['stateId']=='BUSAN' and x['chapterId']!='chapter-03' for x in schedule))
 
     def test_real_studio_constructor_and_legacy_normalizer_are_reused_no_worker(self):

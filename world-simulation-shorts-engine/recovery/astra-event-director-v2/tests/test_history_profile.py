@@ -2,6 +2,7 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+import shutil
 import unittest
 from unittest.mock import patch
 
@@ -28,7 +29,13 @@ class QualifiedHistoryProfileTest(unittest.TestCase):
         self.assertEqual(profile['fullControlStates'], [])
         self.assertEqual(profile['controlTransitions'], [])
         self.assertFalse(report['fullHistoricalControlAndMorphReady'])
-        self.assertEqual(len([v for v in catalog['sources'].values() if v.get('partialSegments')]), 8)
+        self.assertEqual(len([v for v in catalog['sources'].values() if v.get('partialSegments')]), 9)
+        self.assertEqual(frames[300]['truthKind'], 'observed')
+        self.assertEqual(frames[300]['sourceDate'], '1950-06-28')
+        source = catalog['sources'][frames[300]['stateId']]
+        self.assertEqual(source['classification'], 'OBSERVED_ROK_FRONT')
+        self.assertFalse(source['fullControlPolygon'])
+        self.assertEqual(source['renderConsumer'], 'DIRECTOR_ADDITIONAL_PARTIAL_FRONT')
 
     def test_control_boundary_unknown_not_filled_by_previous_event(self):
         profile, _, _ = builder.build(PLAN)
@@ -59,6 +66,7 @@ class QualifiedHistoryProfileTest(unittest.TestCase):
             with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 (root / 'fixtures').mkdir()
+                shutil.copytree(ROOT / 'source-review', root / 'source-review', ignore=shutil.ignore_patterns('*.png'))
                 edits = json.loads((ROOT / 'fixtures/HISTORY_EDITS.json').read_bytes())
                 if mutation == 'date':
                     edits['sourceSchedule'][10]['sourceDate'] = '1950-11-24'

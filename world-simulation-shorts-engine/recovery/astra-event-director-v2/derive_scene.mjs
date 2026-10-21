@@ -57,7 +57,10 @@ export function compileDerivedScene({sourceBytes,profileBytes,catalogBytes,front
   eventProfileSHA256:sha(profileBytes),sourceCatalogSHA256:sha(catalogBytes),
   explicitSourceMappingChanged:true,originalLegacyGeometryUnchanged:true,
   unknownControlNeverFilled:true,sourceDateRegressionFixed:true,fullHistoricalControlReady:false};
- const front={...clone(originalFront),schedule:profile.sourceSchedule.filter(x=>x.kind==='OBSERVED_PARTIAL_FRONT').map(row=>{
+ const extensionSources=Object.values(catalog.sources).filter(x=>x.renderConsumer==='DIRECTOR_ADDITIONAL_PARTIAL_FRONT');
+ derived.productionV3.directorAdditionalFronts=extensionSources.map(x=>clone(x));
+ const front={...clone(originalFront),schedule:profile.sourceSchedule.filter(x=>x.kind==='OBSERVED_PARTIAL_FRONT'
+  &&catalog.sources[x.stateId]?.renderConsumer!=='DIRECTOR_ADDITIONAL_PARTIAL_FRONT').map(row=>{
   const originalRow=originalFront.schedule.find(x=>x.frontId===row.stateId);
   assert.ok(originalRow,'ORIGINAL_SOURCE_FRONT_REQUIRED');
   return{...clone(originalRow),chapterId:row.chapterId,startFrame:row.startFrame,endFrame:row.endFrame,
