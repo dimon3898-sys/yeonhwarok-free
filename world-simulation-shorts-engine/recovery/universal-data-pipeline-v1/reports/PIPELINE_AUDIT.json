@@ -1,0 +1,265 @@
+{
+  "schema": "WORLD_ENGINE_UNIVERSAL_DATA_PIPELINE_AUDIT_V1",
+  "baselineCommit": "e39969cbc76a071d34a38440d9551425e6d5e545",
+  "scope": "PHASE_A_READ_ONLY_SOURCE_AUDIT",
+  "protectionGate": "PARENT_OWNED_VERIFY_SEPARATELY",
+  "existingFilesModified": false,
+  "gpuExecuted": false,
+  "paidApiUsed": false,
+  "renderExecuted": false,
+  "featureStages": [
+    {
+      "id": "studio_input",
+      "classification": "PARTIAL",
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "line": 77,
+      "evidence": "Structured JSON/fenced JSON parser, duplicate-key and finite-number checks; free prose is explicitly rejected.",
+      "failureCode": "STUDIO_STRUCTURED_PROMPT_REQUIRED"
+    },
+    {
+      "id": "studio_direct_scene",
+      "classification": "IMPLEMENTED",
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "line": 151,
+      "evidence": "Direct sceneJson bypasses reinterpretation; preserved backend binding and validation remain required.",
+      "failureCode": "STUDIO_RENDER_PLAN_REJECTED"
+    },
+    {
+      "id": "studio_v2_prompt",
+      "classification": "TOPIC_PRESET_BOUND",
+      "path": "world-simulation-shorts-engine/recovery/universal-integration-v1/contract_v2.py",
+      "line": 72,
+      "evidence": "V2 prompt lowers to V1, admits only VERIFIED_FRONT_V4_80S, V4_ARCHIVAL_80S, duration80; sceneJson+V2 forbidden.",
+      "failureCode": "STUDIO_V2_PRESET_REQUIRED"
+    },
+    {
+      "id": "completion_sidecar",
+      "classification": "IMPLEMENTED_BOUNDED",
+      "path": "world-simulation-shorts-engine/recovery/universal-integration-completion-v2/contract_v2.py",
+      "line": 119,
+      "evidence": "Optional camera/frontier/eventFlow sidecar, no new source trust; delegates V1 unchanged.",
+      "failureCode": "STUDIO_COMPLETION_FIELD_UNSUPPORTED"
+    },
+    {
+      "id": "offline_nl_request",
+      "classification": "PARTIAL",
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+      "line": 40,
+      "evidence": "Parses bounded topic/duration/fps/resolution; no external AI and no arbitrary fact extraction.",
+      "failureCode": "INVALID_TOPIC"
+    },
+    {
+      "id": "offline_catalog",
+      "classification": "TOPIC_DATA_BOUND",
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/planner.py",
+      "line": 114,
+      "evidence": "Catalog contains only KOREAN_WAR. Other subjects rejected before rendering; WAR-only long timing allocator.",
+      "failureCode": "FACT_CATALOG_TOPIC_REQUIRED"
+    },
+    {
+      "id": "fact_validator",
+      "classification": "IMPLEMENTED",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+      "line": 194,
+      "evidence": "Existing source/mode/geometry validator, four event families, calls protected Event/Flow/Area validators.",
+      "failureCode": "DATA_REQUIRED"
+    },
+    {
+      "id": "scene_compiler",
+      "classification": "IMPLEMENTED",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+      "line": 417,
+      "evidence": "compileScenePlan supplied facts -> deterministic PLANNER_SCENE_JSON_V1; validateScenePlan is authoritative compatible API.",
+      "failureCode": "PLANNER_FACTS_VERSION_REQUIRED"
+    },
+    {
+      "id": "engine_plan_compiler",
+      "classification": "IMPLEMENTED_BOUNDED",
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+      "line": 75,
+      "evidence": "compileExistingEnginePlan emits Flow/Event/Area/Wave plans for all four families; contract success is not actual pixel proof.",
+      "failureCode": "PLANNER_EXISTING_ENGINE_BINDING_REQUIRED"
+    },
+    {
+      "id": "area_only_runtime",
+      "classification": "DISCONNECTED_FOR_OTHER_FAMILIES",
+      "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
+      "line": 12,
+      "evidence": "Existing fixture-backed capture uses compileSceneEngineRequest and createAreaGpuAdapter, not general route runtime.",
+      "failureCode": "PLANNER_EXISTING_AREA_SCENE_CONTRACT_REQUIRED"
+    },
+    {
+      "id": "long_timeline",
+      "classification": "IMPLEMENTED",
+      "path": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/contracts.py",
+      "line": 157,
+      "evidence": "split_plan/validate_plan enforce exact half-open ranges, frame sums and boundary identity; not generic source admission.",
+      "failureCode": "SCENE_GAP_OVERLAP_OR_RESET"
+    },
+    {
+      "id": "studio_production_backend",
+      "classification": "TOPIC_PROFILE_BOUND",
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+      "line": 83,
+      "evidence": "V4 exact source-parent equality; V3 frozen chronology/source validation. Existing durations80/120/180/300/600.",
+      "failureCode": "STUDIO_V4_SOURCE_PLAN_CHANGED"
+    },
+    {
+      "id": "source_scene_normalizer",
+      "classification": "IMPLEMENTED_SERVER_BOUND",
+      "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/source_contract.py",
+      "line": 71,
+      "evidence": "Exact server-index/bundle bindings, source rights/SHA, actor palette, up to240 frames; new prompt cannot register sources.",
+      "failureCode": "SOURCE_SCENE_BINDING_MISMATCH_*"
+    },
+    {
+      "id": "control_source_registry",
+      "classification": "IMPLEMENTED",
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/control_provider.py",
+      "line": 110,
+      "evidence": "Server-pinned SourceRegistry and compile_control_state reuse protected Area V3 and GEOS; no complement ownership inference.",
+      "failureCode": "CONTROL_SOURCE_ROLE_NOT_QUALIFIED"
+    },
+    {
+      "id": "source_pixel_consumer",
+      "classification": "PARTIAL_SYNTHETIC_ONLY",
+      "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
+      "line": 25,
+      "evidence": "Actual factory, Area passes and CameraV5 reusable; current runtime requires bounded owner/front frames, synthetic caption, local frame indices.",
+      "failureCode": "UNIVERSAL_SOURCE_FIELD_CLOCK_MISMATCH"
+    },
+    {
+      "id": "g2_final_contract",
+      "classification": "INTENTIONALLY_FIXED_DEMO",
+      "path": "world-simulation-shorts-engine/recovery/g2-final-recovery-v1/source_contract.py",
+      "line": 69,
+      "evidence": "Delegates exact original180f nonhistorical DEMO then adds only trusted generic label placement; must remain immutable.",
+      "failureCode": "G2_RECOVERY_UNCHANGED_DEMO_SCENE_REQUIRED"
+    },
+    {
+      "id": "g2_layout_extension",
+      "classification": "IMPLEMENTED_REUSABLE",
+      "path": "world-simulation-shorts-engine/recovery/g2-final-recovery-v1/source_contract.py",
+      "line": 48,
+      "evidence": "apply_layout_profile(runtime_payload) independently adds bounded generic placement policy without replacing geometry/camera.",
+      "failureCode": "G2_FINAL_SERVER_LAYOUT_PROFILE_REQUIRED"
+    },
+    {
+      "id": "studio_auth_http",
+      "classification": "IMPLEMENTED_REUSABLE",
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+      "line": 224,
+      "evidence": "Owner authentication, CSRF and effective-Origin policy; injected controller handles preflight/submit/start/status/results.",
+      "failureCode": "STUDIO_PREFLIGHT_BLOCKED"
+    },
+    {
+      "id": "studio_source_worker",
+      "classification": "IMPLEMENTED_REUSABLE",
+      "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/studio_controller.py",
+      "line": 165,
+      "evidence": "Explicit owner consent, idempotent private claim, active lock, detached software worker; admission900sec max0 retries.",
+      "failureCode": "STUDIO_OWNER_CONSENT_REQUIRED"
+    },
+    {
+      "id": "video_and_result_validation",
+      "classification": "IMPLEMENTED",
+      "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/software_worker.py",
+      "line": 66,
+      "evidence": "Full capture frame count, fullDecode and video SHA checked before COMPLETED; no NVIDIA or user approval claimed.",
+      "failureCode": "STUDIO_SOURCE_CAPTURE_INCOMPLETE_OR_CHANGED"
+    },
+    {
+      "id": "generic_validation_outcomes",
+      "classification": "MISSING_AT_BASELINE",
+      "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/source_contract.py",
+      "line": 157,
+      "evidence": "Existing per-module fail codes and ready/blockers lack one shared PASS/NEEDS_INPUT/CONFLICT/UNSUPPORTED/INVALID response contract.",
+      "failureCode": "NOT_IMPLEMENTED"
+    },
+    {
+      "id": "generic_prompt_data_compiler",
+      "classification": "MISSING_AT_BASELINE",
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_contracts.py",
+      "line": 173,
+      "evidence": "No one topic+supplied-data prompt lowering all requested history/fiction/general topic inputs to an actually selected Studio runtime.",
+      "failureCode": "STUDIO_PROMPT_FIELD_UNSUPPORTED"
+    }
+  ],
+  "g3Blockers": [
+    {
+      "kind": "EXPLICIT_POLICY",
+      "status": "CONFIRMED",
+      "path": "g2-final-recovery-v1/studio_controller.py:30-46",
+      "evidence": "historicalG3 must remain BLOCKED and paidGpuExecuted false; source synthetic recovery cannot authorize history."
+    },
+    {
+      "kind": "FIXED_DEMO_CONTRACT",
+      "status": "CONFIRMED",
+      "path": "g2-renderer-recovery-v1/source_contract.py:59-72",
+      "evidence": "Exact DEMO equality and180f restrictions reject arbitrary replacement prompts before scene compile. This is intentional recovery scope, not a parser defect."
+    },
+    {
+      "kind": "SOURCE_EVIDENCE_GAPS",
+      "status": "CONFIRMED_PARTIAL",
+      "path": "studio-integration-gates-v1/fixtures/INCHEON_SOURCE_GATE.json",
+      "evidence": "Dates and8 official PDF page-position paths exist; full dated bilateral owner masks, georegistrationGCP/heldout residuals, eventROI, transition correspondence not source-qualified."
+    },
+    {
+      "kind": "PIXEL_CONSUMER_ADMISSION",
+      "status": "CONFIRMED",
+      "path": "universal-source-pipeline-v2/source_contract.py:152-155",
+      "evidence": "Historical branch unconditionally appends SOURCE_HISTORICAL_PIXEL_CONSUMER_NOT_ADMITTED even if data become available."
+    },
+    {
+      "kind": "INTEGRATION_IMAGE_QUALITY_GATES",
+      "status": "CONFIRMED_CODE_PATH",
+      "path": "universal-integration-v1/runtime_bridge.py:92-133",
+      "evidence": "Data blockers, registered image equality, real operator budget and full-video quality approval are separate gates; no current image inspection in this audit."
+    },
+    {
+      "kind": "ALL_DATA_LOST",
+      "status": "RULED_OUT_AS_GENERAL_CLAIM",
+      "path": "universal-source-pipeline-v2/source-review/CMH_UN_OFFENSIVE_PDF008_POSITION_PATHS.json",
+      "evidence": "Actual preserved source-position artifact contains8 paths; June28 partial front and3 official-source catalog rows exist. Incomplete ownership evidence must not be mislabeled total data loss."
+    },
+    {
+      "kind": "NEPAL_LAYOUT",
+      "status": "RULED_OUT_AS_HISTORY_BLOCKER",
+      "path": "g2-final-recovery-v1/layout_adapter.py",
+      "evidence": "Layout recovery is separate from historic source qualification. Current task starts from finalG2 recovery, preserves placement adapter."
+    }
+  ],
+  "readOnlyProbes": [
+    {
+      "input": "세계 항공망80초",
+      "result": "FACT_CATALOG_TOPIC_REQUIRED",
+      "scope": "READ_ONLY_PARSE_AND_CATALOG_LOOKUP_NO_RENDER"
+    },
+    {
+      "input": "세계 무역80초",
+      "result": "FACT_CATALOG_TOPIC_REQUIRED",
+      "scope": "READ_ONLY_PARSE_AND_CATALOG_LOOKUP_NO_RENDER"
+    },
+    {
+      "input": "로마제국80초",
+      "result": "FACT_CATALOG_TOPIC_REQUIRED",
+      "scope": "READ_ONLY_PARSE_AND_CATALOG_LOOKUP_NO_RENDER"
+    },
+    {
+      "input": "가상 전쟁80초",
+      "result": "FACT_CATALOG_TOPIC_REQUIRED",
+      "scope": "READ_ONLY_PARSE_AND_CATALOG_LOOKUP_NO_RENDER"
+    },
+    {
+      "input": "한국전쟁80초",
+      "result": "KOREAN_WAR recognized; schematic only",
+      "scope": "READ_ONLY_PARSE_AND_CATALOG_LOOKUP_NO_RENDER"
+    }
+  ],
+  "limitations": [
+    "This audit traces checked-out source and preserved evidence; it does not revalidate the historical truth of all source rows.",
+    "No NVIDIA image inspection, GPU execution or new visual quality approval performed.",
+    "Full143regression suite is parent-owned and not executed by audit agent.",
+    "Potential new adapter must preserve G2 and old Scene APIs instead of widening fixed recovery gates."
+  ]
+}
