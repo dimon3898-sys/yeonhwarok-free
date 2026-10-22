@@ -1,0 +1,284 @@
+{
+  "schema": "WORLD_ENGINE_G2_RECOVERY_MATERIAL_API_AUDIT_V1",
+  "baselineCommit": "0069e9af1c0888843289d312d86bad29ac26007e",
+  "scope": "READ_ONLY_NO_RENDER_NO_SOURCE_OR_ASSET_EDITS_NO_NEW_DATA_DOWNLOAD",
+  "confirmedCause": {
+    "id": "REGIONAL_GLOBAL_SOURCE_AND_MATERIAL_PROFILE_SWITCH",
+    "codeEvidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          143,
+          144,
+          151
+        ],
+        "finding": "The geographic UV maps correctly, but a binary support test switches between NE1 baked RGB and unrelated global RGB at the actual regional bounds."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          187,
+          206
+        ],
+        "finding": "BAKED_RELIEF changes luminance and proxy lighting only inside the admitted baked tile, adding a material discontinuity."
+      }
+    ],
+    "notProvedFromThisAudit": [
+      "No new pixel render was performed.",
+      "Missing tiles and UV misregistration are not assumed merely from the rectangular seam."
+    ]
+  },
+  "existingApi": {
+    "createMapInfographicRenderer": {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+      "lines": [
+        345,
+        357,
+        359,
+        360,
+        361,
+        409,
+        435
+      ],
+      "supportedContextDescriptor": {
+        "url": "Same-origin URL of the actual source texture.",
+        "bounds": "Actual [west, south, east, north] pixel-edge extent.",
+        "classification": "BAKED HILLSHADE is required with BAKED_RELIEF_V1.",
+        "dimensions": "Actual cropped window width and height.",
+        "pixelSpacing": "The original 1/60 degree spacing for a native NE1 crop.",
+        "sha256": "Actual derived PNG byte hash; retain the original source hash separately."
+      }
+    },
+    "setTerrainLod": {
+      "lines": [
+        589,
+        590,
+        591,
+        592,
+        596,
+        598
+      ],
+      "constantZeroCandidate": "With complete real context coverage, weight 0 chooses context RGB at every geographic pixel before the unchanged material. This does not blend finished frames or blur a boundary. Preflight must prove that every camera viewport is contained in the context bounds; otherwise the outside-context global fallback can recreate the seam."
+    },
+    "sameStyleMultiLod": {
+      "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v2.mjs",
+      "lines": [
+        10,
+        12,
+        17,
+        19,
+        20
+      ],
+      "finding": "geographicTerrainLod computes density and coverage weight. It is appropriate only when the source family and registration agree. Different RGB styles remain mismatched even with a smooth weight."
+    }
+  },
+  "lawfulSameStyleSource": {
+    "status": "EXISTING_PROVENANCE_LOCAL_METADATA_VERIFIED_ORIGINAL_PIXELS_NOT_LOCALLY_AVAILABLE",
+    "sourceRecord": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/ORIGINAL_SOURCE_RECORD.json",
+    "sourceRecordSHA256": "f60c7f3f50be45c3ff32c6bf29ccb0fb537b1173c581dff227c3d8604d5b915b",
+    "originalSource": {
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-raster/f04832c819e7a203d159dffe93cd9245332d6b33/10m_rasters/NE1_HR_LC_SR_W_DR/NE1_HR_LC_SR_W_DR.tif",
+      "author": "Tom Patterson, Nathaniel Vaughn Kelso and Natural Earth contributors",
+      "license": "Public Domain",
+      "license_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "source_pinned_commit": "f04832c819e7a203d159dffe93cd9245332d6b33",
+      "source_original_sha256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+      "source_original_bytes": 699969932,
+      "source_original_dimensions": [
+        21600,
+        10800
+      ],
+      "coordinate_reference_system": "EPSG:4326",
+      "degrees_per_native_pixel": 0.016666666666666666
+    },
+    "metadataChecks": [
+      {
+        "file": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.tfw",
+        "sha256": "3f69f09374ddd5eb9a8ce94c4b08f4ff5fae947a20720684a2215ab0fae03cb2",
+        "matchesOriginalRecord": true
+      },
+      {
+        "file": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.prj",
+        "sha256": "3259f0e55290a82b1350646f604e8a7ee1e2136c0320a40fad838ab40819fff8",
+        "matchesOriginalRecord": true
+      },
+      {
+        "file": "/workspace/yeonhwarok-free/world-simulation-shorts-engine/library/flat/terrain/NE1_HR_LC_SR_W_DR.README.html",
+        "sha256": "62b9fc50d9cd3bc9124fc68643f2fb58db620a31dc38674100783d5ddeb600cf",
+        "matchesOriginalRecord": true
+      }
+    ],
+    "sourcePixelEdgeBounds": [
+      -180,
+      -90,
+      180,
+      90
+    ],
+    "pixelCenterTransform": {
+      "xResolution": 0.016666666666666666,
+      "yResolution": -0.016666666666666666,
+      "firstLongitude": -179.99166666666667,
+      "firstLatitude": 89.99166666666666
+    },
+    "licenseEvidence": {
+      "path": "/workspace/yeonhwarok-free/cinematic-world-map/assets/gis/natural-earth-license.html",
+      "sha256": "2631b5b39b6d1acc56de75235109b5af2dbb4b0ac5a127b6f06185977247fd4b",
+      "actuallyRead": true,
+      "excerpt": "All versions of Natural Earth raster + vector map data found on this website are in the public domain. You may use the maps in any manner, including modifying the content and design, electronic dissemination, and offset printing."
+    },
+    "newDerivativeRequirements": [
+      "Acquire the actual source through an approved free route and check its exact SHA-256 and 699969932 byte length before using it.",
+      "Crop a native aligned pixel window; do not reproject, upscale, recolor, or synthesize detail.",
+      "Recompute real pixel-edge bounds from indices and the world file; preserve EPSG:4326 pixel centers.",
+      "Verify decoded overlap RGB against the original regional image. PNG encoders need not produce identical encoded bytes.",
+      "Persist source provenance, license, derived SHA, window, dimensions, and native spacing.",
+      "Cover all camera states plus a gutter and reject unsupported requests before rendering."
+    ]
+  },
+  "sameDemoCandidate": {
+    "cameraEnvelope": [
+      93,
+      -3,
+      123,
+      43
+    ],
+    "proposedRealSourceWindowExample": [
+      90,
+      -6,
+      126,
+      46
+    ],
+    "originalPixelWindow": [
+      16200,
+      2640,
+      18360,
+      5760
+    ],
+    "derivedDimensions": [
+      2160,
+      3120
+    ],
+    "nativeSpacing": [
+      0.016666666666666666,
+      0.016666666666666666
+    ],
+    "sameFinalBounds": [
+      97,
+      3,
+      117,
+      35
+    ],
+    "pixelsPerSourceTexelAtFinal": [
+      0.9,
+      1.0
+    ],
+    "status": "DATA_PREPARATION_CANDIDATE_NOT_YET_ACQUIRED_OR_RENDERED"
+  },
+  "existingGlobalRgbAlternative": {
+    "file": "cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+    "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+    "actualDimensions": [
+      8192,
+      4096
+    ],
+    "samplingBounds": [
+      -180,
+      -90,
+      180,
+      90
+    ],
+    "spacing": [
+      0.0439453125,
+      0.0439453125
+    ],
+    "projectedPixelsPerTexelAtSameFinal": [
+      2.373046875,
+      2.63671875
+    ],
+    "currentTreatmentNeeded": true,
+    "notAcceptableAsSameDetailFix": "A single global RGB source with CURRENT could avoid style mixing, but it produces 2.37 by 2.64 screen pixels per source texel at the unchanged final camera, versus NE1 at no more than one. It must not be relabeled NE1 baked hillshade or DEM. CURRENT alone also does not fix the existing binary source switch."
+  },
+  "geographicPolicy": {
+    "flatProjection": "The existing contextTerrain API explicitly rejects globe projection; preserve that restriction.",
+    "bboxOrder": "west,south,east,north",
+    "latitudeRange": [
+      -90,
+      90
+    ],
+    "longitudeRange": [
+      -180,
+      180
+    ],
+    "nonWrappingBoundsRequired": true,
+    "datelineCrossing": "Fail closed as explicitly unsupported unless a verified split-source adapter is used. Do not claim unimplemented wrapping.",
+    "polarFootprint": "Valid NE1 coverage does not grant LOCAL detail or geometry accuracy. Preserve existing admission and projection limits.",
+    "outsideSupport": "Fail preflight outside approved source-style coverage. Do not stretch or clamp the tile or invent heights.",
+    "maskProjection": "Continue using unchanged factory.screen for masks, shared fronts and markers. Context RGB changes only the underlying material source."
+  },
+  "accessObservation": {
+    "localOriginalTIFFSearch": "No full TIFF was found under workspace or tmp. Metadata and the existing regional PNG are present.",
+    "gitPromisorRead": "git show/cat-file unexpectedly attempted to fetch a missing promisor blob and failed to connect to the proxy. This agent did not retry, escalate or download data.",
+    "networkDataDownloaded": false
+  },
+  "protectedFilesModified": 0,
+  "rendersExecuted": 0,
+  "gpuExecuted": false,
+  "qualityApproved": false,
+  "preferredMinimalDataOnlyFix": {
+    "status": "EXISTING_API_SUPPORTED_SUBJECT_TO_ACTUAL_SOURCE_BYTES_AND_TESTS",
+    "strategy": "Provide a real wider same-family native NE1 crop as nativePlan.assets.terrain; keep the unchanged old native runtime, LOD=1 and BAKED_RELIEF_V1.",
+    "whyItRemovesActualCause": "When every camera viewport is inside the real wider NE1 crop, the original binary inside test is one everywhere visible. No different RGB family or inside-only lighting branch boundary is visible. This changes the source coverage rather than blurring or concealing an edge.",
+    "codeEvidence": [
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          143,
+          144,
+          151,
+          409,
+          415,
+          442
+        ],
+        "finding": "The existing regional texture descriptor owns URL and real tile bounds; the source and material paths are otherwise unchanged."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/local_detail_admission.mjs",
+        "lines": [
+          222,
+          223
+        ],
+        "finding": "Actual LOCAL verification remains enforced for LOCAL; a correctly unchanged REGIONAL plan returns without inventing LOCAL admission."
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+        "lines": [
+          124,
+          134,
+          136,
+          150,
+          195,
+          197,
+          253,
+          265
+        ],
+        "finding": "compileScalePlan with REGIONAL preserves existing framing/design but refreshes source LOD metadata."
+      }
+    ],
+    "requiredRefresh": [
+      "nativePlan.assets.terrain: actual new file/URL/bounds/dimensions/pixelSpacing/SHA, classification BAKED HILLSHADE, Public Domain/sourceSHA/version and crop window.",
+      "Call unchanged compileScalePlan on the new base with REGIONAL to refresh scale.lod descriptors, coverage, projected density and ground spacing. Preserve framing/camera/theme/layout/geometries.",
+      "Replace only the terrain sourceBindings entry path/SHA/bytes; retain other source bindings.",
+      "Refresh NATIVE, BUNDLE, INDEX/archive pins and explicit source raster evidence; leave old source package and old claims untouched.",
+      "Add a narrow explicit same-origin HTTP route for the new namespace asset. The old /static mount only serves ENGINE/web and does not expose arbitrary recovery paths.",
+      "Fail preflight unless all 180 camera states are contained within real source support with a source-pixel gutter. The original factory complete-coverage guard is conditional on contextTerrain and is not enough for this path."
+    ],
+    "mustRemainIdentical": [
+      "Scene event/time and 180 control fields",
+      "Camera plan and schedule",
+      "Actor palette and shared-front geometry",
+      "Native material/shaders and Area renderer",
+      "Marker, glyph/layout, video encoding settings"
+    ],
+    "sourceAccuracy": "The real NE1 1/60 degree spacing keeps actual final pixel density [0.9,1]. This does not claim scientific elevation, LOCAL geometry accuracy or newly generated detail."
+  }
+}

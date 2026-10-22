@@ -1,0 +1,247 @@
+{
+  "schema": "WORLD_ENGINE_G2_READONLY_DOMAIN_AND_COORDINATE_AUDIT_V1",
+  "scope": "Read-only current source data/code audit; no source, protected file, cache, historical data or image modified; no renderer or network execution",
+  "sourceBaselineCommit": "0069e9af1c0888843289d312d86bad29ac26007e",
+  "sourceArchive": {
+    "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/fixtures/SOURCE_BUNDLE.zip",
+    "sha256": "bd6e7f54691bfed361d98f0bd8b3c4575a17a0dc2fc033f7501b2be730d03cb3"
+  },
+  "staircase": {
+    "status": "CONFIRMED_AUTHORED_DATA_QUANTIZATION_NOT_A_NEW_RASTER_TILE_BOUNDARY",
+    "originalDataType": "Natural Earth5.1.1 country MultiPolygon613vertices; none of its613vertices land exactly on0.25degree grid",
+    "runtimeDataType": "Explicit synthetic Polygon,105closed-ring vertices/104nonzero axis-aligned edges, everycoordinate quarter-degree aligned",
+    "domainSHA256": "85cadf15126dab7354b73b4a3f4e5bf0d3cb4f2f5dc166682081a870cb5c9af8",
+    "domainSameForAllSourceFrames": 180,
+    "domainBounds": [
+      104.75,
+      9.0,
+      109.25,
+      16.25
+    ],
+    "authoredCellCountByExactArea": 150,
+    "canonicalStepPixels": {
+      "x": [
+        9.0,
+        13.5
+      ],
+      "y": [
+        10.434782608695652,
+        15.0
+      ]
+    },
+    "actualExistingFrameViewed": {
+      "path": "public-review/DEMO_000.png",
+      "sha256": "bf815b4a557ec9d4b8da50e400a35e33720da53bd0705cf3f3c0a65133c6c0d6",
+      "staircaseVisibleAtStart": true
+    },
+    "firstSourceFrame": 0,
+    "sourcePersistenceHalfOpenFrames": [
+      0,
+      180
+    ],
+    "temporalQualification": "All180source domains are byte-identical and remain inside all180camera viewports. Only existing f0PNG directly viewed by this agent; full-video visual persistence is for root frame audit, not claimed from these source checks alone.",
+    "codeEvidence": [
+      {
+        "file": "tools/build_source_packages.py",
+        "namespace": "universal-source-pipeline-v2",
+        "lines": [
+          52,
+          73
+        ],
+        "fact": "Authors0.25degree axis-aligned land-contained cells, unions them and selects largest connected polygon; does not use original coastline as control domain."
+      },
+      {
+        "file": "tools/build_source_packages.py",
+        "namespace": "universal-source-pipeline-v2",
+        "lines": [
+          79,
+          84
+        ],
+        "fact": "Recipe explicitly qualifies these as authored grid observation zones, not observed territory/coastline."
+      },
+      {
+        "file": "tools/build_source_packages.py",
+        "namespace": "universal-source-pipeline-v2",
+        "lines": [
+          93,
+          104
+        ],
+        "fact": "Owner masks are authored current halfplanes intersected with this grid domain and persisted as polygons."
+      },
+      {
+        "file": "web/map_infographic_v1/area_overlay_pass_v3.mjs",
+        "lines": [
+          95,
+          109,
+          197,
+          209
+        ],
+        "fact": "Area pass projects original polygon vertices, triangulates then draws triangles; no geographic grid quantization happens here."
+      },
+      {
+        "file": "web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          314,
+          326
+        ],
+        "fact": "Existing triangulateRegion preserves polygon rings and holes and triangulates projected points; it does not rasterize/snap geography."
+      }
+    ],
+    "antialiasQualification": {
+      "status": "MACRO_STEP_CAUSE_CONFIRMED_MICRO_ALIASING_NOT_INDEPENDENTLY_MEASURED",
+      "fillPath": "Direct triangle rasterization; no new antialias pass. Renderer/context antialias false.",
+      "contourPath": "Existing contour shader has one-pixel smoothstep core at area_overlay_pass_v3.mjs58-60.",
+      "meaning": "Antialiasing could affect approximately pixel-scale raster edges but cannot legitimately remove9\u201315pixel authored grid steps without changing represented geometry. No new AA render comparison was run."
+    },
+    "recommendedSameConditionRecovery": "Retain source domain and everyowner/shared-front geometry/hash, explain exact0.25degree synthetic resolution, and separate data-shape features from material/tile renderer defects. Do not blur/smooth/replace grid with modern coastline to claim an identical Scene or improved accuracy.",
+    "fullCountryClaimAllowed": false,
+    "sourceAreaQualification": "Grid area9.375square-degrees versus original modern country27.8568632562685square-degrees; largest authored component is not full country control coverage.",
+    "sourceDomainFullyInsideActualCameraViewports": 180
+  },
+  "strictTopology": {
+    "unchangedProvider": "recovery/studio-integration-gates-v1/control_provider.py",
+    "codeEvidence": [
+      {
+        "lines": [
+          287,
+          295
+        ],
+        "fact": "No geographic resampling and no unsupported continuous historical morph."
+      },
+      {
+        "lines": [
+          343,
+          354
+        ],
+        "fact": "Any positive domain-outside, owner-outside or interior-overlap area is rejected; no epsilon allowed."
+      },
+      {
+        "lines": [
+          359,
+          395
+        ],
+        "fact": "Unknown derives from unassigned source domain; shared frontier derives only from same-state owner boundary intersection, exact complete partition is checked."
+      }
+    ],
+    "actualReadOnlyGEOSMeasurements": [
+      {
+        "frame": 0,
+        "ownerOutsideAreasDegreesSquared": [
+          0.0,
+          0.0
+        ],
+        "ownerOverlapAreaDegreesSquared": 0.0,
+        "unassignedAreaDegreesSquared": 0.0
+      },
+      {
+        "frame": 90,
+        "ownerOutsideAreasDegreesSquared": [
+          0.0,
+          0.0
+        ],
+        "ownerOverlapAreaDegreesSquared": 0.0,
+        "unassignedAreaDegreesSquared": 0.0
+      },
+      {
+        "frame": 179,
+        "ownerOutsideAreasDegreesSquared": [
+          0.0,
+          0.0
+        ],
+        "ownerOverlapAreaDegreesSquared": 0.0,
+        "unassignedAreaDegreesSquared": 0.0
+      }
+    ],
+    "domainOutsideModernLandAreaDegreesSquared": 0.0,
+    "validatorToleranceWeakened": false,
+    "binaryGridMotivation": "Existing newfixture authoring comment cites float clipping sliver failures against strict original validator. This audit confirms the exact validator; it does not independently re-run the previous failed non-grid authoring attempts."
+  },
+  "coordinatePipeline": {
+    "mapProjection": "Existing flat REGIONAL_EQUIRECTANGULAR with canonical1080x1920 output",
+    "sharedProjectionEvidence": [
+      {
+        "file": "web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          355,
+          378
+        ],
+        "fact": "Factory screen uses same geographic projection and actual orthographic camera as country coverage."
+      },
+      {
+        "file": "web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          561,
+          577
+        ],
+        "fact": "updateCamera changes camera and bounds uniform, redrawsGIS id/coverage, records same camera evidence."
+      },
+      {
+        "file": "recovery/universal-source-pipeline-v2/native_runtime.mjs",
+        "lines": [
+          99,
+          108
+        ],
+        "fact": "Everyframe evaluates browserV5, updatesfactorycamera first, then usesfactory.screen for eventpoint and allArea passes."
+      },
+      {
+        "file": "web/map_infographic_v1/area_overlay_pass_v3.mjs",
+        "lines": [
+          214,
+          223
+        ],
+        "fact": "Front projection is re-evaluated eachframe and must match recorded screenCoordinates exactly; stalefront is rejected."
+      }
+    ],
+    "currentCoordinateChangeDetectedByAudit": false,
+    "rotation": "NOT_SELECTED_IN_THIS_SOURCE_DEMO; flatbounds translation/zoom audit cannot be reported as real rotation validation",
+    "eventPoint": [
+      106.5,
+      18.0
+    ],
+    "eventPointRelativeToAuthoredZone": "It is north of domain maxlatitude16.25 by explicit fixture data. Its separation from colored control zone does not establish renderer drift. Keep it unchanged in same-condition before/after capture.",
+    "historicalScope": "No history or troop geometry is admitted by this audit."
+  },
+  "minimumFutureSyntheticAlternative": {
+    "status": "OPTIONAL_NEW_FIXTURE_NOT_APPLIED_NOT_IDENTICAL_BEFORE_AFTER",
+    "description": "If a visually continuous authoring example is desired, create a new explicitly nonhistorical inscribed convex observation polygon with its own version/source recipe, retain actual modernland only as containment evidence, and persist every owner sample. A source-authored simple polygon can avoid a grid outline without implying country/coast accuracy.",
+    "mandatoryValidation": [
+      "No edits to old fixture or sourceGeometry",
+      "Exact GEOS area(owner-domain)==0, exact overlap==0 and exact unassigned==0 for every persisted frame",
+      "Known source bounds and SHA, no change to source precision or existingvalidator",
+      "No new historical or measured-control accuracy claim",
+      "Distinctinputhash/profile; do not compare it as sameconditions"
+    ],
+    "whyNotPreferredForCurrentTask": "Current user requires sameScene/time/camera before/after. Replacing grid domain changes that condition and could hide a truthful data limitation."
+  },
+  "suggestedNewRegressionTests": [
+    {
+      "id": "MASK_INPUT_BYTES_UNCHANGED",
+      "check": "Compare all360owner geometry files,181domain files andsame-state shared-front hashes across recovery baseline/candidate."
+    },
+    {
+      "id": "GRID_SHAPE_RESOLUTION_PRESERVED",
+      "check": "Require105domain vertices/104axis edges on0.25degreegrid and no coordinate smoothing. Surface renderer must not be credited for changing source resolution."
+    },
+    {
+      "id": "EXACT_TOPOLOGY_NO_EPSILON",
+      "check": "Forall180states retain positive-area rejection; assertoutside/overlap/unassigned exactlyzero andowner/frontsameframe IDs."
+    },
+    {
+      "id": "SHARED_PROJECTION_AT_MULTIPLE_BOUNDS",
+      "check": "Use actualfactory.screen andV5camera atstart/closest/return views, compareowner vertices,front endpoints andmarker projection withcanonical equirectangular expectations."
+    },
+    {
+      "id": "NON_AXIS_VECTOR_SUPPORT",
+      "check": "Separate nonhistorical2-region fixtures should contain non-axis-aligned polygons and holes; assert sourcegeometry unchanged and actualtriangulation outputpoints retained. Do not replace baseline grid."
+    },
+    {
+      "id": "ROTATION_CAPABILITY_HONESTY",
+      "check": "Explicitly mark current source-lane rotation unselected/unsupported; onlyclaimtestedrotation ifactualexistingrotationconsumer is selected and verified."
+    }
+  ],
+  "sourceOrProtectedFilesEdited": false,
+  "rendererExecuted": false,
+  "networkUsed": false,
+  "historicalDataCreated": false,
+  "visualQualityApproved": false
+}
