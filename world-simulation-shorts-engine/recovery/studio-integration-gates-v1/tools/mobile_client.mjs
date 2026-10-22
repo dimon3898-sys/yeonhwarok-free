@@ -6,7 +6,7 @@ const {chromium} = require('playwright');
 const [origin, privateRoot, requestFile] = process.argv.slice(2);
 if (!/^http:\/\/127\.0\.0\.1:\d+$/.test(origin)) throw new Error('LOOPBACK_ONLY');
 const request = JSON.parse(await readFile(requestFile, 'utf8'));
-const browser = await chromium.launch({headless:true, args:['--no-sandbox']});
+const browser = await chromium.launch({executablePath:'/usr/bin/chromium',headless:true, args:['--no-sandbox']});
 const context = await browser.newContext({viewport:{width:412,height:915},isMobile:true,hasTouch:true,
   userAgent:'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/154.0.0.0 Mobile Safari/537.36'});
 try {
@@ -17,6 +17,9 @@ try {
     return {status:r.status,body:await r.json()};
   }, request);
   if(unauth.status !== 401) throw new Error('AUTH_GATE_FAILED');
+  const wrongOrigin = await context.request.post(origin+'/api/preflight', {
+    headers:{'Origin':'https://invalid.example','Content-Type':'application/json'},data:request});
+  if(wrongOrigin.status()!==403) throw new Error('ORIGIN_GATE_FAILED');
   await page.locator('#owner-code').fill((await readFile(privateRoot+'/owner-code','utf8')).trim());
   await Promise.all([page.waitForURL(origin+'/'),page.locator('#login').click()]);
   const facts = await page.evaluate(async request => {
@@ -39,6 +42,6 @@ try {
       preflight:preflight.body,submissionId:submission.body.submissionId,startStatus:started.status,
       jobId:started.body.jobId,duplicateJobId:duplicate.body.jobId,viewport:[innerWidth,innerHeight],mobileBrowser:true};
   },request);
-  await writeFile(privateRoot+'/MOBILE_HTTP_START.json',JSON.stringify({...facts,browserDisconnectedAfterStart:true},null,2),{mode:0o600,flag:'wx'});
+  await writeFile(privateRoot+'/MOBILE_HTTP_START.json',JSON.stringify({...facts,wrongOriginStatus:403,browserDisconnectedAfterStart:true},null,2),{mode:0o600,flag:'wx'});
   process.stdout.write(JSON.stringify({jobId:facts.jobId,status:'AUTHENTICATED_HTTP_START_AND_DUPLICATE_CHECK_PASS'})+'\n');
 } finally {await context.close();await browser.close();}
