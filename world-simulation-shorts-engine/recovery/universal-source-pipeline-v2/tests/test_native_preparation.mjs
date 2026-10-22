@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {prepareNative} from '../tools/prepare_native.mjs';
 import {evaluateMinimumContextCameraFrame} from '../../../web/map_infographic_v1/camera_director_v5.mjs';
+import {GRAPHIC_LAYOUT_VERSION,buildMeasuredGraphicLayout} from '../../../web/map_infographic_v1/graphic_layout.mjs';
 const seed='/workspace/exact-65422-capsule-20261020/world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/REGIONAL-plan.json';
 const config=JSON.parse(await readFile(new URL('../fixtures/NATIVE_DEMO_CONFIG.json',import.meta.url)));
 const digest=b=>createHash('sha256').update(b).digest('hex');
@@ -13,6 +14,16 @@ test('actual source preparation reuses world GIS/assets without changing origina
  assert.equal(prepared.nativePlan.primary,'COUNTRY_VNM');assert.equal(JSON.parse(before).primary,'COUNTRY_KOR');
  assert.equal(digest(await readFile(seed)),digest(before));assert.equal(prepared.nativePlan.geometries.length,JSON.parse(before).geometries.length);
  assert.equal(prepared.sourceBindings.length,5);assert.equal(prepared.evidence.protectedG1PlanChanged,false);
+});
+test('native factory receives the unchanged recognized measured-layout API profile',async()=>{
+ const seedPlan=JSON.parse(await readFile(seed));
+ assert.deepEqual(prepared.nativePlan.layout.measured,seedPlan.layout.measured);
+ assert.equal(prepared.nativePlan.layout.measured.version,GRAPHIC_LAYOUT_VERSION);
+ const b=prepared.nativePlan.framing.bounds,screen=p=>[(p[0]-b[0])/(b[2]-b[0])*1080,(b[3]-p[1])/(b[3]-b[1])*1920];
+ // An actual glyph measurement request proves this exact profile passed the
+ // unchanged factory's layout-version guard. Real glyph/layout validity is a
+ // separate Chromium factory smoke test, not fabricated Node font metrics.
+ assert.throws(()=>buildMeasuredGraphicLayout({plan:prepared.nativePlan,screen,measure:()=>{throw Error('ACTUAL_GLYPH_MEASUREMENT_REQUESTED');}}),/ACTUAL_GLYPH_MEASUREMENT_REQUESTED/);
 });
 test('every output camera state is an actual integer Camera V5 evaluation',()=>{
  assert.equal(prepared.cameraSchedule.length,180);

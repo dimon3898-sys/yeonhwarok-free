@@ -1,0 +1,94 @@
+{
+  "schema": "WORLD_ENGINE_NATIVE_FACTORY_CONTRACT_RECOVERY_V1",
+  "scope": "ONE_SYNTHETIC_FRAME_SOFTWARE_SMOKE_NOT_STUDIO_OR_NVIDIA_PASS",
+  "confirmedCauses": [
+    {
+      "code": "MEASURED_LAYOUT_API_VERSION_OVERWRITTEN",
+      "newPreparer": "tools/prepare_native.mjs",
+      "nativeRequirement": "graphic_layout.mjs:93 GRAPHIC_LAYOUT_VERSION",
+      "fix": "Preserve the exact existing source measured profile; independent data version remains at package schema level."
+    },
+    {
+      "code": "SEMANTIC_EMPTY_MASK_SENT_TO_TRIANGULATOR",
+      "input": "unknownMask.geometry = Polygon coordinates [[]]",
+      "originalFailure": {
+        "stage": "ACTUAL_NATIVE_FACTORY_INIT",
+        "message": "page.evaluate: Error: Degenerate verified polygon\n    at triangulateRegion (http://127.0.0.1:45003/modules/renderer.mjs:318:28)\n    at projectedPolygon (http://127.0.0.1:45003/modules/area_overlay_pass_v3.mjs:99:15)\n    at drawArea (http://127.0.0.1:45003/modules/area_overlay_pass_v3.mjs:200:18)\n    at http://127.0.0.1:45003/modules/area_overlay_pass_v3.mjs:233:47\n    at Array.map (<anonymous>)\n    at Object.draw (http://127.0.0.1:45003/modules/area_overlay_pass_v3.mjs:233:37)\n    at draw (http://127.0.0.1:45003/native_runtime.mjs:107:37)\n    at Object.drawFrame (http://127.0.0.1:45003/native_runtime.mjs:110:47)\n    at eval (eval at evaluate (:311:30), <anonymous>:4:54)\n    at async <anonymous>:337:30"
+      },
+      "fix": "Skip only explicit null/EMPTY Polygon []/[[]] or MultiPolygon []; never drop nonempty malformed geometry."
+    }
+  ],
+  "whyPreviousCPUChecksMissed": "Previous checks covered source GIS/assets and CameraV5 outputs but did not exercise native measured-layout construction or first AreaOverlay draw.",
+  "after": {
+    "status": "ONE_FRAME_SOFTWARE_SMOKE_PASS",
+    "renderedFrames": 1,
+    "backend": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+    "nativeMeasuredLayoutValid": true,
+    "nativeMeasuredLayoutVersion": "KOREAN_LAYOUT_STAGE3_V1",
+    "glError": 0,
+    "nonBlackPixels": 2073600,
+    "actualGlyphLabel": "SYNTHETIC DEMO",
+    "captionDrawn": true,
+    "ownerAreaDrawCounts": [
+      {
+        "actorId": "ZONE_A",
+        "areas": 1
+      },
+      {
+        "actorId": "ZONE_B",
+        "areas": 1
+      }
+    ],
+    "emptyMaskDrawCounts": [
+      {
+        "kind": "unknown",
+        "areas": 0
+      },
+      {
+        "kind": "contested",
+        "areas": 0
+      }
+    ],
+    "sharedFrontPasses": 2,
+    "browserErrors": [],
+    "cameraAdmission": {
+      "status": "LOCAL_NOT_ADMITTED",
+      "requestedScale": "REGIONAL",
+      "effectiveScale": "REGIONAL",
+      "localUsed": false,
+      "localRejected": false,
+      "localPermitted": false,
+      "regionalStopBounds": [
+        97,
+        3,
+        117,
+        35
+      ],
+      "stopBounds": [
+        97,
+        3,
+        117,
+        35
+      ],
+      "safeClosestStatus": "APPROVED_FIXED_STOP",
+      "diagnosticCategory": "DATA_ADMISSION"
+    },
+    "rawPixelSHA256": "3b645bc43f5942a8732422083587fc5611fb3f542881c08d76ffd402da1b8b64"
+  },
+  "nativeInputsSHA256": "29d7373460eb52990061a265fad18d69d0b7420fa68d59cad3bc06c452d59dde",
+  "originalSourcePackageSHA256": "6cd63b3f5a109d648417fb53707a1bbea9165bb224d2f4cbec701c432c283dd0",
+  "focusedNodePreparationTests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "focusedEmptyMaskTests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "g1Rendered": false,
+  "historicalFramesRendered": 0,
+  "fullClipRendered": false,
+  "nvidiaVerified": false,
+  "visualQualityApproved": false,
+  "protectedEngineFilesChanged": 0
+}

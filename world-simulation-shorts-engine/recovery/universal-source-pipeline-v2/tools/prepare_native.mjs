@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {compileMinimumContextPlan,evaluateMinimumContextCameraFrame} from '../../../web/map_infographic_v1/camera_director_v5.mjs';
 import {compileScalePlan,geometryBounds} from '../../../web/map_infographic_v1/scale_contract.mjs';
+import {GRAPHIC_LAYOUT_VERSION} from '../../../web/map_infographic_v1/graphic_layout.mjs';
 const HERE=path.dirname(fileURLToPath(import.meta.url)),ENGINE=path.resolve(HERE,'../../..'),REPO=path.dirname(ENGINE);
 const hash=b=>createHash('sha256').update(b).digest('hex'),clone=x=>structuredClone(x),box=b=>Array.isArray(b)&&b.length===4&&b.every(Number.isFinite)&&b[0]<b[2]&&b[1]<b[3];
 export async function prepareNative({seedPlanFile,config}){
@@ -14,6 +15,7 @@ export async function prepareNative({seedPlanFile,config}){
   ||!Number.isSafeInteger(config.total_frames)||config.total_frames<30||config.total_frames>240||config.fps!==30)throw Error('GENERIC_NATIVE_CONFIG_INVALID');
  const seedRaw=await readFile(seedPlanFile),seed=JSON.parse(seedRaw),primary=seed.geometries.find(g=>g.id===config.primary_id);
  if(!primary)throw Error('GENERIC_NATIVE_SOURCE_PRIMARY_REQUIRED');
+ if(seed.layout?.measured?.version!==GRAPHIC_LAYOUT_VERSION)throw Error('GENERIC_NATIVE_EXISTING_MEASURED_PROFILE_REQUIRED');
  const spacing=seed.assets?.terrain?.pixelSpacing;
  if(!Array.isArray(spacing)||spacing.length!==2||spacing.some(v=>!Number.isFinite(v)||v<=0))throw Error('GENERIC_NATIVE_RASTER_SPACING_REQUIRED');
  const requiredSpan=[spacing[0]*1080,spacing[1]*1920],actualSpan=[config.final_bounds[2]-config.final_bounds[0],config.final_bounds[3]-config.final_bounds[1]];
@@ -22,7 +24,6 @@ export async function prepareNative({seedPlanFile,config}){
  plan.primary=config.primary_id;plan.secondary=[];plan.anchor={geometry_type:'Point',crs:'EPSG:4326',coordinates:[...config.event_location]};
  plan.framing={projection:'REGIONAL_EQUIRECTANGULAR',bounds:[...config.final_bounds]};
  plan.text={locationLabel:'ZONE',eventTitle:'DEMO',watermark:''};plan.layout.countryLabels=[];
- plan.layout.measured.version='UNIVERSAL_SOURCE_DEMO_DATA_V2';
  const nativePlan=compileScalePlan(plan,'REGIONAL',{allCountries:seed.geometries});
  const scene={primary_region_id:config.primary_id,primary_geometry:clone(primary),event_anchor:[...config.event_location],
   approved_final_extent:[...config.final_bounds],start_extent:[...config.start_bounds],desired_detail_level:'REGIONAL',
@@ -46,7 +47,8 @@ export async function prepareNative({seedPlanFile,config}){
  }
  return{schema:'WORLD_ENGINE_GENERIC_NATIVE_INPUTS_V2',nativePlan,cameraPlan,cameraSchedule,sourceBindings:[{role:'SEED_NATIVE_SOURCE_PLAN',path:String(seedPlanFile),sha256:hash(seedRaw),bytes:seedRaw.length},...assets],
   evidence:{newDataOnlyPlan:true,sourcePrimaryGeometryId:primary.id,sourcePrimaryGeometryBounds:sourceBounds,
-   protectedG1PlanChanged:false,existingCameraMathChanged:false,cameraClock:'EXPLICIT_INTEGER_FORWARD_HOLD_REVERSE_OF_ACTUAL_V5_PLAN',
+   protectedG1PlanChanged:false,existingMeasuredLayoutProfileVersion:nativePlan.layout.measured.version,
+   existingCameraMathChanged:false,cameraClock:'EXPLICIT_INTEGER_FORWARD_HOLD_REVERSE_OF_ACTUAL_V5_PLAN',
    resampledGlobalDerivativeClaimed:false,sourceRasterExtent:clone(nativePlan.assets.terrain.bounds),
    rasterOutsideSupport:'UNCHANGED_NATIVE_GLOBAL_SOURCE_FALLBACK',localAdmissionGranted:false,syntheticOnly:true,
    actualSourceFrames:cameraSchedule.map(r=>r.sourceFrame),cameraArrivalSourceFrame:arrival,holdFrames:hold}};

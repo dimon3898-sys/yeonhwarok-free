@@ -175,5 +175,5 @@ def normalize_submission(value, *, source_root, expected_index_sha256):
                 "coordinateTransform": deepcopy(item.get("page_coordinates", {}).get("coordinate_transform")),
                 "geographicRenderAllowed": item.get("render_allowed", False)} for item in artifacts],
             "adapterSourceBindings": [{"path": name, "sha256": sha((HERE/name).read_bytes())}
-                for name in ("source_contract.py", "native_runtime.mjs", "camera_numeric_contract.mjs", "capture_source.mjs")],
+                for name in ("source_contract.py", "native_runtime.mjs", "camera_numeric_contract.mjs", "source_geometry_contract.mjs", "capture_source.mjs")],
             "fullControlAreaStatus": bundle.get("full_control_area_status"), "gpuVerified": False, "userApproved": False}}

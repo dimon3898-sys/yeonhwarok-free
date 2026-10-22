@@ -1,0 +1,127 @@
+{
+  "schema": "WORLD_ENGINE_G2_G3_READINESS_GATE_STATUS_V2",
+  "baselineCommit": "e6ff697348a8e63c9308d7b4546682cbc6620c96",
+  "status": "G2_FULL_AREA_BLOCKED",
+  "scope": "Historical gate assessment only; generic synthetic renderer results remain separate evidence.",
+  "g1": {
+    "status": "PERSISTED_REGRESSION_RECHECK_PASS",
+    "artifactCommit": "b97f9aaa6d58d01566c17555ae4abbfd032c6386",
+    "reRendered": false,
+    "rawFramesRecompared": 150,
+    "pngFramesRecompared": 150,
+    "sourceCaptureUnchanged": true,
+    "mp4SHA256": "3b68fead7b9b79e8671f91afa24a7f04bd687f69e1d836f5f50c4f103bf78041",
+    "strictEncodedComparison": "REPRODUCTION_NEEDS_REWORK_RETAINED",
+    "userQualityApproved": false
+  },
+  "g2": {
+    "sourceLedger": {
+      "status": "VERIFIED_ACTUAL_SOURCE_EVIDENCE",
+      "entries": 4,
+      "cachedOfficialPDFs": 3,
+      "newDownloadsSucceeded": 0,
+      "factClaimsWithPageQuotationsVerified": 7,
+      "path": "source-ledger.json",
+      "sha256": "b8dc663aba3fcf4d3622916f660ff6fed7cfe4da3c087142466a650ad71d2c96"
+    },
+    "sourceGeometry": {
+      "status": "VERIFIED_SOURCE_COORDINATES_ONLY",
+      "file": "source-review/CMH_UN_OFFENSIVE_PDF008_POSITION_PATHS.json",
+      "sha256": "6d54aa4746b76ed7a29acb1f2c6b7b77b0424bd74e4889df8d8d6796558e7efa",
+      "paths": 8,
+      "nativeCommands": 29,
+      "crs": "PDF_PAGE_POINTS_TOP_LEFT",
+      "transformToEPSG4326": "UNVERIFIED",
+      "historicalEPSGCoordinatesInvented": 0
+    },
+    "actualSourceConnection": {
+      "status": "INPUT_NORMALIZATION_CONNECTED_HISTORICAL_DRAW_BLOCKED",
+      "consumer": "source_contract.normalize_submission",
+      "sourceObservationsForwarded": true,
+      "preflightPositionPaths": 8,
+      "inputFrameRange": [
+        600,
+        800
+      ],
+      "availableQualifiedControlFrames": 0,
+      "historyRequestSHA256": "d38ace3dcd7cd4f53f55a390035482089f775287e86903600077d89cbb6c91ea",
+      "sourceBundleSHA256": "0e5e32bd20996d09e178ecfb43a1109a5eca594627c0bb1b7fc16b0f76aff921"
+    },
+    "geographicRegistration": {
+      "status": "BLOCKED",
+      "independentGCPs": 0,
+      "sourceDatum": null,
+      "validatedTransform": null,
+      "fitResidualMeters": null,
+      "heldOutResidualMeters": null,
+      "totalAccuracyMeters": null
+    },
+    "fullControlArea": {
+      "status": "BLOCKED",
+      "completeBilateralOwnerStates": 0,
+      "opposingOwnerMasks": [],
+      "eventROIQualified": false,
+      "localCameraAdmitted": false,
+      "coastlineClosurePerformed": false,
+      "opponentComplementInferred": false,
+      "busanOrFictional65422FallbackUsed": false
+    },
+    "limitedGeographicVisualization": {
+      "status": "BLOCKED_GEOGRAPHIC_REGISTRATION",
+      "sourceImageOnlyObservationsAvailable": true,
+      "historicalVideoAllowed": false,
+      "countedAsG3Achievement": false
+    },
+    "blockers": [
+      "G2_DATED_BILATERAL_CONTROL_START_END_NOT_AVAILABLE",
+      "G2_FULL_CONTROL_AREA_BLOCKED",
+      "G2_GEOGRAPHIC_GCP_AND_TRANSFORM_NOT_VERIFIED",
+      "G2_LOCAL_CAMERA_NOT_ADMITTED",
+      "G2_OPPOSING_ACTOR_AND_UNCERTAINTY_DOMAIN_NOT_AVAILABLE",
+      "SOURCE_CAMERA_PLAN_AND_ADMISSION_MISSING",
+      "SOURCE_CONTROL_START_AND_END_MISSING",
+      "SOURCE_GEOGRAPHIC_REGISTRATION_UNVERIFIED",
+      "SOURCE_HISTORICAL_PIXEL_CONSUMER_NOT_ADMITTED"
+    ]
+  },
+  "genericPipeline": {
+    "consumerAdmission": "SYNTHETIC_DEMO_ONLY",
+    "productionPixelConsumer": "NOT_ADMITTED",
+    "technicalDemoIsHistoricalEvidence": false,
+    "demoRenderPassDeclaredByThisReport": false,
+    "demoVisualApprovalDeclaredByThisReport": false,
+    "evidenceLocation": "Parent final synthetic capture report; separate from this historical gate."
+  },
+  "g3": {
+    "status": "BLOCKED_G2_HISTORY_INPUT",
+    "historicalRenderAllowed": false,
+    "historicalFramesDrawn": 0,
+    "fullTerritoryExpansionDemoAllowed": false,
+    "partialHistoricalPreviewApproved": false,
+    "syntheticDemoCountsAsHistoricalPass": false
+  },
+  "missingInputs": {
+    "originalEvidenceArchive": "ASTRA_MASTER_V2_EVIDENCE.zip exceeds32MiB executor transfer limit; no original archive entry list read. Cached/immutable individual evidence only.",
+    "reference64306": {
+      "status": "ORIGINAL_NOT_ACCESSIBLE",
+      "expectedFileName": "64306(7).mp4",
+      "expectedSHA256": "853ce5be22dc95c95e0c4b3eddbd603930e499bc88ee40cb4e59b50aad1187bc",
+      "directComparisonPerformed": false
+    }
+  },
+  "qualifiedNextRequirements": [
+    "Original source map or official high-resolution equivalent with rights and source SHA, historical shoreline/landmark identity, and documented coordinate datum/projection.",
+    "Independent map-to-geographic controls and held-out checks; explicit coordinate transform plus fitting residual, validation residual and source uncertainty. Source-page points are not EPSG4326.",
+    "Source-qualified start/end control coverage for required dates, including independently supported actor masks and explicit unknown/contested domain. Do not infer opposing territory as a complement or close partial positions against the coast.",
+    "Source-supported temporal/topological correspondence so state color and actual shared frontier use the same geographic/time field.",
+    "Qualified local camera ROI/resolution/coverage and safe-layout admission; retain existing unsupported-zoom guards.",
+    "Historical pixel-consumer admission with actual same-frame control/front input, then G2 mandatory proof; only after satisfaction may historical G3 render begin."
+  ],
+  "productionReady": false,
+  "full80SecondRenderAllowed": false,
+  "paidGpuExecuted": false,
+  "deploymentPerformed": false,
+  "finalPromotion": false,
+  "userApproved": false,
+  "next": "USER_REVIEW_REQUIRED"
+}

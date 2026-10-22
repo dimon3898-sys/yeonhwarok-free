@@ -7,6 +7,8 @@ import {evaluateMinimumContextCameraFrame} from '/modules/camera_director_v5.mjs
 import {createAreaAnnotation} from '/modules/area_annotation_v3.mjs';
 import {createMovingGraphicPass} from '/modules/graphic_motion_pass_v4.mjs';
 import {cameraBoundsNumericallyAgree,CAMERA_NUMERIC_CONTRACT} from './camera_numeric_contract.mjs';
+import {GRAPHIC_LAYOUT_VERSION} from '/modules/graphic_layout.mjs';
+import {sourcePolygonHasCoverage} from './source_geometry_contract.mjs';
 
 export const UNIVERSAL_SOURCE_RUNTIME_VERSION='WORLD_ENGINE_UNIVERSAL_SOURCE_RUNTIME_V2';
 const clone=x=>structuredClone(x),same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -17,12 +19,13 @@ function roleStyle(color,fill=0,width=0,alpha=0,halo=0,gain=0){return{fillColor:
 function styleFor(area,front){return{version:'SOURCE_FIELD_EXISTING_AREA_STYLE_V2',AREA:area,FRONT:front,IMPACT:area,PROPAGATION:front};}
 function maskItems(mask,prefix,field){
  const rows=Array.isArray(mask)?mask:mask?[mask]:[];
- return rows.filter(row=>notEmpty(row.geometry)).map((row,index)=>({id:row.id??prefix+'-'+index,geometry:clone(row.geometry),alpha:1,coverage:1,coverageOrigin:null,
+ return rows.filter(row=>sourcePolygonHasCoverage(row.geometry)).map((row,index)=>({id:row.id??prefix+'-'+index,geometry:clone(row.geometry),alpha:1,coverage:1,coverageOrigin:null,
   fieldId:field.fieldId,frame:field.frame}));
 }
 function validate(inputs){
  const {canvas,nativePlan,frames,cameraPlan,cameraSchedule,actors,eventLocation,annotations=[],profile={}}=inputs;
  if(!canvas||canvas.width!==1080||canvas.height!==1920||!nativePlan||!bounds(nativePlan.framing?.bounds))throw Error('UNIVERSAL_CANONICAL_NATIVE_PLAN_REQUIRED');
+ if(nativePlan.layout?.measured?.version!==GRAPHIC_LAYOUT_VERSION)throw Error('UNIVERSAL_EXISTING_MEASURED_LAYOUT_PROFILE_REQUIRED');
  if(!Array.isArray(frames)||frames.length<2||frames.length>240||!Array.isArray(cameraSchedule)||cameraSchedule.length!==frames.length)throw Error('UNIVERSAL_BOUNDED_SOURCE_FRAME_SEQUENCE_REQUIRED');
  if(cameraPlan?.directorVersion!=='CAMERA_DIRECTOR_V5'||cameraPlan.fps!==30||!same(cameraPlan.intent.finalExtent,nativePlan.framing.bounds))throw Error('UNIVERSAL_ACTUAL_V5_CAMERA_BINDING_REQUIRED');
  if(!Array.isArray(actors)||actors.length<1||actors.length>8||new Set(actors.map(a=>a.actor_id)).size!==actors.length||actors.some(a=>typeof a.actor_id!=='string'||!rgb(a.actor_color)))throw Error('UNIVERSAL_EXPLICIT_ACTOR_PALETTE_REQUIRED');
