@@ -6,6 +6,7 @@ import {compileAreaLinePrimitive} from '/modules/area_core_v3.mjs';
 import {evaluateMinimumContextCameraFrame} from '/modules/camera_director_v5.mjs';
 import {createAreaAnnotation} from '/modules/area_annotation_v3.mjs';
 import {createMovingGraphicPass} from '/modules/graphic_motion_pass_v4.mjs';
+import {cameraBoundsNumericallyAgree,CAMERA_NUMERIC_CONTRACT} from './camera_numeric_contract.mjs';
 
 export const UNIVERSAL_SOURCE_RUNTIME_VERSION='WORLD_ENGINE_UNIVERSAL_SOURCE_RUNTIME_V2';
 const clone=x=>structuredClone(x),same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -36,7 +37,7 @@ function validate(inputs){
   if(field.ownerMasks.some(row=>!actorIDs.has(row.factionId)||row.fieldId!==field.fieldId||row.frame!==i))throw Error('UNIVERSAL_SOURCE_OWNER_FIELD_MISMATCH');
   if(clock?.frame!==i||!Number.isSafeInteger(clock.sourceFrame)||clock.sourceFrame<0||clock.sourceFrame>=cameraPlan.totalFrames)throw Error('UNIVERSAL_CAMERA_SOURCE_CLOCK_REQUIRED');
   const actual=evaluateMinimumContextCameraFrame(cameraPlan,clock.sourceFrame);
-  if(actual.admission.localUsed||!same(actual.camera.flatBounds,clock.flatBounds))throw Error('UNIVERSAL_CAMERA_STATE_NOT_ACTUAL_V5');
+  if(actual.admission.localUsed||!cameraBoundsNumericallyAgree(actual.camera.flatBounds,clock.flatBounds).matches)throw Error('UNIVERSAL_CAMERA_STATE_NOT_ACTUAL_V5');
  }
  return true;
 }
@@ -116,6 +117,7 @@ export async function createUniversalSourceRuntime(inputs={}){
    last={version:UNIVERSAL_SOURCE_RUNTIME_VERSION,frame,timeSeconds:frame/30,classification:'SYNTHETIC_DEMO_NOT_HISTORY',
     fieldId:field.fieldId,ownerMasks:clone(field.ownerMasks),sharedFront:clone(field.sharedFront),unknownMask:clone(field.unknownMask),contestedMask:clone(field.contestedMask),
     sourceControlFrame:field.frame,sharedFieldClock:true,actualCamera:clone(factory.evidence.cameraFrame),camera:{...clone(camera),sourceFrame:clock.sourceFrame,clockDirection:clock.clockDirection,globalDerivativeClaimed:false},
+    cameraNumericalAgreement:cameraBoundsNumericallyAgree(bounds,clock.flatBounds),
     projectEventPoint:projected,fillDraws:drawResults,frontDraws,annotation,marker:{position:projected,source:'UNCHANGED_NATIVE_MARKER_ART_EXPLICIT_EVENT_LOCATION',safeArea:projected[0]-size/2>=safe[0]&&projected[0]+size/2<=safe[2]&&projected[1]-size/2>=safe[1]&&projected[1]+size/2<=safe[3]},
     nativeDrawCount,glError:0,sourceGeometryUnchanged:true,finishedFrameReuse:false,framePixelsNewlyDrawn:true,
     sourceTerrainFallback:'UNCHANGED_NATIVE_NE1_REGIONAL_AND_GLOBAL_RGB_COVERAGE',astraOutsideSupportUsed:false,
@@ -127,6 +129,7 @@ export async function createUniversalSourceRuntime(inputs={}){
    evidence:{version:UNIVERSAL_SOURCE_RUNTIME_VERSION,native:factory.evidence,areaEngine:'UNCHANGED_AREA_OVERLAY_PASS_V3',cameraEngine:'UNCHANGED_CAMERA_DIRECTOR_V5',
     sourceField:'ONE_SUPPLIED_FRAME_OWNER_UNKNOWN_CONTESTED_AND_SHARED_FRONT',sharedFrontStroke:'EXISTING_AREA_LINE_PASS_WHITE_CORE_GOLD_OUTER_NO_SCALAR_INFERENCE',
     nationSpecificBranches:false,fullRendererCopied:false,g1SourceOrArtifactsChanged:false,syntheticCaption:'UNCHANGED_EVENT_METRIC_GLYPH_LAYOUT_GPU_PASS',
+    cameraNumericalContract:CAMERA_NUMERIC_CONTRACT,
     backend:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):gl.getParameter(gl.RENDERER),softwareOnly:true,productionEligible:false,visualQualityApproved:false},
    dispose(){if(disposed)return;caption?.dispose();graphics?.dispose();passes.forEach(p=>p.dispose());factory?.dispose();renderer.dispose();disposed=true;}};
  }catch(error){caption?.dispose();graphics?.dispose();passes.forEach(p=>p.dispose());factory?.dispose();renderer.dispose();throw error;}

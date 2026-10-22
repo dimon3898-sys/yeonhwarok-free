@@ -29,7 +29,7 @@ export async function capture({planFile,expectedSHA256,outputRoot,cacheRoot}){
  await mkdir(cacheRoot,{mode:0o700});
  const publicRoot=path.join(outputRoot,'public-review'),proofRoot=path.join(outputRoot,'proof'),pngRoot=path.join(cacheRoot,'frames');
  for(const p of [publicRoot,proofRoot,pngRoot])await mkdir(p,{mode:0o700});
- const ownFiles=['native_runtime.mjs','capture_source.mjs','source_contract.py'];
+ const ownFiles=['native_runtime.mjs','camera_numeric_contract.mjs','capture_source.mjs','source_contract.py'];
  const bindings=await Promise.all(ownFiles.map(async name=>({path:name,sha256:hash(await readFile(path.join(HERE,name)))})));
  const assertBindings=async()=>{for(const row of bindings)check(hash(await readFile(path.join(HERE,row.path)))===row.sha256,'SOURCE_CAPTURE_ADAPTER_CHANGED');};
  for(const row of inputs.sourceBindings){
@@ -44,7 +44,7 @@ export async function capture({planFile,expectedSHA256,outputRoot,cacheRoot}){
    let body,type='application/octet-stream';
    if(p==='/'){body=Buffer.from('<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}canvas{display:block}</style></head><body><canvas id="map" width="1080" height="1920"></canvas></body></html>');type='text/html';}
    else if(p==='/runtime.json'){body=runtimeBytes;type='application/json';}
-   else if(p==='/native_runtime.mjs'){body=await readFile(path.join(HERE,'native_runtime.mjs'));type='text/javascript';}
+   else if(['/native_runtime.mjs','/camera_numeric_contract.mjs'].includes(p)){body=await readFile(path.join(HERE,p.slice(1)));type='text/javascript';}
    else {
     const mounts=[['/modules/',path.join(ENGINE,'web/map_infographic_v1')],['/static/',path.join(ENGINE,'web')],['/v3/assets/',path.join(REPO,'cinematic-world-map/assets')]];
     if(p==='/three.js'){body=await confined(path.join(ENGINE,'web/vendor/three/0.170.0/three.module.js'),ENGINE);type='text/javascript';}
