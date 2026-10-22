@@ -1,0 +1,48 @@
+{
+  "schema": "WORLD_ENGINE_UDP_STUDIO_FOCUSED_TESTS_V1",
+  "status": "PASS",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python -B -m unittest discover -s world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/tests -p test_studio_adapter.py -v",
+  "exitCode": 0,
+  "tests": 20,
+  "passed": 20,
+  "failures": 0,
+  "errors": 0,
+  "observedDurationSeconds": 2.536,
+  "toolOutputChunk": "55f2a4",
+  "testNames": [
+    "ControllerTests.test_normalization_preserves_standard_scene_and_trace",
+    "ControllerTests.test_unknown_or_production_request_has_no_fallback",
+    "ControllerTests.test_partial_selection_is_explicit_and_blocked_scene_cannot_start",
+    "ControllerTests.test_historical_g3_remains_blocked_even_mock_compiler_says_pass",
+    "ControllerTests.test_server_opt_in_required",
+    "ControllerTests.test_consent_required_before_child_launch",
+    "ControllerTests.test_duplicate_start_and_reconnect_reuse_same_claim",
+    "ControllerTests.test_other_active_job_is_blocked",
+    "ControllerTests.test_submit_to_start_source_change_is_rejected",
+    "ControllerTests.test_restart_constructor_never_starts_and_resume_forbidden",
+    "ControllerTests.test_state_cannot_be_shared_export_or_repo",
+    "ControllerTests.test_server_registry_hash_not_client_truth_flag",
+    "ControllerTests.test_worker_bound_package_and_historical_rejection",
+    "ControllerTests.test_expired_receipt_is_rejected",
+    "HttpSecurityTests.test_real_server_auth_csrf_origin_and_owner_form_preserved",
+    "ActualCompilerStudioTests.test_real_invalid_coordinate_is_blocked_before_job",
+    "ActualCompilerStudioTests.test_all_three_real_nonhistorical_inputs_select_actual_scene",
+    "ActualCompilerStudioTests.test_missing_future_scene_does_not_silently_replace_it",
+    "ActualCompilerStudioTests.test_real_sixty_fps_cannot_claim_render_ready",
+    "ActualCompilerStudioTests.test_real_historical_control_data_remains_blocked"
+  ],
+  "scopes": [
+    "15 orchestration/security tests: compiler/child mocks plus actual preserved local HTTP auth/CSRF/Origin",
+    "5 actual prompt-compiler-to-Studio preflight tests: 3 nonhistorical examples, invalid coordinates, explicit partial selection with missing future scene, 60fps rejection, historical control rejection"
+  ],
+  "hardwareOrVisualPassClaimed": false,
+  "gpuExecuted": false,
+  "paidExecution": false,
+  "initialEnvironmentLimitations": [
+    "Local HTTP sockets require the officially escalated free CPU test command under this sandbox. Default sandbox EPERM is not a code failure.",
+    "Existing private storage correctly rejects /tmp world-writable ancestry. New fixture private roots use /workspace; security checks are unchanged."
+  ],
+  "remainingValidation": [
+    "Actual detached Studio worker capture and all frame/video evidence is a separate PHASE F gate."
+  ]
+}

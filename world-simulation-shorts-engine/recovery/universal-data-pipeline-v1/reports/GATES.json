@@ -1,0 +1,72 @@
+{
+  "schema": "WORLD_ENGINE_UNIVERSAL_DATA_GATES_V1",
+  "baselineCommit": "e39969cbc76a071d34a38440d9551425e6d5e545",
+  "branch": "development/universal-data-pipeline-v1-20261022",
+  "protection": {
+    "status": "PASS",
+    "originalProtectedFiles": 307,
+    "baselineTrackedFiles": 6268,
+    "report": "reports/PROTECTION_INITIAL.json"
+  },
+  "phaseA": {
+    "status": "PASS",
+    "evidence": [
+      "PIPELINE_AUDIT.md",
+      "G3_BLOCK_CAUSE_REPORT.md"
+    ]
+  },
+  "phaseB": {
+    "status": "PASS",
+    "evidence": [
+      "PROMPT_CONTRACT.md",
+      "PROMPT_INPUT.schema.json",
+      "reports/PROMPT_PIPELINE_TEST.log"
+    ],
+    "scope": "Supported bounded preview contract; expected historical/unsupported rejections remain blocked"
+  },
+  "phaseC": {
+    "status": "PASS",
+    "evidence": [
+      "reports/FIVE_TOPIC_INPUT_RESULTS.json",
+      "reports/INDEPENDENT_REVIEW.json"
+    ],
+    "scope": "Supported bounded preview contract; expected historical/unsupported rejections remain blocked"
+  },
+  "phaseD": {
+    "status": "PASS",
+    "evidence": [
+      "reports/ACTUAL_CLI_CONVERSION.json",
+      "reports/compiled-inputs/AVIATION_GERMANY.json"
+    ],
+    "scope": "Supported bounded preview contract; expected historical/unsupported rejections remain blocked"
+  },
+  "phaseE": {
+    "status": "PASS",
+    "evidence": [
+      "reports/PROMPT_SCHEMA_TEST.log",
+      "reports/RENDER_CONTRACT_TEST_RESULTS.json",
+      "reports/STUDIO_FOCUSED_TEST_RESULTS.json"
+    ],
+    "scope": "Supported bounded preview contract; expected historical/unsupported rejections remain blocked"
+  },
+  "phaseF": {
+    "status": "READY",
+    "requires": [
+      "phaseA",
+      "phaseB",
+      "phaseC",
+      "phaseD",
+      "phaseE"
+    ]
+  },
+  "phaseG": {
+    "status": "PENDING"
+  },
+  "historicalG3": "BLOCKED",
+  "paidGpuExecuted": false,
+  "paidApiUsed": false,
+  "deploymentExecuted": false,
+  "nvidiaHardwareValidated": false,
+  "visualQuality": "NOT_ASSESSED",
+  "finalPromoted": false
+}

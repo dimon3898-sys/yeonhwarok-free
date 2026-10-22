@@ -1,0 +1,985 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:world-engine:data-prompt:v1",
+  "title": "WORLD ENGINE bounded structured production prompt V1",
+  "description": "Structural shape only. Semantic validation, per-family pixel capability, evidence review, timeline continuity, and original engine contracts also run. This schema does not certify facts or runtime readiness.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "WORLD_ENGINE_DATA_PROMPT_V1"
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 1
+    },
+    "simulationType": {
+      "enum": [
+        "HISTORICAL",
+        "FICTIONAL",
+        "GENERAL"
+      ]
+    },
+    "durationSeconds": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 600
+    },
+    "fps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ]
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "sceneId": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]+$"
+          },
+          "startFrame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "endFrame": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "facts": {
+            "$ref": "#/$defs/facts"
+          },
+          "renderSettings": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "sourceRegionId": {
+                "type": "string",
+                "enum": [
+                  "namibia_desert_coast",
+                  "europe_germany",
+                  "south_america_chile",
+                  "korean_peninsula",
+                  "nepal_himalaya"
+                ]
+              }
+            },
+            "required": []
+          },
+          "dependsOn": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            }
+          },
+          "historicalEvidence": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "recordId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                },
+                "sourceId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                },
+                "claimId": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                },
+                "geometryIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]+$"
+                  }
+                },
+                "stageIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]+$"
+                  }
+                }
+              },
+              "required": [
+                "recordId",
+                "sourceId",
+                "claimId"
+              ]
+            }
+          }
+        },
+        "required": [
+          "sceneId",
+          "startFrame",
+          "endFrame",
+          "facts"
+        ]
+      }
+    },
+    "renderSettings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceRegionId": {
+          "type": "string",
+          "enum": [
+            "namibia_desert_coast",
+            "europe_germany",
+            "south_america_chile",
+            "korean_peninsula",
+            "nepal_himalaya"
+          ]
+        }
+      },
+      "required": []
+    }
+  },
+  "required": [
+    "schema",
+    "topic",
+    "simulationType",
+    "durationSeconds",
+    "fps",
+    "resolution",
+    "scenes"
+  ],
+  "$defs": {
+    "facts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "PLANNER_FACTS_V1"
+        },
+        "data_mode": {
+          "enum": [
+            "SYNTHETIC_TEST",
+            "PRODUCTION"
+          ]
+        },
+        "subject": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "label": {
+              "type": "string",
+              "minLength": 1
+            },
+            "aliases": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "minItems": 1
+            },
+            "event_family": {
+              "enum": [
+                "WAR",
+                "TRANSPORT",
+                "LINE_METRIC",
+                "DISASTER"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "label",
+            "aliases",
+            "event_family"
+          ]
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "anchor": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "country_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "anchor"
+            ]
+          }
+        },
+        "time_range": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "start": {
+              "type": "string",
+              "format": "date"
+            },
+            "end": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ]
+        },
+        "source_notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "source_type": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_reference": {
+                "type": "string",
+                "minLength": 1
+              },
+              "verification_status": {
+                "type": "string",
+                "minLength": 1
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1
+              },
+              "verification_basis": {
+                "type": "string",
+                "minLength": 1
+              },
+              "live_access": {
+                "type": "string",
+                "minLength": 1
+              },
+              "retrieval_date": {
+                "type": "string",
+                "minLength": 1
+              },
+              "license": {
+                "type": "string",
+                "minLength": 1
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "original_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "source_wrapper_sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "crs": {
+                "type": "string",
+                "minLength": 1
+              },
+              "resolution": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "source_type",
+              "source_reference",
+              "verification_status"
+            ]
+          }
+        },
+        "geometries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "source_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "geometry": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "Point",
+                      "LineString",
+                      "Polygon",
+                      "MultiPolygon"
+                    ]
+                  },
+                  "coordinates": {
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "type",
+                  "coordinates"
+                ]
+              },
+              "note": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "source_id",
+              "geometry"
+            ]
+          }
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "area_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                }
+              },
+              "front_refs": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "date",
+              "label",
+              "area_refs",
+              "front_refs"
+            ]
+          }
+        },
+        "routes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "geometry_ref": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "direction": {
+                "enum": [
+                  "FORWARD",
+                  "REVERSE"
+                ]
+              },
+              "object_role": {
+                "type": "string",
+                "minLength": 1
+              },
+              "object_profile": {
+                "type": "string",
+                "minLength": 1
+              },
+              "required_for_story": {
+                "type": "boolean"
+              },
+              "object_graphic": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "width_px": {
+                    "type": "number",
+                    "minimum": 24,
+                    "maximum": 80
+                  },
+                  "height_px": {
+                    "type": "number",
+                    "minimum": 12,
+                    "maximum": 80
+                  },
+                  "polygons": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 8,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "points": {
+                          "type": "array",
+                          "minItems": 3,
+                          "maxItems": 12,
+                          "items": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {
+                              "type": "number",
+                              "minimum": -0.5,
+                              "maximum": 0.5
+                            }
+                          }
+                        },
+                        "color": {
+                          "type": "array",
+                          "minItems": 4,
+                          "maxItems": 4,
+                          "items": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 1
+                          }
+                        }
+                      },
+                      "required": [
+                        "points",
+                        "color"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "width_px",
+                  "height_px",
+                  "polygons"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "geometry_ref",
+              "object_role"
+            ]
+          }
+        },
+        "camera": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "anchor": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number",
+                  "minimum": -180,
+                  "maximum": 180
+                },
+                {
+                  "type": "number",
+                  "minimum": -90,
+                  "maximum": 90
+                }
+              ],
+              "items": false,
+              "minItems": 2,
+              "maxItems": 2
+            },
+            "target_geometry_refs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "minimum_context_geometry_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "detail_policy": {
+              "const": "FACT_BASED_VISUAL_GRADE"
+            },
+            "native_context": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "country_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]+$"
+                  }
+                },
+                "primary_country_id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9_.:-]+$"
+                },
+                "secondary_country_ids": {
+                  "type": "array",
+                  "maxItems": 0
+                },
+                "context_location_ids": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]+$"
+                  }
+                }
+              },
+              "required": []
+            }
+          },
+          "required": [
+            "anchor",
+            "target_geometry_refs"
+          ]
+        },
+        "scale": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "preferred": {
+              "enum": [
+                "REGIONAL",
+                "LOCAL",
+                "CONTINENT"
+              ]
+            }
+          },
+          "required": []
+        },
+        "native_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "country_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "primary_country_id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_.:-]+$"
+            },
+            "secondary_country_ids": {
+              "type": "array",
+              "maxItems": 0
+            },
+            "context_location_ids": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            }
+          },
+          "required": []
+        },
+        "semantic_mode": {
+          "enum": [
+            "ILLUSTRATIVE_FACT_BASED_VISUAL",
+            "SUPPLIED_OBSERVED_STATES"
+          ]
+        },
+        "scene_timing": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fps": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total_frames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "duration_seconds": {
+              "type": "number",
+              "minimum": 0
+            },
+            "camera_lock_frame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "event_start_frame": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "initial_reveal_frames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "state_transition_frames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "final_hold_frames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "action_frames": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "frame_policy": {
+              "const": "INTEGER_DETERMINISTIC"
+            },
+            "blank_interstage_frames": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "fps",
+            "total_frames",
+            "duration_seconds",
+            "camera_lock_frame",
+            "event_start_frame",
+            "initial_reveal_frames",
+            "state_transition_frames",
+            "final_hold_frames",
+            "action_frames",
+            "frame_policy",
+            "blank_interstage_frames"
+          ]
+        },
+        "markers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1
+              },
+              "anchor": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "source_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "anchor"
+            ]
+          }
+        },
+        "text": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "content": {
+                "type": "string",
+                "minLength": 1
+              },
+              "role": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "content",
+              "role"
+            ]
+          }
+        },
+        "geographic_lines": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "geometry_ref": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "direction": {
+                "enum": [
+                  "FORWARD",
+                  "REVERSE"
+                ]
+              },
+              "style_role": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "id",
+              "geometry_ref"
+            ]
+          }
+        },
+        "metrics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "display_value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unit": {
+                "type": "string",
+                "minLength": 1
+              },
+              "anchor": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "source_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "id",
+              "display_value",
+              "unit",
+              "anchor",
+              "source_id"
+            ]
+          }
+        },
+        "impacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "geometry_ref": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              }
+            },
+            "required": [
+              "id",
+              "geometry_ref"
+            ]
+          }
+        },
+        "propagations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "origin": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  }
+                ],
+                "items": false,
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "source_id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "geometry_ref": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]+$"
+              },
+              "radius_start_degrees": {
+                "type": "number"
+              },
+              "radius_end_degrees": {
+                "type": "number"
+              },
+              "angular_range_degrees": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "origin",
+              "source_id"
+            ]
+          }
+        },
+        "causal_tracks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "description": "Preserved native causal contract; current pixel profile rejects until admitted, never silently consumes."
+          }
+        }
+      },
+      "required": [
+        "version",
+        "data_mode",
+        "subject",
+        "locations",
+        "time_range",
+        "source_notes",
+        "geometries",
+        "camera"
+      ]
+    }
+  }
+}

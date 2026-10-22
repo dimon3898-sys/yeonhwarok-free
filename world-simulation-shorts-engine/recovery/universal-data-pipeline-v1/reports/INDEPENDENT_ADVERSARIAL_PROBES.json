@@ -1,0 +1,500 @@
+{
+  "schema": "WORLD_ENGINE_UDP_INDEPENDENT_ADVERSARIAL_PROBES_V1",
+  "status": "PASS",
+  "tests": 20,
+  "failures": 0,
+  "compilerSHA256": "07b0d50023ec02d01a549388c77410d14d18f48e03a8bcb549f4db438fc0f6fa",
+  "originalSourceModified": false,
+  "renderExecuted": false,
+  "gpuExecuted": false,
+  "paidWorkExecuted": false,
+  "cases": [
+    {
+      "id": "BASELINE_AVIATION_GERMANY.json",
+      "expected": "PASS",
+      "status": "PASS",
+      "renderableSceneIds": [
+        "aviation-germany"
+      ],
+      "blockedSceneIds": [],
+      "issues": [],
+      "pass": true
+    },
+    {
+      "id": "BASELINE_TRADE_CHILE.json",
+      "expected": "PASS",
+      "status": "PASS",
+      "renderableSceneIds": [
+        "trade-chile"
+      ],
+      "blockedSceneIds": [],
+      "issues": [],
+      "pass": true
+    },
+    {
+      "id": "BASELINE_FICTIONAL_NAMIBIA.json",
+      "expected": "PASS",
+      "status": "PASS",
+      "renderableSceneIds": [
+        "namibia-fictional-zone"
+      ],
+      "blockedSceneIds": [],
+      "issues": [],
+      "pass": true
+    },
+    {
+      "id": "UNKNOWN_RESOLUTION_FIELD",
+      "expected": "UNSUPPORTED",
+      "status": "UNSUPPORTED",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "UNSUPPORTED_FIELD",
+          "field": "$.resolution.fakeAntiAlias"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "SHADOWED_NATIVE_CONTEXT_UNKNOWN",
+      "expected": "UNSUPPORTED_OR_CONFLICT_WITH_EXPLICIT_FIELD_ERROR",
+      "status": "CONFLICT",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "UNSUPPORTED_FIELD",
+          "field": "$.scenes[0].facts.camera.native_context.secret_override"
+        },
+        {
+          "status": "CONFLICT",
+          "code": "AMBIGUOUS_NATIVE_CONTEXT",
+          "field": "$.scenes[0].facts.native_context"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "UNDRAWN_TEXT_REJECTED",
+      "expected": "UNSUPPORTED",
+      "status": "UNSUPPORTED",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "FEATURE_HAS_NO_PIXEL_CONSUMER",
+          "field": "$.scenes[0].facts.text"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "UNSUPPORTED_60FPS",
+      "expected": "UNSUPPORTED",
+      "status": "UNSUPPORTED",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "PREVIEW_FPS",
+          "field": "$.fps"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "UNSUPPORTED_LOCAL_SCALE",
+      "expected": "UNSUPPORTED",
+      "status": "UNSUPPORTED",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "REGIONAL_SCALE_ONLY",
+          "field": "$.scenes[0].facts.scale.preferred"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "NONOBJECT_RENDER_SETTINGS",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.renderSettings"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "CLIENT_EVIDENCE_REGISTRY_REJECTED",
+      "expected": "UNSUPPORTED",
+      "status": "UNSUPPORTED",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "UNSUPPORTED_FIELD",
+          "field": "$.evidenceRegistry"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_NULL_RECORD_geometries",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "IDENTIFIER_REQUIRED",
+          "field": "$.scenes[0].facts.geometries[0].id"
+        },
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].facts.geometries[0]"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_NULL_RECORD_locations",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "IDENTIFIER_REQUIRED",
+          "field": "$.scenes[0].facts.locations[0].id"
+        },
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].facts.locations[0]"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_NULL_RECORD_markers",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "IDENTIFIER_REQUIRED",
+          "field": "$.scenes[0].facts.markers[0].id"
+        },
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].facts.markers[0]"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_NULL_RECORD_routes",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "IDENTIFIER_REQUIRED",
+          "field": "$.scenes[0].facts.routes[0].id"
+        },
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].facts.routes[0]"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_NULL_RECORD_source_notes",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "IDENTIFIER_REQUIRED",
+          "field": "$.scenes[0].facts.source_notes[0].id"
+        },
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].facts.source_notes[0]"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_NULL_RECORD_stages",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "IDENTIFIER_REQUIRED",
+          "field": "$.scenes[0].facts.stages[0].id"
+        },
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].facts.stages[0]"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "MALFORMED_HISTORY_BINDING",
+      "expected": "INVALID",
+      "status": "INVALID",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany"
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "OBJECT_REQUIRED",
+          "field": "$.scenes[0].historicalEvidence[0]"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.COUNTRY_DEU"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.DECLARED_CONNECTION"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.SUPPLIED_FIXTURE"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "HISTORICAL_CLIENT_VERIFIED_CANNOT_APPROVE",
+      "expected": "NOT_PASS",
+      "status": "NEEDS_INPUT",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "korea-exact-control-missing"
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+          "field": "$.scenes[0].facts.stages"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "EVIDENCE_NOT_ADMITTED",
+          "field": "$.scenes[0].historicalEvidence[0]"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.COUNTRY_KOR"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.COUNTRY_PRK"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_START"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_START"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_BUSAN"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_BUSAN"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_NORTH_ADVANCE"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_NORTH_ADVANCE"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_SEOUL_WITHDRAWAL"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_SEOUL_WITHDRAWAL"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_ARMISTICE"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_ARMISTICE"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.START"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.BUSAN"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.NORTH_ADVANCE"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.SEOUL_WITHDRAWAL"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.ARMISTICE"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.HISTORY_START"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.HISTORY_CAMPAIGNS"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.HISTORY_OVERVIEW"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.SCHEMATIC_STATES"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.NATIVE_COUNTRIES"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "UNRELATED_QUALIFIED_SCENE_RETAINED",
+      "expected": "PARTIAL_NEEDS_INPUT",
+      "status": "NEEDS_INPUT",
+      "renderableSceneIds": [
+        "aviation-germany"
+      ],
+      "blockedSceneIds": [
+        "missing-route"
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "ROUTE_DATA_REQUIRED",
+          "field": "$.scenes[1].facts.routes"
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "DECLARED_BLOCKED_DEPENDENCY_PROPAGATES",
+      "expected": "NO_RENDERABLE_DEPENDENT",
+      "status": "NEEDS_INPUT",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "aviation-germany",
+        "missing-route"
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "DEPENDENCY_BLOCKED",
+          "field": "$.scenes.aviation-germany.dependsOn"
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "ROUTE_DATA_REQUIRED",
+          "field": "$.scenes[1].facts.routes"
+        }
+      ],
+      "pass": true
+    }
+  ]
+}

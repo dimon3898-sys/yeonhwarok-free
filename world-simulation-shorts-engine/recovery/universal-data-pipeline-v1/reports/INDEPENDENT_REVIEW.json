@@ -1,0 +1,213 @@
+{
+  "schema": "WORLD_ENGINE_UDP_INDEPENDENT_REVIEW_V1",
+  "status": "PASS_FOR_FREE_STUDIO_DEMO_GATE",
+  "scope": [
+    "structured_input_contract",
+    "historical_server_evidence_boundary",
+    "partial_scene_selection",
+    "authenticated_studio",
+    "source_bindings",
+    "runtime_field_consumption"
+  ],
+  "reviewer": "independent protection/regression agent",
+  "protected143RegressionResult": "PASS_143_ZERO_SKIP",
+  "protectionAfterRegressions": "PASS_307_AND_6268",
+  "findings": [
+    {
+      "id": "IR001",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "prompt_pipeline.mjs",
+      "function": "inspectFacts/analyzePrompt",
+      "reproduction": "AVIATION_GERMANY + facts.camera.native_context.secret_override=true",
+      "observed": "Before fix: top-level native_context shadowed camera.native_context, allowing its unknown field to disappear. After fix: explicit UNSUPPORTED_FIELD plus CONFLICT for ambiguous contexts; no render request.",
+      "required": "Reject unsupported nested fields explicitly.",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": 90,
+        "functionOrGuard": "AMBIGUOUS_NATIVE_CONTEXT"
+      },
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+    },
+    {
+      "id": "IR002",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "prompt_pipeline.mjs;generic_runtime.mjs",
+      "reproduction": "AVIATION_GERMANY + facts.text=[{id:custom_label,content:THIS MUST SHOW,role:TITLE}]",
+      "observed": "PASS Scene.text; runtime hides native text and does not consume supplied Scene.text",
+      "required": "Reject until actual text consumer exists.",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": null,
+        "functionOrGuard": "['impacts'"
+      },
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+    },
+    {
+      "id": "IR003",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "prompt_pipeline.mjs;capture_generic.mjs",
+      "reproduction": "AVIATION_GERMANY fps=60,durationSeconds=1.5 retaining90frames",
+      "observed": "PASS compiler; runtime only accepts30fps",
+      "required": "Return UNSUPPORTED for non30fps in free profile.",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": 299,
+        "functionOrGuard": "PREVIEW_FPS"
+      },
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+    },
+    {
+      "id": "IR004",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "prompt_pipeline.mjs;capture_generic.mjs",
+      "reproduction": "AVIATION_GERMANY + facts.scale.preferred=LOCAL",
+      "observed": "PASS Scene.scale_intent.LOCAL; runtime forces REGIONAL",
+      "required": "Reject unsupported requested scale.",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": 93,
+        "functionOrGuard": "REGIONAL_SCALE_ONLY"
+      },
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+    },
+    {
+      "id": "IR005",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "prompt_pipeline.mjs",
+      "reproduction": "AVIATION_GERMANY + renderSettings=unsupported-string",
+      "observed": "PASS; nonobject silently ignored",
+      "required": "Validate optional renderSettings object type.",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": 42,
+        "functionOrGuard": "OBJECT_REQUIRED"
+      },
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+    },
+    {
+      "id": "IR006",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "studio_adapter.py",
+      "function": "StudioController._normal",
+      "reproduction": "HISTORICAL structured JSON fence with preceding prose; analyzer accepts fence anywhere but Studio reparses only leading fence",
+      "observed": "Before fix: static divergent fence-parser mismatch; no actual render bypass was established and worker failed closed. After fix: analyzer provides authoritative simulationType and actual authenticated local HTTP preflight blocks the prefixed-fence historical mode.",
+      "required": "Consume validated simulationType from analyzer result, not divergent parsing.",
+      "resolution": {
+        "file": "studio_adapter.py",
+        "line": 140,
+        "functionOrGuard": "simulation = analyzed.get('simulationType')"
+      },
+      "evidence": "INDEPENDENT_HTTP_MODE_PROBE.json"
+    },
+    {
+      "id": "IR007",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_AND_REPROBED",
+      "file": "prompt_pipeline.mjs",
+      "function": "inspectFacts/checkEvidence",
+      "reproduction": "Replace each facts record array with [null], and historicalEvidence with [null].",
+      "observedBefore": "Uncaught TypeError for several arrays instead of structured INVALID.",
+      "observedAfter": "All malformed-record probes return structured INVALID, no render request.",
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+    },
+    {
+      "id": "IR008",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_CONFIRMED_BY_CODE_AND_OWNER_FOCUSED_TESTS",
+      "file": "prompt_pipeline.mjs;capture_generic.mjs;generic_runtime.mjs",
+      "function": "CAPABILITIES.families/connected runtime family guard",
+      "observedBefore": "Compiler admitted LINE_METRIC while free capture runtime accepted WAR/TRANSPORT only.",
+      "observedAfter": "Connected capabilities WAR/TRANSPORT only; LINE_METRIC explicitly UNSUPPORTED; existing Event implementation preserved.",
+      "evidence": "PROMPT_PIPELINE_TEST.log; prompt_pipeline.mjs CAPABILITIES.families and FAMILY_NOT_CONNECTED"
+    }
+  ],
+  "securityChecks": [
+    {
+      "id": "AUTH_CSRF_ORIGIN",
+      "status": "PASS_ACTUAL_LOCAL_HTTP_UNIT",
+      "command": "PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/tests python -B -m unittest test_studio_adapter.HttpSecurityTests.test_real_server_auth_csrf_origin_and_owner_form_preserved -v",
+      "result": "Ran 1 test in 0.627s; OK; unauth401/wrongOrigin403/missingCSRF403/authenticated200 tested",
+      "compilerMocked": true,
+      "GPUExecuted": false
+    }
+  ],
+  "paidWorkExecuted": false,
+  "nvidiaVerified": false,
+  "visualQualityApproved": false,
+  "reviewedAtUTC": "2026-10-22T04:52:44Z",
+  "unresolvedConfirmedFindings": 0,
+  "criticalFindings": 0,
+  "adversarialTests": {
+    "status": "PASS",
+    "tests": 20,
+    "failures": 0,
+    "file": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+  },
+  "historicalHTTPModeProbe": {
+    "status": "PASS",
+    "file": "INDEPENDENT_HTTP_MODE_PROBE.json",
+    "compilerMocked": true,
+    "renderAllowed": false
+  },
+  "scopeLimitations": [
+    "No independent new video was rendered by this reviewer. Parent runtime lane must produce and audit the actual three Studio demos.",
+    "Historical G3, production/NVIDIA, paid deployment,80s FINAL and visual quality approval remain forbidden/unverified.",
+    "Marker labels and moving-object profiles are metadata-only; preserved native marker/vector graphics are drawn at supplied positions.",
+    "Free profile is structured input,30fps REGIONAL WAR/TRANSPORT within five already-qualified regional source styles; unsupported requests fail explicitly."
+  ],
+  "reviewedSourceHashes": [
+    {
+      "path": "prompt_pipeline.mjs",
+      "sha256": "0aa35d764c2c870af41e9ab6178a8d5a43d6e8c5f87b9303fd067e782957e16f",
+      "bytes": 39059
+    },
+    {
+      "path": "studio_adapter.py",
+      "sha256": "f87d178d0df7c469a55de3fb2e50bdc934fa3e29836aa1016b2d825af3367b55",
+      "bytes": 12155
+    },
+    {
+      "path": "software_worker.py",
+      "sha256": "88be313edf4b772b81f97ac9b4d7308eb831001272858db3a95be109b510ca1c",
+      "bytes": 13055
+    },
+    {
+      "path": "capture_generic.mjs",
+      "sha256": "4bcb923b9ba213c368b0d346332439b4a36945cba5b0e320553ad7c588757383",
+      "bytes": 17439
+    },
+    {
+      "path": "generic_runtime.mjs",
+      "sha256": "6f2d5601bfeaf1c444348da7a64b6318700ba298255f1ebf660f71bd32869f99",
+      "bytes": 10696
+    }
+  ],
+  "codeChecks": [
+    {
+      "scope": "server evidence authority",
+      "result": "Client VERIFIED/status/registry fields cannot qualify history; exact server-owned registry pin and canonical fact/geometry/date bindings required."
+    },
+    {
+      "scope": "partial scenes",
+      "result": "Unrelated qualified scene retained at original frame range; explicit selected scene and declared dependencies enforced."
+    },
+    {
+      "scope": "free execution",
+      "result": "Loopback-only authenticated Studio; explicit owner consent; exclusive claim; bounded detached worker; SwiftShader-only real backend; no deployment API."
+    },
+    {
+      "scope": "source identity",
+      "result": "Source ZIP SHA pinned; every actual base asset SHA verified; actual Scene is passed unchanged separately from map/style seed; Area/Flow consume supplied Scene geometries."
+    },
+    {
+      "scope": "camera/markers",
+      "result": "Actual V5 state and common factory.screen reused; supported regional camera inputs consumed; unsupported scale/secondary context/text rejected; labels explicitly metadata-only."
+    }
+  ]
+}

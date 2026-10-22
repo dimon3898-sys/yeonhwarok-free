@@ -1,0 +1,195 @@
+{
+  "schema": "WORLD_ENGINE_DATA_PIPELINE_RESULT_V1",
+  "compilerVersion": "universal-data-pipeline-v1.0.0",
+  "engineHashes": {
+    "planner_scene_v1.mjs": "9f03171bac5fd5bea023d6a01034608fc2da12f73c8d8d2116da5bf997d64e80",
+    "planner_engine_adapter_v1.mjs": "cf5ed1dc3a40b2c6d18fbbc8cc4100d8ee6db5ff53657d7d005887b210e68732",
+    "area_core_v3.mjs": "10c55061c2a38ab527411fcd58cb6c4248d4a4fc21c0c59ae31271e755500d3f",
+    "flow_core_v2.mjs": "5666f77c2dd254458f7e937d0dbec5d6a2725f06705e168ecf982623da5045be",
+    "event_contract_v1.mjs": "38a1b423b8dc741ab0c5f78b42a68bcc3cd22ba79272d20a3e019045fe10bd07"
+  },
+  "status": "NEEDS_INPUT",
+  "issues": [
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REQUIRED_FIELD",
+      "field": "$.scenes[0].facts.time_range.start",
+      "reason": "Supply the field required by the selected feature.",
+      "example": {
+        "field": "start",
+        "contract": "PROMPT_CONTRACT.md"
+      }
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REQUIRED_FIELD",
+      "field": "$.scenes[0].facts.time_range.end",
+      "reason": "Supply the field required by the selected feature.",
+      "example": {
+        "field": "end",
+        "contract": "PROMPT_CONTRACT.md"
+      }
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REQUIRED_FIELD",
+      "field": "$.scenes[0].facts.camera.anchor",
+      "reason": "Supply the field required by the selected feature.",
+      "example": {
+        "field": "anchor",
+        "contract": "PROMPT_CONTRACT.md"
+      }
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REQUIRED_FIELD",
+      "field": "$.scenes[0].facts.camera.target_geometry_refs",
+      "reason": "Supply the field required by the selected feature.",
+      "example": {
+        "field": "target_geometry_refs",
+        "contract": "PROMPT_CONTRACT.md"
+      }
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+      "field": "$.scenes[0].facts.stages",
+      "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon.",
+      "example": {
+        "minimumStates": 2,
+        "eachStateRequires": [
+          "date",
+          "area_refs",
+          "front_refs"
+        ]
+      }
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REVIEWED_EVIDENCE_REQUIRED",
+      "field": "$.scenes[0].historicalEvidence",
+      "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact.",
+      "example": {
+        "historicalEvidence": [
+          {
+            "recordId": "approved_record",
+            "sourceId": "source_1",
+            "claimId": "approved_claim",
+            "geometryIds": [],
+            "stageIds": []
+          }
+        ]
+      }
+    }
+  ],
+  "sceneResults": [
+    {
+      "sceneId": "rome-missing-extent",
+      "startFrame": 0,
+      "endFrame": 90,
+      "status": "NEEDS_INPUT",
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.time_range.start",
+          "reason": "Supply the field required by the selected feature.",
+          "example": {
+            "field": "start",
+            "contract": "PROMPT_CONTRACT.md"
+          }
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.time_range.end",
+          "reason": "Supply the field required by the selected feature.",
+          "example": {
+            "field": "end",
+            "contract": "PROMPT_CONTRACT.md"
+          }
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.camera.anchor",
+          "reason": "Supply the field required by the selected feature.",
+          "example": {
+            "field": "anchor",
+            "contract": "PROMPT_CONTRACT.md"
+          }
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.camera.target_geometry_refs",
+          "reason": "Supply the field required by the selected feature.",
+          "example": {
+            "field": "target_geometry_refs",
+            "contract": "PROMPT_CONTRACT.md"
+          }
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+          "field": "$.scenes[0].facts.stages",
+          "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon.",
+          "example": {
+            "minimumStates": 2,
+            "eachStateRequires": [
+              "date",
+              "area_refs",
+              "front_refs"
+            ]
+          }
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REVIEWED_EVIDENCE_REQUIRED",
+          "field": "$.scenes[0].historicalEvidence",
+          "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact.",
+          "example": {
+            "historicalEvidence": [
+              {
+                "recordId": "approved_record",
+                "sourceId": "source_1",
+                "claimId": "approved_claim",
+                "geometryIds": [],
+                "stageIds": []
+              }
+            ]
+          }
+        }
+      ],
+      "dependsOn": []
+    }
+  ],
+  "renderableSceneIds": [],
+  "blockedSceneIds": [
+    "rome-missing-extent"
+  ],
+  "renderRequests": [],
+  "capabilities": {
+    "prompt": "STRUCTURED_JSON_OR_SINGLE_JSON_FENCE; NO_EXTERNAL_AI",
+    "families": [
+      "WAR",
+      "TRANSPORT"
+    ],
+    "plannerOnlyFamilies": [
+      "LINE_METRIC",
+      "DISASTER"
+    ],
+    "camera": "EXISTING_SERVER_OWNED_REGION_PROFILE_LOCKED; supplied targets must fit its coverage",
+    "dates": "GREGORIAN_ISO_DATE_0001_TO_9999; BCE and precision-only dates are unsupported",
+    "routeMotion": "PROJECTED_ARC_LENGTH_PLAYBACK; not physical velocity or inferred navigation",
+    "bounds": "EPSG:4326 [longitude,latitude]; antimeridian-spanning segments unsupported",
+    "historical": "SERVER_REVIEWED_CLAIM_AND_GEOMETRY_BINDINGS; SHA and VERIFIED labels alone are insufficient",
+    "rendering": "FREE_SOFTWARE_PREVIEW_ONLY; 30fps,16..240 frames per scene; no NVIDIA quality claim",
+    "legacy": "Existing PLANNER_SCENE_JSON_V1 validated without reinterpretation by validateLegacyScene"
+  },
+  "inputSHA256": "46f18a19a59213b3b68737ba3e2c39e92b024591fad4c58a9f372dc7f9ccb08b",
+  "simulationType": "HISTORICAL",
+  "totalFrames": 90,
+  "timelinePreserved": true,
+  "partialRenderRequiresExplicitSceneSelection": true
+}
