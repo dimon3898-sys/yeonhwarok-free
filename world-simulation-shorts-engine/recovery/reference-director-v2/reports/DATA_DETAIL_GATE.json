@@ -1,0 +1,53 @@
+{
+  "schema": "WORLD_ENGINE_DETAIL_SOURCE_GATE_V2",
+  "status": "DATA_DETAIL_BLOCKED",
+  "renderAllowed": false,
+  "heroIdentity": {
+    "status": "UNVERIFIED",
+    "candidates": [
+      "Peñón de Vélez de la Gomera"
+    ],
+    "candidateChosenAsFact": false,
+    "reason": "Original video observations alone do not establish identity. Requested independent identity source was not accessible through the configured proxy."
+  },
+  "requiredInputs": [
+    {
+      "field": "detailLocationId",
+      "status": "NEEDS_VERIFIED_SOURCE",
+      "format": "Verified identity and EPSG:4326 Point with source/hash/date/positional uncertainty"
+    },
+    {
+      "field": "detailGeometryId",
+      "status": "NEEDS_VERIFIED_SOURCE",
+      "format": "Unmodified detailed GeoJSON Polygon/MultiPolygon with CRS/source/hash/license/date/native precision/scale"
+    },
+    {
+      "field": "detailBoundaryGeometryId",
+      "status": "NEEDS_VERIFIED_SOURCE",
+      "format": "Verified ordered GeoJSON LineString with actual endpoints, direction and boundary meaning; no screen trace"
+    },
+    {
+      "field": "basemapSourceIds",
+      "status": "NEEDS_VERIFIED_SOURCE",
+      "format": "Licensed source covering every rotated viewport corner with sufficient native pixels; dimensions, bounds, CRS, sampling, NoData, original bytes/hash, registration, date and credits"
+    }
+  ],
+  "metric": {
+    "displayText": "85 m",
+    "truth": "OBSERVED_REFERENCE_TEXT_ONLY",
+    "independentlyVerifiedGeographicLength": false,
+    "displayingObservedTextAllowed": true,
+    "surveyClaimAllowed": false
+  },
+  "existingCoarseInputs": "Preserved V1 source bindings and hashes remain available, but they do not establish native local detail. No existing source file was changed.",
+  "phase3StudioReferenceRendering": "BLOCKED_UNTIL_SOURCE_AND_NATIVE_PIXEL_GATES_PASS",
+  "newDetailedAssetsAcquired": false,
+  "paidGPUOrAPIUsed": false,
+  "coarseSelectionsCompleted": [
+    "Explicit existing coarse context region",
+    "Explicit source-ID/style-group mappings",
+    "Explicit primary polygon component as framing subject with full render geometry preserved"
+  ],
+  "preparedInput": "REFERENCE_DIRECTOR_INPUT_V2.json",
+  "preparedInputSHA256": "de2bc1a27363edaa3da56239b8678d5a04a76a993b5c431096062de6139f1300"
+}

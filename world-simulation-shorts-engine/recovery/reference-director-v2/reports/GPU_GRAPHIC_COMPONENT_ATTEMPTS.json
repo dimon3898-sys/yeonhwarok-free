@@ -1,0 +1,24 @@
+{
+  "schema": "WORLD_ENGINE_GRAPHIC_COMPONENT_ATTEMPTS_V1",
+  "scope": "UNIT_GPU_GRAPHIC_DRAW",
+  "nativeMapRendered": false,
+  "actualStudioRender": false,
+  "referenceProduction": false,
+  "attempts": [
+    {
+      "id": "attempt-01",
+      "result": "FAIL",
+      "observedFailure": "AREA_GPU_GL_ERROR_1282",
+      "evidenceSource": "Actual tool stderr observed during this task; full pre-fix stderr was not persisted",
+      "processExitCode": null,
+      "fix": "In the new shared-renderer consumer only, reset bindings before unchanged raw GL Area pass construction; assert preexisting/create GL errors instead of hiding them. Earlier disposed Three resources could remain in shared GL state."
+    },
+    {
+      "id": "attempt-02",
+      "result": "PASS",
+      "receipt": "GPU_GRAPHIC_COMPONENT_RESULT.json",
+      "allFiveConsumersGlError": 0
+    }
+  ],
+  "paidGpuOrApiUsed": false
+}

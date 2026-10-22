@@ -1,0 +1,165 @@
+{
+  "schema": "WORLD_ENGINE_PUBLIC_SOURCE_ACQUISITION_LEDGER_V2",
+  "baseCommit": "5cc9b98c628324814e1e63f9d0f8c6254ee84174",
+  "officialNetworkPermissionRequest": {
+    "tool": "request_permissions",
+    "requested": {
+      "network": {
+        "enabled": true
+      }
+    },
+    "granted": true,
+    "scope": "turn",
+    "notEquivalentToAppliedProxyHostPolicy": true
+  },
+  "configuredProxyPreserved": true,
+  "tlsVerificationPreserved": true,
+  "proxyOrPolicyBypassUsed": false,
+  "blockedDestinationsRetried": false,
+  "ciUsedAsNetworkBypass": false,
+  "actualSourceAttempts": [
+    {
+      "id": "candidate-identity-wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Pe%C3%B1%C3%B3n_de_V%C3%A9lez_de_la_Gomera",
+      "purpose": "Independent candidate identity/location description; not accepted as a verified match before reading",
+      "result": "PROXY_CONNECT_DENIED",
+      "httpStatus": 403,
+      "responseBodyAcquired": false
+    },
+    {
+      "id": "official-ign-portal",
+      "url": "https://www.ign.es/web/ign/portal",
+      "purpose": "Official cartographic catalogue/source licensing and detail coverage",
+      "result": "PROXY_CONNECT_DENIED",
+      "httpStatus": 403,
+      "responseBodyAcquired": false
+    },
+    {
+      "id": "osm-overpass-service-status",
+      "url": "https://overpass-api.de/api/status",
+      "purpose": "Determine whether a documented community GIS extraction service is reachable before any actual geometry query",
+      "result": "PROXY_CONNECT_DENIED",
+      "httpStatus": 403,
+      "responseBodyAcquired": false,
+      "geometryQueryExecuted": false
+    },
+    {
+      "id": "github-public-repository-index-api",
+      "url": "https://api.github.com/search/repositories?q=pe%C3%B1on+velez",
+      "purpose": "Find existing legitimate public GIS/source mirrors",
+      "result": "PROXY_CONNECT_DENIED",
+      "httpStatus": 403,
+      "responseBodyAcquired": false
+    },
+    {
+      "id": "github-public-repository-index-web",
+      "url": "https://github.com/search?q=%22Velez+de+la+Gomera%22&type=repositories",
+      "purpose": "Allowed public repository index alternative",
+      "result": "HTTP_OK_NO_MATCHING_REPOSITORY",
+      "httpStatus": 200,
+      "repositoryResultCount": 0,
+      "notGeographicEvidence": true
+    },
+    {
+      "id": "github-public-code-index",
+      "url": "https://github.com/search?q=%22V%C3%A9lez%22+%22Gomera%22&type=code",
+      "purpose": "Check whether existing source data can be located without inventing an asset",
+      "result": "AUTHENTICATED_CODE_SEARCH_REQUIRED",
+      "httpStatus": 200,
+      "loggedIn": false,
+      "notGeographicEvidence": true
+    },
+    {
+      "id": "geoboundaries-esp-metadata-pointer",
+      "url": "https://raw.githubusercontent.com/wmgeolab/geoBoundaries/main/releaseData/gbOpen/ESP/ADM0/geoBoundaries-ESP-ADM0-metaData.json",
+      "purpose": "Existing public geographic-source metadata; no large global raster download",
+      "result": "LFS_POINTER_ONLY_NOT_METADATA",
+      "httpStatus": 200,
+      "bytes": 128,
+      "lfsExpectedBytes": 887,
+      "lfsExpectedSHA256": "f0b1e8fc01a18ee44a8e12e7323104ec9f85d3342a47d6a95607e1afd5d18bd3",
+      "metadataParsed": false,
+      "geometryAcquired": false
+    },
+    {
+      "id": "geoboundaries-official-github-download",
+      "url": "https://github.com/wmgeolab/geoBoundaries/raw/refs/heads/main/releaseData/gbOpen/ESP/ADM0/geoBoundaries-ESP-ADM0-metaData.json",
+      "purpose": "Try documented official GitHub download rather than treating LFS metadata as source data",
+      "result": "DOWNLOAD_REDIRECT_PROXY_CONNECT_DENIED",
+      "httpStatus": 403,
+      "responseBodyAcquired": false
+    },
+    {
+      "id": "ign-official-api-readme",
+      "url": "https://raw.githubusercontent.com/IGN-CNIG/API-CNIG/master/README.md",
+      "purpose": "Official API documentation confirms WMS/WMTS/WFS/KML capability. It is not imagery, geometry, coverage metadata or a dataset redistribution grant.",
+      "result": "DOCUMENT_ACQUIRED",
+      "httpStatus": 200,
+      "bytes": 2146,
+      "sha256": "19c053293e0c3e1df239fc3748a6862a2c2211892e73ca62c18c50a9cf2bc867",
+      "actualDetailedGISData": false,
+      "checkedAtUTC": "2026-10-22T09:47:42.803502+00:00"
+    },
+    {
+      "id": "ign-official-software-license",
+      "url": "https://raw.githubusercontent.com/IGN-CNIG/API-CNIG/master/LICENSE",
+      "purpose": "EUPL1.2 applies to API software; it is not evidence that any particular PNOA/WMTS raster or boundary dataset may be redistributed.",
+      "result": "DOCUMENT_ACQUIRED",
+      "httpStatus": 200,
+      "bytes": 13865,
+      "sha256": "6e5399ad2f4548dc22dd9eff1c367d5d286efc15723894b3a3b772347b609d11",
+      "actualDetailedGISData": false,
+      "checkedAtUTC": "2026-10-22T09:47:42.803560+00:00"
+    },
+    {
+      "id": "natural-earth-upstream-license",
+      "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/LICENSE.md",
+      "purpose": "Natural Earth public-domain permission independently confirmed; unchanged coarse existing geometry remains insufficient for the tiny detail.",
+      "result": "DOCUMENT_ACQUIRED",
+      "httpStatus": 200,
+      "bytes": 4636,
+      "sha256": "2631b5b39b6d1acc56de75235109b5af2dbb4b0ac5a127b6f06185977247fd4b",
+      "actualDetailedGISData": false,
+      "checkedAtUTC": "2026-10-22T09:47:42.803587+00:00"
+    },
+    {
+      "id": "ign-root-package-json",
+      "url": "https://raw.githubusercontent.com/IGN-CNIG/API-CNIG/master/package.json",
+      "purpose": "Check documented API repository metadata without importing or deploying software",
+      "result": "UPSTREAM_FILE_NOT_FOUND",
+      "httpStatus": 404,
+      "notNetworkPolicyFailure": true
+    }
+  ],
+  "additionalPublicRepositorySearches": {
+    "queries": [
+      "Peñón",
+      "geonames spain",
+      "osm spain geojson",
+      "españa IGN limites"
+    ],
+    "result": "No verified candidate-identity/detail-geometry/native-basemap source found. Unrelated repositories were not treated as geographic evidence."
+  },
+  "newPreciseGeometryFiles": 0,
+  "newDetailedRasterFiles": 0,
+  "originalReferenceVideoPublished": false,
+  "unredactedSearchHtmlPublished": false,
+  "paidGPUUsed": false,
+  "paidAPIUsed": false,
+  "subsequentNetworkConfigurationDraft": {
+    "performedBy": "same-task primary agent using official environment configuration workflow",
+    "networkOnly": true,
+    "preservedExistingCustomHosts": 12,
+    "addedHosts": [
+      "en.wikipedia.org",
+      "www.ign.es",
+      "overpass-api.de",
+      "www.openstreetmap.org",
+      "ejercito.defensa.gob.es"
+    ],
+    "requiresPublish": true,
+    "actuallyAppliedToRuntimeVerified": false,
+    "existingSecretsRuntimeVariablesAndInstallSettingsPreserved": true,
+    "blockedHostsRetriedAfterDraftSave": false
+  }
+}
