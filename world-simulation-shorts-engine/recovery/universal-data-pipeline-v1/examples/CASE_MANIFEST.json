@@ -1,0 +1,105 @@
+{
+  "schema": "WORLD_ENGINE_UNIVERSAL_EXAMPLE_CASES_V1",
+  "cases": [
+    {
+      "id": "fictional-war",
+      "path": "examples/FICTIONAL_NAMIBIA.json",
+      "expectedStatus": "PASS",
+      "evidenceScope": "EXPLICIT_FICTIONAL_TECHNICAL_INPUT"
+    },
+    {
+      "id": "illustrative-aviation",
+      "path": "examples/AVIATION_GERMANY.json",
+      "expectedStatus": "PASS",
+      "evidenceScope": "MODERN_LOCALITIES_ORIGINAL_DECLARED_CONNECTION_NOT_REAL_AIR_TRAFFIC"
+    },
+    {
+      "id": "illustrative-trade",
+      "path": "examples/TRADE_CHILE.json",
+      "expectedStatus": "PASS",
+      "evidenceScope": "MODERN_LOCALITIES_ORIGINAL_DECLARED_CONNECTION_NOT_OBSERVED_SHIPPING"
+    },
+    {
+      "id": "korean-war-exact-control",
+      "path": "examples/KOREAN_WAR_MISSING_CONTROL.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "evidenceScope": "ORIGINAL_SCHEMATIC_HELD_CORES_NO_EXACT_OWNER_FIELDS"
+    },
+    {
+      "id": "roman-empire-area",
+      "path": "examples/ROMAN_EMPIRE_MISSING_EXTENT.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "evidenceScope": "MISSING_DATED_GEOMETRY_SOURCE_NO_INVENTED_HISTORY"
+    }
+  ],
+  "negativeCases": [
+    {
+      "id": "MISSING_REQUIRED_GEOMETRY",
+      "path": "examples/negative/MISSING_REQUIRED_GEOMETRY.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "base": "FICTIONAL_NAMIBIA.json"
+    },
+    {
+      "id": "INVALID_COORDINATE",
+      "path": "examples/negative/INVALID_COORDINATE.json",
+      "expectedStatus": "INVALID",
+      "base": "FICTIONAL_NAMIBIA.json"
+    },
+    {
+      "id": "REVERSED_TIME",
+      "path": "examples/negative/REVERSED_TIME.json",
+      "expectedStatus": "CONFLICT",
+      "base": "FICTIONAL_NAMIBIA.json",
+      "classificationReason": "Date values individually valid but interval contradicts itself;semantic CONFLICT,not a coordinate/JSON INVALID case."
+    },
+    {
+      "id": "UNKNOWN_RENDER_FIELD",
+      "path": "examples/negative/UNKNOWN_RENDER_FIELD.json",
+      "expectedStatus": "UNSUPPORTED",
+      "base": "FICTIONAL_NAMIBIA.json"
+    },
+    {
+      "id": "SELF_ASSERTED_HISTORICAL_VERIFICATION",
+      "path": "examples/negative/SELF_ASSERTED_HISTORICAL_VERIFICATION.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "base": "FICTIONAL_NAMIBIA.json"
+    },
+    {
+      "id": "CONFLICTING_SOURCE_IDENTITY",
+      "path": "examples/negative/CONFLICTING_SOURCE_IDENTITY.json",
+      "expectedStatus": "CONFLICT",
+      "base": "KOREAN_WAR_PARTIAL_FRONT_UNSUPPORTED.json",
+      "reason": "Same approved source ID but altered source raster SHA must conflict,not acquire approval."
+    }
+  ],
+  "testStatus": "INPUTS_PREPARED_NOT_YET_EXECUTED",
+  "demoReadiness": "ONLY_AFTER_PARENT_PHASE_A_TO_E_GATES_PASS",
+  "paidGPUAllowed": false,
+  "explicitCompatibilityAdaptation": {
+    "originalDatasetPath": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/data/FACT_DATA.json",
+    "originalDatasetSHA256": "753f629a22f8bc2e5676ebdf4d7c9e64edd6a7314188f55cd3ca3237355a9e65",
+    "method": "Preserved native validateFactDataset returned canonical supported fields; original metadata remains in original immutable dataset/audit. This new incomplete historical fixture intentionally leaves every area_refs empty because no exact military ownership is supplied.",
+    "originalSourceChanged": false,
+    "metadataSilentlyIgnoredByNewCompiler": false,
+    "newFixtureTextPolicy": "New incomplete request explicitly does not request legacy text overlays; original fact text remains preserved in immutable source and audit. No compiler consumer silently discards supplied text.",
+    "newFixtureContextPolicy": "This missing-input test asks for one primary native context only,not preserved secondary-country overlays unsupported by the bounded preview consumer. Original multi-country context remains unchanged at source."
+  },
+  "admissionCases": [
+    {
+      "id": "qualified-partial-history-unconnected-consumer",
+      "path": "examples/KOREAN_WAR_PARTIAL_FRONT_UNSUPPORTED.json",
+      "expectedStatus": "UNSUPPORTED",
+      "reason": "Source-scoped partialLine contract has exact evidence binding,while actual newStudioLINE_METRICpixelconsumer is unsupported. No full control inferred."
+    },
+    {
+      "id": "independent-historical-full-vs-partial",
+      "path": "examples/KOREAN_WAR_INDEPENDENT_SCENE_ADMISSION.json",
+      "expectedStatus": "UNSUPPORTED",
+      "expectedSceneStatuses": {
+        "korea-exact-control-missing": "NEEDS_INPUT",
+        "korea-partial-source-only": "UNSUPPORTED"
+      },
+      "reason": "Distinct per-scene evidence vs consumer blockers; no silent omission,reindexing or implied cross-scene dependency."
+    }
+  ]
+}

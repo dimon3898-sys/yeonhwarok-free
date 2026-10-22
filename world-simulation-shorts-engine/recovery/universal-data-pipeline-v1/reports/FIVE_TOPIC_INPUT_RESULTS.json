@@ -1,0 +1,885 @@
+{
+  "schema": "WORLD_ENGINE_FIVE_TOPIC_INPUT_RESULTS_V1",
+  "command": "node --input-type=module: analyzePrompt each CASE_MANIFEST request using server evidence registry",
+  "compiler": "prompt_pipeline.mjs",
+  "compilerSHA256": "e2ae9a10a3d0c470dd692fbeab4460df528ab7ce87633b7c23c1a1f94b5a5104",
+  "cases": [
+    {
+      "id": "fictional-war",
+      "path": "examples/FICTIONAL_NAMIBIA.json",
+      "expectedStatus": "PASS",
+      "evidenceScope": "EXPLICIT_FICTIONAL_TECHNICAL_INPUT",
+      "actualStatus": "PASS",
+      "expectationMatched": true,
+      "inputSHA256": "cc336ce0ff585be9d925acde127d019fb1087f8984d40cb0c8bddfbff1b6d5f2",
+      "renderableSceneIds": [
+        "namibia-fictional-zone"
+      ],
+      "blockedSceneIds": [],
+      "sceneResults": [
+        {
+          "sceneId": "namibia-fictional-zone",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "PASS",
+          "issues": []
+        }
+      ],
+      "issues": [],
+      "renderExecuted": false
+    },
+    {
+      "id": "illustrative-aviation",
+      "path": "examples/AVIATION_GERMANY.json",
+      "expectedStatus": "PASS",
+      "evidenceScope": "MODERN_LOCALITIES_ORIGINAL_DECLARED_CONNECTION_NOT_REAL_AIR_TRAFFIC",
+      "actualStatus": "PASS",
+      "expectationMatched": true,
+      "inputSHA256": "76432ef4710828778b502725cee1d5d04a917713fb04b9babb9079118d7a348b",
+      "renderableSceneIds": [
+        "aviation-germany"
+      ],
+      "blockedSceneIds": [],
+      "sceneResults": [
+        {
+          "sceneId": "aviation-germany",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "PASS",
+          "issues": []
+        }
+      ],
+      "issues": [],
+      "renderExecuted": false
+    },
+    {
+      "id": "illustrative-trade",
+      "path": "examples/TRADE_CHILE.json",
+      "expectedStatus": "PASS",
+      "evidenceScope": "MODERN_LOCALITIES_ORIGINAL_DECLARED_CONNECTION_NOT_OBSERVED_SHIPPING",
+      "actualStatus": "PASS",
+      "expectationMatched": true,
+      "inputSHA256": "63bdeaac83b4b1e8f5ac645a28281f5728200bce502904c618ce8cb0744fa435",
+      "renderableSceneIds": [
+        "trade-chile"
+      ],
+      "blockedSceneIds": [],
+      "sceneResults": [
+        {
+          "sceneId": "trade-chile",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "PASS",
+          "issues": []
+        }
+      ],
+      "issues": [],
+      "renderExecuted": false
+    },
+    {
+      "id": "korean-war-exact-control",
+      "path": "examples/KOREAN_WAR_MISSING_CONTROL.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "evidenceScope": "ORIGINAL_SCHEMATIC_HELD_CORES_NO_EXACT_OWNER_FIELDS",
+      "actualStatus": "NEEDS_INPUT",
+      "expectationMatched": true,
+      "inputSHA256": "96342e334e9e336f54c8ab9feb1170b88e3ccf999f9150e8882e24f3c7c012aa",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "korea-exact-control-missing"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "korea-exact-control-missing",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "NEEDS_INPUT",
+          "issues": [
+            {
+              "status": "NEEDS_INPUT",
+              "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+              "field": "$.scenes[0].facts.stages",
+              "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REVIEWED_EVIDENCE_REQUIRED",
+              "field": "$.scenes[0].historicalEvidence",
+              "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+          "field": "$.scenes[0].facts.stages",
+          "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REVIEWED_EVIDENCE_REQUIRED",
+          "field": "$.scenes[0].historicalEvidence",
+          "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "roman-empire-area",
+      "path": "examples/ROMAN_EMPIRE_MISSING_EXTENT.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "evidenceScope": "MISSING_DATED_GEOMETRY_SOURCE_NO_INVENTED_HISTORY",
+      "actualStatus": "NEEDS_INPUT",
+      "expectationMatched": true,
+      "inputSHA256": "c4f717120ebe0df322a53899bc86e720a9c10a8f7820f30589a59e54160d617d",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "rome-missing-extent"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "rome-missing-extent",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "NEEDS_INPUT",
+          "issues": [
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REQUIRED_FIELD",
+              "field": "$.scenes[0].facts.time_range.start",
+              "reason": "Supply the field required by the selected feature."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REQUIRED_FIELD",
+              "field": "$.scenes[0].facts.time_range.end",
+              "reason": "Supply the field required by the selected feature."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REQUIRED_FIELD",
+              "field": "$.scenes[0].facts.camera.anchor",
+              "reason": "Supply the field required by the selected feature."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REQUIRED_FIELD",
+              "field": "$.scenes[0].facts.camera.target_geometry_refs",
+              "reason": "Supply the field required by the selected feature."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+              "field": "$.scenes[0].facts.stages",
+              "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REVIEWED_EVIDENCE_REQUIRED",
+              "field": "$.scenes[0].historicalEvidence",
+              "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.time_range.start",
+          "reason": "Supply the field required by the selected feature."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.time_range.end",
+          "reason": "Supply the field required by the selected feature."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.camera.anchor",
+          "reason": "Supply the field required by the selected feature."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REQUIRED_FIELD",
+          "field": "$.scenes[0].facts.camera.target_geometry_refs",
+          "reason": "Supply the field required by the selected feature."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+          "field": "$.scenes[0].facts.stages",
+          "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REVIEWED_EVIDENCE_REQUIRED",
+          "field": "$.scenes[0].historicalEvidence",
+          "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "MISSING_REQUIRED_GEOMETRY",
+      "path": "examples/negative/MISSING_REQUIRED_GEOMETRY.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "base": "FICTIONAL_NAMIBIA.json",
+      "actualStatus": "NEEDS_INPUT",
+      "expectationMatched": true,
+      "inputSHA256": "069c0c3d26981b93caec86ee8b500d671856955433c107b9253ee9304508ec07",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "namibia-fictional-zone"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "namibia-fictional-zone",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "NEEDS_INPUT",
+          "issues": [
+            {
+              "status": "NEEDS_INPUT",
+              "code": "PLANNER_STAGE_AREA_REFERENCE_REQUIRED",
+              "field": "$.scenes[0].facts",
+              "reason": "PLANNER_STAGE_AREA_REFERENCE_REQUIRED"
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "PLANNER_STAGE_AREA_REFERENCE_REQUIRED",
+          "field": "$.scenes[0].facts",
+          "reason": "PLANNER_STAGE_AREA_REFERENCE_REQUIRED"
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "INVALID_COORDINATE",
+      "path": "examples/negative/INVALID_COORDINATE.json",
+      "expectedStatus": "INVALID",
+      "base": "FICTIONAL_NAMIBIA.json",
+      "actualStatus": "INVALID",
+      "expectationMatched": true,
+      "inputSHA256": "8bbfde21e7a366e3409141c6b97dfa2cee3213ccc308c61a25c7a1a7cee7f94b",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "namibia-fictional-zone"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "namibia-fictional-zone",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "INVALID",
+          "issues": [
+            {
+              "status": "INVALID",
+              "code": "COORDINATE_RANGE",
+              "field": "$.scenes[0].facts.locations[0].anchor",
+              "reason": "Use finite [longitude,latitude] in EPSG:4326 within ±180,±90."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "COORDINATE_RANGE",
+          "field": "$.scenes[0].facts.locations[0].anchor",
+          "reason": "Use finite [longitude,latitude] in EPSG:4326 within ±180,±90."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "REVERSED_TIME",
+      "path": "examples/negative/REVERSED_TIME.json",
+      "expectedStatus": "CONFLICT",
+      "base": "FICTIONAL_NAMIBIA.json",
+      "classificationReason": "Date values individually valid but interval contradicts itself;semantic CONFLICT,not a coordinate/JSON INVALID case.",
+      "actualStatus": "CONFLICT",
+      "expectationMatched": true,
+      "inputSHA256": "adbf61e0039c25e2923e7323b05c9315d5d98c620c2bb4efefb9b66bb848dc86",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "namibia-fictional-zone"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "namibia-fictional-zone",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "CONFLICT",
+          "issues": [
+            {
+              "status": "CONFLICT",
+              "code": "REVERSED_TIME_RANGE",
+              "field": "$.scenes[0].facts.time_range",
+              "reason": "End date precedes start date."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "CONFLICT",
+          "code": "REVERSED_TIME_RANGE",
+          "field": "$.scenes[0].facts.time_range",
+          "reason": "End date precedes start date."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "UNKNOWN_RENDER_FIELD",
+      "path": "examples/negative/UNKNOWN_RENDER_FIELD.json",
+      "expectedStatus": "UNSUPPORTED",
+      "base": "FICTIONAL_NAMIBIA.json",
+      "actualStatus": "UNSUPPORTED",
+      "expectationMatched": true,
+      "inputSHA256": "1c8326ebda6c9a2a08f9bd67e16d2e88ba7d7a4542c5648a82059eec405b9f37",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "namibia-fictional-zone"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "namibia-fictional-zone",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "UNSUPPORTED",
+          "issues": [
+            {
+              "status": "UNSUPPORTED",
+              "code": "UNSUPPORTED_FIELD",
+              "field": "$.scenes[0].renderSettings.inventUnsupportedShader",
+              "reason": "This field has no implemented consumer. It will not be silently ignored."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "UNSUPPORTED_FIELD",
+          "field": "$.scenes[0].renderSettings.inventUnsupportedShader",
+          "reason": "This field has no implemented consumer. It will not be silently ignored."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "SELF_ASSERTED_HISTORICAL_VERIFICATION",
+      "path": "examples/negative/SELF_ASSERTED_HISTORICAL_VERIFICATION.json",
+      "expectedStatus": "NEEDS_INPUT",
+      "base": "FICTIONAL_NAMIBIA.json",
+      "actualStatus": "NEEDS_INPUT",
+      "expectationMatched": true,
+      "inputSHA256": "ac5813a9ce929ada1bcc58dc65a070d0542ecc56d7c2b469fb51fc6663db6047",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "korea-exact-control-missing"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "korea-exact-control-missing",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "NEEDS_INPUT",
+          "issues": [
+            {
+              "status": "NEEDS_INPUT",
+              "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+              "field": "$.scenes[0].facts.stages",
+              "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "EVIDENCE_NOT_ADMITTED",
+              "field": "$.scenes[0].historicalEvidence[0]",
+              "reason": "No matching server-reviewed evidence record exists."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.COUNTRY_KOR",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.COUNTRY_PRK",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.HELD_CORE_START",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.FRONT_START",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.HELD_CORE_BUSAN",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.FRONT_BUSAN",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.HELD_CORE_NORTH_ADVANCE",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.FRONT_NORTH_ADVANCE",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.HELD_CORE_SEOUL_WITHDRAWAL",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.FRONT_SEOUL_WITHDRAWAL",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.HELD_CORE_ARMISTICE",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.FRONT_ARMISTICE",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_STAGE_DATE",
+              "field": "$.scenes[0].facts.stages.START",
+              "reason": "No reviewed claim qualifies this stage date."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_STAGE_DATE",
+              "field": "$.scenes[0].facts.stages.BUSAN",
+              "reason": "No reviewed claim qualifies this stage date."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_STAGE_DATE",
+              "field": "$.scenes[0].facts.stages.NORTH_ADVANCE",
+              "reason": "No reviewed claim qualifies this stage date."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_STAGE_DATE",
+              "field": "$.scenes[0].facts.stages.SEOUL_WITHDRAWAL",
+              "reason": "No reviewed claim qualifies this stage date."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_STAGE_DATE",
+              "field": "$.scenes[0].facts.stages.ARMISTICE",
+              "reason": "No reviewed claim qualifies this stage date."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_SOURCE_CLAIM",
+              "field": "$.scenes[0].facts.source_notes.HISTORY_START",
+              "reason": "No admitted claim binds this source."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_SOURCE_CLAIM",
+              "field": "$.scenes[0].facts.source_notes.HISTORY_CAMPAIGNS",
+              "reason": "No admitted claim binds this source."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_SOURCE_CLAIM",
+              "field": "$.scenes[0].facts.source_notes.HISTORY_OVERVIEW",
+              "reason": "No admitted claim binds this source."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_SOURCE_CLAIM",
+              "field": "$.scenes[0].facts.source_notes.SCHEMATIC_STATES",
+              "reason": "No admitted claim binds this source."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_SOURCE_CLAIM",
+              "field": "$.scenes[0].facts.source_notes.NATIVE_COUNTRIES",
+              "reason": "No admitted claim binds this source."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+          "field": "$.scenes[0].facts.stages",
+          "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "EVIDENCE_NOT_ADMITTED",
+          "field": "$.scenes[0].historicalEvidence[0]",
+          "reason": "No matching server-reviewed evidence record exists."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.COUNTRY_KOR",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.COUNTRY_PRK",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_START",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_START",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_BUSAN",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_BUSAN",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_NORTH_ADVANCE",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_NORTH_ADVANCE",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_SEOUL_WITHDRAWAL",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_SEOUL_WITHDRAWAL",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.HELD_CORE_ARMISTICE",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.FRONT_ARMISTICE",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.START",
+          "reason": "No reviewed claim qualifies this stage date."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.BUSAN",
+          "reason": "No reviewed claim qualifies this stage date."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.NORTH_ADVANCE",
+          "reason": "No reviewed claim qualifies this stage date."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.SEOUL_WITHDRAWAL",
+          "reason": "No reviewed claim qualifies this stage date."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_STAGE_DATE",
+          "field": "$.scenes[0].facts.stages.ARMISTICE",
+          "reason": "No reviewed claim qualifies this stage date."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.HISTORY_START",
+          "reason": "No admitted claim binds this source."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.HISTORY_CAMPAIGNS",
+          "reason": "No admitted claim binds this source."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.HISTORY_OVERVIEW",
+          "reason": "No admitted claim binds this source."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.SCHEMATIC_STATES",
+          "reason": "No admitted claim binds this source."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.NATIVE_COUNTRIES",
+          "reason": "No admitted claim binds this source."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "CONFLICTING_SOURCE_IDENTITY",
+      "path": "examples/negative/CONFLICTING_SOURCE_IDENTITY.json",
+      "expectedStatus": "CONFLICT",
+      "base": "KOREAN_WAR_PARTIAL_FRONT_UNSUPPORTED.json",
+      "reason": "Same approved source ID but altered source raster SHA must conflict,not acquire approval.",
+      "actualStatus": "CONFLICT",
+      "expectationMatched": true,
+      "inputSHA256": "ce7615d13708b6dcd1ac4bdf7b9641049ab68858e81b0f59783a32a70db59afb",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "korea-partial-source-only"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "korea-partial-source-only",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "CONFLICT",
+          "issues": [
+            {
+              "status": "UNSUPPORTED",
+              "code": "FAMILY_NOT_CONNECTED",
+              "field": "$.scenes[0].facts.subject.event_family",
+              "reason": "This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer."
+            },
+            {
+              "status": "CONFLICT",
+              "code": "EVIDENCE_SOURCE_MISMATCH",
+              "field": "$.scenes[0].historicalEvidence[0]",
+              "reason": "Source reference or original SHA differs from the reviewed record."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_GEOMETRY",
+              "field": "$.scenes[0].facts.geometries.cmh-front-1951-01-24",
+              "reason": "No reviewed claim binds this exact geometry."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "UNREVIEWED_SOURCE_CLAIM",
+              "field": "$.scenes[0].facts.source_notes.CMH_PARTIAL_19510124",
+              "reason": "No admitted claim binds this source."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "FAMILY_NOT_CONNECTED",
+          "field": "$.scenes[0].facts.subject.event_family",
+          "reason": "This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer."
+        },
+        {
+          "status": "CONFLICT",
+          "code": "EVIDENCE_SOURCE_MISMATCH",
+          "field": "$.scenes[0].historicalEvidence[0]",
+          "reason": "Source reference or original SHA differs from the reviewed record."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_GEOMETRY",
+          "field": "$.scenes[0].facts.geometries.cmh-front-1951-01-24",
+          "reason": "No reviewed claim binds this exact geometry."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "UNREVIEWED_SOURCE_CLAIM",
+          "field": "$.scenes[0].facts.source_notes.CMH_PARTIAL_19510124",
+          "reason": "No admitted claim binds this source."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "qualified-partial-history-unconnected-consumer",
+      "path": "examples/KOREAN_WAR_PARTIAL_FRONT_UNSUPPORTED.json",
+      "expectedStatus": "UNSUPPORTED",
+      "reason": "Source-scoped partialLine contract has exact evidence binding,while actual newStudioLINE_METRICpixelconsumer is unsupported. No full control inferred.",
+      "actualStatus": "UNSUPPORTED",
+      "expectationMatched": true,
+      "inputSHA256": "6db47a14f71550ba413e6974464494b23a0968b44b6276004ff52291133edfdd",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "korea-partial-source-only"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "korea-partial-source-only",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "UNSUPPORTED",
+          "issues": [
+            {
+              "status": "UNSUPPORTED",
+              "code": "FAMILY_NOT_CONNECTED",
+              "field": "$.scenes[0].facts.subject.event_family",
+              "reason": "This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "FAMILY_NOT_CONNECTED",
+          "field": "$.scenes[0].facts.subject.event_family",
+          "reason": "This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer."
+        }
+      ],
+      "renderExecuted": false
+    },
+    {
+      "id": "independent-historical-full-vs-partial",
+      "path": "examples/KOREAN_WAR_INDEPENDENT_SCENE_ADMISSION.json",
+      "expectedStatus": "UNSUPPORTED",
+      "expectedSceneStatuses": {
+        "korea-exact-control-missing": "NEEDS_INPUT",
+        "korea-partial-source-only": "UNSUPPORTED"
+      },
+      "reason": "Distinct per-scene evidence vs consumer blockers; no silent omission,reindexing or implied cross-scene dependency.",
+      "actualStatus": "UNSUPPORTED",
+      "expectationMatched": true,
+      "inputSHA256": "e6b5d3030cc1e2d1cbf79a0447962b716642ad43e9f85826ce998f99cd2fa20e",
+      "renderableSceneIds": [],
+      "blockedSceneIds": [
+        "korea-exact-control-missing",
+        "korea-partial-source-only"
+      ],
+      "sceneResults": [
+        {
+          "sceneId": "korea-exact-control-missing",
+          "startFrame": 0,
+          "endFrame": 90,
+          "status": "NEEDS_INPUT",
+          "issues": [
+            {
+              "status": "NEEDS_INPUT",
+              "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+              "field": "$.scenes[0].facts.stages",
+              "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+            },
+            {
+              "status": "NEEDS_INPUT",
+              "code": "REVIEWED_EVIDENCE_REQUIRED",
+              "field": "$.scenes[0].historicalEvidence",
+              "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact."
+            }
+          ]
+        },
+        {
+          "sceneId": "korea-partial-source-only",
+          "startFrame": 90,
+          "endFrame": 180,
+          "status": "UNSUPPORTED",
+          "issues": [
+            {
+              "status": "UNSUPPORTED",
+              "code": "FAMILY_NOT_CONNECTED",
+              "field": "$.scenes[1].facts.subject.event_family",
+              "reason": "This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer."
+            }
+          ]
+        }
+      ],
+      "issues": [
+        {
+          "status": "NEEDS_INPUT",
+          "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+          "field": "$.scenes[0].facts.stages",
+          "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon."
+        },
+        {
+          "status": "NEEDS_INPUT",
+          "code": "REVIEWED_EVIDENCE_REQUIRED",
+          "field": "$.scenes[0].historicalEvidence",
+          "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact."
+        },
+        {
+          "status": "UNSUPPORTED",
+          "code": "FAMILY_NOT_CONNECTED",
+          "field": "$.scenes[1].facts.subject.event_family",
+          "reason": "This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer."
+        }
+      ],
+      "renderExecuted": false
+    }
+  ],
+  "actualRenderExecuted": false,
+  "scope": "STRUCTURED_PROMPT_AND_REAL_NATIVE_SCENE_COMPILATION_NOT_VIDEO_SUCCESS"
+}

@@ -1,0 +1,77 @@
+{
+  "schema": "WORLD_ENGINE_UNIVERSAL_EXAMPLE_NATIVE_VALIDATION_V1",
+  "command": "node --input-type=module; import validateFactDataset,topicIntent,selectFeatures from unchanged web/map_infographic_v1/planner_scene_v1.mjs; validate each supplied facts,then infer intent and select features",
+  "firstAttempt": {
+    "threeNewSyntheticFacts": "FAIL_PLANNER_SEMANTIC_MODE_REQUIRED",
+    "cause": "An authored fixture used a new semantic enum unsupported by preserved native contract. No engine change was needed.",
+    "correction": "Use existing ILLUSTRATIVE_FACT_BASED_VISUAL enum while preserving SYNTHETIC_TEST source/data mode and explicit original illustrative meaning."
+  },
+  "correctedRerun": {
+    "pass": 4,
+    "fail": 0,
+    "rows": [
+      {
+        "file": "examples/FICTIONAL_NAMIBIA.json",
+        "sha256": "cc336ce0ff585be9d925acde127d019fb1087f8984d40cb0c8bddfbff1b6d5f2",
+        "nativeValidateFactDataset": "PASS",
+        "topicIntent": "PASS",
+        "selectFeatures": [
+          "FRONT_LINE",
+          "STATE_TRANSITION",
+          "TIME_STEP",
+          "AREA_HOLD"
+        ],
+        "historicalAdmission": "NOT_EXECUTED",
+        "actualRender": "NOT_EXECUTED"
+      },
+      {
+        "file": "examples/AVIATION_GERMANY.json",
+        "sha256": "76432ef4710828778b502725cee1d5d04a917713fb04b9babb9079118d7a348b",
+        "nativeValidateFactDataset": "PASS",
+        "topicIntent": "PASS",
+        "selectFeatures": [
+          "ROUTE_REVEAL",
+          "DIRECTIONAL_FLOW",
+          "MOVING_OBJECT",
+          "ENDPOINT_PULSE",
+          "ROUTE_HOLD"
+        ],
+        "historicalAdmission": "NOT_EXECUTED",
+        "actualRender": "NOT_EXECUTED"
+      },
+      {
+        "file": "examples/TRADE_CHILE.json",
+        "sha256": "63bdeaac83b4b1e8f5ac645a28281f5728200bce502904c618ce8cb0744fa435",
+        "nativeValidateFactDataset": "PASS",
+        "topicIntent": "PASS",
+        "selectFeatures": [
+          "ROUTE_REVEAL",
+          "DIRECTIONAL_FLOW",
+          "MOVING_OBJECT",
+          "ENDPOINT_PULSE",
+          "ROUTE_HOLD"
+        ],
+        "historicalAdmission": "NOT_EXECUTED",
+        "actualRender": "NOT_EXECUTED"
+      },
+      {
+        "file": "examples/KOREAN_WAR_MISSING_CONTROL.json",
+        "sha256": "48437e273bbb8ea7f3d3f904d8547e7de2be8be3006e453b12a491094a17781a",
+        "nativeValidateFactDataset": "PASS",
+        "topicIntent": "PASS",
+        "selectFeatures": [
+          "FRONT_LINE",
+          "STATE_TRANSITION",
+          "TIME_STEP",
+          "AREA_HOLD"
+        ],
+        "historicalAdmission": "NOT_EXECUTED",
+        "actualRender": "NOT_EXECUTED"
+      }
+    ]
+  },
+  "classification": "NATIVE_INPUT_CONTRACT_ONLY_NOT_GENERIC_COMPILER_OR_RENDER_PASS",
+  "originalSourcesChanged": false,
+  "inputRevision": "INITIAL_NATIVE_CONTRACT_CHECK_BEFORE_EXPLICIT_INCOMPLETE_HISTORICAL_FIXTURE_ADAPTATION",
+  "currentInputResults": "reports/FIVE_TOPIC_INPUT_RESULTS.json"
+}
