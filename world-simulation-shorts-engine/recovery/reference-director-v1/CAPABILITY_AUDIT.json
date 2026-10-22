@@ -1,0 +1,31 @@
+{
+  "schema": "REFERENCE_DIRECTOR_NATIVE_CAPABILITY_AUDIT_V1",
+  "auditedCommit": "82854af429d09aebb4b31c2f168e2f0ddc9560c9",
+  "status": "CAPABILITY_EXTENSION_REQUIRED",
+  "evidenceKind": "READ_ONLY_CODE_AUDIT_NOT_GPU_EXECUTION",
+  "protectedCodeModified": false,
+  "newMapRendererImplemented": false,
+  "completedFrameRotationUsed": false,
+  "rendererConnection": "NOT_CONNECTED_CAPABILITY_EXTENSION_REQUIRED",
+  "findings": [
+    {"id":"NATIVE_CAMERA_PRIVATE","status":"CONFIRMED","path":"world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs","function":"createMapInfographicRenderer","lines":[355,374,375,378,677],"observation":"Camera and projected coordinates are factory closure variables; public API returns screen and bounds update, not a shared transform/inverse hook."},
+    {"id":"TERRAIN_INVERSE_UNROTATED","status":"CONFIRMED","path":"world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs","function":"terrainFragment.main","lines":[132,133,142,143],"observation":"Flat terrain longitude/latitude derives directly from bounds and full-screen UV. An external overlay-only rotation does not rotate the base geography."},
+    {"id":"BOUNDS_ONLY_UPDATE","status":"CONFIRMED","path":"world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs","function":"updateCamera","lines":[561,563,568,573,574,577],"observation":"Only four geographic bounds are accepted. Minimum-detail admission exists and must be preserved."},
+    {"id":"SHARED_RENDERER_NOT_COORDINATE_HOOK","status":"CONFIRMED","path":"world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs","function":"createMapInfographicRenderer","lines":[345,348,351,677],"observation":"outputRenderer permits shared Three rendering/output composition but exposes no public geographic transform/inverse/shader callback. Monkey-patching renderer.render to mutate private cameras or shaders is not a supported protected-preserving adapter."},
+    {"id":"OLD_ROLL_IS_FRAME_COPY","status":"CONFIRMED","path":"world-simulation-shorts-engine/web/map_infographic_v1/reference_presentation_adapter_v2.mjs","function":"createReferencePresentationPass","lines":[129,136,140,173,194],"observation":"Existing rotation resamples copied completed native framebuffer; expressly unsuitable for the current MASTER."},
+    {"id":"OLD_TRACK_FINAL_CLOSEST","status":"CONFIRMED","path":"world-simulation-shorts-engine/web/map_infographic_v1/reference_camera_adapter_v1.mjs","function":"compileReferenceCameraTrack","lines":[61,76,77,78],"observation":"Final track key must be closest. Review A must not be forced into this legacy contract using a fake final key."},
+    {"id":"V2_ENGINE_SELECTION","status":"CONFIRMED","path":"world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs","function":"createPresentationRuntime","lines":[65,66,67,68,86,107],"observation":"Runtime selects Area/Flow; native graphic pass disabled and overlay draw is marker-only. General line/metric metadata is not a connected consumer."}
+  ],
+  "minimumPatchRequest": {
+    "applied": false,
+    "protectedPath": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+    "contract": "REFERENCE_SIMILARITY_2D_V1_OPT_IN",
+    "requiredChanges": ["Shared forward/inverse camera transform for actual geographic camera and terrain inverse sampling", "Screen projection and inverseScreen public pairing", "All-four-rotated-corner source admission preserving existing minimum detail and source checks", "Unchanged default path; screen-space glyph/pin orientation preserved"],
+    "notSufficient": ["Expose private Three camera only", "Replace overlay projector only", "Rotate a completed native framebuffer", "Add a second full map renderer"]
+  },
+  "referenceProductionStaticDraws": "BLOCKED",
+  "referenceProductionMP4Windows": "BLOCKED",
+  "referenceVisualMatch": "UNVERIFIED",
+  "historicalG3": "BLOCKED",
+  "paidGPUUsed": false
+}
