@@ -8,6 +8,7 @@ from pathlib import Path
 import signal
 import subprocess
 import time
+from process_guard import DescendantGuard
 
 HERE = Path(__file__).resolve().parent
 
@@ -42,7 +43,7 @@ def run(args):
         if receipt["softwareOnly"] is not True or receipt["approvedFrameRange"] != [0, 150] or receipt["maxWallSeconds"] != 900:
             raise RuntimeError("STUDIO_REFERENCE_SCOPE_INVALID")
         remaining = (datetime.fromisoformat(receipt["expiresAt"]) - datetime.now(timezone.utc)).total_seconds()
-        if remaining <= 0:
+        if remaining <= 5:
             raise RuntimeError("STUDIO_REFERENCE_APPROVAL_EXPIRED")
         output = args.export_root / receipt["jobId"]
         output.mkdir(parents=True, exist_ok=False, mode=0o700)
@@ -55,12 +56,24 @@ def run(args):
             "--capsule=" + str(args.capsule_root), "--original-report=" + str(args.original_report)]
         # Session belongs to this detached worker, not the browser or terminal.
         child = subprocess.Popen(command, stdin=subprocess.DEVNULL, start_new_session=True)
-        try:
-            returncode = child.wait(timeout=min(900, remaining))
-        except subprocess.TimeoutExpired:
-            os.killpg(child.pid, signal.SIGKILL)
-            child.wait()
-            raise
+        with DescendantGuard(child.pid) as guard:
+            try:
+                returncode = child.wait(timeout=min(895, remaining - 5))
+            except subprocess.TimeoutExpired:
+                os.killpg(child.pid, signal.SIGKILL)
+                child.wait()
+                raise
+            finally:
+                # Playwright detaches Chromium into its own session. Bound
+                # pidfds additionally clean up observed owned descendants.
+                try:
+                    os.killpg(child.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                cleanup = guard.cleanup()
+                atomic(job / "cleanup.json", cleanup)
+            if cleanup["remaining"] or cleanup["errors"] or cleanup["observationError"]:
+                raise RuntimeError("STUDIO_REFERENCE_CLEANUP_UNVERIFIED")
         if returncode:
             raise subprocess.CalledProcessError(returncode, command)
         videos = list((output / "public-review").glob("*.mp4"))

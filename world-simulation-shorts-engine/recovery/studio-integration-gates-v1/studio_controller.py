@@ -31,8 +31,11 @@ StudioError = parent.StudioError
 
 
 class StudioController(parent.StudioController):
-    def __init__(self, *, allow_software_reference=False, capsule_root=None, original_report=None, **kwargs):
+    def __init__(self, *, allow_software_reference=False, capsule_root=None, original_report=None, history_source_gate=None, **kwargs):
         self.allow_software_reference = allow_software_reference is True
+        # A source-owner callback, never a Scene/body approval flag. Different
+        # source packages may supply their own qualified control-state provider.
+        self.history_source_gate = history_source_gate
         self.capsule_root = Path(capsule_root or "/workspace/exact-65422-capsule-20261020")
         self.original_report = Path(original_report or "/workspace/exact-65422-original-report-20261020.json")
         # Own namespace keeps existing submissions, completed claims and caches.
@@ -53,7 +56,15 @@ class StudioController(parent.StudioController):
     def _preflight_record(self, root, record):
         submission = record["submission"]
         if submission.get("schema") != contract.SCHEMA:
-            return super()._preflight_record(root, record)
+            result = super()._preflight_record(root, record)
+            if isinstance(submission.get("eventDirector"), dict) and self.history_source_gate is not None:
+                evidence = self.history_source_gate(request=submission)
+                result["sourceControlGate"] = evidence
+                if evidence.get("renderAllowed") is not True:
+                    result["ready"] = False
+                    result["reviewReady"] = False
+                    result["checks"].append({"name": "SOURCE_QUALIFIED_CONTROL_STATE", "status": "BLOCKED", "code": "G2_SOURCE_CONTROL_NOT_ADMITTED"})
+            return result
         # Revalidate persisted input and source, rather than trust a client flag.
         normalized = self._normal(submission["request"])
         if contract.sha(normalized) != contract.sha(submission):
@@ -102,9 +113,15 @@ class StudioController(parent.StudioController):
                     except (OSError, IndexError):
                         alive = False
                     if not alive:
-                        state = {**state, "state": "INTERRUPTED", "phase": "INTERRUPTED",
-                                 "errorCode": "STUDIO_REFERENCE_WORKER_INTERRUPTED"}
-                        job.write_json("state.json", state, replace=True)
+                        # The worker may have committed COMPLETED between our
+                        # first read and its exit. Never overwrite that record.
+                        with job.lock(wait_seconds=8):
+                            latest = job.json("state.json")
+                            if latest["state"] in {"COMPLETED", "FAILED", "INTERRUPTED"}:
+                                return latest
+                            state = {**latest, "state": "INTERRUPTED", "phase": "INTERRUPTED",
+                                     "errorCode": "STUDIO_REFERENCE_WORKER_INTERRUPTED"}
+                            job.write_json("state.json", state, replace=True)
                 return state
 
     def start(self, submission_id, idempotency_key, *, consent=False):

@@ -1,0 +1,137 @@
+{
+  "schema": "WORLD_ENGINE_G1_INDEPENDENT_IMPLEMENTATION_REVIEW_V1",
+  "reviewScope": "Source review and seven focused CPU tests; no renderer execution or active-job changes by reviewer.",
+  "reviewedFiles": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/reference_contract.py",
+      "sha256": "dd12b50ef09ec298c3d31f797d94b1d4796124a865fffefe2bcf0166abf7fd40"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/studio_controller.py",
+      "sha256": "2f4e35cad65a22439695cf29d39448a642ce737bf36367aa4c6cae990c2acace"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/studio_service.py",
+      "sha256": "890150b0f8ae009d804287f2bb8c151e24fafddd336e3134071a6fa7433e061c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/software_worker.py",
+      "sha256": "cb7773ac2b5a814181cbe2bd929a92228c967362a2a2e562228eb91b7c5f9eb4"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/reference_capture.mjs",
+      "sha256": "bed6d0428f6844ac49dd750d038ee6dd024b00f8a6afc2be678027d000cee7e8"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tools/mobile_client.mjs",
+      "sha256": "39e34827733631e6a31df27e5a0399b32c4eb0351f46bed1392b69c87c7620a0"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tools/run_actual_studio.py",
+      "sha256": "35f7e0247ad0178316915e2e66329faa74dd15ca5878b56405ae35f539962689"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/process_guard.py",
+      "sha256": "f92a47cb9ae48f942c06b84fb38bf8dfb0a9728c8e3bdd61b50f483ba1aa8d96"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tests/test_status_race.py",
+      "sha256": "ce2ff8101893800bbf8a188d4f5c8fcc871293250587dd1baa16d90b7e50d065"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tests/test_process_guard.py",
+      "sha256": "727157b309a416e5c918aaf231e079eb942231ed6c7b5ef08c0701a47c0ec5d5"
+    }
+  ],
+  "findings": [
+    {
+      "id": "STATUS_TERMINAL_OVERWRITE_RACE",
+      "severity": "correctness",
+      "status": "FIXED_AND_CPU_VERIFIED",
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/studio_controller.py",
+      "lines": [
+        97,
+        114
+      ],
+      "cause": "Polling could read RUNNING, observe the exited worker after its COMPLETED write, then overwrite terminal success as INTERRUPTED.",
+      "resolution": "Root added a private job lock and re-read of the latest state before interruption. Terminal COMPLETED, FAILED and INTERRUPTED states are preserved.",
+      "verification": {
+        "file": "tests/test_status_race.py",
+        "tests": 2,
+        "result": "PASS",
+        "seconds": 0.045,
+        "rendererStarted": false
+      }
+    },
+    {
+      "id": "DETACHED_BROWSER_NOT_IN_NODE_PROCESS_GROUP",
+      "severity": "resource-lifetime",
+      "status": "GUARD_IMPLEMENTED_CPU_VERIFIED_WORKER_WIRING_PENDING",
+      "path": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/software_worker.py",
+      "lines": [
+        57,
+        70
+      ],
+      "cause": "Playwright launches Chromium with detached:true on Unix. Killing only the Node process group cannot guarantee cleanup of a browser in its own group after a hard timeout or failed close. Installed Playwright coreBundle.js:8902-8905 confirms this process launch behavior.",
+      "resolution": "New process_guard.py observes only verified same-UID descendants, pins each process by Linux pidfd, and cleans detached sessions by process identity. Root must wire it around the child wait after the active capture finishes.",
+      "api": "with DescendantGuard(child.pid) as guard: ... child.wait(...); finally: cleanup = guard.cleanup()",
+      "verification": {
+        "file": "tests/test_process_guard.py",
+        "tests": 5,
+        "result": "PASS",
+        "seconds": 0.305,
+        "syntheticProcesses": "Only free Python sleep processes, including a detached grandchild and an unrelated same-UID control.",
+        "rendererStarted": false
+      },
+      "limits": "Polling is not cgroup containment. A child that forks and reparents entirely between observations cannot be inferred safely; the guard intentionally never kills unverified orphans. Cleanup reports remaining identities and observation errors."
+    },
+    {
+      "id": "LOCAL_SOURCE_PROOF_IS_NOT_GCUBE_HTTPS_DEPLOYMENT",
+      "severity": "interpretation",
+      "status": "LIMIT_RETAINED",
+      "paths": [
+        "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/studio_service.py",
+        "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tools/run_actual_studio.py",
+        "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tools/mobile_client.mjs"
+      ],
+      "evidence": "studio_service loads the existing production Studio HTTP/auth/Origin/CSRF server with local_test_only=True, loopback host, and the new controller extending the latest ASTRA director. Mobile client uses Android Chromium emulation and the existing login/preflight/submit/start routes.",
+      "requiredReporting": "This can prove an authenticated Studio source execution path, not deployed gCube HTTPS bootstrap, an updated OCI image, a physical Android device or actual NVIDIA execution. The prior image digest is metadata only. No GPU operator policy is fabricated or bypassed: the opt-in branch is software-only and production calls delegate unchanged."
+    }
+  ],
+  "focusedTests": {
+    "test_status_race.py": {
+      "passed": 2,
+      "rendererStarted": false
+    },
+    "test_process_guard.py": {
+      "passed": 5,
+      "rendererStarted": false
+    }
+  },
+  "activeJobProtection": {
+    "privateRoot": "/workspace/studio-g1-private-20261022-c",
+    "startedByReviewer": false,
+    "killedByReviewer": false,
+    "filesModifiedByReviewer": false
+  },
+  "newFilesOwnedByReviewer": [
+    "process_guard.py",
+    "tests/test_status_race.py",
+    "tests/test_process_guard.py",
+    "reports/G1_IMPLEMENTATION_REVIEW.json"
+  ],
+  "notClaimed": [
+    "Actual 150-frame capture completion",
+    "NVIDIA PASS",
+    "gCube deployment",
+    "Production HTTPS mobile PASS",
+    "User visual quality approval"
+  ],
+  "rootFollowup": {
+    "workerWiring": "IMPLEMENTED_AFTER_CAPTURE",
+    "workerSHA256": "cb7773ac2b5a814181cbe2bd929a92228c967362a2a2e562228eb91b7c5f9eb4",
+    "details": "DescendantGuard wraps the Node child wait; cleanup receipt private; observation errors/remaining descendants fail closed. Five-second deadline cleanup reserve. No unrelated renderer re-run. Focused 50 Python + 14 capture + 15 layout tests pass.",
+    "actualHardTimeoutOfChromiumTested": false,
+    "syntheticDetachedProcessCleanupTested": true
+  }
+}
