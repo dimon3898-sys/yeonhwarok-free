@@ -51,6 +51,18 @@ requires the live renderer still to match the original SHA, then records the
 original/candidate SHA, byte counts and exact unified diff. That receipt is a
 pre-change evidence artifact; it does not assert a pixel or feature PASS.
 
+For a later corrective candidate, `--followup-proposal` additionally requires
+the exact SHA-256 of the currently live renderer. It verifies the original307
+contract still has no change outside this one file, retains the original backup
+and baseline, and saves both original→candidate and current→candidate diffs.
+The tool never applies the candidate. In this task candidate04 exposed a real
+default-globe pixel comparison failure; its failed evidence is retained. Later
+unchanged-original controls also varied, so patch attribution is unconfirmed.
+The candidate05
+receipt pins live candidate04 rather than pretending the live source is still
+the original. Both a missing expected-current SHA and an incorrect SHA were
+verified to fail before writing a receipt.
+
 After a real authorized edit, the protection result must be reported as
 **306 original protected files unchanged +1 explicit authorized modification**,
 with both hashes and its exact diff. It must not be described as307 unchanged.

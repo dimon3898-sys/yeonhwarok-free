@@ -70,3 +70,15 @@ The root/baseline independent review added these bounded safeguards before any p
 - The original DEM sampling/material algorithm is unchanged. An active opt-in draw refuses DEM data finer than the representable absolute geographic Float32 sampling precision with `SIMILARITY_DEM_GEOGRAPHIC_PRECISION_INSUFFICIENT`. This is a bounded new-path admission guard, not synthesized height or a shader-lighting rewrite.
 
 These are generic numerical/source contracts. No country, event, reference frame number, label or85m fact is embedded in the native renderer. Actual draw/readPixels remains a mandatory subsequent gate, not awarded by this proposal.
+
+
+## Default shader-source isolation revision05
+
+Actual candidate04 default globe draw changed12pixels(maxRGBdelta5), while the flat12-frame tests were exact. Candidate05 therefore restores the original `terrainFragment` declaration and builds its bounded four-anchor extension only for explicitly opted-in flat factories. The default/globe material compiles the byte-exact original fragment string. Camera/source/numerical guards are unchanged, no framebuffer is copied or rotated, and no test tolerance was relaxed.
+
+Candidate05 SHA `9f60a7e4a6299b23b6c9070be4b830a3bbad25f5e1b321e5eff383ce35fb4995` was applied only after the follow-up original/current→candidate proposal and failed pixel evidence were remotely saved at `bb0d8ec781949e2c765f178019ff44cc588c2154`. Existing04 proposal and failure evidence remain intact. Actual revalidation is pending the pixel audit; syntax/source-string checks alone are not native-pixel PASS.
+
+
+### Later control corrects the candidate04 attribution
+
+Candidate05 also produced a tiny failed WORLD exact comparison. An unchanged-original, same-factory repeat then changed raw pixel hashes. The first comparison therefore did not establish a candidate04-caused regression or a GLSL-branch root cause. All observed failures remain preserved, and PHASE1 does not pass on a relaxed tolerance. Candidate05 still keeps the exact original normal/globe fragment string, but pixel restoration is UNVERIFIED until the native audit resolves the original-only determinism failure. No further core change is authorized merely by a hypothesis.
