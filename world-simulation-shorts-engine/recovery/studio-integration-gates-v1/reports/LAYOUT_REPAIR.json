@@ -1,0 +1,251 @@
+{
+  "schema": "STUDIO_INTEGRATION_GATES_V1_LAYOUT_REPAIR",
+  "status": "CPU_LAYOUT_IMPLEMENTED_ACTUAL_WHOLE_CHAPTER_RENDER_PENDING_G1_G2",
+  "scope": "Minimal independent reservation planner; original Glyph/Layout/Occlusion and original renderer are reused unchanged",
+  "confirmedCause": {
+    "classification": "CONFIRMED",
+    "implementationEvidence": [
+      {
+        "file": "recovery/astra-event-director-v2/browser_adapter.mjs",
+        "line": 48,
+        "symbol": "place",
+        "finding": "Each draw invokes the original layout selector with that frame context, preferred anchor and several alternative anchors; there is no chapter-wide reservation"
+      },
+      {
+        "file": "recovery/astra-event-director-v2/browser_adapter.mjs",
+        "line": 66,
+        "symbol": "eventPlacement",
+        "finding": "The same chapter event title is laid out again for each changing projected native obstacle context"
+      },
+      {
+        "file": "web/map_infographic_v1/area_annotation_v3.mjs",
+        "line": 41,
+        "symbol": "place",
+        "finding": "Original layout uses safe-area/native-graphics/boundary AABB protection and chooses the first eligible placement; these checks are retained"
+      }
+    ],
+    "actualEvidence": [
+      {
+        "globalFrame": 640,
+        "recordSHA256": "055acba063f1861465bcfea254b82ac685bbb8d67d65cbe9e05165af60a42eef",
+        "recordPath": "recovery/astra-event-director-v2/.private/frames/0640.json",
+        "roi": [
+          311,
+          1515,
+          769,
+          1570
+        ],
+        "atlasDimensions": [
+          458,
+          55
+        ],
+        "guardCount": 507,
+        "guardSemantics": "Original Area consumer already-expanded native graphic reservations PLUS boundary radius AABBs; all preserved as exclusion rectangles in regression"
+      },
+      {
+        "globalFrame": 641,
+        "recordSHA256": "b96744cd2c1f1f2a8ee759a50f3a713ec1909cad50c31fe00e83012cbb01247a",
+        "recordPath": "recovery/astra-event-director-v2/.private/frames/0641.json",
+        "roi": [
+          311,
+          1646,
+          769,
+          1701
+        ],
+        "atlasDimensions": [
+          458,
+          55
+        ],
+        "guardCount": 507,
+        "guardSemantics": "Original Area consumer already-expanded native graphic reservations PLUS boundary radius AABBs; all preserved as exclusion rectangles in regression"
+      },
+      {
+        "globalFrame": 642,
+        "recordSHA256": "b4ab9c638f502bd94b5ccba60ef4ed303921c51356b763afba4775cef04b68b4",
+        "recordPath": "recovery/astra-event-director-v2/.private/frames/0642.json",
+        "roi": [
+          311,
+          159,
+          769,
+          214
+        ],
+        "atlasDimensions": [
+          458,
+          55
+        ],
+        "guardCount": 507,
+        "guardSemantics": "Original Area consumer already-expanded native graphic reservations PLUS boundary radius AABBs; all preserved as exclusion rectangles in regression"
+      }
+    ],
+    "actualSameChapterCenterDisplacementPixels": {
+      "640_to_641": 131,
+      "641_to_642": 1487
+    },
+    "notEstablished": "No claim that the camera, Glyph renderer or Occlusion core caused the observed title relocation"
+  },
+  "implementation": {
+    "files": [
+      "stable_annotation.mjs",
+      "tests/test_stable_annotation.mjs",
+      "reports/LAYOUT_REPAIR.json"
+    ],
+    "api": {
+      "compileStableAnnotationChapter": {
+        "requiredFields": [
+          "chapterId",
+          "startFrame",
+          "endFrame",
+          "safeArea",
+          "binding",
+          "labels",
+          "frames"
+        ],
+        "bindingFields": [
+          "sceneSHA256",
+          "cameraSHA256",
+          "layoutSHA256",
+          "codeSHA256"
+        ],
+        "labelFields": [
+          "id",
+          "atlasEnvelope",
+          "preferredAnchor"
+        ],
+        "optionalLabelFields": {
+          "markerSize": 40,
+          "gap": 18
+        },
+        "frameFields": [
+          "globalFrame",
+          "protectedGraphics",
+          "boundarySegments"
+        ],
+        "range": "All contiguous frames in [startFrame,endFrame); no sampling/omission; exact order required",
+        "result": "READY with original AREA_ANNOTATION_V3 placement wrappers, or BLOCKED with exact reason. READY is layout admission only; it does not grant render/gate authorization"
+      },
+      "evaluateStableAnnotationFrame": {
+        "arguments": "(compiledPlan,{globalFrame,binding,labels:[{id,atlasEnvelope}],protectedGraphics,boundarySegments,safeArea?})",
+        "result": "Stateless LAYOUT_VALIDATED with fixed placements; source/atlas/context/range drift throws and must stop the draw"
+      },
+      "stableAnnotationReceipt": "Compact serializable evidence only. A receipt or deserialized READY object cannot authorize drawing"
+    },
+    "algorithm": "Union all frames’ actual expanded native graphic reservations and original boundary radius AABBs. Reuse productionAnnotationAnchors and chooseMetricPlacement over that union; reserve each entire measured atlas, then add that stable box before placing subsequent labels. If no common safe slot exists, return BLOCKED without moving native content or ignoring guards",
+    "randomSeek": "No previous-frame cache or mutable placement history; stored immutable frame context is checked independently for every requested frame",
+    "boundedPreflight": {
+      "maximumFramesPerChapter": 18000,
+      "maximumLabels": 8,
+      "maximumExclusionRectanglesPerFrame": 8192,
+      "maximumUniqueExclusionRectangles": 250000,
+      "maximumProjectedExclusionRecords": 600000,
+      "onExcess": "BLOCKED_CONTEXT_BUDGET_EXCEEDED; no unsafe sampling"
+    },
+    "actualAtlasOwnership": "The caller supplies atlasEnvelope from unchanged createAreaAnnotation.evidence.atlasEnvelope and rechecks the same measured values before draw; this CPU planner does not create substitute glyphs"
+  },
+  "focusedValidation": {
+    "command": "node world-simulation-shorts-engine/recovery/studio-integration-gates-v1/tests/test_stable_annotation.mjs",
+    "result": "PASS",
+    "tests": 15,
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0,
+    "syntheticTests": 13,
+    "archivedActualDiagnosticTests": 2,
+    "coverage": [
+      "one immutable measured reservation",
+      "moving obstacles and arbitrary seek order",
+      "native boundary radius and marker/text reservations",
+      "multiple labels without overlap",
+      "all-frame completeness and sequence",
+      "missing native guard arrays",
+      "no common slot fails closed",
+      "invalid measured atlas/safe area/radius/source bindings",
+      "projected-context drift",
+      "source/atlas/safe-area drift",
+      "forged READY/receipt rejection",
+      "caller mutation isolation",
+      "duplicate guard normalization",
+      "actual f641-to642 relocation",
+      "actual original consumer guard replay"
+    ],
+    "archivedActualThreeFrameGuardReplay": {
+      "range": [
+        640,
+        643
+      ],
+      "status": "READY",
+      "fixedROI": [
+        311,
+        101.25396825396825,
+        769,
+        156.25396825396825
+      ],
+      "guardCounts": [
+        507,
+        507,
+        507
+      ],
+      "allOriginalExclusionsRetained": true,
+      "newGlyphDrawPerformed": false,
+      "sameInputVideoRerenderPerformed": false,
+      "wholeChapterProof": false
+    },
+    "wholeChapterClosure": {
+      "chapterId": "chapter-04",
+      "range": [
+        600,
+        800
+      ],
+      "requiredFrames": 200,
+      "availableActualRecords": 101,
+      "missingActualRecords": 99,
+      "status": "BLOCKED_ALL_CHAPTER_FRAMES_REQUIRED",
+      "availableRecordSummary": "600..699 plus 750; no claim of full actual trajectory closure"
+    },
+    "nvidiaHardwareVerified": false,
+    "visualQualityApproved": false,
+    "readOnlyIndependentCodeReview": {
+      "result": "NO_BLOCKING_FINDING",
+      "scope": "Original Area wrapper compatibility, all-frame union, boundary preservation, runtime drift and random-seek determinism",
+      "testImprovementApplied": "Actual three-frame guard replay now requires its observed READY + exact fixed ROI, rather than allowing an unnecessary BLOCKED regression",
+      "visualRepairEstablished": false
+    }
+  },
+  "integrationState": {
+    "historicalRuntimeModified": false,
+    "newHistoricalDrawPerformed": false,
+    "old16FramesRegenerated": false,
+    "M1Regenerated": false,
+    "currentExecutionPath": "Not active in historical runtime; reserved for caller wiring only after G1 and G2 are satisfied",
+    "requiredCallerWiring": [
+      "Enforce G1/G2 before historical rendering; this layout module does not supersede those gates",
+      "Collect all actual projected native contexts and unchanged measured atlas values for the complete chapter",
+      "Compile one chapter reservation with exact code/scene/camera/layout SHA bindings",
+      "Before each draw, independently evaluate that frame’s context and atlas",
+      "Pass selected placement to unchanged annotationOwner.draw({id,placement:result.placements[labelId]}); do not call per-frame owner.place again",
+      "Stop before draw if compilation/validation blocks; preserve existing files and receipts",
+      "Rerender same original input only when gate authorization exists; inspect continuous encoded motion before declaring actual visual repair"
+    ],
+    "residualBlocker": "All-frame projected native context and same-input actual re-render/visual inspection are not yet available under G1/G2 ordering"
+  },
+  "protection": {
+    "oldSourceEdits": 0,
+    "rendererShaderCameraLayoutCoreOcclusionCoreEdits": 0,
+    "newVisualEffectAdded": false,
+    "paidGPUUsed": false,
+    "historicalControlGenerated": false,
+    "gitActionsByThisSubtask": false,
+    "readOnlySourceSHA256": {
+      "recovery/astra-event-director-v2/browser_adapter.mjs": "a65089d1d9a2a3c8ccf195ddd425e2d842960a5bf98060599c02daa773ba1ee8",
+      "recovery/astra-event-director-v2/camera_bridge.mjs": "dcd73d1360353eefccbe67b9ca9be27e7f0d10d34fd26bbadaee364d4dfbd311",
+      "web/map_infographic_v1/event_layout_adapter_v1.mjs": "f430faa7cc75851d1fe3b55644dc5cb8f75db50c9df32c19a5baef316d1f11dc",
+      "web/map_infographic_v1/area_annotation_v3.mjs": "40571c53d87ca3b40d914939a0a41273958f8128767c9fad4d5ee594f808192a",
+      "recovery/universal-production-v3/production_visual_profile.mjs": "babbc57c4f1f10ad16c662140a7c477c4aa57081b806058d95ce3dd8ffe048b4"
+    }
+  },
+  "sourceSHA256": {
+    "stable_annotation.mjs": "baf61711eab00262b8015b6a91a0c13bcf9fdeb409f3f949a8806b3fca63b383",
+    "tests/test_stable_annotation.mjs": "c773a51083f8c043165579b6c6d39d7c3a619028d7743156c8a9cabd4683c00d"
+  },
+  "decision": "CPU_LAYOUT_REPAIR_READY_FOR_GATED_RUNTIME_INTEGRATION; ACTUAL_VISUAL_FIX_UNVERIFIED",
+  "next": "Complete G1; obtain admissible G2 evidence; only then collect full chapter contexts and render approved G3 proof"
+}

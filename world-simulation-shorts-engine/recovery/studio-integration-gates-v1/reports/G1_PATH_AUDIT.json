@@ -1,0 +1,1857 @@
+{
+  "schema": "WORLD_ENGINE_G1_STUDIO_PATH_AUDIT_V1",
+  "auditCommit": "419d01ccace83d871277b2fcfc487d1b61ff7d81",
+  "scope": "READ_ONLY_SOURCE_PATH_AND_ACTUAL_INPUT_CONTRACT_PROBES",
+  "status": "CONFIRMED_INPUT_AND_RUNTIME_PATH_DIVERGENCES_REQUIRES_OPT_IN_STUDIO_ADAPTER",
+  "nvidiaVerified": false,
+  "visualQualityApproved": false,
+  "deployedStudioVerified": false,
+  "original65422": {
+    "schema": "ORIGINAL_65422_EXACT_EXECUTION_PROFILE_V1",
+    "purpose": "RESTORE_EXISTING_COUNTERFACTUAL_CANDIDATE_WITHOUT_VISUAL_CHANGES",
+    "sourceCommit": "2c097df2d02432a3f9ae4dae5d714dbc9eacd434",
+    "originalProofCommit": "45af879d7417abba58e9ebd59d8e6630a785ac28",
+    "producingImageDigest": null,
+    "producingImageDigestStatus": "UNVERIFIED_NOT_ATTESTED_ORIGINAL_CAPTURE_IS_SOURCE_CHECKOUT",
+    "originalCommand": "node world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/render_proof.mjs --source-commit=2c097df2d02432a3f9ae4dae5d714dbc9eacd434",
+    "runtimeModule": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/reference_runtime.mjs",
+    "runtimeExport": "openQualityRuntime",
+    "runtimeOptions": {
+      "mode": "VISUAL_REFERENCE_STUDY"
+    },
+    "scene": {
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json",
+      "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+      "bytes": 371934,
+      "public": false,
+      "materialization": "IMMUTABLE_GIT_BYTES_TO_INDEPENDENT_CAPSULE_ONLY"
+    },
+    "fixture": {
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/RUNTIME_FIXTURE.json",
+      "sha256": "0eed0d9a77721339934e2fa3e35807e0af3725e17b3781f9a1a0a5b92d3e08cf",
+      "bytes": 4342
+    },
+    "runtimeSourceSignature": "b81774e0d8627f0269901daff6fdbd5fdbc06f7dec85f35849f4150525c1126c",
+    "originalCaptureSignature": "d8b2150ba064cd0c0d59ba6e0dc0d2bfd408bbc3d3bb66d64eb479564565ee9a",
+    "originalVideo": {
+      "file": "WORLD_ENGINE_MOVING_FRONTIER_GLOW_FIX_5S.mp4",
+      "sha256": "f3de1bdf9244171a47c6e5eccca6aae1370f58d8bf4721a7658b6bca2eed2ef6",
+      "bytes": 4145271
+    },
+    "timeline": {
+      "startFrame": 0,
+      "endFrameExclusive": 150,
+      "fps": 30,
+      "durationSeconds": 5,
+      "nativeCameraAnchorFrame": 176,
+      "is80SecondHistorySlice": false
+    },
+    "output": {
+      "width": 1080,
+      "height": 1920,
+      "codec": "h264",
+      "pixelFormat": "yuv420p",
+      "audio": false
+    },
+    "requiredVersions": {
+      "node": "24.19.0",
+      "playwright": "1.62.1",
+      "chromium": "154.0.8037.57"
+    },
+    "backend": "EXPLICIT_ORIGINAL_SWIFTSHADER",
+    "nvidiaRequired": false,
+    "existingImagesChanged": false,
+    "existingStudioChanged": false,
+    "implicitHistoricalSceneConversionAllowed": false,
+    "fallbackToAreaSnapshotsAllowed": false,
+    "protectedSourcesChanged": false,
+    "finalPromotion": false
+  },
+  "actualContractProbes": [
+    {
+      "path": "production-studio-mvp-v1/studio_contracts.py:normalize_submission",
+      "request": "actual original MAP_ENGINE_UNIT_SCENE_V4 Scene, durationSeconds=5, profile=UNIVERSAL_V3, sfx.enabled=false",
+      "errorCode": "STUDIO_DURATION_UNSUPPORTED",
+      "fields": [
+        "durationSeconds"
+      ],
+      "backendReached": false
+    },
+    {
+      "path": "universal-overnight-v3/contract_v3.py:normalize_submission (reconciliation controller parent)",
+      "request": "same unchanged original Scene envelope",
+      "errorCode": "STUDIO_OVERNIGHT_PROFILE_REQUIRED",
+      "fields": [
+        "overnight"
+      ],
+      "backendReached": false
+    }
+  ],
+  "firstDivergences": [
+    {
+      "stage": "STUDIO_REQUEST_NORMALIZATION",
+      "status": "CONFIRMED",
+      "evidence": "universal-overnight-v3/contract_v3.py:66-80",
+      "difference": "Active source entry reconciliation inherits an overnight input contract requiring explicit V2 completion and a historical preset. The original scalar Scene cannot enter unchanged. Actual probe fails before backend selection."
+    },
+    {
+      "stage": "BASE_STUDIO_DURATION_AND_PRESET",
+      "status": "CONFIRMED",
+      "evidence": [
+        "production-studio-mvp-v1/studio_contracts.py:20-21,109-118,188-199",
+        "universal-integration-v1/contract_v2.py:80-109"
+      ],
+      "difference": "Base accepts only 80, 120, 180, 300 or 600 seconds. Integrated V2 requires the 80-second VERIFIED_FRONT_V4_80S preset and rejects a direct Scene combined with V2. A five-second slice of that historical plan is not the original five-second MAP_ENGINE_UNIT_SCENE_V4."
+    },
+    {
+      "stage": "RUNTIME_SELECTION_AND_OWNERSHIP",
+      "status": "CONFIRMED",
+      "evidence": [
+        "moving-frontier-glow-fix-v1/reference_runtime.mjs:131-145",
+        "verified-front-data-v4-recovery/front_adapter.mjs:49-56,101-107,128-142"
+      ],
+      "difference": "Original compiles complementary scalar territory and a reference camera track, then calls createMapEngineUnitGpuAdapterV4. The historical path compiles supplied archival fronts as AREA_HOLD. Its observed front has areas=[], coordinatesInterpolated=false and no inferred opponent complement. The inputs and runtime owners differ deliberately."
+    },
+    {
+      "stage": "SCALAR_NATIVE_SLOT",
+      "status": "CONFIRMED",
+      "evidence": "render-path-reconciliation-v1/native_capabilities.py:119-146",
+      "difference": "Selecting scalar territory in the historical native route fails RECONCILE_NATIVE_SCALAR_COMPOSITION_UNAVAILABLE before draw. Missing native slots are enumerated in code. A null scalar selection cannot invoke the original advanced ownership consumer."
+    },
+    {
+      "stage": "DIRECTOR_CALLBACK",
+      "status": "CONFIRMED_SOURCE_ONLY",
+      "evidence": [
+        "astra-event-director-v2/studio_controller.py:1-5,52-71,98-100",
+        "astra-event-director-v2/director_contract.py:496-509"
+      ],
+      "difference": "The director has a callback selector but no authenticated start or worker connection. Its production preflight always returns ready=false. A helper function is not evidence of execution through Studio."
+    },
+    {
+      "stage": "EXISTING_EXACT_REPRO_CLI_OUTPUT_LOCATION",
+      "status": "CONFIRMED",
+      "evidence": "exact-65422-reproduction-v1/tools/capture_original.mjs:28-29,79-81,90-94",
+      "difference": "The standalone exact-capture CLI writes proof/public-review in the older namespace and refuses an existing completed video. It cannot be called unchanged for a new Studio job. A new callback can import the unchanged original capsule runtime and write only to its own job directory."
+    },
+    {
+      "stage": "ORIGINAL_IMAGE_AND_GPU",
+      "status": "UNVERIFIED",
+      "evidence": "exact-65422-reproduction-v1/ORIGINAL_EXECUTION_PROFILE.json",
+      "difference": "The original producing image digest is not attested. Original capture used a source checkout with SwiftShader. Source closure and runtime signature are available; NVIDIA execution and original OCI environment equality remain unverified."
+    }
+  ],
+  "actualAuthenticatedStudioPath": [
+    "New sibling Application -> preserved render-path-reconciliation-v1/studio_entry.py Application(controller_factory=...).",
+    "Preserved HTTPS setup/proxy, Origin policy and login sessions.",
+    "production-studio-mvp-v1/server.py Handler._dispatch validates Host/Origin, authenticates, checks CSRF, then handles POST /api/preflight, /api/submissions and /api/start.",
+    "Controller normalizes, saves a canonical private submission, checks bounded free-profile preflight, and requires consent plus an idempotent start claim.",
+    "New source-pinned callback -> unchanged original capsule openQualityRuntime -> referenceProof.capture(0..149) -> new job-owned PNG/MP4 -> full 150-frame comparison."
+  ],
+  "proposedMinimalNewNamespaceOnlyIntegration": {
+    "profile": "FREE_SWIFTSHADER_EXACT_65422_REVIEW_V1 (proposed, not implemented by this audit)",
+    "inputAuthority": "Use server-owned immutable ORIGINAL_EXECUTION_PROFILE, Scene SHA aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159 and the full sourceBindings closure. Accept only that named regression fixture for G1. Never accept executable module paths or a capsule path from the HTTP body.",
+    "contract": "Add an explicit opt-in branch before the historical parent normalizer. Reject unknown fields, changed Scene/settings/timing, outputs other than 1080x1920 at 30fps over [0,150), enabled audio, paid execution and 80-second output. Delegate other profiles unchanged.",
+    "controller": "Reuse the latest Studio HTTPS Application controller_factory, authentication, Origin/CSRF, PrivateTree and submission/status records. Enter through actual authenticated HTTP endpoints. Preserve production operator policy and NVIDIA admission.",
+    "freePolicy": "Use a separate explicit free-review authority with a strict software backend, process timeout and concurrency limit. Inherited start always creates UNIVERSAL_GPU_AUTHORIZATION_V1 and calls monetary _policy at lines 313-320. Do not invent a GPU rate, cost policy or image proof to force a CPU test through production admission.",
+    "runtimeCallback": "Import the unchanged reference_runtime.mjs from the independent verified capsule. Call openQualityRuntime({mode:VISUAL_REFERENCE_STUDY}) and verify runtime source signature b81774e0d8627f0269901daff6fdbd5fdbc06f7dec85f35849f4150525c1126c. Capture frames 0 through 149 into new job-owned outputs. Preserve native camera anchor 176, scalar control, flags, presentation, camera and terrain.",
+    "proof": "Record authenticated HTTP request IDs, selected controller/normalizer/callback, canonical submission hash, source bindings and capture signature. Compare all 150 new readbacks against original camera, control, unit, frontier, protection, raw RGBA and PNG evidence. Decode the entire MP4 separately and distinguish encoding differences.",
+    "production": "NVIDIA and deployed image validation remain unverified. No paid GPU, deployment, historical full-video approval or FINAL promotion is authorized by this audit."
+  },
+  "evidence": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/render-path-reconciliation-v1/studio_entry.py",
+      "symbol": "Application.__init__",
+      "lines": [
+        22,
+        29
+      ],
+      "claim": "Existing secure entry controller_factory injection hook.",
+      "sha256": "26ff36c36d08b34d0346784a44c715c68824753a37b4d1bbbd4b160f97a4a20c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+      "symbol": "Handler._authenticate/_dispatch",
+      "lines": [
+        224,
+        235,
+        292,
+        334
+      ],
+      "claim": "Actual Origin/authentication/CSRF checks and preflight/submit/start HTTP dispatch.",
+      "sha256": "8c8b23b02ff14edf21ab8189821c5c1dec780d148b46ef1f1786dc7a6418d7c7"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+      "symbol": "StudioController.submit/start",
+      "lines": [
+        254,
+        261,
+        272,
+        347
+      ],
+      "claim": "Canonical private submissions, idempotence, consent, claims and mandatory GPU authorization.",
+      "sha256": "c2e0d94a31cd90569d29f944da1a538c9efcf77d15cd0f2bfacbe99396ae053c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-integration-v1/runtime_backend.py",
+      "symbol": "RuntimeBackend.integration_start",
+      "lines": [
+        44,
+        64
+      ],
+      "claim": "Instance-scoped explicit bridge callback.",
+      "sha256": "3514bb739127eb6e2fa14746daae7264b32ffb396a4b626ef45e5f951e3732e6"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/universal-overnight-v3/runtime_bridge.py",
+      "symbol": "gate_context/prepare_runtime_request",
+      "lines": [
+        46,
+        71,
+        97,
+        109
+      ],
+      "claim": "Historical profile, bounded preview, global clock, source closure and image admission.",
+      "sha256": "17dee9fca637d93af7e044a4fa20812448c69c3171410e3ee9d3200631e05f67"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/exact-65422-reproduction-v1/tools/capture_original.mjs",
+      "symbol": "originalcapture",
+      "lines": [
+        18,
+        70,
+        90,
+        104
+      ],
+      "claim": "Pinned original 150-frame capture loop and encoder; old output directory restriction.",
+      "sha256": "fb96f2770780a3cfa1d4c2792cbf5efc22b9cc335d732002733ce0efaf0874bd"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/reference_runtime.mjs",
+      "symbol": "openQualityRuntime",
+      "lines": [
+        41,
+        72,
+        117,
+        145
+      ],
+      "claim": "Unchanged original source consumer and software WebGL runtime.",
+      "sha256": "013d5d4d569e34982f093f8623313c920e645cda5f371783fca27aedd6b1670e"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/verified-front-data-v4-recovery/front_adapter.mjs",
+      "symbol": "bootLongRuntime/drawFrame",
+      "lines": [
+        25,
+        56,
+        92,
+        142
+      ],
+      "claim": "Different historical partial-front semantics and native layer ownership.",
+      "sha256": "047b075b9a38989e908bee576ef0c40a4e9237526e204f420beef8b5f7132bc3"
+    }
+  ],
+  "protection": {
+    "existingFilesModified": 0,
+    "finalChanged": false,
+    "candidateChanged": false,
+    "sceneChanged": false,
+    "rendererChanged": false,
+    "shaderChanged": false,
+    "paidGpuExecuted": false,
+    "full80Rendered": false,
+    "oldOutputsReusedAsNewCapture": false
+  },
+  "qualityDecision": "NOT_EVALUATED_BY_READ_ONLY_AUDIT",
+  "next": "Implement the new strict Studio adapter, exercise the authenticated route, then compare a newly rendered 150-frame capture before the G1 review decision.",
+  "sourceOnlyClosureComparison": {
+    "scope": "Source bytes only; no renderer execution, no container/deployed image validation. Existing completed parsing and rendering tests were not repeated.",
+    "originalReportSHA256": "550c1d7db502b91dc94548284ddfb10ff27f8e52cdf7efac7e7df68bfa768656",
+    "originalReportBindings": 73,
+    "originalCapsuleMatchingBindings": 73,
+    "currentCheckoutMatchingBindings": 69,
+    "rows": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/RUNTIME_FIXTURE.json",
+        "bytes": 4342,
+        "sha256": "0eed0d9a77721339934e2fa3e35807e0af3725e17b3781f9a1a0a5b92d3e08cf",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "0eed0d9a77721339934e2fa3e35807e0af3725e17b3781f9a1a0a5b92d3e08cf",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "0eed0d9a77721339934e2fa3e35807e0af3725e17b3781f9a1a0a5b92d3e08cf",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/fixtures/SCENE_PLAN.json",
+        "bytes": 371934,
+        "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "aac147932d687f065469c224dbe2a02494f17c01a9be87383e771ada3f275159",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/evidence/VISUAL_ADMISSION.json",
+        "bytes": 2420,
+        "sha256": "2a776df9c129d4a972d94b433b1c9d8e1497ebb847b4b50e200f6132e13ccb2c",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "2a776df9c129d4a972d94b433b1c9d8e1497ebb847b4b50e200f6132e13ccb2c",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "2a776df9c129d4a972d94b433b1c9d8e1497ebb847b4b50e200f6132e13ccb2c",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/reference_runtime.mjs",
+        "bytes": 13520,
+        "sha256": "013d5d4d569e34982f093f8623313c920e645cda5f371783fca27aedd6b1670e",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "013d5d4d569e34982f093f8623313c920e645cda5f371783fca27aedd6b1670e",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "013d5d4d569e34982f093f8623313c920e645cda5f371783fca27aedd6b1670e",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/probe_native.mjs",
+        "bytes": 4573,
+        "sha256": "ee248fa655590d91fdb454d0dc077a7570583eb97fd9c649d4b50fc1091e10fe",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "ee248fa655590d91fdb454d0dc077a7570583eb97fd9c649d4b50fc1091e10fe",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "ee248fa655590d91fdb454d0dc077a7570583eb97fd9c649d4b50fc1091e10fe",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/render_proof.mjs",
+        "bytes": 14483,
+        "sha256": "067a99bf9197661f9b7f5c85c8fa63b7e9b0be9871e2a6bfc7390257bed8e97d",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "067a99bf9197661f9b7f5c85c8fa63b7e9b0be9871e2a6bfc7390257bed8e97d",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "067a99bf9197661f9b7f5c85c8fa63b7e9b0be9871e2a6bfc7390257bed8e97d",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/map-engine-unit-bundle-v1/fixtures/SCENE_PLAN.json",
+        "bytes": 371938,
+        "sha256": "73d5ab5bd41e91866227a9174af64c219c46dc001bd570bd7f854c153e1dc09b",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "73d5ab5bd41e91866227a9174af64c219c46dc001bd570bd7f854c153e1dc09b",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": false,
+          "sha256": null,
+          "matchesOriginal": false,
+          "pathExists": false,
+          "symlink": false,
+          "regularFile": false
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/REGIONAL-plan.json",
+        "bytes": 7984189,
+        "sha256": "e5940e0f258001e2f3273d441694a8b4f0fbcd1d51d74e4d38685c64c2944ee6",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "e5940e0f258001e2f3273d441694a8b4f0fbcd1d51d74e4d38685c64c2944ee6",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "e5940e0f258001e2f3273d441694a8b4f0fbcd1d51d74e4d38685c64c2944ee6",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/fixtures/CONTINENT-plan.json",
+        "bytes": 1404571,
+        "sha256": "70a30d24159b2392abed86eec3b4a9853f96ee5fb0f6f7e27c2a492e89b0baa5",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "70a30d24159b2392abed86eec3b4a9853f96ee5fb0f6f7e27c2a492e89b0baa5",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "70a30d24159b2392abed86eec3b4a9853f96ee5fb0f6f7e27c2a492e89b0baa5",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/scene-native.json",
+        "bytes": 97266,
+        "sha256": "e92a958a6d23c76c9a548332d37fa92a5403a7c562c1a56eb6026e2f7fa6cd41",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "e92a958a6d23c76c9a548332d37fa92a5403a7c562c1a56eb6026e2f7fa6cd41",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "e92a958a6d23c76c9a548332d37fa92a5403a7c562c1a56eb6026e2f7fa6cd41",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/fixtures/camera-plan.json",
+        "bytes": 125639,
+        "sha256": "304f633e38c51b14ef8258edb5974f1636a7b4dbe055a32ec02158f72a72d973",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "304f633e38c51b14ef8258edb5974f1636a7b4dbe055a32ec02158f72a72d973",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "304f633e38c51b14ef8258edb5974f1636a7b4dbe055a32ec02158f72a72d973",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/fixtures/input-manifest.json",
+        "bytes": 2363,
+        "sha256": "abfd594bc16222d33930c898369367e978b500ef7cb632d3b3f902d2a49e99a2",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "abfd594bc16222d33930c898369367e978b500ef7cb632d3b3f902d2a49e99a2",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "abfd594bc16222d33930c898369367e978b500ef7cb632d3b3f902d2a49e99a2",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-reproduction-v1/fixtures/SCENE_PLAN.json",
+        "bytes": 57583,
+        "sha256": "22e2994b6e5df527c1f291ed0bb7e2614534a3a7933ad433657f52ba0ae6a12a",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "22e2994b6e5df527c1f291ed0bb7e2614534a3a7933ad433657f52ba0ae6a12a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "22e2994b6e5df527c1f291ed0bb7e2614534a3a7933ad433657f52ba0ae6a12a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/reference-reproduction-v1/evidence/VISUAL_ADMISSION.json",
+        "bytes": 19654,
+        "sha256": "2d6ec98448588fce9a0a7690be30b265b356730ae7cb42e98d712b7937bfdd6e",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "2d6ec98448588fce9a0a7690be30b265b356730ae7cb42e98d712b7937bfdd6e",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "2d6ec98448588fce9a0a7690be30b265b356730ae7cb42e98d712b7937bfdd6e",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_annotation_v3.mjs",
+        "bytes": 6813,
+        "sha256": "40571c53d87ca3b40d914939a0a41273958f8128767c9fad4d5ee594f808192a",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "40571c53d87ca3b40d914939a0a41273958f8128767c9fad4d5ee594f808192a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "40571c53d87ca3b40d914939a0a41273958f8128767c9fad4d5ee594f808192a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_core_v3.mjs",
+        "bytes": 28186,
+        "sha256": "10c55061c2a38ab527411fcd58cb6c4248d4a4fc21c0c59ae31271e755500d3f",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "10c55061c2a38ab527411fcd58cb6c4248d4a4fc21c0c59ae31271e755500d3f",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "10c55061c2a38ab527411fcd58cb6c4248d4a4fc21c0c59ae31271e755500d3f",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_gpu_adapter_v3.mjs",
+        "bytes": 5797,
+        "sha256": "8f5c165c035b97fdbe195ef51eb23a80203af4e265e6c76bcd88d80167c07769",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "8f5c165c035b97fdbe195ef51eb23a80203af4e265e6c76bcd88d80167c07769",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "8f5c165c035b97fdbe195ef51eb23a80203af4e265e6c76bcd88d80167c07769",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_native_bridge_v3.mjs",
+        "bytes": 10216,
+        "sha256": "375edfaf971a8e4ce66d0ffa4ff94b1d1927203228b2a4f213bc95ea6ebbf998",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "375edfaf971a8e4ce66d0ffa4ff94b1d1927203228b2a4f213bc95ea6ebbf998",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "375edfaf971a8e4ce66d0ffa4ff94b1d1927203228b2a4f213bc95ea6ebbf998",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_overlay_pass_v3.mjs",
+        "bytes": 21898,
+        "sha256": "f96e96b1965adf61220d2d362591d9400a05e5b20e76630e0288feee8c84ec55",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "f96e96b1965adf61220d2d362591d9400a05e5b20e76630e0288feee8c84ec55",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "f96e96b1965adf61220d2d362591d9400a05e5b20e76630e0288feee8c84ec55",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/area_style_v3.mjs",
+        "bytes": 2318,
+        "sha256": "f9c56994d3ed9447cca3e8d2cff4564ea8496f4c22558b9d8c2311a0ed823f30",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "f9c56994d3ed9447cca3e8d2cff4564ea8496f4c22558b9d8c2311a0ed823f30",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "f9c56994d3ed9447cca3e8d2cff4564ea8496f4c22558b9d8c2311a0ed823f30",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_detail_approach_adapter_v1.mjs",
+        "bytes": 14247,
+        "sha256": "b0c6d0be1339982ff329ee001e995403b981cc2441ef113f09076d6c783936a9",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "b0c6d0be1339982ff329ee001e995403b981cc2441ef113f09076d6c783936a9",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "b0c6d0be1339982ff329ee001e995403b981cc2441ef113f09076d6c783936a9",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director.mjs",
+        "bytes": 21265,
+        "sha256": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "5b7d22eed5f493cd106a2b076ba64f2e6265bfce3c0245eff229da52265f17b9",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v2.mjs",
+        "bytes": 21054,
+        "sha256": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "94ff1903b89f78cbdd9eeb06e16744543bfba5680686cc407c16702e8f620811",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v4.mjs",
+        "bytes": 22183,
+        "sha256": "604f89f13441ba1831da95a1eee6b5f71b19237eaec2286ab3e8ed2366721fef",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "604f89f13441ba1831da95a1eee6b5f71b19237eaec2286ab3e8ed2366721fef",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "604f89f13441ba1831da95a1eee6b5f71b19237eaec2286ab3e8ed2366721fef",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_director_v5.mjs",
+        "bytes": 25364,
+        "sha256": "8dde7d2feb2cd85c073b0edde8eb6d03fc379afa8b462c71966d1e4c73efb8d3",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "8dde7d2feb2cd85c073b0edde8eb6d03fc379afa8b462c71966d1e4c73efb8d3",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "8dde7d2feb2cd85c073b0edde8eb6d03fc379afa8b462c71966d1e4c73efb8d3",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v2.mjs",
+        "bytes": 5290,
+        "sha256": "ef3b1af99a685b4c1330947334b2778c98a5e35fff0dcdd27ed627b40a517f94",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "ef3b1af99a685b4c1330947334b2778c98a5e35fff0dcdd27ed627b40a517f94",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "ef3b1af99a685b4c1330947334b2778c98a5e35fff0dcdd27ed627b40a517f94",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_gpu_pipeline_v5.mjs",
+        "bytes": 7671,
+        "sha256": "9990b8d0fdf481db076627fa7b45c5d99739d114be9dbc26b06169fe8c323279",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "9990b8d0fdf481db076627fa7b45c5d99739d114be9dbc26b06169fe8c323279",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "9990b8d0fdf481db076627fa7b45c5d99739d114be9dbc26b06169fe8c323279",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/camera_reveal_v4.mjs",
+        "bytes": 8321,
+        "sha256": "360a0e6b6b76c5cc1dac988b05cf56e7507f13b0522bdaf2cdf420dca0bc9658",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "360a0e6b6b76c5cc1dac988b05cf56e7507f13b0522bdaf2cdf420dca0bc9658",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "360a0e6b6b76c5cc1dac988b05cf56e7507f13b0522bdaf2cdf420dca0bc9658",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_contract_v1.mjs",
+        "bytes": 4684,
+        "sha256": "38a1b423b8dc741ab0c5f78b42a68bcc3cd22ba79272d20a3e019045fe10bd07",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "38a1b423b8dc741ab0c5f78b42a68bcc3cd22ba79272d20a3e019045fe10bd07",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "38a1b423b8dc741ab0c5f78b42a68bcc3cd22ba79272d20a3e019045fe10bd07",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_layout_adapter_v1.mjs",
+        "bytes": 15260,
+        "sha256": "f430faa7cc75851d1fe3b55644dc5cb8f75db50c9df32c19a5baef316d1f11dc",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "f430faa7cc75851d1fe3b55644dc5cb8f75db50c9df32c19a5baef316d1f11dc",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "f430faa7cc75851d1fe3b55644dc5cb8f75db50c9df32c19a5baef316d1f11dc",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_line_pass_v1.mjs",
+        "bytes": 6141,
+        "sha256": "08ae04a5ff22dc7b0d915d2c7198d733ef65ad75837dbaa441e7d27bfddd163a",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "08ae04a5ff22dc7b0d915d2c7198d733ef65ad75837dbaa441e7d27bfddd163a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "08ae04a5ff22dc7b0d915d2c7198d733ef65ad75837dbaa441e7d27bfddd163a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_line_v1.mjs",
+        "bytes": 4783,
+        "sha256": "02ccfe464c7c09f584335e6afee8db9886803df6b4a1c8652456243e18dacf06",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "02ccfe464c7c09f584335e6afee8db9886803df6b4a1c8652456243e18dacf06",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "02ccfe464c7c09f584335e6afee8db9886803df6b4a1c8652456243e18dacf06",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_metric_pass_v1.mjs",
+        "bytes": 3102,
+        "sha256": "f36027b223bc45be4ff07998ee896608d63a5cc540f8a1ceca5911d46e4c8e5f",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "f36027b223bc45be4ff07998ee896608d63a5cc540f8a1ceca5911d46e4c8e5f",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "f36027b223bc45be4ff07998ee896608d63a5cc540f8a1ceca5911d46e4c8e5f",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_metric_v1.mjs",
+        "bytes": 6226,
+        "sha256": "526eed5c58e1d6e91f14030e44482c19ef3819845d0cdcde810cf89cc22a0bfa",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "526eed5c58e1d6e91f14030e44482c19ef3819845d0cdcde810cf89cc22a0bfa",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "526eed5c58e1d6e91f14030e44482c19ef3819845d0cdcde810cf89cc22a0bfa",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_occlusion_policy_v1.mjs",
+        "bytes": 1725,
+        "sha256": "02aec53203c9c56eccd415020b0d91108a8c33bbe94a25bf3a79405cc8ee14c5",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "02aec53203c9c56eccd415020b0d91108a8c33bbe94a25bf3a79405cc8ee14c5",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "02aec53203c9c56eccd415020b0d91108a8c33bbe94a25bf3a79405cc8ee14c5",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_style_v1.mjs",
+        "bytes": 7458,
+        "sha256": "28c76f97525dfa22e4c5dc4e2bde1d3b94f250e96db454e35b8954ed10e7d467",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "28c76f97525dfa22e4c5dc4e2bde1d3b94f250e96db454e35b8954ed10e7d467",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "28c76f97525dfa22e4c5dc4e2bde1d3b94f250e96db454e35b8954ed10e7d467",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/event_timeline_v1.mjs",
+        "bytes": 7329,
+        "sha256": "55c53af83a1c90a94e87e3854355e5eedef77eed22e6dbd9f3e7b6c90ed94414",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "55c53af83a1c90a94e87e3854355e5eedef77eed22e6dbd9f3e7b6c90ed94414",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "55c53af83a1c90a94e87e3854355e5eedef77eed22e6dbd9f3e7b6c90ed94414",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_core_v2.mjs",
+        "bytes": 14658,
+        "sha256": "5666f77c2dd254458f7e937d0dbec5d6a2725f06705e168ecf982623da5045be",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "5666f77c2dd254458f7e937d0dbec5d6a2725f06705e168ecf982623da5045be",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "5666f77c2dd254458f7e937d0dbec5d6a2725f06705e168ecf982623da5045be",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/flow_graphic_pass_v2.mjs",
+        "bytes": 23094,
+        "sha256": "71752fe1462f4c359ca3481f20c02c65a464a0469337c6a6d2850d6c9496b704",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "71752fe1462f4c359ca3481f20c02c65a464a0469337c6a6d2850d6c9496b704",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "71752fe1462f4c359ca3481f20c02c65a464a0469337c6a6d2850d6c9496b704",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/glyph_atlas.mjs",
+        "bytes": 5121,
+        "sha256": "34c30d6fd57e9a9821ec8058ec65285a2402f6b72a30a534773a044dbe770386",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "34c30d6fd57e9a9821ec8058ec65285a2402f6b72a30a534773a044dbe770386",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "34c30d6fd57e9a9821ec8058ec65285a2402f6b72a30a534773a044dbe770386",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+        "bytes": 21026,
+        "sha256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_motion_pass_v4.mjs",
+        "bytes": 7187,
+        "sha256": "7208e40a16c8a083fb8d8d9b0517091c76dd3a6525f41fb9aeaa1be7cbf0e7a4",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "7208e40a16c8a083fb8d8d9b0517091c76dd3a6525f41fb9aeaa1be7cbf0e7a4",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "7208e40a16c8a083fb8d8d9b0517091c76dd3a6525f41fb9aeaa1be7cbf0e7a4",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/local_detail_admission.mjs",
+        "bytes": 17105,
+        "sha256": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "817ddb0ef6e143d43ef774062f638726d4456abbb94f082bf67c20591554ac93",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_engine_unit_gpu_adapter_v4.mjs",
+        "bytes": 19678,
+        "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "1e09878c71fc4106d2b74f21ffbbc66ae8b5e13705c0830aeebb07a1ad5f8bd3",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/map_visual_gpu_adapter_v3.mjs",
+        "bytes": 17775,
+        "sha256": "322efd6d48e3f05243fa786386e8dd2ef1f08204dd8e0a0e6190a9808ead0f1b",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "322efd6d48e3f05243fa786386e8dd2ef1f08204dd8e0a0e6190a9808ead0f1b",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "322efd6d48e3f05243fa786386e8dd2ef1f08204dd8e0a0e6190a9808ead0f1b",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/moving_layout_v4.mjs",
+        "bytes": 11280,
+        "sha256": "6036693abe5996a7c136076376b534460a08f2ee2cc5396c1ccee2a28d07db2d",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "6036693abe5996a7c136076376b534460a08f2ee2cc5396c1ccee2a28d07db2d",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "6036693abe5996a7c136076376b534460a08f2ee2cc5396c1ccee2a28d07db2d",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/national_unit_badge_v1.mjs",
+        "bytes": 17545,
+        "sha256": "46d798c3aec56e79fa4bcfc1281ec8f28a76ef3446ab9bdb0c687620d424311d",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "46d798c3aec56e79fa4bcfc1281ec8f28a76ef3446ab9bdb0c687620d424311d",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "46d798c3aec56e79fa4bcfc1281ec8f28a76ef3446ab9bdb0c687620d424311d",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_engine_adapter_v1.mjs",
+        "bytes": 10532,
+        "sha256": "cf5ed1dc3a40b2c6d18fbbc8cc4100d8ee6db5ff53657d7d005887b210e68732",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "cf5ed1dc3a40b2c6d18fbbc8cc4100d8ee6db5ff53657d7d005887b210e68732",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "cf5ed1dc3a40b2c6d18fbbc8cc4100d8ee6db5ff53657d7d005887b210e68732",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+        "bytes": 45769,
+        "sha256": "9f03171bac5fd5bea023d6a01034608fc2da12f73c8d8d2116da5bf997d64e80",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "9f03171bac5fd5bea023d6a01034608fc2da12f73c8d8d2116da5bf997d64e80",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "9f03171bac5fd5bea023d6a01034608fc2da12f73c8d8d2116da5bf997d64e80",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_camera_adapter_v1.mjs",
+        "bytes": 9102,
+        "sha256": "d74ffa8fc9884655f543a98d41bead9717d74d467484b99f4c14c18c17ce5bb1",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "d74ffa8fc9884655f543a98d41bead9717d74d467484b99f4c14c18c17ce5bb1",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "d74ffa8fc9884655f543a98d41bead9717d74d467484b99f4c14c18c17ce5bb1",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_combat_overlay_v2.mjs",
+        "bytes": 16339,
+        "sha256": "dc3d12c62d9272d8e7a6f28afa068066dbdfacb82d953b32b1cb71bfce3da8a2",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "dc3d12c62d9272d8e7a6f28afa068066dbdfacb82d953b32b1cb71bfce3da8a2",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "dc3d12c62d9272d8e7a6f28afa068066dbdfacb82d953b32b1cb71bfce3da8a2",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_control_frontier_light_v3.mjs",
+        "bytes": 18791,
+        "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "417c7138bd68260c182c4ef09694512b46365e81e45727133b029abb7bbf7818",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_ocean_material_v3.mjs",
+        "bytes": 5717,
+        "sha256": "a14781ae8eb1c4380e28d36f2b876912d77cce8a90aa023faba949aadfb72395",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "a14781ae8eb1c4380e28d36f2b876912d77cce8a90aa023faba949aadfb72395",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "a14781ae8eb1c4380e28d36f2b876912d77cce8a90aa023faba949aadfb72395",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_ocean_material_v4.mjs",
+        "bytes": 4733,
+        "sha256": "1ac6dad69b5a5ccaf1d94fa351eaef98172de76ef7fdfe0acee63c2885a204db",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "1ac6dad69b5a5ccaf1d94fa351eaef98172de76ef7fdfe0acee63c2885a204db",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "1ac6dad69b5a5ccaf1d94fa351eaef98172de76ef7fdfe0acee63c2885a204db",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_presentation_adapter_v2.mjs",
+        "bytes": 14324,
+        "sha256": "9fd7c91f8d49a6dbf469d14b20135453abf9c40131603a667867269f196b7277",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "9fd7c91f8d49a6dbf469d14b20135453abf9c40131603a667867269f196b7277",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "9fd7c91f8d49a6dbf469d14b20135453abf9c40131603a667867269f196b7277",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_quality_gpu_adapter_v2.mjs",
+        "bytes": 16225,
+        "sha256": "91bbdb29310666cc6479f32e8a6488f3bfca7ccabf7eb25f6e0b1100a5f52495",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "91bbdb29310666cc6479f32e8a6488f3bfca7ccabf7eb25f6e0b1100a5f52495",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "91bbdb29310666cc6479f32e8a6488f3bfca7ccabf7eb25f6e0b1100a5f52495",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v2.mjs",
+        "bytes": 11758,
+        "sha256": "489f200212bee39550d173568ccb1c004113e55e9a1ef173c67d911a4d9002d9",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "489f200212bee39550d173568ccb1c004113e55e9a1ef173c67d911a4d9002d9",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "489f200212bee39550d173568ccb1c004113e55e9a1ef173c67d911a4d9002d9",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v3.mjs",
+        "bytes": 15295,
+        "sha256": "d788c884e677d5655f4e0d1b550567c618d9fcd05ed5d536a6aa7296aeeac839",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "d788c884e677d5655f4e0d1b550567c618d9fcd05ed5d536a6aa7296aeeac839",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "d788c884e677d5655f4e0d1b550567c618d9fcd05ed5d536a6aa7296aeeac839",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/reference_terrain_material_v4.mjs",
+        "bytes": 16247,
+        "sha256": "fa44852e518b7e73cea5acaa6493f2ced405883de1ddb362f3251339d1909980",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "fa44852e518b7e73cea5acaa6493f2ced405883de1ddb362f3251339d1909980",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "fa44852e518b7e73cea5acaa6493f2ced405883de1ddb362f3251339d1909980",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "bytes": 53468,
+        "sha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_contract.mjs",
+        "bytes": 19684,
+        "sha256": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "5c891956dc43428af8fcf9a165ae11f1a6108f77d512189d996f31729f7b7683",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/scale_projection.mjs",
+        "bytes": 14660,
+        "sha256": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "4d6a405207a7db2aaad77662a5bc29bcfa20a67be7ae3e3f0277251f929abd95",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/territory_control_adapter_v1.mjs",
+        "bytes": 14735,
+        "sha256": "dbcfc10d5f78b9875223751cf3cf4054135f7db1b38ffc6c819a2f37f5c63494",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "dbcfc10d5f78b9875223751cf3cf4054135f7db1b38ffc6c819a2f37f5c63494",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "dbcfc10d5f78b9875223751cf3cf4054135f7db1b38ffc6c819a2f37f5c63494",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/territory_control_gpu_adapter_v1.mjs",
+        "bytes": 50121,
+        "sha256": "9781c21d9a4743a8007876e9df87f9524c23973262b1f20f3384fa561a729dad",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "9781c21d9a4743a8007876e9df87f9524c23973262b1f20f3384fa561a729dad",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "9781c21d9a4743a8007876e9df87f9524c23973262b1f20f3384fa561a729dad",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/unit_participation_policy_v1.mjs",
+        "bytes": 7843,
+        "sha256": "86752878601046d960bc66ba4319d0deb338df1bd55019cdabac4586bac3acf2",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "86752878601046d960bc66ba4319d0deb338df1bd55019cdabac4586bac3acf2",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "86752878601046d960bc66ba4319d0deb338df1bd55019cdabac4586bac3acf2",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/wave_visual_v3.mjs",
+        "bytes": 15507,
+        "sha256": "dcbf072e81a1b6880e6e7b264c2a38a5ea88876e89c795cbb61393c66a415f05",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "dcbf072e81a1b6880e6e7b264c2a38a5ea88876e89c795cbb61393c66a415f05",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "dcbf072e81a1b6880e6e7b264c2a38a5ea88876e89c795cbb61393c66a415f05",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/map_infographic_v1/world_engine_unit_overlay_v3.mjs",
+        "bytes": 14645,
+        "sha256": "94891a46cc01b78452efff3aac506f334b4b43cf3921358bd3ad19da2cd2caac",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "94891a46cc01b78452efff3aac506f334b4b43cf3921358bd3ad19da2cd2caac",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "94891a46cc01b78452efff3aac506f334b4b43cf3921358bd3ad19da2cd2caac",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/vendor/three/0.170.0/three.module.js",
+        "bytes": 1314681,
+        "sha256": "ce1fa418de16a19495a9f72495580e3015d7745c296d3ce0485897f902ddedfb",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "ce1fa418de16a19495a9f72495580e3015d7745c296d3ce0485897f902ddedfb",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "ce1fa418de16a19495a9f72495580e3015d7745c296d3ce0485897f902ddedfb",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/flat_assets/natural_earth_1_east_asia.png",
+        "bytes": 13947958,
+        "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/web/fonts/NotoSansCJKkr-Bold.otf",
+        "bytes": 16997968,
+        "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": true,
+          "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/evidence/native_probe/000.png",
+        "bytes": 2466333,
+        "sha256": "8a352abec4ceaf1cf5c64ceae01cfa324005a3f17f74a0a5ecf764b0faf27307",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "8a352abec4ceaf1cf5c64ceae01cfa324005a3f17f74a0a5ecf764b0faf27307",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": false,
+          "sha256": null,
+          "matchesOriginal": false,
+          "pathExists": false,
+          "symlink": false,
+          "regularFile": false
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/evidence/native_probe/074.png",
+        "bytes": 2638017,
+        "sha256": "c3b3c48285c1510688fc3101b23afa69a893598fcd34085e0c2fd1e743648325",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "c3b3c48285c1510688fc3101b23afa69a893598fcd34085e0c2fd1e743648325",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": false,
+          "sha256": null,
+          "matchesOriginal": false,
+          "pathExists": false,
+          "symlink": false,
+          "regularFile": false
+        }
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/moving-frontier-glow-fix-v1/evidence/native_probe/149.png",
+        "bytes": 2632450,
+        "sha256": "4c2e27bae7554ca72924d5882a623d4c5ba7ad81a89da7986d9046315b2c9a8c",
+        "originalCapsule": {
+          "exists": true,
+          "sha256": "4c2e27bae7554ca72924d5882a623d4c5ba7ad81a89da7986d9046315b2c9a8c",
+          "matchesOriginal": true,
+          "pathExists": true,
+          "symlink": false,
+          "regularFile": true
+        },
+        "currentCheckout": {
+          "exists": false,
+          "sha256": null,
+          "matchesOriginal": false,
+          "pathExists": false,
+          "symlink": false,
+          "regularFile": false
+        }
+      }
+    ],
+    "dependencyClosureManifest": "world-simulation-shorts-engine/recovery/exact-65422-reproduction-v1/reports/SOURCE_CAPSULE_MANIFEST.json",
+    "dependencyClosureManifestSHA256": "ee15187b78403dc06e62b4b2253a7196f6f64159f8ac7fb8d60344f63ea8496b",
+    "additionalClosureChecks": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/planner-scene-json-v1/planner_runtime.mjs",
+        "sha256": "2ab6197bdb018158bbaa10d8c62d8c38252c7f857fe0bddf7524bd2320972295",
+        "matchesCapsule": true
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/v5/serve.py",
+        "sha256": "06790aecb376e5adfbbf3e48e6f399fb85c4fce32ae04dfaf9337ab397dc947c",
+        "matchesCapsule": true
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/v5/index.html",
+        "sha256": "c16301f2bcc19f59babe649794749145b8dd30dabd2e496c2ab11c7d0d0f3295",
+        "matchesCapsule": true
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/v5/harness.mjs",
+        "sha256": "1b7dd6cb60e2abed31d08ee7a8dc9fa8d9308e46569ffc37fbb35f28bde43eb2",
+        "matchesCapsule": true
+      },
+      {
+        "path": "cinematic-world-map/package.json",
+        "sha256": "b5c91a7a3bf6326ffd396dc285e14b226cb1b6f0715268b055d303dc5833e7a2",
+        "matchesCapsule": true
+      },
+      {
+        "path": "cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+        "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+        "matchesCapsule": true
+      },
+      {
+        "path": "cinematic-world-map/assets/gis/earth-topology.png",
+        "sha256": "839b12da2e4dd346b256cebae72e10c479a102c8980a22084c41275e4b9a0e12",
+        "matchesCapsule": true
+      }
+    ],
+    "originalInputsIntact": true,
+    "checkoutMismatchExplanation": "Four current checkout paths are absent: the runtime-consumed saved map-engine-unit Scene and three static native-probe PNGs. The independent capsule supplies all 73 exact original bindings plus seven operational closure files. Static PNGs are evidence only; the saved Scene is read at runtime and must come from the verified capsule."
+  },
+  "workingTreeProtectionAtAudit": {
+    "baselineCommit": "419d01ccace83d871277b2fcfc487d1b61ff7d81",
+    "trackedChangedFiles": [],
+    "ownedAuditFile": "world-simulation-shorts-engine/recovery/studio-integration-gates-v1/reports/G1_PATH_AUDIT.json",
+    "auditWrites": "Only the new G1_PATH_AUDIT.json report. No original source/candidate/asset bytes changed by this agent.",
+    "rendererRunsByThisAudit": 0
+  }
+}
