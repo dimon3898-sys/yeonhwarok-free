@@ -118,7 +118,7 @@ def verify(args):
     for index, relative in enumerate(args.file):
         file = HERE / relative
         if (not file.is_file() or file.is_symlink() or not file.resolve().is_relative_to(HERE.resolve())
-                or not relative.startswith(("public-review/", "review-package/"))):
+                or not (relative == "SHA256SUMS" or relative.startswith(("public-review/", "review-package/")))):
             raise ValueError("PUBLIC_ARTIFACT_REQUIRED")
         url = ("https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/" + args.commit + "/" +
                urllib.parse.quote(file.relative_to(REPO).as_posix(), safe="/"))
