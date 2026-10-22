@@ -1,0 +1,87 @@
+--- renderer.mjs@candidate04
++++ renderer.mjs@candidate05
+@@ -29,12 +29,6 @@
+ in vec2 vUv; out vec4 frag;
+ uniform sampler2D terrain, globalTerrain, topo, regionID, coverage, roles;
+ uniform vec4 bounds, tileBounds;
+-// Opt-in inverse geographic sampling. GIS targets stay in current-view UVs.
+-uniform int similarityEnabled;
+-uniform vec2 similarityCenterQ, similarityAngle;
+-uniform float similarityScale;
+-uniform vec3 similarityOrigin;
+-uniform vec2 similarityTileSpanQ, similarityTileCenterUV;
+ // Optional continuous-map LOD is a geographic SOURCE input, before the frozen
+ // material/lighting response. It never blends completed frames or GIS masks.
+ uniform sampler2D contextTerrain;
+@@ -137,7 +131,6 @@
+ }
+ void main(){
+  vec2 geo=mix(bounds.xy,bounds.zw,vUv);
+- vec2 activeSimilarityDeltaQ=vec2(0.);
+  vec2 gisUv=vUv;
+  if(globeProjection==1){
+   vec2 xy=(vUv-globeDisc.xy)/globeDisc.zw;
+@@ -147,18 +140,8 @@
+   geo=vec2(degrees(atan(earth.z,earth.x)),degrees(asin(clamp(earth.y,-1.,1.))));
+   gisUv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);
+  }
+- if(globeProjection==0&&similarityEnabled==1){
+-  vec2 d=vec2((vUv.x-.5)*1080.,(.5-vUv.y)*1920.)/similarityScale;
+-  vec2 deltaQ=vec2(similarityAngle.x*d.x+similarityAngle.y*d.y,-similarityAngle.y*d.x+similarityAngle.x*d.y);
+-  vec2 q=similarityCenterQ+deltaQ;
+-  activeSimilarityDeltaQ=deltaQ;
+-  geo=vec2(similarityOrigin.x+q.x/similarityOrigin.z,similarityOrigin.y-q.y);
+- }
+  vec2 guv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);
+  vec2 tuv=(geo-tileBounds.xy)/(tileBounds.zw-tileBounds.xy);
+- // Relative projected source coordinates avoid subtracting large absolute
+- // latitudes at fine local RGB detail; default/world sampling is unchanged.
+- if(globeProjection==0&&similarityEnabled==1)tuv=similarityTileCenterUV+vec2(activeSimilarityDeltaQ.x/similarityTileSpanQ.x,-activeSimilarityDeltaQ.y/similarityTileSpanQ.y);
+  float inside=step(0.,tuv.x)*step(0.,tuv.y)*step(tuv.x,1.)*step(tuv.y,1.);
+  // WORLD admits the global source; regional crops are not world detail.
+  if(globeProjection==1)inside=0.;
+@@ -258,6 +241,35 @@
+  }else color=originalColor;
+  frag=vec4(encode(clamp(color,0.,1.)),1.);
+ }`;
++// Preserve the original default/globe shader bytes and compile its exact program.
++// Only the explicit opt-in builds this bounded source variant, before material creation.
++function referenceSimilarityTerrainFragment(){
++ let source=terrainFragment;
++ const edits=[
++  [
++    "uniform vec4 bounds, tileBounds;",
++    "uniform vec4 bounds, tileBounds;\n// Opt-in inverse geographic sampling. GIS targets stay in current-view UVs.\nuniform int similarityEnabled;\nuniform vec2 similarityCenterQ, similarityAngle;\nuniform float similarityScale;\nuniform vec3 similarityOrigin;\nuniform vec2 similarityTileSpanQ, similarityTileCenterUV;"
++  ],
++  [
++    " vec2 geo=mix(bounds.xy,bounds.zw,vUv);",
++    " vec2 geo=mix(bounds.xy,bounds.zw,vUv);\n vec2 activeSimilarityDeltaQ=vec2(0.);"
++  ],
++  [
++    " vec2 guv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);",
++    " if(globeProjection==0&&similarityEnabled==1){\n  vec2 d=vec2((vUv.x-.5)*1080.,(.5-vUv.y)*1920.)/similarityScale;\n  vec2 deltaQ=vec2(similarityAngle.x*d.x+similarityAngle.y*d.y,-similarityAngle.y*d.x+similarityAngle.x*d.y);\n  vec2 q=similarityCenterQ+deltaQ;\n  activeSimilarityDeltaQ=deltaQ;\n  geo=vec2(similarityOrigin.x+q.x/similarityOrigin.z,similarityOrigin.y-q.y);\n }\n vec2 guv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);"
++  ],
++  [
++    " vec2 tuv=(geo-tileBounds.xy)/(tileBounds.zw-tileBounds.xy);",
++    " vec2 tuv=(geo-tileBounds.xy)/(tileBounds.zw-tileBounds.xy);\n // Relative source UV is evaluated before the unchanged material/lighting path.\n if(globeProjection==0&&similarityEnabled==1)tuv=similarityTileCenterUV+vec2(activeSimilarityDeltaQ.x/similarityTileSpanQ.x,-activeSimilarityDeltaQ.y/similarityTileSpanQ.y);"
++  ]
++];
++ for(const [from,to] of edits){
++  const at=source.indexOf(from);
++  if(at<0||source.indexOf(from,at+from.length)!==-1)throw Error('SIMILARITY_SHADER_SOURCE_ANCHOR_CHANGED');
++  source=source.slice(0,at)+to+source.slice(at+from.length);
++ }
++ return source;
++}
+ const ribbonVertex = `precision highp float;
+ uniform mat4 projectionMatrix,modelViewMatrix;
+ uniform vec2 resolution; uniform float width;
+@@ -480,7 +492,7 @@
+   bounds:{value:new THREE.Vector4(...b)},tileBounds:{value:new THREE.Vector4(...plan.assets.terrain.bounds)},
+   primaryHue:{value:new THREE.Vector3(...theme.primary)},secondaryHue:{value:new THREE.Vector3(...theme.secondary)},
+   primaryStrength:{value:theme.primaryStrength},secondaryStrength:{value:theme.secondaryStrength},primaryLuminance:{value:theme.primaryLuminance??1},secondaryLuminance:{value:theme.secondaryLuminance??1},detailContrast:{value:theme.detailContrast??1},reliefStrength:{value:theme.relief},exposure:{value:theme.exposure},mode:{value:0},terrainTreatment:{value:terrainTreatment==='CURRENT'?0:1}};
+- const terrainMaterial=mat(fullscreenVertex,terrainFragment,uniforms),terrainScene=fullScene(terrainMaterial);
++ const terrainMaterial=mat(fullscreenVertex,similarityOptIn?referenceSimilarityTerrainFragment():terrainFragment,uniforms),terrainScene=fullScene(terrainMaterial);
+  const primaryGeometry=ribbon(primaryRings),secondaryGeometry=ribbon(secondaryRings),boundaryScene=new THREE.Scene(),glowScene=new THREE.Scene();
+  function line(scene,g,pixels,color){const material=mat(ribbonVertex,rgbaFragment,{resolution:{value:new THREE.Vector2(width,height)},width:{value:pixels*scale},color:{value:new THREE.Vector4(...color)}},true);const mesh=new THREE.Mesh(g,material);scene.add(mesh);return mesh;}
+  // Boundary-only tokens. Absent tokens reproduce the approved previous style.

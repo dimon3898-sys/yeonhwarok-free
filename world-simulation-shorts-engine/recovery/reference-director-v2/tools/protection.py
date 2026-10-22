@@ -207,14 +207,84 @@ def proposal(path, report):
     return 0
 
 
+def followup_proposal(path, report, expected_current_sha):
+    """Record a reviewed replacement without rewriting the original contract.
+
+    The preceding candidate remains live. Both immutable-original and exact
+    current-candidate diffs are captured; this function never applies either.
+    """
+    if not re.fullmatch(r'[0-9a-f]{64}', expected_current_sha or ''):
+        raise RuntimeError('R2_FOLLOWUP_REQUIRES_EXPECTED_CURRENT_SHA256')
+    if not re.fullmatch(r'[A-Z0-9_]+', report):
+        raise RuntimeError('R2_SAFE_PROPOSAL_REPORT_NAME_REQUIRED')
+    baseline = json.loads(BASELINE.read_bytes())
+    if reused.sha_file(BACKUP) != ORIGINAL_SHA:
+        raise RuntimeError('R2_ORIGINAL_BACKUP_CHANGED')
+    live = ROOT / ALLOWED
+    if live.is_symlink() or not live.is_file():
+        raise RuntimeError('R2_LIVE_RENDERER_MUST_BE_REGULAR_FILE')
+    current = live.read_bytes()
+    if digest(current) != expected_current_sha:
+        raise RuntimeError('R2_FOLLOWUP_LIVE_RENDERER_SHA_MISMATCH')
+    source = reused.source_contract()
+    protected, errors = reused.check_protected(source)
+    forbidden = [row for row in errors if row['path'] != ALLOWED]
+    if forbidden or any(not row.get('actualSHA256') for row in errors):
+        raise RuntimeError('R2_FOLLOWUP_ORIGINAL_307_SCOPE_GATE_FAILED')
+    candidate = Path(path)
+    if candidate.is_symlink() or not candidate.is_file() or not candidate.resolve().is_relative_to(HERE):
+        raise RuntimeError('R2_CANDIDATE_MUST_BE_NEW_NAMESPACE_FILE')
+    raw = candidate.read_bytes()
+    if digest(raw) == expected_current_sha:
+        raise RuntimeError('R2_FOLLOWUP_CANDIDATE_MUST_DIFFER_FROM_CURRENT')
+    original_diff = renderer_diff(BACKUP.read_bytes(), raw)
+    current_diff = ''.join(difflib.unified_diff(current.decode().splitlines(True),
+        raw.decode().splitlines(True), fromfile=ALLOWED + '@' + expected_current_sha,
+        tofile=ALLOWED + '@' + digest(raw)))
+    patches = []
+    for label, diff in [('ORIGINAL_TO_CANDIDATE', original_diff),
+                        ('CURRENT_TO_CANDIDATE', current_diff)]:
+        target = HERE / 'reports' / (report + '_' + label + '.patch')
+        with target.open('x') as stream:
+            stream.write(diff)
+        patches.append({'basis': label, 'path': target.relative_to(ROOT).as_posix(),
+                        'sha256': digest(diff.encode())})
+    data = {'schema': 'WORLD_ENGINE_REFERENCE_RENDERER_FOLLOWUP_PRE_CHANGE_PROPOSAL_V1',
+        'baselineCommit': BASE_COMMIT, 'targetPath': ALLOWED,
+        'candidatePath': candidate.relative_to(ROOT).as_posix(),
+        'originalSHA256': ORIGINAL_SHA, 'currentSHA256': expected_current_sha,
+        'candidateSHA256': digest(raw), 'currentBytes': len(current),
+        'originalBytes': baseline['allowedModification']['originalBytes'],
+        'candidateBytes': len(raw), 'patches': patches,
+        'beforeApplyProtected307': {'count': len(protected),
+            'originalUnchangedCount': len(protected) - len(errors),
+            'authorizedModifiedCount': len(errors), 'forbiddenChanges': forbidden},
+        'protectedFileStillCurrentSHA256': digest(live.read_bytes()),
+        'original307ManifestChanged': False, 'originalBaselineUpdated': False,
+        'oneAllowedPathScopeUnchanged': True,
+        'approvalAlreadyProvidedInUserAttachment': True,
+        'authorizationSHA256': AUTHORIZATION_SHA,
+        'candidateAppliedByThisTool': False, 'featureOrPixelPassClaimed': False,
+        'rollback': 'Original immutable backup and both exact diffs remain preserved; this tool never restores or overwrites the live renderer.'}
+    if data['protectedFileStillCurrentSHA256'] != expected_current_sha:
+        raise RuntimeError('R2_FOLLOWUP_LIVE_RENDERER_CHANGED_DURING_RECEIPT')
+    write_json(HERE / 'reports' / (report + '.json'), data)
+    print(json.dumps(data))
+    return 0
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--acquire', action='store_true')
     group.add_argument('--proposal', type=Path)
+    group.add_argument('--followup-proposal', type=Path)
     parser.add_argument('--output', default='PROTECTION_CURRENT.json')
     parser.add_argument('--proposal-report', default='RENDERER_PRE_CHANGE_PROPOSAL')
+    parser.add_argument('--expected-current-sha256')
     parser.add_argument('--require-original', action='store_true')
     args = parser.parse_args()
     raise SystemExit(acquire() if args.acquire else proposal(args.proposal, args.proposal_report)
-        if args.proposal else verify(args.output, require_original=args.require_original))
+        if args.proposal else followup_proposal(args.followup_proposal, args.proposal_report,
+            args.expected_current_sha256) if args.followup_proposal
+        else verify(args.output, require_original=args.require_original))

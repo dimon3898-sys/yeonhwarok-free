@@ -7,11 +7,12 @@ import * as THREE from '/three.js';
 import {createMeasuredGlyph} from './glyph_atlas.mjs';
 import {buildMeasuredGraphicLayout} from './graphic_layout.mjs';
 import {createGlobeProjection, geographicAtlasRecord, globeBoundaryRings, globeBasis} from './scale_projection.mjs';
-import {assertLocalDetailAdmission} from './local_detail_admission.mjs';
+import {assertLocalDetailAdmission,terrainDetailDescriptor} from './local_detail_admission.mjs';
 
 export const VERSION = 'MAP_INFOGRAPHIC_RENDERER_V1_GATE1';
 export const SHADER_VERSION = 'explicit-glsl-1-scale-system-v1';
 export const THEME_VERSION = 'terrain-material-1';
+export const REFERENCE_SIMILARITY_SCHEMA = 'REFERENCE_SIMILARITY_2D_V1';
 const fullscreenVertex = `precision highp float;
 in vec3 position; in vec2 uv; out vec2 vUv;
 void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
@@ -28,6 +29,12 @@ const terrainFragment = `precision highp float;
 in vec2 vUv; out vec4 frag;
 uniform sampler2D terrain, globalTerrain, topo, regionID, coverage, roles;
 uniform vec4 bounds, tileBounds;
+// Opt-in inverse geographic sampling. GIS targets stay in current-view UVs.
+uniform int similarityEnabled;
+uniform vec2 similarityCenterQ, similarityAngle;
+uniform float similarityScale;
+uniform vec3 similarityOrigin;
+uniform vec2 similarityTileSpanQ, similarityTileCenterUV;
 // Optional continuous-map LOD is a geographic SOURCE input, before the frozen
 // material/lighting response. It never blends completed frames or GIS masks.
 uniform sampler2D contextTerrain;
@@ -130,6 +137,7 @@ vec3 terrainOutput(vec3 color,int stage){
 }
 void main(){
  vec2 geo=mix(bounds.xy,bounds.zw,vUv);
+ vec2 activeSimilarityDeltaQ=vec2(0.);
  vec2 gisUv=vUv;
  if(globeProjection==1){
   vec2 xy=(vUv-globeDisc.xy)/globeDisc.zw;
@@ -139,8 +147,18 @@ void main(){
   geo=vec2(degrees(atan(earth.z,earth.x)),degrees(asin(clamp(earth.y,-1.,1.))));
   gisUv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);
  }
+ if(globeProjection==0&&similarityEnabled==1){
+  vec2 d=vec2((vUv.x-.5)*1080.,(.5-vUv.y)*1920.)/similarityScale;
+  vec2 deltaQ=vec2(similarityAngle.x*d.x+similarityAngle.y*d.y,-similarityAngle.y*d.x+similarityAngle.x*d.y);
+  vec2 q=similarityCenterQ+deltaQ;
+  activeSimilarityDeltaQ=deltaQ;
+  geo=vec2(similarityOrigin.x+q.x/similarityOrigin.z,similarityOrigin.y-q.y);
+ }
  vec2 guv=vec2((geo.x+180.)/360.,(geo.y+90.)/180.);
  vec2 tuv=(geo-tileBounds.xy)/(tileBounds.zw-tileBounds.xy);
+ // Relative projected source coordinates avoid subtracting large absolute
+ // latitudes at fine local RGB detail; default/world sampling is unchanged.
+ if(globeProjection==0&&similarityEnabled==1)tuv=similarityTileCenterUV+vec2(activeSimilarityDeltaQ.x/similarityTileSpanQ.x,-activeSimilarityDeltaQ.y/similarityTileSpanQ.y);
  float inside=step(0.,tuv.x)*step(0.,tuv.y)*step(tuv.x,1.)*step(tuv.y,1.);
  // WORLD admits the global source; regional crops are not world detail.
  if(globeProjection==1)inside=0.;
@@ -306,6 +324,18 @@ async function texture(url){
  t.colorSpace=THREE.NoColorSpace;t.minFilter=THREE.LinearMipmapLinearFilter;
  t.magFilter=THREE.LinearFilter;t.generateMipmaps=true;return t;
 }
+// Only the explicitly selected path fetches/hash-binds real source bytes.
+// The established default TextureLoader path above is unchanged.
+async function verifiedSimilarityTexture(asset){
+ if(!/^[a-f0-9]{64}$/i.test(asset?.sha256??''))throw Error('SIMILARITY_TERRAIN_SHA256_REQUIRED');
+ const response=await fetch(asset.url);if(!response.ok)throw Error('SIMILARITY_TERRAIN_SOURCE_UNAVAILABLE');
+ const bytes=await response.arrayBuffer();
+ const digest=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))).map(v=>v.toString(16).padStart(2,'0')).join('');
+ if(digest.toLowerCase()!==asset.sha256.toLowerCase())throw Error('SIMILARITY_TERRAIN_SHA256_MISMATCH');
+ const url=URL.createObjectURL(new Blob([bytes]));
+ try{const result=await texture(url);result.userData.verifiedSimilaritySource={sha256:digest,bytes:bytes.byteLength};return result;}
+ finally{URL.revokeObjectURL(url);}
+}
 export function polygons(record){
  if(record.geometry_type==='Polygon')return [record.coordinates];
  if(record.geometry_type==='MultiPolygon')return record.coordinates;
@@ -342,8 +372,16 @@ function ribbon(rings){
  g.setAttribute('tangent',new THREE.Float32BufferAttribute(tan,2));g.setAttribute('side',new THREE.Float32BufferAttribute(side,1));
  g.setIndex(idx);return g;
 }
-export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null,outputRenderer=null,outputTarget=null,layoutPlan=null,contextTerrain=null,contextGeometries=[]}){
+export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null,outputRenderer=null,outputTarget=null,layoutPlan=null,contextTerrain=null,contextGeometries=[],projectionMode=null}){
+ const similarityOptIn=projectionMode===REFERENCE_SIMILARITY_SCHEMA;
+ if(projectionMode!==null&&!similarityOptIn)throw Error('SIMILARITY_PROJECTION_MODE_UNSUPPORTED');
+ if(similarityOptIn&&(plan.framing?.projection!=='REGIONAL_EQUIRECTANGULAR'||!Array.isArray(plan.framing.bounds)||plan.framing.bounds.length!==4||!plan.framing.bounds.every(Number.isFinite)||plan.framing.bounds[0]<-180||plan.framing.bounds[2]>180||plan.framing.bounds[0]>=plan.framing.bounds[2]||plan.framing.bounds[2]-plan.framing.bounds[0]>180||plan.framing.bounds[1]<-85||plan.framing.bounds[3]>85||plan.framing.bounds[1]>=plan.framing.bounds[3]))throw Error('SIMILARITY_FLAT_UNWRAPPED_REGIONAL_PROJECTION_REQUIRED');
+ const similarityAsset=similarityOptIn?structuredClone(plan.assets.terrain):null;
+ const similarityMinimumBounds=similarityOptIn?[...(layoutPlan??plan).framing.bounds]:null;
+ const similarityInitialMinimumBounds=similarityOptIn?[...plan.framing.bounds]:null;
+ if(similarityOptIn&&(!Array.isArray(similarityMinimumBounds)||similarityMinimumBounds.length!==4||!similarityMinimumBounds.every(Number.isFinite)||similarityMinimumBounds[0]>=similarityMinimumBounds[2]||similarityMinimumBounds[1]>=similarityMinimumBounds[3]))throw Error('SIMILARITY_ADMITTED_MINIMUM_INVALID');
  assertLocalDetailAdmission(plan,heightSource);
+ if(similarityOptIn&&layoutPlan&&layoutPlan!==plan)assertLocalDetailAdmission(layoutPlan,heightSource);
  console.info('GATE1: factory start');
  if(width/height!==1080/1920)throw Error('Canonical 9:16 layout required');
  const gl=outputRenderer?outputRenderer.getContext():canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});
@@ -352,7 +390,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  if(!outputRenderer){renderer.setPixelRatio(1);renderer.setSize(width,height,false);}renderer.autoClear=false;
  if(outputTarget&&(outputTarget.width!==width||outputTarget.height!==height))throw Error('Explicit output target must match canonical output resolution');
  renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
- const scale=width/1080,b=plan.framing.bounds,c=(b[0]+b[2])/2,lat=(b[1]+b[3])/2,cos=Math.cos(lat*Math.PI/180);
+ const scale=width/1080,b=similarityOptIn?[...plan.framing.bounds]:plan.framing.bounds,c=(b[0]+b[2])/2,lat=(b[1]+b[3])/2,cos=Math.cos(lat*Math.PI/180);
  const isGlobe=plan.framing.projection==='WORLD_GLOBE_ORTHOGRAPHIC';
  if(contextTerrain){
   const cb=contextTerrain.bounds;
@@ -406,7 +444,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  draw(idScene,camera,idTarget);draw(covScene,camera,covTarget);
  console.info('GATE1: GIS targets drawn');
  const lut=new THREE.DataTexture(roleLUT,256,1,THREE.RGBAFormat);lut.minFilter=lut.magFilter=THREE.NearestFilter;lut.needsUpdate=true;
- const [regional,global,topo,wide]=await Promise.all([texture(plan.assets.terrain.url),texture(plan.assets.global.url),texture(plan.assets.topo.url),contextTerrain?texture(contextTerrain.url):Promise.resolve(null)]);
+ const [regional,global,topo,wide]=await Promise.all([similarityOptIn?verifiedSimilarityTexture(similarityAsset):texture(plan.assets.terrain.url),texture(plan.assets.global.url),texture(plan.assets.topo.url),contextTerrain?texture(contextTerrain.url):Promise.resolve(null)]);
  const ownedTextures=[regional,global,topo,lut];if(wide)ownedTextures.push(wide);
  console.info('GATE1: terrain sources loaded');
  const anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());for(const t of [regional,global,topo,...(wide?[wide]:[])])t.anisotropy=anisotropy;
@@ -431,7 +469,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  }
  heightTexture.internalFormat='R32F';heightTexture.flipY=false;heightTexture.generateMipmaps=false;
  heightTexture.minFilter=heightTexture.magFilter=THREE.NearestFilter;heightTexture.needsUpdate=true;ownedTextures.push(heightTexture);
- const uniforms={terrain:{value:regional},globalTerrain:{value:global},topo:{value:topo},regionID:{value:idTarget.texture},coverage:{value:covTarget.texture},roles:{value:lut},
+ const uniforms={similarityEnabled:{value:0},similarityCenterQ:{value:new THREE.Vector2()},similarityScale:{value:1},similarityAngle:{value:new THREE.Vector2(1,0)},similarityOrigin:{value:new THREE.Vector3(c,lat,cos)},similarityTileSpanQ:{value:new THREE.Vector2(((similarityAsset??plan.assets.terrain).bounds[2]-(similarityAsset??plan.assets.terrain).bounds[0])*cos,(similarityAsset??plan.assets.terrain).bounds[3]-(similarityAsset??plan.assets.terrain).bounds[1])},similarityTileCenterUV:{value:new THREE.Vector2()},terrain:{value:regional},globalTerrain:{value:global},topo:{value:topo},regionID:{value:idTarget.texture},coverage:{value:covTarget.texture},roles:{value:lut},
   contextTerrain:{value:wide??regional},contextTileBounds:{value:new THREE.Vector4(...(contextTerrain?.bounds??plan.assets.terrain.bounds))},contextTerrainEnabled:{value:contextTerrain?1:0},terrainLodWeight:{value:1},
   globeProjection:{value:isGlobe?1:0},globeDisc:{value:new THREE.Vector4(globeOptions.screenCenter[0]/1080,1-globeOptions.screenCenter[1]/1920,globeOptions.diameter/2160,globeOptions.diameter/3840)},
   globeEast:{value:new THREE.Vector3(...globeBasis(globeOptions.center).east)},globeNorth:{value:new THREE.Vector3(...globeBasis(globeOptions.center).north)},globeCenter:{value:new THREE.Vector3(...globeBasis(globeOptions.center).center)},
@@ -536,6 +574,57 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  if(contextTerrain)evidence.terrainLod={weight:1,wideSource:{sha256:contextTerrain.sha256??null,bounds:[...contextTerrain.bounds],dimensions:contextTerrain.dimensions??null},regionalSource:{sha256:plan.assets.terrain.sha256??null,bounds:[...plan.assets.terrain.bounds],dimensions:plan.assets.terrain.dimensions??null},contextGeometryIds:extraContext.map(record=>record.id),method:'Geographic raw terrain RGB source sampling before the unchanged linear decode/material/lighting; real-source coverage only; no completed-frame transition'};
  const revealDefaults={primary:1,marker:1,location:1,country:1,title:1,disclosure:1};
  let currentReveal={...revealDefaults},currentBounds=[...b],primaryMaterialReveal=1;
+ let similarityReady=true,similarityState=null;
+ const similarityError=(code,message=code)=>Object.assign(Error(message),{code,category:'DATA_ADMISSION'});
+ const finitePoint=p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite);
+ const float32HalfUlp=x=>x===0?2**-150:Math.max(2**-150,2**(Math.floor(Math.log2(Math.abs(x)))-24));
+ const validGeoBounds=(a,source=false)=>Array.isArray(a)&&a.length===4&&a.every(Number.isFinite)&&a[0]>=-180&&a[2]<=180&&a[1]>=(source?-90:-85)&&a[3]<=(source?90:85)&&a[0]<a[2]&&a[1]<a[3]&&a[2]-a[0]<=(source?360:180);
+ function projectionDescriptor(){
+  if(isGlobe)throw similarityError('SIMILARITY_GLOBE_TRANSITION_UNSUPPORTED');
+  return Object.freeze({schema:'NATIVE_FLAT_Q_MODEL_V1',initialBounds:Object.freeze([...b]),center:Object.freeze([c,lat]),standardParallelCosine:cos});
+ }
+ function inverseScreen(pixel){
+  if(isGlobe)throw similarityError('SIMILARITY_GLOBE_INVERSE_UNSUPPORTED');
+  if(!finitePoint(pixel))throw similarityError('SIMILARITY_FINITE_SCREEN_POINT_REQUIRED');
+  const point=new THREE.Vector3(pixel[0]/1080*2-1,1-pixel[1]/1920*2,0).unproject(camera);
+  return [c+point.x/cos,lat+point.y];
+ }
+ function sourceEnvelope(){
+  const corners=[[0,0],[1080,0],[1080,1920],[0,1920]].map(inverseScreen);
+  return {corners,bounds:[Math.min(...corners.map(p=>p[0])),Math.min(...corners.map(p=>p[1])),Math.max(...corners.map(p=>p[0])),Math.max(...corners.map(p=>p[1]))],method:'ACTUAL_NATIVE_CAMERA_INVERSE_FOUR_VIEWPORT_CORNERS'};
+ }
+ function updateSimilarity(value){
+  if(!similarityOptIn)throw similarityError('SIMILARITY_EXPLICIT_OPT_IN_REQUIRED');
+  if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!['centerQ','scale','angleDegrees'].includes(k))||!finitePoint(value.centerQ)||!Number.isFinite(value.scale)||value.scale<=0||!Number.isFinite(value.angleDegrees))throw similarityError('SIMILARITY_POSE_INVALID');
+  const {centerQ,scale:pixelScale,angleDegrees}=value,a=(angleDegrees%360)*Math.PI/180,ca=Math.cos(a),sa=Math.sin(a);
+  const inverse=p=>{const dx=(p[0]-540)/pixelScale,dy=(p[1]-960)/pixelScale,qx=centerQ[0]+ca*dx+sa*dy,qy=centerQ[1]-sa*dx+ca*dy;return[c+qx/cos,lat-qy];};
+  const corners=[[0,0],[1080,0],[1080,1920],[0,1920]].map(inverse);
+  const envelope=[Math.min(...corners.map(p=>p[0])),Math.min(...corners.map(p=>p[1])),Math.max(...corners.map(p=>p[0])),Math.max(...corners.map(p=>p[1]))];
+  if(!validGeoBounds(envelope))throw similarityError('SIMILARITY_GEOGRAPHIC_DOMAIN_OR_DATELINE_UNSUPPORTED');
+  // Rotation cannot enlarge an AABB to evade the original closest-extent gate.
+  const minimum=similarityMinimumBounds,initialMinimum=similarityInitialMinimumBounds,axisExtent=[1080/(pixelScale*cos),1920/pixelScale];
+  if([minimum,initialMinimum].some(m=>axisExtent[0]<m[2]-m[0]-1e-9||axisExtent[1]<m[3]-m[1]-1e-9))throw similarityError('LOCAL_NOT_ADMITTED','Similarity exceeds the original admitted minimum camera extent');
+  const qRadius=Math.hypot(540,960)/pixelScale,qMagnitude=Math.max(Math.abs(centerQ[0])+qRadius,Math.abs(centerQ[1])+qRadius),positionPrecisionPixels=4*float32HalfUlp(qMagnitude)*pixelScale;
+  if(positionPrecisionPixels>.25)throw similarityError('SIMILARITY_FLOAT32_POSITION_PRECISION_EXCEEDED');
+  const asset=similarityAsset,descriptor=terrainDetailDescriptor(asset),image=regional.image,dimensions=[image.naturalWidth??image.width,image.naturalHeight??image.height];
+  if(!validGeoBounds(asset.bounds,true)||(asset.CRS??asset.source?.crs)!=='EPSG:4326'||asset.NoData!==null||!finitePoint(descriptor.pixelSpacing)||descriptor.pixelSpacing.some(v=>v<=0)||!/^[a-f0-9]{64}$/i.test(descriptor.nativeSourceSha256??'')||dimensions.some(v=>!Number.isSafeInteger(v)||v<2)||asset.dimensions&&(!finitePoint(asset.dimensions)||asset.dimensions.some((v,i)=>v!==dimensions[i])))throw similarityError('SIMILARITY_NATIVE_TERRAIN_DESCRIPTOR_REQUIRED');
+  const spacing=descriptor.pixelSpacing.map((v,i)=>Math.max(v,(asset.bounds[i+2]-asset.bounds[i])/dimensions[i]));
+  const density=[pixelScale*spacing[0]*cos,pixelScale*spacing[1]];
+  if(Math.max(...density)>1+1e-8)throw similarityError('SIMILARITY_NATIVE_TEXEL_DENSITY_EXCEEDED');
+  const gutter=Math.min((envelope[0]-asset.bounds[0])/spacing[0],(envelope[1]-asset.bounds[1])/spacing[1],(asset.bounds[2]-envelope[2])/spacing[0],(asset.bounds[3]-envelope[3])/spacing[1]);
+  if(gutter<1-1e-8)throw similarityError('SIMILARITY_SOURCE_ENVELOPE_GUTTER_FAILED');
+  similarityReady=false;
+  camera.left=-540/pixelScale;camera.right=540/pixelScale;camera.top=960/pixelScale;camera.bottom=-960/pixelScale;
+  camera.position.set(centerQ[0],-centerQ[1],5);camera.rotation.set(0,0,a);camera.updateProjectionMatrix();camera.updateMatrixWorld();
+  const actual=sourceEnvelope();
+  if(actual.corners.some((p,i)=>Math.hypot(p[0]-corners[i][0],p[1]-corners[i][1])>1e-7))throw similarityError('SIMILARITY_NATIVE_CAMERA_INVERSE_MISMATCH');
+  uniforms.similarityCenterQ.value.set(...centerQ);uniforms.similarityScale.value=pixelScale;uniforms.similarityAngle.value.set(ca,sa);uniforms.similarityTileCenterUV.value.set(((c-asset.bounds[0])*cos+centerQ[0])/((asset.bounds[2]-asset.bounds[0])*cos),(lat-asset.bounds[1]-centerQ[1])/(asset.bounds[3]-asset.bounds[1]));uniforms.similarityEnabled.value=1;
+  const footprint=(Math.abs(ca)+Math.abs(sa))/pixelScale;uniforms.canonicalPixelDegrees.value.set(footprint/cos,footprint);uniforms.bounds.value.set(...envelope);
+  currentBounds=[...envelope];draw(idScene,camera,idTarget);draw(covScene,camera,covTarget);
+  similarityState={schema:REFERENCE_SIMILARITY_SCHEMA,centerQ:[...centerQ],scale:pixelScale,angleDegrees,projection:projectionDescriptor(),sourceEnvelope:actual,sourceAdmission:{terrainSHA256:regional.userData.verifiedSimilaritySource.sha256,nativeSourceSHA256:descriptor.nativeSourceSha256,nativePixelSpacing:spacing,actualDecodedDimensions:dimensions,projectedPixelsPerNativeTexel:density,minimumSourceGutterPixels:gutter,minimumOriginalExtent:[...minimum],minimumPlanExtent:[...initialMinimum],positionPrecisionBoundPixels:positionPrecisionPixels,sourceSampling:'CPU_CENTER_RELATIVE_UV_PLUS_SMALL_GPU_INVERSE_DELTA',qualityPolicy:'NO_MORE_THAN_ONE_OUTPUT_PIXEL_PER_NATIVE_TEXEL_AND_ONE_NATIVE_PIXEL_GUTTER',actualTerrainBytesVerified:true},cameraLocked:false,settleLocked:false,completedFrameRotation:false,screenGraphicsPolicy:'CURRENT_PROJECTED_CONSUMER_REQUIRED_NATIVE_FIXED_GRAPHICS_DISABLED'};
+  evidence.cameraFrame={...similarityState,bounds:[...currentBounds],anchorCanonical:screen(plan.anchor.coordinates),layoutFrozen:!!layoutPlan};
+  similarityReady=true;return structuredClone(evidence.cameraFrame);
+ }
  function setReveal(reveal=null,primaryMaterial=null){
   const next={...revealDefaults,...reveal};
   if(reveal&&Object.hasOwn(reveal,'eventTitle'))next.title=reveal.eventTitle;
@@ -568,6 +657,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
    const minimum=closestPlan.framing.bounds;
    if(nextBounds[2]-nextBounds[0]<(minimum[2]-minimum[0])-1e-9||nextBounds[3]-nextBounds[1]<(minimum[3]-minimum[1])-1e-9)throw Object.assign(Error('Camera extent exceeds the admitted locked endpoint'),{code:'LOCAL_NOT_ADMITTED',category:'DATA_ADMISSION'});
   }
+  if(similarityOptIn){camera.rotation.set(0,0,0);uniforms.similarityEnabled.value=0;similarityState=null;similarityReady=true;}
   const [west,south,east,north]=nextBounds;
   camera.left=-(east-west)*cos/2;camera.right=(east-west)*cos/2;camera.top=(north-south)/2;camera.bottom=-(north-south)/2;
   camera.position.set(((west+east)/2-c)*cos,(south+north)/2-lat,5);camera.updateProjectionMatrix();camera.updateMatrixWorld();
@@ -593,6 +683,10 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   if(evidence.terrainLod)evidence.terrainLod.weight=weight;
  }
  function renderFrame({mode=0,graphics=true,boundaries=true,glow=true,dem=!!heightSource,correctedLight=false,verticalExaggeration=1,bakedSuppression=0,shadingCorrection='BASELINE',reveal=null,primaryMaterial=null,finish=false,log=false}={}){
+  if(similarityOptIn&&!similarityReady)throw similarityError('SIMILARITY_PREVIOUS_UPDATE_FAILED_NO_DRAW_ALLOWED');
+  if(similarityState&&graphics)throw similarityError('SIMILARITY_CURRENT_PROJECTED_GRAPHIC_CONSUMER_REQUIRED');
+  if(similarityState&&uniforms.terrainLodWeight.value!==1)throw similarityError('SIMILARITY_SINGLE_QUALIFIED_TERRAIN_SOURCE_REQUIRED');
+  if(similarityState&&dem){const corners=similarityState.sourceEnvelope.corners,p=heightSource?.pixelSpacing;if(!finitePoint(p)||p.some((v,i)=>v<=0||float32HalfUlp(Math.max(...corners.map(q=>Math.abs(q[i]))))>v*.25))throw similarityError('SIMILARITY_DEM_GEOGRAPHIC_PRECISION_INSUFFICIENT');}
   if(contextTerrain&&uniforms.terrainLodWeight.value===1){
    const tile=plan.assets.terrain.bounds;
    if(currentBounds[0]<tile[0]-1e-9||currentBounds[1]<tile[1]-1e-9||currentBounds[2]>tile[2]+1e-9||currentBounds[3]>tile[3]+1e-9)throw Error('Final regional terrain LOD requires complete real-source viewport coverage');
@@ -674,7 +768,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   }
   results.glError=gl.getError();renderer.setRenderTarget(null);return results;
  }
- return {render,renderFrame,updateCamera,setScaleVisual,setTerrainLod,outputTexture:outputTarget?.texture??null,readPixels:()=>{if(outputTarget)return readTarget(outputTarget);const bytes=new Uint8Array(width*height*4);renderer.setRenderTarget(null);gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,bytes);return bytes;},evidence,plan,boundaryProbe,boundaryLayerProbe,measureBoundaryWidths,glyphAtlases:()=>glyphExports,glowPixels:()=>readTarget(glowFinal),coverage:()=>readTarget(covTarget),regionIDs:()=>readTarget(idTarget),screen,
+ return {render,renderFrame,updateCamera,updateSimilarity,projectionDescriptor,inverseScreen,sourceEnvelope,setScaleVisual,setTerrainLod,outputTexture:outputTarget?.texture??null,readPixels:()=>{if(outputTarget)return readTarget(outputTarget);const bytes=new Uint8Array(width*height*4);renderer.setRenderTarget(null);gl.readPixels(0,0,width,height,gl.RGBA,gl.UNSIGNED_BYTE,bytes);return bytes;},evidence,plan,boundaryProbe,boundaryLayerProbe,measureBoundaryWidths,glyphAtlases:()=>glyphExports,glowPixels:()=>readTarget(glowFinal),coverage:()=>readTarget(covTarget),regionIDs:()=>readTarget(idTarget),screen,
   dispose(){
    const materials=new Set(),geometries=new Set();
    for(const s of [idScene,covScene,terrainScene,boundaryScene,glowScene,blurScene,compositeScene,graphicScene])s.traverse(o=>{if(o.material)materials.add(o.material);if(o.geometry)geometries.add(o.geometry);});
