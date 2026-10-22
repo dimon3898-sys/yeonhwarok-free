@@ -51,6 +51,24 @@ CPU fixture는 이전 실제 source geometry와 pinned-font export에서 필요�
 
 Browser는 원래 Layout을 `/modules/graphic_layout_legacy.mjs`로 byte 동일하게 제공하고, 새 실행 프로필의 `/modules/graphic_layout.mjs`만 adapter에 연결한다. Node CPU 검사는 원래 파일을 직접 import한다. 기존 G1·FINAL 실행은 이 별도 프로필을 선택하지 않는다.
 
+## 실제 범용 검사 결과
+
+기존 101개 전수 회귀와 추가 42개 검사에서 모두 PASS, skip 0을 확인했다. 별도로 5개 지역의 실제 SwiftShader draw 20회가 통과했다. 모든 지역은 같은 renderer·source runtime·adapter를 사용했다.
+
+| 지역 | factory 초기화 | 현재 카메라 Layout diagnostic | 실제 지도 draw |
+|---|---|---|---|
+| Namibia | 기존 gap 18 유지 | 18/18/18/18 valid | 4 PASS |
+| Nepal | gap 66 선택, 위치 역할 유지 | 50/66/50/66 valid | 4 PASS |
+| 한반도 | gap 50 선택 | 34/50/34/50 valid | 4 PASS |
+| 유럽 Germany | 기존 gap 18 유지 | 18/18/18/18 valid | 4 PASS |
+| 남미 Chile | gap 34 선택 | 18/34/18/34 valid | 4 PASS |
+
+기존 Namibia·Nepal 원본 source/Scene 입력은 변경하지 않았다. 실제 같은 프레임 재검사는 raw SHA가 같고, owner partition과 shared-front source binding이 유지됐다. 모든 기록 draw에서 이벤트 좌표 투영 오차 0px, GL 오류 0, black fraction 0을 확인했다. 실제 지도 자산 요청의 HTTP 200·SHA와 source-native coverage 검사도 통과했다. 독립 read-only 검토는 PHASE C의 실제 기록 범위에서 차단 오류가 없다고 판정했다.
+
+`auditRuntimeLayout`은 초기화와 같은 실제 glyph callback 및 각 draw의 현재 projection을 사용했다. 이는 보이지 않는 native 위치 라벨의 보호 상자 정합 검사다. 기존 runtime의 `location:0`은 유지되므로 **새로운 위치 라벨이 화면에 그려졌거나 모바일에서 읽힌다는 주장은 하지 않는다**. Label 삭제·활성 역할 비활성화로 초기화 검사를 우회한 것이 아니다.
+
+관련 증거: `reports/CPU_REGRESSION_RESULTS.json`, `ACTUAL_REGIONS.json`, `ACTUAL_REGION_*.json`, `INDEPENDENT_PHASE_C_REVIEW.json`. 준비 과정의 최초 Chile recognition 입력 오류와 summary parser 오류도 별도 실패 기록으로 보존했다. 전자는 새 예제 viewport만 수정했고 후자는 보고 harness만 수정했다. 기존 테스트·보호 core·geometry·입장 기준은 완화하지 않았다.
+
 ## 완료 범위
 
-본 파일은 구현과 CPU 단위 검사 범위를 설명한다. 5개 지역 실제 draw, 기존 101개 전체 회귀, 실제 Studio 6초 MP4, 전체 180프레임 품질은 각각 해당 실행 보고서가 있어야 완료로 판정한다. 사용자 실제 영상 승인 전 영상 품질 PASS·FINAL 승격을 선언하지 않는다.
+구현·기존 101개 및 추가 42개 CPU 회귀·5개 지역 실제 draw를 완료했다. 이후 실제 인증 Studio가 6초·180프레임 MP4를 생성했다. 전체 디코딩·PTS·상태·Layout 검증을 통과했으며 기술 근거와 수동 검수 범위는 `FRAME_AUDIT.md`, 실제 실행은 `reports/STUDIO_FINAL_EXECUTION.json`에 있다. 판정은 `G2 TECHNICAL_PASS / QUALITY_REVIEW_REQUIRED`다. NVIDIA 검증은 실행하지 않았으며 사용자 실제 영상 승인 전 영상 품질 PASS·FINAL 승격을 선언하지 않는다.

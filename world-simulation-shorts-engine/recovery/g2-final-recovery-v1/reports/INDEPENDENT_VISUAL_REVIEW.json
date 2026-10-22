@@ -1,0 +1,111 @@
+{
+  "schema": "WORLD_ENGINE_G2_INDEPENDENT_VISUAL_REVIEW_V1",
+  "reviewedAtUTC": "2026-10-22T03:09:49.072961+00:00",
+  "role": "Independent focused actual-image review after completed Studio capture; no rendering or threshold modification.",
+  "technicalFlagClassification": "NATURAL_SOURCE_TERRAIN_CONTRAST_NOT_RECURRING_TILE_OR_MATERIAL_BOUNDARY",
+  "qualityDecision": "USER_REVIEW_REQUIRED",
+  "userQualityApproved": false,
+  "actualVisualScope": {
+    "wholeActualDecodedFramesViewed": [
+      132,
+      133,
+      134
+    ],
+    "wholeFramePaths": [
+      "/workspace/g2-final-recovery-decoded-video-20261022/132.png",
+      "/workspace/g2-final-recovery-decoded-video-20261022/133.png",
+      "/workspace/g2-final-recovery-decoded-video-20261022/134.png"
+    ],
+    "focusedGeographicROI": [
+      103,
+      22,
+      105,
+      31
+    ],
+    "formerSourceSeamLongitude": 104,
+    "actualCropPanelsViewed": [
+      "FINAL_f132",
+      "FINAL_f133",
+      "FINAL_f134",
+      "BASELINE_f133",
+      "SOURCE_NATIVE_RGB"
+    ],
+    "comparisonPNG": "public-review/FLAGGED_F133_ACTUAL_CROPS.png",
+    "comparisonPNGSHA256": "0a8309bad64e4d4d97f7896475ac900f7905073749ff44b1cf5a85ade1ab183f",
+    "cropMetadata": "reports/F133_CROP_METADATA.json",
+    "all180FramesManuallyViewedByThisReviewer": false,
+    "all180AutomatedDecodedFrameAuditReference": "reports/RECOVERY_FRAME_AUDIT.json"
+  },
+  "flagEvidence": {
+    "unchangedFrozenBaselineP99": 12.133750066757203,
+    "frame133Score": 12.166666984558105,
+    "frame133ExcessOverFrozenP99": 0.03291691780090211,
+    "frame133ExcessPercentOverFrozenP99": 0.27128396101617824,
+    "neighborScores": {
+      "130": 12.083333015441895,
+      "131": 11.75,
+      "132": 11.291666030883789,
+      "133": 12.166666984558105,
+      "134": 11.833333015441895,
+      "135": 11.083333015441895,
+      "136": 11.958333969116211
+    },
+    "verticalFlaggedFrames": [
+      133
+    ],
+    "horizontalFlaggedFrames": [],
+    "scoreMeasures": "Median absolute RGB difference between two separated 4px strips across a long geographic ROI, not a direct material-ID or tile-boundary test.",
+    "interpretation": "The lone slight exceedance is retained as evidence. It does not reproduce the baseline persistent, high-contrast straight source-style switch."
+  },
+  "actualImageFindings": [
+    "At f132/f133/f134, mountainous ridges, valleys and rivers continue through 104E without the baseline vertical color/material jump.",
+    "The matching native source RGB crop contains the same diagonal ridges, pale basin and river shapes that produce local contrast near the sampling longitude.",
+    "The old baseline f133 crop has a distinct straight dark globalRGB/light NE1 transition at104E. That transition is absent in each of the three newly decoded frame crops.",
+    "The neighboring frames move and zoom continuously; no newly appearing rectangle or line is observed in the reviewed ROI.",
+    "The visible grid-shaped control-area steps remain authored source geometry. This review does not infer better geographic accuracy or call those steps smoothed."
+  ],
+  "sourceAndRendererEvidence": {
+    "actualTerrainAssetSHA256": "787579415aad212801251ddaaa1ee3d2366eebb93a35ba81d276105ef18737fb",
+    "sameOriginalNE1DecodedOverlapExact": true,
+    "sourceOriginalSHA256": "b47bdddd1336b07f498c50eba5d70699ec57dd726a7ea0a85d2dca243236c9eb",
+    "actualAssetHTTPAndReceipt": "PASS",
+    "actualTerrainBounds": [
+      92.85000000000002,
+      -3.13333333333334,
+      123.13333333333333,
+      43.13333333333333
+    ],
+    "sourceBoundaryOutsideEveryActualViewport": true,
+    "minimumSourceGutterPixelsBySide": [
+      8.999775417995295,
+      8.000000000000398,
+      7.999999999999545,
+      7.999999999999972
+    ],
+    "nativeImageColumnAt104E": 668.9999999999986,
+    "nativeImageDimensions": [
+      1817,
+      2776
+    ],
+    "sourceImageColumnClassification": "Interior native image column, not a tile edge or coverage boundary.",
+    "noMissingTileOrSourceSwitchAt104EEstablished": true,
+    "sameCameraOwnerFrontMarkerFrameClock180": true
+  },
+  "decision": {
+    "formerMaterialBoundaryRecurrenceObserved": false,
+    "flagBlocksTechnicalGate": false,
+    "technicalEvidenceSupports": "G2 TECHNICAL_PASS when other required gates and preservation checks pass.",
+    "finalVisualQualityPassGranted": false,
+    "remainingReview": "User must inspect actual six-second MP4 for overall motion, readability and preferred visual quality; this focused review does not replace user approval."
+  },
+  "stopAndProtection": {
+    "auditorOrThresholdEdited": false,
+    "newFramesRendered": 0,
+    "videoReencoded": false,
+    "protectedSourceOrPreviousArtifactEdited": false,
+    "imageProcessing": "Only crops of actual decodedPNG and actual sourceRGB arranged with labels; nearest-neighbor2xdisplay, no blur/retouch/overlay over map pixels.",
+    "paidGpuExecuted": false,
+    "historicalG3": "BLOCKED",
+    "full80SecondRendered": false
+  }
+}
