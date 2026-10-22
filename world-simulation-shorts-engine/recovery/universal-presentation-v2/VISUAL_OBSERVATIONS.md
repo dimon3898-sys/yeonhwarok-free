@@ -1,6 +1,6 @@
 # Independent visual observations
 
-Status: **USER_REVIEW_REQUIRED**. This is a human-visible review of six actual renderer probe PNGs, not a full video review, NVIDIA validation or reference-quality approval. The files were opened individually with the image-view tool. Exact dimensions and SHA-256 values are recorded in `evidence/FICTION_PROBE_VISUAL_REVIEW.json`.
+Status: **QUALITY_REVIEW_REQUIRED / USER_REVIEW_REQUIRED**. This independent review covers the earlier actual probe PNGs and, subsequently, nine decoded contact pages containing all 540 actual movie-frame thumbnails plus 15 selected 1080×1920 frames. The exact inspected files and hashes are recorded in `reports/VISUAL_REVIEW.json`. It is not 540 full-resolution manual inspections, full-rate playback, NVIDIA validation or reference-quality approval. Images were opened with the image-view tool; no video was decoded or rerendered by this reviewer.
 
 ## Fictional-area probe, actual frame indices
 
@@ -37,6 +37,44 @@ The actual subsequent probe files `/workspace/universal-presentation-v2-private-
 
 The authored cut still changes the map scale and position between frames 89 and 90. Preserving the supplied geographic state does not make that cut a smooth camera continuation. No complete-movie or final-quality approval follows from these three PNGs.
 
-## Remaining visual review
+## Actual Studio movies: manual scope
 
-Full MP4s for the three demonstration types have not been reviewed in this document yet. Complete frame audits, decoded playback, route-follow motion, event-highlight visibility and comparison against the reference remain separate evidence. No final image-quality PASS is declared.
+For each movie, the three `FRAMES_000_059`, `FRAMES_060_119` and `FRAMES_120_179` contact pages were viewed. Thus every decoded frame is represented at thumbnail scale in the manual review. The following native frames were additionally opened:
+
+| Movie and actual audit folder | Native frames viewed |
+|---|---|
+| Aviation Europe: `reports/MOVIE_AUDIT_1_TRACE_SCOPED` | 20, 89, 90, 110, 179 |
+| Trade South America: `reports/MOVIE_AUDIT_2` | 20, 89, 90, 179 |
+| Fictional Africa: `reports/MOVIE_AUDIT_3` | 20, 45, 89, 90, 135, 179 |
+
+The parent separately performed decoding, frame counts and trace/geometry pixel audits. Their `ACTUAL_MOVIES_AUDIT.json` receipts are technical evidence and are not relabelled as visual-quality approval here. Tiny seams, aliasing or one-frame detail defects can be missed at thumbnail scale; absence of an obvious seam is not a guarantee of pixel-level perfection.
+
+## Aviation Europe
+
+Europe's coastlines and land extent visibly move and change scale through the first scene. The second scene uses a different framing and restrained pan associated with the supplied reverse route; the camera is not tightly locked to a vehicle at the screen center.
+
+A bright yellow bent line follows the supplied Hamburg/Berlin/Munich connection. A yellow triangular moving glyph progresses toward the southern endpoint by frame 89 and points toward the northern endpoint by frame 179 after reversal. The red-centered, white/black-ring locality pulse is clearly visible near Hamburg in native frame 20 and Munich in frame 110. These marks are readable as a path and emphasis; the moving glyph does not visually establish an actual aircraft type or real scheduled flight.
+
+The real cut at frame 90 visibly reframes the map and starts the second route reveal anew. The route is absent at that exact first frame, while the map remains present; this is distinct-scene reveal semantics, not continuous vehicle motion across a seamless edit.
+
+The actual runtime selects `GLOBAL_EARTH_DAY_RGB_V1` for both segments after full camera-envelope admission. The map has green/brown photographic color and a dark, relatively flat sea, with visibly soft terrain detail at the larger framing. This is the explicitly disclosed global RGB fallback, not a claim that a full-resolution NE1 raster, original DEM or bathymetry was newly loaded. No obvious rectangular material patch or full-height vertical seam was noticed in the inspected pages/native samples.
+
+## Trade South America
+
+The Chile/Andes coastline and mountain features remain visible while the first scene changes scale and the second scene pans modestly with the reverse connection. Native frame 20 shows the contrasting locality pulse at the northern endpoint; frame 89 shows the moving triangular glyph at the southern endpoint, and frame 179 shows it returning north. The line follows the provided three-city geometry, including its inland bend. It is an illustrative city connection, not a verified navigable shipping lane or trade observation.
+
+The cut at frame 90 changes framing and restarts the supplied reverse route reveal. No black output frame or unrelated rectangular material seam was apparent in the viewed material. The strong pale hillshade/Andes texture differs visibly from the global RGB used by the Europe case. Runtime metadata identifies the retained native NE1 crop and baked-hillshade treatment; the upstream full NE1 dimensions are a reference, not proof that its unavailable full TIFF was materialized.
+
+## Fictional Africa
+
+The actual 180-frame contacts show small red footprint → wider blue footprint → small red footprint, with intermediate overlapping faded rectangles. Frames 89 and 90 both retain the wider blue supplied state after `PRESERVE_PROVIDED`; the earlier scene-cut disappearance is not present in this final movie boundary. The authored camera cut remains visible.
+
+The red/white/black Windhoek pulse is clear in native frame 20. Terrain remains visible beneath the translucent colored regions. The yellow rectangular outlines correspond to explicitly supplied synthetic polygons, not texture-tile edges. No separate unexplained map-material rectangle was noticed in the inspected samples.
+
+The transition visually crossfades between supplied rectangular footprints. It does not demonstrate a continuously sweeping irregular historical front. No real ownership, military location or historical boundary is inferred from this synthetic example. The actual runtime uses a retained NE1 native crop with baked hillshade.
+
+## Quality limits and remaining approval
+
+These three movies show distinct supplied-data topics, camera changes, real scene cuts, path progress/reversal, location emphasis and Area state changes. They are technical demonstration candidates. The fairly wide framing, simple triangular moving object, schematic rectangular regions, restrained camera follow and source-dependent terrain style remain visible limitations. They do not establish reproduction of the advanced 65422 candidate or reference-level cinematic quality.
+
+This reviewer did not directly compare the reference video or inspect all 540 frames at native resolution, listen to audio, watch full-rate playback or test an Android device. Mobile playback, final aesthetic judgement and any reference-level approval remain **USER_REVIEW_REQUIRED**. No image-quality PASS, NVIDIA PASS or FINAL promotion is declared.

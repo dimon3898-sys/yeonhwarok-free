@@ -101,27 +101,56 @@
     "continuityDraws": 5
   },
   "phaseF": {
-    "status": "AUTHORIZED_FREE_ONLY_NOT_STARTED",
-    "requires": [
-      "phaseA",
-      "phaseB",
-      "phaseC",
-      "phaseD",
-      "phaseE"
-    ],
-    "maximumMovies": 3,
+    "status": "PASS",
+    "actualStudioMovies": 3,
     "framesPerMovie": 180,
-    "softwareBackend": "SwiftShader",
+    "totalFrames": 540,
+    "fps": 30,
     "resolution": [
       1080,
       1920
     ],
-    "fps": 30,
-    "gpuPermission": false,
-    "maximumRetries": 0
+    "codec": "H264",
+    "softwareBackend": "SwiftShader",
+    "sourceRuntime": "SOURCE_CHECKOUT_NOT_OCI_IMAGE",
+    "evidence": [
+      {
+        "file": "reports/STUDIO_DEMOS_actual-01.json",
+        "sha256": "4811ea4e26ae287203eaa4de509d5f45e37f91230881735c11237cd7efe4485f"
+      },
+      {
+        "file": "reports/FINAL_MOVIES_AUDIT.json",
+        "sha256": "5dcd88c3ee22cc3d0a438dfe21955bdebf5e4e265b49d957d9ec21e56c0026b7"
+      },
+      {
+        "file": "reports/PUBLIC_MEDIA_MINIMIZATION.json",
+        "sha256": "2037a1a308fc77f31c536a0ebd216cc616c816c6a41f856bc65ae369f7fc04c1"
+      }
+    ]
   },
   "phaseG": {
-    "status": "PENDING"
+    "status": "PASS",
+    "scope": "FREE_SOURCE_CHECKOUT_TECHNICAL_GATE_ONLY",
+    "existingTests": 298,
+    "newCoreTests": 205,
+    "allTechnicalFailuresRemaining": 0,
+    "evidence": [
+      {
+        "file": "reports/PROTECTION_FINAL.json",
+        "sha256": "8ecc39bd17705f8d6f92b0188e86743afe03db059ef0feb611a021857086ab21"
+      },
+      {
+        "file": "reports/SOURCE_RELEASE_AUDIT.json",
+        "sha256": "3389b56bad599032024cf97e13fd63d54934771f61486841d92d3b6cfa95b505"
+      },
+      {
+        "file": "reports/VISUAL_REVIEW.json",
+        "sha256": "098884bd2213a243529eedfe85a6da1ff386e32d32fd8b6bcf8e1305eee25282"
+      }
+    ],
+    "qualityApproved": false,
+    "deployedStudioUIUpdated": false,
+    "operatingImageUpdated": false
   },
   "paidGpuExecuted": false,
   "paidApiUsed": false,
@@ -130,5 +159,10 @@
   "full80SecondFilmExecuted": false,
   "nvidiaVerified": false,
   "visualQuality": "USER_REVIEW_REQUIRED",
-  "finalPromoted": false
+  "finalPromoted": false,
+  "delivery": {
+    "status": "PACKAGE_THEN_INDEPENDENT_HTTPS_READBACK_PENDING",
+    "networkProofFile": "reports/DOWNLOAD_VERIFICATION.json"
+  },
+  "finalStatus": "SOURCE_CHECKOUT_TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED"
 }

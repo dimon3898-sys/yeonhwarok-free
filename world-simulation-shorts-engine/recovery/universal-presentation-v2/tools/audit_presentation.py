@@ -49,7 +49,7 @@ def frames_audit(name, capture, output):
         "exactGlobalFrameOrder": [f["frame"] for f in frames] == list(range(total)),
         "softwareOnlyExplicit": receipt["softwareOnly"] is True and receipt["nvidiaVerified"] is False,
         "noBrowserErrors": receipt["browserErrors"] == [],
-        "inputTracePresent": bool(request.get("inputTrace")),
+        "inputTracePresentForEveryScene": all(bool(s.get("inputTrace")) for s in request["segments"]),
         "realSceneCuts": request["transitions"] == [
             {"type": "CUT", "frame": s["startFrame"]} for s in request["segments"][1:]],
         "sourceQualificationBound": receipt["sourceQualificationSHA256"] ==
@@ -79,6 +79,8 @@ def frames_audit(name, capture, output):
             "allLocationProjectionRecorded": all(f["diagnostic"]["suppliedLocations"] for f in selected),
             "currentSourceGeometryBound": all(bool(f["diagnostic"]["sourceGeometryBinding"]) for f in selected),
             "noInventedDEMClaim": all(f["diagnostic"]["material"]["demEnabled"] is False for f in selected),
+            "everyFrameRetainsItsSceneInputTrace": all(f["diagnostic"]["inputTrace"] == segment["inputTrace"]
+                                                       for f in selected),
         }
         source_routes = {t["id"]: t for t in segment["scene"].get("routes", [])}
         source_geometries = {t["id"]: t["geometry"] for t in segment["scene"]["geometries"]}
@@ -159,7 +161,10 @@ def frames_audit(name, capture, output):
     checks["allSegmentChecks"] = all(s["status"] == "PASS" for s in segments)
     exclusive_json(output / f"{name}_INPUT_SCENE_PIXEL_MAPPING.json", {
         "schema": "WORLD_ENGINE_UP2_INPUT_SCENE_PIXEL_MAPPING_V1", "sourceInputSHA256": request["sourceInputSHA256"],
-        "inputTrace": request["inputTrace"], "frames": mapping})
+        "aggregateInputTrace": request.get("inputTrace", []),
+        "perSceneInputTrace": {s["sceneId"]: s["inputTrace"] for s in request["segments"]},
+        "traceScope": "SCENE_LOCAL_TRACE_BOUND_TO_EVERY_ACTUAL_FRAME; aggregate may be empty",
+        "frames": mapping})
     return {"name": name, "checks": checks, "segments": segments,
             "status": "PASS" if all(checks.values()) else "FAIL", "quality": "USER_REVIEW_REQUIRED"}
 
@@ -181,6 +186,10 @@ def main():
         directory = Path(directory)
         row = frames_audit(name, directory, args.output)
         row["encodedVideo"] = module.audit(name, directory / "VIDEO.mp4", args.output, 180)
+        for index in [20, 45, 89, 110, 135]:
+            module.subprocess.run(["ffmpeg", "-v", "error", "-n", "-i", str(directory / "VIDEO.mp4"),
+                "-vf", f"select=eq(n\\,{index})", "-frames:v", "1",
+                str(args.output / f"{name}_F{index:03d}.png")], check=True, capture_output=True)
         # The existing auditor generated these thumbnails only by decoding the
         # actual H.264 stream. Split the long sheet into readable 60-frame pages.
         with Image.open(args.output / f"{name}_ALL_FRAMES.png") as sheet:
