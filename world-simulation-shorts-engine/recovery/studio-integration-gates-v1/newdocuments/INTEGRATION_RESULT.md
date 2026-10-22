@@ -13,7 +13,7 @@
 
 새 MP4의 SHA-256은 `3b68fead7b9b79e8671f91afa24a7f04bd687f69e1d836f5f50c4f103bf78041`이다. 원본 MP4는 `f3de1bdf9244171a47c6e5eccca6aae1370f58d8bf4721a7658b6bca2eed2ef6`이다. 새 영상은 이전 복원본을 복사하거나 재인코딩한 증거가 아니라 이번 작업의 새 캡처 receipt와 프레임별 해시로 추적된다. 디코딩된 MP4의 차이를 원본 소스 캡처 일치와 혼동하지 않는다.
 
-기존 151개 기능 표와 53개 원래 미연결 항목은 그대로 보존했다. 참조는 `recovery/astra-event-director-v2/reports/FEATURE_STATUS_151.csv`와 `FEATURE_STATUS_SUMMARY.json`이며, CSV SHA는 `ac9ab4ff5c800d36c41359d5ce55908d78513dfe20ba30e1a89112fbb36cac37`이다. 이번 가상 시나리오의 G1 성공 증거를 한국전쟁 80초의 역사 영토·표식·음향 검증으로 승격하지 않았다. 기능별 기존 분류와 남은 항목은 `../reports/REUSE_AND_REMAINING.json`에 연결했다.
+기존 151개 기능 표와 53개 원래 미연결 항목은 그대로 보존했다. 참조는 `recovery/astra-event-director-v2/reports/FEATURE_STATUS_151.csv`와 `FEATURE_STATUS_SUMMARY.json`이며, CSV SHA는 `ac9ab4ff5c800d36c41359d5ce55908d78513dfe20ba30e1a89112fbb36cac37`이다. 이번 가상 시나리오의 G1 캡처 증거를 한국전쟁 80초의 역사 영토·표식·음향 검증으로 승격하지 않았다. 기능별 기존 분류와 남은 항목은 `../reports/REUSE_AND_REMAINING.json`에 연결했다.
 
 인천·서울 공식 지도 원문은 재사용·검토했지만 실제 양측 통제면의 시작·종료, 독립 지리등록, 전환 대응관계와 LOCAL 카메라 admission은 부족하다. 범용 CPU control provider를 구현하고 32개 집중 검사를 통과했으며, 하나의 상태에서 owner·unknown·contested·공유 전선을 평가한다. 합성 fixture의 성공은 역사 자료 승인이 아니다. **G2_BLOCKED이며 G3 역사 영상은 렌더하지 않았다.** 부분선을 해안으로 닫거나 부산 도식·현대 국경·가상 65422 영토로 대체하지 않았다.
 
