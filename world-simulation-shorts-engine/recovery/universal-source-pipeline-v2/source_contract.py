@@ -33,6 +33,18 @@ def selected(value):
     return isinstance(value, dict) and value.get("schema") == SCHEMA
 
 
+def same_json_value(left,right):
+    """JSON numbers have no integer/float lexical identity; booleans do."""
+    if type(left) in (int,float) and type(right) in (int,float):
+        return math.isfinite(left) and math.isfinite(right) and left==right
+    if type(left) is not type(right):return False
+    if isinstance(left,dict):
+        return left.keys()==right.keys() and all(same_json_value(left[k],right[k]) for k in left)
+    if isinstance(left,list):
+        return len(left)==len(right) and all(same_json_value(a,b) for a,b in zip(left,right))
+    return left==right
+
+
 def fail(code):
     raise ValueError(code)
 
@@ -86,7 +98,7 @@ def normalize_submission(value, *, source_root, expected_index_sha256):
     # request cannot replace geometry, camera admission, dates or rights.
     expected = bundle["scene"]
     for field in TOP - {"title", "actors"}:
-        if canonical(value[field]) != canonical(expected[field]):
+        if not same_json_value(value[field],expected[field]):
             fail("SOURCE_SCENE_BINDING_MISMATCH_" + field.upper())
     actors = value["actors"]
     if not isinstance(actors, list) or len(actors) != len(expected["actors"]):

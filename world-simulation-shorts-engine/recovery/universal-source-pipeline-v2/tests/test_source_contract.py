@@ -27,6 +27,11 @@ class SourceContractTests(unittest.TestCase):
         self.assertEqual(len(p['runtimePayload']['frames']),180)
         self.assertFalse(p['gpuVerified']);self.assertFalse(p['userApproved'])
 
+    def test_browser_json_numbers_are_semantic_without_boolean_or_rounding_bypass(self):
+        self.assertTrue(module.same_json_value({'coordinates':[106.5,18.0],'seconds':6.0},{'coordinates':[106.5,18],'seconds':6}))
+        self.assertFalse(module.same_json_value(1,True))
+        self.assertFalse(module.same_json_value([1.0],[1.00000000001]))
+
     def test_one_field_owns_each_frame_fill_and_front(self):
         frames=self.actual['sourcePipeline']['runtimePayload']['frames']
         self.assertEqual([f['frame'] for f in frames],list(range(180)))
