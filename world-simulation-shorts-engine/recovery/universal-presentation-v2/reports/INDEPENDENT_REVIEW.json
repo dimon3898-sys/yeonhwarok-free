@@ -1,0 +1,420 @@
+{
+  "schema": "WORLD_ENGINE_UP2_INDEPENDENT_REVIEW_V1",
+  "status": "INDEPENDENT_CODE_AND_SAFETY_REVIEW_PASS_WITH_EXPLICIT_LIMITATIONS",
+  "scope": [
+    "moving_camera_model_time_vs_current_projection",
+    "source_coverage_and_licensing",
+    "natural_language_defer_boundary",
+    "authenticated_studio_composite_timeline",
+    "serialization_and_source_bindings"
+  ],
+  "baseline298": "ACTUALLY_PASSED_298_ZERO_SKIP",
+  "protection": "307_AND6439_SHA_AND565_CACHE_METADATA_PASS",
+  "findings": [
+    {
+      "id": "UP2_IR001",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_VERIFIED",
+      "file": "presentation_plan.mjs",
+      "function": "reprojectFlowPresentation",
+      "observed": "Reprojected controls retain modelControls.routeReveal from fixed analysis projection while object/directional/pulses use current projection. Existing Flow GPU recomputes route draw using current primitive, so actual pixel fault is not established.",
+      "required": "Recompute routeReveal from existing geographic reveal function with current primitive, or explicitly scope retained field as model-only.",
+      "resolution": "At frames0/30/60/89, current routeReveal matches unchanged evaluateGeographicLineReveal(current primitive,fraction); actual camera false/model true; no old moving EVENT_READY claim."
+    },
+    {
+      "id": "UP2_IR002",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_VERIFIED",
+      "file": "studio_adapter.py",
+      "function": "_admit_sources",
+      "observed": "Cached source-admission receipt returns without reading current generated crop bytes. Qualification SHA is currently checked for format but not canonical value. Trusted provider implementation is still being written.",
+      "required": "Verify cached generated source integrity and sourceQualification digest/status at admission and/or explicit fail-closed worker requalification; add corrupt/missing-cache case.",
+      "resolution": "Current code checks cached material files and qualification wire seal. Actual preparation under distinct private paths has identical stable qualification SHA. Fresh test crop corruption is refused with REGION_CACHE_CORRUPTION_REFUSED."
+    },
+    {
+      "id": "UP2_IR003",
+      "severity": "LIMITATION",
+      "status": "EXPLICIT_LIMITATION_ENFORCED",
+      "file": "presentation_plan.mjs",
+      "function": "validatePresentation KEYFRAMES",
+      "observed": "Protected reference-camera adapter requires final keyframe be the closest. Zoom-in/out/in is representable, but a final wider overview after a closer peak is not directly accepted.",
+      "required": "Document or explicitly reject unsupported end-overview request. Do not silently drop zoom-out intent.",
+      "resolution": "Final frozen grammar returns UNSUPPORTED/FINAL_ZOOM_OUT_NOT_ADMITTED for a final-only zoomout; an explicit out-and-in profile remains supported within preserved final-closest camera contract."
+    },
+    {
+      "id": "UP2_IR004",
+      "severity": "HIGH",
+      "status": "RESOLVED_VERIFIED",
+      "file": "presentation_prompt.mjs",
+      "function": "localPresentation",
+      "observed": "Global ROUTE_FOLLOW intent applies to first scene despite text explicitly describing second scene; AVIATION_EUROPE_NL and TRADE_SOUTH_AMERICA_NL each return CONFLICT/NATURAL_CAMERA_MODE_CONFLICT for first KEYFRAMES scene. Other second ROUTE_FOLLOW scene passes.",
+      "required": "Resolve explicit per-scene presentation intent through documented scoping or report ambiguity; do not globally conflict with otherwise authoritative per-scene attached controls.",
+      "resolution": "Latest explicit clause-scoped intent binding makes allfivepositiveexamples PASS without changing attached fixtures."
+    },
+    {
+      "id": "UP2_IR005",
+      "severity": "HIGH",
+      "status": "RESOLVED_VERIFIED",
+      "file": "presentation_prompt.mjs",
+      "function": "analyzePresentationPrompt date validation",
+      "observed": "Append explicit 2026-11-15 or impossible 2026-99-99 date to NEW_REGION_JAPAN_NL whose attached time_range is 2026-10-22..23: compiler returns PASS because only year prefix is compared.",
+      "required": "Validate real calendar dates and precision-aware date/range conflict; never accept impossible dates as matching facts.",
+      "resolution": "ExactEnglish/Koreansameyearout-of-rangedates returnCONFLICT; invalidcalendar date returnsINVALID."
+    },
+    {
+      "id": "UP2_IR006",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_VERIFIED",
+      "file": "presentation_prompt.mjs",
+      "function": "explicit natural coordinate consumption",
+      "observed": "Append actual center coordinate [0,0] to NEW_REGION_JAPAN_NL while attached region center is [138,37]: valid coordinate is extracted then ignored, result PASS.",
+      "required": "Bind explicit coordinate intent to supplied region/location, or return an explicit NEEDS_INPUT/CONFLICT for unbound/conflicting coordinates.",
+      "resolution": "Explicit center including Korean subject particles conflicts with attached region even when coordinate is a supplied location. Unbound coordinates no longer silently pass."
+    },
+    {
+      "id": "UP2_IR007",
+      "severity": "MEDIUM",
+      "status": "RESOLVED_VERIFIED",
+      "file": "presentation_prompt.mjs",
+      "function": "unsupported native label intent",
+      "observed": "Valid structured facts.text is rejected by originalvalidator, but explicit Korean request to display city name labels currently returnsPASS although newprofile draws no native labels.",
+      "required": "Reject requested visible-label/text intent in the bounded grammar and explicitly report no visible-text capability; preserve originalG2glyphbinding and existing label tests.",
+      "resolution": "Exact Korean and English visible-label requests return UNSUPPORTED_VISIBLE_LABELS. Valid structured facts.text is already rejected by unchanged original validator. Original G2 glyph/layout owners remain unchanged; native text is intentionally invisible in this new profile."
+    }
+  ],
+  "positiveFindings": [
+    "Presentation camera track derives from genuine unchanged V5 frame and preserves actual moving cameraLocked=false and settle.locked=false.",
+    "Fixed analysis camera is labelled MODEL_FIXED_V5_ONLY_NOT_CURRENT_MOVING_CAMERA; no actual-camera lock forgery observed in current source.",
+    "Studio complete timeline selector requires globalPASS,no blocked scenes, contiguous frame intervals and exact actualCUT boundary list.",
+    "Scene wire string separately binds wireSHA and canonicalsemanticSHA across sorted private persistence.",
+    "Newcatalog explicitly distinguishes6localNE1nativecrops fromglobal8192RGBsource; unavailablefullTIFF identified as134byte LFS pointer, not raster."
+  ],
+  "sourceSnapshots": {
+    "PRESENTATION_PROMPT.schema.json": "d8ed5dea190538de959570a56da0664199166f54064b8d007e3d60071855088f",
+    "REGION_REQUEST_SCHEMA.json": "a72c5b8dd4355b23eb6fb730a42fba5d8762fdb5601d28a65d1b9e0c9caddd2c",
+    "REGION_SOURCE_CATALOG.json": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+    "capture_presentation.mjs": "fc17ceb56499184a6f4ae6888d617f7b1b67e4fd508320eb295493161596753e",
+    "presentation_plan.mjs": "8773a5651649eb47dc080f21c7718a7b2e126576626a0bdd22c22de7ef62c70b",
+    "presentation_prompt.mjs": "70708100feb7a479eb108431ac83219c51270ff1a75dc5b727df093faf1a4a1c",
+    "presentation_runtime.mjs": "631d69debd02ed24584a72499febc5f541d3adcfc411095906c444c03e90d0a6",
+    "region_source.mjs": "bf89be2fa74d3b55f6651106cb35171c10ceaffd802bb505dbd3d31cca2bd008",
+    "run_studio_demos.py": "99bd8e43c981d65e2ec0541f7f47cacc3eeb8040b2b9cb8a7a5a07e697f2d94a",
+    "software_worker.py": "1b6cb29c9893044552ac1a6bbbea8f7e2b01eb632050747418fbd2078ca50d3c",
+    "studio_adapter.py": "489e8a205dddaddf0d96bbb3645e6e24aa0682de644f69b7c7ad29154c439c52"
+  },
+  "actualAdversarialProbes": [
+    {
+      "command": "node --input-type=module; analyzePresentationPrompt on five unchanged examples",
+      "observed": {
+        "AVIATION_EUROPE_NL": "CONFLICT/NATURAL_CAMERA_MODE_CONFLICT",
+        "TRADE_SOUTH_AMERICA_NL": "CONFLICT/NATURAL_CAMERA_MODE_CONFLICT",
+        "FICTIONAL_AFRICA_NL": "PASS",
+        "NEW_REGION_JAPAN_NL": "PASS",
+        "NEW_REGION_AUSTRALIA_NL": "PASS"
+      },
+      "fixtureMutated": false
+    },
+    {
+      "command": "node --input-type=module; clone NEW_REGION_JAPAN_NL and append one adversarial clause; no saved fixture writes",
+      "observed": [
+        {
+          "clause": "2026-11-15 사건을 사용해줘.",
+          "status": "PASS",
+          "expected": "CONFLICT"
+        },
+        {
+          "clause": "2026년 11월 15일 사건을 사용해줘.",
+          "status": "PASS",
+          "expected": "CONFLICT"
+        },
+        {
+          "clause": "2026-99-99 사건을 사용해줘.",
+          "status": "PASS",
+          "expected": "INVALID"
+        },
+        {
+          "clause": "실제 중심 좌표는 [0, 0]이야.",
+          "status": "PASS",
+          "expected": "CONFLICT_OR_NEEDS_INPUT"
+        }
+      ]
+    },
+    {
+      "command": "Actual analyzePresentationPrompt same5fixtures and4sameadversarialclauses afterfix",
+      "observed": {
+        "allFivePositiveExamples": "PASS",
+        "sameYearOutsideDay": "CONFLICT/NATURAL_DATE_OUTSIDE_ATTACHED_DATA",
+        "koreanOutsideDay": "CONFLICT/NATURAL_DATE_OUTSIDE_ATTACHED_DATA",
+        "impossibleDate": "INVALID/NATURAL_DATE_INVALID",
+        "unboundCoordinate": "NEEDS_INPUT/NATURAL_COORDINATE_BINDING_REQUIRED"
+      },
+      "fixtureMutated": false
+    },
+    {
+      "command": "Actual prepareRuntimeRequest twice under newindependentprivatepaths;verifyRegionQualification before/after corrupting only fresh testcrop",
+      "observed": {
+        "schema": "WORLD_ENGINE_INDEPENDENT_SOURCE_PROBE_V2",
+        "stableQualificationAcrossPrivatePaths": true,
+        "qualificationSHA256": "a2c5999be10b6b6655eaacdf92e101f3f1d645a6476b634dc7ace78831c8bade",
+        "cleanStatus": "PASS",
+        "corruptStatus": "INVALID",
+        "corruptCodes": [
+          "REGION_CACHE_CORRUPTION_REFUSED"
+        ],
+        "existingSourcesModified": false,
+        "paidExecuted": false
+      }
+    },
+    {
+      "command": "Pure compile/evaluate/reprojectFlowPresentation existingFlow/newcamera Japanframes0,30,60,89",
+      "observed": {
+        "status": "PASS_PURE_MODEL_PROJECTED_CONTRACT_NOT_ACTUAL_DRAW",
+        "actualCameraLocked": false,
+        "actualSettleLocked": false,
+        "genuineModelCameraLocked": true,
+        "routeRevealCurrent": true,
+        "oldEventAdmissionClaimed": false
+      }
+    },
+    {
+      "command": "Clone Japanexample; validfacts.text versus natural city-labeldisplayrequest",
+      "observed": {
+        "structuredVisibleText": "UNSUPPORTED/FEATURE_HAS_NO_PIXEL_CONSUMER",
+        "naturalVisibleLabelRequest": "PASS_EXPECTED_UNSUPPORTED"
+      }
+    },
+    {
+      "command": "Final frozen compiler: five positive supplied-data examples plus eight explicit date/coordinate/label/final-zoomout cases",
+      "status": "PASS",
+      "tests": 13,
+      "positiveExamples": [
+        "AVIATION_EUROPE_NL",
+        "TRADE_SOUTH_AMERICA_NL",
+        "FICTIONAL_AFRICA_NL",
+        "NEW_REGION_JAPAN_NL",
+        "NEW_REGION_AUSTRALIA_NL"
+      ],
+      "allOldProfileStatus": "UNSUPPORTED",
+      "oldProfileFalselyReportedAsPass": false,
+      "rejectedCases": {
+        "sameYearOutsideEnglishDate": "CONFLICT",
+        "sameYearOutsideKoreanDate": "CONFLICT",
+        "impossibleCalendarDate": "INVALID",
+        "unboundCenter": "CONFLICT",
+        "knownLocationButWrongCenter": "CONFLICT",
+        "koreanVisibleLabels": "UNSUPPORTED",
+        "englishVisibleLabels": "UNSUPPORTED",
+        "finalOnlyZoomout": "UNSUPPORTED"
+      }
+    }
+  ],
+  "paidGpuExecuted": false,
+  "paidApiUsed": false,
+  "nvidiaVerified": false,
+  "visualQualityApproved": false,
+  "finalProtection": {
+    "status": "PASS",
+    "checkedAtUTC": "2026-10-22T06:31:20Z",
+    "originalProtected307ActualSHA": "PASS",
+    "originalProtectedCount": 307,
+    "allBaselineTrackedActualSHA": "PASS",
+    "allBaselineTrackedCount": 6439,
+    "cacheMetadata": "PASS",
+    "cacheMetadataEntries": 565,
+    "preservedCheckouts": "PASS",
+    "changesOutsideNewNamespace": [],
+    "protectedErrors": [],
+    "trackedChanges": [],
+    "oldFilesWrittenByVerification": false
+  },
+  "sourceQualificationAdversarialProof": {
+    "proofSHA256": "2926aa8cf29aa9be81b7e3a6d6168738ce814c7f0f72c5ed75ed798553a8569e",
+    "result": {
+      "schema": "WORLD_ENGINE_INDEPENDENT_FINAL_SOURCE_PROBE_V2",
+      "stableQualificationAcrossPrivatePaths": true,
+      "qualificationSHA256": "5409df6e1aaff5c6f50fea8b62c03ddf0cd0bf42834a498718d809c2b20a7370",
+      "cleanAggregate": {
+        "status": "PASS",
+        "sourceQualificationSHA256": "5409df6e1aaff5c6f50fea8b62c03ddf0cd0bf42834a498718d809c2b20a7370",
+        "verifiedSegments": 1
+      },
+      "tamperedResealedAggregate": {
+        "status": "INVALID",
+        "code": "UP2_CACHED_SOURCE_QUALIFICATION_CHANGED"
+      },
+      "tamperedCamera": {
+        "status": "INVALID",
+        "code": "UP2_CACHED_PRESENTATION_CAMERA_CHANGED"
+      },
+      "corruptActualCrop": "INVALID",
+      "corruptCodes": [
+        "REGION_CACHE_CORRUPTION_REFUSED"
+      ],
+      "oldSourcesAndCacheModified": false,
+      "paidExecuted": false
+    },
+    "proofScope": "CPU actual source/crop bytes and aggregate integrity; no draw/GPU claim"
+  },
+  "baselineAndFocusedTestEvidence": [
+    {
+      "path": "reports/regressions/actual-298-01/RESULTS.json",
+      "tests": 298,
+      "pass": 298,
+      "skip": 0,
+      "actuallyExecutedByThisAgent": true,
+      "sha256": "ddbd0c1615deff2a28dbab4fb319942a8adf58ee8772f7820ca243e55b5d1022"
+    },
+    {
+      "path": "reports/NL_TEST_RESULTS.json",
+      "tests": 85,
+      "pass": 85,
+      "skip": 0,
+      "inspectedOwnerReport": true,
+      "sha256": "f75aff9ab2add6d355051c989b00d606fafc12977c9a19766a258885665e968e"
+    },
+    {
+      "path": "reports/REGION_PROVIDER_INITIALIZATION_FIX_TESTS.json",
+      "tests": 44,
+      "pass": 44,
+      "skip": 0,
+      "inspectedOwnerReport": true,
+      "sha256": "44b1fa36d1dbaf14150d4a8cbd366b9b31757e4e0cb722ccfa79c0872e0f69c3"
+    },
+    {
+      "path": "reports/STUDIO_FOCUSED_TESTS_attempt-06.json",
+      "tests": 36,
+      "pass": 36,
+      "skip": 0,
+      "inspectedOwnerReport": true,
+      "sha256": "04d09ab3f9a6dfaea6f5dbcdd062f70fb2fc4122b85d6b7f60547ef0486b7c19"
+    }
+  ],
+  "inspectedActualDrawProbeReceipts": {
+    "cases": [
+      {
+        "case": "NEW_REGION_AUSTRALIA_NL-draw",
+        "receiptSHA256": "7e69854fcea46e9b72dedc07e29a2720ece973f54e376f61b58325e903900bfd",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "NEW_REGION_JAPAN_NL-draw",
+        "receiptSHA256": "0be8e6aff5a66918b6902dd1eeaf90846a9089c5b361862ea0826cbc71b615ad",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "europe_germany-draw",
+        "receiptSHA256": "c6a8642328c7280239f35c5b1efd803c93644ef30be3d135cdbb2a45e1de05ab",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "fictional-continuity-draw",
+        "receiptSHA256": "eaa29e1d1e3c1b966ef6e0259f6ab9772490b3ec1c703862371791d986c9537d",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 5,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "korean_peninsula-draw",
+        "receiptSHA256": "9ff93f2867d2f652d99905291faccf9b8ea0f7db56f6270e00ef09cd76a26402",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "namibia_desert_coast-draw",
+        "receiptSHA256": "3af67b062d3921cf431ac5e3af9ee0a34232fa08ac8e251e0c226cb2153b8edd",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "nepal_himalaya-draw",
+        "receiptSHA256": "25d96db87269db52fd205846ccc70fe7023e8d9127e53ee96fe637081719c297",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      },
+      {
+        "case": "south_america_chile-draw",
+        "receiptSHA256": "19eb8c7dd63882f80dc0c7114a9852d42f2cf478dd1a5ec9ac6ae4119a6edf45",
+        "status": "ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO",
+        "renderedFrames": 3,
+        "browserErrors": [],
+        "softwareBackend": "SwiftShader",
+        "nvidiaVerified": false,
+        "videoGeneratedByTheseProbes": false
+      }
+    ],
+    "scope": "Inspected owner-produced actual draw/readPixels sample receipts; this review did not generate Studio MP4 files. Short highlight windows are not certified by sparse probes.",
+    "renderSourceBindingsMatchCurrent": true,
+    "compilerProvenanceDifference": "These E7 probes used prior compiler 5c39ad72; final compiler70708100 is covered separately by actual13 independent probes and85 owner tests; final Studio MP4 must bind current compiler."
+  },
+  "nativeLabelAndMarkerScope": {
+    "sceneTextMustBeEmpty": true,
+    "structuredVisibleTextRejectedByUnchangedValidator": true,
+    "naturalVisibleLabelsRejectedByNewGrammar": true,
+    "nativeLabelRasterRevealsZero": true,
+    "nativeGraphicsPassDisabled": true,
+    "nativeGlyphAndMeasuredSeedTextPreserved": true,
+    "nativeScaleInformationLocationFlag": "Original native capability/layout metadata, not a claim that labels are visible in this wrapper.",
+    "actualSuppliedMarkerLayer": "Uses existing marker design at supplied geographic locations/highlight frames, subject to current full-ROI safety checks.",
+    "originalG2LabelFunctionalityModified": false
+  },
+  "cameraHydrationReview": {
+    "protectedCanonicalOwnerCheckPreserved": true,
+    "browserRecompilesFromIdenticalAuthoredKeys": true,
+    "everyBrowserFrameComparedWithCPUSamples": true,
+    "maximumPermittedDeltaDegrees": 1e-09,
+    "observedSampleDeltaDegrees": 1.4210854715202004e-14,
+    "oldEventAdmissionForged": false,
+    "actualMovingCameraLock": false,
+    "fixedModelCameraLock": true,
+    "currentRouteRevealRecomputed": true
+  },
+  "explicitLimitations": [
+    "Bounded Korean/English intent grammar over supplied structured facts; no unrestricted NLU, paid LLM, geocoder or historical-fact generation.",
+    "New free review profile is source checkout, not an OCI deployment; 2..240 frames at1080x1920/30fps, silent.",
+    "Native visible labels/text are unsupported in this moving presentation profile; original G2 label path remains intact.",
+    "Final-only wider zoomout, dynamic zoom during route-follow, fade/dissolve and camera orbit/rotation are explicitly unsupported.",
+    "Only source-covered qualified regional extents are accepted; polar/date-line/pure-ocean limits remain explicit. Global8192RGB is not DEM, bathymetry or materialized fullNE1.",
+    "HistoricalG3,80second production, paidGPU/API/deployment and FINAL promotion remain blocked.",
+    "Sparse software draw probes do not certify full Studio MP4s, NVIDIA performance or final visual quality."
+  ],
+  "gate": {
+    "codeReview": "PASS",
+    "independentAdversarialProbes": "PASS",
+    "protection": "PASS",
+    "knownConfirmedUnresolvedDefects": 0,
+    "actualStudioMP4Review": "OWNED_BY_ROOT_SUBSEQUENT_PHASE_F_NOT_CLAIMED_HERE",
+    "nvidia": "NOT_EXECUTED",
+    "visualQuality": "USER_REVIEW_REQUIRED"
+  },
+  "reviewedAtUTC": "2026-10-22T06:34:57Z"
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "WORLD_ENGINE_PRESENTATION_PROMPT_V2",
+  "prompt": "첨부한 HAMBURG, BERLIN, MUNICH 좌표와 두 방향 연결 자료로 6초 항공 연결 영상을 만들어줘. 첫 장면은 카메라를 이동하고 줌아웃한 뒤 줌인해줘. 두 번째 장면은 제공한 역방향 경로를 따라 카메라가 이동해줘. 제공한 도시를 강조하고 두 장면을 전환해줘. 이 연결은 실제 항공편이 아닌 가상 예시야.",
+  "region": {
+    "sourceId": "AUTO",
+    "crs": "EPSG:4326",
+    "center": [
+      10,
+      51
+    ],
+    "bbox": [
+      0,
+      35,
+      20,
+      67
+    ],
+    "countryId": "COUNTRY_DEU"
+  },
+  "presentation": {
+    "camera": {
+      "mode": "KEYFRAMES",
+      "keyframes": [
+        {
+          "frame": 0,
+          "center": [
+            9.75,
+            50.85
+          ],
+          "zoom": 0.85
+        },
+        {
+          "frame": 40,
+          "center": [
+            10.25,
+            51.15
+          ],
+          "zoom": 0.75
+        },
+        {
+          "frame": 89,
+          "center": [
+            10,
+            51
+          ],
+          "zoom": 1
+        }
+      ]
+    },
+    "highlights": [
+      {
+        "id": "hamburg-focus",
+        "locationId": "HAMBURG",
+        "startFrame": 12,
+        "endFrame": 28
+      }
+    ],
+    "sceneOverrides": {
+      "aviation-germany-return": {
+        "camera": {
+          "mode": "ROUTE_FOLLOW",
+          "routeId": "ILLUSTRATIVE_ROUTE",
+          "zoom": 0.85,
+          "followStrength": 0.1
+        },
+        "highlights": [
+          {
+            "id": "munich-focus",
+            "locationId": "MUNICH",
+            "startFrame": 12,
+            "endFrame": 28
+          }
+        ]
+      }
+    },
+    "transitions": [
+      {
+        "type": "CUT",
+        "frame": 90
+      }
+    ]
+  }
+}

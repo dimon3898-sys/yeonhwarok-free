@@ -1,0 +1,3463 @@
+{
+  "schema": "WORLD_ENGINE_PRESENTATION_SUPPLIED_INPUT_SCENE_TRACE_V2",
+  "sourceReceipt": "reports/EXAMPLE_MATRIX_ATTEMPT_4.json",
+  "scope": "ACTUAL_COMPILER_SOURCE_QUALIFICATION_ONLY_DRAW_NOT_CLAIMED",
+  "inputs": [
+    {
+      "id": "AVIATION_EUROPE_NL",
+      "inputPath": "examples/AVIATION_EUROPE_NL.json",
+      "inputSHA256": "91c244b48cdbc9465d5ee1e38683fde8fe3888b101d1ea255c4a85ba28fc973e",
+      "totalFrames": 180,
+      "naturalLanguage": {
+        "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+        "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+        "unrestrictedLanguageUnderstanding": false,
+        "externalLLMUsed": false,
+        "rawPrompt": "첨부한 HAMBURG, BERLIN, MUNICH 좌표와 두 방향 연결 자료로 6초 항공 연결 영상을 만들어줘. 첫 장면은 카메라를 이동하고 줌아웃한 뒤 줌인해줘. 두 번째 장면은 제공한 역방향 경로를 따라 카메라가 이동해줘. 제공한 도시를 강조하고 두 장면을 전환해줘. 이 연결은 실제 항공편이 아닌 가상 예시야.",
+        "topic": {
+          "text": "첨부한 HAMBURG, BERLIN, MUNICH 좌표와 두 방향 연결 자료로 6초 항공 연결 영상을 만들어줘",
+          "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+          "factsInferred": false
+        },
+        "intents": [
+          {
+            "type": "ROUTE_FOLLOW",
+            "value": "ROUTE_FOLLOW",
+            "start": 109,
+            "end": 115,
+            "text": "경로를 따라",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                1
+              ],
+              "clause": {
+                "start": 91,
+                "end": 125,
+                "text": " 두 번째 장면은 제공한 역방향 경로를 따라 카메라가 이동해줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "CAMERA_MOVE",
+            "value": "CAMERA_MOVE",
+            "start": 69,
+            "end": 76,
+            "text": "카메라를 이동",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0
+              ],
+              "clause": {
+                "start": 62,
+                "end": 90,
+                "text": " 첫 장면은 카메라를 이동하고 줌아웃한 뒤 줌인해줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "CAMERA_MOVE",
+            "value": "CAMERA_MOVE",
+            "start": 116,
+            "end": 123,
+            "text": "카메라가 이동",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                1
+              ],
+              "clause": {
+                "start": 91,
+                "end": 125,
+                "text": " 두 번째 장면은 제공한 역방향 경로를 따라 카메라가 이동해줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "ZOOM_IN",
+            "value": "ZOOM_IN",
+            "start": 86,
+            "end": 88,
+            "text": "줌인",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0
+              ],
+              "clause": {
+                "start": 62,
+                "end": 90,
+                "text": " 첫 장면은 카메라를 이동하고 줌아웃한 뒤 줌인해줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "ZOOM_OUT",
+            "value": "ZOOM_OUT",
+            "start": 79,
+            "end": 82,
+            "text": "줌아웃",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0
+              ],
+              "clause": {
+                "start": 62,
+                "end": 90,
+                "text": " 첫 장면은 카메라를 이동하고 줌아웃한 뒤 줌인해줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "LOCATION_HIGHLIGHT",
+            "value": "LOCATION_HIGHLIGHT",
+            "start": 131,
+            "end": 137,
+            "text": "도시를 강조",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "type": "SCENE_TRANSITION",
+            "value": "SCENE_TRANSITION",
+            "start": 142,
+            "end": 148,
+            "text": "장면을 전환",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "durations": [
+          {
+            "type": "DURATION",
+            "value": 6,
+            "start": 44,
+            "end": 46,
+            "text": "6초",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+          }
+        ],
+        "fps": [],
+        "dates": [],
+        "locations": [
+          {
+            "start": 4,
+            "end": 11,
+            "text": "HAMBURG",
+            "id": "HAMBURG",
+            "alias": "HAMBURG",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              9.998053,
+              53.551971
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 13,
+            "end": 19,
+            "text": "BERLIN",
+            "id": "BERLIN",
+            "alias": "BERLIN",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              13.399603,
+              52.523764
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 21,
+            "end": 27,
+            "text": "MUNICH",
+            "id": "MUNICH",
+            "alias": "MUNICH",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              11.573048,
+              48.131888
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "routes": [],
+        "connections": [],
+        "coordinates": [],
+        "unsupported": [],
+        "uninterpretedText": "첨부한 HAMBURG, BERLIN, MUNICH 좌표와 두 방향 연결 자료로 6초 항공 연결 영상을 만들어줘. 첫 장면은 카메라를 이동하고 줌아웃한 뒤 줌인해줘. 두 번째 장면은 제공한 역방향 경로를 따라 카메라가 이동해줘. 제공한 도시를 강조하고 두 장면을 전환해줘. 이 연결은 실제 항공편이 아닌 가상 예시야."
+      },
+      "transitionPlan": [
+        {
+          "type": "CUT",
+          "frame": 90
+        }
+      ],
+      "scenes": [
+        {
+          "sceneId": "aviation-germany",
+          "startFrame": 0,
+          "endFrame": 90,
+          "sceneSHA256": "644ca1df7ac71844fb17432a1a629549bc3a161f895dfc8f5104836ac76d9df4",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              10,
+              51
+            ],
+            "bbox": [
+              0,
+              35,
+              20,
+              67
+            ],
+            "countryId": "COUNTRY_DEU"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "KEYFRAMES",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "center": [
+                    9.75,
+                    50.85
+                  ],
+                  "zoom": 0.85
+                },
+                {
+                  "frame": 40,
+                  "center": [
+                    10.25,
+                    51.15
+                  ],
+                  "zoom": 0.75
+                },
+                {
+                  "frame": 89,
+                  "center": [
+                    10,
+                    51
+                  ],
+                  "zoom": 1
+                }
+              ]
+            },
+            "highlights": [
+              {
+                "id": "hamburg-focus",
+                "locationId": "HAMBURG",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                10,
+                51
+              ],
+              "bbox": [
+                0,
+                35,
+                20,
+                67
+              ],
+              "countryId": "COUNTRY_DEU"
+            },
+            "fittedBounds": [
+              -4.301141561591745,
+              35,
+              24.301141561591745,
+              67
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_DEU",
+            "contextCountryName": "Germany",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "HAMBURG",
+                "countryId": "COUNTRY_DEU",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  9.998053,
+                  53.551971
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "BERLIN",
+                "countryId": "COUNTRY_DEU",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  13.399603,
+                  52.523764
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "MUNICH",
+                "countryId": "COUNTRY_DEU",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  11.573048,
+                  48.131888
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_EUROPE_GERMANY_NATIVE_V1",
+            "sourceSHA256": "b914c444c50d3a11ac004db18e952a5d32b2f6bf97f5ba252cce6950e6455e5c",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              1936,
+              2776
+            ],
+            "sourceBounds": [
+              -6.133333333333326,
+              27.866666666666667,
+              26.133333333333326,
+              74.13333333333333
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                107,
+                425,
+                1829,
+                2350
+              ],
+              "dimensions": [
+                1722,
+                1925
+              ],
+              "bounds": [
+                -4.3499999999999925,
+                34.96666666666666,
+                24.35000000000001,
+                67.05
+              ],
+              "minimumGutterPixels": 2.0000000000003126
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[0]",
+              "scenePath": "$",
+              "sceneId": "aviation-germany",
+              "inputDataSHA256": "0b7b4cad337f054e9542e49e79d4e831e2a698fdc88abcb0f9a58adf4e6ef6ef",
+              "sceneSHA256": "644ca1df7ac71844fb17432a1a629549bc3a161f895dfc8f5104836ac76d9df4",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "0e266f616c9a441326c52f3582d1beb496a43dd99c59dc22d60a482d58532c06",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "b02f76ff5f40216f3989bf92a7a3c16d790465aad72523885966d10399074404",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    10,
+                    51
+                  ],
+                  "bbox": [
+                    0,
+                    35,
+                    20,
+                    67
+                  ],
+                  "countryId": "COUNTRY_DEU"
+                },
+                "fittedBounds": [
+                  -4.301141561591745,
+                  35,
+                  24.301141561591745,
+                  67
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_DEU",
+                "contextCountryName": "Germany",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "HAMBURG",
+                    "countryId": "COUNTRY_DEU",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      9.998053,
+                      53.551971
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "BERLIN",
+                    "countryId": "COUNTRY_DEU",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      13.399603,
+                      52.523764
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "MUNICH",
+                    "countryId": "COUNTRY_DEU",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      11.573048,
+                      48.131888
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_EUROPE_GERMANY_NATIVE_V1",
+                "sourceSHA256": "b914c444c50d3a11ac004db18e952a5d32b2f6bf97f5ba252cce6950e6455e5c",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  1936,
+                  2776
+                ],
+                "sourceBounds": [
+                  -6.133333333333326,
+                  27.866666666666667,
+                  26.133333333333326,
+                  74.13333333333333
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    107,
+                    425,
+                    1829,
+                    2350
+                  ],
+                  "dimensions": [
+                    1722,
+                    1925
+                  ],
+                  "bounds": [
+                    -4.3499999999999925,
+                    34.96666666666666,
+                    24.35000000000001,
+                    67.05
+                  ],
+                  "minimumGutterPixels": 2.0000000000003126
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "78c7995b830f2a5b432f2a9dc8ded62652685c7e0bde02875f258b3b2780629a"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_DEU",
+              "geometrySHA256": "775b91fc2987a5db018de821e48b0800eb798d4b62a00c80e28a4a43befde559",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "DECLARED_CONNECTION",
+              "geometrySHA256": "dba775b01c74e03a865b2d4201e5bcea12824342a0abc83c03158ce757d5fd54",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[0].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 0,
+                "state_transition_frames": 0,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.aviation-germany.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        },
+        {
+          "sceneId": "aviation-germany-return",
+          "startFrame": 90,
+          "endFrame": 180,
+          "sceneSHA256": "35a47d3d2e039a5cb3575b565dcbb0bae00d8adebd04b7fd4b1d87abf8dc2960",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              10,
+              51
+            ],
+            "bbox": [
+              0,
+              35,
+              20,
+              67
+            ],
+            "countryId": "COUNTRY_DEU"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "ROUTE_FOLLOW",
+              "routeId": "ILLUSTRATIVE_ROUTE",
+              "zoom": 0.85,
+              "followStrength": 0.1
+            },
+            "highlights": [
+              {
+                "id": "munich-focus",
+                "locationId": "MUNICH",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                10,
+                51
+              ],
+              "bbox": [
+                0,
+                35,
+                20,
+                67
+              ],
+              "countryId": "COUNTRY_DEU"
+            },
+            "fittedBounds": [
+              -4.301141561591745,
+              35,
+              24.301141561591745,
+              67
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_DEU",
+            "contextCountryName": "Germany",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "HAMBURG",
+                "countryId": "COUNTRY_DEU",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  9.998053,
+                  53.551971
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "BERLIN",
+                "countryId": "COUNTRY_DEU",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  13.399603,
+                  52.523764
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "MUNICH",
+                "countryId": "COUNTRY_DEU",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  11.573048,
+                  48.131888
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_EUROPE_GERMANY_NATIVE_V1",
+            "sourceSHA256": "b914c444c50d3a11ac004db18e952a5d32b2f6bf97f5ba252cce6950e6455e5c",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              1936,
+              2776
+            ],
+            "sourceBounds": [
+              -6.133333333333326,
+              27.866666666666667,
+              26.133333333333326,
+              74.13333333333333
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                107,
+                425,
+                1829,
+                2350
+              ],
+              "dimensions": [
+                1722,
+                1925
+              ],
+              "bounds": [
+                -4.3499999999999925,
+                34.96666666666666,
+                24.35000000000001,
+                67.05
+              ],
+              "minimumGutterPixels": 2.0000000000003126
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[1]",
+              "scenePath": "$",
+              "sceneId": "aviation-germany-return",
+              "inputDataSHA256": "2729e8055f2e2530b366838cd96515dc8ec44f5c8daea24a0cc8628af9aa43a0",
+              "sceneSHA256": "35a47d3d2e039a5cb3575b565dcbb0bae00d8adebd04b7fd4b1d87abf8dc2960",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "0e266f616c9a441326c52f3582d1beb496a43dd99c59dc22d60a482d58532c06",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "b02f76ff5f40216f3989bf92a7a3c16d790465aad72523885966d10399074404",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    10,
+                    51
+                  ],
+                  "bbox": [
+                    0,
+                    35,
+                    20,
+                    67
+                  ],
+                  "countryId": "COUNTRY_DEU"
+                },
+                "fittedBounds": [
+                  -4.301141561591745,
+                  35,
+                  24.301141561591745,
+                  67
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_DEU",
+                "contextCountryName": "Germany",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "HAMBURG",
+                    "countryId": "COUNTRY_DEU",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      9.998053,
+                      53.551971
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "BERLIN",
+                    "countryId": "COUNTRY_DEU",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      13.399603,
+                      52.523764
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "MUNICH",
+                    "countryId": "COUNTRY_DEU",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      11.573048,
+                      48.131888
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_EUROPE_GERMANY_NATIVE_V1",
+                "sourceSHA256": "b914c444c50d3a11ac004db18e952a5d32b2f6bf97f5ba252cce6950e6455e5c",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  1936,
+                  2776
+                ],
+                "sourceBounds": [
+                  -6.133333333333326,
+                  27.866666666666667,
+                  26.133333333333326,
+                  74.13333333333333
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    107,
+                    425,
+                    1829,
+                    2350
+                  ],
+                  "dimensions": [
+                    1722,
+                    1925
+                  ],
+                  "bounds": [
+                    -4.3499999999999925,
+                    34.96666666666666,
+                    24.35000000000001,
+                    67.05
+                  ],
+                  "minimumGutterPixels": 2.0000000000003126
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "dbb8cd66b3f4bf77ddfc9edecc738f38a27cb7c6c58b0accabab8510d1558787"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_DEU",
+              "geometrySHA256": "775b91fc2987a5db018de821e48b0800eb798d4b62a00c80e28a4a43befde559",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "DECLARED_CONNECTION",
+              "geometrySHA256": "dba775b01c74e03a865b2d4201e5bcea12824342a0abc83c03158ce757d5fd54",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[1].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 0,
+                "state_transition_frames": 0,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.aviation-germany-return.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TRADE_SOUTH_AMERICA_NL",
+      "inputPath": "examples/TRADE_SOUTH_AMERICA_NL.json",
+      "inputSHA256": "e4b66a25011d9027e43cd1f396cde252d7d6df24763b997f48bfd97d2a82aff8",
+      "totalFrames": 180,
+      "naturalLanguage": {
+        "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+        "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+        "unrestrictedLanguageUnderstanding": false,
+        "externalLLMUsed": false,
+        "rawPrompt": "Create a 6 second illustrative trade connection using the attached VALPARAISO, SANTIAGO and CONCEPCION coordinates. Pan and zoom out, then zoom in during the first scene. Follow the supplied reverse route with the camera in the second scene. Highlight the supplied cities and cut between the two scenes. This is an abstract city connection, not an observed or navigable shipping service.",
+        "topic": {
+          "text": "Create a 6 second illustrative trade connection using the attached VALPARAISO, SANTIAGO and CONCEPCION coordinates",
+          "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+          "factsInferred": false
+        },
+        "intents": [
+          {
+            "type": "ROUTE_FOLLOW",
+            "value": "ROUTE_FOLLOW",
+            "start": 171,
+            "end": 204,
+            "text": "Follow the supplied reverse route",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                1
+              ],
+              "clause": {
+                "start": 170,
+                "end": 240,
+                "text": " Follow the supplied reverse route with the camera in the second scene"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "ZOOM_IN",
+            "value": "ZOOM_IN",
+            "start": 139,
+            "end": 146,
+            "text": "zoom in",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0
+              ],
+              "clause": {
+                "start": 115,
+                "end": 169,
+                "text": " Pan and zoom out, then zoom in during the first scene"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "ZOOM_OUT",
+            "value": "ZOOM_OUT",
+            "start": 124,
+            "end": 132,
+            "text": "zoom out",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0
+              ],
+              "clause": {
+                "start": 115,
+                "end": 169,
+                "text": " Pan and zoom out, then zoom in during the first scene"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "LOCATION_HIGHLIGHT",
+            "value": "LOCATION_HIGHLIGHT",
+            "start": 242,
+            "end": 271,
+            "text": "Highlight the supplied cities",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "type": "SCENE_TRANSITION",
+            "value": "SCENE_TRANSITION",
+            "start": 276,
+            "end": 302,
+            "text": "cut between the two scenes",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "durations": [
+          {
+            "type": "DURATION",
+            "value": 6,
+            "start": 9,
+            "end": 17,
+            "text": "6 second",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+          }
+        ],
+        "fps": [],
+        "dates": [],
+        "locations": [
+          {
+            "start": 67,
+            "end": 77,
+            "text": "VALPARAISO",
+            "id": "VALPARAISO",
+            "alias": "VALPARAISO",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              -71.617026,
+              -33.047739
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 79,
+            "end": 87,
+            "text": "SANTIAGO",
+            "id": "SANTIAGO",
+            "alias": "SANTIAGO",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              -70.650504,
+              -33.440205
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 92,
+            "end": 102,
+            "text": "CONCEPCION",
+            "id": "CONCEPCION",
+            "alias": "CONCEPCION",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              -73.050022,
+              -36.830014
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "routes": [],
+        "connections": [],
+        "coordinates": [],
+        "unsupported": [],
+        "uninterpretedText": "Create a 6 second illustrative trade connection using the attached VALPARAISO, SANTIAGO and CONCEPCION coordinates. Pan and zoom out, then zoom in during the first scene. Follow the supplied reverse route with the camera in the second scene. Highlight the supplied cities and cut between the two scenes. This is an abstract city connection, not an observed or navigable shipping service."
+      },
+      "transitionPlan": [
+        {
+          "type": "CUT",
+          "frame": 90
+        }
+      ],
+      "scenes": [
+        {
+          "sceneId": "trade-chile",
+          "startFrame": 0,
+          "endFrame": 90,
+          "sceneSHA256": "57186bb3db114170376a0963622fcef06df0ef76197c334ee49b48c9923d44e6",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              -71.5,
+              -33
+            ],
+            "bbox": [
+              -78,
+              -43,
+              -65,
+              -23
+            ],
+            "countryId": "COUNTRY_CHL"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "KEYFRAMES",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "center": [
+                    -71.65,
+                    -33.1
+                  ],
+                  "zoom": 0.85
+                },
+                {
+                  "frame": 40,
+                  "center": [
+                    -71.35,
+                    -32.9
+                  ],
+                  "zoom": 0.75
+                },
+                {
+                  "frame": 89,
+                  "center": [
+                    -71.5,
+                    -33
+                  ],
+                  "zoom": 1
+                }
+              ]
+            },
+            "highlights": [
+              {
+                "id": "valparaiso-focus",
+                "locationId": "VALPARAISO",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                -71.5,
+                -33
+              ],
+              "bbox": [
+                -78,
+                -43,
+                -65,
+                -23
+              ],
+              "countryId": "COUNTRY_CHL"
+            },
+            "fittedBounds": [
+              -78.2070435222022,
+              -43,
+              -64.7929564777978,
+              -23
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_CHL",
+            "contextCountryName": "Chile",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "VALPARAISO",
+                "countryId": "COUNTRY_CHL",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  -71.617026,
+                  -33.047739
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "SANTIAGO",
+                "countryId": "COUNTRY_CHL",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  -70.650504,
+                  -33.440205
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "CONCEPCION",
+                "countryId": "COUNTRY_CHL",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  -73.050022,
+                  -36.830014
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_SOUTH_AMERICA_CHILE_NATIVE_V1",
+            "sourceSHA256": "dbad846e3b147c041088a64b944a41d367f4253fd013fa6fe7e2162be0336822",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              3136,
+              2716
+            ],
+            "sourceBounds": [
+              -114.13333333333334,
+              -59.133333333333326,
+              -61.86666666666666,
+              -13.86666666666666
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                2153,
+                546,
+                2963,
+                1751
+              ],
+              "dimensions": [
+                810,
+                1205
+              ],
+              "bounds": [
+                -78.25,
+                -43.05,
+                -64.75,
+                -22.96666666666666
+              ],
+              "minimumGutterPixels": 2.0000000000003126
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[0]",
+              "scenePath": "$",
+              "sceneId": "trade-chile",
+              "inputDataSHA256": "01db9373161c653808bbd897c9d6a0b4baab3cce80e0276d1c6548b3cccf97f2",
+              "sceneSHA256": "57186bb3db114170376a0963622fcef06df0ef76197c334ee49b48c9923d44e6",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "e89a46698647c54da661cc991735281dc55398d5227bd8a8f9d605347a64596d",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "aecd56e6e4e7a0d7631a8e1faf9e51af47541a693a2640c54ccd388cf9f51e71",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    -71.5,
+                    -33
+                  ],
+                  "bbox": [
+                    -78,
+                    -43,
+                    -65,
+                    -23
+                  ],
+                  "countryId": "COUNTRY_CHL"
+                },
+                "fittedBounds": [
+                  -78.2070435222022,
+                  -43,
+                  -64.7929564777978,
+                  -23
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_CHL",
+                "contextCountryName": "Chile",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "VALPARAISO",
+                    "countryId": "COUNTRY_CHL",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      -71.617026,
+                      -33.047739
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "SANTIAGO",
+                    "countryId": "COUNTRY_CHL",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      -70.650504,
+                      -33.440205
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "CONCEPCION",
+                    "countryId": "COUNTRY_CHL",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      -73.050022,
+                      -36.830014
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_SOUTH_AMERICA_CHILE_NATIVE_V1",
+                "sourceSHA256": "dbad846e3b147c041088a64b944a41d367f4253fd013fa6fe7e2162be0336822",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  3136,
+                  2716
+                ],
+                "sourceBounds": [
+                  -114.13333333333334,
+                  -59.133333333333326,
+                  -61.86666666666666,
+                  -13.86666666666666
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    2153,
+                    546,
+                    2963,
+                    1751
+                  ],
+                  "dimensions": [
+                    810,
+                    1205
+                  ],
+                  "bounds": [
+                    -78.25,
+                    -43.05,
+                    -64.75,
+                    -22.96666666666666
+                  ],
+                  "minimumGutterPixels": 2.0000000000003126
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "e4d42366cecfccc805baa37d1313dcba8ab964766d17d2691c4b31d04222f3d0"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_CHL",
+              "geometrySHA256": "d9e40230c47d2ba2f3e279910f7239441cad74661bbe485e8bb2887ea3eba187",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "DECLARED_CONNECTION",
+              "geometrySHA256": "d79f42f8ee3eae5209d223fe403d85b3bf12a54793d269c55f662d8c035f7fa3",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[0].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 0,
+                "state_transition_frames": 0,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.trade-chile.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        },
+        {
+          "sceneId": "trade-chile-return",
+          "startFrame": 90,
+          "endFrame": 180,
+          "sceneSHA256": "20a587e91906ace4c9dfe3871921c6fb0a69d2b264b81d2aaff0da63d13b2487",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              -71.5,
+              -33
+            ],
+            "bbox": [
+              -78,
+              -43,
+              -65,
+              -23
+            ],
+            "countryId": "COUNTRY_CHL"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "ROUTE_FOLLOW",
+              "routeId": "ILLUSTRATIVE_ROUTE",
+              "zoom": 0.85,
+              "followStrength": 0.1
+            },
+            "highlights": [
+              {
+                "id": "concepcion-focus",
+                "locationId": "CONCEPCION",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                -71.5,
+                -33
+              ],
+              "bbox": [
+                -78,
+                -43,
+                -65,
+                -23
+              ],
+              "countryId": "COUNTRY_CHL"
+            },
+            "fittedBounds": [
+              -78.2070435222022,
+              -43,
+              -64.7929564777978,
+              -23
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_CHL",
+            "contextCountryName": "Chile",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "VALPARAISO",
+                "countryId": "COUNTRY_CHL",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  -71.617026,
+                  -33.047739
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "SANTIAGO",
+                "countryId": "COUNTRY_CHL",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  -70.650504,
+                  -33.440205
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "CONCEPCION",
+                "countryId": "COUNTRY_CHL",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  -73.050022,
+                  -36.830014
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_SOUTH_AMERICA_CHILE_NATIVE_V1",
+            "sourceSHA256": "dbad846e3b147c041088a64b944a41d367f4253fd013fa6fe7e2162be0336822",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              3136,
+              2716
+            ],
+            "sourceBounds": [
+              -114.13333333333334,
+              -59.133333333333326,
+              -61.86666666666666,
+              -13.86666666666666
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                2153,
+                546,
+                2963,
+                1751
+              ],
+              "dimensions": [
+                810,
+                1205
+              ],
+              "bounds": [
+                -78.25,
+                -43.05,
+                -64.75,
+                -22.96666666666666
+              ],
+              "minimumGutterPixels": 2.0000000000003126
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[1]",
+              "scenePath": "$",
+              "sceneId": "trade-chile-return",
+              "inputDataSHA256": "b03169d879a2a761ea07d14408d5f7cd3e3a8a35954fc12d4d927ea9cd9420a5",
+              "sceneSHA256": "20a587e91906ace4c9dfe3871921c6fb0a69d2b264b81d2aaff0da63d13b2487",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "e89a46698647c54da661cc991735281dc55398d5227bd8a8f9d605347a64596d",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "aecd56e6e4e7a0d7631a8e1faf9e51af47541a693a2640c54ccd388cf9f51e71",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    -71.5,
+                    -33
+                  ],
+                  "bbox": [
+                    -78,
+                    -43,
+                    -65,
+                    -23
+                  ],
+                  "countryId": "COUNTRY_CHL"
+                },
+                "fittedBounds": [
+                  -78.2070435222022,
+                  -43,
+                  -64.7929564777978,
+                  -23
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_CHL",
+                "contextCountryName": "Chile",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "VALPARAISO",
+                    "countryId": "COUNTRY_CHL",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      -71.617026,
+                      -33.047739
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "SANTIAGO",
+                    "countryId": "COUNTRY_CHL",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      -70.650504,
+                      -33.440205
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "CONCEPCION",
+                    "countryId": "COUNTRY_CHL",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      -73.050022,
+                      -36.830014
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_SOUTH_AMERICA_CHILE_NATIVE_V1",
+                "sourceSHA256": "dbad846e3b147c041088a64b944a41d367f4253fd013fa6fe7e2162be0336822",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  3136,
+                  2716
+                ],
+                "sourceBounds": [
+                  -114.13333333333334,
+                  -59.133333333333326,
+                  -61.86666666666666,
+                  -13.86666666666666
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    2153,
+                    546,
+                    2963,
+                    1751
+                  ],
+                  "dimensions": [
+                    810,
+                    1205
+                  ],
+                  "bounds": [
+                    -78.25,
+                    -43.05,
+                    -64.75,
+                    -22.96666666666666
+                  ],
+                  "minimumGutterPixels": 2.0000000000003126
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "96a010b14a9240ee48c408ba3ba4970d59fd23df4b82770606d03f227b27517c"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_CHL",
+              "geometrySHA256": "d9e40230c47d2ba2f3e279910f7239441cad74661bbe485e8bb2887ea3eba187",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "DECLARED_CONNECTION",
+              "geometrySHA256": "d79f42f8ee3eae5209d223fe403d85b3bf12a54793d269c55f662d8c035f7fa3",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[1].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 0,
+                "state_transition_frames": 0,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.trade-chile-return.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "FICTIONAL_AFRICA_NL",
+      "inputPath": "examples/FICTIONAL_AFRICA_NL.json",
+      "inputSHA256": "aa36cdef19275f777d690ff53294064d526d88ae3b2f4bba3915030b928a02d8",
+      "totalFrames": 180,
+      "naturalLanguage": {
+        "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+        "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+        "unrestrictedLanguageUnderstanding": false,
+        "externalLLMUsed": false,
+        "rawPrompt": "제공한 가상 영토 자료만 사용해 6초 지도 영상을 만들어줘. 첫 장면에서는 영역 확장과 영토 색상 변화를, 두 번째 장면에서는 같은 영역의 축소를 보여줘. 카메라를 이동하고 줌아웃한 뒤 줌인해줘. 제공한 WINDHOEK 위치를 강조하고 두 장면을 전환해줘. 실제 역사나 실제 점령 주장이 아닌 가상 설정이야.",
+        "topic": {
+          "text": "제공한 가상 영토 자료만 사용해 6초 지도 영상을 만들어줘",
+          "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+          "factsInferred": false
+        },
+        "intents": [
+          {
+            "type": "CAMERA_MOVE",
+            "value": "CAMERA_MOVE",
+            "start": 87,
+            "end": 94,
+            "text": "카메라를 이동",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "type": "ZOOM_IN",
+            "value": "ZOOM_IN",
+            "start": 104,
+            "end": 106,
+            "text": "줌인",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "type": "ZOOM_OUT",
+            "value": "ZOOM_OUT",
+            "start": 78,
+            "end": 80,
+            "text": "축소",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0,
+                1
+              ],
+              "clause": {
+                "start": 33,
+                "end": 85,
+                "text": " 첫 장면에서는 영역 확장과 영토 색상 변화를, 두 번째 장면에서는 같은 영역의 축소를 보여줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "ZOOM_OUT",
+            "value": "ZOOM_OUT",
+            "start": 97,
+            "end": 100,
+            "text": "줌아웃",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "type": "TERRITORY_CHANGE",
+            "value": "TERRITORY_CHANGE",
+            "start": 42,
+            "end": 57,
+            "text": "영역 확장과 영토 색상 변화",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0,
+                1
+              ],
+              "clause": {
+                "start": 33,
+                "end": 85,
+                "text": " 첫 장면에서는 영역 확장과 영토 색상 변화를, 두 번째 장면에서는 같은 영역의 축소를 보여줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "TERRITORY_CHANGE",
+            "value": "TERRITORY_CHANGE",
+            "start": 74,
+            "end": 80,
+            "text": "영역의 축소",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": [
+                0,
+                1
+              ],
+              "clause": {
+                "start": 33,
+                "end": 85,
+                "text": " 첫 장면에서는 영역 확장과 영토 색상 변화를, 두 번째 장면에서는 같은 영역의 축소를 보여줘"
+              },
+              "method": "EXPLICIT_SCENE_ID_OR_ORDINAL_IN_CLAUSE"
+            }
+          },
+          {
+            "type": "SCENE_TRANSITION",
+            "value": "SCENE_TRANSITION",
+            "start": 134,
+            "end": 140,
+            "text": "장면을 전환",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "durations": [
+          {
+            "type": "DURATION",
+            "value": 6,
+            "start": 18,
+            "end": 20,
+            "text": "6초",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+          }
+        ],
+        "fps": [],
+        "dates": [],
+        "locations": [
+          {
+            "start": 114,
+            "end": 122,
+            "text": "WINDHOEK",
+            "id": "WINDHOEK",
+            "alias": "WINDHOEK",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              17.083546,
+              -22.570006
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "routes": [],
+        "connections": [],
+        "coordinates": [],
+        "unsupported": [],
+        "uninterpretedText": "제공한 가상 영토 자료만 사용해 6초 지도 영상을 만들어줘. 첫 장면에서는 영역 확장과 영토 색상 변화를, 두 번째 장면에서는 같은 영역의 축소를 보여줘. 카메라를 이동하고 줌아웃한 뒤 줌인해줘. 제공한 WINDHOEK 위치를 강조하고 두 장면을 전환해줘. 실제 역사나 실제 점령 주장이 아닌 가상 설정이야."
+      },
+      "transitionPlan": [
+        {
+          "type": "CUT",
+          "frame": 90
+        }
+      ],
+      "scenes": [
+        {
+          "sceneId": "namibia-fictional-zone",
+          "startFrame": 0,
+          "endFrame": 90,
+          "sceneSHA256": "ef4d27f720c502b5adf16e9bbcc881ae0e9be4f36ea0ad74423d345396179ec4",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              17.5,
+              -23.5
+            ],
+            "bbox": [
+              11,
+              -30,
+              24,
+              -17
+            ],
+            "countryId": "COUNTRY_NAM"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "KEYFRAMES",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "center": [
+                    17.32,
+                    -23.62
+                  ],
+                  "zoom": 0.85
+                },
+                {
+                  "frame": 40,
+                  "center": [
+                    17.68,
+                    -23.38
+                  ],
+                  "zoom": 0.75
+                },
+                {
+                  "frame": 89,
+                  "center": [
+                    17.5,
+                    -23.5
+                  ],
+                  "zoom": 1
+                }
+              ]
+            },
+            "territoryColors": {
+              "FICTIONAL_START": [
+                0.92,
+                0.14,
+                0.09,
+                0.32
+              ],
+              "FICTIONAL_END": [
+                0.1,
+                0.35,
+                0.95,
+                0.35
+              ]
+            },
+            "highlights": [
+              {
+                "id": "windhoek-focus",
+                "locationId": "WINDHOEK",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                17.5,
+                -23.5
+              ],
+              "bbox": [
+                11,
+                -30,
+                24,
+                -17
+              ],
+              "countryId": "COUNTRY_NAM"
+            },
+            "fittedBounds": [
+              11,
+              -34.097138637339214,
+              24,
+              -12.90286136266079
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_NAM",
+            "contextCountryName": "Namibia",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "WINDHOEK",
+                "countryId": "COUNTRY_NAM",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  17.083546,
+                  -22.570006
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_NAMIBIA_DESERT_COAST_NATIVE_V1",
+            "sourceSHA256": "0d7d5e2db7770aad365c00a055044b92954d8711fa7d202ef4d495ee83c82068",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              1936,
+              2776
+            ],
+            "sourceBounds": [
+              -1.1333333333333258,
+              -45.133333333333326,
+              31.133333333333326,
+              1.13333333333334
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                725,
+                840,
+                1510,
+                2116
+              ],
+              "dimensions": [
+                785,
+                1276
+              ],
+              "bounds": [
+                10.950000000000008,
+                -34.133333333333326,
+                24.033333333333342,
+                -12.86666666666666
+              ],
+              "minimumGutterPixels": 2.000000000000526
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[0]",
+              "scenePath": "$",
+              "sceneId": "namibia-fictional-zone",
+              "inputDataSHA256": "150f2ea5feba92eaba171e96f2b96fd4ee06123bfb43205002e64b8ad6e1e070",
+              "sceneSHA256": "ef4d27f720c502b5adf16e9bbcc881ae0e9be4f36ea0ad74423d345396179ec4",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "4fa97d0410034841d4c66a3f332d2f64e45cffc3491181a58dbe23a48b4e7252",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "8fd20eda2962126eacaac9d6b45c981b964c895edd1d0501806ca38afbd1e3e1",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    17.5,
+                    -23.5
+                  ],
+                  "bbox": [
+                    11,
+                    -30,
+                    24,
+                    -17
+                  ],
+                  "countryId": "COUNTRY_NAM"
+                },
+                "fittedBounds": [
+                  11,
+                  -34.097138637339214,
+                  24,
+                  -12.90286136266079
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_NAM",
+                "contextCountryName": "Namibia",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "WINDHOEK",
+                    "countryId": "COUNTRY_NAM",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      17.083546,
+                      -22.570006
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_NAMIBIA_DESERT_COAST_NATIVE_V1",
+                "sourceSHA256": "0d7d5e2db7770aad365c00a055044b92954d8711fa7d202ef4d495ee83c82068",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  1936,
+                  2776
+                ],
+                "sourceBounds": [
+                  -1.1333333333333258,
+                  -45.133333333333326,
+                  31.133333333333326,
+                  1.13333333333334
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    725,
+                    840,
+                    1510,
+                    2116
+                  ],
+                  "dimensions": [
+                    785,
+                    1276
+                  ],
+                  "bounds": [
+                    10.950000000000008,
+                    -34.133333333333326,
+                    24.033333333333342,
+                    -12.86666666666666
+                  ],
+                  "minimumGutterPixels": 2.000000000000526
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "3f289fa3f7a323d27cd252774f2e753ba674ae902161b01fa71b53ccfa04dc3a"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_NAM",
+              "geometrySHA256": "dce5948b914856654d0018bf361bbb581a8a4cc39b43fca4bdb457ce0f8bedd8",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "ZONE_SMALL",
+              "geometrySHA256": "14ddaec7a966e2b25ecc7cc9c5ecf3f6a152c46e25a86101702d5d237fa28320",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[2]",
+              "scenePath": "$.geometries[2]",
+              "geometryId": "ZONE_LARGE",
+              "geometrySHA256": "198d5ad988438b20a1d4087911561a7febca0b55fef3774c77ebfa49b3a86c91",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[3]",
+              "scenePath": "$.geometries[3]",
+              "geometryId": "FRONT_SMALL",
+              "geometrySHA256": "c4ba921f479d1b83b94c5d76756a3527f151450ef00103ca59f91e6bb51fa802",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[4]",
+              "scenePath": "$.geometries[4]",
+              "geometryId": "FRONT_LARGE",
+              "geometrySHA256": "32ea6de5d92f4503c9d97ee4c9da46e10156e93b2df5b0ad0ddd5a93f4721d91",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[0].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 34,
+                "state_transition_frames": 34,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.namibia-fictional-zone.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        },
+        {
+          "sceneId": "namibia-fictional-zone-contract",
+          "startFrame": 90,
+          "endFrame": 180,
+          "sceneSHA256": "766138ddebe6ee35ff6e551c8d4a1a03dfb13bc5aeff0726d1378c698aa69bc8",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              17.5,
+              -23.5
+            ],
+            "bbox": [
+              11,
+              -30,
+              24,
+              -17
+            ],
+            "countryId": "COUNTRY_NAM"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "KEYFRAMES",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "center": [
+                    17.68,
+                    -23.6
+                  ],
+                  "zoom": 0.85
+                },
+                {
+                  "frame": 40,
+                  "center": [
+                    17.32,
+                    -23.4
+                  ],
+                  "zoom": 0.75
+                },
+                {
+                  "frame": 89,
+                  "center": [
+                    17.5,
+                    -23.5
+                  ],
+                  "zoom": 1
+                }
+              ]
+            },
+            "territoryColors": {
+              "FICTIONAL_RETRACT_START": [
+                0.1,
+                0.35,
+                0.95,
+                0.35
+              ],
+              "FICTIONAL_RETRACT_END": [
+                0.92,
+                0.14,
+                0.09,
+                0.32
+              ]
+            },
+            "highlights": [
+              {
+                "id": "windhoek-return-focus",
+                "locationId": "WINDHOEK",
+                "startFrame": 50,
+                "endFrame": 68
+              }
+            ],
+            "initialStateVisibility": "PRESERVE_PROVIDED",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                17.5,
+                -23.5
+              ],
+              "bbox": [
+                11,
+                -30,
+                24,
+                -17
+              ],
+              "countryId": "COUNTRY_NAM"
+            },
+            "fittedBounds": [
+              11,
+              -34.097138637339214,
+              24,
+              -12.90286136266079
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_NAM",
+            "contextCountryName": "Namibia",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "WINDHOEK",
+                "countryId": "COUNTRY_NAM",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  17.083546,
+                  -22.570006
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_NAMIBIA_DESERT_COAST_NATIVE_V1",
+            "sourceSHA256": "0d7d5e2db7770aad365c00a055044b92954d8711fa7d202ef4d495ee83c82068",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              1936,
+              2776
+            ],
+            "sourceBounds": [
+              -1.1333333333333258,
+              -45.133333333333326,
+              31.133333333333326,
+              1.13333333333334
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                725,
+                840,
+                1510,
+                2116
+              ],
+              "dimensions": [
+                785,
+                1276
+              ],
+              "bounds": [
+                10.950000000000008,
+                -34.133333333333326,
+                24.033333333333342,
+                -12.86666666666666
+              ],
+              "minimumGutterPixels": 2.000000000000526
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[1]",
+              "scenePath": "$",
+              "sceneId": "namibia-fictional-zone-contract",
+              "inputDataSHA256": "fd3cc16c90d6686769158288576d69484e9db9fa36ddc0c918878c288dca1330",
+              "sceneSHA256": "766138ddebe6ee35ff6e551c8d4a1a03dfb13bc5aeff0726d1378c698aa69bc8",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "4fa97d0410034841d4c66a3f332d2f64e45cffc3491181a58dbe23a48b4e7252",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "8fd20eda2962126eacaac9d6b45c981b964c895edd1d0501806ca38afbd1e3e1",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    17.5,
+                    -23.5
+                  ],
+                  "bbox": [
+                    11,
+                    -30,
+                    24,
+                    -17
+                  ],
+                  "countryId": "COUNTRY_NAM"
+                },
+                "fittedBounds": [
+                  11,
+                  -34.097138637339214,
+                  24,
+                  -12.90286136266079
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_NAM",
+                "contextCountryName": "Namibia",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "WINDHOEK",
+                    "countryId": "COUNTRY_NAM",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      17.083546,
+                      -22.570006
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_NAMIBIA_DESERT_COAST_NATIVE_V1",
+                "sourceSHA256": "0d7d5e2db7770aad365c00a055044b92954d8711fa7d202ef4d495ee83c82068",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  1936,
+                  2776
+                ],
+                "sourceBounds": [
+                  -1.1333333333333258,
+                  -45.133333333333326,
+                  31.133333333333326,
+                  1.13333333333334
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    725,
+                    840,
+                    1510,
+                    2116
+                  ],
+                  "dimensions": [
+                    785,
+                    1276
+                  ],
+                  "bounds": [
+                    10.950000000000008,
+                    -34.133333333333326,
+                    24.033333333333342,
+                    -12.86666666666666
+                  ],
+                  "minimumGutterPixels": 2.000000000000526
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "cdba042abcb0d23a6fa2b8aadd69c4a2133ce5b7683f5eca54f71610ba227a0a"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_NAM",
+              "geometrySHA256": "dce5948b914856654d0018bf361bbb581a8a4cc39b43fca4bdb457ce0f8bedd8",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "ZONE_SMALL",
+              "geometrySHA256": "14ddaec7a966e2b25ecc7cc9c5ecf3f6a152c46e25a86101702d5d237fa28320",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[2]",
+              "scenePath": "$.geometries[2]",
+              "geometryId": "ZONE_LARGE",
+              "geometrySHA256": "198d5ad988438b20a1d4087911561a7febca0b55fef3774c77ebfa49b3a86c91",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[3]",
+              "scenePath": "$.geometries[3]",
+              "geometryId": "FRONT_SMALL",
+              "geometrySHA256": "c4ba921f479d1b83b94c5d76756a3527f151450ef00103ca59f91e6bb51fa802",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[1].facts.geometries[4]",
+              "scenePath": "$.geometries[4]",
+              "geometryId": "FRONT_LARGE",
+              "geometrySHA256": "32ea6de5d92f4503c9d97ee4c9da46e10156e93b2df5b0ad0ddd5a93f4721d91",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[1].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 34,
+                "state_transition_frames": 34,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.namibia-fictional-zone-contract.initialStateVisibility",
+              "origin": "EXPLICIT_PUBLIC_AREA_OPERATION_MODE",
+              "value": "PRESERVE_PROVIDED",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NEW_REGION_JAPAN_NL",
+      "inputPath": "examples/NEW_REGION_JAPAN_NL.json",
+      "inputSHA256": "6f6b91a575faa0f35c829a6b02ede5199900a3cd20632e6f5fcb92bde44dfda2",
+      "totalFrames": 90,
+      "naturalLanguage": {
+        "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+        "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+        "unrestrictedLanguageUnderstanding": false,
+        "externalLLMUsed": false,
+        "rawPrompt": "Show the supplied TOKYO to KYOTO illustrative connection for 3 seconds. Move and zoom the camera, and highlight TOKYO. Use only the attached coordinates; no actual flight service is claimed.",
+        "topic": {
+          "text": "Show the supplied TOKYO to KYOTO illustrative connection for 3 seconds",
+          "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+          "factsInferred": false
+        },
+        "intents": [
+          {
+            "type": "CAMERA_MOVE",
+            "value": "CAMERA_MOVE",
+            "start": 72,
+            "end": 96,
+            "text": "Move and zoom the camera",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "durations": [
+          {
+            "type": "DURATION",
+            "value": 3,
+            "start": 61,
+            "end": 70,
+            "text": "3 seconds",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+          }
+        ],
+        "fps": [],
+        "dates": [],
+        "locations": [
+          {
+            "start": 18,
+            "end": 23,
+            "text": "TOKYO",
+            "id": "TOKYO",
+            "alias": "TOKYO",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              139.749462,
+              35.686963
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 112,
+            "end": 117,
+            "text": "TOKYO",
+            "id": "TOKYO",
+            "alias": "TOKYO",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              139.749462,
+              35.686963
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 27,
+            "end": 32,
+            "text": "KYOTO",
+            "id": "KYOTO",
+            "alias": "KYOTO",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              135.748052,
+              35.031938
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "routes": [],
+        "connections": [],
+        "coordinates": [],
+        "unsupported": [],
+        "uninterpretedText": "Show the supplied TOKYO to KYOTO illustrative connection for 3 seconds. Move and zoom the camera, and highlight TOKYO. Use only the attached coordinates; no actual flight service is claimed."
+      },
+      "transitionPlan": [],
+      "scenes": [
+        {
+          "sceneId": "japan-illustrative-aviation",
+          "startFrame": 0,
+          "endFrame": 90,
+          "sceneSHA256": "986cc75678f12b16cacf8daf788e57b99dcb299e63560aef3799d97c21ca0b1b",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              138,
+              37
+            ],
+            "bbox": [
+              130,
+              29,
+              145,
+              46
+            ],
+            "countryId": "COUNTRY_JPN"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "KEYFRAMES",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "center": [
+                    137.9,
+                    36.9
+                  ],
+                  "zoom": 0.85
+                },
+                {
+                  "frame": 40,
+                  "center": [
+                    138.1,
+                    37.1
+                  ],
+                  "zoom": 0.75
+                },
+                {
+                  "frame": 89,
+                  "center": [
+                    138,
+                    37
+                  ],
+                  "zoom": 1
+                }
+              ]
+            },
+            "highlights": [
+              {
+                "id": "tokyo-focus",
+                "locationId": "TOKYO",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                138,
+                37
+              ],
+              "bbox": [
+                130,
+                29,
+                145,
+                46
+              ],
+              "countryId": "COUNTRY_JPN"
+            },
+            "fittedBounds": [
+              130,
+              25.641628301549613,
+              146,
+              48.358371698450384
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_JPN",
+            "contextCountryName": "Japan",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "TOKYO",
+                "countryId": "COUNTRY_JPN",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  139.749462,
+                  35.686963
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "KYOTO",
+                "countryId": "COUNTRY_JPN",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  135.748052,
+                  35.031938
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "NE1_EAST_ASIA_NATIVE_V1",
+            "sourceSHA256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+            "license": "Public Domain",
+            "sourceDimensions": [
+              2880,
+              3360
+            ],
+            "sourceBounds": [
+              104,
+              7,
+              152,
+              63
+            ],
+            "nativePixelSpacing": [
+              0.016666666666666666,
+              0.016666666666666666
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                1558,
+                876,
+                2522,
+                2244
+              ],
+              "dimensions": [
+                964,
+                1368
+              ],
+              "bounds": [
+                129.96666666666667,
+                25.6,
+                146.03333333333333,
+                48.4
+              ],
+              "minimumGutterPixels": 1.9999999999998863
+            },
+            "terrainTreatment": "BAKED_RELIEF_V1",
+            "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[0]",
+              "scenePath": "$",
+              "sceneId": "japan-illustrative-aviation",
+              "inputDataSHA256": "eb7cc35521e6e773d4498bf743e509f35f68b8d2aea95a20d47f6fb8034370ed",
+              "sceneSHA256": "986cc75678f12b16cacf8daf788e57b99dcb299e63560aef3799d97c21ca0b1b",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "1a6e5ffccdd86cda88bda08276d9fe25ca31101f304496d7f3f0e0eafffbe25b",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "32a878a594f389c200424bdf81f898899d2ee60ab63299d4111081a2bdda0a45",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    138,
+                    37
+                  ],
+                  "bbox": [
+                    130,
+                    29,
+                    145,
+                    46
+                  ],
+                  "countryId": "COUNTRY_JPN"
+                },
+                "fittedBounds": [
+                  130,
+                  25.641628301549613,
+                  146,
+                  48.358371698450384
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_JPN",
+                "contextCountryName": "Japan",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "TOKYO",
+                    "countryId": "COUNTRY_JPN",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      139.749462,
+                      35.686963
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "KYOTO",
+                    "countryId": "COUNTRY_JPN",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      135.748052,
+                      35.031938
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "NE1_EAST_ASIA_NATIVE_V1",
+                "sourceSHA256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+                "license": "Public Domain",
+                "sourceDimensions": [
+                  2880,
+                  3360
+                ],
+                "sourceBounds": [
+                  104,
+                  7,
+                  152,
+                  63
+                ],
+                "nativePixelSpacing": [
+                  0.016666666666666666,
+                  0.016666666666666666
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    1558,
+                    876,
+                    2522,
+                    2244
+                  ],
+                  "dimensions": [
+                    964,
+                    1368
+                  ],
+                  "bounds": [
+                    129.96666666666667,
+                    25.6,
+                    146.03333333333333,
+                    48.4
+                  ],
+                  "minimumGutterPixels": 1.9999999999998863
+                },
+                "terrainTreatment": "BAKED_RELIEF_V1",
+                "styleId": "NE1_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "4cc8718bce4def40f181339c8d9471730de575073cc1de07fc54ff4654503e66"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_JPN",
+              "geometrySHA256": "24ac34fba4f39dde08bd3eb11a6ac907742975b78e7b42a3833e920eaaceb4ad",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "DECLARED_CONNECTION",
+              "geometrySHA256": "6326f63e0b351d95d6cc17444989032f6c9636feb7dda60588169ba80896d283",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[0].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 0,
+                "state_transition_frames": 0,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.japan-illustrative-aviation.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NEW_REGION_AUSTRALIA_NL",
+      "inputPath": "examples/NEW_REGION_AUSTRALIA_NL.json",
+      "inputSHA256": "e2ca5fb38ced8fe4af6fb138e878e406dbd1f65e4853ed3b0e902f67de25bae9",
+      "totalFrames": 90,
+      "naturalLanguage": {
+        "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+        "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+        "unrestrictedLanguageUnderstanding": false,
+        "externalLLMUsed": false,
+        "rawPrompt": "제공한 ALICE_SPRINGS, CANBERRA, MELBOURNE 좌표를 연결하는 3초 가상 연결 영상을 만들어줘. 카메라 이동과 줌을 적용하고 제공한 도시를 강조해줘. 실제 항공편이나 물류량은 주장하지 않아.",
+        "topic": {
+          "text": "제공한 ALICE_SPRINGS, CANBERRA, MELBOURNE 좌표를 연결하는 3초 가상 연결 영상을 만들어줘",
+          "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+          "factsInferred": false
+        },
+        "intents": [
+          {
+            "type": "CAMERA_MOVE",
+            "value": "CAMERA_MOVE",
+            "start": 67,
+            "end": 73,
+            "text": "카메라 이동",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "type": "LOCATION_HIGHLIGHT",
+            "value": "LOCATION_HIGHLIGHT",
+            "start": 87,
+            "end": 93,
+            "text": "도시를 강조",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "durations": [
+          {
+            "type": "DURATION",
+            "value": 3,
+            "start": 48,
+            "end": 50,
+            "text": "3초",
+            "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+          }
+        ],
+        "fps": [],
+        "dates": [],
+        "locations": [
+          {
+            "start": 4,
+            "end": 17,
+            "text": "ALICE_SPRINGS",
+            "id": "ALICE_SPRINGS",
+            "alias": "ALICE_SPRINGS",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              133.880034,
+              -23.700996
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 19,
+            "end": 27,
+            "text": "CANBERRA",
+            "id": "CANBERRA",
+            "alias": "CANBERRA",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              149.129026,
+              -35.283029
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          },
+          {
+            "start": 29,
+            "end": 38,
+            "text": "MELBOURNE",
+            "id": "MELBOURNE",
+            "alias": "MELBOURNE",
+            "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+            "suppliedAnchor": [
+              144.97307,
+              -37.818086
+            ],
+            "ambiguousAnchor": false,
+            "scope": {
+              "sceneIndices": null,
+              "method": "UNSCOPED_SHARED_INTENT"
+            }
+          }
+        ],
+        "routes": [],
+        "connections": [],
+        "coordinates": [],
+        "unsupported": [],
+        "uninterpretedText": "제공한 ALICE_SPRINGS, CANBERRA, MELBOURNE 좌표를 연결하는 3초 가상 연결 영상을 만들어줘. 카메라 이동과 줌을 적용하고 제공한 도시를 강조해줘. 실제 항공편이나 물류량은 주장하지 않아."
+      },
+      "transitionPlan": [],
+      "scenes": [
+        {
+          "sceneId": "australia-illustrative-connection",
+          "startFrame": 0,
+          "endFrame": 90,
+          "sceneSHA256": "e36bc7b3b85243ce336f00f9ae5d359c761b559e9ed750ceb92334d02db77d6d",
+          "region": {
+            "sourceId": "AUTO",
+            "crs": "EPSG:4326",
+            "center": [
+              139.5,
+              -29.5
+            ],
+            "bbox": [
+              126,
+              -42,
+              153,
+              -17
+            ],
+            "countryId": "COUNTRY_AUS"
+          },
+          "presentation": {
+            "camera": {
+              "mode": "KEYFRAMES",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "center": [
+                    139.35,
+                    -29.6
+                  ],
+                  "zoom": 0.85
+                },
+                {
+                  "frame": 40,
+                  "center": [
+                    139.65,
+                    -29.4
+                  ],
+                  "zoom": 0.75
+                },
+                {
+                  "frame": 89,
+                  "center": [
+                    139.5,
+                    -29.5
+                  ],
+                  "zoom": 1
+                }
+              ]
+            },
+            "highlights": [
+              {
+                "id": "canberra-focus",
+                "locationId": "CANBERRA",
+                "startFrame": 12,
+                "endFrame": 28
+              }
+            ],
+            "initialStateVisibility": "REVEAL",
+            "transitions": []
+          },
+          "regionEvidence": {
+            "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+            "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+            "request": {
+              "sourceId": "AUTO",
+              "crs": "EPSG:4326",
+              "center": [
+                139.5,
+                -29.5
+              ],
+              "bbox": [
+                126,
+                -42,
+                153,
+                -17
+              ],
+              "countryId": "COUNTRY_AUS"
+            },
+            "fittedBounds": [
+              126,
+              -50.388536702557595,
+              153,
+              -8.611463297442405
+            ],
+            "preservedLegacyFraming": false,
+            "contextCountryId": "COUNTRY_AUS",
+            "contextCountryName": "Australia",
+            "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+            "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+            "locationCountryChecks": [
+              {
+                "locationId": "ALICE_SPRINGS",
+                "countryId": "COUNTRY_AUS",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  133.880034,
+                  -23.700996
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "CANBERRA",
+                "countryId": "COUNTRY_AUS",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  149.129026,
+                  -35.283029
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              },
+              {
+                "locationId": "MELBOURNE",
+                "countryId": "COUNTRY_AUS",
+                "status": "INSIDE_OR_BOUNDARY",
+                "geographic": [
+                  144.97307,
+                  -37.818086
+                ],
+                "boundaryDistanceDegrees": 0,
+                "boundaryUncertaintyDegrees": 0.1
+              }
+            ],
+            "sourceId": "GLOBAL_EARTH_DAY_RGB_V1",
+            "sourceSHA256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+            "license": "CC-BY-4.0",
+            "sourceDimensions": [
+              8192,
+              4096
+            ],
+            "sourceBounds": [
+              -180,
+              -90,
+              180,
+              90
+            ],
+            "nativePixelSpacing": [
+              0.0439453125,
+              0.0439453125
+            ],
+            "initialWindow": {
+              "pixelBox": [
+                6961,
+                2241,
+                7580,
+                3197
+              ],
+              "dimensions": [
+                619,
+                956
+              ],
+              "bounds": [
+                125.9033203125,
+                -50.4931640625,
+                153.10546875,
+                -8.4814453125
+              ],
+              "minimumGutterPixels": 2.2
+            },
+            "terrainTreatment": "CURRENT",
+            "styleId": "GLOBAL_RGB_SOURCE_NATIVE_COVERAGE",
+            "originalNE1Materialized": false,
+            "sourceBytesActuallyVerified": true,
+            "trajectoryCoverageRequiredBeforeStart": true,
+            "noElevationCreated": true,
+            "noHistoricalOwnershipInferred": true
+          },
+          "inputTrace": [
+            {
+              "inputPath": "$.data.scenes[0]",
+              "scenePath": "$",
+              "sceneId": "australia-illustrative-connection",
+              "inputDataSHA256": "3b091f5a17476e6a36af393c9aeb0edf214325ec5802601085c54bee9f505bd4",
+              "sceneSHA256": "e36bc7b3b85243ce336f00f9ae5d359c761b559e9ed750ceb92334d02db77d6d",
+              "authoritativeSource": "USER_ATTACHED_STRUCTURE"
+            },
+            {
+              "inputPath": "$.prompt",
+              "scenePath": "$.presentation",
+              "rawPromptSHA256": "8d16d0b53232c4db1610fb533b5e9e0f58aab3c757381a3c3a1070dc08ae4458",
+              "boundedIntentExtraction": true,
+              "factsGenerated": false
+            },
+            {
+              "inputPath": "$.region",
+              "scenePath": "$.runtime.region",
+              "regionSHA256": "228be243deed650cbc72e4f13cd75754a652368b5f97f6a84a01e62657bda4ed",
+              "actualSourceQualification": {
+                "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+                "catalogSHA256": "00cd6b5e6903da221b9c9dd5d60dca967d2cb12a5e8ff990940bf33588b3755b",
+                "request": {
+                  "sourceId": "AUTO",
+                  "crs": "EPSG:4326",
+                  "center": [
+                    139.5,
+                    -29.5
+                  ],
+                  "bbox": [
+                    126,
+                    -42,
+                    153,
+                    -17
+                  ],
+                  "countryId": "COUNTRY_AUS"
+                },
+                "fittedBounds": [
+                  126,
+                  -50.388536702557595,
+                  153,
+                  -8.611463297442405
+                ],
+                "preservedLegacyFraming": false,
+                "contextCountryId": "COUNTRY_AUS",
+                "contextCountryName": "Australia",
+                "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+                "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+                "locationCountryChecks": [
+                  {
+                    "locationId": "ALICE_SPRINGS",
+                    "countryId": "COUNTRY_AUS",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      133.880034,
+                      -23.700996
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "CANBERRA",
+                    "countryId": "COUNTRY_AUS",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      149.129026,
+                      -35.283029
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  },
+                  {
+                    "locationId": "MELBOURNE",
+                    "countryId": "COUNTRY_AUS",
+                    "status": "INSIDE_OR_BOUNDARY",
+                    "geographic": [
+                      144.97307,
+                      -37.818086
+                    ],
+                    "boundaryDistanceDegrees": 0,
+                    "boundaryUncertaintyDegrees": 0.1
+                  }
+                ],
+                "sourceId": "GLOBAL_EARTH_DAY_RGB_V1",
+                "sourceSHA256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+                "license": "CC-BY-4.0",
+                "sourceDimensions": [
+                  8192,
+                  4096
+                ],
+                "sourceBounds": [
+                  -180,
+                  -90,
+                  180,
+                  90
+                ],
+                "nativePixelSpacing": [
+                  0.0439453125,
+                  0.0439453125
+                ],
+                "initialWindow": {
+                  "pixelBox": [
+                    6961,
+                    2241,
+                    7580,
+                    3197
+                  ],
+                  "dimensions": [
+                    619,
+                    956
+                  ],
+                  "bounds": [
+                    125.9033203125,
+                    -50.4931640625,
+                    153.10546875,
+                    -8.4814453125
+                  ],
+                  "minimumGutterPixels": 2.2
+                },
+                "terrainTreatment": "CURRENT",
+                "styleId": "GLOBAL_RGB_SOURCE_NATIVE_COVERAGE",
+                "originalNE1Materialized": false,
+                "sourceBytesActuallyVerified": true,
+                "trajectoryCoverageRequiredBeforeStart": true,
+                "noElevationCreated": true,
+                "noHistoricalOwnershipInferred": true
+              }
+            },
+            {
+              "inputPath": "$.presentation",
+              "scenePath": "$.runtime.presentation",
+              "presentationSHA256": "c26cba4dac2e0175a30e02bfbbbfc35bae22be7a445e7bc391271898537d4fc2"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[0]",
+              "scenePath": "$.geometries[0]",
+              "geometryId": "COUNTRY_AUS",
+              "geometrySHA256": "ab090f5f3a9563fff4f3e665157317bd54df20a3dfb743bdcf6fc40088474477",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "inputPath": "$.data.scenes[0].facts.geometries[1]",
+              "scenePath": "$.geometries[1]",
+              "geometryId": "DECLARED_CONNECTION",
+              "geometrySHA256": "9b6140563ae486c00cf774243388263b3ecbb3def7f81787cf8a067f54a4da49",
+              "sourceId": "SUPPLIED_FIXTURE"
+            },
+            {
+              "field": "$.data.scenes[0].facts.scene_timing",
+              "origin": "EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION",
+              "worldFactCreated": false,
+              "value": {
+                "fps": 30,
+                "total_frames": 90,
+                "duration_seconds": 3,
+                "camera_lock_frame": 0,
+                "event_start_frame": 0,
+                "initial_reveal_frames": 0,
+                "state_transition_frames": 0,
+                "final_hold_frames": 22,
+                "action_frames": 68,
+                "frame_policy": "INTEGER_DETERMINISTIC",
+                "blank_interstage_frames": 0
+              }
+            },
+            {
+              "field": "$.presentation.sceneOverrides.australia-illustrative-connection.initialStateVisibility",
+              "origin": "PRESERVED_REVEAL_DEFAULT",
+              "value": "REVEAL",
+              "worldGeometryChanged": false,
+              "worldClockChanged": false
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

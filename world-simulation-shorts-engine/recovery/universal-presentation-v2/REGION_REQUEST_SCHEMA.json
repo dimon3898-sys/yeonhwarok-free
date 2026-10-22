@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "WORLD_ENGINE_REGION_REQUEST_V2",
+  "title": "Server provider region request; Studio prompt envelope uses explicit center and bbox",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "center": {"type": "array", "minItems": 2, "maxItems": 2, "prefixItems": [{"type": "number", "minimum": -180, "maximum": 180}, {"type": "number", "minimum": -90, "maximum": 90}], "items": false},
+    "bbox": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}, "description": "[west,south,east,north]; runtime rejects reversed/dateline/polar bounds and unsupported actual source coverage"},
+    "countryId": {"type": "string", "minLength": 1},
+    "countryName": {"type": "string", "minLength": 1, "description": "Provider-level existing GIS identity matching; not free-text geocoding"},
+    "sourceId": {"type": "string", "minLength": 1, "default": "AUTO"},
+    "crs": {"const": "EPSG:4326", "default": "EPSG:4326"},
+    "legacyProfileId": {"type": "string", "minLength": 1, "description": "Internal provider regression alias to a preserved profile; not inferred from topic or natural language"}
+  },
+  "anyOf": [{"required": ["center", "bbox"]}, {"required": ["legacyProfileId"]}]
+}
