@@ -41,6 +41,7 @@ def validate_package(raw, expected_sha):
     total = pipeline.get('totalFrames')
     selected = pipeline.get('runtimePayload', {})
     scene = selected.get('scene')
+    wire = selected.get('sceneWireJSON')
     if (package.get('schema') != SCHEMA or package.get('profile') != PROFILE
             or pipeline.get('ready') is not True or pipeline.get('scope') != PROFILE
             or pipeline.get('mode') != 'FREE_DATA_REVIEW' or pipeline.get('simulationType') not in {'FICTIONAL', 'GENERAL'}
@@ -52,6 +53,8 @@ def validate_package(raw, expected_sha):
             or sha(canonical(pipeline.get('originalRequest'))) != pipeline.get('requestSHA256')
             or not isinstance(scene, dict) or scene != package.get('videoPlan')
             or sha(canonical(scene)) != pipeline.get('sceneSHA256')
+            or not isinstance(wire, str) or sha(wire.encode()) != pipeline.get('sceneWireSHA256')
+            or json.loads(wire) != scene
             or scene.get('timing', {}).get('total_frames') != total
             or scene.get('timing', {}).get('fps') != 30
             or selected.get('sceneId') != pipeline.get('explicitSelectedSceneId')):
@@ -99,7 +102,7 @@ def validate_capture(directory, pipeline):
     # audit. Here the file, clock, and backend declaration cannot be fabricated.
     if (receipt.get('schema') != 'WORLD_ENGINE_UNIVERSAL_DATA_CAPTURE_V1'
             or receipt.get('status') != 'TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'
-            or receipt.get('sceneSHA256') != pipeline['sceneSHA256']
+            or receipt.get('sceneSHA256') != pipeline['sceneWireSHA256']
             or receipt.get('sourceRegionId') != pipeline['runtimePayload']['renderSettings']['sourceRegionId']
             or receipt.get('totalFrames') != total or receipt.get('renderedFrames') != total
             or receipt.get('softwareOnly') is not True or receipt.get('nvidiaVerified') is not False
@@ -111,6 +114,7 @@ def validate_capture(directory, pipeline):
         raise RuntimeError('UDP_CAPTURE_RECEIPT_BINDING_INVALID')
     return {'videoSHA256': sha(data), 'videoBytes': len(data), 'totalFrames': total,
         'resolution': [1080, 1920], 'fps': 30, 'fullDecode': 'PASS', 'receipt': receipt,
+        'sceneSemanticSHA256': pipeline['sceneSHA256'], 'sceneWireSHA256': pipeline['sceneWireSHA256'],
         'gpuRenderingVerified': False, 'qualityApproved': False}
 
 
@@ -136,7 +140,7 @@ def run(args):
         selected = pipeline['runtimePayload']
         scene_file = job / 'ACTUAL_SCENE.json'
         with scene_file.open('xb') as stream:
-            stream.write(canonical(selected['scene']))
+            stream.write(selected['sceneWireJSON'].encode())
         os.chmod(scene_file, 0o600)
         trace_file = job / 'INPUT_TRACE.json'
         with trace_file.open('x') as stream:
@@ -149,7 +153,7 @@ def run(args):
         atomic(state_file, state)
         stage = 'ACTUAL_STUDIO_SOURCE_RENDER'
         command = ['node', str(HERE / 'capture_generic.mjs'), '--scene=' + str(scene_file),
-            '--output-root=' + str(output), '--expected-sha256=' + pipeline['sceneSHA256'],
+            '--output-root=' + str(output), '--expected-sha256=' + pipeline['sceneWireSHA256'],
             '--source-region=' + selected['renderSettings']['sourceRegionId'], '--input-trace=' + str(trace_file)]
         remaining = (datetime.fromisoformat(receipt['expiresAt'].replace('Z', '+00:00')) - datetime.now(timezone.utc)).total_seconds()
         child = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, text=True, bufsize=1, start_new_session=True)
@@ -210,6 +214,7 @@ def run(args):
         result = {'jobId': job.name, 'state': 'COMPLETED', 'softwareOnly': True,
             'historicalRenderAllowed': False, 'paidRenderAllowed': False, 'gpuRenderingVerified': False,
             'userApproved': False, 'downloads': downloads, 'sourceSceneSHA256': pipeline['sceneSHA256'],
+            'sceneWireSHA256': pipeline['sceneWireSHA256'],
             'captureSignature': pipeline['captureSignature'], 'sourceInputSHA256': pipeline['compilerInputSHA256'],
             'actualRuntime': 'SOURCE_CHECKOUT_NOT_OCI_IMAGE'}
         atomic(job / 'result.json', result)

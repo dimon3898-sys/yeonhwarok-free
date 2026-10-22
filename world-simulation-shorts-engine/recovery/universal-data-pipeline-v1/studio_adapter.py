@@ -137,15 +137,7 @@ class StudioController(manager.StudioController):
             raise StudioError('UDP_BOUNDED_SOFTWARE_FRAMES_REQUIRED')
         # Existing historical G3 remains blocked. No prompt-level VERIFIED flag,
         # accepted chronology or new data analysis can authorize its pixel lane.
-        simulation = analyzed.get('simulationType') or (prompt.get('simulationType') if isinstance(prompt, dict) else None)
-        if simulation is None and isinstance(prompt, str):
-            text = prompt.strip()
-            if text.startswith('```'):
-                text = re.sub(r'^```(?:json)?\s*\n|\n```$', '', text)
-            try:
-                simulation = json.loads(text).get('simulationType')
-            except (ValueError, AttributeError):
-                pass
+        simulation = analyzed.get('simulationType')
         if simulation not in {'GENERAL', 'FICTIONAL', 'HISTORICAL'}:
             raise StudioError('UDP_SIMULATION_TYPE_REQUIRED')
         history_blocked = simulation == 'HISTORICAL'
@@ -154,8 +146,15 @@ class StudioController(manager.StudioController):
             raise StudioError('UDP_SOURCE_REGION_UNSUPPORTED')
         request_hash = sha(canonical(value))
         scene_hash = sha(canonical(scene))
+        # The preserved Scene validator checks canonical *member order* inside
+        # geometry records using JSON.stringify. PrivateTree storage deliberately
+        # sorts JSON keys, so preserve the compiler's validated wire ordering as
+        # a string while independently binding its semantic hash.
+        scene_wire = json.dumps(scene, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+        scene_wire_hash = sha(scene_wire.encode())
+        selected['sceneWireJSON'] = scene_wire
         bindings = source_bindings()
-        identity = {'requestSHA256': request_hash, 'sceneSHA256': scene_hash,
+        identity = {'requestSHA256': request_hash, 'sceneSHA256': scene_hash, 'sceneWireSHA256': scene_wire_hash,
             'compilerInputSHA256': analyzed.get('inputSHA256'), 'registrySHA256': self.registry_pin,
             'sourceRegionId': region, 'executionSourceBindings': bindings}
         return {'schema': SCHEMA, 'title': str(scene.get('subject', {}).get('label') or value['sceneId'])[:180],
@@ -164,7 +163,7 @@ class StudioController(manager.StudioController):
                 'simulationType': simulation, 'blockers': ['UDP_HISTORICAL_G3_REMAINS_BLOCKED'] if history_blocked else [],
                 'totalFrames': frames, 'fps': 30, 'startFrame': 0, 'requestSHA256': request_hash,
                 'originalRequest': deepcopy(value), 'runtimePayload': selected,
-                'sceneSHA256': scene_hash, 'compilerInputSHA256': analyzed.get('inputSHA256'),
+                'sceneSHA256': scene_hash, 'sceneWireSHA256': scene_wire_hash, 'compilerInputSHA256': analyzed.get('inputSHA256'),
                 'sourceBindings': bindings, 'sourceRegistrySHA256': self.registry_pin,
                 'captureSignature': sha(canonical(identity)), 'blockedSceneIds': analyzed.get('blockedSceneIds', []),
                 'explicitSelectedSceneId': value['sceneId'], 'validation': {

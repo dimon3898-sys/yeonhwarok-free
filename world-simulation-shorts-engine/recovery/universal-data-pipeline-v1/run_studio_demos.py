@@ -42,7 +42,9 @@ def require_gates(file, expected):
     return data
 
 
-def run_one(private, request_file, name, *, evidence_registry=None, registry_pin=None):
+def run_one(private, request_file, name, *, evidence_registry=None, registry_pin=None, attempt='attempt-01'):
+    if not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', attempt):
+        raise RuntimeError('UDP_ATTEMPT_ID_INVALID')
     if not re.fullmatch(r'[A-Z][A-Z0-9_]{1,60}', name):
         raise RuntimeError('UDP_DEMO_PUBLIC_NAME_INVALID')
     private.mkdir(mode=0o700, exist_ok=False)
@@ -107,8 +109,8 @@ def run_one(private, request_file, name, *, evidence_registry=None, registry_pin
             'historicalG3': 'BLOCKED', 'userQualityApproved': False,
             'requestSHA256': hashlib.sha256(bound_request.read_bytes()).hexdigest(),
             'sourceFixtureSHA256': hashlib.sha256(request_file.read_bytes()).hexdigest(),
-            'explicitSceneId': request['sceneId'], 'publicName': name}
-        report_file = HERE / 'reports' / (name + '_STUDIO_EXECUTION.json')
+            'explicitSceneId': request['sceneId'], 'publicName': name, 'attempt': attempt}
+        report_file = HERE / 'reports' / (name + '_STUDIO_EXECUTION_' + attempt + '.json')
         with report_file.open('x') as file:
             json.dump(report, file, indent=2); file.write('\n')
         if status['state'] != 'COMPLETED':
@@ -150,11 +152,11 @@ def run(args):
         # Serial jobs make the resource and timeout bound explicit; never batch
         # three GPU contexts or render unrequested neighbouring scenes.
         results.append(run_one(private / ('case-' + str(index + 1)), request, name,
-            evidence_registry=args.evidence_registry, registry_pin=args.expected_registry_sha256))
+            evidence_registry=args.evidence_registry, registry_pin=args.expected_registry_sha256, attempt=args.attempt))
     report = {'schema': 'WORLD_ENGINE_UDP_REAL_STUDIO_DEMOS_V1', 'jobs': results,
         'gateSHA256': args.expected_gate_sha256, 'softwareOnly': True, 'nvidiaVerified': False,
         'paidExecuted': False, 'qualityStatus': 'QUALITY_REVIEW_REQUIRED', 'historicalG3': 'BLOCKED'}
-    with (HERE / 'reports/STUDIO_DEMOS.json').open('x') as file:
+    with (HERE / 'reports' / ('STUDIO_DEMOS_' + args.attempt + '.json')).open('x') as file:
         json.dump(report, file, indent=2); file.write('\n')
     return report
 
@@ -162,6 +164,7 @@ def run(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--private-root', type=Path, required=True)
+    parser.add_argument('--attempt', default='attempt-01')
     parser.add_argument('--gate-file', type=Path, required=True)
     parser.add_argument('--expected-gate-sha256', required=True)
     parser.add_argument('--request', type=Path, action='append', required=True)

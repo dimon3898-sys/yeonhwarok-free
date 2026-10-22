@@ -1,0 +1,85 @@
+{
+  "schema": "WORLD_ENGINE_UDP_STUDIO_WIRE_RECOVERY_V1",
+  "status": "PASS",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python -B -m unittest discover -s world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/tests -p test_studio_adapter.py -v",
+  "exitCode": 0,
+  "tests": 22,
+  "passed": 22,
+  "failures": 0,
+  "errors": 0,
+  "observedDurationSeconds": 6.425,
+  "toolOutputChunk": "1ef11e",
+  "testNames": [
+    "ControllerTests.test_normalization_preserves_standard_scene_and_trace",
+    "ControllerTests.test_unknown_or_production_request_has_no_fallback",
+    "ControllerTests.test_partial_selection_is_explicit_and_blocked_scene_cannot_start",
+    "ControllerTests.test_historical_g3_remains_blocked_even_mock_compiler_says_pass",
+    "ControllerTests.test_server_opt_in_required",
+    "ControllerTests.test_consent_required_before_child_launch",
+    "ControllerTests.test_duplicate_start_and_reconnect_reuse_same_claim",
+    "ControllerTests.test_other_active_job_is_blocked",
+    "ControllerTests.test_submit_to_start_source_change_is_rejected",
+    "ControllerTests.test_restart_constructor_never_starts_and_resume_forbidden",
+    "ControllerTests.test_state_cannot_be_shared_export_or_repo",
+    "ControllerTests.test_server_registry_hash_not_client_truth_flag",
+    "ControllerTests.test_worker_bound_package_and_historical_rejection",
+    "ControllerTests.test_changed_wire_bytes_are_rejected_even_if_semantics_match",
+    "ControllerTests.test_expired_receipt_is_rejected",
+    "HttpSecurityTests.test_real_server_auth_csrf_origin_and_owner_form_preserved",
+    "ActualCompilerStudioTests.test_real_invalid_coordinate_is_blocked_before_job",
+    "ActualCompilerStudioTests.test_all_three_real_nonhistorical_inputs_select_actual_scene",
+    "ActualCompilerStudioTests.test_missing_future_scene_does_not_silently_replace_it",
+    "ActualCompilerStudioTests.test_real_sixty_fps_cannot_claim_render_ready",
+    "ActualCompilerStudioTests.test_actual_compiler_private_persistence_preserves_renderer_wire",
+    "ActualCompilerStudioTests.test_real_historical_control_data_remains_blocked"
+  ],
+  "confirmedCause": {
+    "firstActualFailure": "PLANNER_SCENE_NON_CANONICAL_GEOMETRY",
+    "affectedStage": "Persisted private Scene JSON before first renderer draw",
+    "privateStorage": "universal-auto-video-v2/cache.py canonical_bytes uses sort_keys=True",
+    "protectedValidator": "planner_scene_v1.mjs:498-499 reconstructs canonical geometry then compares JSON.stringify, sensitive to object member order",
+    "numericOrCoordinateMutation": false
+  },
+  "fix": {
+    "sourceFiles": [
+      "studio_adapter.py",
+      "software_worker.py",
+      "run_studio_demos.py",
+      "tests/test_studio_adapter.py"
+    ],
+    "sceneSemanticSHA256": "Unchanged canonical semantic Scene identity retained as sourcePipeline.sceneSHA256",
+    "sceneWireSHA256": "Separate hash binds exact compiler-emitted member order through Scene JSON string private persistence",
+    "validatorChanged": false,
+    "comparisonWeakened": false,
+    "geometryRepairedOrReorderedAfterStorage": false,
+    "wireStringStoredBeforePrivateSerialization": true,
+    "workerChecks": [
+      "Original package SHA",
+      "Wire SHA",
+      "Parsed wire equals bound persisted Scene",
+      "Semantic Scene SHA",
+      "Existing full capture raw-wire SHA and media contract"
+    ],
+    "oldFailedJobAndReportsPreserved": true,
+    "runnerAttemptLabel": "--attempt=02 makes NAME_STUDIO_EXECUTION_02.json and STUDIO_DEMOS_02.json; canonical public names unchanged"
+  },
+  "actualCompilerPersistenceTests": {
+    "cases": [
+      "AVIATION_GERMANY.json",
+      "FICTIONAL_NAMIBIA.json",
+      "TRADE_CHILE.json"
+    ],
+    "steps": [
+      "Real analyzePrompt compiler",
+      "PrivateTree submit/write/read canonical sorted package",
+      "Re-normalized immutable binding hash equality",
+      "Sorted Scene reproduces exact protected validator rejection",
+      "Preserved Scene wire passes unchanged protected validateScenePlan",
+      "buildRuntimePayload succeeds with identical geometry binding"
+    ],
+    "renderedFrames": 0
+  },
+  "gpuExecuted": false,
+  "paidExecution": false,
+  "actualVisualQualityClaimed": false
+}

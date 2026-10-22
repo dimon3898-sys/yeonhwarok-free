@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import subprocess
 import threading
 import unittest
 from unittest.mock import patch
@@ -27,8 +28,8 @@ REQUEST = {'schema': m.REQUEST_SCHEMA, 'prompt': {'schema': 'WORLD_ENGINE_DATA_P
 
 def compiler(prompt, registry):
     scene = {'metadata': {'schema': 'PLANNER_SCENE_JSON_V1', 'output': {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False}}, 'subject': {'label': 'Unit test supplied route'},
-        'timing': {'fps': 30, 'total_frames': 60}, 'inputData': deepcopy(prompt)}
-    return {'schema': 'WORLD_ENGINE_DATA_PIPELINE_RESULT_V1', 'status': 'PASS', 'inputSHA256': m.sha(m.canonical(prompt)),
+        'timing': {'fps': 30, 'total_frames': 60}, 'inputData': json.loads(m.canonical(prompt))}
+    return {'schema': 'WORLD_ENGINE_DATA_PIPELINE_RESULT_V1', 'simulationType': prompt.get('simulationType', 'GENERAL'), 'status': 'PASS', 'inputSHA256': m.sha(m.canonical(prompt)),
         'issues': [], 'sceneResults': [{'sceneId': 'unit-route', 'status': 'PASS'}],
         'renderableSceneIds': ['unit-route'], 'blockedSceneIds': [],
         'renderRequests': [{'sceneId': 'unit-route', 'scene': scene, 'enginePlan': {}, 'renderSettings': {'sourceRegionId': 'europe_germany'}, 'sourceManifest': []}]}
@@ -155,6 +156,15 @@ class ControllerTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 w.validate_package(encoded, w.sha(encoded))
 
+    def test_changed_wire_bytes_are_rejected_even_if_semantics_match(self):
+        _, state, _ = self.start_mock()
+        file = self.controller.control_root / 'source-jobs' / state['jobId'] / 'compiledpackage.json'
+        package = json.loads(file.read_bytes())
+        package['sourcePipeline']['runtimePayload']['sceneWireJSON'] += ' '
+        raw = w.canonical(package)
+        with self.assertRaisesRegex(RuntimeError, 'EXECUTION_SCOPE_INVALID'):
+            w.validate_package(raw, w.sha(raw))
+
     def test_expired_receipt_is_rejected(self):
         _, state, _ = self.start_mock()
         file = self.controller.control_root / 'source-jobs' / state['jobId'] / 'compiledpackage.json'
@@ -252,6 +262,43 @@ class ActualCompilerStudioTests(unittest.TestCase):
         request['prompt']['fps'] = 60
         request['prompt']['durationSeconds'] /= 2
         self.assertFalse(self.controller.preflight(request)['ready'])
+
+    def test_actual_compiler_private_persistence_preserves_renderer_wire(self):
+        for filename in ('AVIATION_GERMANY.json', 'FICTIONAL_NAMIBIA.json', 'TRADE_CHILE.json'):
+            request = self.request(filename)
+            submitted = self.controller.submit(request)
+            with self.controller._cache.PrivateTree(self.controller.control_root) as root:
+                restored = self.controller._read_submission(root, submitted['submissionId'])['submission']
+            self.assertEqual(m.manager._sha(self.controller._normal(restored['sourcePipeline']['originalRequest'])), m.manager._sha(restored))
+            pipeline = restored['sourcePipeline']
+            scene = restored['videoPlan']
+            wire = pipeline['runtimePayload']['sceneWireJSON']
+            self.assertEqual(json.loads(wire), scene)
+            self.assertEqual(m.sha(m.canonical(scene)), pipeline['sceneSHA256'])
+            self.assertEqual(m.sha(wire.encode()), pipeline['sceneWireSHA256'])
+            self.assertNotEqual(m.canonical(scene), wire.encode())
+            # The stored-object key order reproduces the exact first failure;
+            # preserving the compiler wire cures it without changing that object.
+            script = """import{readFileSync}from'node:fs';
+const p=JSON.parse(readFileSync(0,'utf8'));
+const{validateScenePlan}=await import(p.planner);
+let oldFailure=null;try{validateScenePlan(p.sorted);}catch(e){oldFailure=e.message;}
+if(oldFailure!=='PLANNER_SCENE_NON_CANONICAL_GEOMETRY')throw Error('FAILURE_NOT_REPRODUCED:'+oldFailure);
+const actual=JSON.parse(p.wire);validateScenePlan(actual);
+const{buildRuntimePayload}=await import(p.capture);
+const runtime=await buildRuntimePayload({scene:actual,sourceRegionId:p.region});
+process.stdout.write(JSON.stringify({oldFailure,wireValidated:true,region:runtime.serverBindings.sourceRegionId,family:actual.event_type,geometryBindingMatches:runtime.serverBindings.inputGeometryBinding===JSON.stringify(actual.geometries),rendered:false}));"""
+            payload = {'sorted': scene, 'wire': wire,
+                'planner': (HERE.parent.parent / 'web/map_infographic_v1/planner_scene_v1.mjs').as_uri(),
+                'capture': (HERE / 'capture_generic.mjs').as_uri(),
+                'region': pipeline['runtimePayload']['renderSettings']['sourceRegionId']}
+            result = subprocess.run(['node', '--input-type=module', '-e', script], input=m.canonical(payload),
+                capture_output=True, timeout=60, check=False)
+            self.assertEqual(result.returncode, 0, result.stderr.decode()[-1500:])
+            evidence = json.loads(result.stdout)
+            self.assertTrue(evidence['wireValidated'])
+            self.assertTrue(evidence['geometryBindingMatches'])
+            self.assertFalse(evidence['rendered'])
 
     def test_real_historical_control_data_remains_blocked(self):
         request = self.request('KOREAN_WAR_MISSING_CONTROL.json')

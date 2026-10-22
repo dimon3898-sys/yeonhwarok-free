@@ -39,8 +39,8 @@
       "required": "Reject until actual text consumer exists.",
       "resolution": {
         "file": "prompt_pipeline.mjs",
-        "line": null,
-        "functionOrGuard": "['impacts'"
+        "line": 143,
+        "functionOrGuard": "FEATURE_HAS_NO_PIXEL_CONSUMER"
       },
       "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
     },
@@ -114,7 +114,12 @@
       "reproduction": "Replace each facts record array with [null], and historicalEvidence with [null].",
       "observedBefore": "Uncaught TypeError for several arrays instead of structured INVALID.",
       "observedAfter": "All malformed-record probes return structured INVALID, no render request.",
-      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json"
+      "evidence": "INDEPENDENT_ADVERSARIAL_PROBES.json",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": 106,
+        "functionOrGuard": "facts[key].some(row => !object(row))"
+      }
     },
     {
       "id": "IR008",
@@ -124,7 +129,12 @@
       "function": "CAPABILITIES.families/connected runtime family guard",
       "observedBefore": "Compiler admitted LINE_METRIC while free capture runtime accepted WAR/TRANSPORT only.",
       "observedAfter": "Connected capabilities WAR/TRANSPORT only; LINE_METRIC explicitly UNSUPPORTED; existing Event implementation preserved.",
-      "evidence": "PROMPT_PIPELINE_TEST.log; prompt_pipeline.mjs CAPABILITIES.families and FAMILY_NOT_CONNECTED"
+      "evidence": "PROMPT_PIPELINE_TEST.log; prompt_pipeline.mjs CAPABILITIES.families and FAMILY_NOT_CONNECTED",
+      "resolution": {
+        "file": "prompt_pipeline.mjs",
+        "line": 136,
+        "functionOrGuard": "FAMILY_NOT_CONNECTED"
+      }
     }
   ],
   "securityChecks": [
