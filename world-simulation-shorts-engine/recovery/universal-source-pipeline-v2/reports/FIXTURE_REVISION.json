@@ -1,0 +1,94 @@
+{
+  "schema": "WORLD_ENGINE_SOURCE_FIXTURE_REVISION_V2",
+  "status": "TECHNICAL_PASS_DATA_ONLY_REVISION",
+  "oldPublishedCommit": "f3c2da7f66b4845fce89970c7ebe7d4772b53ef0",
+  "oldArchive": {
+    "sha256": "49b1603f9cea1f566fcd86f10bed2b4570e84584665cdf1da7831cedd80b1974",
+    "bytes": 1552183,
+    "indexSHA256": "3d489e11c29629caf58a143e57c14bf373579a5753ec245971fa4b7f9668251e",
+    "stillAccessibleByImmutableGit": true
+  },
+  "newArchive": {
+    "sha256": "bd6e7f54691bfed361d98f0bd8b3c4575a17a0dc2fc033f7501b2be730d03cb3",
+    "bytes": 1552371,
+    "indexSHA256": "6d90f2132cf8c496c2c3df6492fdb6ac9d1af05ea34f553039c3f7b5eac14088",
+    "pinMatchesBytes": true
+  },
+  "manifestPayloadsCheckedEachVersion": 1087,
+  "addedPayloads": [],
+  "removedPayloads": [],
+  "changedPayloads": [
+    {
+      "file": "INDEX.json",
+      "oldSHA256": "3d489e11c29629caf58a143e57c14bf373579a5753ec245971fa4b7f9668251e",
+      "newSHA256": "6d90f2132cf8c496c2c3df6492fdb6ac9d1af05ea34f553039c3f7b5eac14088",
+      "oldBytes": 325,
+      "newBytes": 325,
+      "jsonFieldChanges": [
+        {
+          "path": "$.packages.synthetic_zones_v2.sha256",
+          "old": "9fb68006ffd004cdec614f840694d822b660d2be3755f471484cf5fe7e527c3f",
+          "new": "a947318868dc0fdb536673deca18d9f4368dd913d05bf3b9aaf194d362bbe159"
+        }
+      ]
+    },
+    {
+      "file": "demo/BUNDLE.json",
+      "oldSHA256": "9fb68006ffd004cdec614f840694d822b660d2be3755f471484cf5fe7e527c3f",
+      "newSHA256": "a947318868dc0fdb536673deca18d9f4368dd913d05bf3b9aaf194d362bbe159",
+      "oldBytes": 60987,
+      "newBytes": 60987,
+      "jsonFieldChanges": [
+        {
+          "path": "$.native.sha256",
+          "old": "57109f26dbb5abada3c19e39fd76b94cb0bdba454e5b7e634110c519bc0ad5c6",
+          "new": "e4437b9398ef208e2813537d90112bbfa66a7f80fd2cad9c758c0ff9dc5011c0"
+        }
+      ]
+    },
+    {
+      "file": "demo/NATIVE.json",
+      "oldSHA256": "57109f26dbb5abada3c19e39fd76b94cb0bdba454e5b7e634110c519bc0ad5c6",
+      "newSHA256": "e4437b9398ef208e2813537d90112bbfa66a7f80fd2cad9c758c0ff9dc5011c0",
+      "oldBytes": 2477751,
+      "newBytes": 2477810,
+      "jsonFieldChanges": [
+        {
+          "path": "$.evidence.existingMeasuredLayoutProfileVersion",
+          "old": null,
+          "new": "KOREAN_LAYOUT_STAGE3_V1"
+        },
+        {
+          "path": "$.nativePlan.layout.measured.version",
+          "old": "UNIVERSAL_SOURCE_DEMO_DATA_V2",
+          "new": "KOREAN_LAYOUT_STAGE3_V1"
+        }
+      ]
+    }
+  ],
+  "changedPayloadCount": 3,
+  "unchangedPayloadCount": 1084,
+  "geometryPayloadsByteUnchanged": 541,
+  "historicalPayloadsByteUnchanged": 2,
+  "archiveMetadataManifestChange": "SOURCE_MANIFEST.json records only the three payload SHA/byte updates; it is not an additional historical/data payload.",
+  "confirmedCause": {
+    "nativeConsumer": "web/map_infographic_v1/graphic_layout.mjs:2,93",
+    "requiredContractTag": "KOREAN_LAYOUT_STAGE3_V1",
+    "oldIncorrectAuthoredTag": "UNIVERSAL_SOURCE_DEMO_DATA_V2",
+    "minimumCorrection": "Preserve the existing GRAPHIC_LAYOUT_VERSION tag instead of assigning a new unrecognized tag while retargeting the data-only measured layout. BUNDLE/INDEX hashes change transitively.",
+    "existingContractTagIsNotCountryBranch": "The existing frozen API name is reused literally; no country-specific renderer condition or geometry substitution was added by this revision audit.",
+    "nativeConsumerSHA256": "1d64134a50661338856635a4de4c311e5a10ef23369a724ccfdef08e33b89b41",
+    "preparerCurrentSHA256": "85d1669d59624bbd9f3b24d867f8e47b5889bb8393c7bb37f0d2eea1e12aeee7"
+  },
+  "protection": {
+    "protected307FileAuditRepeatedInThisRevisionCheck": false,
+    "oldG1RenderOrEncodeStarted": false,
+    "sourceOrHistoryGeometryChanged": false,
+    "oldTemporaryCacheEdited": false,
+    "oldPublishedArchiveReplaced": false,
+    "rendererOrFinalModifiedByThisAudit": false,
+    "gpuOrDeploymentExecuted": false,
+    "qualityApproved": false
+  },
+  "remainingValidation": "Actual corrected demo rendering is owned by the parent job. This archive diff is CPU evidence only; rerun tools/check_protection.py after final public files are prepared."
+}

@@ -1,0 +1,194 @@
+{
+  "schema": "WORLD_ENGINE_UNIVERSAL_SOURCE_VISUAL_LIMITATIONS_V1",
+  "scope": "READ_ONLY_REVIEW_OF_COMPLETED_180_FRAME_SYNTHETIC_TECHNICAL_DEMO",
+  "jobId": "studio-8975377b03cbcc47a2b0e0ce0981d4dc",
+  "visualDecision": "NEEDS_REWORK",
+  "productionQualityApproved": false,
+  "historicalG3DirectorApproved": false,
+  "nvidiaVerified": false,
+  "confirmedLimitations": [
+    {
+      "id": "REGIONAL_GLOBAL_SOURCE_RECTANGLE_SEAM",
+      "status": "CONFIRMED",
+      "severity": "MAJOR_VISUAL",
+      "observed": "A hard vertical and horizontal material/source boundary is visible in DEMO_000, DEMO_090 and CONTROL_OFF. The regional NE1 cartographic hillshade differs strongly from the global earth-day RGB source.",
+      "exactMechanism": [
+        {
+          "file": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+          "line": 143,
+          "evidence": "tuv maps the actual geographic point into tileBounds."
+        },
+        {
+          "file": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+          "line": 144,
+          "evidence": "inside is a product of step functions: a binary rectangular source-support switch with no edge feather."
+        },
+        {
+          "file": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+          "line": 151,
+          "evidence": "Default path mixes globalTerrain and regional terrain using the binary inside value."
+        },
+        {
+          "file": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+          "line": 187,
+          "evidence": "BAKED_RELIEF treatment also changes surface response only for inside > .5."
+        },
+        {
+          "file": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+          "line": 206,
+          "evidence": "BAKED_RELIEF changes proxy-light response only for inside > .5."
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
+          "line": 55,
+          "evidence": "Actual technical demo has no additional contextTerrain or heightSource."
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
+          "line": 70,
+          "evidence": "Existing factory is requested with BAKED_RELIEF_V1."
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
+          "line": 100,
+          "evidence": "Actual path keeps original factory terrain LOD weight 1; no hidden new blending layer exists."
+        }
+      ],
+      "regionalAsset": {
+        "path": "world-simulation-shorts-engine/web/flat_assets/natural_earth_1_east_asia.png",
+        "sha256": "49127186cb2076131e49e3787454c31474e48ef206c27c6c637749173aca143a",
+        "actualBounds": [
+          104,
+          7,
+          152,
+          63
+        ],
+        "dimensions": [
+          2880,
+          3360
+        ],
+        "pixelSpacingDegrees": [
+          0.016666666666666666,
+          0.016666666666666666
+        ],
+        "classification": "EXISTING_BAKED_HILLSHADE_RGB_NOT_NEW_ASTRA_OR_DEM"
+      },
+      "globalAsset": {
+        "path": "cinematic-world-map/assets/v3/earth/earth-day-8k.jpg",
+        "sha256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+        "actualSamplingBounds": [
+          -180,
+          -90,
+          180,
+          90
+        ],
+        "classification": "EXISTING_GLOBAL_RGB_SOURCE"
+      },
+      "geographicScreenAgreement": [
+        {
+          "frame": 0,
+          "actualCameraBounds": [
+            93,
+            -3,
+            123,
+            43
+          ],
+          "sourceWestBoundaryLongitude": 104,
+          "predictedVerticalEdgeX": 396,
+          "sourceSouthBoundaryLatitude": 7,
+          "predictedHorizontalEdgeY": 1502.608695652174,
+          "basis": "Existing equirectangular geographic projection; matching visible rectangle."
+        },
+        {
+          "frame": 90,
+          "actualCameraBounds": [
+            97,
+            3,
+            117,
+            35
+          ],
+          "sourceWestBoundaryLongitude": 104,
+          "predictedVerticalEdgeX": 378,
+          "sourceSouthBoundaryLatitude": 7,
+          "predictedHorizontalEdgeY": 1680,
+          "basis": "Existing equirectangular geographic projection; matching visible rectangle."
+        }
+      ],
+      "ablationEvidence": {
+        "comparison": [
+          "DEMO_090.png",
+          "DEMO_ABLATION_CONTROL_OFF.png"
+        ],
+        "verticalEdgeROI": [
+          375,
+          200,
+          381,
+          1600
+        ],
+        "verticalEdgeChangedPixels": 0,
+        "horizontalEdgeROI": [
+          400,
+          1678,
+          1050,
+          1682
+        ],
+        "horizontalEdgeChangedPixels": 0,
+        "conclusion": "Visible source seam remains identical when control-area fills and shared frontier are disabled; it is not created by the new ownership/front overlays."
+      },
+      "safeExistingApiOptionsNotApplied": [
+        {
+          "option": "Real, geographically registered, matching-style wider source through existing contextTerrain + geographicTerrainLod",
+          "existingApiReferences": [
+            "renderer.mjs:153",
+            "renderer.mjs:160",
+            "renderer.mjs:589",
+            "camera_gpu_pipeline_v5.mjs:39",
+            "camera_gpu_pipeline_v5.mjs:64"
+          ],
+          "constraints": "Needs verified actual wider source pixels/bounds/SHA/native resolution; retain source-family classification and full viewport support. Existing code can blend source RGB before unchanged material. No covering matching-style source was established for this submitted fixture.",
+          "status": "DATA_REQUIREMENT_UNRESOLVED_NOT_APPLIED"
+        },
+        {
+          "option": "Existing terrainTreatment CURRENT",
+          "existingApiReferences": [
+            "renderer.mjs:444",
+            "renderer.mjs:187",
+            "renderer.mjs:206"
+          ],
+          "constraints": "Would disable the baked-only conditional material/light response, but binary source selection at line151 remains; therefore it cannot be claimed to fix this atlas/global source mismatch.",
+          "status": "NOT_A_CONFIRMED_SEAM_FIX_NOT_APPLIED"
+        },
+        {
+          "option": "Existing same-style source descriptors through data-only fixture configuration",
+          "constraints": "Could be evaluated only with truthful actual coverage/resolution/hash metadata. Do not relabel earth-day RGB as NE1, enlarge the existing tile bounds, clamp unsupported UVs or invent elevation. Do not change the submitted camera merely to hide the seam.",
+          "status": "REQUIRES_SEPARATE_VERIFIED_DATA_CANDIDATE"
+        }
+      ],
+      "notPerformed": [
+        "No renderer/shader/asset/runtime edits for this review",
+        "No redraw or video regeneration",
+        "No historical G3 or G1 rendering",
+        "No paid GPU execution",
+        "No unsupported outside-footprint ASTRA claim"
+      ]
+    }
+  ],
+  "reviewedArtifacts": [
+    {
+      "file": "public-review/DEMO_000.png",
+      "sha256": "bf815b4a557ec9d4b8da50e400a35e33720da53bd0705cf3f3c0a65133c6c0d6",
+      "actuallyViewed": true
+    },
+    {
+      "file": "public-review/DEMO_090.png",
+      "sha256": "b82305f001625aaf78345bc6843d7dcd13d5d2363ab04340a93787c8c23f57cb",
+      "actuallyViewed": true
+    },
+    {
+      "file": "public-review/DEMO_ABLATION_CONTROL_OFF.png",
+      "sha256": "2e90c20b9dbc2ec8ed2574ea60f2369b7c7236ff437c8184b8424540c4ed85e6",
+      "actuallyViewed": true
+    }
+  ],
+  "nextAction": "Keep this output as a source-pipeline technical proof with visual NEEDS_REWORK. Resolve real matching terrain source coverage through a separate verified data candidate before claiming seamless geographic rendering or production quality."
+}

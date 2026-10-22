@@ -74,3 +74,5 @@ G1의 상세 재질·국기·회전·scalar 스타일과 이 DEMO의 시각적 �
 `tools/source_fixture_store.py`는 원본 ZIP·모든 entry·INDEX SHA와 경로를 검사하고 복원한다.
 변경된 기존 파일, symlink, 경로 이탈, 과대 패키지는 거부한다. GPU 전용 메모리 배치는 고정하지 않았다.
 이 검증은 CPU/SwiftShader이며 NVIDIA 업로드·성능·gCube 운용·사용자 품질 승인을 대신하지 않는다.
+정규화·receipt에서 비영점 전역 오프셋을 보존하는 검사는 통과했지만, 현재 DEMO pixel consumer는
+0부터 시작하는 source field만 허용한다. 인천의 전역 600프레임 구간이 실제로 그려졌다는 뜻은 아니다.

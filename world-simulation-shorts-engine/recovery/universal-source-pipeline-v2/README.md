@@ -1,4 +1,14 @@
-# Universal source pipeline V2 — source checkpoint
+# Universal source pipeline V2 — actual software review
+
+Actual authenticated Studio demo: 6 seconds /180 freshly drawn frames /1080×1920 /
+30fps /H.264 /silent /SwiftShader. Historical Incheon G2_FULL_AREA remains BLOCKED;
+historical G3 was not run. The demo has visible regional-material seams and is
+NEEDS_REWORK for visual quality. No NVIDIA or user quality approval is claimed.
+
+Read `IMPLEMENTATION_REPORT.md`, `DATA_CONTRACT.md` and `reports/GATE_STATUS.json`.
+Public video/PNG hashes are in `public-review/SHA256SUMS`; the neutral source
+archive and review ZIP are also covered by root `SHA256SUMS`. Fixed-commit mobile
+URLs and actual HTTP/download hash evidence are in `reports/DOWNLOAD_VERIFICATION.json`.
 
 Baseline `e6ff697348a8e63c9308d7b4546682cbc6620c96`. Independent branch and
 namespace; existing G1, FINAL, engines, images, Scenes and claims are unchanged.

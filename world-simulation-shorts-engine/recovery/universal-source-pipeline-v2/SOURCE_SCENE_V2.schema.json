@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:world-engine:universal-source-scene:v2",
+  "$comment": "Structural contract only. source_contract.py additionally requires exact server-registered Scene values, source SHA/rights/geometry validation and ready admission. This schema alone does not approve rendering or data. Nonempty annotation/audio slots currently block execution.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "actors",
+    "audio_cue_slots",
+    "camera",
+    "confidence",
+    "control_states",
+    "durationSeconds",
+    "event_id",
+    "event_location",
+    "fps",
+    "frontline_geometries",
+    "geometry",
+    "resolution",
+    "scenario_id",
+    "schema",
+    "source_bundle_id",
+    "source_refs",
+    "startFrame",
+    "time_interval",
+    "title",
+    "transition",
+    "visual_annotations"
+  ],
+  "properties": {
+    "actors": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "actor_id",
+          "actor_color"
+        ],
+        "properties": {
+          "actor_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "actor_color": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    },
+    "audio_cue_slots": {
+      "type": "array"
+    },
+    "camera": {
+      "type": "object"
+    },
+    "confidence": {
+      "type": "object"
+    },
+    "control_states": {
+      "type": "array",
+      "maxItems": 240,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "frame",
+          "state_ref"
+        ],
+        "properties": {
+          "frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "state_ref": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "durationSeconds": {
+      "type": "number",
+      "minimum": 0.06666666666666667,
+      "maximum": 8
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "event_location": {
+      "type": "object"
+    },
+    "fps": {
+      "const": 30
+    },
+    "frontline_geometries": {
+      "type": "object"
+    },
+    "geometry": {
+      "type": "object"
+    },
+    "resolution": {
+      "const": [
+        1080,
+        1920
+      ]
+    },
+    "scenario_id": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "WORLD_ENGINE_UNIVERSAL_SOURCE_SCENE_V2"
+    },
+    "source_bundle_id": {
+      "type": "string"
+    },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "startFrame": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "time_interval": {
+      "type": "object"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[^\\u0000-\\u001f]+$"
+    },
+    "transition": {
+      "type": "object"
+    },
+    "visual_annotations": {
+      "type": "array"
+    }
+  }
+}

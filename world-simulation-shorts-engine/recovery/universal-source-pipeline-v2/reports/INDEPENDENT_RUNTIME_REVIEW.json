@@ -1,35 +1,47 @@
 {
   "schema": "WORLD_ENGINE_INDEPENDENT_SOURCE_RUNTIME_REVIEW_V2",
-  "checkedAtUtc": "2026-10-22T01:13:46.227536+00:00",
+  "checkedAtUtc": "2026-10-22T01:19:06.442378+00:00",
   "scope": "Read-only source review plus7small analysis/clock unit tests. No render, active capture read, oldfile edits, or Git actions by reviewer.",
   "reviewedBindings": [
     {
       "path": "capture_source.mjs",
-      "sha256": "498fc6da0f52037e150c5e35bbfef1f231f0f4dcf1a98c40fe58b4c7d472ce91"
+      "sha256": "bfb30c2520e1d171eb1835666ae090f3acd88c629c3952be7d1af2dd1abd3540"
     },
     {
       "path": "native_runtime.mjs",
-      "sha256": "a97db56e29ad79fa91fe4104850536e337e73f27230efde0e627edc5e5057e34"
+      "sha256": "dade8edd71f87f6f3ba6e5b0e157c910693e30e3ec14b686e26b4bc5cae3c129"
     },
     {
       "path": "camera_numeric_contract.mjs",
       "sha256": "e02fa386edb4619196d79d6012ace0a61ab44c92dcf52459938079b2e7e68312"
     },
     {
+      "path": "source_geometry_contract.mjs",
+      "sha256": "59459e5c1ab6f8e4c6b31c72a1f3a2c1a66335188f5e140efceda6552bd84194"
+    },
+    {
       "path": "source_contract.py",
-      "sha256": "3a8f46ce74b3687a56c4db98ae6bf30d3938a96d98092b00072e3384f19c01ab"
+      "sha256": "686a93629941b173515a7ac06d4bea4941d3d72977cf18866eb22fa384cbed98"
+    },
+    {
+      "path": "DATA_CONTRACT.md",
+      "sha256": "b439dba029666e2ff68e5c144c5f0faaa12673aedeed67b2531fdfef953a5fe2"
+    },
+    {
+      "path": "SOURCE_SCENE_V2.schema.json",
+      "sha256": "ef3fb055bf7797aedc3074c4ae6b4c231972adabe87495780a3c42d4184a3251"
     },
     {
       "path": "tools/analyze_capture.py",
-      "sha256": "12f486c6fb1372822933f010908e65434ab89d8c800a49dee741653da2ab8751"
+      "sha256": "d5330648531dd9a86b375e83cd21c5ba1f64b9e2489c3778ecbc67a040a0518a"
     }
   ],
   "staticNativeModuleClosure": {
-    "count": 27,
+    "count": 28,
     "files": [
       {
         "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
-        "sha256": "a97db56e29ad79fa91fe4104850536e337e73f27230efde0e627edc5e5057e34"
+        "sha256": "dade8edd71f87f6f3ba6e5b0e157c910693e30e3ec14b686e26b4bc5cae3c129"
       },
       {
         "path": "world-simulation-shorts-engine/web/vendor/three/0.170.0/three.module.js",
@@ -134,6 +146,10 @@
       {
         "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/camera_numeric_contract.mjs",
         "sha256": "e02fa386edb4619196d79d6012ace0a61ab44c92dcf52459938079b2e7e68312"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/source_geometry_contract.mjs",
+        "sha256": "59459e5c1ab6f8e4c6b31c72a1f3a2c1a66335188f5e140efceda6552bd84194"
       }
     ]
   },
@@ -173,8 +189,8 @@
       "id": "HELPER_HASH_AND_HTTP_BOUNDARIES",
       "status": "SOURCE_CHECKED",
       "evidence": [
-        "capture_source binds native_runtime,camera_numeric_contract,capture_source,source_contract SHA before andaftercapture",
-        "Camera helperhasexplicitlocalservermodule route; its relativeimport resolves on loopback",
+        "capture_source binds native_runtime,camera_numeric_contract,source_geometry_contract,capture_source,source_contract SHA before andaftercapture",
+        "Camera and source-geometry helpers have explicit local-server JavaScript routes; their relative imports resolve on loopback",
         "Nativeassets sourceBindings hashes checked before draw",
         "HTTP listenerbinds127.0.0.1only; browsernetworkroutepermits that exact origin only",
         "Static mounts use realpath confined roots and rejects .., backslashes, queries, and symlinkescape"
@@ -190,18 +206,65 @@
         "Local/globalClockcurrentconsumerrequiresframeindex0..N; nohistorical600...drawclaimmade"
       ],
       "limits": "EvenfuturecontrollerqualifiedPRODUCTIONscope cannotrenderthroughthisdemo-onlypixelconsumer. Actualhistoricalextensionrequiresqualifieddataandexplicitconsumerreview; currentIncheonfullcontrolgateremainsblocked."
+    },
+    {
+      "id": "EXPLICIT_EMPTY_GEOMETRY_CONTRACT",
+      "status": "SOURCE_CHECKED",
+      "evidence": [
+        "source_geometry_contract recognizes explicit provider Polygon EMPTY as [] or [[]] and optional null coverage",
+        "Nonempty Polygon/MultiPolygon coordinates are returned for unchanged old Area pass consumption; no arbitrary clipping, simplification or generated historical fill",
+        "Unknown/contested empty representations retain source field/frame metadata in diagnostics"
+      ],
+      "limits": "This helper is not a replacement geometry validator. The pinned server SourceRegistry/Area V3 validator remains authoritative; a forged arbitrary client JSON is not admitted."
+    },
+    {
+      "id": "DATA_CONTRACT_AND_SCHEMA_CLAIMS",
+      "status": "NO_FALSE_READY_CLAIM_FOUND_IN_REVIEWED_SCOPE",
+      "evidence": [
+        "JSON Schema explicitly says structural only, with server-pinned semantic/source/admission checks required",
+        "DATA_CONTRACT identifies strict registered Scene family, actual stored input example and blocked historical example",
+        "Custom annotations/audio slots explicitly BLOCKED; no free-natural-language/SFX implementation claim",
+        "Documentation explicitly distinguishes NE1 fallback from G1 V4/Astra parity, actual Node/Chromium numeric agreement from LOCAL approval, and a SYNTHETIC demo from G3 historical proof"
+      ],
+      "limits": "Nonzero global offsets are preserved by source records/receipt, but current demo pixel consumer explicitly expects local-index source frames0..N. The blocked historical package is not actual nonzero historical pixel execution. Source-schema validity alone is not render authorization."
     }
   ],
   "analysisTool": {
     "file": "tools/analyze_capture.py",
     "unitTests": 7,
     "unitResult": "PASS",
-    "actualCaptureAnalyzed": false,
+    "actualCaptureAnalyzed": true,
     "originalPNGsModified": false,
-    "redrawPerformed": false
+    "redrawPerformed": false,
+    "actualFrames": 180,
+    "actualCaptureReportSHA256": "b35f97f59b71e463f7528f5f0f6e8691f1d61cb377eb6d96282cdd741f9892c0",
+    "sameFrameRandomAccessRawExact": true,
+    "frontContributionChangedPixels": 1774,
+    "fillContributionChangedPixels": 30405,
+    "sourceOwnerAndFrontChangedAdjacentFrames": 105,
+    "actualSafeAreaChecks": true,
+    "qualityApproved": false
   },
   "nvidiaVerified": false,
   "visualQualityApproved": false,
   "userApproved": false,
-  "g3HistoricalAchieved": false
+  "g3HistoricalAchieved": false,
+  "finalReadOnlyReview": {
+    "activeJob": "private-d",
+    "activeCaptureReadOrChanged": false,
+    "rootRuntimeCaptureContractModified": false,
+    "newTestsRequired": false,
+    "blockingFindingForCurrentSyntheticDemo": false,
+    "historicalG3ConsumerAdmitted": false,
+    "actualModuleClosureCount": 28,
+    "reviewReportOnlyUpdated": true
+  },
+  "postCaptureVisualObservation": {
+    "actualPNGViewed": "DEMO_ABLATION_COMPARISON.png",
+    "terrainTextureContinuity": "NEEDS_REWORK_RECTANGULAR_SOURCE_SUPPORT_SEAMS_VISIBLE",
+    "visibleInControlOff": true,
+    "sharedFrontContributionPixels": 1774,
+    "pixelProofIsNotQualityApproval": true,
+    "nativeCaptureOrSourceFilesModifiedByReviewer": false
+  }
 }
