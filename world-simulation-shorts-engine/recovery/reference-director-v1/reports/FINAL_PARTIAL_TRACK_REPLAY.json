@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "--input-type=module",
+    "-e",
+    "import fs from 'node:fs';import{buildReview}from'./world-simulation-shorts-engine/recovery/reference-director-v1/tools/build_review.mjs';const h='./world-simulation-shorts-engine/recovery/reference-director-v1/';const read=p=>JSON.parse(fs.readFileSync(h+p,'utf8'));const track=read('COMPILED_DIRECTOR_TRACK.json');const out=buildReview({target:read('supplied/REFERENCE_DIRECTOR_TARGET_V1.json'),input:read('REFERENCE_DIRECTOR_INPUT.json'),sourceAudit:read('reports/REFERENCE_INPUT_AUDIT.json'),targetSHA256:track.targetSHA256});if(JSON.stringify(track)!==JSON.stringify(out.track)||fs.readFileSync(h+'INPUT_TO_PIXEL_TRACE.csv','utf8')!==out.traceCSV)throw Error('CURRENT_CODE_AND_FINAL_INPUT_REPLAY_MISMATCH');console.log(JSON.stringify({status:'PASS',globalFrames:out.track.frameCount,actualRenderedFrames:0,traceRows:4914,lateInputAndCodeChangesReplayed:true}));"
+  ],
+  "exitCode": 0,
+  "stdout": "{\"status\":\"PASS\",\"globalFrames\":546,\"actualRenderedFrames\":0,\"traceRows\":4914,\"lateInputAndCodeChangesReplayed\":true}\n",
+  "stderr": ""
+}

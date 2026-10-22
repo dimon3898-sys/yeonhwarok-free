@@ -17,6 +17,22 @@ function geographic(point) {
  assert(finitePoint(point) && Math.abs(point[0]) <= 180 && Math.abs(point[1]) <= 90, 'DIRECTOR_GEOGRAPHIC_POINT_INVALID');
  return point;
 }
+function noDatelineWrap(points) {
+ points.forEach(geographic);
+ const longitudes = points.map(p => p[0]);
+ assert(Math.max(...longitudes) - Math.min(...longitudes) <= 180, 'DIRECTOR_DATELINE_WRAP_UNSUPPORTED');
+}
+function projectionDescriptor(projection) {
+ assert(projection?.schema === 'NATIVE_FLAT_Q_MODEL_V1' && Array.isArray(projection.initialBounds) && projection.initialBounds.length === 4 && projection.initialBounds.every(Number.isFinite)
+  && finitePoint(projection.center) && Number.isFinite(projection.standardParallelCosine), 'DIRECTOR_PROJECTION_DESCRIPTOR_INVALID');
+ const [w, s, e, n] = projection.initialBounds;
+ assert(w >= -180 && e <= 180 && s >= -90 && n <= 90 && e > w && n > s, 'DIRECTOR_PROJECTION_DESCRIPTOR_INVALID');
+ const center = [(w + e) / 2, (s + n) / 2], cosine = Math.cos(radians(center[1]));
+ assert(cosine > 1e-8 && projection.standardParallelCosine > 1e-8
+  && projection.center.every((v, i) => Math.abs(v - center[i]) <= 1e-12)
+  && Math.abs(projection.standardParallelCosine - cosine) <= 1e-12, 'DIRECTOR_PROJECTION_DESCRIPTOR_INVALID');
+ return projection;
+}
 
 /** Same flat standard-parallel world coordinates as renderer.mjs:355/374,
  * with y down explicitly to match canonical screen pixels. No terrain inferred.
@@ -24,18 +40,20 @@ function geographic(point) {
 export function createFactoryFlatProjection(initialBounds) {
  assert(Array.isArray(initialBounds) && initialBounds.length === 4 && initialBounds.every(Number.isFinite), 'DIRECTOR_PROJECTION_BOUNDS_INVALID');
  const [w, s, e, n] = initialBounds;
+ assert(w <= e, 'DIRECTOR_DATELINE_WRAP_UNSUPPORTED');
  assert(w >= -180 && e <= 180 && s >= -90 && n <= 90 && e > w && n > s, 'DIRECTOR_PROJECTION_BOUNDS_INVALID');
  const center = [(w + e) / 2, (s + n) / 2], standardParallelCosine = Math.cos(radians(center[1]));
  assert(standardParallelCosine > 1e-8, 'DIRECTOR_POLAR_PROJECTION_UNSUPPORTED');
- return {schema: 'NATIVE_FLAT_Q_MODEL_V1', initialBounds: [...initialBounds], center, standardParallelCosine,
-  note: 'Pure factory-coordinate model; private native camera is not changed'};
+ return Object.freeze({schema: 'NATIVE_FLAT_Q_MODEL_V1', initialBounds: Object.freeze([...initialBounds]), center: Object.freeze(center), standardParallelCosine,
+  note: 'Pure factory-coordinate model; private native camera is not changed'});
 }
 export function projectQ(point, projection) {
- geographic(point); assert(projection?.schema === 'NATIVE_FLAT_Q_MODEL_V1', 'DIRECTOR_PROJECTION_REQUIRED');
+ geographic(point); projectionDescriptor(projection);
+ assert(Math.abs(point[0] - projection.center[0]) <= 180, 'DIRECTOR_DATELINE_WRAP_UNSUPPORTED');
  return [(point[0] - projection.center[0]) * projection.standardParallelCosine, projection.center[1] - point[1]];
 }
 export function inverseQ(point, projection) {
- assert(finitePoint(point) && projection?.schema === 'NATIVE_FLAT_Q_MODEL_V1', 'DIRECTOR_PROJECTION_REQUIRED');
+ assert(finitePoint(point), 'DIRECTOR_PROJECTED_POINT_INVALID'); projectionDescriptor(projection);
  return [point[0] / projection.standardParallelCosine + projection.center[0], projection.center[1] - point[1]];
 }
 function pose(state) {
@@ -61,7 +79,7 @@ export function solveAnchorPose({anchor, targetUV, scale, angleDegrees, projecti
 }
 export function solveContextPairPose({anchors, targetUVs, projection, canvas = [1080, 1920]}) {
  assert(Array.isArray(anchors) && anchors.length === 2 && Array.isArray(targetUVs) && targetUVs.length === 2, 'DIRECTOR_PAIR_REQUIRED');
- canvasSize(canvas); anchors.forEach(geographic);
+ canvasSize(canvas); noDatelineWrap(anchors);
  assert(targetUVs.every(p => finitePoint(p) && p.every(v => v >= 0 && v <= 1)), 'DIRECTOR_ANCHOR_TARGET_INVALID');
  const q = anchors.map(p => projectQ(p, projection)), delta = q[1].map((v, i) => v - q[0][i]), d = targetUVs[1].map((v, i) => (v - targetUVs[0][i]) * canvas[i]);
  assert(Math.hypot(...delta) > 1e-12 && Math.hypot(...d) > 1e-12, 'DIRECTOR_DEGENERATE_PAIR');
@@ -72,7 +90,7 @@ function polygonPoints(geometry) {
  assert(['Polygon', 'MultiPolygon'].includes(geometry?.type), 'DIRECTOR_POLYGON_REQUIRED');
  const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
  assert(Array.isArray(polygons) && polygons.length > 0, 'DIRECTOR_POLYGON_REQUIRED');
- const points = polygons.flat(2); assert(points.length >= 4, 'DIRECTOR_POLYGON_REQUIRED'); points.forEach(geographic);
+ const points = polygons.flat(2); assert(points.length >= 4, 'DIRECTOR_POLYGON_REQUIRED'); noDatelineWrap(points);
  return points;
 }
 export function projectedGeometryBBox(geometry, state, projection, canvas = [1080, 1920]) {
@@ -99,6 +117,7 @@ export function solvePolygonFramingPose({geometry, centroidAnchor, targetCentroi
  */
 export function solveBoundaryHeading({segment, desiredDegrees, projection}) {
  assert(Array.isArray(segment) && segment.length === 2 && Number.isFinite(desiredDegrees), 'DIRECTOR_BOUNDARY_TANGENT_REQUIRED');
+ noDatelineWrap(segment);
  const a = projectQ(segment[0], projection), b = projectQ(segment[1], projection);
  assert(Math.hypot(b[0] - a[0], b[1] - a[1]) > 1e-12, 'DIRECTOR_DEGENERATE_BOUNDARY');
  return desiredDegrees - Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI;
@@ -153,13 +172,13 @@ function unwrap(values) {
 export function compileCameraMathTrack({contract, projection, keyframes, inputEvidence}) {
  assert(['SYNTHETIC_TEST', 'SOURCE_BOUND_GEOMETRY'].includes(inputEvidence?.dataMode), 'DIRECTOR_SOURCE_EVIDENCE_REQUIRED');
  assert(inputEvidence.dataMode !== 'SOURCE_BOUND_GEOMETRY' || Array.isArray(inputEvidence.sourceHashes) && inputEvidence.sourceHashes.length > 0 && inputEvidence.sourceHashes.every(h => /^[a-f0-9]{64}$/.test(h)), 'DIRECTOR_REAL_SOURCE_HASHES_REQUIRED');
- assert(projection?.schema === 'NATIVE_FLAT_Q_MODEL_V1' && contract?.schema === 'REFERENCE_DIRECTOR_REVIEW_WINDOWS_V1', 'DIRECTOR_CONTRACT_REQUIRED');
+ projectionDescriptor(projection); assert(contract?.schema === 'REFERENCE_DIRECTOR_REVIEW_WINDOWS_V1', 'DIRECTOR_CONTRACT_REQUIRED');
  assert(Array.isArray(keyframes) && keyframes.length >= 2, 'DIRECTOR_GLOBAL_CAMERA_KEYS_REQUIRED');
  keyframes.forEach((k, i) => { pose(k); assert(Number.isSafeInteger(k.referenceFrame) && (!i || k.referenceFrame > keyframes[i - 1].referenceFrame), 'DIRECTOR_ORDERED_KEYS_REQUIRED'); });
  const [start, end] = contract.sourceFrameRange;
  assert(keyframes[0].referenceFrame === start && keyframes.at(-1).referenceFrame === end - 1, 'DIRECTOR_WHOLE_TRACK_KEYS_REQUIRED');
  const frames = keyframes.map(k => k.referenceFrame), angles = unwrap(keyframes.map(k => k.angleDegrees));
- return {schema: DIRECTOR_CAMERA_SCHEMA, contract: clone(contract), projection: clone(projection), inputEvidence: clone(inputEvidence), keyframes: clone(keyframes),
+ return {schema: DIRECTOR_CAMERA_SCHEMA, contract: clone(contract), projection: createFactoryFlatProjection(projection.initialBounds), inputEvidence: clone(inputEvidence), keyframes: clone(keyframes),
   curves: [curve(keyframes.map(k => k.centerQ[0]), frames), curve(keyframes.map(k => k.centerQ[1]), frames), curve(keyframes.map(k => Math.log(k.scale)), frames), curve(angles, frames)],
   interpolation: 'BOUNDED_C1_MONOTONE_CUBIC_CENTER_LOG_SCALE_UNWRAPPED_ANGLE', rendererConnection: RENDERER_CONNECTION,
   actualPixelVerified: false, referenceVisualMatch: 'UNVERIFIED', sourceAdmission: 'NOT_VERIFIED_BY_MATH_MODULE', cameraLocked: false, settle: {locked: false, settled: false}};

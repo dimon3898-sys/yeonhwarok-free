@@ -1,0 +1,147 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_DIRECTOR_DATA_ADMISSION_V1",
+  "status": "DATA_DETAIL_BLOCKED",
+  "baselineCommit": "82854af429d09aebb4b31c2f168e2f0ddc9560c9",
+  "sourceReferenceSHA256": "853ce5be22dc95c95e0c4b3eddbd603930e499bc88ee40cb4e59b50aad1187bc",
+  "notExecutableScene": true,
+  "noSyntheticSubstitutionAllowed": true,
+  "partialBindings": {
+    "primaryCountryGeometryId": "COUNTRY_ESP",
+    "primaryCountryGeometry": {
+      "sourcePath": "cinematic-world-map/assets/gis/countries_50m.geojson",
+      "sourceSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "selector": {
+        "featureIndex": 54,
+        "property": "ADM0_A3",
+        "value": "ESP"
+      },
+      "geometryType": "MultiPolygon",
+      "nativeGeometryUnchanged": true,
+      "sourceScaleDenominator": 50000000,
+      "parts": 12,
+      "framingScope": "Full supplied MultiPolygon. Mainland component 4 exists; excluding islands needs an explicit input selection rather than silently changing geometry."
+    },
+    "contextLocationIds": [
+      "NE_PLACE_1159146357",
+      "NE_PLACE_1159147943"
+    ],
+    "locations": [
+      {
+        "id": "NE_PLACE_1159146357",
+        "sourceFeatureIndex": 4976,
+        "sourceFeatureId": 1159146357,
+        "sourceName": "Ceuta",
+        "displayName": "세우타",
+        "displayNameBasis": "Provided reference analysis; authored display text, not a survey identity claim",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -5.306999,
+            35.888984
+          ]
+        },
+        "sourcePath": "world-simulation-shorts-engine/data/populated_places_source.geojson",
+        "sourceSHA256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+        "crs": "EPSG:4326",
+        "accuracy": "Natural Earth 1:10m locality point; surveyed pin position not established",
+        "license": "Public Domain"
+      },
+      {
+        "id": "NE_PLACE_1159147943",
+        "sourceFeatureIndex": 5681,
+        "sourceFeatureId": 1159147943,
+        "sourceName": "Melilla",
+        "displayName": "멜리야",
+        "displayNameBasis": "Provided reference analysis; authored display text, not a survey identity claim",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            -2.950011,
+            35.300002
+          ]
+        },
+        "sourcePath": "world-simulation-shorts-engine/data/populated_places_source.geojson",
+        "sourceSHA256": "fd3fa867a320cbd5c5b6bb5bc550afeec2939fb2cef688e508007282a55ac42f",
+        "crs": "EPSG:4326",
+        "accuracy": "Natural Earth 1:10m locality point; surveyed pin position not established",
+        "license": "Public Domain"
+      }
+    ],
+    "contextRegionGeometryId": null,
+    "availableContextCandidate": {
+      "id": "COUNTRY_MAR",
+      "sourcePath": "cinematic-world-map/assets/gis/countries_50m.geojson",
+      "sourceSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "selector": {
+        "featureIndex": 103,
+        "property": "ADM0_A3",
+        "value": "MAR"
+      },
+      "status": "AVAILABLE_COARSE_CANDIDATE_NOT_FINAL_BINDING"
+    },
+    "detailLocationId": null,
+    "detailGeometryId": null,
+    "detailBoundaryGeometryId": null,
+    "metricValueId": "REF64306_OBSERVED_TEXT_85_M",
+    "metric": {
+      "id": "REF64306_OBSERVED_TEXT_85_M",
+      "displayText": "85 m",
+      "valueText": "85",
+      "unitText": "m",
+      "truthStatus": "REFERENCE_OBSERVATION_NOT_INDEPENDENT_GEOGRAPHIC_MEASUREMENT",
+      "sourceReferenceSHA256": "853ce5be22dc95c95e0c4b3eddbd603930e499bc88ee40cb4e59b50aad1187bc",
+      "independentlyVerified": false,
+      "boundaryGeometryId": null
+    },
+    "basemapSourceIds": [],
+    "availableOverviewCandidate": "GLOBAL_EARTH_DAY_RGB_V1",
+    "contextBoundaryGroups": []
+  },
+  "missingInputs": [
+    {
+      "field": "detailLocationId",
+      "status": "NEEDS_INPUT",
+      "required": "Verified geographic identity and EPSG:4326 Point [longitude,latitude], source identifier/hash/date and positional uncertainty. The tiny hero place is not identified from pixels alone."
+    },
+    {
+      "field": "detailGeometryId",
+      "status": "NEEDS_INPUT",
+      "required": "License-cleared detailed GeoJSON Polygon or MultiPolygon in EPSG:4326, native vertex precision, scale/uncertainty, provenance and SHA-256. No screenshot tracing or synthetic coast accepted as measured geometry."
+    },
+    {
+      "field": "detailBoundaryGeometryId",
+      "status": "NEEDS_INPUT",
+      "required": "License-cleared ordered GeoJSON LineString in EPSG:4326 with real endpoints, direction, source/hash, uncertainty, and definition of the explained boundary. Arclength reveal follows the unmodified input ordering."
+    },
+    {
+      "field": "contextRegionGeometryId",
+      "status": "NEEDS_INPUT",
+      "required": "Explicit selection of the region to tint. COUNTRY_MAR is an available coarse candidate, not an independently approved target binding."
+    },
+    {
+      "field": "contextBoundaryGroups",
+      "status": "NEEDS_INPUT",
+      "required": "Explicit supplied geometry-ID to style-group mapping; no engine rule based on continent or nationality."
+    },
+    {
+      "field": "basemapSourceIds.detailCoverage",
+      "status": "NEEDS_INPUT",
+      "required": "One coherent license-cleared basemap or evidence-backed source hierarchy covering the entire rotated camera envelope, with detailed local native pixels, dimensions, CRS/registration, extent, native resolution, parent SHA-256 and NoData. Upscaled global color pixels are not new source detail."
+    }
+  ],
+  "finalAdmission": {
+    "DIRECTOR_IMPLEMENTATION": "SEPARATE_CAPABILITY_GATE",
+    "GEO_AND_SOURCE_READY": "DATA_DETAIL_BLOCKED",
+    "REFERENCE_VISUAL_MATCH": "NOT_EXECUTED_DATA_GATE_FAILED",
+    "HISTORICAL_G3": "BLOCKED"
+  },
+  "unverifiedClaims": [
+    {
+      "field": "metricValueId.geographicMeasurement",
+      "status": "UNVERIFIED",
+      "required": "Independent source, measurement definition, date and uncertainty if 85 m is to be stated as geographic fact. The video only supports reference-observed display text.",
+      "blocksObservedTextDisplay": false,
+      "blocksIndependentMeasurementClaim": true
+    }
+  ]
+}

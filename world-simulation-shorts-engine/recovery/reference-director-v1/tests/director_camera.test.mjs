@@ -50,6 +50,36 @@ test('factorycoordinateQ model preserves standardparallel and inverse without as
  assert.equal(p.note.includes('not changed'), true);
  assert.throws(() => projectQ([181, 0], p), /DIRECTOR_GEOGRAPHIC_POINT_INVALID/);
 });
+test('malformed or inconsistent projection descriptors fail explicitly at public boundaries', () => {
+ const valid = createFactoryFlatProjection([0, -20, 30, 50]);
+ assert.ok(Object.isFrozen(valid) && Object.isFrozen(valid.center) && Object.isFrozen(valid.initialBounds));
+ assert.throws(() => { valid.center[0] = 99; }, TypeError);
+ const invalid = [
+  {schema: 'NATIVE_FLAT_Q_MODEL_V1'},
+  {...structuredClone(valid), standardParallelCosine: 0},
+  {...structuredClone(valid), standardParallelCosine: Infinity},
+  {...structuredClone(valid), standardParallelCosine: .5},
+  {...structuredClone(valid), center: [1, 2]},
+  {...structuredClone(valid), initialBounds: [-180, -91, 180, 90]},
+  {...structuredClone(valid), initialBounds: [30, -20, 0, 50]},
+ ];
+ for (const projection of invalid) {
+  for (const consume of [() => projectQ([1, 2], projection), () => inverseQ([1, 2], projection), () => compileCameraMathTrack({contract, projection, keyframes: track().keyframes, inputEvidence: {dataMode: 'SYNTHETIC_TEST'}})]) {
+   assert.throws(consume, error => error.code === 'DIRECTOR_PROJECTION_DESCRIPTOR_INVALID');
+  }
+ }
+});
+test('wrapped dateline bounds, anchor pairs, segments and polygons are explicitly unsupported', () => {
+ assert.throws(() => createFactoryFlatProjection([170, -10, -170, 10]), /DIRECTOR_DATELINE_WRAP_UNSUPPORTED/);
+ const wrappedPair = [[179, 1], [-179, 1]], p = createFactoryFlatProjection([-180, -20, 180, 20]);
+ assert.throws(() => solveContextPairPose({anchors: wrappedPair, targetUVs: [[.3, .4], [.7, .4]], projection: p}), /DIRECTOR_DATELINE_WRAP_UNSUPPORTED/);
+ assert.throws(() => solveBoundaryHeading({segment: wrappedPair, desiredDegrees: 0, projection: p}), /DIRECTOR_DATELINE_WRAP_UNSUPPORTED/);
+ const polygon = {type: 'Polygon', coordinates: [[[179, 1], [-179, 1], [-179, 2], [179, 2], [179, 1]]]};
+ assert.throws(() => projectedGeometryBBox(polygon, {centerQ: [0, 0], scale: 1, angleDegrees: 0}, p), /DIRECTOR_DATELINE_WRAP_UNSUPPORTED/);
+ assert.throws(() => projectQ([179, 1], createFactoryFlatProjection([-179, -10, -170, 10])), /DIRECTOR_DATELINE_WRAP_UNSUPPORTED/);
+ const local = solveContextPairPose({anchors: [[178, 1], [179, 1]], targetUVs: [[.3, .4], [.7, .4]], projection: createFactoryFlatProjection([170, -10, 180, 10])});
+ assert.ok(Number.isFinite(local.scale) && local.scale > 0);
+});
 test('similarityproject/inverse keepsworldanchors for variedscales andwrappedangles', () => {
  for (const angleDegrees of [-179, -90, -33, 0, 45, 181, 720]) for (const scale of [.1, 100, 30000]) {
   const state = {centerQ: [3, 2], scale, angleDegrees};

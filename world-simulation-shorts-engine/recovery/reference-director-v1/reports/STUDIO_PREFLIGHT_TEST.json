@@ -1,0 +1,145 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_STUDIO_READINESS_TEST_V1",
+  "scope": "READ_ONLY_PREFLIGHT_NO_RENDER",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python -B tests/test_studio_preflight.py",
+  "executions": [
+    {
+      "sandbox": "default",
+      "testsRun": 12,
+      "passed": 11,
+      "errors": 1,
+      "error": "PermissionError: [Errno 1] Operation not permitted at socket.socket()",
+      "classification": "ENVIRONMENT_LOOPBACK_SOCKET_PERMISSION",
+      "codeChangedToObtainPass": false
+    },
+    {
+      "sandbox": "official require_escalated approved; same command and test source",
+      "testsRun": 12,
+      "passed": 12,
+      "errors": 0,
+      "skipped": 0,
+      "unittestDurationSeconds": 0.788,
+      "exitCode": 0
+    },
+    {
+      "sandbox": "official require_escalated approved; changed partial-input qualification tests",
+      "testsRun": 12,
+      "passed": 12,
+      "errors": 0,
+      "skipped": 0,
+      "unittestDurationSeconds": 0.808,
+      "exitCode": 0,
+      "stderrLog": "STUDIO_PREFLIGHT_TEST.stderr.txt",
+      "stdoutLog": "STUDIO_PREFLIGHT_TEST.stdout.txt"
+    }
+  ],
+  "tests": [
+    {
+      "name": "test_all_windows_honestly_map_one_global_timeline",
+      "result": "PASS"
+    },
+    {
+      "name": "test_client_admission_overrides_are_rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "test_missing_or_unknown_window_and_wrong_types_are_rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "test_client_target_sha_cannot_select_different_target",
+      "result": "PASS"
+    },
+    {
+      "name": "test_changed_server_target_or_partial_input_is_not_readiness_evidence",
+      "result": "PASS"
+    },
+    {
+      "name": "test_changed_protected_renderer_is_rejected",
+      "result": "PASS"
+    },
+    {
+      "name": "test_reference_submit_never_saves_or_claims_or_launches",
+      "result": "PASS"
+    },
+    {
+      "name": "test_readiness_is_read_only_and_missing_inputs_are_explicit",
+      "result": "PASS"
+    },
+    {
+      "name": "test_non_reference_preflight_delegates_preserved_behavior",
+      "result": "PASS"
+    },
+    {
+      "name": "test_non_reference_submission_delegates_preserved_behavior",
+      "result": "PASS"
+    },
+    {
+      "name": "test_missing_owner_file_remains_a_startup_failure",
+      "result": "PASS"
+    },
+    {
+      "name": "test_actual_http_preserves_auth_origin_csrf_and_blocks_submission",
+      "result": "PASS"
+    }
+  ],
+  "actualHttpEvidence": {
+    "server": "preserved production-studio-mvp-v1/server.py via universal-presentation-v2/studio_adapter.py",
+    "bind": "127.0.0.1 only; ephemeral port",
+    "owner": "fresh private ephemeral test credential; never published",
+    "healthz": 200,
+    "unauthenticatedPreflight": 401,
+    "invalidLogin": 401,
+    "wrongOrigin": 403,
+    "missingCsrf": 403,
+    "authenticatedWindowPreflights": {
+      "A_CONTEXT": {
+        "httpStatus": 200,
+        "valid": true,
+        "ready": false,
+        "renderAllowed": false
+      },
+      "B_FOCUS": {
+        "httpStatus": 200,
+        "valid": true,
+        "ready": false,
+        "renderAllowed": false
+      },
+      "C_BOUNDARY_METRIC": {
+        "httpStatus": 200,
+        "valid": true,
+        "ready": false,
+        "renderAllowed": false
+      }
+    },
+    "authenticatedReferenceSubmit": {
+      "httpStatus": 409,
+      "errorCode": "RD_REFERENCE_RENDER_GATES_BLOCKED",
+      "renderAllowed": false
+    },
+    "controlFilesChangedByReferencePreflightOrSubmit": false,
+    "workerPopenCalls": 0
+  },
+  "rendererOriginal82854afSha256": "e4c80a478fe7b849c9f260eaffa436bea32af78596673dd2e046e25412363b38",
+  "sourceFileHashes": {
+    "studio_preflight.py": "51ba4b1f1bad40ee93525fc298f3aabfc7e33f858542a23bf223d51bbbb44448",
+    "tests/test_studio_preflight.py": "ae3ce5be5a24b1702e46b4fa87aeddcead6ddaa672c30f08660b502de2d48e64"
+  },
+  "paidGpuUsed": false,
+  "paidApiUsed": false,
+  "rendererDrawPerformed": false,
+  "actualStudioVideoProduced": false,
+  "visualQualityApproved": false,
+  "limitation": "Authenticated truthful readiness integration only; native shared rotation and fine reference data remain blocked.",
+  "partialInputSHA256": "4b892aadfb6415088a7a35bba58e9408d50bbd6f140d6e5c74d6f931e68b4dc0",
+  "partialInputQualification": {
+    "actualMissingBindings": 6,
+    "availablePrimaryCountry": "COUNTRY_ESP",
+    "availableContextLocations": [
+      "NE_PLACE_1159146357",
+      "NE_PLACE_1159147943"
+    ],
+    "availableMetric": "REF64306_OBSERVED_TEXT_85_M",
+    "independent85mSurveyRequiredForObservedTextDisplay": false
+  }
+}
