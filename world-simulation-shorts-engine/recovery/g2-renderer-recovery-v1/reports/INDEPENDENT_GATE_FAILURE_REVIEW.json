@@ -1,0 +1,305 @@
+{
+  "schema": "WORLD_ENGINE_G2_INDEPENDENT_GATE_FAILURE_REVIEW_V1",
+  "scope": "Read-only review after mandatory PHASE2 hard stop. No code/test changes, redraw, retry, Git or renderer modification.",
+  "decision": "CONFIRMED_PHASE2_FAILURE_STOP_BEFORE_PHASE3",
+  "g2Status": "NEEDS_REWORK",
+  "historicalG3": "BLOCKED",
+  "newStudio180FrameVideoAllowed": false,
+  "actualFailureEvidence": {
+    "path": "world-simulation-shorts-engine/recovery/g2-renderer-recovery-v1/captures/phase2-nepal_himalaya/proof/PROBE_REPORT.json",
+    "sha256": "08c5317b2358597a2610289d7ad5dbab086a1b7332e517f9a451758f7a9cb7ad",
+    "inputSHA256": "2561b75494786d1c48ca19ef96eec721abb277694b81b202147f5b393af9dd08",
+    "status": "FAIL",
+    "stage": "ACTUAL_NATIVE_FACTORY_INIT",
+    "firstRequestedFrame": 0,
+    "failedInsideFrame": null,
+    "timing": "Native factory initialization failed before the first runtime drawFrame/readPixels proof. Internal factory GIS initialization draws are not successful captured terrain frames.",
+    "successfulCapturedFrames": 0,
+    "elapsedSeconds": 1.351224542,
+    "outerError": "MEASURED_LAYOUT_INVALID",
+    "firstFailure": {
+      "role": "LOCATION_LABEL",
+      "code": "NO_SAFE_BOUNDARY_CLEAR_LOCATION_PLACEMENT"
+    },
+    "boundaryCollisions": [
+      {
+        "textRole": "LOCATION_LABEL",
+        "id": "COUNTRY_NPL",
+        "role": "PRIMARY",
+        "clearance": 8
+      }
+    ],
+    "safeArea": {
+      "bounds": [
+        48,
+        72,
+        1032,
+        1848
+      ],
+      "canonical": [
+        1080,
+        1920
+      ],
+      "violations": []
+    },
+    "locationPlacementAttempt": {
+      "role": "LOCATION_LABEL",
+      "candidates": [
+        {
+          "candidate": "LEFT",
+          "inkBox": [
+            353,
+            1006.5,
+            95,
+            27
+          ],
+          "acceptable": false,
+          "score": 1,
+          "primaryInterior": false,
+          "boundaryHits": [
+            {
+              "id": "COUNTRY_NPL",
+              "role": "PRIMARY",
+              "clearance": 8
+            }
+          ]
+        },
+        {
+          "candidate": "RIGHT",
+          "inkBox": [
+            524,
+            1006.5,
+            95,
+            27
+          ],
+          "acceptable": false,
+          "score": 1,
+          "primaryInterior": false,
+          "boundaryHits": [
+            {
+              "id": "COUNTRY_NPL",
+              "role": "PRIMARY",
+              "clearance": 8
+            }
+          ]
+        },
+        {
+          "candidate": "ABOVE",
+          "inkBox": [
+            438.5,
+            955,
+            95,
+            27
+          ],
+          "acceptable": false,
+          "score": 1,
+          "primaryInterior": false,
+          "boundaryHits": [
+            {
+              "id": "COUNTRY_NPL",
+              "role": "PRIMARY",
+              "clearance": 8
+            }
+          ]
+        },
+        {
+          "candidate": "BELOW",
+          "inkBox": [
+            438.5,
+            1058,
+            95,
+            27
+          ],
+          "acceptable": false,
+          "score": 1,
+          "primaryInterior": false,
+          "boundaryHits": [
+            {
+              "id": "COUNTRY_NPL",
+              "role": "PRIMARY",
+              "clearance": 8
+            }
+          ]
+        }
+      ]
+    },
+    "errorDetailTruncated": true,
+    "errorDetailQualification": "Recorded error text is truncated to3000characters; the LOCATION_LABEL failure and allfour locationcandidates are complete before truncation. No unrecorded tail or missing later diagnostics are inferred."
+  },
+  "sourceSceneConditions": {
+    "primaryGeometryId": "COUNTRY_NPL",
+    "eventAnchor": {
+      "coordinates": [
+        84,
+        28
+      ],
+      "crs": "EPSG:4326",
+      "geometry_type": "Point"
+    },
+    "closestLayoutBounds": [
+      75,
+      13,
+      95,
+      45
+    ],
+    "locationText": "ZONE",
+    "scaleInformation": {
+      "location": true,
+      "country": true,
+      "title": true,
+      "disclosure": true
+    },
+    "measuredLocationProfile": {
+      "fontFamily": "Gate1Bold",
+      "fontSize": 36,
+      "gap": 18,
+      "lineHeight": 1.28,
+      "maxLines": 1,
+      "maxWidth": 175,
+      "minFontSize": 36,
+      "outlineRadius": 1.4
+    },
+    "screenAnchorAtFrozenLayout": [
+      486,
+      1020
+    ],
+    "glyphInkDimensions": [
+      95,
+      27
+    ],
+    "actualFontHTTP": {
+      "path": "/static/fonts/NotoSansCJKkr-Bold.otf",
+      "httpStatus": 200,
+      "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0"
+    },
+    "allFourPositionsRejectedForPrimaryBoundaryClearance": true,
+    "pixelSafeAreaViolationObserved": false,
+    "missingFontOrUnloadedTextureEstablished": false
+  },
+  "confirmedCause": {
+    "classification": "SOURCE_PROFILE_AND_NATIVE_LAYOUT_ROLE_CONTRACT_MISMATCH_NOT_A_CONFIRMED_TERRAIN_SOURCE_FAILURE",
+    "mechanism": "The generic source fixture retains location:true and textZONE in the nativePlan. createMapInfographicRenderer measures and admits its full selected graphiclayout during initialization. For this narrowcountry/eventpoint/frozenextent, allfour existing locationcandidates intersect the primary boundary clearance. Later native_runtime drawFrame sets graphics:false/location:0 and draws only marker plusseparateSYNTHETICcaption, but this later visibility doesnot skip or retroactively alter factory layout admission. The original safetyguard rejects the configuration as designed.",
+    "notAClaimTheProtectedLayoutAlgorithmIsDefective": true,
+    "notAClaimTerrainVisualsPassedInNepal": true,
+    "codeEvidence": [
+      {
+        "file": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/tools/prepare_native.mjs",
+        "lines": [
+          24,
+          27
+        ],
+        "fact": "Newgenericplan supplies ZONE/DEMO text and retains the recognized measuredlayout profile. It doesnot declare a marker-only nativegraphic role policy."
+      },
+      {
+        "file": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+        "lines": [
+          87,
+          100
+        ],
+        "fact": "Location visibility defaults to true unless explicitlydisabled in plan.scale.information; sourceprimary geometry is projected for collision tests."
+      },
+      {
+        "file": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+        "lines": [
+          122,
+          130
+        ],
+        "fact": "Primary boundary collision uses existing8pixelminimumclearance; no newfailure threshold was introduced."
+      },
+      {
+        "file": "world-simulation-shorts-engine/web/map_infographic_v1/graphic_layout.mjs",
+        "lines": [
+          137,
+          168
+        ],
+        "fact": "OnlyLEFT/RIGHT/ABOVE/BELOW locationcandidates are measured. Eachmustfitsafearea/occupied/boundaryguards. Allinvalid yields NO_SAFE_BOUNDARY_CLEAR_LOCATION_PLACEMENT."
+      },
+      {
+        "file": "world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs",
+        "lines": [
+          467,
+          477
+        ],
+        "fact": "Frozenfinal-layout projection and actual pinnedfontmeasures occur during nativefactoryinit; any invalidlayout immediatelythrows."
+      },
+      {
+        "file": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
+        "lines": [
+          68,
+          84
+        ],
+        "fact": "Nativefactorymustcomplete before markerart andsyntheticcaptionpasses canbecreated."
+      },
+      {
+        "file": "world-simulation-shorts-engine/recovery/universal-source-pipeline-v2/native_runtime.mjs",
+        "lines": [
+          99,
+          116
+        ],
+        "fact": "Later per-framegraphics:false andlocationreveal0 do notcontrol initialization roles. They do notbypass the earlierlayoutguard."
+      }
+    ]
+  },
+  "terrainVersusLayout": {
+    "actualTerrainHTTP200": true,
+    "terrainBytesSHA256Matched": true,
+    "terrainSHA256": "7232f52441eaa1cc4db23888dd8843acf35a99f6aaf13a0b100c354e35eea468",
+    "actualCameraViewportsCovered": true,
+    "minimumNativeGutterPixels": 7.999999999999545,
+    "sourceStyleReceiptSHA256": "95c5d3c46b213c37733e8b8a06e4831ab8680c42149c36031e60fa6ccff9831a",
+    "visibleNepalTextureQuality": "UNVERIFIED_NO_COMPLETED_FRAME",
+    "basis": "Actual failure is font-measuredlayout placement, not missingNE1request, UV/sourcehasherror, NoData or materialshader error. SuccessfulassetHTTP andCPUcoverage do not establish finalNepalpixelquality."
+  },
+  "gateReconciliation": {
+    "existingCPUTestsPASS": 52,
+    "newCPUTestsPASS": 49,
+    "cpuStatus": "PASS",
+    "phase1MainProbe": {
+      "status": "PASS",
+      "successfulCapturedFrames": 4,
+      "requestedFrames": [
+        0,
+        90,
+        179,
+        90
+      ]
+    },
+    "phase2Namibia": {
+      "status": "PASS",
+      "successfulCapturedFrames": 4
+    },
+    "phase2Nepal": {
+      "status": "FAIL",
+      "successfulCapturedFrames": 0
+    },
+    "requiredTwoGenericRegionsPassed": false,
+    "phase3": "BLOCKED_PHASE2_GATE_FAILED",
+    "new180FrameStudioJobStarted": false,
+    "cpuPassCanOverrideActualGenericFailure": false,
+    "thresholdRelaxedOrFailedCaseRemoved": false
+  },
+  "futureFixOptionsNotApplied": [
+    {
+      "option": "Explicit generic nativegraphic role contract that matches actualoutputroles",
+      "constraints": "A futureseparateversion coulddeclare marker-only nativegraphics when no nativeLOCATION_LABEL is actuallyrendered, using supportedscaleinformation/layoutsemantics andserver-ownedprofileadmission beforeinitialization. It mustnot silentlyflip location:false or suppress an active requiredlabel justto pass. Addnegativechecks that visible-locationprofiles stillfail boundarycollision andretain original8pxclearance. Preserve existing FINAL/G1/native files, sourcepoint/camera/ownergeometry.",
+      "status": "DESIGN_AND_NEW_VALIDATION_REQUIRED_NOT_IMPLEMENTED"
+    },
+    {
+      "option": "A genuine generic visible-location placement profile",
+      "constraints": "If locationtextisrequired, defineabounded source-independent placementprofile usingrealfontmeasurements andprimaryboundarygeometry. Anyadditionalcandidatepolicy mustpreservecollision/safearea checks,markeranchor,textlegibility andsourcebinding, usea separateextensionifprotectedcodewouldbeaffected, andreceiveactualtwo-regionvalidation. Do notlowerclearance, shrinktextarbitrarily, movequalifiedeventpoint or change the failedcase solelyto hide failure.",
+      "status": "SEPARATE_SCOPE_REQUIRED_NOT_IMPLEMENTED"
+    }
+  ],
+  "stopCompliance": {
+    "codeEdited": false,
+    "testsEditedOrRerun": false,
+    "newDrawsOrRetries": 0,
+    "protectedFilesEdited": false,
+    "sourceGeometryOrCameraChanged": false,
+    "paidGpuExecuted": false,
+    "historicalG3Started": false,
+    "full80SecondVideoStarted": false,
+    "visualQualityApproved": false
+  },
+  "nextAction": "Persist completedsource/materialwork and thisactualfailureevidence. Resumeonlya separatelyscopedgenericlayout/profilefix andthefailedPHASE2case; do notstartPHASE3untilallrequiredgatespass. Thefailedclaim/report mustremainpreserved."
+}
