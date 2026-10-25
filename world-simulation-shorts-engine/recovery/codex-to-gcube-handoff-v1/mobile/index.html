@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>WORLD ENGINE · 6초 GPU 검수</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><header><p class="eyebrow">WORLD ENGINE</p><h1>6초 GPU 검수</h1><p>1080×1920 · 30fps · 180프레임 · 무음</p><button id="logout" type="button" class="quiet">로그아웃</button></header><main>
+<section class="card"><h2>제작 입력</h2><p class="hint">기존 지도 자료와 검증된 구조화 입력을 사용합니다. 예제 연결은 실제 항공편이 아닌 비역사 설명용 데이터입니다.</p>
+<button id="load-example" type="button" class="quiet">검증된 6초 예제 불러오기</button><label for="input-file">입력 JSON 선택</label><input id="input-file" type="file" accept="application/json,.json"><label for="prompt">제작 입력 JSON</label><textarea id="prompt" rows="12" maxlength="4000000" spellcheck="false"></textarea>
+<form id="prepare-form"><button id="preflight" type="submit">사전검사</button></form><div id="checks" role="status" aria-live="polite"></div>
+<div id="start-section" hidden><p id="budget" class="hint"></p><p class="hint">작업 시간 제한은 gCube 과금 종료가 아닙니다. 워크로드는 사용자가 직접 중지합니다.</p><label class="inline"><input id="consent" type="checkbox">표시된 승인 한도 안에서 6초 영상 1개를 제작합니다.</label><button id="start" type="button" disabled>제작 시작</button></div></section>
+<section id="job-section" class="card" hidden><h2>작업 상태</h2><dl id="job-facts"></dl><button id="refresh" type="button" class="quiet">상태 새로고침</button><p class="hint">재접속은 상태만 조회합니다. 자동 시작·재시도·재렌더링은 하지 않습니다.</p></section>
+<section id="result-section" class="card" hidden><h2>결과</h2><div id="downloads"></div><video id="video" controls playsinline preload="none" hidden></video><p id="storage" class="hint"></p><p class="hint">실제 영상과 다운로드 SHA를 확인한 뒤 gCube 워크로드를 직접 중지하세요. 사용자 승인 전 FINAL로 승격하지 않습니다.</p></section>
+<section id="error" class="card error" hidden role="alert"><h2>확인이 필요합니다</h2><p id="error-text"></p></section>
+<textarea id="example-data" hidden aria-hidden="true">__HANDOFF_EXAMPLE_JSON__</textarea>
+</main></body></html>
