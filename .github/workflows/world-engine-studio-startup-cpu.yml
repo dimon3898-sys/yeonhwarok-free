@@ -1,0 +1,85 @@
+name: WORLD ENGINE Studio startup CPU validation
+
+on:
+  push:
+    branches:
+      - validation/world-engine-studio-startup-20261025
+    paths:
+      - .github/workflows/world-engine-studio-startup-cpu.yml
+      - world-simulation-shorts-engine/recovery/studio-cold-start-v1/**
+
+permissions:
+  contents: read
+
+jobs:
+  startup-cpu:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.ref == 'refs/heads/validation/world-engine-studio-startup-20261025'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da
+      STARTUP_DIR: world-simulation-shorts-engine/recovery/studio-cold-start-v1
+    steps:
+      - name: Read only the frozen runtime inventory and new validation files
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/studio-cold-start-v1/**
+            /.github/workflows/world-engine-studio-startup-cpu.yml
+
+      - name: Materialize only files required by the existing runtime contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path, PurePosixPath
+          import subprocess
+          manifest = 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
+          rows = json.loads(Path(manifest).read_text())['files']
+          paths = []
+          for row in rows:
+              value = row['path']
+              path = PurePosixPath(value)
+              if path.is_absolute() or '..' in path.parts or any(c in value for c in '\n\r\\*?[]!'):
+                  raise SystemExit('INVALID_FROZEN_RUNTIME_PATH')
+              paths.append('/' + value)
+          paths += ['/' + manifest,
+                    '/world-simulation-shorts-engine/recovery/studio-cold-start-v1/**',
+                    '/.github/workflows/world-engine-studio-startup-cpu.yml']
+          subprocess.run(['git', 'sparse-checkout', 'set', '--no-cone', '--stdin'],
+                         input='\n'.join(sorted(set(paths))) + '\n', text=True, check=True)
+          print('Frozen runtime paths materialized; no source or manifest changes.')
+          PY
+
+      - name: Pull the unchanged original image once
+        timeout-minutes: 6
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker version --format '{{.Server.Version}}'
+          docker pull "$IMAGE"
+
+      - name: Run the actual CPU container lifecycle suite once
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$STARTUP_DIR/tests/container_suite.py" --repo "$GITHUB_WORKSPACE" --image "$IMAGE"
+
+      - name: Remove only this validation's disposable CPU containers
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          containers=$(docker ps -aq --filter label=world-engine.validation=studio-cold-start-v1)
+          if [ -n "$containers" ]; then
+            docker rm -f $containers
+          fi
