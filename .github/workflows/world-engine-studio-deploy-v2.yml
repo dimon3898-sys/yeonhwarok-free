@@ -1,0 +1,96 @@
+name: WORLD ENGINE packaged Studio setup CPU and image
+
+on:
+  push:
+    branches:
+      - recovery/world-engine-studio-deploy-20261026
+    paths:
+      - .github/workflows/world-engine-studio-deploy-v2.yml
+      - world-simulation-shorts-engine/recovery/studio-cold-start-v2/**
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: world-engine-studio-deploy-v2-20261026
+  cancel-in-progress: false
+
+jobs:
+  package-cpu-publish:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.ref == 'refs/heads/recovery/world-engine-studio-deploy-20261026'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      BASE_IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da
+      STARTUP_DIR: world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      WORLD_ENGINE_PUBLIC_CPU_RUNNER: ubuntu-24.04
+    steps:
+      - name: Read frozen runtime and additive packaging candidate
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/studio-cold-start-v2/**
+            /.github/workflows/world-engine-studio-deploy-v2.yml
+
+      - name: Materialize the frozen file set and assign a unique new tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, re, subprocess
+          from pathlib import Path, PurePosixPath
+          manifest = 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
+          paths = []
+          for row in json.loads(Path(manifest).read_text())['files']:
+              text = row['path']; p = PurePosixPath(text)
+              if p.is_absolute() or '..' in p.parts or any(c in text for c in '\n\r\\*?[]!'):
+                  raise SystemExit('INVALID_FROZEN_PATH')
+              paths.append('/' + text)
+          paths += ['/' + manifest, '/' + os.environ['STARTUP_DIR'] + '/**', '/.github/workflows/world-engine-studio-deploy-v2.yml']
+          subprocess.run(['git','sparse-checkout','set','--no-cone','--stdin'],input='\n'.join(sorted(set(paths)))+'\n',text=True,check=True)
+          commit, run = os.environ['GITHUB_SHA'], os.environ['GITHUB_RUN_ID']
+          assert re.fullmatch('[a-f0-9]{40}', commit) and run.isdecimal()
+          image = 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine:studio-setup-v2-20261026-' + commit[:12] + '-' + run
+          with open(os.environ['GITHUB_ENV'],'a') as stream:
+              stream.write('CANDIDATE_IMAGE=' + image + '\n')
+          PY
+
+      - name: Assemble only verified existing runtime and new startup files
+        run: python3 "$STARTUP_DIR/ci_image.py" stage --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/world-engine-v2-context"
+
+      - name: Pull original base once and build additive image on CPU
+        timeout-minutes: 12
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull "$BASE_IMAGE"
+          docker build --network=none --pull=false --tag "$CANDIDATE_IMAGE" "$RUNNER_TEMP/world-engine-v2-context"
+
+      - name: Test actual packaged default startup and authenticated setup once
+        timeout-minutes: 12
+        run: python3 "$STARTUP_DIR/tests/container_suite.py" --repo "$GITHUB_WORKSPACE" --image "$CANDIDATE_IMAGE" --result "$RUNNER_TEMP/world-engine-v2-cpu.json"
+
+      - name: Publish new tag only after CPU PASS and verify remote manifest
+        timeout-minutes: 6
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 "$STARTUP_DIR/ci_image.py" publish --image "$CANDIDATE_IMAGE" --result "$RUNNER_TEMP/world-engine-v2-cpu.json"
+
+      - name: Remove only disposable test containers
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          containers=$(docker ps -aq --filter label=world-engine.validation=studio-cold-start-v2)
+          if [ -n "$containers" ]; then
+            docker rm -f $containers
+          fi
