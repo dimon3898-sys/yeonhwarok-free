@@ -18,7 +18,7 @@ import tempfile
 REPO = Path('/opt/world-engine-handoffs/studio-v2/repo')
 BACKEND = REPO / 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py'
 BACKEND_SHA256 = '4329dc7c28dc7ca5e9c368e398d3f5fa87ec1a1ad3fcfb76971fa5a176365c56'
-DEPS = Path('/opt/world-engine/cinematic-world-map')
+DEPS = Path('/opt/rtx-package/repo/cinematic-world-map')
 GIB = 1024 ** 3
 EXPECTED_RESERVE = """def reserve():
     if shutil.disk_usage(control_root).free < 2 * 1024**3:

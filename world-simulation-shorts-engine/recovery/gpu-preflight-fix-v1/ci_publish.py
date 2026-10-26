@@ -12,7 +12,7 @@ import tempfile
 IMAGE = 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine'
 BASE = IMAGE + '@sha256:32c677d1dbeec3908b6790484b34905ad6818f8e5a9127106579f7dfd233342e'
 BRANCH = 'refs/heads/recovery/world-engine-gpu-preflight-20261026'
-DEPS = '/opt/world-engine/cinematic-world-map'
+DEPS = '/opt/rtx-package/repo/cinematic-world-map'
 KEY = 'WORLD_ENGINE_NODE_DEPS'
 
 
@@ -70,7 +70,7 @@ def publish(args):
     baseline = json.loads(args.baseline_result.read_text())
     result = json.loads(args.result.read_text())
     for item, mode, expected_names in (
-            (baseline, 'baseline', ['missing-root', 'existing-root']),
+            (baseline, 'baseline', ['existing-root']),
             (result, 'candidate', ['inherited-root', 'decimal-2gb', 'binary-2gib', 'decimal-3gb'])):
         require(item.get('schema') == 'WORLD_ENGINE_GPU_PREFLIGHT_CPU_SUITE_V1'
                 and item.get('mode') == mode and item.get('status') == 'PASS'

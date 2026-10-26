@@ -48,7 +48,7 @@ jobs:
         timeout-minutes: 12
         run: docker pull "$BASE_IMAGE"
 
-      - name: Inspect real OCI Playwright files and reproduce only missing-root blocker
+      - name: Validate evidenced OCI Playwright root without repeating passed reproduction
         timeout-minutes: 3
         run: python3 "$FIX_DIR/tests/container_suite.py" --mode baseline --image "$BASE_IMAGE" --result "$RUNNER_TEMP/preflight-baseline.json"
 

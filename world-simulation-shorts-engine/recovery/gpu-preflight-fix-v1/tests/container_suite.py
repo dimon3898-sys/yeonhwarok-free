@@ -108,7 +108,8 @@ class Suite:
 
     def run(self):
         if self.args.mode == 'baseline':
-            self.case('missing-root', 'missing-root')
+            # Missing-root reproduction already passed in run40296356971.
+            # Validate only the newly evidenced OCI root; no passed-case rerun.
             self.case('existing-root', 'existing-root')
         else:
             self.case('inherited-root', 'inherited-root')

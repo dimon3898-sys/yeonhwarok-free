@@ -9,7 +9,7 @@ DEPENDENCY ROOT
 The original dependency_facts rejects a missing/invalid WORLD_ENGINE_NODE_DEPS
 before Playwright module resolution. The runtime expects a package root, not
 node_modules itself. The candidate adds only:
-WORLD_ENGINE_NODE_DEPS=/opt/world-engine/cinematic-world-map
+WORLD_ENGINE_NODE_DEPS=/opt/rtx-package/repo/cinematic-world-map
 The CPU baseline gate must first prove that this root and the pinned Playwright
 files already exist in the real original OCI filesystem. No install occurs.
 If that evidence fails, CI stops before the build/publication. No guessed PASS.
@@ -29,8 +29,12 @@ A new image alone does not alter the provider's runtime shared-memory mount.
 
 FOCUSED FREE CPU VERIFICATION
 Public ubuntu-24.04, attempt1 only; no GPU, render, auth or full preflight.
-Original dependency_facts runs with missing root (exact expected failure) and
-existing root (pinned Node/Playwright metadata success). Candidate uses its actual
+Missing-root exact failure was already verified in CPU run40296356971; the first
+path candidate came from legacy Codespaces and was rejected. Direct immutable
+OCI layer17/19 inspection located package.json and Playwright/core1.62.1 under
+/opt/rtx-package/repo/cinematic-world-map. The corrected revision does not rerun
+the passed missing-root case. It validates the evidenced existing root using the
+original dependency_facts and pinned Node/Playwright versions. Candidate uses its actual
 inherited ENV; the test must not inject the value it is supposed to verify.
 Actual CPU Docker /dev/shm sizes 2,000,000,000 / 2,147,483,648 / 3,000,000,000
 exercise the unchanged reserve() body: BLOCKED / PASS / PASS. Decimal requested
