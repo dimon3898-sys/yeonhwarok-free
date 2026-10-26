@@ -1,0 +1,77 @@
+name: WORLD ENGINE two preflight fixes CPU and config-only image
+
+on:
+  push:
+    branches:
+      - recovery/world-engine-gpu-preflight-20261026
+    paths:
+      - .github/workflows/world-engine-gpu-preflight-fix-v1.yml
+      - world-simulation-shorts-engine/recovery/gpu-preflight-fix-v1/**
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: world-engine-gpu-preflight-fix-20261026
+  cancel-in-progress: false
+
+jobs:
+  cpu-delta-and-publish:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.ref == 'refs/heads/recovery/world-engine-gpu-preflight-20261026'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      BASE_IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:32c677d1dbeec3908b6790484b34905ad6818f8e5a9127106579f7dfd233342e
+      FIX_DIR: world-simulation-shorts-engine/recovery/gpu-preflight-fix-v1
+      WORLD_ENGINE_PUBLIC_CPU_RUNNER: ubuntu-24.04
+    steps:
+      - name: Read only focused fix and preserved registry helper
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/recovery/gpu-preflight-fix-v1/**
+            /world-simulation-shorts-engine/recovery/studio-cold-start-v2/ci_image.py
+            /.github/workflows/world-engine-gpu-preflight-fix-v1.yml
+
+      - name: Assign unique new image tag
+        run: python3 "$FIX_DIR/ci_publish.py" prepare
+
+      - name: Pull current immutable image once on free public CPU runner
+        timeout-minutes: 12
+        run: docker pull "$BASE_IMAGE"
+
+      - name: Inspect real OCI Playwright files and reproduce only missing-root blocker
+        timeout-minutes: 3
+        run: python3 "$FIX_DIR/tests/container_suite.py" --mode baseline --image "$BASE_IMAGE" --result "$RUNNER_TEMP/preflight-baseline.json"
+
+      - name: Build configuration-only derivative without install or source changes
+        timeout-minutes: 2
+        run: docker build --network=none --pull=false --tag "$CANDIDATE_IMAGE" "$FIX_DIR"
+
+      - name: Test inherited dependency path and real shared-memory boundaries once
+        timeout-minutes: 4
+        run: python3 "$FIX_DIR/tests/container_suite.py" --mode candidate --image "$CANDIDATE_IMAGE" --result "$RUNNER_TEMP/preflight-candidate.json"
+
+      - name: Assert unchanged filesystem then publish new tag and read back digest
+        timeout-minutes: 4
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 "$FIX_DIR/ci_publish.py" publish --image "$CANDIDATE_IMAGE" --repo "$GITHUB_WORKSPACE" --baseline-result "$RUNNER_TEMP/preflight-baseline.json" --result "$RUNNER_TEMP/preflight-candidate.json"
+
+      - name: Remove only this validation's disposable containers
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          containers=$(docker ps -aq --filter label=world-engine.validation=gpu-preflight-fix-v1)
+          if [ -n "$containers" ]; then
+            docker rm -f $containers
+          fi
