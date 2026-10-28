@@ -24,6 +24,7 @@ CODES = frozenset({"GCUBE_CAPTURE_RUNTIME_FAILED", "HANDOFF_CAPTURE_PROCESS_FAIL
     "GCUBE_NATIVE_DRAW_FAILED", "GCUBE_NATIVE_READBACK_INVALID",
     "GCUBE_NATIVE_REPEATED_PIXEL_MISMATCH", "UP2_BLACK_FRAME", "UP2_FRAME_GL_ERROR",
     "UP2_ENCODER_EARLY_EXIT", "UP2_ENCODER_CLOSED", "UP2_PRIVATE_PLAYWRIGHT_REQUIRED"})
+DIAGNOSTIC_STAGES = frozenset({"PAGE_EVALUATE_RUNTIME_IMPORT", "PAGE_EVALUATE_FIRST_NATIVE_DRAW", "PAGE_EVALUATE_FRAME_CAPTURE"})
 LIMIT = 65536
 
 
@@ -112,11 +113,14 @@ def export_failure(job_root, destination, *, deadline_seconds=5):
     code = (first or {}).get("code")
     stage = (first or {}).get("stage")
     frames = (receipt or {}).get("renderedFrames")
+    raw_stage = failure.get("diagnosticStage") if isinstance(failure, dict) else None
+    safe_stage = raw_stage if type(raw_stage) is str and raw_stage in DIAGNOSTIC_STAGES else None
     payload = {"schema": "WORLD_ENGINE_CAPTURE_DIAGNOSTIC_SAFE_V2",
         "firstFailure": {"code": safe_code(code), "stage": stage if isinstance(stage, str) and stage in STAGES else None,
             "unrecognizedCode": code is not None and safe_code(code) is None},
         "supervisor": {"reason": safe_code(supervisor.get("reason")), "cleanupVerified": True},
         "capture": {"code": safe_code(text), "messageCategory": message_category(text),
+            "diagnosticStage": safe_stage,
             "renderedFrames": frames if type(frames) is int and 0 <= frames <= 180 else None,
             "nvidiaVerified": (receipt or {}).get("nvidiaVerified") is True},
         "missingEvidence": {"first": first is None, "capture": receipt is None}}
