@@ -54,6 +54,7 @@ jobs:
           docker build --network none --pull=false -t "$TAG" out
           # Host metadata must be readable by UID1000: explicit file0644 / dir0755.
           python3 "$G2/build_g2_image.py" identity --tag "$TAG"
+      # Resume the failed Chromium launch with closed diagnostics and conditional private HOME.
       - name: Candidate-internal 353-file and browser diagnostic integration
         id: validate
         timeout-minutes: 4

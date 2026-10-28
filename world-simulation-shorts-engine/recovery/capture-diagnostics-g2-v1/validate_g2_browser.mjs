@@ -2,15 +2,40 @@
 import assert from 'node:assert/strict';
 import {createRequire} from 'node:module';
 import {pathToFileURL} from 'node:url';
-import {readFile} from 'node:fs/promises';
+import {readFile,access,mkdir,stat} from 'node:fs/promises';
+import {constants} from 'node:fs';
 import {createServer} from 'node:http';
 import path from 'node:path';
+import os from 'node:os';
 
 const [root, job, depsRoot] = process.argv.slice(2);
 const ns = path.join(root, 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1');
 let browser, server, step='ARGUMENTS';
 const proof = {schema:'WORLD_ENGINE_G2_IMAGE_BROWSER_PROBE_V1', status:'BLOCKED',
   scope:'INSTALLED_IMAGE_CPU_INTEGRATION', gpuExecuted:false, renderedFrames:0, gpuRootCause:'UNKNOWN'};
+function launchSignals(error, home) {
+  // Only closed booleans leave the browser failure. Never publish its raw log.
+  const message=typeof error?.message==='string'?error.message:'';
+  const denied=/permission denied|read-only file system|EACCES|EROFS/i.test(message);
+  const xdg=[process.env.XDG_CONFIG_HOME,process.env.XDG_CACHE_HOME]
+    .filter(value=>typeof value==='string' && path.isAbsolute(value));
+  return {
+    crashpadDatabaseRequired:/chrome_crashpad_handler:\s*--database is required|crashpad_handler[^\n]*--database[^\n]*required/i.test(message),
+    homeWriteDenied:denied && typeof home==='string' && home.length>1 && message.includes(home),
+    xdgWriteDenied:denied && xdg.some(value=>message.includes(value)),
+    missingSharedLibrary:/error while loading shared libraries|Host system is missing dependencies/i.test(message),
+    sandboxAdmission:/no usable sandbox|SUID sandbox|Running as root without --no-sandbox/i.test(message),
+    executableMissing:/executable doesn.t exist|spawn .*ENOENT|Failed to launch.*executable/i.test(message),
+    browserClosed:/Target page, context or browser has been closed|browser has been closed/i.test(message)
+  };
+}
+async function homeReadiness(home) {
+  const state={configured:typeof process.env.HOME==='string',absolute:path.isAbsolute(home),
+    exists:false,directory:false,writableByAccessCheck:false};
+  try {const info=await stat(home);state.exists=true;state.directory=info.isDirectory();} catch {}
+  try {await access(home,constants.W_OK);state.writableByAccessCheck=true;} catch {}
+  return state;
+}
 try {
   assert(path.isAbsolute(root) && path.isAbsolute(job) && path.isAbsolute(depsRoot));
   step='VARIANT_VERIFY';
@@ -40,8 +65,33 @@ try {
   });
   await new Promise(resolve=>server.listen(0, '127.0.0.1', resolve));
   step='CHROMIUM_LAUNCH';
-  browser = await chromium.launch({executablePath:proof.chromiumExecutable, headless:true,
-    args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']});
+  const home=os.homedir();
+  proof.launchEnvironment={home:await homeReadiness(home),ephemeralTestEnvironmentApplied:false,
+    productionEnvironmentChanged:false,launchAttempts:1};
+  const launch={executablePath:proof.chromiumExecutable, headless:true,
+    args:['--no-sandbox','--disable-gpu','--disable-dev-shm-usage']};
+  try {browser=await chromium.launch(launch);}
+  catch(error) {
+    const signals=launchSignals(error,home);
+    proof.launchEnvironment.initialFailureSignals=signals;
+    const eligible=(signals.crashpadDatabaseRequired||signals.homeWriteDenied||signals.xdgWriteDenied)
+      && !signals.missingSharedLibrary && !signals.sandboxAdmission && !signals.executableMissing;
+    proof.launchEnvironment.ephemeralEnvironmentRetryEligible=eligible;
+    if(!eligible) throw error;
+    // A single CPU-only correction is conditional on an observed home/crashpad
+    // failure. This changes only the test browser child environment, never the
+    // packaged capture launch profile, container environment, or production HOME.
+    step='CHROMIUM_LAUNCH_EPHEMERAL_HOME';
+    const childHome=path.join(job,'browser-home'),config=path.join(childHome,'config'),cache=path.join(childHome,'cache');
+    await mkdir(childHome,{mode:0o700});
+    await mkdir(config,{mode:0o700});
+    await mkdir(cache,{mode:0o700});
+    proof.launchEnvironment.ephemeralTestEnvironmentApplied=true;
+    proof.launchEnvironment.launchAttempts=2;
+    try {browser=await chromium.launch({...launch,env:{...process.env,
+      HOME:childHome,XDG_CONFIG_HOME:config,XDG_CACHE_HOME:cache}});}
+    catch(retryError) {proof.launchEnvironment.retryFailureSignals=launchSignals(retryError,childHome);throw retryError;}
+  }
   proof.chromium = browser.version();
   step='PAGE_NAVIGATION';
   const page = await browser.newPage();
