@@ -1,0 +1,39 @@
+name: WORLD ENGINE page stage safe-export delta gate
+on:
+  push:
+    branches: [recovery/capture-page-evaluation-evidence-20261028]
+    paths:
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py'
+      - 'world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/**'
+      - '.github/workflows/world-engine-page-stage-export.yml'
+permissions:
+  contents: read
+jobs:
+  stage-export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: New stage allowlist and safe output only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import importlib.util, tempfile, json, pathlib, hashlib
+          root=pathlib.Path('world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller')
+          spec=importlib.util.spec_from_file_location('safe',root/'safe_capture_export.py')
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          assert len(m.DIAGNOSTIC_STAGES)==3
+          for stage in list(m.DIAGNOSTIC_STAGES)+['PASSWORD_LEAK',None]:
+            with tempfile.TemporaryDirectory() as d:
+              base=pathlib.Path(d);job=base/'job';(job/'capture').mkdir(parents=True)
+              for f,data in [(job/'LEASE_SUPERVISOR_RESULT.json',{'cleanupVerified':True,'reason':'GCUBE_CAPTURE_RUNTIME_FAILED'}),(job/'FIRST_CAPTURE_FAILURE.json',{'code':'GCUBE_CAPTURE_RUNTIME_FAILED','stage':'RENDER_RUNTIME'}),(job/'capture'/'CAPTURE_RECEIPT.json',{'failure':{'code':'page.evaluate: PASSWORD_LEAK','diagnosticStage':stage}})]:
+                f.write_text(json.dumps(data));f.chmod(0o600)
+              dest=base/'out';m.export_failure(job,dest)
+              raw=(dest/'CAPTURE_DIAGNOSTIC.json').read_bytes();data=json.loads(raw)
+              assert data['capture']['diagnosticStage']==(stage if stage in m.DIAGNOSTIC_STAGES else None)
+              assert b'PASSWORD_LEAK' not in raw
+              assert hashlib.sha256(raw).hexdigest() in (dest/'SHA256SUMS').read_text()
+          print('STAGE_EXPORT_ALLOWLIST_PASS')
+          PY
+      - name: Previously approved capture stage-only syntax gate
+        run: node --check world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs
