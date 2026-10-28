@@ -1,0 +1,152 @@
+{
+  "schema": "WORLD_ENGINE_WAR_GPU_FAILURE_INVESTIGATION_V1",
+  "date": "2026-10-29",
+  "timezone": "Asia/Seoul",
+  "jobId": "studio-86e62700b98ac8d70089b3fe8534a693",
+  "status": "BLOCKED",
+  "firstFailureCause": "UNKNOWN",
+  "actualFirstFailureFileFunctionLine": null,
+  "displayErrorCode": "HANDOFF_UNRESOLVED_WORKER_OR_DESCENDANTS",
+  "displayPhase": "UNRESOLVED_CAPTURE_CLEANUP",
+  "lastReportedCompletedFrames": 87,
+  "totalFrames": 180,
+  "confirmedFindings": [
+    {
+      "claim": "Retained reference source synthesizes displayed phase/error when QUEUED/RUNNING saved worker identity cannot be confirmed via /proc.",
+      "evidence": "SOURCE_TRACE.json",
+      "function": "NvidiaPresentationBackend.studio_status",
+      "path": "controller/nvidia_backend.py",
+      "lines": [
+        259,
+        271
+      ],
+      "scope": "SOURCE_SEMANTICS; actual failed deployment digest unobserved"
+    },
+    {
+      "claim": "UI error does not itself prove descendants survived or cleanup actually failed. It overwrites returned errorCode and phase; original state.json is required.",
+      "evidence": "SOURCE_TRACE.json"
+    },
+    {
+      "claim": "87 is last propagated completed-frame count, not a known failing frame index.",
+      "evidence": "SOURCE_TRACE.json"
+    },
+    {
+      "claim": "Authenticated gCube UI exposed Finished state and container start/stop events; live terminal/SSH disabled. No target job runtime log obtained.",
+      "evidence": "GCUBE_OBSERVATIONS.json"
+    },
+    {
+      "claim": "Connected Dropbox search and complete named-folder listings did not locate target diagnostics. Seven recent export folders contained storage-preflight only.",
+      "evidence": "DROPBOX_OBSERVATIONS.json"
+    },
+    {
+      "claim": "Reference exporter only runs after verified cleanup and before deadline. Diagnostic absence does not prove no exception or a Dropbox outage.",
+      "evidence": "SOURCE_TRACE.json",
+      "scope": "CONDITIONAL_SOURCE_SEMANTICS_NOT_ACTUAL_INCIDENT_CAUSE"
+    }
+  ],
+  "unconfirmed": [
+    "actual deployed image digest and target Scene hash",
+    "target studio job-to-pod linkage",
+    "first exception and actual failing frame/operation",
+    "whether worker exited, became zombie, PID was reused, or /proc lookup failed",
+    "whether cleanup ran or which child survived",
+    "actual signals, timeout, exit code, OOMKilled or kernel GPU fault",
+    "cause/requester of container termination",
+    "whether private evidence still exists after container termination"
+  ],
+  "missingEvidence": [
+    {
+      "location": "<control_root>/handoff-gpu-jobs/studio-86e62700b98ac8d70089b3fe8534a693/",
+      "files": [
+        "state.json",
+        "launch.json",
+        "lease-holder.json",
+        "actual-progress.json",
+        "FIRST_CAPTURE_FAILURE.json",
+        "LEASE_SUPERVISOR_RESULT.json",
+        "worker.log",
+        "lease-supervisor.stderr.log",
+        "capture/CAPTURE_OPERATION_CHECKPOINT.json",
+        "capture/CAPTURE_RECEIPT.json"
+      ],
+      "additionalIfPresent": [
+        "capture/FRAME_EVIDENCE.json",
+        "CAPTURE_PROCESS_RESULT.json"
+      ],
+      "keyFields": [
+        "firstFailure",
+        "cleanupFailure",
+        "operationId",
+        "frameIndex",
+        "sequence",
+        "observedAtUnixMs",
+        "executionDeadline",
+        "pid",
+        "processStart",
+        "reason",
+        "cleanupVerified",
+        "cleanup.tracked",
+        "cleanup.signalsSent",
+        "cleanup.remaining",
+        "cleanup.errors",
+        "cleanup.observationError"
+      ],
+      "availability": "NOT_RECOVERED; may require provider retained storage; not asserted to survive"
+    },
+    {
+      "location": "gCube retained pod/container records",
+      "files": [
+        "existing container stdout/stderr",
+        "terminated state exitCode/signal/reason/OOMKilled",
+        "job-to-pod mapping and runtime imageID/digest",
+        "stop requester and timestamp",
+        "existing process/signal records if retained"
+      ],
+      "availability": "NOT_OBTAINED_FROM_AVAILABLE_UI"
+    }
+  ],
+  "minimumCodeFix": {
+    "status": "NOT_ESTABLISHED",
+    "filesToModify": [],
+    "reason": "No actual first exception, cleanup receipt or runtime identity. Source semantics alone does not establish a defect. No speculative timeout, cleanup or renderer changes."
+  },
+  "nextFreeAction": "Recover already retained target job files and stopped-pod logs read-only; correlate operation timestamps, PID/start identity, firstFailure and cleanupFailure. If unavailable, retain UNKNOWN; do not restart or redeploy.",
+  "userIntervention": {
+    "required": true,
+    "why": "Current authenticated UI cannot access the stopped container private files or raw logs; connected backups lack target evidence.",
+    "action": "Provide any already saved target diagnostic bundle, or obtain retained logs/files from gCube support without restart/redeployment. Use LOG_RECOVERY_REQUEST.txt. No login or new GPU execution requested."
+  },
+  "preserved": {
+    "priorPassGates": [
+      "G0",
+      "G1",
+      "G2",
+      "WAR_SCENE_CONTRACT",
+      "WAR_MAP_CAMERA"
+    ],
+    "priorPassTestsRerun": false,
+    "gpuExecuted": false,
+    "imagePulled": false,
+    "imageBuilt": false,
+    "imagePublished": false,
+    "rendererModified": false,
+    "sceneModified": false,
+    "sourceCodeModified": false,
+    "newActionsRuns": 0,
+    "mainModified": false
+  },
+  "evidenceFiles": [
+    "PRIOR_EVIDENCE_INTAKE.json",
+    "USER_SCREENSHOT_OBSERVATION.json",
+    "GCUBE_OBSERVATIONS.json",
+    "DROPBOX_OBSERVATIONS.json",
+    "SOURCE_TRACE.json",
+    "INVESTIGATION.md",
+    "LOG_RECOVERY_REQUEST.txt"
+  ],
+  "review": {
+    "independentReviewCompleted": true,
+    "reviewExecution": "READ_ONLY_NO_TESTS",
+    "conclusion": "BLOCKED/UNKNOWN; screen error and termination event do not establish first cause; screenshot upload time separate from failure time."
+  }
+}

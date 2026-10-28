@@ -1,0 +1,26 @@
+기존 종료 작업의 로그/파일 회수 요청 — 재실행 금지
+
+대상 Studio 작업: studio-86e62700b98ac8d70089b3fe8534a693
+gCube workload: #5373 world-engine-test
+확인한 Pod: dep5373-7498c68478-dq8m7
+컨테이너: dep5373-0
+이벤트 식별자: wn7e9b3dce
+조회 범위: 2026-10-29 07:25–07:36 KST (2026-10-28 22:25–22:36 UTC)
+주의: 위 Pod와 Studio 작업의 직접 연결 기록은 아직 없으므로 함께 확인이 필요합니다.
+
+기존에 남아 있는 자료만 읽기 전용으로 회수 가능한지 확인해 주세요.
+GPU 시작, 컨테이너 재시작, 재배포, 이미지 빌드, 렌더링은 요청하지 않습니다.
+
+1. 기존 컨테이너 stdout/stderr, 종료 exitCode/signal/reason/OOMKilled, 종료 요청 주체·시각, runtime imageID/digest, 작업 ID와 Pod 연결 기록.
+2. <control_root>/handoff-gpu-jobs/studio-86e62700b98ac8d70089b3fe8534a693/ 내 기존 파일:
+   state.json, launch.json, lease-holder.json, actual-progress.json
+   FIRST_CAPTURE_FAILURE.json, LEASE_SUPERVISOR_RESULT.json
+   worker.log, lease-supervisor.stderr.log
+   capture/CAPTURE_OPERATION_CHECKPOINT.json, capture/CAPTURE_RECEIPT.json
+   존재하는 경우 capture/FRAME_EVIDENCE.json, CAPTURE_PROCESS_RESULT.json
+3. 이미 삭제되어 회수할 수 없는 항목은 보존 여부와 삭제 시각/정책만 알려 주세요.
+
+원본은 비공개로 보존하고 인증정보·환경변수·토큰은 포함하지 말아 주세요.
+공개 GitHub에는 원본 비공개 로그를 그대로 올리지 말고 필요한 진단 필드만 정리합니다.
+
+이 문안은 조사 결과와 함께 준비했으며 자동 발송하지 않았습니다.

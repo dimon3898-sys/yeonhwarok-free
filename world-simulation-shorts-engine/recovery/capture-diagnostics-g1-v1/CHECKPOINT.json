@@ -122,6 +122,17 @@
       "imageAndSceneUnchanged": true,
       "gpuExecuted": false,
       "nativeFactoryVisualAdmission": "NOT_RUN_NOT_CLAIMED"
+    },
+    "WAR_GPU_FAILURE_INVESTIGATION": {
+      "status": "BLOCKED",
+      "reason": "TARGET_FIRST_FAILURE_AND_PRIVATE_CLEANUP_EVIDENCE_NOT_RECOVERED",
+      "scope": "READ_ONLY_WAR_GPU_FAILURE_INVESTIGATION",
+      "jobId": "studio-86e62700b98ac8d70089b3fe8534a693",
+      "rootCause": "UNKNOWN",
+      "result": "../war-gpu-failure-investigation-v1/RESULT.json",
+      "existingPassRerun": false,
+      "gpuExecuted": false,
+      "codeModified": false
     }
   },
   "gpuExecutionApproved": false,
@@ -161,8 +172,8 @@
       "tests": 8
     }
   },
-  "nextAction": "CPU map/camera compatibility is complete; retain input/image pins. Any native visual/GPU execution requires separate explicit approval. No automatic next execution.",
-  "nextOwner": "USER_IF_NEW_GPU_EXECUTION_REQUESTED",
+  "nextAction": "Obtain existing target state/firstFailure/cleanup receipts and stopped-pod logs read-only. No GPU execution or code change; preserve UNKNOWN until evidence is recovered.",
+  "nextOwner": "USER_OR_PROVIDER_FOR_EXISTING_LOG_RECOVERY",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -184,7 +195,7 @@
   "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
   "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "WAR_MAP_CAMERA_CPU_PASS_EXISTING_G0_G1_G2_WAR_INPUT_PRESERVED",
+  "scope": "WAR_GPU_FAILURE_INVESTIGATION_BLOCKED_PRIOR_PASSES_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "WARSceneEvidence": {
@@ -242,5 +253,22 @@
     "existingPassSuitesRerun": false,
     "remainingCurrentGateBlockers": [],
     "completionReceipt": "../war-map-camera-v1/COMPLETION_RECEIPT.json"
+  },
+  "WAR_GPU_FAILURE_INVESTIGATION": {
+    "status": "BLOCKED",
+    "reason": "TARGET_FIRST_FAILURE_AND_PRIVATE_CLEANUP_EVIDENCE_NOT_RECOVERED",
+    "scope": "READ_ONLY_WAR_GPU_FAILURE_INVESTIGATION",
+    "jobId": "studio-86e62700b98ac8d70089b3fe8534a693",
+    "rootCause": "UNKNOWN",
+    "result": "../war-gpu-failure-investigation-v1/RESULT.json",
+    "existingPassRerun": false,
+    "gpuExecuted": false,
+    "codeModified": false,
+    "referenceHead": "15b21bf1e6c50d94bf514709fa850b94240d5215",
+    "report": "../war-gpu-failure-investigation-v1/INVESTIGATION.md",
+    "gcubeAccess": "AUTHENTICATED_UI_READ_ONLY",
+    "actualRuntimeDigest": "UNOBSERVED",
+    "nextFreeAction": "Recover only already retained target job files and stopped-pod logs; no restart or rerun.",
+    "userIntervention": "Existing records from user or provider required; no authentication action requested."
   }
 }
