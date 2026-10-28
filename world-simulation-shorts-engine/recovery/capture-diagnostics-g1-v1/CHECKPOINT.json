@@ -1,6 +1,6 @@
 {
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "EXISTING_G1_EXECUTION_RECONCILED_WITH_ORIGINAL_INPUT",
+  "scope": "G2_COST_PREREQUISITE_REVIEW_EXISTING_PASS_REUSED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "branch": "recovery/g1-capture-diagnostic-contract-20261028",
   "originalCHECKPOINT": {
@@ -30,7 +30,7 @@
     "G2": {
       "status": "BLOCKED",
       "reasons": [
-        "MASTER-required account artifact usage/allowance and stop-budget setting not verified; billing browser signed out",
+        "Account usage and allowance accepted from user-provided account-screen observations; applicable Actions budget scope/amount and stop-usage control remain UNKNOWN; current browser requires authentication",
         "Exact-parent G1 derivative, candidate-internal checks, regenerated pins and required artifact evidence remain NOT_RUN"
       ],
       "imagePackaged": false,
@@ -61,18 +61,19 @@
     "runner": "ubuntu-24.04 standard GitHub hosted",
     "documentation": "https://docs.github.com/en/billing/concepts/product-billing/github-actions",
     "runnerCharge": "ZERO_FOR_PUBLIC_STANDARD_RUNNER",
-    "artifactStorageAllowance": "UNKNOWN",
+    "artifactStorageAllowance": "ACCEPTED_USER_PROVIDED_ACCOUNT_SCREEN_OBSERVATIONS",
     "artifactUpload": "NOT_RUN",
     "evidenceFallback": "Safe run log then exact Git backup",
     "ghcrContainerStorageBandwidth": "CURRENTLY_FREE_OFFICIAL_DOCUMENTATION",
-    "billingAccountAccess": "NOT_AUTHENTICATED",
+    "billingAccountAccess": "CONNECTOR_UNSUPPORTED_BROWSER_SIGNED_OUT",
     "accountBudgetStopSetting": "UNKNOWN",
-    "artifactGateNote": "Safe Git backup preserves existing G1 evidence but does not replace the mandatory G2 workflow artifact contract."
+    "artifactGateNote": "Safe Git backup preserves existing G1 evidence but does not replace the mandatory G2 workflow artifact contract.",
+    "accountUsageAndPlanEvidence": "USER_PROVIDED_G2_MASTER_20261029_REUSED_NOT_REQUERIED"
   },
   "sceneSHA256": null,
   "sceneSHA256Reason": "No Scene input read or render scheduled",
   "nextOwner": "USER",
-  "nextAction": "Use secure GitHub sign-in to verify account Actions artifact allowance/usage and billing stop setting; then complete exact-parent G2 candidate and image-internal verification only. Original ZIP is resolved; do not request it again or rerun G1.",
+  "nextAction": "Complete secure GitHub sign-in only so the agent can read Budgets and alerts: applicable Actions budget scope, amount, and Stop usage when budget limit is reached. Do not change account settings. After this prerequisite is satisfied, resume G2 exact-parent image work; do not rerun G0/G1.",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "G1Evidence": {
     "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40674899782",
@@ -105,5 +106,24 @@
     "archiveSHA256": "3dba4907bf169ca790a7d39de6eddc67f29a02179aeaad4b33294d1b4f262cf2",
     "status": "PASS",
     "rawPrivateReceiptRecovered": false
+  },
+  "lastPrerequisiteReview": {
+    "date": "2026-10-29",
+    "timezone": "Asia/Seoul",
+    "status": "BLOCKED_ACCOUNT_BUDGET_READ_REQUIRES_AUTHENTICATION",
+    "connectorFinding": "Available GitHub tools have no account billing/budget method; fetch supports repository resources and excludes sensitive user/organization endpoint families. No unsupported billing API attempted.",
+    "browserFinding": "Budget settings access displayed signed-out GitHub page; visible Sign in link opened the GitHub login form. No account settings changed.",
+    "requiredControl": "Applicable Actions budget scope and amount; Stop usage when budget limit is reached selected",
+    "officialGuidance": "https://docs.github.com/en/billing/how-tos/set-up-budgets",
+    "g0g1PassReused": true,
+    "g1RunId": 40674899782,
+    "g0g1Rerun": false,
+    "existingPassFileHashChecks": 0,
+    "newWorkflowRuns": 0,
+    "imagePullBuildPush": false,
+    "gpuExecuted": false,
+    "gpuRootCause": "UNKNOWN",
+    "recordChangeScope": "Only this checkpoint and its checksum entry; no runtime, workflow, renderer, Scene or original evidence changes",
+    "historicalConditionsNote": "Earlier intake cost usage fields remain historical; this checkpoint incorporates the user-provided account usage observations. Candidate conditions remain NOT_RUN."
   }
 }
