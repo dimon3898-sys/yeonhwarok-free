@@ -108,6 +108,11 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                 if isinstance(code, str) and re.fullmatch(r'[A-Z][A-Z0-9_]{2,120}', code) and failed_stage in allowed:
                     first_failure = {'code': code, 'stage': failed_stage}
                     atomic(Path(output) / 'FIRST_CAPTURE_FAILURE.json', first_failure)
+                    try:
+                        from capture_diagnostics_safe import preserve_before_cleanup
+                        preserve_before_cleanup(output)
+                    except BaseException:
+                        pass  # First safe evidence must not depend on cleanup returning.
             if row.get('stage') != 'ACTUAL_FRAME_DRAW':
                 continue
             if (type(row.get('renderedFrames')) is not int or row['renderedFrames'] != count + 1
@@ -203,6 +208,11 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
             except BaseException:
                 verified = False
         finally:
+            try:
+                from capture_diagnostics_safe import preserve_before_cleanup
+                preserve_before_cleanup(output)
+            except BaseException:
+                pass  # Diagnostic I/O must not release an unresolved lease.
             if child is not None and not verified:
                 # Even a wait/storage failure cannot close the last inherited
                 # original flock description after its parent has died.
@@ -296,3 +306,4 @@ if __name__ == '__main__':
             print('HANDOFF_FAILURE_STATE_WRITE_FAILED', file=sys.stderr)
         print(safe, file=sys.stderr)
         raise SystemExit(1)
+

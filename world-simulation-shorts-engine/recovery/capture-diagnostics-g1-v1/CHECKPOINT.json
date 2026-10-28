@@ -133,6 +133,19 @@
       "existingPassRerun": false,
       "gpuExecuted": false,
       "codeModified": false
+    },
+    "DIAGNOSTIC_PENDING_PRESERVATION": {
+      "status": "PASS",
+      "scope": "NEW_PRIVATE_PENDING_EVIDENCE_ONLY_NOT_GPU_OR_DEPLOYMENT_PASS",
+      "result": "../diagnostic-pending-preservation-v1/RESULT.json",
+      "testsPassed": 10,
+      "existingPassRerun": false,
+      "gpuExecuted": false,
+      "existingSuccessfulImageUnchanged": true,
+      "actualGpuRootCause": "UNKNOWN",
+      "deploymentApproved": false,
+      "newImageBuilt": false,
+      "sourcePackagingPins": "NOT_REGENERATED_SEPARATE_IMAGE_GATE_REQUIRED"
     }
   },
   "gpuExecutionApproved": false,
@@ -172,8 +185,8 @@
       "tests": 8
     }
   },
-  "nextAction": "Obtain existing target state/firstFailure/cleanup receipts and stopped-pod logs read-only. No GPU execution or code change; preserve UNKNOWN until evidence is recovered.",
-  "nextOwner": "USER_OR_PROVIDER_FOR_EXISTING_LOG_RECOVERY",
+  "nextAction": "This diagnostic source patch is complete with new free synthetic evidence. Keep WAR first cause UNKNOWN; recover only existing incident receipts. Any new image packaging or GPU execution requires a separate authorized task.",
+  "nextOwner": "MAINTAINER_FOR_SEPARATE_SOURCE_PACKAGING_GATE; USER_OR_PROVIDER_FOR_EXISTING_INCIDENT_LOGS",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -195,7 +208,7 @@
   "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
   "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "WAR_GPU_FAILURE_INVESTIGATION_BLOCKED_PRIOR_PASSES_PRESERVED",
+  "scope": "PRIVATE_PENDING_DIAGNOSTIC_SYNTHETIC_PASS_PRIOR_PASSES_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "WARSceneEvidence": {
@@ -270,5 +283,18 @@
     "actualRuntimeDigest": "UNOBSERVED",
     "nextFreeAction": "Recover only already retained target job files and stopped-pod logs; no restart or rerun.",
     "userIntervention": "Existing records from user or provider required; no authentication action requested."
+  },
+  "diagnosticPendingPreservation": {
+    "status": "PASS",
+    "scope": "NEW_PRIVATE_PENDING_EVIDENCE_ONLY_NOT_GPU_OR_DEPLOYMENT_PASS",
+    "result": "../diagnostic-pending-preservation-v1/RESULT.json",
+    "testsPassed": 10,
+    "existingPassRerun": false,
+    "gpuExecuted": false,
+    "existingSuccessfulImageUnchanged": true,
+    "actualGpuRootCause": "UNKNOWN",
+    "deploymentApproved": false,
+    "newImageBuilt": false,
+    "sourcePackagingPins": "NOT_REGENERATED_SEPARATE_IMAGE_GATE_REQUIRED"
   }
 }

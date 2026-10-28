@@ -263,6 +263,11 @@ class NvidiaPresentationBackend:
             except (OSError, KeyError, IndexError):
                 alive = False
             if not alive:
+                try:
+                    from capture_diagnostics_safe import preserve_before_cleanup
+                    preserve_before_cleanup(path)
+                except Exception:
+                    pass  # The existing liveness response must remain available.
                 # Preserve the ACTIVE claim. A deceased supervisor is not proof
                 # that every renderer descendant stopped, nor permission for a
                 # fresh GPU job. The global inherited lease also remains held
@@ -280,3 +285,4 @@ class NvidiaPresentationBackend:
 
     def start_studio_revision(self, *args, **kwargs):
         raise RuntimeError('HANDOFF_REVISION_NOT_SUPPORTED')
+

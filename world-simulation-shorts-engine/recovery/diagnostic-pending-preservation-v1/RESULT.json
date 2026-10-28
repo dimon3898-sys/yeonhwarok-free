@@ -1,0 +1,83 @@
+{
+  "schema": "WORLD_ENGINE_PENDING_DIAGNOSTIC_FREE_SYNTHETIC_V1",
+  "verdict": "PASS",
+  "scope": "NEW_PRIVATE_PENDING_EVIDENCE_ONLY_NOT_GPU_OR_DEPLOYMENT_PASS",
+  "baselineCommit": "64891255192188620b3a9cda2ace0fc5e86e361e",
+  "commandBase": "python3 -I -B world-simulation-shorts-engine/recovery/test_pending_preservation.py",
+  "pythonVersion": "3.12.14",
+  "scenariosPassed": 10,
+  "scenarios": {
+    "01": "NORMAL_CAPTURE_AND_VERIFIED_CLEANUP",
+    "02": "FIRST_ERROR_WRITE_ONCE_AND_POST_CLEANUP_EXPORT",
+    "03": "DEAD_WORKER_STATUS_WITHOUT_STATE_MUTATION",
+    "04": "SUPERVISOR_CLEANUP_EXCEPTION_LEASE_HELD",
+    "05": "DESCENDANT_REMAINS_AND_WORKER_HOLD_LEASE",
+    "06": "LOCAL_STORAGE_FAILURE_AND_EXTERNAL_STORAGE_FAILURE_KEEP_ORIGINALS",
+    "07": "CONCURRENT_DIAGNOSTICS_AND_DUPLICATE_CPU_LOCK_BLOCKED",
+    "08": "RENDER_DEADLINE_AND_DIAGNOSTIC_CHILD_TIMEOUT",
+    "09": "SYMLINK_OVERSIZE_PRIVATE_MODE_AND_SECRET_FILTER",
+    "10": "FIRST_EVIDENCE_PRESENT_BEFORE_NONRETURNING_CLEANUP"
+  },
+  "executionRecord": {
+    "initialRun": "8 passed; scenario 08 fixture failed because synthetic cleanup did not stop CPU child",
+    "fixtureCorrection": "Only fixture Guard.cleanup now terminates its owned CPU child on timeout; only 08 rerun: PASS",
+    "firstEventHookChange": "New supervisor hook preserves before cleanup can hang; affected scenarios 02/04/05/07 rerun only: PASS",
+    "nonReturningCleanup": "New scenario 10: PASS",
+    "unaffectedScenarioEvidenceReused": [
+      "01",
+      "03",
+      "06",
+      "08",
+      "09"
+    ]
+  },
+  "realMechanisms": [
+    "Python subprocess",
+    "pidfd",
+    "flock contention on isolated CPU fixture lock",
+    "pipes",
+    "bounded helper child with empty environment",
+    "private directory descriptors",
+    "atomic hard-link write-once publication"
+  ],
+  "syntheticMechanisms": [
+    "capture output and capture failure",
+    "DescendantGuard cleanup outcomes",
+    "worker/supervisor imports isolated by AST extraction of actual function bodies",
+    "external mounted-storage failure, not a live Dropbox request"
+  ],
+  "constraints": {
+    "priorPassSuitesRerun": false,
+    "gpuExecuted": false,
+    "rendererChanged": false,
+    "sceneCameraTerritoryChanged": false,
+    "imagePulledBuiltPublished": false,
+    "gpuLeaseUnlockPolicyChanged": false,
+    "cleanupExportGateBypassed": false,
+    "timeoutsIncreased": false,
+    "mainChanged": false
+  },
+  "limitations": [
+    "Actual WAR first GPU cause remains UNKNOWN",
+    "No private evidence can survive loss of unpersisted container storage by this change alone",
+    "Unconfirmed cleanup never authorizes external export",
+    "No evidence is fabricated if no original first-failure receipt exists",
+    "Local pending snapshot is not proof of cleanup or GPU success",
+    "Future image packaging must regenerate source/startup pins in a separate authorized step"
+  ],
+  "newPrivateFile": "<control_root>/handoff-gpu-jobs/<job>/CAPTURE_DIAGNOSTIC_PENDING.json",
+  "storageBounds": {
+    "inputFileMaxBytes": 65536,
+    "outputFileMaxBytes": 65536,
+    "directoryMode": "0700",
+    "fileMode": "0600",
+    "diagnosticChildSeconds": 1,
+    "killReapSeconds": 0.5,
+    "environment": {},
+    "destination": "FIXED_PRIVATE_JOB_ONLY",
+    "replacement": "NEVER"
+  },
+  "actualIncidentJob": "studio-86e62700b98ac8d70089b3fe8534a693",
+  "actualIncidentDigest": "UNOBSERVED",
+  "actualIncidentFirstFailure": "UNKNOWN"
+}

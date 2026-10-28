@@ -215,13 +215,91 @@ def export_failure(job_root, destination, *, deadline_seconds=5):
     return {"sha256": digest, "diagnostic": payload}
 
 
+def preserve_private_pending(job_root, *, deadline_seconds=1):
+    """Write-once safe evidence INSIDE the private job, never an export permit.
+
+    Cleanup remains unconfirmed. Existing post-cleanup export gates are unchanged.
+    No raw stderr, state/approval file, token or caller-selected destination is read.
+    """
+    if type(deadline_seconds) not in (float, int) or not 0 < deadline_seconds <= 1:
+        raise ValueError("DIAGNOSTIC_DEADLINE_INVALID")
+    end = time.monotonic() + deadline_seconds
+    def check():
+        if time.monotonic() >= end:
+            raise TimeoutError("DIAGNOSTIC_DEADLINE_EXCEEDED")
+    job = Path(job_root)
+    if not re.fullmatch(r"studio-[a-f0-9]{32}", job.name) or job.parent.name != "handoff-gpu-jobs":
+        raise ValueError("DIAGNOSTIC_JOB_ID_INVALID")
+    parent = directory_fd(job)
+    temporary = None
+    try:
+        info = os.fstat(parent)
+        if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o700:
+            raise ValueError("DIAGNOSTIC_PRIVATE_JOB_REQUIRED")
+        # An existing record wins, including under concurrent status readers.
+        try:
+            os.stat("CAPTURE_DIAGNOSTIC_PENDING.json", dir_fd=parent, follow_symlinks=False)
+            return "ALREADY_PRESERVED"
+        except FileNotFoundError:
+            pass
+        check()
+        first = read_json_safe(job / "FIRST_CAPTURE_FAILURE.json")
+        supervisor = read_json_safe(job / "LEASE_SUPERVISOR_RESULT.json") or {}
+        if first is None and isinstance(supervisor.get("firstFailure"), dict):
+            first = supervisor["firstFailure"]
+        operations = safe_operations(read_json_safe(job / "capture" / "CAPTURE_OPERATION_CHECKPOINT.json"))
+        inner = (operations or {}).get("firstFailure")
+        if first is None and inner is None:
+            return "NO_FIRST_FAILURE_EVIDENCE"
+        code, stage = (first or {}).get("code"), (first or {}).get("stage")
+        payload = {"schema": "WORLD_ENGINE_PRIVATE_PENDING_DIAGNOSTIC_V1",
+            "cleanupStatus": "UNCONFIRMED_NOT_AN_EXPORT_AUTHORIZATION",
+            "firstFailure": inner,
+            "supervisorFirstFailure": {"code": safe_code(code),
+                "stage": stage if type(stage) is str and stage in STAGES else None,
+                "unrecognizedCode": code is not None and safe_code(code) is None},
+            "operations": operations}
+        body = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
+        if len(body) > LIMIT:
+            raise OSError(27, "DIAGNOSTIC_STORAGE_TOO_LARGE")
+        check()
+        # Unique temp + link provides complete, atomic, no-replace publication.
+        temporary = ".pending-diagnostic-" + os.urandom(12).hex()
+        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                     0o600, dir_fd=parent)
+        with os.fdopen(fd, "wb") as stream:
+            stream.write(body); stream.flush(); os.fsync(stream.fileno())
+        check()
+        try:
+            os.link(temporary, "CAPTURE_DIAGNOSTIC_PENDING.json", src_dir_fd=parent,
+                    dst_dir_fd=parent, follow_symlinks=False)
+        except FileExistsError:
+            return "ALREADY_PRESERVED"
+        os.unlink(temporary, dir_fd=parent); temporary = None
+        os.fsync(parent)
+        return "PRIVATE_PENDING_PRESERVED"
+    finally:
+        try:
+            if temporary is not None:
+                os.unlink(temporary, dir_fd=parent)
+        finally:
+            os.close(parent)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--job-root", required=True)
-    parser.add_argument("--destination", required=True)
+    parser.add_argument("--destination")
+    parser.add_argument("--private-pending", action="store_true")
     parser.add_argument("--seconds", type=float, required=True)
     args = parser.parse_args()
     try:
-        export_failure(args.job_root, args.destination, deadline_seconds=args.seconds)
+        if args.private_pending:
+            if args.destination is not None:
+                raise ValueError("DIAGNOSTIC_PRIVATE_DESTINATION_FORBIDDEN")
+            preserve_private_pending(args.job_root, deadline_seconds=args.seconds)
+        else:
+            export_failure(args.job_root, args.destination, deadline_seconds=args.seconds)
     except Exception as error:
         raise SystemExit(storage_exit_code(error)) from None
+

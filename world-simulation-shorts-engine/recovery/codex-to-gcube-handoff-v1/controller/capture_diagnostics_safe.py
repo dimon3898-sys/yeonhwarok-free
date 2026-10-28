@@ -11,6 +11,36 @@ import sys
 _JOB = re.compile(r"studio-[a-f0-9]{32}\Z")
 
 
+def preserve_before_cleanup(job_root):
+    """Best-effort LOCAL safe receipt only; never unlock or access export_root.
+
+    Called after cleanup attempts or on dead-worker status. Child I/O is bounded
+    independently, including after the render deadline. This grants no render time.
+    """
+    process = None
+    try:
+        job = Path(job_root)
+        if not _JOB.fullmatch(job.name) or job.parent.name != "handoff-gpu-jobs":
+            return {"status": "PRIVATE_JOB_INVALID"}
+        process = subprocess.Popen([sys.executable, "-I", "-S",
+            str(Path(__file__).with_name("safe_capture_export.py")),
+            "--job-root", str(job), "--private-pending", "--seconds", "1"],
+            stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            env={}, close_fds=True)
+        try:
+            code = process.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            try:
+                process.wait(timeout=0.5)
+            except subprocess.TimeoutExpired:
+                return {"status": "TIMEOUT_CLEANUP_UNCONFIRMED"}
+            return {"status": "TIMEOUT"}
+        return {"status": "LOCAL_ATTEMPT_COMPLETE" if code == 0 else "LOCAL_STORAGE_FAILED"}
+    except Exception:
+        return {"status": "LOCAL_STORAGE_FAILED"}
+
+
 def export_after_cleanup(job_root, export_root, execution_deadline):
     job, export = Path(job_root), Path(export_root)
     if not _JOB.fullmatch(job.name):
@@ -40,3 +70,4 @@ def export_after_cleanup(job_root, export_root, execution_deadline):
         return {"status": "TIMEOUT"}
     failures = {21: "STORAGE_PERMISSION", 22: "STORAGE_NO_SPACE", 23: "STORAGE_TOO_LARGE", 24: "EXPORT_FAILED", 25: "TIMEOUT"}
     return {"status": "EXPORTED" if code == 0 else failures.get(code, "EXPORT_FAILED")}
+

@@ -45,6 +45,11 @@ def keep_original_lease_until_cleanup(original, job, holder, save):
                 except (OSError, ValueError, RuntimeError, FileNotFoundError):
                     verified = False
                 if not verified:
+                    try:
+                        from capture_diagnostics_safe import preserve_before_cleanup
+                        preserve_before_cleanup(job)
+                    except BaseException:
+                        pass  # Preserve the original lease and cleanup policy.
                     save(state='RUNNING', phase='UNRESOLVED_CAPTURE_CLEANUP',
                          errorCode='HANDOFF_UNRESOLVED_CAPTURE_CLEANUP')
                     for number in (signal.SIGTERM, signal.SIGINT, signal.SIGHUP):
@@ -286,3 +291,4 @@ if __name__ == '__main__':
     except BaseException as error:
         print(_code(error), file=sys.stderr)
         raise SystemExit(1)
+
