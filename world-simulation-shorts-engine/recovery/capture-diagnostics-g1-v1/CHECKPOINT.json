@@ -1,44 +1,81 @@
 {
-  "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "G2_COST_GATE_SATISFIED_IMAGE_INTEGRATION_IN_PROGRESS",
-  "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
-  "branch": "recovery/g1-capture-diagnostic-contract-20261028",
-  "originalCHECKPOINT": {
-    "path": "evidence/intake-20261028/original/CHECKPOINT.json",
-    "sha256": "d31b08f750d0aab3fc6d7290ee14b51fcc4f1debe47755454ec8b028500bcdee",
-    "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
-    "historicalG1NotRunDoesNotOverrideCurrentPass": true
+  "G1Evidence": {
+    "actualBrowserBoundary": true,
+    "attempt": 1,
+    "browserAndTerminationCases": 14,
+    "gpuRootCause": "UNKNOWN",
+    "jobId": 122770687028,
+    "nodeRecorderExporter": "PASS",
+    "productionImageTested": false,
+    "pythonTests": 8,
+    "readbackReceipt": "evidence/READBACK_RECEIPT.json",
+    "remoteEvidenceReadback": "PASS_38_FILES",
+    "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40674899782",
+    "safeEvidenceBytes": 22116,
+    "safeEvidenceFiles": 30,
+    "safeEvidenceGitCommit": "da2b2d19a4837961a660397f01d7e1a9579c6863",
+    "safeEvidenceSHA256": "All 30 verified from CI log transfer",
+    "sourceRemoteReadbackFiles": 13
   },
-  "originalCHECKPOINTReason": "RESOLVED: original ZIP received; 9 internal checksum entries and 12 baseline/incident assertions match. Original input preserved without rerunning G1 or baseline reproduction.",
+  "G2Evidence": {
+    "G1Reexecuted": false,
+    "artifact": {
+      "artifactDigest": "bf029504ea7e8ce161ad45fa7006671eb70ffa1c08d0383435336afcd60fb3c2",
+      "artifactId": 12850501997,
+      "artifactURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40765828611/artifacts/12850501997",
+      "retentionDays": 1,
+      "schema": "WORLD_ENGINE_G2_ARTIFACT_RECEIPT_V1",
+      "uncompressedByteLimit": 5242880
+    },
+    "gitEvidenceDirectory": "world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40765828611",
+    "gpuExecuted": false,
+    "gpuRootCause": "UNKNOWN",
+    "imageInternalValidation": "failure",
+    "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40765828611",
+    "sourceCommit": "fbc8acb86d331e8d634af18c56d37cda99bb8d1d"
+  },
+  "branch": "recovery/g1-capture-diagnostic-contract-20261028",
+  "cpuCostBasis": {
+    "accountBudgetStopSetting": "SATISFIED_USER_ATTESTED",
+    "accountUsageAndPlanEvidence": "USER_PROVIDED_G2_MASTER_20261029_REUSED_NOT_REQUERIED",
+    "artifactGateNote": "Safe Git backup preserves existing G1 evidence but does not replace the mandatory G2 workflow artifact contract.",
+    "artifactStorageAllowance": "ACCEPTED_USER_PROVIDED_ACCOUNT_SCREEN_OBSERVATIONS",
+    "artifactUpload": "PASS",
+    "billingAccountAccess": "ACCOUNT_REQUERY_NOT_REQUIRED_USER_EVIDENCE_ACCEPTED",
+    "costEvidence": "../capture-diagnostics-g2-v1/COST_EVIDENCE.json",
+    "documentation": "https://docs.github.com/en/billing/concepts/product-billing/github-actions",
+    "evidenceFallback": "Safe run log then exact Git backup",
+    "ghcrContainerStorageBandwidth": "CURRENTLY_FREE_OFFICIAL_DOCUMENTATION",
+    "repositoryPublic": true,
+    "runner": "ubuntu-24.04 standard GitHub hosted",
+    "runnerCharge": "ZERO_FOR_PUBLIC_STANDARD_RUNNER"
+  },
   "existingImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-pin-v1-478c6c33648e-40664470151",
   "existingImageDigest": "sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f",
   "failedRunId": "studio-56ad1bf48706ff64201eda263de11d35",
-  "gpuRootCause": "UNKNOWN",
-  "gpuExecutionApproved": false,
   "gCubeAccessed": false,
-  "privateReceiptRead": false,
-  "privateReceiptReason": "No stopped-container private filesystem access available; no broad search repeated.",
   "gates": {
     "G0": {
-      "status": "PASS",
-      "scope": "Original master, work order, CHECKPOINT and evidence received and reconciled; prior PASS scope preserved"
+      "scope": "Original master, work order, CHECKPOINT and evidence received and reconciled; prior PASS scope preserved",
+      "status": "PASS"
     },
     "G1": {
-      "status": "PASS",
-      "scope": "CPU diagnostic contract: browser/Node/exporter; no GPU proof"
+      "scope": "CPU diagnostic contract: browser/Node/exporter; no GPU proof",
+      "status": "PASS"
     },
     "G2": {
-      "status": "IN_PROGRESS",
-      "reasons": [
-        "Exact-parent diagnostic image packaging and image-internal CPU checks remain incomplete; no G2 PASS claimed"
-      ],
-      "imagePackaged": false,
       "conditions": "evidence/intake-20261028/G2_REMAINING_CONDITIONS.json",
-      "costGate": "SATISFIED_USER_ATTESTED"
+      "costGate": "SATISFIED_USER_ATTESTED",
+      "evidenceDirectory": "world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40765828611",
+      "imagePackaged": false,
+      "reasons": [
+        "See G2 run evidence for exact failed step"
+      ],
+      "status": "BLOCKED"
     },
     "G3": {
-      "status": "BLOCKED",
-      "reason": "NO_NEW_GPU_APPROVAL"
+      "reason": "NO_NEW_GPU_APPROVAL",
+      "status": "BLOCKED"
     },
     "G4": {
       "status": "NOT_RUN"
@@ -47,85 +84,66 @@
       "status": "NOT_RUN"
     }
   },
+  "gpuExecutionApproved": false,
+  "gpuRootCause": "UNKNOWN",
+  "inputReconciliation": {
+    "archiveSHA256": "3dba4907bf169ca790a7d39de6eddc67f29a02179aeaad4b33294d1b4f262cf2",
+    "path": "evidence/intake-20261028/CHECKPOINT_RECONCILIATION.json",
+    "rawPrivateReceiptRecovered": false,
+    "status": "PASS"
+  },
+  "lastPrerequisiteReview": {
+    "browserFinding": "Budget settings access displayed signed-out GitHub page; visible Sign in link opened the GitHub login form. No account settings changed.",
+    "connectorFinding": "Available GitHub tools have no account billing/budget method; fetch supports repository resources and excludes sensitive user/organization endpoint families. No unsupported billing API attempted.",
+    "date": "2026-10-29",
+    "existingPassFileHashChecks": 0,
+    "g0g1PassReused": true,
+    "g0g1Rerun": false,
+    "g1RunId": 40674899782,
+    "gpuExecuted": false,
+    "gpuRootCause": "UNKNOWN",
+    "historicalConditionsNote": "Earlier intake cost usage fields remain historical; this checkpoint incorporates the user-provided account usage observations. Candidate conditions remain NOT_RUN.",
+    "imagePullBuildPush": false,
+    "newWorkflowRuns": 0,
+    "officialGuidance": "https://docs.github.com/en/billing/how-tos/set-up-budgets",
+    "recordChangeScope": "Only this checkpoint and its checksum entry; no runtime, workflow, renderer, Scene or original evidence changes",
+    "requiredControl": "Applicable Actions budget scope and amount; Stop usage when budget limit is reached selected",
+    "status": "SUPERSEDED_BY_USER_COST_EVIDENCE_20261029",
+    "supersededBy": "../capture-diagnostics-g2-v1/COST_EVIDENCE.json",
+    "timezone": "Asia/Seoul"
+  },
   "localFocusedChecks": {
+    "browserInstall": "FAILED_INVALID_ARCHIVE_NO_MANUAL_RETRY",
+    "browserInstallNote": "One CLI invocation failed; installer performed its own internal download attempts. No second invocation, environment swap, GPU retry or CI job rerun.",
+    "nodeRecorderExporter": "PASS",
     "pythonExporter": {
       "status": "PASS",
       "tests": 8
-    },
-    "nodeRecorderExporter": "PASS",
-    "browserInstall": "FAILED_INVALID_ARCHIVE_NO_MANUAL_RETRY",
-    "browserInstallNote": "One CLI invocation failed; installer performed its own internal download attempts. No second invocation, environment swap, GPU retry or CI job rerun."
+    }
   },
-  "cpuCostBasis": {
-    "repositoryPublic": true,
-    "runner": "ubuntu-24.04 standard GitHub hosted",
-    "documentation": "https://docs.github.com/en/billing/concepts/product-billing/github-actions",
-    "runnerCharge": "ZERO_FOR_PUBLIC_STANDARD_RUNNER",
-    "artifactStorageAllowance": "ACCEPTED_USER_PROVIDED_ACCOUNT_SCREEN_OBSERVATIONS",
-    "artifactUpload": "NOT_RUN",
-    "evidenceFallback": "Safe run log then exact Git backup",
-    "ghcrContainerStorageBandwidth": "CURRENTLY_FREE_OFFICIAL_DOCUMENTATION",
-    "billingAccountAccess": "ACCOUNT_REQUERY_NOT_REQUIRED_USER_EVIDENCE_ACCEPTED",
-    "accountBudgetStopSetting": "SATISFIED_USER_ATTESTED",
-    "artifactGateNote": "Safe Git backup preserves existing G1 evidence but does not replace the mandatory G2 workflow artifact contract.",
-    "accountUsageAndPlanEvidence": "USER_PROVIDED_G2_MASTER_20261029_REUSED_NOT_REQUERIED",
-    "costEvidence": "../capture-diagnostics-g2-v1/COST_EVIDENCE.json"
+  "nextAction": "Inspect G2 failure and fix only affected step; do not rerun G0/G1.",
+  "nextOwner": "ASTRA",
+  "originalCHECKPOINT": {
+    "historicalG1NotRunDoesNotOverrideCurrentPass": true,
+    "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
+    "path": "evidence/intake-20261028/original/CHECKPOINT.json",
+    "sha256": "d31b08f750d0aab3fc6d7290ee14b51fcc4f1debe47755454ec8b028500bcdee"
+  },
+  "originalCHECKPOINTReason": "RESOLVED: original ZIP received; 9 internal checksum entries and 12 baseline/incident assertions match. Original input preserved without rerunning G1 or baseline reproduction.",
+  "privateReceiptRead": false,
+  "privateReceiptReason": "No stopped-container private filesystem access available; no broad search repeated.",
+  "runtimeClosureUpdate": {
+    "addedRuntimeFile": "backend/capture_operation_diagnostics.mjs",
+    "existingStageProcedurePreserved": true,
+    "expectedCountIsNotVerified": true,
+    "expectedFileCount": 353,
+    "pinRegenerationRequired": true,
+    "status": "NOT_RUN"
   },
   "sceneSHA256": null,
   "sceneSHA256Reason": "No Scene input read or render scheduled",
-  "nextOwner": "ASTRA",
-  "nextAction": "Package exact-parent G1 derivative, validate only new image integration and 353-file/pin closure, preserve bounded safe artifact and Git backup; publish one tested image only after all G2 checks PASS. No GPU.",
-  "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
-  "G1Evidence": {
-    "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40674899782",
-    "jobId": 122770687028,
-    "attempt": 1,
-    "pythonTests": 8,
-    "browserAndTerminationCases": 14,
-    "nodeRecorderExporter": "PASS",
-    "actualBrowserBoundary": true,
-    "sourceRemoteReadbackFiles": 13,
-    "safeEvidenceFiles": 30,
-    "safeEvidenceBytes": 22116,
-    "safeEvidenceSHA256": "All 30 verified from CI log transfer",
-    "gpuRootCause": "UNKNOWN",
-    "productionImageTested": false,
-    "safeEvidenceGitCommit": "da2b2d19a4837961a660397f01d7e1a9579c6863",
-    "remoteEvidenceReadback": "PASS_38_FILES",
-    "readbackReceipt": "evidence/READBACK_RECEIPT.json"
-  },
-  "runtimeClosureUpdate": {
-    "status": "NOT_RUN",
-    "expectedFileCount": 353,
-    "addedRuntimeFile": "backend/capture_operation_diagnostics.mjs",
-    "pinRegenerationRequired": true,
-    "existingStageProcedurePreserved": true,
-    "expectedCountIsNotVerified": true
-  },
-  "inputReconciliation": {
-    "path": "evidence/intake-20261028/CHECKPOINT_RECONCILIATION.json",
-    "archiveSHA256": "3dba4907bf169ca790a7d39de6eddc67f29a02179aeaad4b33294d1b4f262cf2",
-    "status": "PASS",
-    "rawPrivateReceiptRecovered": false
-  },
-  "lastPrerequisiteReview": {
-    "date": "2026-10-29",
-    "timezone": "Asia/Seoul",
-    "status": "SUPERSEDED_BY_USER_COST_EVIDENCE_20261029",
-    "connectorFinding": "Available GitHub tools have no account billing/budget method; fetch supports repository resources and excludes sensitive user/organization endpoint families. No unsupported billing API attempted.",
-    "browserFinding": "Budget settings access displayed signed-out GitHub page; visible Sign in link opened the GitHub login form. No account settings changed.",
-    "requiredControl": "Applicable Actions budget scope and amount; Stop usage when budget limit is reached selected",
-    "officialGuidance": "https://docs.github.com/en/billing/how-tos/set-up-budgets",
-    "g0g1PassReused": true,
-    "g1RunId": 40674899782,
-    "g0g1Rerun": false,
-    "existingPassFileHashChecks": 0,
-    "newWorkflowRuns": 0,
-    "imagePullBuildPush": false,
-    "gpuExecuted": false,
-    "gpuRootCause": "UNKNOWN",
-    "recordChangeScope": "Only this checkpoint and its checksum entry; no runtime, workflow, renderer, Scene or original evidence changes",
-    "historicalConditionsNote": "Earlier intake cost usage fields remain historical; this checkpoint incorporates the user-provided account usage observations. Candidate conditions remain NOT_RUN.",
-    "supersededBy": "../capture-diagnostics-g2-v1/COST_EVIDENCE.json"
-  }
+  "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
+  "scope": "G2_COST_GATE_SATISFIED_IMAGE_INTEGRATION_IN_PROGRESS",
+  "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
+  "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32"
 }
