@@ -1,0 +1,81 @@
+name: WORLD ENGINE G1 diagnostic contract CPU
+on:
+  push:
+    branches: [recovery/g1-capture-diagnostic-contract-20261028]
+    paths:
+      - '.github/workflows/world-engine-g1-diagnostic-contract.yml'
+      - 'world-simulation-shorts-engine/recovery/capture-diagnostics-g1-v1/tests/**'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs'
+      - 'world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-g1-diagnostic-contract-20261028
+  cancel-in-progress: false
+jobs:
+  focused-browser-contract:
+    if: github.run_attempt == 1 && github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      FIX: world-simulation-shorts-engine/recovery/capture-diagnostics-g1-v1
+      npm_config_fetch_retries: '0'
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/capture-diagnostics-g1-v1
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs
+          sparse-checkout-cone-mode: false
+      - name: Locate existing CPU Chromium and install test transport only
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$chrome"
+          "$chrome" --version
+          node --version
+          echo "WORLD_ENGINE_TEST_CHROMIUM=$chrome" >> "$GITHUB_ENV"
+          echo "WORLD_ENGINE_TEST_PLAYWRIGHT_ROOT=$RUNNER_TEMP/we-g1-playwright" >> "$GITHUB_ENV"
+          npm install --prefix "$RUNNER_TEMP/we-g1-playwright" --ignore-scripts --no-audit --no-fund --package-lock=false playwright-core@1.56.1
+      - name: Focused exporter and parent recorder contracts
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest discover -s "$FIX/tests" -p test_safe_export.py -v
+          node "$FIX/tests/test_operations.mjs"
+      - name: Actual browser evaluate to Node to safe exporter
+        timeout-minutes: 3
+        env:
+          WORLD_ENGINE_TEST_OUTPUT: g1-evidence
+        run: node "$FIX/tests/test_browser_boundary.mjs"
+      - name: Preserve only allowlisted CPU evidence in run log
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('g1-evidence')
+          if not (root/'TEST_RESULTS.json').is_file():
+              print('G1_COMPLETE_EVIDENCE_NOT_AVAILABLE')
+              raise SystemExit(0)
+          rows=[]
+          for p in sorted(root.rglob('*')):
+              if p.is_file() and p.name in {'TEST_RESULTS.json','CAPTURE_DIAGNOSTIC.json','SHA256SUMS'}:
+                  b=p.read_bytes()
+                  assert len(b)<=65536 and b'SYNTHETIC_SECRET_NOT_FOR_EXPORT' not in b
+                  rows.append({'path':str(p.relative_to(root)),'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest(),'content':b.decode()})
+          print('G1_SAFE_EVIDENCE_JSON='+json.dumps({'schema':'WORLD_ENGINE_G1_RUN_EVIDENCE_V1','files':rows},separators=(',',':')))
+          print('ARTIFACT_UPLOAD_NOT_RUN_COST_ALLOWANCE_UNCONFIRMED; SAFE_EVIDENCE_PRESERVED_IN_LOG_FOR_GIT_BACKUP')
+          PY

@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,readFile,writeFile,chmod} from 'node:fs/promises';
+import path from 'node:path';
+import os from 'node:os';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {createRecorder,classifyException,preserveCleanup,atomicPrivateJSON,safeFailure,storageCode} from '../../codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs';
+const execute=promisify(execFile),here=path.dirname(fileURLToPath(import.meta.url));
+const root=await mkdtemp(path.join(os.tmpdir(),'we-g1-unit-'));await chmod(root,0o700);
+const job=path.join(root,'studio-'+'1'.repeat(32)),capture=path.join(job,'capture');await mkdir(capture,{recursive:true,mode:0o700});
+const recorder=createRecorder({outputRoot:capture});
+await recorder.event({phase:'END',operationId:'DRAW'});
+const original=classifyException(Error('GCUBE_NATIVE_READBACK_INVALID'),'READBACK','NATIVE_GUARD',0);
+await recorder.fail(original);
+const calls=[];await preserveCleanup(recorder,[()=>{calls.push('first');throw Error('SYNTHETIC_SECRET_NOT_FOR_EXPORT');},()=>calls.push('second')]);
+assert.deepEqual(calls,['first','second']);assert.equal(recorder.snapshot().firstFailure.errorCode,original.errorCode);
+assert.equal(recorder.snapshot().cleanupFailure.errorCode,'UNCLASSIFIED_EXCEPTION');
+assert.equal(recorder.snapshot().lastCompletedOperation,'DRAW');
+for(const[code,want]of [['EACCES','DIAGNOSTIC_STORAGE_PERMISSION'],['ENOSPC','DIAGNOSTIC_STORAGE_NO_SPACE'],['EFBIG','DIAGNOSTIC_STORAGE_TOO_LARGE'],['EIO','DIAGNOSTIC_STORAGE_IO']]){
+ const failing=createRecorder({outputRoot:capture,write:async()=>{throw Object.assign(Error('SYNTHETIC_SECRET_NOT_FOR_EXPORT'),{code});}});
+ await failing.fail(original);assert.equal(failing.snapshot().storageError,want);assert.equal(failing.snapshot().firstFailure.errorCode,original.errorCode);
+}
+await assert.rejects(atomicPrivateJSON(path.join(capture,'huge.json'),{data:'x'.repeat(20000)}),error=>storageCode(error)==='DIAGNOSTIC_STORAGE_TOO_LARGE');
+assert.equal(safeFailure({...original,errorCode:'SECRET',stack:'SECRET',line:'SECRET'}).errorCode,'UNCLASSIFIED_EXCEPTION');
+const destination=path.join(root,'safe');await execute('python3',[path.join(here,'export_fixture.py'),job,destination]);
+const safe=await readFile(path.join(destination,'CAPTURE_DIAGNOSTIC.json'));
+assert(!safe.includes(Buffer.from('SYNTHETIC_SECRET_NOT_FOR_EXPORT')));
+const sums=await readFile(path.join(destination,'SHA256SUMS'),'utf8');assert(sums.startsWith(createHash('sha256').update(safe).digest('hex')));
+console.log(JSON.stringify({scope:'CPU_ONLY_NODE_EXPORTER',status:'PASS',checks:['first_failure_preserved','cleanup_continues','last_completed_preserved','storage_error_codes','size_limit','allowlist_only','actual_safe_export_sha256']}));

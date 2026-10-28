@@ -38,4 +38,5 @@ def export_after_cleanup(job_root, export_root, execution_deadline):
         except subprocess.TimeoutExpired:
             return {"status": "TIMEOUT_CLEANUP_UNCONFIRMED"}
         return {"status": "TIMEOUT"}
-    return {"status": "EXPORTED" if code == 0 else "EXPORT_FAILED"}
+    failures = {21: "STORAGE_PERMISSION", 22: "STORAGE_NO_SPACE", 23: "STORAGE_TOO_LARGE", 24: "EXPORT_FAILED", 25: "TIMEOUT"}
+    return {"status": "EXPORTED" if code == 0 else failures.get(code, "EXPORT_FAILED")}

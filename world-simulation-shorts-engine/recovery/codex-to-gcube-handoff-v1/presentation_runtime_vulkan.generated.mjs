@@ -23,7 +23,8 @@ const flatPoints=g=>g.type==='Polygon'?g.coordinates.flat():g.type==='MultiPolyg
 
 /** Source data, camera track and regional coverage were qualified before claim.
  * Actual current-projection admission is nevertheless repeated at every draw. */
-export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null}={}){
+export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,diagnostics=null}={}){
+ const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'PRESENTATION_RUNTIME'}):task();
  validateScenePlan(scene);
  assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&scene.timing.total_frames<=240,'UP2_FREE_FRAME_SCOPE');
  assert(canvas?.width===1080&&canvas?.height===1920,'UP2_CANONICAL_CANVAS_REQUIRED');
@@ -31,14 +32,14 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
  assert(sourceStyle.terrainAsset.sha256===nativePlan.assets.terrain.sha256&&terrainTreatment===sourceStyle.terrainTreatment,'UP2_SOURCE_BINDING_REQUIRED');
  assert(baseCameraPlan?.directorVersion==='CAMERA_DIRECTOR_V5'&&presentationPlan?.actualMovingCameraLockForged===false,'UP2_CAMERA_OWNER_REQUIRED');
  const original=JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle}),p=presentationPlan.presentation,engines=compilePresentationEnginePlan({scene,presentation:p}),safe=copy(nativePlan.layout.safe);
- const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});assert(gl,'UP2_WEBGL2_REQUIRED');
- const{backend}=assertNvidiaVulkanContext(gl);
+ const gl=await observe('WEBGL_CONTEXT',()=>{const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});assert(gl,'UP2_WEBGL2_REQUIRED');return gl;});
+ const{backend}=await observe('RENDERER_IDENTIFICATION',()=>assertNvidiaVulkanContext(gl));
  const renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:false});renderer.setPixelRatio(1);renderer.setSize(1080,1920,false);renderer.autoClear=false;
  renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
  let factory,graphics,last,lastBasePixels,disposed=false,nativeStabilityProof=null;const passes=[];
  try{
-  factory=await createMapInfographicRenderer({canvas,plan:nativePlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment});
-  graphics=await createMovingGraphicPass({renderer,factory,width:1080,height:1920});
+  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:nativePlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment}));
+  graphics=await observe('GRAPHICS_PREPARATION',()=>createMovingGraphicPass({renderer,factory,width:1080,height:1920}));
   // Derived plans are created in their consuming JS realm. The frozen owner's
   // canonical check is retained; JSON is the transport for authored inputs,
   // not a promise that Node/Chromium Math.log coefficients are bit-identical.
@@ -117,5 +118,6 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   return{drawFrame,readPixels:factory.readPixels,readBasePixels:()=>{assert(lastBasePixels,'UP2_FRAME_NOT_DRAWN');return lastBasePixels;},png:()=>canvas.toDataURL('image/png'),project,
    evidence:{schema:PRESENTATION_RUNTIME_SCHEMA,backend,softwareOnly:false,get nvidiaVerified(){return nativeStabilityProof!==null;},get actualGPUVerified(){return nativeStabilityProof!==null;},visualQualityApproved:false,existingEngines:engines.plans.map(b=>b.engine),nativeFactory:truthfulFactoryEvidence,materialSource:copy(sourceStyle),movingComposition:'NEW_EXPLICIT_PROJECTED_COMPOSITION_OLD_EVENT_ADMISSION_NOT_FORGED',modelCamera:copy(presentationPlan.analysisCamera),trackHydration,countrySpecificBranches:false,finishedFrameBlit:false},
    recordNativeStability(proof){validateNativeStability(proof,backend);nativeStabilityProof=copy(proof);},get diagnostic(){return last;},dispose(){if(disposed)return;passes.forEach(pass=>pass.dispose());graphics?.dispose();factory?.dispose();renderer.dispose();disposed=true;}};
- }catch(error){passes.forEach(pass=>pass.dispose());graphics?.dispose();factory?.dispose();renderer.dispose();throw error;}
+ }catch(error){if(diagnostics){await diagnostics.cleanup(()=>passes.forEach(pass=>pass.dispose()));await diagnostics.cleanup(()=>graphics?.dispose());await diagnostics.cleanup(()=>factory?.dispose());await diagnostics.cleanup(()=>renderer.dispose());}
+  else{passes.forEach(pass=>pass.dispose());graphics?.dispose();factory?.dispose();renderer.dispose();}throw error;}
 }

@@ -15,20 +15,21 @@ export function validateNativeStability(proof,expectedBackend){
  check(proof.draws.every(draw=>draw.rawRGBA256===proof.draws[0].rawRGBA256),'GCUBE_NATIVE_REPEATED_PIXEL_MISMATCH');
  return true;
 }
-export async function runThreeNativeDraws({runtime,canvas,frame=0}={}){
+export async function runThreeNativeDraws({runtime,canvas,frame=0,diagnostics=null}={}){
+ const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'NATIVE_GUARD',frame}):task();
  check(frame===0&&canvas?.width===1080&&canvas?.height===1920,'GCUBE_STABILITY_INITIAL_FRAME_REQUIRED');
  check(runtime&&typeof runtime.drawFrame==='function'&&typeof runtime.readPixels==='function'&&typeof runtime.recordNativeStability==='function','GCUBE_ACTUAL_NATIVE_RUNTIME_REQUIRED');
- const gl=canvas.getContext('webgl2'),{backend}=assertNvidiaVulkanContext(gl),draws=[];
+ const gl=await observe('WEBGL_CONTEXT',()=>canvas.getContext('webgl2'));
+ const{backend}=await observe('RENDERER_IDENTIFICATION',()=>assertNvidiaVulkanContext(gl)),draws=[];
  for(let index=0;index<3;index++){
-  const diagnostic=runtime.drawFrame(frame),pixels=runtime.readPixels();
-  check(diagnostic?.glError===0&&diagnostic.backend===backend,'GCUBE_NATIVE_DRAW_FAILED');
-  check(pixels instanceof Uint8Array&&pixels.byteLength===1080*1920*4,'GCUBE_NATIVE_READBACK_INVALID');
+  const diagnostic=await observe('DRAW',()=>runtime.drawFrame(frame)),pixels=await observe('READBACK',()=>runtime.readPixels());
+  await observe('PROOF_VALIDATION',()=>{check(diagnostic?.glError===0&&diagnostic.backend===backend,'GCUBE_NATIVE_DRAW_FAILED');
+   check(pixels instanceof Uint8Array&&pixels.byteLength===1080*1920*4,'GCUBE_NATIVE_READBACK_INVALID');});
   let nonBlackPixels=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]||pixels[i+1]||pixels[i+2])nonBlackPixels++;
   const rawRGBA256=[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels))].map(value=>value.toString(16).padStart(2,'0')).join('');
   draws.push({index,frame,glError:gl.getError(),rawRGBA256,nonBlackPixels,rgbaBytes:pixels.byteLength});
  }
  const proof={schema:'WORLD_ENGINE_NATIVE_MAP_STABILITY_V1',status:'PASS',backend,draws,source:'ACTUAL_EXISTING_MAP_RUNTIME_DRAW_AND_READPIXELS',basicWebGLProbeRepeated:false};
- validateNativeStability(proof,backend);
- runtime.recordNativeStability(proof);
+ await observe('PROOF_VALIDATION',()=>{validateNativeStability(proof,backend);runtime.recordNativeStability(proof);});
  return proof;
 }
