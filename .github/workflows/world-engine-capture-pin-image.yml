@@ -106,8 +106,8 @@ jobs:
       - name: Verify generated variant sources in the built image
         timeout-minutes: 2
         run: |
-          docker run --rm --network none --read-only --user 1000:1000 --tmpfs /tmp:rw,nosuid,nodev,mode=1777 \
-            --entrypoint /usr/bin/node "$TAG" --input-type=module -e "import {verifyGeneratedSources} from '/opt/world-engine-handoffs/studio-page-stage-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs'; await verifyGeneratedSources(); console.log('VERIFY_GENERATED_SOURCES_PASS')"
+          cd out/runtime/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend
+          node --input-type=module -e "import {verifyGeneratedSources} from './capture_nvidia.mjs'; await verifyGeneratedSources(); console.log('VERIFY_GENERATED_SOURCES_PASS')"
       - name: Publish only verified unique tag
         timeout-minutes: 3
         env:
