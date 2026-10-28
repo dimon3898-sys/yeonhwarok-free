@@ -105,6 +105,14 @@
     },
     "G5": {
       "status": "NOT_RUN"
+    },
+    "WAR_SCENE_CONTRACT": {
+      "status": "PASS",
+      "scope": "Existing engine Node input contracts;180 Area frames;camera input only",
+      "evidenceDirectory": "world-simulation-shorts-engine/recovery/war-scene-contract-v1",
+      "completionReceipt": "../war-scene-contract-v1/COMPLETION_RECEIPT.json",
+      "existingPassRerun": false,
+      "gpuExecuted": false
     }
   },
   "gpuExecutionApproved": false,
@@ -144,8 +152,8 @@
       "tests": 8
     }
   },
-  "nextAction": "G2 complete. Do not redeploy or render. G3 requires separate explicit GPU execution approval; GPU root cause remains UNKNOWN. Reuse G0/G1/G2 evidence.",
-  "nextOwner": "USER",
+  "nextAction": "WAR Scene input contract is complete. No mandatory user action. Do not rerun prior PASS; any new GPU deployment/render requires separate explicit approval.",
+  "nextOwner": "USER_IF_NEW_GPU_EXECUTION_REQUESTED",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -164,10 +172,33 @@
     "pinRegenerationRequired": false,
     "status": "PASS"
   },
-  "sceneSHA256": null,
-  "sceneSHA256Reason": "No Scene input read or render scheduled",
+  "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
+  "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "G2_PUBLISHED_IMAGE_CPU_PASS_G3_NO_APPROVAL",
+  "scope": "WAR_SCENE_CONTRACT_PASS_EXISTING_G0_G1_G2_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
-  "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32"
+  "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
+  "WARSceneEvidence": {
+    "status": "PASS",
+    "evidenceCommit": "5364473e2e469ac2f102da3606fdf6639db1ea77",
+    "evidenceURL": "https://github.com/dimon3898-sys/yeonhwarok-free/commit/5364473e2e469ac2f102da3606fdf6639db1ea77",
+    "inputOriginalSHA256": "efbc1816c2391b680b8b990050da4737aa23373c58c0a05ab2d54d430a972b3e",
+    "inputFinalSHA256": "b845bc57e2c47363608880320cc63ef4289b2528e2d7e4a0af6d4c9290ca1751",
+    "compiledSceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
+    "nodeVersion": "v24.22.1",
+    "evaluatedFrames": 180,
+    "renderedFrames": 0,
+    "cameraKeyframes": [
+      0,
+      60,
+      119,
+      179
+    ],
+    "finalHoldFrames": 60,
+    "sourceIdentity": "../war-scene-contract-v1/SOURCE_IDENTITY.json",
+    "completionReceipt": "../war-scene-contract-v1/COMPLETION_RECEIPT.json",
+    "reusedBaselineImageDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+    "newImage": false,
+    "userReportedPriorGPUSuccess": "Preserved as USER_CURRENT_MASTER; no previous GPU/Studio/Owner work rerun; historical G0-G5 evidence remains intact."
+  }
 }
