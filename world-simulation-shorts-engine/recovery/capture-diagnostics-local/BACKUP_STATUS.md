@@ -1,12 +1,8 @@
-# WORLD ENGINE capture diagnostics — isolated candidate
+# Capture diagnostics candidate
 
-Status: BACKUP_PENDING_SOURCE_IMPORT. This branch is not deploy-ready.
+Status: SOURCE_IMPORT_IN_PROGRESS_NOT_DEPLOY_READY.
 
-Baseline commit: a7aa1c814a62ba5f4b17114b671424a4dcd497a7
+Baseline: a7aa1c814a62ba5f4b17114b671424a4dcd497a7.
+Pinned parent image: sha256:abbdab6844bb27bd0d7ea0339a6242dd15805b0cd6446c9fd76d9ba6d86f3eb6.
 
-Prepared local artifact: WORLD_ENGINE_GITHUB_BACKUP_READY_20261028.zip
-Artifact SHA256: 6ddb43c038cd9d0b2ea9192b081ed38c6ce2350ec394262af66050c17be2d9d7
-
-The prepared archive contains 8 candidate files and a manifest. The source files have NOT been imported into this branch yet. The original GPU capture failure remains undiagnosed. CPU-focused tests are not equivalent to an operating container validation. Do not build or deploy from this branch until source import, SHA256 recheck, container validation, and external diagnostic export have passed.
-
-No GPU deployment or rendering is authorized by this record.
+Runtime/source manifests are deliberately unchanged. The modified worker requires isolated derived-image packaging; do not deploy this branch directly. No GPU execution or new gCube settings are authorized by this record.

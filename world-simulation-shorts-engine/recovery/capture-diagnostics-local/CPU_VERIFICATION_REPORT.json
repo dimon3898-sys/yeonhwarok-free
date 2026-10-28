@@ -1,0 +1,35 @@
+{
+  "status": "LOCAL_CPU_REGRESSION_PASS_NOT_DEPLOY_READY",
+  "cases": {
+    "test_actual_worker_diagnostics.py": {
+      "expired_deadline": "PASS",
+      "failure_with_receipt": "PASS",
+      "failure_without_receipt": "PASS",
+      "invalid_failure_fields": "PASS"
+    },
+    "test_worker_real_except_integration.py": {
+      "cleanup_unverified": "PASS",
+      "cleanup_verified": "PASS",
+      "deadline_expired": "PASS",
+      "destination_exists": "PASS",
+      "supervisor_alive": "PASS"
+    }
+  },
+  "receiptContract": {
+    "exclusive_destination_preserved": "PASS",
+    "real_supervisor_job_root_and_bounded_export": "PASS",
+    "receipt_message_category_no_raw_message": "PASS",
+    "symlink_ancestor_and_fifo_rejected": "PASS",
+    "uppercase_secret_rejected": "PASS"
+  },
+  "initialFailure": {
+    "scope": "local test invocation",
+    "error": "ModuleNotFoundError: numpy",
+    "cause": "-S excluded site packages",
+    "correction": "use installed project interpreter with -I, not -S",
+    "affected_test_rechecks": 1
+  },
+  "gpuExecuted": false,
+  "productionImageCpuVerified": false,
+  "originalGpuRootCause": "UNKNOWN"
+}

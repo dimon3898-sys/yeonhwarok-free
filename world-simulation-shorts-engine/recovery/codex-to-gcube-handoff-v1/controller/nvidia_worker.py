@@ -241,6 +241,14 @@ def _run(args):
         unresolved = supervisor is not None and (supervisor.poll() is None or not cleanup_verified)
         save(state='RUNNING' if unresolved else 'FAILED',
              phase='UNRESOLVED_CAPTURE_CLEANUP' if unresolved else 'FAILED', errorCode=_code(error))
+        # Diagnostics are best-effort and only exported after confirmed cleanup.
+        # Never export raw stderr, approvals, or any private source files.
+        if not unresolved and cleanup_verified:
+            try:
+                from capture_diagnostics_safe import export_after_cleanup
+                export_after_cleanup(job, exports, state['executionDeadline'])
+            except Exception:
+                pass  # Preserve the original capture error and GPU cleanup result.
         raise
     return state
 

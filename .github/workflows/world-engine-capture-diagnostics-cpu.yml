@@ -1,0 +1,79 @@
+name: WORLD ENGINE capture diagnostics production-image CPU gate
+on:
+  push:
+    branches: [recovery/world-engine-capture-diagnostics-local-20261028]
+    paths:
+      - '.github/workflows/world-engine-capture-diagnostics-cpu.yml'
+      - 'world-simulation-shorts-engine/recovery/capture-diagnostics-local/**'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py'
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: world-engine-capture-diagnostics-cpu-20261028
+  cancel-in-progress: false
+jobs:
+  focused-production-image:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      BASE_IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:abbdab6844bb27bd0d7ea0339a6242dd15805b0cd6446c9fd76d9ba6d86f3eb6
+      FIX: world-simulation-shorts-engine/recovery/capture-diagnostics-local
+    steps:
+      - name: Fetch only candidate files and verify remote SHA256
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path,PurePosixPath
+          from urllib.request import urlopen
+          base='https://raw.githubusercontent.com/'+os.environ['GITHUB_REPOSITORY']+'/'+os.environ['GITHUB_SHA']+'/'
+          def read(name):
+              with urlopen(base+name,timeout=30) as r:
+                  data=r.read(1000001)
+              assert len(data)<=1000000
+              return data
+          raw=read(os.environ['FIX']+'/BACKUP_MANIFEST.json')
+          assert hashlib.sha256(raw).hexdigest()=='fa9afec276282f498a9696a0f72ee4a75e88dc6c058a4e80277a996ab6ec0b35'
+          manifest=json.loads(raw)
+          assert len(manifest['files'])==11
+          for row in manifest['files']:
+              name=PurePosixPath(row['path'])
+              assert not name.is_absolute() and '..' not in name.parts
+              assert str(name).startswith('world-simulation-shorts-engine/recovery/')
+              data=read(str(name))
+              assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+              target=Path('candidate')/str(name)
+              target.parent.mkdir(parents=True,exist_ok=True)
+              with target.open('xb') as f:f.write(data)
+          print(json.dumps({'remoteFilesVerified':11,'sha256':'PASS','fullRepositoryFetch':False}))
+          PY
+      - name: Pull pinned production image once
+        timeout-minutes: 12
+        run: docker pull "$BASE_IMAGE"
+      - name: Focused CPU integration under production Python and UID1000
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 150s docker run --rm \
+            --name "we-diagnostic-${GITHUB_RUN_ID}" --network none --read-only \
+            --tmpfs /tmp:rw,nosuid,size=256m --tmpfs /run:rw,nosuid,size=16m \
+            --cap-drop ALL --cap-add SETUID --cap-add SETGID --security-opt no-new-privileges \
+            --user 0:0 --mount "type=bind,src=$PWD/candidate,dst=/candidate,readonly" \
+            --entrypoint /usr/bin/python3 "$BASE_IMAGE" -I \
+            "/candidate/$FIX/run_container_validation.py"
+      - name: Remove only the disposable CPU test container
+        if: always()
+        run: |
+          if docker container inspect "we-diagnostic-${GITHUB_RUN_ID}" >/dev/null 2>&1; then
+            docker rm -f "we-diagnostic-${GITHUB_RUN_ID}"
+          fi
