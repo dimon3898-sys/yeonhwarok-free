@@ -27,7 +27,9 @@ def propose(original: str) -> str:
     changed = original.replace("let browser,encoder,encoderExit,service;",
                                "let browser,encoder,encoderExit,service;let diagnosticStage='BEFORE_PAGE_EVALUATION';", 1)
     for anchor, stage in ANCHORS:
-        if stage == "PAGE_EVALUATE_FRAME_CAPTURE":
+        if stage == "PAGE_EVALUATE_FIRST_NATIVE_DRAW":
+            changed = changed.replace(anchor, f"diagnosticStage='{stage}';" + anchor, 1)
+        elif stage == "PAGE_EVALUATE_FRAME_CAPTURE":
             changed = changed.replace("const capture=" + anchor, f"diagnosticStage='{stage}';const capture=" + anchor, 1)
         else:
             changed = changed.replace(anchor, f"diagnosticStage='{stage}';" + anchor, 1)
