@@ -1,0 +1,63 @@
+name: Capture variant CPU validation
+on:
+  push:
+    branches:
+      - recovery/fix-capture-variant-pin-20261028
+    paths:
+      - '.github/workflows/capture-variant-cpu-validation.yml'
+      - 'world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Disk capacity precheck
+        run: |
+          df -h /
+          docker system df
+          test "$(df -Pk / | awk 'NR==2 {print $4}')" -gt 10000000
+      - name: Pull pinned parent
+        run: docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e
+      - name: Generate and validate derived runtime without GPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          PARENT=ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e
+          mkdir -p stage-input out
+          cp world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs stage-input/
+          cp world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py stage-input/
+          docker run --rm --network none --read-only --user 0:0 \
+            --mount "type=bind,src=$PWD/stage-input,dst=/candidate,readonly" \
+            --mount "type=bind,src=$PWD/world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/stage_derived_runtime.py,dst=/stage.py,readonly" \
+            --mount "type=bind,src=$PWD/out,dst=/out" \
+            --entrypoint /usr/bin/python3 "$PARENT" -I /stage.py --candidate /candidate --destination /out/runtime
+          python3 - <<'PY'
+          import hashlib,json,pathlib
+          root=pathlib.Path('out/runtime')
+          rec=root/'world-simulation-shorts-engine/recovery'
+          manifest=rec/'codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
+          data=json.loads(manifest.read_bytes())
+          assert len(data['files'])==352
+          for row in data['files']:
+              raw=(root/row['path']).read_bytes()
+              assert len(raw)==row['bytes'] and hashlib.sha256(raw).hexdigest()==row['sha256'],row['path']
+          variants=json.loads((rec/'codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json').read_bytes())
+          for row in variants['variants']:
+              raw=(rec/'codex-to-gcube-handoff-v1'/row['variant']).read_bytes()
+              assert hashlib.sha256(raw).hexdigest()==row['variantSHA256'],row['variant']
+          startup=rec/'studio-cold-start-v2/STARTUP_MANIFEST.json'
+          st=json.loads(startup.read_bytes())
+          assert st['runtimeManifestSHA256']==hashlib.sha256(manifest.read_bytes()).hexdigest()
+          bootstrap=(rec/'studio-cold-start-v2/bootstrap.py').read_text()
+          assert "SOURCE_SHA = '"+st['runtimeManifestSHA256']+"'" in bootstrap
+          print('CAPTURE_VARIANT_MANIFEST_CHAIN_PASS')
+          PY
+      - name: Execute generated source verification
+        run: |
+          node --version
+          cd out/runtime/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend
+          node --input-type=module -e "import {verifyGeneratedSources} from './capture_nvidia.mjs'; await verifyGeneratedSources(); console.log('VERIFY_GENERATED_SOURCES_PASS')"
