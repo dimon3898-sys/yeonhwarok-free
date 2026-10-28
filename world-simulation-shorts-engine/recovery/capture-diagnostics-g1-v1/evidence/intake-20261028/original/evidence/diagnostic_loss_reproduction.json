@@ -1,0 +1,156 @@
+{
+  "status": "DIAGNOSTIC_INFORMATION_LOSS_REPRODUCED",
+  "scope": "Unchanged baseline exporter with synthetic receipts; no browser, GPU, image build or deployment",
+  "repository_commit": "478c6c33648e94f662673cab533bf14b74133f91",
+  "source_git_blob_sha": "6950a1b77a85c9edf49b2fd7c8c9675d1effbed3",
+  "source_sha256": "a475a21e2bc4f8f7657f9f8edf62a22714209f1cbe59e63872c8456fc2a1d8c2",
+  "cases": [
+    {
+      "case": "known_code",
+      "synthetic_input": "GCUBE_NATIVE_DRAW_FAILED",
+      "output": {
+        "schema": "WORLD_ENGINE_CAPTURE_DIAGNOSTIC_SAFE_V2",
+        "firstFailure": {
+          "code": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "stage": "RENDER_RUNTIME",
+          "unrecognizedCode": false
+        },
+        "supervisor": {
+          "reason": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "cleanupVerified": true
+        },
+        "capture": {
+          "code": "GCUBE_NATIVE_DRAW_FAILED",
+          "messageCategory": "UNCLASSIFIED",
+          "diagnosticStage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+          "renderedFrames": 0,
+          "nvidiaVerified": false
+        },
+        "missingEvidence": {
+          "first": false,
+          "capture": false
+        }
+      },
+      "assertion": "MATCHES_BASELINE_BEHAVIOR"
+    },
+    {
+      "case": "wrapped_known_code",
+      "synthetic_input": "page.evaluate: Error: GCUBE_NATIVE_DRAW_FAILED",
+      "output": {
+        "schema": "WORLD_ENGINE_CAPTURE_DIAGNOSTIC_SAFE_V2",
+        "firstFailure": {
+          "code": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "stage": "RENDER_RUNTIME",
+          "unrecognizedCode": false
+        },
+        "supervisor": {
+          "reason": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "cleanupVerified": true
+        },
+        "capture": {
+          "code": null,
+          "messageCategory": "PAGE_EVALUATION",
+          "diagnosticStage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+          "renderedFrames": 0,
+          "nvidiaVerified": false
+        },
+        "missingEvidence": {
+          "first": false,
+          "capture": false
+        }
+      },
+      "assertion": "MATCHES_BASELINE_BEHAVIOR"
+    },
+    {
+      "case": "wrapped_unknown_exception",
+      "synthetic_input": "page.evaluate: TypeError: synthetic test exception",
+      "output": {
+        "schema": "WORLD_ENGINE_CAPTURE_DIAGNOSTIC_SAFE_V2",
+        "firstFailure": {
+          "code": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "stage": "RENDER_RUNTIME",
+          "unrecognizedCode": false
+        },
+        "supervisor": {
+          "reason": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "cleanupVerified": true
+        },
+        "capture": {
+          "code": null,
+          "messageCategory": "PAGE_EVALUATION",
+          "diagnosticStage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+          "renderedFrames": 0,
+          "nvidiaVerified": false
+        },
+        "missingEvidence": {
+          "first": false,
+          "capture": false
+        }
+      },
+      "assertion": "MATCHES_BASELINE_BEHAVIOR"
+    },
+    {
+      "case": "native_guard_code_not_allowlisted",
+      "synthetic_input": "GCUBE_ACTUAL_NATIVE_RUNTIME_REQUIRED",
+      "output": {
+        "schema": "WORLD_ENGINE_CAPTURE_DIAGNOSTIC_SAFE_V2",
+        "firstFailure": {
+          "code": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "stage": "RENDER_RUNTIME",
+          "unrecognizedCode": false
+        },
+        "supervisor": {
+          "reason": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "cleanupVerified": true
+        },
+        "capture": {
+          "code": null,
+          "messageCategory": "UNCLASSIFIED",
+          "diagnosticStage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+          "renderedFrames": 0,
+          "nvidiaVerified": false
+        },
+        "missingEvidence": {
+          "first": false,
+          "capture": false
+        }
+      },
+      "assertion": "MATCHES_BASELINE_BEHAVIOR"
+    },
+    {
+      "case": "missing_receipt_is_distinguished",
+      "output": {
+        "schema": "WORLD_ENGINE_CAPTURE_DIAGNOSTIC_SAFE_V2",
+        "firstFailure": {
+          "code": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "stage": "RENDER_RUNTIME",
+          "unrecognizedCode": false
+        },
+        "supervisor": {
+          "reason": "GCUBE_CAPTURE_RUNTIME_FAILED",
+          "cleanupVerified": true
+        },
+        "capture": {
+          "code": null,
+          "messageCategory": null,
+          "diagnosticStage": null,
+          "renderedFrames": null,
+          "nvidiaVerified": false
+        },
+        "missingEvidence": {
+          "first": false,
+          "capture": true
+        }
+      },
+      "assertion": "MATCHES_BASELINE_BEHAVIOR"
+    },
+    {
+      "case": "cleanup_guard_preserved",
+      "error": "DIAGNOSTIC_VERIFIED_CLEANUP_REQUIRED",
+      "assertion": "MATCHES_BASELINE_BEHAVIOR"
+    }
+  ],
+  "gpu_root_cause": "NOT_ESTABLISHED",
+  "diagnostic_fix_implemented": false,
+  "tests_reexecuted_from_existing_PASS_suite": false
+}

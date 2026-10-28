@@ -1,0 +1,54 @@
+WORLD ENGINE — ASTRA 단일 복구 작업 지시서 v2
+이 지시서와 WORLD_ENGINE_MASTER_V2.md, CHECKPOINT.json, evidence 폴더를 함께 사용한다.
+
+[목표]
+전체 엔진을 재개발하지 않는다. 기존 성과를 보존하면서 확인된 진단 손실 결함을 고치고, GPU 없이 검증 가능한 범위를 완료한다. 보고서만 반복하지 말고 실제 수정·시험·증거 보존까지 연결한다. 정확한 GPU 원인은 아직 미확정이다.
+
+[기준점]
+저장소: https://github.com/dimon3898-sys/yeonhwarok-free
+출시 소스 커밋: 478c6c33648e94f662673cab533bf14b74133f91
+기존 브랜치: recovery/fix-capture-variant-pin-20261028
+현재 이미지: ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-pin-v1-478c6c33648e-40664470151
+현재 digest: sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f
+기존 성공 실행: https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40664470151
+원인 조사 대상: studio-56ad1bf48706ff64201eda263de11d35
+
+[이미 확인한 사실 — 재조사 반복 금지]
+1. Studio 접속, Owner 로그인, 해시 수정, 기존 CPU 검증·이미지 게시 증거는 보존한다.
+2. 진단은 PAGE_EVALUATE_FIRST_NATIVE_DRAW, code:null, renderedFrames:0, cleanupVerified:true, missingEvidence.capture:false다.
+3. 첫 단계는 런타임 생성·native_guard import·실제 검증을 묶은 블록이다. GPU 자체가 고장이라는 증거는 아니다.
+4. safe_capture_export.py는 문자열 전체를 고정 enum과 비교한다. page.evaluate 접두어가 붙으면 허용 오류도 null이 된다.
+5. 동봉된 재현 코드의 baseline blob SHA는 6950a1b77a85c9edf49b2fd7c8c9675d1effbed3와 일치한다. 합성 6조건으로 정보 손실을 재현했다. 이는 GPU 원인 재현이 아니다.
+6. 기존 CI의 JavaScript 검증은 runner Node에서 실행됐다. 이미지 내부 Python 검사는 통과했지만 실제 브라우저/GPU 통합시험과는 다르다.
+
+[진행 순서]
+A. 기준점·권한 고정
+기존 PASS 실행은 재실행하지 말고 증거를 재사용한다. 기존 실패 작업의 정확한 내부 receipt를 원격 실행 없이 읽을 수 있는 권한이 이미 있다면 그 작업만 조회한다. 없으면 없다고 기록하고 같은 전역 검색을 반복하지 않는다. 원본 receipt가 없다는 판단을 Dropbox 파일명 검색 결과만으로 내리지 않는다.
+main과 기존 복구 브랜치를 보존한다. 별도 작업 브랜치를 만들되 이미 같은 작업 브랜치가 있으면 head와 소유자를 확인하고 중복 생성/병렬 편집하지 않는다. 운영 컨테이너에서 직접 소스를 고치지 않는다.
+
+B. G1 — 확인된 진단 결함만 수정
+브라우저 안에서 오류를 구조화하고 Node 및 exporter까지 고정 오류 코드·내부 operation·위치를 보존한다. 런타임 생성/컨텍스트/지도 준비/native_guard import/draw/readback/proof 단계를 구분한다. 부모가 마지막 완료 연산을 보존한다. 최초 실패를 cleanup 예외가 덮지 못하게 한다.
+원본 임의 메시지·인증 코드·토큰·쿠키·환경변수·URL 쿼리를 공개 진단으로 내보내지 않는다. 기존 supervisor, private/public 분리, source pin, 실제 NVIDIA 조건은 유지한다. 알 수 없는 오류도 UNKNOWN 분류와 안전한 위치·단계를 남긴다.
+범위는 기존 캡처·진단 모듈과 필요한 테스트로 제한한다. 렌더러 연산, Scene, 지도 자산, Vulkan 옵션을 원인 증거 없이 바꾸지 않는다.
+
+C. 실패 경로 시험
+실제 브라우저의 page.evaluate 경계를 통과하는 합성 오류 → Node → safe exporter → 최종 안전 파일까지 시험한다. 알려진 코드·TypeError·모듈/자산 실패·timeout/crash·readback 실패·cleanup 실패·저장 권한/공간 오류·비밀값 유출을 검사한다. CPU와 mock의 성공을 GPU 성공으로 표시하지 않는다.
+동봉된 재현은 기존 결함의 근거로 재사용한다. 수정 후에는 영향받는 계약만 검증한다. 핵심 코드가 변경돼 이전 검증이 무효화된 경우 필요한 재검증을 생략하지 않는다.
+무료 또는 무과금 한도 확인이 안 된 CI 실행을 “무료”라고 단정하지 않는다. 공유 데몬·백업·이미지의 일괄 삭제로 디스크를 확보하지 않는다.
+
+D. G2 — G1 완료 후 필요한 후보 1개만 패키징
+진단 변경 반영에 이미지가 필요할 때만 새 후보를 만든다. 정확한 후보 이미지 내부에서 실행 파일 경로·버전·JS import·manifest·CPU 검증 가능 계약을 확인한다. GPU 필요한 항목은 NOT_RUN으로 남긴다.
+해시 연결은 기존 수정된 생성 절차로 갱신한다. GitHub의 오래된 generated 파일을 현재 파생 이미지 파일처럼 취급하지 않는다. 테스트한 동일 digest를 게시 대상으로 삼는다. 검사 후 다시 빌드해 다른 이미지를 배포하지 않는다.
+
+E. 증거 보존과 종료
+TEST_RESULTS와 안전 로그, source/image binding, 변경 diff, SHA256SUMS, CHECKPOINT를 보존한다. 해당 저장소에서 다시 읽어 확인한다. 결과는 G1_PASS/G2_PASS 등 정확한 범위로만 판정한다.
+실제 GPU 원인까지 CPU 재현으로 밝혀지면 근거와 최소 수정안을 함께 보존한다. 그렇지 않으면 GPU_ROOT_CAUSE_UNKNOWN으로 유지한다.
+
+[중단선]
+추가 유료 실행 승인은 없다. gCube 배포·GPU 실행·렌더링·자동 재시도 금지.
+원격 정지 권한과 새 실행의 증거 보존이 검증되지 않았으면 배포 준비 완료라고 하지 않는다.
+G1/G2 완료 후 실제 하드웨어에서만 가능한 확인이 남으면, 목적·이미지 digest·입력·관측 필드·실행 횟수·비용/시간 상한·Stop 담당을 포함한 단회 승인 요청만 준비한다. 기존 승인 재사용 금지.
+
+[완료 보고 — 짧게]
+확인된 원인 / 정확한 수정 / 테스트 범위와 증거 / 커밋·이미지 / 미확인 항목 / 현재 Gate / 사용자에게 필요한 한 가지 행동.
+진단 개선 완료를 렌더링 복구 완료로 바꾸어 말하지 않는다. 기존 성과는 유지하며 해당 단계가 미통과이면 다음 단계로 넘어가지 않는다.

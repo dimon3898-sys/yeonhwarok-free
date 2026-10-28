@@ -1,10 +1,15 @@
 {
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "NEW_EXECUTION_CHECKPOINT_NOT_REPLACEMENT_FOR_MISSING_INPUT",
+  "scope": "EXISTING_G1_EXECUTION_RECONCILED_WITH_ORIGINAL_INPUT",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "branch": "recovery/g1-capture-diagnostic-contract-20261028",
-  "originalCHECKPOINT": null,
-  "originalCHECKPOINTReason": "Not attached; exact and alternate Library searches did not resolve the requested file. No claim of nonexistence.",
+  "originalCHECKPOINT": {
+    "path": "evidence/intake-20261028/original/CHECKPOINT.json",
+    "sha256": "d31b08f750d0aab3fc6d7290ee14b51fcc4f1debe47755454ec8b028500bcdee",
+    "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
+    "historicalG1NotRunDoesNotOverrideCurrentPass": true
+  },
+  "originalCHECKPOINTReason": "RESOLVED: original ZIP received; 9 internal checksum entries and 12 baseline/incident assertions match. Original input preserved without rerunning G1 or baseline reproduction.",
   "existingImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-pin-v1-478c6c33648e-40664470151",
   "existingImageDigest": "sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f",
   "failedRunId": "studio-56ad1bf48706ff64201eda263de11d35",
@@ -16,7 +21,7 @@
   "gates": {
     "G0": {
       "status": "PASS",
-      "scope": "Supplied master baseline retained; authoritative original CHECKPOINT attachment unresolved"
+      "scope": "Original master, work order, CHECKPOINT and evidence received and reconciled; prior PASS scope preserved"
     },
     "G1": {
       "status": "PASS",
@@ -25,10 +30,11 @@
     "G2": {
       "status": "BLOCKED",
       "reasons": [
-        "Requested authoritative CHECKPOINT.json and reproduction evidence attachment not supplied/resolved",
-        "Mandatory CI artifact storage allowance/budget not verified; no billable artifact operation attempted"
+        "MASTER-required account artifact usage/allowance and stop-budget setting not verified; billing browser signed out",
+        "Exact-parent G1 derivative, candidate-internal checks, regenerated pins and required artifact evidence remain NOT_RUN"
       ],
-      "imagePackaged": false
+      "imagePackaged": false,
+      "conditions": "evidence/intake-20261028/G2_REMAINING_CONDITIONS.json"
     },
     "G3": {
       "status": "BLOCKED",
@@ -57,12 +63,16 @@
     "runnerCharge": "ZERO_FOR_PUBLIC_STANDARD_RUNNER",
     "artifactStorageAllowance": "UNKNOWN",
     "artifactUpload": "NOT_RUN",
-    "evidenceFallback": "Safe run log then exact Git backup"
+    "evidenceFallback": "Safe run log then exact Git backup",
+    "ghcrContainerStorageBandwidth": "CURRENTLY_FREE_OFFICIAL_DOCUMENTATION",
+    "billingAccountAccess": "NOT_AUTHENTICATED",
+    "accountBudgetStopSetting": "UNKNOWN",
+    "artifactGateNote": "Safe Git backup preserves existing G1 evidence but does not replace the mandatory G2 workflow artifact contract."
   },
   "sceneSHA256": null,
   "sceneSHA256Reason": "No Scene input read or render scheduled",
   "nextOwner": "USER",
-  "nextAction": "Attach original CHECKPOINT.json and its evidence directory as one ZIP. Artifact-specific storage approval/zero-cost verification remains required before that operation.",
+  "nextAction": "Use secure GitHub sign-in to verify account Actions artifact allowance/usage and billing stop setting; then complete exact-parent G2 candidate and image-internal verification only. Original ZIP is resolved; do not request it again or rerun G1.",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "G1Evidence": {
     "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40674899782",
@@ -87,6 +97,13 @@
     "expectedFileCount": 353,
     "addedRuntimeFile": "backend/capture_operation_diagnostics.mjs",
     "pinRegenerationRequired": true,
-    "existingStageProcedurePreserved": true
+    "existingStageProcedurePreserved": true,
+    "expectedCountIsNotVerified": true
+  },
+  "inputReconciliation": {
+    "path": "evidence/intake-20261028/CHECKPOINT_RECONCILIATION.json",
+    "archiveSHA256": "3dba4907bf169ca790a7d39de6eddc67f29a02179aeaad4b33294d1b4f262cf2",
+    "status": "PASS",
+    "rawPrivateReceiptRecovered": false
   }
 }

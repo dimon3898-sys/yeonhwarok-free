@@ -1,0 +1,87 @@
+{
+  "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_DESIGN_V2",
+  "date": "2026-10-28",
+  "timezone": "Asia/Seoul",
+  "status": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
+  "baseline": {
+    "repository": "https://github.com/dimon3898-sys/yeonhwarok-free",
+    "sourceCommit": "478c6c33648e94f662673cab533bf14b74133f91",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-pin-v1-478c6c33648e-40664470151",
+    "imageDigest": "sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f",
+    "imageDigestEvidence": "Prior Astra registry verification report provided by user; not queried again in this redesign",
+    "buildRunId": 40664470151,
+    "buildJobId": 122735368022,
+    "buildJobStatusObservedThisTurn": "success",
+    "sourceFilesBaseline": 352,
+    "runtimeRoot": "/opt/world-engine-handoffs/studio-page-stage-v1/repo"
+  },
+  "incident": {
+    "jobId": "studio-56ad1bf48706ff64201eda263de11d35",
+    "diagnosticPath": "/WORLD_ENGINE/capture-diagnostic-studio-56ad1bf48706ff64201eda263de11d35/CAPTURE_DIAGNOSTIC.json",
+    "diagnosticRevision": "65ee38157db795b9b3b62",
+    "diagnosticModifiedUTC": "2026-10-28T09:51:20Z",
+    "stage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+    "captureCode": null,
+    "renderedFrames": 0,
+    "reportedNvidiaVerified": false,
+    "nativeProofStatus": "NOT_CONFIRMED",
+    "childCleanupVerified": true,
+    "receiptWasReadAtExport": true,
+    "gpuRootCause": "UNKNOWN",
+    "primaryDiagnosticLoss": "CONFIRMED_BY_LOCAL_SYNTHETIC_REPRODUCTION"
+  },
+  "authority": {
+    "newPaidGpuApproval": false,
+    "renderRetriesAllowed": 0,
+    "providerState": "LAST_USER_REPORT_STOPPED_NOT_LIVE_VERIFIED",
+    "billingStop": "NOT_VERIFIED",
+    "remoteAstraTaskStarted": false,
+    "remoteAstraDispatchCapability": "NOT_FOUND_IN_AVAILABLE_DISCOVERY",
+    "runtimeWritePerformed": false,
+    "newCiRunStarted": false,
+    "imageBuildPerformed": false
+  },
+  "gates": {
+    "G0": {
+      "status": "PASS",
+      "scope": "Evidence inventory and immutable reference identification only"
+    },
+    "G1": {
+      "status": "NOT_RUN",
+      "scope": "Diagnostic repair and new failure-path contract tests",
+      "priorEvidence": "Diagnostic defect reproduced; implementation not applied"
+    },
+    "G2": {
+      "status": "NOT_RUN",
+      "scope": "New exact-image CPU packaging contract"
+    },
+    "G3": {
+      "status": "BLOCKED",
+      "scope": "Native GPU trial",
+      "reason": "No new approval; G1/G2 incomplete"
+    },
+    "G4": {
+      "status": "NOT_RUN",
+      "scope": "GPU root-cause correction if needed"
+    },
+    "G5": {
+      "status": "NOT_RUN",
+      "scope": "6s MP4 + storage + stop + visual quality"
+    }
+  },
+  "nextAction": "Repair confirmed diagnostic information loss under G1; no speculative renderer changes",
+  "sourceReferences": {
+    "S1": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/478c6c33648e94f662673cab533bf14b74133f91/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py",
+    "S2": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/478c6c33648e94f662673cab533bf14b74133f91/world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs",
+    "S3": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/478c6c33648e94f662673cab533bf14b74133f91/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs",
+    "S4": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/478c6c33648e94f662673cab533bf14b74133f91/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs",
+    "S5": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/478c6c33648e94f662673cab533bf14b74133f91/.github/workflows/world-engine-capture-pin-image.yml",
+    "S6": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40664470151",
+    "S7": "/WORLD_ENGINE/capture-diagnostic-studio-56ad1bf48706ff64201eda263de11d35/CAPTURE_DIAGNOSTIC.json",
+    "S8": "evidence/diagnostic_loss_reproduction.json",
+    "D1": "https://playwright.dev/docs/evaluating",
+    "D2": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet",
+    "D3": "https://docs.github.com/en/actions/tutorials/store-and-share-data",
+    "D4": "https://docs.github.com/en/actions/concepts/billing-and-usage"
+  }
+}
