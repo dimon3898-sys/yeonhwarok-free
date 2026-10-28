@@ -1,0 +1,31 @@
+{
+  "schema": "WORLD_ENGINE_WAR_MAP_CAMERA_SCOPE_V1",
+  "date": "2026-10-29",
+  "timezone": "Asia/Seoul",
+  "firstIncompleteGate": "WAR_MAP_REGION_QUALIFICATION",
+  "checkpointRead": "../capture-diagnostics-g1-v1/CHECKPOINT.json",
+  "previousCompletionRead": "../war-scene-contract-v1/COMPLETION_RECEIPT.json",
+  "skippedExistingPass": [
+    "G0",
+    "G1 run40674899782",
+    "G2 run40767632198",
+    "WAR_SCENE_CONTRACT",
+    "original static audit",
+    "GPU/MP4/Studio/Owner prior successes"
+  ],
+  "existingPassInvalidated": [],
+  "requestedNewSequence": [
+    "qualifyRegion actual map source/GIS/extent",
+    "resolveRegionPlan existing production module",
+    "compilePresentationCameraPlan180frames",
+    "prepareRegionTerrain exact source crop for complete camera envelope",
+    "verifyRegionQualification actual final source/crop verification"
+  ],
+  "requiredInternalCalls": "Existing resolveRegionPlan internally calls qualifyRegion; camera compile internally validates its Scene/engine/presentation inputs. These unchanged production API dependencies are not standalone reruns of prior test suites.",
+  "execution": "One free standard GitHub ubuntu-24.04 CPU runner; exact existing image; no GPU device, no image build or push; read-only image with separate private writable cache.",
+  "rendererChanged": false,
+  "inputChanged": false,
+  "gpuExecutionApproved": false,
+  "priorCostEvidence": "../capture-diagnostics-g2-v1/COST_EVIDENCE.json",
+  "nextGateBlockedUntilNewSequencePass": true
+}
