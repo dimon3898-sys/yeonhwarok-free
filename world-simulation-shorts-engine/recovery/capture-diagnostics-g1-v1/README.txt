@@ -8,3 +8,5 @@ Browser tests exercise real page.evaluate and fault injection. Native test mocks
 Original CHECKPOINT.json/evidence attachment not available; this checkpoint documents only this new execution and cites the supplied master.
 CI uses public standard Ubuntu only. Artifact quota is unverified: no cache/artifact uploads. Safe evidence is printed for exact backup into this branch; artifact-specific gate remains unverified.
 GPU_ROOT_CAUSE_UNKNOWN. gCube deployment/render prohibited.
+
+G1 CPU contract passed at af2acfc5f0ceb7200d70a4ea668b717fa6a72d32, Actions run 40674899782. Eight exporter tests, recorder/exporter contracts, fourteen real-browser/termination cases. GPU_ROOT_CAUSE_UNKNOWN. G2 blocked pending original requested checkpoint/evidence and artifact zero-cost prerequisites. Source and safe evidence are preserved on this branch; no deployed image changes.

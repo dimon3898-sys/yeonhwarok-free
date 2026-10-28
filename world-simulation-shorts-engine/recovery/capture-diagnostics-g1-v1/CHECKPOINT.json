@@ -14,20 +14,41 @@
   "privateReceiptRead": false,
   "privateReceiptReason": "No stopped-container private filesystem access available; no broad search repeated.",
   "gates": {
-    "G0": "PASS_WITH_ORIGINAL_CHECKPOINT_MISSING",
-    "G1": "NOT_RUN_BROWSER_BOUNDARY",
-    "G2": "NOT_RUN",
-    "G3": "BLOCKED_NO_GPU_APPROVAL",
-    "G4": "NOT_RUN",
-    "G5": "NOT_RUN"
+    "G0": {
+      "status": "PASS",
+      "scope": "Supplied master baseline retained; authoritative original CHECKPOINT attachment unresolved"
+    },
+    "G1": {
+      "status": "PASS",
+      "scope": "CPU diagnostic contract: browser/Node/exporter; no GPU proof"
+    },
+    "G2": {
+      "status": "BLOCKED",
+      "reasons": [
+        "Requested authoritative CHECKPOINT.json and reproduction evidence attachment not supplied/resolved",
+        "Mandatory CI artifact storage allowance/budget not verified; no billable artifact operation attempted"
+      ],
+      "imagePackaged": false
+    },
+    "G3": {
+      "status": "BLOCKED",
+      "reason": "NO_NEW_GPU_APPROVAL"
+    },
+    "G4": {
+      "status": "NOT_RUN"
+    },
+    "G5": {
+      "status": "NOT_RUN"
+    }
   },
   "localFocusedChecks": {
     "pythonExporter": {
       "status": "PASS",
-      "tests": 7
+      "tests": 8
     },
     "nodeRecorderExporter": "PASS",
-    "browserInstall": "FAILED_INVALID_ARCHIVE_NO_MANUAL_RETRY"
+    "browserInstall": "FAILED_INVALID_ARCHIVE_NO_MANUAL_RETRY",
+    "browserInstallNote": "One CLI invocation failed; installer performed its own internal download attempts. No second invocation, environment swap, GPU retry or CI job rerun."
   },
   "cpuCostBasis": {
     "repositoryPublic": true,
@@ -40,6 +61,29 @@
   },
   "sceneSHA256": null,
   "sceneSHA256Reason": "No Scene input read or render scheduled",
-  "nextOwner": "Astra Work",
-  "nextAction": "Run only new G1 browser contract CPU workflow; do not package image before G1."
+  "nextOwner": "USER",
+  "nextAction": "Attach original CHECKPOINT.json and its evidence directory as one ZIP. Artifact-specific storage approval/zero-cost verification remains required before that operation.",
+  "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
+  "G1Evidence": {
+    "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40674899782",
+    "jobId": 122770687028,
+    "attempt": 1,
+    "pythonTests": 8,
+    "browserAndTerminationCases": 14,
+    "nodeRecorderExporter": "PASS",
+    "actualBrowserBoundary": true,
+    "sourceRemoteReadbackFiles": 13,
+    "safeEvidenceFiles": 30,
+    "safeEvidenceBytes": 22116,
+    "safeEvidenceSHA256": "All 30 verified from CI log transfer",
+    "gpuRootCause": "UNKNOWN",
+    "productionImageTested": false
+  },
+  "runtimeClosureUpdate": {
+    "status": "NOT_RUN",
+    "expectedFileCount": 353,
+    "addedRuntimeFile": "backend/capture_operation_diagnostics.mjs",
+    "pinRegenerationRequired": true,
+    "existingStageProcedurePreserved": true
+  }
 }
