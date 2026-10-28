@@ -1,0 +1,116 @@
+name: WORLD ENGINE isolated diagnostic image build and CPU startup gate
+on:
+  push:
+    branches: [recovery/world-engine-capture-diagnostics-local-20261028]
+    paths:
+      - '.github/workflows/world-engine-capture-diagnostics-image.yml'
+      - 'world-simulation-shorts-engine/recovery/capture-diagnostics-image-v1/**'
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: world-engine-capture-diagnostics-image-20261028
+  cancel-in-progress: false
+jobs:
+  derivative-image:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    env:
+      BASE_IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:abbdab6844bb27bd0d7ea0339a6242dd15805b0cd6446c9fd76d9ba6d86f3eb6
+      PIPELINE: world-simulation-shorts-engine/recovery/capture-diagnostics-image-v1/image_pipeline.py
+    steps:
+      - name: Fetch only pinned runtime delta and existing startup tests
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          from urllib.request import urlopen
+          repo='https://raw.githubusercontent.com/'+os.environ['GITHUB_REPOSITORY']+'/'
+          def read(ref,name):
+              with urlopen(repo+ref+'/'+name,timeout=30) as r:
+                  raw=r.read(1000001)
+              assert len(raw)<=1000000
+              return raw
+          def save(name,raw):
+              p=Path('payload')/name;p.parent.mkdir(parents=True,exist_ok=True)
+              with p.open('xb') as f:f.write(raw)
+          source='bc76bbfacc9b8fab40e89c3eb8d85b94b3ae8dbb'
+          rel='world-simulation-shorts-engine/recovery/'
+          name=rel+'capture-diagnostics-local/BACKUP_MANIFEST.json'
+          raw=read(source,name)
+          assert hashlib.sha256(raw).hexdigest()=='fa9afec276282f498a9696a0f72ee4a75e88dc6c058a4e80277a996ab6ec0b35'
+          save(name,raw)
+          rows=json.loads(raw)['files']
+          needed={rel+'codex-to-gcube-handoff-v1/controller/'+n for n in ['nvidia_worker.py','safe_capture_export.py','capture_diagnostics_safe.py']}
+          found=set()
+          for row in rows:
+              if row['path'] not in needed:continue
+              data=read(source,row['path'])
+              assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+              save(row['path'],data);found.add(row['path'])
+          assert found==needed
+          for name,git_sha in {'container_suite.py':'8b2f00f493ef7c5f2b3828947fb6f7274242ed0d','container_probe.py':'3b2a1b8f56534665c0f5a2ec75b8cf04ebdefa48'}.items():
+              data=read('a7aa1c814a62ba5f4b17114b671424a4dcd497a7',rel+'studio-cold-start-v2/tests/'+name)
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==git_sha
+              save('support/'+name,data)
+          data=read(os.environ['GITHUB_SHA'],os.environ['PIPELINE'])
+          assert hashlib.sha256(data).hexdigest()=='6426895d38c5276ea7ce1ac15c378b584cdc9aa8085399c1c0e9f20eb4e7d30e'
+          save(os.environ['PIPELINE'],data)
+          print(json.dumps({'sourceDeltaSHA256':'PASS','supportGitBlobs':'PASS','fullFetch':False}))
+          PY
+          echo "CANDIDATE_IMAGE=ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-diag-v1-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}" >> "$GITHUB_ENV"
+      - name: Pull immutable parent for derivative packaging
+        timeout-minutes: 12
+        run: docker pull "$BASE_IMAGE"
+      - name: Stage separate runtime and derived pins without modifying parent
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          mkdir -p buildout
+          docker run --rm --network none --read-only --user 0:0 \
+            --mount "type=bind,src=$PWD/payload,dst=/payload,readonly" \
+            --mount "type=bind,src=$PWD/buildout,dst=/buildout" \
+            --entrypoint /usr/bin/python3 "$BASE_IMAGE" -I \
+            "/payload/$PIPELINE" stage --context /buildout/context
+          sudo chown "$(id -u):$(id -g)" buildout/context
+      - name: Build one unique diagnostic image without installs
+        timeout-minutes: 3
+        run: docker build --network=none --pull=false --tag "$CANDIDATE_IMAGE" buildout/context
+      - name: Verify installed pins and affected default-startup paths without GPU
+        timeout-minutes: 7
+        run: |
+          set -euo pipefail
+          sudo python3 "payload/$PIPELINE" validate \
+            --payload "$PWD/payload" --context "$PWD/buildout/context" \
+            --image "$CANDIDATE_IMAGE" --result "$PWD/derived-image-cpu.json"
+      - name: Publish only CPU-verified new tag and verify registry digest
+        timeout-minutes: 4
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 "payload/$PIPELINE" publish \
+            --payload "$PWD/payload" --context "$PWD/buildout/context" \
+            --image "$CANDIDATE_IMAGE" --result "$PWD/derived-image-cpu.json"
+      - name: Preserve safe failure or publication summary in run log
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          for name in ['derived-image-cpu.json','buildout/context/PUBLISH_RESULT.json','buildout/context/DERIVATION.json']:
+              p=Path(name)
+              if p.is_file():print(json.dumps({'file':name,'record':json.loads(p.read_bytes())},sort_keys=True))
+          PY
+      - name: Remove only disposable validation containers
+        if: always()
+        run: |
+          ids=$(docker ps -aq --filter label=world-engine.validation=studio-cold-start-v2)
+          if [ -n "$ids" ]; then docker rm -f $ids; fi
