@@ -1,0 +1,46 @@
+name: WORLD ENGINE page evaluation stage-only syntax gate
+on:
+  push:
+    branches: [recovery/capture-page-evaluation-evidence-20261028]
+    paths:
+      - 'world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs'
+      - '.github/workflows/world-engine-page-eval-stage-only.yml'
+permissions:
+  contents: read
+jobs:
+  syntax-and-exact-delta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Fetch only two pinned files and validate delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from urllib.request import urlopen
+          import os, pathlib
+          repo='https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/'
+          base='af4649e8e0feb3f2eafda0e91df9baeaa2164586'
+          src='world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs'
+          candidate='world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs'
+          def fetch(ref,path):
+              with urlopen(repo+ref+'/'+path,timeout=30) as r:return r.read(100000)
+          original=fetch(base,src).decode()
+          modified=fetch(os.environ['GITHUB_SHA'],candidate).decode()
+          replacements=[
+            ("let browser,encoder,encoderExit,service;","let browser,encoder,encoderExit,service;let diagnosticStage='BEFORE_PAGE_EVALUATION';"),
+            ("await page.evaluate(async()=>{window.payload=","diagnosticStage='PAGE_EVALUATE_RUNTIME_IMPORT';await page.evaluate(async()=>{window.payload="),
+            ("const firstNativeProof=await page.evaluate(async()=>{","diagnosticStage='PAGE_EVALUATE_FIRST_NATIVE_DRAW';const firstNativeProof=await page.evaluate(async()=>{"),
+            ("const capture=await page.evaluate(async frame=>{","diagnosticStage='PAGE_EVALUATE_FRAME_CAPTURE';const capture=await page.evaluate(async frame=>{"),
+            ("receipt.failure={code:String(error.message).slice(0,4000)};","receipt.failure={code:String(error.message).slice(0,4000),diagnosticStage};")
+          ]
+          expected=original
+          for a,b in replacements:
+              assert expected.count(a)==1,a
+              expected=expected.replace(a,b,1)
+          assert modified==expected,'Unexpected renderer behavior delta'
+          pathlib.Path('candidate.mjs').write_text(modified)
+          print('EXACT_STAGE_ONLY_DELTA_PASS')
+          PY
+      - name: Node syntax check only (no GPU or renderer execution)
+        run: node --check candidate.mjs
