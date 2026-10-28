@@ -52,6 +52,7 @@ jobs:
           TAG="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:g2-diagnostics-v1-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
           echo "TAG=$TAG" >> "$GITHUB_ENV"
           docker build --network none --pull=false -t "$TAG" out
+          # Host metadata must be readable by UID1000: explicit file0644 / dir0755.
           python3 "$G2/build_g2_image.py" identity --tag "$TAG"
       - name: Candidate-internal 353-file and browser diagnostic integration
         id: validate

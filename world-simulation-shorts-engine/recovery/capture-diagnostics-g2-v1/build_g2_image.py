@@ -144,10 +144,25 @@ def identity(tag):
     for key in ['Env', 'Cmd', 'User', 'WorkingDir', 'ExposedPorts', 'Healthcheck']:
         require(cfg.get(key) == base.get(key), 'PARENT_CONFIG_CHANGED_' + key.upper())
     filtered = {key: cfg.get(key) for key in ['Entrypoint', 'Cmd', 'User', 'WorkingDir', 'ExposedPorts']}
-    write('out/image-config.json', filtered)
+    config_path = Path('out/image-config.json')
+    # Atomic NamedTemporaryFile outputs are owner-only by default. This one
+    # non-secret metadata file is bind-mounted into the UID1000 CPU verifier.
+    config_path.parent.chmod(0o755)
+    write(config_path, filtered)
+    before = config_path.stat()
+    config_path.chmod(0o644)
+    after = config_path.stat()
+    directory = config_path.parent.stat()
+    require(after.st_mode & 0o777 == 0o644 and directory.st_mode & 0o777 == 0o755,
+            'IMAGE_CONFIG_PERMISSION_CONTRACT_FAILED')
+    access = {'path': 'out/image-config.json', 'modeBeforeFix': oct(before.st_mode & 0o777),
+        'modeAfterFix': oct(after.st_mode & 0o777), 'uid': after.st_uid, 'gid': after.st_gid,
+        'parentMode': oct(directory.st_mode & 0o777), 'verifierUID': 1000}
     write('g2-evidence/IMAGE_IDENTITY.json', {'schema': 'WORLD_ENGINE_G2_IMAGE_IDENTITY_V1',
         'imageTag': tag, 'testedImageId': inspect['Id'], 'parentImageId': parent['Id'],
-        'parentDigest': DIGEST, 'configPreservedExceptEntrypointPins': True, 'gpuExecuted': False})
+        'parentDigest': DIGEST, 'configPreservedExceptEntrypointPins': True,
+        'imageConfigAccess': access, 'gpuExecuted': False})
+    print('G2_IMAGE_CONFIG_ACCESS=' + json.dumps(access, sort_keys=True))
 
 
 def collect(validation_outcome):
