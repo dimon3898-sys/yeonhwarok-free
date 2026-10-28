@@ -1,0 +1,168 @@
+{
+  "version": "PLANNER_ENGINE_ADAPTER_V1",
+  "family": "WAR",
+  "totalFrames": 180,
+  "globalEventStartFrame": 0,
+  "engine": "EXISTING_AREA_V3",
+  "states": [
+    {
+      "id": "S0",
+      "date": "2026-10-22",
+      "areaIds": [
+        "AREA_S0_0"
+      ],
+      "frontIds": [
+        "FRONT_S0_0"
+      ]
+    },
+    {
+      "id": "S1",
+      "date": "2026-10-23",
+      "areaIds": [
+        "AREA_S1_0"
+      ],
+      "frontIds": [
+        "FRONT_S1_0"
+      ]
+    },
+    {
+      "id": "S2",
+      "date": "2026-10-24",
+      "areaIds": [
+        "AREA_S2_0"
+      ],
+      "frontIds": [
+        "FRONT_S2_0"
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "id": "OP_0",
+      "type": "AREA_REVEAL",
+      "start_frame": 0,
+      "duration_frames": 30,
+      "target_id": "AREA_S0_0",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "id": "OP_1",
+      "type": "AREA_REVEAL",
+      "start_frame": 0,
+      "duration_frames": 30,
+      "target_id": "AREA_S1_0",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "id": "OP_2",
+      "type": "AREA_REVEAL",
+      "start_frame": 0,
+      "duration_frames": 30,
+      "target_id": "AREA_S2_0",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "id": "OP_3",
+      "type": "FRONT_LINE",
+      "start_frame": 0,
+      "duration_frames": 30,
+      "target_id": "FRONT_S0_0",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "id": "OP_4",
+      "type": "FRONT_LINE",
+      "start_frame": 0,
+      "duration_frames": 30,
+      "target_id": "FRONT_S1_0",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "id": "OP_5",
+      "type": "FRONT_LINE",
+      "start_frame": 0,
+      "duration_frames": 30,
+      "target_id": "FRONT_S2_0",
+      "from": 0,
+      "to": 1
+    },
+    {
+      "id": "OP_6",
+      "type": "STATE_TRANSITION",
+      "start_frame": 30,
+      "duration_frames": 45,
+      "state_ids": [
+        "S0",
+        "S1"
+      ]
+    },
+    {
+      "id": "OP_7",
+      "type": "STATE_TRANSITION",
+      "start_frame": 75,
+      "duration_frames": 45,
+      "state_ids": [
+        "S1",
+        "S2"
+      ]
+    },
+    {
+      "id": "OP_8",
+      "type": "AREA_HOLD",
+      "start_frame": 120,
+      "duration_frames": 60
+    }
+  ],
+  "timeline": [
+    {
+      "state": "AREA_REVEAL+AREA_REVEAL+AREA_REVEAL+FRONT_LINE+FRONT_LINE+FRONT_LINE",
+      "types": [
+        "AREA_REVEAL",
+        "AREA_REVEAL",
+        "AREA_REVEAL",
+        "FRONT_LINE",
+        "FRONT_LINE",
+        "FRONT_LINE"
+      ],
+      "startFrame": 0,
+      "endFrame": 30,
+      "durationFrames": 30
+    },
+    {
+      "state": "STATE_TRANSITION",
+      "types": [
+        "STATE_TRANSITION"
+      ],
+      "startFrame": 30,
+      "endFrame": 75,
+      "durationFrames": 45
+    },
+    {
+      "state": "STATE_TRANSITION",
+      "types": [
+        "STATE_TRANSITION"
+      ],
+      "startFrame": 75,
+      "endFrame": 120,
+      "durationFrames": 45
+    },
+    {
+      "state": "AREA_HOLD",
+      "types": [
+        "AREA_HOLD"
+      ],
+      "startFrame": 120,
+      "endFrame": 180,
+      "durationFrames": 60
+    }
+  ],
+  "sourceGeometryBinding": "[{\"id\":\"AREA_S0\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[9,49.2],[10,49.2],[10,51.3],[9,51.3],[9,49.2]]]},\"source_id\":\"SYNTHETIC_WAR_FIXTURE\"},{\"id\":\"FRONT_S0\",\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[10,49.2],[10,51.3]]},\"source_id\":\"SYNTHETIC_WAR_FIXTURE\"},{\"id\":\"AREA_S1\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[9,49.2],[11,49.2],[11,51.3],[9,51.3],[9,49.2]]]},\"source_id\":\"SYNTHETIC_WAR_FIXTURE\"},{\"id\":\"FRONT_S1\",\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[11,49.2],[11,51.3]]},\"source_id\":\"SYNTHETIC_WAR_FIXTURE\"},{\"id\":\"AREA_S2\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[9,49.2],[12,49.2],[12,51.3],[9,51.3],[9,49.2]]]},\"source_id\":\"SYNTHETIC_WAR_FIXTURE\"},{\"id\":\"FRONT_S2\",\"geometry\":{\"type\":\"LineString\",\"coordinates\":[[12,49.2],[12,51.3]]},\"source_id\":\"SYNTHETIC_WAR_FIXTURE\"}]",
+  "newEngine": false,
+  "newRenderer": false,
+  "physicalSimulation": false
+}

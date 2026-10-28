@@ -1,0 +1,33 @@
+{
+  "schema": "WORLD_ENGINE_WAR_DATA_CORRECTION_V1",
+  "status": "RESOLVED_ACTUAL_ENGINE_PASS",
+  "cause": "SCENE_DATA_SUBJECT_ALIAS_BINDING",
+  "actualErrorEvidence": "evidence/original/RESULT.json",
+  "actualErrorCode": "DATA_REQUIRED",
+  "actualErrorMessage": "topic has no supplied matching subject",
+  "location": "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs:347",
+  "patch": [
+    {
+      "op": "add",
+      "path": "/data/scenes/0/facts/subject/aliases/-",
+      "value": "Fictional territory state change QA"
+    }
+  ],
+  "originalSHA256": "efbc1816c2391b680b8b990050da4737aa23373c58c0a05ab2d54d430a972b3e",
+  "candidateSHA256": "b845bc57e2c47363608880320cc63ef4289b2528e2d7e4a0af6d4c9290ca1751",
+  "onlyThisSemanticChange": true,
+  "engineFilesChanged": [],
+  "preserved": [
+    "prompt",
+    "topic",
+    "timing",
+    "geometry",
+    "state/front references",
+    "camera keyframes",
+    "territory colors",
+    "region"
+  ],
+  "existingPassInvalidated": [],
+  "reexecutionScope": "Retry only failed compilation with corrected input; run previously unexecuted requested WAR contracts. Old CPU/GPU/static PASS suites skipped.",
+  "resolutionEvidence": "evidence/validated/VALIDATION_RESULT.json"
+}

@@ -1,0 +1,362 @@
+{
+  "schema": "WORLD_ENGINE_PRESENTATION_PROMPT_V2",
+  "prompt": "Create a six-second fictional territorial change QA animation using only supplied synthetic states S0 S1 S2; do not infer real history.",
+  "data": {
+    "schema": "WORLD_ENGINE_DATA_PROMPT_V1",
+    "topic": "Fictional territory state change QA",
+    "simulationType": "GENERAL",
+    "durationSeconds": 6,
+    "fps": 30,
+    "resolution": {
+      "width": 1080,
+      "height": 1920
+    },
+    "scenes": [
+      {
+        "sceneId": "fictional-war-state-qa",
+        "startFrame": 0,
+        "endFrame": 180,
+        "facts": {
+          "version": "PLANNER_FACTS_V1",
+          "data_mode": "SYNTHETIC_TEST",
+          "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL",
+          "subject": {
+            "id": "FICTIONAL_TERRITORY_CHANGE",
+            "label": "Fictional territorial state change",
+            "aliases": [
+              "Fictional territorial QA"
+            ],
+            "event_family": "WAR"
+          },
+          "locations": [
+            {
+              "id": "CENTER",
+              "label": "Fictional region center",
+              "anchor": [
+                10.5,
+                50.3
+              ]
+            }
+          ],
+          "time_range": {
+            "start": "2026-10-22",
+            "end": "2026-10-24"
+          },
+          "source_notes": [
+            {
+              "id": "SYNTHETIC_WAR_FIXTURE",
+              "source_type": "SYNTHETIC_TEST",
+              "source_reference": "Author-created fictional territory-state polygons and fronts for renderer QA only",
+              "verification_status": "SYNTHETIC_TEST",
+              "note": "Fictional map state. Not a claim about real conflict, borders or occupation.",
+              "license": "Original authored synthetic geometry",
+              "crs": "EPSG:4326",
+              "resolution": "Illustrative test shapes, not observed territorial control"
+            }
+          ],
+          "geometries": [
+            {
+              "id": "AREA_S0",
+              "source_id": "SYNTHETIC_WAR_FIXTURE",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      9.0,
+                      49.2
+                    ],
+                    [
+                      10.0,
+                      49.2
+                    ],
+                    [
+                      10.0,
+                      51.3
+                    ],
+                    [
+                      9.0,
+                      51.3
+                    ],
+                    [
+                      9.0,
+                      49.2
+                    ]
+                  ]
+                ]
+              }
+            },
+            {
+              "id": "FRONT_S0",
+              "source_id": "SYNTHETIC_WAR_FIXTURE",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    10.0,
+                    49.2
+                  ],
+                  [
+                    10.0,
+                    51.3
+                  ]
+                ]
+              }
+            },
+            {
+              "id": "AREA_S1",
+              "source_id": "SYNTHETIC_WAR_FIXTURE",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      9.0,
+                      49.2
+                    ],
+                    [
+                      11.0,
+                      49.2
+                    ],
+                    [
+                      11.0,
+                      51.3
+                    ],
+                    [
+                      9.0,
+                      51.3
+                    ],
+                    [
+                      9.0,
+                      49.2
+                    ]
+                  ]
+                ]
+              }
+            },
+            {
+              "id": "FRONT_S1",
+              "source_id": "SYNTHETIC_WAR_FIXTURE",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    11.0,
+                    49.2
+                  ],
+                  [
+                    11.0,
+                    51.3
+                  ]
+                ]
+              }
+            },
+            {
+              "id": "AREA_S2",
+              "source_id": "SYNTHETIC_WAR_FIXTURE",
+              "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [
+                      9.0,
+                      49.2
+                    ],
+                    [
+                      12.0,
+                      49.2
+                    ],
+                    [
+                      12.0,
+                      51.3
+                    ],
+                    [
+                      9.0,
+                      51.3
+                    ],
+                    [
+                      9.0,
+                      49.2
+                    ]
+                  ]
+                ]
+              }
+            },
+            {
+              "id": "FRONT_S2",
+              "source_id": "SYNTHETIC_WAR_FIXTURE",
+              "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                  [
+                    12.0,
+                    49.2
+                  ],
+                  [
+                    12.0,
+                    51.3
+                  ]
+                ]
+              }
+            }
+          ],
+          "stages": [
+            {
+              "id": "S0",
+              "date": "2026-10-22",
+              "label": "Fictional state 0",
+              "area_refs": [
+                "AREA_S0"
+              ],
+              "front_refs": [
+                "FRONT_S0"
+              ]
+            },
+            {
+              "id": "S1",
+              "date": "2026-10-23",
+              "label": "Fictional state 1",
+              "area_refs": [
+                "AREA_S1"
+              ],
+              "front_refs": [
+                "FRONT_S1"
+              ]
+            },
+            {
+              "id": "S2",
+              "date": "2026-10-24",
+              "label": "Fictional state 2",
+              "area_refs": [
+                "AREA_S2"
+              ],
+              "front_refs": [
+                "FRONT_S2"
+              ]
+            }
+          ],
+          "routes": [],
+          "markers": [],
+          "text": [],
+          "camera": {
+            "anchor": [
+              10.5,
+              50.3
+            ],
+            "target_geometry_refs": [
+              "AREA_S0",
+              "AREA_S1",
+              "AREA_S2"
+            ],
+            "minimum_context_geometry_refs": [
+              "AREA_S0",
+              "AREA_S1",
+              "AREA_S2"
+            ],
+            "detail_policy": "FACT_BASED_VISUAL_GRADE"
+          },
+          "native_context": {
+            "country_ids": [],
+            "secondary_country_ids": [],
+            "context_location_ids": [
+              "CENTER"
+            ]
+          },
+          "scale": {
+            "preferred": "REGIONAL"
+          },
+          "scene_timing": {
+            "fps": 30,
+            "total_frames": 180,
+            "duration_seconds": 6,
+            "camera_lock_frame": 0,
+            "event_start_frame": 0,
+            "initial_reveal_frames": 30,
+            "state_transition_frames": 45,
+            "final_hold_frames": 60,
+            "action_frames": 120,
+            "frame_policy": "INTEGER_DETERMINISTIC",
+            "blank_interstage_frames": 0
+          }
+        },
+        "dependsOn": [],
+        "historicalEvidence": []
+      }
+    ]
+  },
+  "region": {
+    "sourceId": "AUTO",
+    "crs": "EPSG:4326",
+    "center": [
+      10.5,
+      50.3
+    ],
+    "bbox": [
+      6,
+      45,
+      16,
+      55
+    ]
+  },
+  "presentation": {
+    "camera": {
+      "mode": "KEYFRAMES",
+      "keyframes": [
+        {
+          "frame": 0,
+          "center": [
+            10.5,
+            50.3
+          ],
+          "zoom": 0.75
+        },
+        {
+          "frame": 60,
+          "center": [
+            10.3,
+            50.2
+          ],
+          "zoom": 0.85
+        },
+        {
+          "frame": 119,
+          "center": [
+            11,
+            50.2
+          ],
+          "zoom": 0.95
+        },
+        {
+          "frame": 179,
+          "center": [
+            11,
+            50.3
+          ],
+          "zoom": 1
+        }
+      ]
+    },
+    "territoryColors": {
+      "S0": [
+        0.2,
+        0.45,
+        0.9,
+        0.45
+      ],
+      "S1": [
+        0.9,
+        0.6,
+        0.2,
+        0.45
+      ],
+      "S2": [
+        0.9,
+        0.2,
+        0.3,
+        0.45
+      ]
+    },
+    "highlights": [],
+    "transitions": []
+  }
+}

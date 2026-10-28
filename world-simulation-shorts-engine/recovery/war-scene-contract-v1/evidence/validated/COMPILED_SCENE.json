@@ -1,0 +1,424 @@
+{
+  "metadata": {
+    "schema": "PLANNER_SCENE_JSON_V1",
+    "planner_version": "1.0.0",
+    "fact_dataset_version": "PLANNER_FACTS_V1",
+    "data_mode": "SYNTHETIC_TEST",
+    "topic": "Fictional territory state change QA",
+    "policy": "FACT_BASED_VISUAL_GRADE",
+    "deterministic": true,
+    "user_video_review_required": true,
+    "semantic_mode": "ILLUSTRATIVE_FACT_BASED_VISUAL",
+    "output": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "audio": false
+    }
+  },
+  "subject": {
+    "id": "FICTIONAL_TERRITORY_CHANGE",
+    "label": "Fictional territorial state change",
+    "aliases": [
+      "Fictional territorial QA",
+      "Fictional territory state change QA"
+    ],
+    "event_family": "WAR"
+  },
+  "locations": [
+    {
+      "id": "CENTER",
+      "label": "Fictional region center",
+      "anchor": [
+        10.5,
+        50.3
+      ]
+    }
+  ],
+  "time_range": {
+    "start": "2026-10-22",
+    "end": "2026-10-24"
+  },
+  "topic_intent": {
+    "version": "TOPIC_INTENT_V1",
+    "topic": "Fictional territory state change QA",
+    "subject_id": "FICTIONAL_TERRITORY_CHANGE",
+    "event_family": "WAR",
+    "subject_match": "SUPPLIED_DATA_ALIAS",
+    "data_policy": "FACT_BASED_VISUAL_GRADE",
+    "question": "SHOW_EVENT",
+    "facts_required": true,
+    "natural_language_owner": "PLANNER_ONLY"
+  },
+  "event_type": "WAR",
+  "selected_features": [
+    "FRONT_LINE",
+    "STATE_TRANSITION",
+    "TIME_STEP",
+    "AREA_HOLD"
+  ],
+  "camera_intent": {
+    "owner": "CAMERA_DIRECTOR_V5_WITH_DETAIL_ADAPTER",
+    "arrival_required": true,
+    "anchor": [
+      10.5,
+      50.3
+    ],
+    "target_geometry_refs": [
+      "AREA_S0",
+      "AREA_S1",
+      "AREA_S2"
+    ],
+    "minimum_context_geometry_refs": [
+      "AREA_S0",
+      "AREA_S1",
+      "AREA_S2"
+    ],
+    "detail_policy": "FACT_BASED_VISUAL_GRADE",
+    "native_context": {
+      "country_ids": [],
+      "secondary_country_ids": [],
+      "context_location_ids": [
+        "CENTER"
+      ]
+    }
+  },
+  "scale_intent": {
+    "owner": "EXISTING_SCALE_CORE",
+    "preferred": "REGIONAL",
+    "target_geometry_refs": [
+      "AREA_S0",
+      "AREA_S1",
+      "AREA_S2"
+    ]
+  },
+  "beats": [
+    {
+      "id": "BEAT_01",
+      "type": "EVENT_ACTION",
+      "start_frame": 0,
+      "end_frame": 30,
+      "duration_frames": 30,
+      "geometry_refs": [
+        "AREA_S0",
+        "AREA_S1",
+        "AREA_S2"
+      ],
+      "state_id": "S0"
+    },
+    {
+      "id": "BEAT_02",
+      "type": "STATE_CHANGE",
+      "start_frame": 30,
+      "end_frame": 75,
+      "duration_frames": 45,
+      "geometry_refs": [
+        "AREA_S0",
+        "AREA_S1",
+        "AREA_S2"
+      ],
+      "state_id": "S1"
+    },
+    {
+      "id": "BEAT_03",
+      "type": "STATE_CHANGE",
+      "start_frame": 75,
+      "end_frame": 120,
+      "duration_frames": 45,
+      "geometry_refs": [
+        "AREA_S0",
+        "AREA_S1",
+        "AREA_S2"
+      ],
+      "state_id": "S2"
+    },
+    {
+      "id": "BEAT_04",
+      "type": "HOLD",
+      "start_frame": 120,
+      "end_frame": 180,
+      "duration_frames": 60,
+      "geometry_refs": [
+        "AREA_S0",
+        "AREA_S1",
+        "AREA_S2"
+      ],
+      "camera_intent": "LOCK"
+    }
+  ],
+  "geometries": [
+    {
+      "id": "AREA_S0",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9,
+              49.2
+            ],
+            [
+              10,
+              49.2
+            ],
+            [
+              10,
+              51.3
+            ],
+            [
+              9,
+              51.3
+            ],
+            [
+              9,
+              49.2
+            ]
+          ]
+        ]
+      },
+      "source_id": "SYNTHETIC_WAR_FIXTURE"
+    },
+    {
+      "id": "FRONT_S0",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            10,
+            49.2
+          ],
+          [
+            10,
+            51.3
+          ]
+        ]
+      },
+      "source_id": "SYNTHETIC_WAR_FIXTURE"
+    },
+    {
+      "id": "AREA_S1",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9,
+              49.2
+            ],
+            [
+              11,
+              49.2
+            ],
+            [
+              11,
+              51.3
+            ],
+            [
+              9,
+              51.3
+            ],
+            [
+              9,
+              49.2
+            ]
+          ]
+        ]
+      },
+      "source_id": "SYNTHETIC_WAR_FIXTURE"
+    },
+    {
+      "id": "FRONT_S1",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            11,
+            49.2
+          ],
+          [
+            11,
+            51.3
+          ]
+        ]
+      },
+      "source_id": "SYNTHETIC_WAR_FIXTURE"
+    },
+    {
+      "id": "AREA_S2",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              9,
+              49.2
+            ],
+            [
+              12,
+              49.2
+            ],
+            [
+              12,
+              51.3
+            ],
+            [
+              9,
+              51.3
+            ],
+            [
+              9,
+              49.2
+            ]
+          ]
+        ]
+      },
+      "source_id": "SYNTHETIC_WAR_FIXTURE"
+    },
+    {
+      "id": "FRONT_S2",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            12,
+            49.2
+          ],
+          [
+            12,
+            51.3
+          ]
+        ]
+      },
+      "source_id": "SYNTHETIC_WAR_FIXTURE"
+    }
+  ],
+  "visual_roles": {
+    "base_map": "EXISTING_TERRAIN_AND_REGION_MATERIAL",
+    "event": "EXISTING_AUTO_CONTRAST",
+    "geographic_markers": "PROTECTED_NATIVE_MARKERS",
+    "text": "EXISTING_GLYPH_AND_LAYOUT",
+    "camera": "READ_ONLY_EXISTING_DIRECTOR",
+    "physics": "NONE"
+  },
+  "timing": {
+    "fps": 30,
+    "total_frames": 180,
+    "duration_seconds": 6,
+    "camera_lock_frame": 0,
+    "event_start_frame": 0,
+    "initial_reveal_frames": 30,
+    "state_transition_frames": 45,
+    "final_hold_frames": 60,
+    "action_frames": 120,
+    "frame_policy": "INTEGER_DETERMINISTIC",
+    "blank_interstage_frames": 0
+  },
+  "source_notes": [
+    {
+      "id": "SYNTHETIC_WAR_FIXTURE",
+      "source_type": "SYNTHETIC_TEST",
+      "source_reference": "Author-created fictional territory-state polygons and fronts for renderer QA only",
+      "verification_status": "SYNTHETIC_TEST",
+      "note": "Fictional map state. Not a claim about real conflict, borders or occupation.",
+      "license": "Original authored synthetic geometry",
+      "crs": "EPSG:4326",
+      "resolution": "Illustrative test shapes, not observed territorial control"
+    }
+  ],
+  "areas": [
+    {
+      "id": "AREA_S0_0",
+      "geometry_ref": "AREA_S0",
+      "stage_id": "S0",
+      "source_id": "SYNTHETIC_WAR_FIXTURE",
+      "role": "EVENT_AREA",
+      "style_role": "PRIMARY"
+    },
+    {
+      "id": "AREA_S1_0",
+      "geometry_ref": "AREA_S1",
+      "stage_id": "S1",
+      "source_id": "SYNTHETIC_WAR_FIXTURE",
+      "role": "EVENT_AREA",
+      "style_role": "PRIMARY"
+    },
+    {
+      "id": "AREA_S2_0",
+      "geometry_ref": "AREA_S2",
+      "stage_id": "S2",
+      "source_id": "SYNTHETIC_WAR_FIXTURE",
+      "role": "EVENT_AREA",
+      "style_role": "PRIMARY"
+    }
+  ],
+  "front_lines": [
+    {
+      "id": "FRONT_S0_0",
+      "geometry_ref": "FRONT_S0",
+      "stage_id": "S0",
+      "source_id": "SYNTHETIC_WAR_FIXTURE",
+      "role": "FRONT_LINE",
+      "style_role": "PRIMARY",
+      "direction": "FORWARD"
+    },
+    {
+      "id": "FRONT_S1_0",
+      "geometry_ref": "FRONT_S1",
+      "stage_id": "S1",
+      "source_id": "SYNTHETIC_WAR_FIXTURE",
+      "role": "FRONT_LINE",
+      "style_role": "PRIMARY",
+      "direction": "FORWARD"
+    },
+    {
+      "id": "FRONT_S2_0",
+      "geometry_ref": "FRONT_S2",
+      "stage_id": "S2",
+      "source_id": "SYNTHETIC_WAR_FIXTURE",
+      "role": "FRONT_LINE",
+      "style_role": "PRIMARY",
+      "direction": "FORWARD"
+    }
+  ],
+  "time_steps": [
+    {
+      "id": "S0",
+      "date": "2026-10-22",
+      "label": "Fictional state 0",
+      "area_ids": [
+        "AREA_S0_0"
+      ],
+      "front_line_ids": [
+        "FRONT_S0_0"
+      ],
+      "start_frame": 0,
+      "transition_frames": 30
+    },
+    {
+      "id": "S1",
+      "date": "2026-10-23",
+      "label": "Fictional state 1",
+      "area_ids": [
+        "AREA_S1_0"
+      ],
+      "front_line_ids": [
+        "FRONT_S1_0"
+      ],
+      "start_frame": 30,
+      "transition_frames": 45
+    },
+    {
+      "id": "S2",
+      "date": "2026-10-24",
+      "label": "Fictional state 2",
+      "area_ids": [
+        "AREA_S2_0"
+      ],
+      "front_line_ids": [
+        "FRONT_S2_0"
+      ],
+      "start_frame": 75,
+      "transition_frames": 45
+    }
+  ]
+}
