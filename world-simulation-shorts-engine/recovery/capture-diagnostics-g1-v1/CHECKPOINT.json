@@ -31,6 +31,26 @@
     "gpuExecuted": false,
     "gpuRootCause": "UNKNOWN",
     "imageInternalValidation": "success",
+    "release": {
+      "baselineImageDigest": "sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f",
+      "candidateImageDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+      "candidateImageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:g2-diagnostics-v1-27f9fa5c133a-40767632198",
+      "generatedSourceManifestSHA256": "2fc89c792de8ebb49eae00241bf5cc10acd78c80934dbc1ada21c9d62d21438e",
+      "gpuExecuted": false,
+      "gpuRootCause": "UNKNOWN",
+      "manifestBodySHA256": "9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+      "registryManifestBytes": 15994,
+      "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40767632198",
+      "runtimeManifestSHA256": "a4ef7cdca49e64881f737d4c88d949dafa502868fa6a1df7d392170e0170f314",
+      "sceneSHA256": null,
+      "schema": "WORLD_ENGINE_RELEASE_LOCK_V1",
+      "sourceCommit": "27f9fa5c133a65ed08824cf047116128bd9dfe5e",
+      "sourceFiles": 353,
+      "startupManifestSHA256": "3cac42a8da8fd76994b20035666e3f15c94779073deb0d0d4ae515a0b2da8407",
+      "status": "G2_IMAGE_PUBLISHED_CPU_VERIFIED",
+      "tagDigestBodyIdentical": true,
+      "testedImageId": "sha256:68732e51a2a72bdfd796edfdc19968de497833695062f6e2c56e83c72d9a11c3"
+    },
     "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40767632198",
     "sourceCommit": "27f9fa5c133a65ed08824cf047116128bd9dfe5e"
   },
@@ -69,9 +89,9 @@
       "evidenceDirectory": "world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198",
       "imagePackaged": true,
       "reasons": [
-        "Publication pending"
+        "Confirm whole Actions run completion before final G2 PASS"
       ],
-      "status": "VALIDATED_PENDING_PUBLICATION"
+      "status": "IMAGE_EVIDENCE_PASS_PENDING_WORKFLOW_COMPLETION"
     },
     "G3": {
       "reason": "NO_NEW_GPU_APPROVAL",
@@ -121,7 +141,7 @@
       "tests": 8
     }
   },
-  "nextAction": "Publish this exact validated candidate only after artifact and Git evidence backup succeed.",
+  "nextAction": "Confirm whole Actions run success and final Git backup before final G2 PASS. G3 GPU execution remains blocked; separate explicit approval is required before deployment or rendering.",
   "nextOwner": "ASTRA",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
@@ -133,12 +153,13 @@
   "privateReceiptRead": false,
   "privateReceiptReason": "No stopped-container private filesystem access available; no broad search repeated.",
   "runtimeClosureUpdate": {
+    "actualFileCount": 353,
     "addedRuntimeFile": "backend/capture_operation_diagnostics.mjs",
     "existingStageProcedurePreserved": true,
-    "expectedCountIsNotVerified": true,
+    "expectedCountIsNotVerified": false,
     "expectedFileCount": 353,
-    "pinRegenerationRequired": true,
-    "status": "NOT_RUN"
+    "pinRegenerationRequired": false,
+    "status": "PASS"
   },
   "sceneSHA256": null,
   "sceneSHA256Reason": "No Scene input read or render scheduled",
