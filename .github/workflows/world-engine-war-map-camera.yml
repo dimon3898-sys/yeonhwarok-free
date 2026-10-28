@@ -1,0 +1,73 @@
+name: WORLD ENGINE WAR map and camera CPU contract
+on:
+  push:
+    branches: [recovery/g1-capture-diagnostic-contract-20261028]
+    paths:
+      - '.github/workflows/world-engine-war-map-camera.yml'
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: world-engine-war-map-camera
+  cancel-in-progress: false
+jobs:
+  map-camera:
+    if: github.run_attempt == 1 && github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      WAR: world-simulation-shorts-engine/recovery/war-map-camera-v1
+      IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Reuse cost evidence and check capacity before immutable pull
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          mkdir -p war-map-evidence war-map-workspace
+          chmod 0777 war-map-evidence
+          chmod 0755 war-map-workspace
+          sudo install -d -o 1000 -g 1000 -m 0700 "$PWD/war-map-workspace/private"
+          sudo install -d -o 1000 -g 1000 -m 0755 "$PWD/war-map-workspace/public"
+          python3 "$WAR/run_cpu_workflow.py" preflight
+      - name: Pull the already published image by exact digest
+        timeout-minutes: 12
+        run: docker pull "$IMAGE"
+      - name: Qualify map then evaluate camera and complete source coverage
+        id: validate
+        timeout-minutes: 8
+        run: python3 "$WAR/run_cpu_workflow.py" run
+      - name: Preserve bounded new evidence and failed-stage resume checkpoint
+        id: evidence
+        if: always() && !cancelled()
+        env:
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          set -euo pipefail
+          sudo python3 "$WAR/run_cpu_workflow.py" collect \
+            --validation-outcome "$VALIDATION_OUTCOME" \
+            --run-id "$GITHUB_RUN_ID" --source-commit "$GITHUB_SHA"
+      - name: Upload bounded evidence for one day
+        id: artifact
+        if: always() && !cancelled() && steps.evidence.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-war-map-camera-${{ github.run_id }}
+          path: war-map-artifact/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+          include-hidden-files: false
+      - name: Record artifact identity
+        if: always() && !cancelled() && steps.artifact.outcome == 'success'
+        env:
+          ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact-digest }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        run: |
+          python3 - <<'PY'
+          import json,os
+          print('WAR_MAP_ARTIFACT_RECEIPT='+json.dumps({'artifactId':os.environ['ARTIFACT_ID'],'artifactDigest':os.environ['ARTIFACT_DIGEST'],'artifactURL':os.environ['ARTIFACT_URL'],'retentionDays':1,'gpuExecuted':False},separators=(',',':')))
+          PY
