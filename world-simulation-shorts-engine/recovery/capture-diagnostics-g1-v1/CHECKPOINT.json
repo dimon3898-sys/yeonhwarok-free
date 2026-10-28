@@ -52,7 +52,11 @@
       "testedImageId": "sha256:68732e51a2a72bdfd796edfdc19968de497833695062f6e2c56e83c72d9a11c3"
     },
     "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/40767632198",
-    "sourceCommit": "27f9fa5c133a65ed08824cf047116128bd9dfe5e"
+    "sourceCommit": "27f9fa5c133a65ed08824cf047116128bd9dfe5e",
+    "workflowStatus": "completed",
+    "workflowConclusion": "success",
+    "evidenceBackupCommit": "8ecdcebdd2c7d3eda1f2f8006e507d3d2390acab",
+    "completedRunAttempt": 1
   },
   "branch": "recovery/g1-capture-diagnostic-contract-20261028",
   "cpuCostBasis": {
@@ -88,10 +92,9 @@
       "costGate": "SATISFIED_USER_ATTESTED",
       "evidenceDirectory": "world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198",
       "imagePackaged": true,
-      "reasons": [
-        "Confirm whole Actions run completion before final G2 PASS"
-      ],
-      "status": "IMAGE_EVIDENCE_PASS_PENDING_WORKFLOW_COMPLETION"
+      "reasons": [],
+      "status": "PASS",
+      "completionReceipt": "../capture-diagnostics-g2-v1/COMPLETION_RECEIPT.json"
     },
     "G3": {
       "reason": "NO_NEW_GPU_APPROVAL",
@@ -141,8 +144,8 @@
       "tests": 8
     }
   },
-  "nextAction": "Confirm whole Actions run success and final Git backup before final G2 PASS. G3 GPU execution remains blocked; separate explicit approval is required before deployment or rendering.",
-  "nextOwner": "ASTRA",
+  "nextAction": "G2 complete. Do not redeploy or render. G3 requires separate explicit GPU execution approval; GPU root cause remains UNKNOWN. Reuse G0/G1/G2 evidence.",
+  "nextOwner": "USER",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -164,7 +167,7 @@
   "sceneSHA256": null,
   "sceneSHA256Reason": "No Scene input read or render scheduled",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "G2_COST_GATE_SATISFIED_IMAGE_INTEGRATION_IN_PROGRESS",
+  "scope": "G2_PUBLISHED_IMAGE_CPU_PASS_G3_NO_APPROVAL",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32"
 }
