@@ -1,0 +1,60 @@
+name: WORLD ENGINE page-stage derived runtime CPU-only gate
+on:
+  push:
+    branches: [recovery/capture-page-evaluation-evidence-20261028]
+    paths:
+      - 'world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/stage_derived_runtime.py'
+      - '.github/workflows/world-engine-page-stage-runtime.yml'
+permissions:
+  contents: read
+jobs:
+  stage-runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - name: Fetch exact files only from pinned revisions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib,os
+          from urllib.request import urlopen
+          repo='https://raw.githubusercontent.com/dimon3898-sys/yeonhwarok-free/'
+          files={
+           'candidate/candidate_capture_vulkan.mjs':('6d332db529dc6c50177ae791bb7d6d0e084b1a79','world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs'),
+           'candidate/safe_capture_export.py':('0d0ecd092c07697f49a43bdce72065ce53c428f7','world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py'),
+           'stage_derived_runtime.py':(os.environ['GITHUB_SHA'],'world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/stage_derived_runtime.py')
+          }
+          for dest,(ref,src) in files.items():
+           with urlopen(repo+ref+'/'+src,timeout=30) as r:data=r.read(1000000)
+           assert len(data)<1000000
+           p=pathlib.Path(dest);p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
+          PY
+      - name: Pull previously verified immutable parent image once
+        timeout-minutes: 12
+        run: docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e
+      - name: Stage derived runtime in offline CPU container
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          docker run --rm --network none --read-only --user 0:0 \
+            --mount "type=bind,src=$PWD/candidate,dst=/candidate,readonly" \
+            --mount "type=bind,src=$PWD/stage_derived_runtime.py,dst=/stage.py,readonly" \
+            --mount "type=bind,src=$PWD/out,dst=/out" \
+            --entrypoint /usr/bin/python3 \
+            ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e \
+            -I /stage.py --candidate /candidate --destination /out/runtime
+      - name: Check derived manifest and unchanged parent source
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib,json,hashlib
+          root=pathlib.Path('out/runtime')
+          m=json.loads((root/'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json').read_bytes())
+          assert len(m['files'])==352
+          for row in m['files']:
+           data=(root/row['path']).read_bytes()
+           assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+          print('DERIVED_352_SOURCE_SHA256_PASS')
+          PY
