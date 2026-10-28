@@ -1,0 +1,123 @@
+name: WORLD ENGINE G2 diagnostic image
+on:
+  push:
+    branches: [recovery/g1-capture-diagnostic-contract-20261028]
+    paths:
+      - '.github/workflows/world-engine-g2-diagnostic-image.yml'
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-g2-diagnostic-image
+  cancel-in-progress: false
+jobs:
+  g2-image:
+    if: github.run_attempt == 1 && github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      G2: world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1
+      PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f
+      PARENT_DIGEST: sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f
+      NEW_ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cost and Docker capacity preflight before pull
+        timeout-minutes: 2
+        run: |
+          set -euo pipefail
+          mkdir -p out g2-evidence
+          chmod 0777 g2-evidence
+          python3 "$G2/build_g2_image.py" preflight
+      - name: Pull exact immutable parent once
+        timeout-minutes: 10
+        run: docker pull "$PARENT"
+      - name: Stage only the G1-proven diagnostic delta
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --read-only --user 0:0 \
+            --mount "type=bind,src=$PWD,dst=/sources,readonly" \
+            --mount "type=bind,src=$PWD/$G2/stage_g2_runtime.py,dst=/stage.py,readonly" \
+            --mount "type=bind,src=$PWD/out,dst=/out" \
+            --entrypoint /usr/bin/python3 "$PARENT" -I /stage.py \
+            --sources /sources --destination /out/runtime --parent-image-digest "$PARENT_DIGEST"
+      - name: Construct derivative preserving parent execution configuration
+        timeout-minutes: 2
+        run: python3 "$G2/build_g2_image.py" construct
+      - name: Build one candidate without network
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          TAG="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:g2-diagnostics-v1-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
+          docker build --network none --pull=false -t "$TAG" out
+          python3 "$G2/build_g2_image.py" identity --tag "$TAG"
+      - name: Candidate-internal 353-file and browser diagnostic integration
+        id: validate
+        timeout-minutes: 4
+        run: |
+          set -euo pipefail
+          docker run --rm --network none --read-only --user 1000:1000 \
+            --tmpfs /tmp:rw,nosuid,nodev,mode=1777 --shm-size 1g \
+            --mount "type=bind,src=$PWD/$G2,dst=/g2,readonly" \
+            --mount "type=bind,src=$PWD/out,dst=/g2-input,readonly" \
+            --mount "type=bind,src=$PWD/g2-evidence,dst=/evidence" \
+            --entrypoint /usr/bin/python3 "$TAG" -I /g2/validate_g2_image.py \
+            --root "$NEW_ROOT" --stage-receipt /g2-input/STAGE_RECEIPT.json \
+            --image-config /g2-input/image-config.json --output /evidence
+      - name: Prepare bounded safe evidence even on failure
+        id: evidence
+        if: always() && !cancelled()
+        env:
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: python3 "$G2/build_g2_image.py" collect --validation-outcome "$VALIDATION_OUTCOME"
+      - name: Preserve diagnostic artifact for one day
+        id: artifact
+        if: always() && !cancelled() && steps.evidence.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-g2-safe-${{ github.run_id }}
+          path: g2-evidence/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+          include-hidden-files: false
+      - name: Back up new evidence to existing recovery branch before publication
+        id: backup
+        if: always() && !cancelled() && steps.artifact.outcome == 'success'
+        env:
+          ARTIFACT_ID: ${{ steps.artifact.outputs.artifact-id }}
+          ARTIFACT_DIGEST: ${{ steps.artifact.outputs.artifact-digest }}
+          ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          set -euo pipefail
+          python3 "$G2/build_g2_image.py" artifact --artifact-id "$ARTIFACT_ID" --artifact-digest "$ARTIFACT_DIGEST" --artifact-url "$ARTIFACT_URL"
+          python3 "$G2/build_g2_image.py" collect --validation-outcome "$VALIDATION_OUTCOME"
+          python3 "$G2/build_g2_image.py" backup --phase validated
+      - name: Publish exactly the tested candidate after all CPU evidence gates
+        id: publish
+        if: success() && steps.validate.outcome == 'success' && steps.artifact.outcome == 'success' && steps.backup.outcome == 'success'
+        timeout-minutes: 3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,os,subprocess
+          expected=json.load(open('g2-evidence/IMAGE_IDENTITY.json'))['testedImageId']
+          actual=subprocess.check_output(['docker','image','inspect','--format','{{.Id}}',os.environ['TAG']],text=True).strip()
+          assert expected==actual, 'CANDIDATE_CHANGED_AFTER_VALIDATION'
+          PY
+          printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin >/dev/null
+          trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+          docker push "$TAG"
+          python3 "$G2/build_g2_image.py" publish-receipt --tag "$TAG"
+      - name: Preserve release lock and final checkpoint with registry proof
+        if: success() && steps.publish.outcome == 'success'
+        run: |
+          set -euo pipefail
+          python3 "$G2/build_g2_image.py" collect --validation-outcome success
+          python3 "$G2/build_g2_image.py" backup --phase published
+          echo G2_CPU_IMAGE_PUBLISHED_GPU_NOT_EXECUTED
