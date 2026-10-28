@@ -74,7 +74,7 @@ export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA2
  let chain=Promise.resolve();
  function persist(){
   chain=chain.then(async()=>{
-   state.sequence++;state.evidenceStatus='LOCAL_ATOMIC_CHECKPOINT';
+   state.sequence++;state.observedAtUnixMs=Date.now();state.evidenceStatus='LOCAL_ATOMIC_CHECKPOINT';
    try{await write(path.join(outputRoot,'CAPTURE_OPERATION_CHECKPOINT.json'),structuredClone(state));}
    catch(error){state.storageError=storageCode(error);state.evidenceStatus='LOCAL_WRITE_FAILED';}
   });return chain.then(()=>({ok:state.evidenceStatus==='LOCAL_ATOMIC_CHECKPOINT',code:state.storageError}));

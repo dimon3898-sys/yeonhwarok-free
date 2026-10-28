@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import stat
 import time
@@ -53,11 +54,20 @@ def safe_failure(value):
         "failureKind": value.get("failureKind") if value.get("failureKind") in FAILURE_KINDS else "UNCLASSIFIED_EXCEPTION",
         "frameIndex": index if type(index) is int and 0 <= index < 180 else None}
 
+def safe_identifier(value, pattern):
+    return value if type(value) is str and re.fullmatch(pattern, value) else None
+
+
 def safe_operations(value):
     if not isinstance(value, dict) or value.get("schema") != "WORLD_ENGINE_CAPTURE_OPERATIONS_V1":
         return None
     count, sequence = value.get("renderedFrames"), value.get("sequence")
+    observed = value.get("observedAtUnixMs")
     return {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
+        "runId": safe_identifier(value.get("runId"), r"studio-[a-f0-9]{32}"),
+        "imageDigest": safe_identifier(value.get("imageDigest"), r"sha256:[a-f0-9]{64}"),
+        "sceneSHA256": safe_identifier(value.get("sceneSHA256"), r"[a-f0-9]{64}"),
+        "observedAtUnixMs": observed if type(observed) is int and 0 <= observed <= 9007199254740991 else None,
         "operationId": value.get("operationId") if value.get("operationId") in OPERATIONS else None,
         "lastCompletedOperation": value.get("lastCompletedOperation") if value.get("lastCompletedOperation") in OPERATIONS else None,
         "firstFailure": safe_failure(value.get("firstFailure")), "cleanupFailure": safe_failure(value.get("cleanupFailure")),

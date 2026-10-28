@@ -42,6 +42,17 @@ class SafeExportTests(unittest.TestCase):
         self.assertNotIn(secret, wire)
         self.assertNotIn('https://', wire)
         self.assertEqual(result['diagnostic']['capture']['code'], 'UNCLASSIFIED_EXCEPTION')
+    def test_release_and_run_identifiers_only(self):
+        self.checkpoint.update(runId='studio-'+'a'*32, imageDigest='sha256:'+'b'*64, sceneSHA256='c'*64, observedAtUnixMs=1793184000000)
+        write_private(self.job / 'capture/CAPTURE_OPERATION_CHECKPOINT.json', self.checkpoint)
+        operations = exporter.export_failure(self.job,self.root/'export')['diagnostic']['capture']['operations']
+        self.assertEqual(operations['runId'],self.checkpoint['runId'])
+        self.assertEqual(operations['imageDigest'],self.checkpoint['imageDigest'])
+        self.assertEqual(operations['sceneSHA256'],self.checkpoint['sceneSHA256'])
+        self.assertEqual(operations['observedAtUnixMs'],1793184000000)
+        self.checkpoint.update(runId='SYNTHETIC_SECRET_NOT_FOR_EXPORT', imageDigest='https://secret.invalid/?token=secret', sceneSHA256='secret')
+        sanitized=exporter.safe_operations(self.checkpoint)
+        self.assertIsNone(sanitized['runId']);self.assertIsNone(sanitized['imageDigest']);self.assertIsNone(sanitized['sceneSHA256'])
     def test_cleanup_gate_unchanged(self):
         write_private(self.job / 'LEASE_SUPERVISOR_RESULT.json', {'cleanupVerified': False})
         with self.assertRaisesRegex(ValueError, 'DIAGNOSTIC_VERIFIED_CLEANUP_REQUIRED'):
