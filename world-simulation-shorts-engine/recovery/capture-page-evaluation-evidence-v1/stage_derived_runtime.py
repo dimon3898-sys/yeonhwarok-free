@@ -36,7 +36,7 @@ def stage(parent,candidate,dest):
  require(CAPTURE in rows and EXPORTER in rows,'DERIVATIVE_SOURCE_ROWS_MISSING')
  require(all(digest(read(parent,r['path']))==r['sha256'] and len(read(parent,r['path']))==r['bytes'] for r in manifest['files']),'PARENT_SOURCE_CHANGED')
  # Original parent tree remains immutable; no in-place editing.
- shutil.copytree(parent,dest,symlinks=True)
+ shutil.copytree(parent,dest,symlinks=False)
  original_capture=read(parent,CAPTURE).decode()
  changed_capture=read(candidate,'candidate_capture_vulkan.mjs').decode()
  markers=[
