@@ -11,7 +11,7 @@ import hashlib
 ANCHORS = (
     ("await page.evaluate(async()=>{window.payload=", "PAGE_EVALUATE_RUNTIME_IMPORT"),
     ("const firstNativeProof=await page.evaluate(async()=>{", "PAGE_EVALUATE_FIRST_NATIVE_DRAW"),
-    ("const capture=await page.evaluate(async frame=>{", "PAGE_EVALUATE_FRAME_CAPTURE"),
+    ("await page.evaluate(async frame=>{", "PAGE_EVALUATE_FRAME_CAPTURE"),
 )
 
 def propose(original: str) -> str:
@@ -27,7 +27,10 @@ def propose(original: str) -> str:
     changed = original.replace("let browser,encoder,encoderExit,service;",
                                "let browser,encoder,encoderExit,service;let diagnosticStage='BEFORE_PAGE_EVALUATION';", 1)
     for anchor, stage in ANCHORS:
-        changed = changed.replace(anchor, f"diagnosticStage='{stage}';" + anchor, 1)
+        if stage == "PAGE_EVALUATE_FRAME_CAPTURE":
+            changed = changed.replace("const capture=" + anchor, f"diagnosticStage='{stage}';const capture=" + anchor, 1)
+        else:
+            changed = changed.replace(anchor, f"diagnosticStage='{stage}';" + anchor, 1)
     changed = changed.replace(
         "receipt.failure={code:String(error.message).slice(0,4000)};",
         "receipt.failure={code:String(error.message).slice(0,4000),diagnosticStage};", 1)
