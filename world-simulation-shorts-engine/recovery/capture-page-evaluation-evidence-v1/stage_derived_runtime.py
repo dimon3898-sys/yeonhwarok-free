@@ -11,6 +11,7 @@ MANIFEST=REC+'codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
 STARTUP=REC+'studio-cold-start-v2/'
 CAPTURE=REC+'codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs'
 EXPORTER=REC+'codex-to-gcube-handoff-v1/controller/safe_capture_export.py'
+VARIANT=REC+'codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json'
 SOURCE_SHA_NEEDLE="SOURCE_SHA = '"+PARENT_MANIFEST_SHA+"'"
 
 def digest(data):return hashlib.sha256(data).hexdigest()
@@ -33,7 +34,7 @@ def stage(parent,candidate,dest):
  startup=json.loads(startup_raw)
  require(startup['runtimeManifestSHA256']==PARENT_MANIFEST_SHA,'PARENT_STARTUP_SOURCE_PIN_MISMATCH')
  rows={r['path']:r for r in manifest['files']}
- require(CAPTURE in rows and EXPORTER in rows,'DERIVATIVE_SOURCE_ROWS_MISSING')
+ require(CAPTURE in rows and EXPORTER in rows and VARIANT in rows,'DERIVATIVE_SOURCE_ROWS_MISSING')
  require(all(digest(read(parent,r['path']))==r['sha256'] and len(read(parent,r['path']))==r['bytes'] for r in manifest['files']),'PARENT_SOURCE_CHANGED')
  # Original parent tree remains immutable; no in-place editing.
  shutil.copytree(parent,dest,symlinks=False)
@@ -56,6 +57,14 @@ def stage(parent,candidate,dest):
  for name,raw in ((CAPTURE,changed_capture.encode()),(EXPORTER,changed_exporter.encode())):
   (dest/name).write_bytes(raw)
   rows[name].update(bytes=len(raw),sha256=digest(raw))
+ variants=json.loads(read(parent,VARIANT))
+ require(variants.get('schema')=='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1','VARIANT_SCHEMA_CHANGED')
+ matches=[v for v in variants['variants'] if v.get('variant')=='capture_vulkan.generated.mjs']
+ require(len(matches)==1 and matches[0]['variantSHA256']==digest(original_capture.encode()),'PARENT_VARIANT_PIN_CHANGED')
+ matches[0]['variantSHA256']=digest(changed_capture.encode())
+ variant_raw=wire(variants)
+ (dest/VARIANT).write_bytes(variant_raw)
+ rows[VARIANT].update(bytes=len(variant_raw),sha256=digest(variant_raw))
  manifest['files']=sorted(rows.values(),key=lambda r:r['path'])
  manifest['derivation']={'parentRuntimeManifestSHA256':PARENT_MANIFEST_SHA,'stageOnly':True,'parentPreserved':True}
  derived=wire(manifest);(dest/MANIFEST).write_bytes(derived)
