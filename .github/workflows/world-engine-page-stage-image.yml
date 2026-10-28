@@ -1,0 +1,117 @@
+name: WORLD ENGINE page-stage image build CPU gate
+on:
+  push:
+    branches: [recovery/capture-page-evaluation-evidence-20261028]
+    paths:
+      - '.github/workflows/world-engine-page-stage-image.yml'
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: world-engine-page-stage-image
+  cancel-in-progress: false
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    env:
+      PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e
+      NEW_ROOT: /opt/world-engine-handoffs/studio-page-stage-v1/repo
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch pinned parent
+        timeout-minutes: 12
+        run: docker pull "$PARENT"
+      - name: Prepare exact derived 352-file runtime in isolated CPU container
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stage-input out
+          cp world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs stage-input/
+          cp world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py stage-input/
+          docker run --rm --network none --read-only --user 0:0 \
+            --mount "type=bind,src=$PWD/stage-input,dst=/candidate,readonly" \
+            --mount "type=bind,src=$PWD/world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/stage_derived_runtime.py,dst=/stage.py,readonly" \
+            --mount "type=bind,src=$PWD/out,dst=/out" \
+            --entrypoint /usr/bin/python3 "$PARENT" -I /stage.py --candidate /candidate --destination /out/runtime
+      - name: Construct Dockerfile from verified parent entrypoint and derived pins
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json,pathlib,hashlib,subprocess
+          base=json.loads(subprocess.check_output(['docker','image','inspect','--format','{{json .Config}}', 'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e']))
+          root=pathlib.Path('out/runtime')
+          rel='world-simulation-shorts-engine/recovery/'
+          m=root/rel/'codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
+          st=root/rel/'studio-cold-start-v2/STARTUP_MANIFEST.json'
+          mh=hashlib.sha256(m.read_bytes()).hexdigest();sh=hashlib.sha256(st.read_bytes()).hexdigest()
+          entry=base['Entrypoint']
+          assert isinstance(entry,list) and len(entry)>8
+          old='/opt/world-engine-handoffs/studio-diagnostics-v1/repo'
+          new='/opt/world-engine-handoffs/studio-page-stage-v1/repo'
+          assert sum(old in x for x in entry)>=3
+          entry=[x.replace(old,new).replace('312d806393ab7776167a0977678df067b7b1f4ff3c8d25f9f119e549e0e74251',mh).replace('09d9f21f3fa58f5ec81e6753bb946def49d4f666ad58f88f104ad409e2f78ebc',sh) for x in entry]
+          assert mh in entry and sh in entry
+          manifest=json.loads(m.read_bytes())
+          assert len(manifest['files'])==352
+          for row in manifest['files']:
+           data=(root/row['path']).read_bytes()
+           assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
+          dockerfile='FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:eeb0e86441ca6b4cfcb62eedff1d41630c2c01178263363ea1ae48eb38cd993e\nUSER 0\nCOPY --chown=0:0 runtime/ '+new+'/\nRUN find '+new+' -type d -exec chmod 0755 {} + && find '+new+' -type f -exec chmod 0644 {} +\nENTRYPOINT '+json.dumps(entry)+'\nCMD []\n'
+          pathlib.Path('out/Dockerfile').write_text(dockerfile)
+          pathlib.Path('out/PINS.json').write_text(json.dumps({'runtimeManifestSHA256':mh,'startupManifestSHA256':sh,'sourceFiles':352,'parentUnchanged':True},sort_keys=True))
+          print('DERIVED_IMAGE_BUILD_CONTEXT_PASS')
+          PY
+      - name: Build new immutable candidate without network
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "TAG=ghcr.io/dimon3898-sys/world-simulation-shorts-engine:page-stage-v1-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}" >> "$GITHUB_ENV"
+          docker build --network none --pull=false -t "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:page-stage-v1-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}" out
+      - name: CPU installed source and default entrypoint verification
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker image inspect "$TAG" --format '{{json .Config.Entrypoint}}' > out/ENTRYPOINT.json
+          python3 - <<'PY'
+          import json,pathlib
+          p=json.loads(pathlib.Path('out/PINS.json').read_text())
+          entry=json.loads(pathlib.Path('out/ENTRYPOINT.json').read_text())
+          assert p['runtimeManifestSHA256'] in entry and p['startupManifestSHA256'] in entry
+          assert any('/studio-page-stage-v1/repo/' in x for x in entry)
+          assert all('/studio-diagnostics-v1/repo/' not in x for x in entry)
+          print('DERIVED_ENTRYPOINT_PIN_PASS')
+          PY
+          docker run --rm --network none --read-only --user 1000:1000 --tmpfs /tmp:rw,nosuid,nodev,mode=1777 \
+            --entrypoint /usr/bin/python3 "$TAG" -I -c "
+          import pathlib,hashlib,json,sys
+          root=pathlib.Path('/opt/world-engine-handoffs/studio-page-stage-v1/repo')
+          rec=root/'world-simulation-shorts-engine/recovery'
+          m=rec/'codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
+          s=rec/'studio-cold-start-v2/STARTUP_MANIFEST.json'
+          data=json.loads(m.read_bytes());startup=json.loads(s.read_bytes())
+          assert len(data['files'])==352
+          assert startup['runtimeManifestSHA256']==hashlib.sha256(m.read_bytes()).hexdigest()
+          for row in data['files']:
+           f=root/row['path'];b=f.read_bytes()
+           assert len(b)==row['bytes'] and hashlib.sha256(b).hexdigest()==row['sha256']
+          assert 'diagnosticStage' in (rec/'codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs').read_text()
+          assert 'DIAGNOSTIC_STAGES' in (rec/'codex-to-gcube-handoff-v1/controller/safe_capture_export.py').read_text()
+          print('INSTALLED_352_SOURCE_AND_STAGE_PASS')
+          "
+      - name: Publish only verified unique tag
+        timeout-minutes: 3
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin >/dev/null
+          docker push "$TAG"
+          docker logout ghcr.io >/dev/null
+          docker image inspect "$TAG" --format '{{json .RepoDigests}}'
+          echo "CPU_IMAGE_PUBLISHED_NOT_GPU_VERIFIED"
