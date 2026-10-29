@@ -1,0 +1,62 @@
+{
+  "schema": "WORLD_ENGINE_VULKAN_SURFACE_SINGLE_OPTION_RECEIPT_V1",
+  "status": "PASS",
+  "scope": "SINGLE_LAUNCH_OPTION_FUNCTION_CPU_ONLY_NOT_GPU_INITIALIZATION_PASS",
+  "branch": "recovery/g1-capture-diagnostic-contract-20261028",
+  "baseCommit": "131a569556063139dd0f60fc40386bacafebf4a3",
+  "targetFile": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+  "targetFunction": "buildVulkanLaunchOptions",
+  "sourceDelta": "Remove one item from final result.push only; keep stripped set entry",
+  "beforeSourceSHA256": "92a05474a162ffd41238abc24cc5e433838c80192d77f462f67990178fc08809",
+  "afterSourceSHA256": "f55758af58a7c8724bddc097f05586b6d4cfdfa81133fa093636e335bca171c5",
+  "baselineProfileGitBlobSHA": "05db02591d0e5a607114add5576e9d9d1e047933",
+  "nativeGuard": {
+    "status": "PRESERVED_BY_UNCHANGED_GIT_BLOB_NOT_RETESTED",
+    "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs",
+    "gitBlobSHA": "bcec971cb13030c89d9ba801818a392997f919d3"
+  },
+  "checks": {
+    "nodeSyntaxExitCode": 0,
+    "focusedTestsExitCode": 0,
+    "newFocusedTestsPassed": 7,
+    "fullReturnedObjectDifference": "Surface option removed from options.args and evidence.selectedArgs only",
+    "uid1000Sandbox": "PRESERVED",
+    "NvidiaVulkanNativeGuard": "UNCHANGED_NOT_EXECUTED",
+    "softwareRasterizerBlock": "PRESERVED",
+    "allFiveSecurityBypassRejections": "PRESERVED"
+  },
+  "commands": [
+    {
+      "command": "node --check world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+      "exitCode": 0
+    },
+    {
+      "command": "node world-simulation-shorts-engine/recovery/vulkan-surface-option-v1/test_profile_surface.mjs work-baseline/profile_contract.before.mjs world-simulation-shorts-engine/recovery/vulkan-surface-option-v1",
+      "exitCode": 0
+    }
+  ],
+  "baselineReproduction": "Obtain profile_contract.mjs at baseCommit without modification and pass its local file path as the first test-script argument. Second argument is an existing evidence directory. No browser launch is performed.",
+  "priorPassesSkipped": [
+    "G0",
+    "G1",
+    "G2",
+    "USER_REPORTED_AVIATION_SIX_SECOND_SUCCESS",
+    "WAR_SCENE_CONTRACT",
+    "WAR_MAP_CAMERA",
+    "DIAGNOSTIC_PENDING_PRESERVATION_10_SYNTHETIC_TESTS"
+  ],
+  "existingImage": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:g2-diagnostics-v1-27f9fa5c133a-40767632198",
+    "digest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+    "unchanged": true,
+    "candidateApplied": false
+  },
+  "limitations": [
+    "Configured args are function output, not observed complete browser process argv",
+    "GPU initialization success and WAR root-cause correction are NOT established",
+    "Renderer, Scene, camera, territory, native_guard and other options/functions remain unchanged",
+    "GPU execution, browser launch, Docker pull/build, image publish and deployment were not performed",
+    "Future image packaging must separately regenerate runtime/startup/bootstrap source pins; existing successful manifests are untouched"
+  ],
+  "nextGpuScope": "Only after separate image/packaging and GPU approval: same environment, one candidate, actual argv and ICD attribution, existing first-native-draw WebGL2 creation plus NVIDIA/Vulkan guard and draw/readPixels; stop on failure before full 180-frame render"
+}

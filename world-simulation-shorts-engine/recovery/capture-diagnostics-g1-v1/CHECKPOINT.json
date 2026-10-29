@@ -146,6 +146,24 @@
       "deploymentApproved": false,
       "newImageBuilt": false,
       "sourcePackagingPins": "NOT_REGENERATED_SEPARATE_IMAGE_GATE_REQUIRED"
+    },
+    "VULKAN_SURFACE_SINGLE_OPTION_CPU": {
+      "status": "PASS",
+      "scope": "SINGLE_LAUNCH_OPTION_FUNCTION_CPU_ONLY_NOT_GPU_INITIALIZATION_PASS",
+      "baseCommit": "131a569556063139dd0f60fc40386bacafebf4a3",
+      "result": "../vulkan-surface-option-v1/TEST_RESULTS.json",
+      "receipt": "../vulkan-surface-option-v1/RESULT.json",
+      "newFocusedTestsPassed": 7,
+      "removedFinalArg": "--disable-vulkan-surface",
+      "inputStrippingPreserved": true,
+      "beforeSourceSHA256": "92a05474a162ffd41238abc24cc5e433838c80192d77f462f67990178fc08809",
+      "afterSourceSHA256": "f55758af58a7c8724bddc097f05586b6d4cfdfa81133fa093636e335bca171c5",
+      "existingPassSuitesRerun": false,
+      "nativeGuardUnchanged": true,
+      "gpuInitialization": "NOT_RUN_NOT_CLAIMED",
+      "imageBuilt": false,
+      "imagePublished": false,
+      "imageReflection": "NOT_APPLIED_SEPARATE_AUTHORIZED_PACKAGING_REQUIRED"
     }
   },
   "gpuExecutionApproved": false,
@@ -185,8 +203,8 @@
       "tests": 8
     }
   },
-  "nextAction": "This diagnostic source patch is complete with new free synthetic evidence. Keep WAR first cause UNKNOWN; recover only existing incident receipts. Any new image packaging or GPU execution requires a separate authorized task.",
-  "nextOwner": "MAINTAINER_FOR_SEPARATE_SOURCE_PACKAGING_GATE; USER_OR_PROVIDER_FOR_EXISTING_INCIDENT_LOGS",
+  "nextAction": "Single-option source candidate is free-CPU-verified only. GPU initialization remains unresolved. Stop here; any image packaging/pin regeneration and subsequent GPU comparison require separate authorization.",
+  "nextOwner": "MAINTAINER_FOR_SEPARATE_PACKAGING_AUTHORIZATION_THEN_USER_FOR_BOUNDED_GPU_COMPARISON",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -208,7 +226,7 @@
   "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
   "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "PRIVATE_PENDING_DIAGNOSTIC_SYNTHETIC_PASS_PRIOR_PASSES_PRESERVED",
+  "scope": "VULKAN_SURFACE_SINGLE_OPTION_CPU_PASS_PRIOR_PASSES_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "WARSceneEvidence": {
@@ -296,5 +314,23 @@
     "deploymentApproved": false,
     "newImageBuilt": false,
     "sourcePackagingPins": "NOT_REGENERATED_SEPARATE_IMAGE_GATE_REQUIRED"
+  },
+  "vulkanSurfaceSingleOption": {
+    "status": "PASS",
+    "scope": "SINGLE_LAUNCH_OPTION_FUNCTION_CPU_ONLY_NOT_GPU_INITIALIZATION_PASS",
+    "baseCommit": "131a569556063139dd0f60fc40386bacafebf4a3",
+    "result": "../vulkan-surface-option-v1/TEST_RESULTS.json",
+    "receipt": "../vulkan-surface-option-v1/RESULT.json",
+    "newFocusedTestsPassed": 7,
+    "removedFinalArg": "--disable-vulkan-surface",
+    "inputStrippingPreserved": true,
+    "beforeSourceSHA256": "92a05474a162ffd41238abc24cc5e433838c80192d77f462f67990178fc08809",
+    "afterSourceSHA256": "f55758af58a7c8724bddc097f05586b6d4cfdfa81133fa093636e335bca171c5",
+    "existingPassSuitesRerun": false,
+    "nativeGuardUnchanged": true,
+    "gpuInitialization": "NOT_RUN_NOT_CLAIMED",
+    "imageBuilt": false,
+    "imagePublished": false,
+    "imageReflection": "NOT_APPLIED_SEPARATE_AUTHORIZED_PACKAGING_REQUIRED"
   }
 }

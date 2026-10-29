@@ -1,0 +1,465 @@
+{
+  "schema": "WORLD_ENGINE_VULKAN_SURFACE_ARGS_COMPARISON_V1",
+  "scope": "BUILD_FUNCTION_OUTPUT_NOT_OBSERVED_BROWSER_PROCESS_ARGV",
+  "comparisons": [
+    {
+      "name": "actual-G2-capture-call",
+      "inputOptions": {
+        "executablePath": "/usr/bin/chromium",
+        "headless": true,
+        "args": [
+          "--no-sandbox",
+          "--enable-unsafe-swiftshader",
+          "--use-angle=swiftshader",
+          "--disable-dev-shm-usage"
+        ]
+      },
+      "identity": {
+        "uid": 1000,
+        "rootTestOptIn": false
+      },
+      "before": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "args": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ],
+          "chromiumSandbox": true
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "after": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "args": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-software-rasterizer"
+          ],
+          "chromiumSandbox": true
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "removed": [
+        "--disable-vulkan-surface"
+      ],
+      "added": []
+    },
+    {
+      "name": "conflicting-caller-args",
+      "inputOptions": {
+        "executablePath": "/usr/bin/chromium",
+        "headless": false,
+        "args": [
+          "--disable-vulkan-surface",
+          "--disable-vulkan-surface",
+          "--use-angle=swiftshader",
+          "--use-angle",
+          "gl",
+          "--use-gl=desktop",
+          "--use-vulkan",
+          "swiftshader",
+          "--enable-features=Vulkan,Alpha,Alpha",
+          "--enable-features",
+          "Beta,Vulkan",
+          "--disable-features=Vulkan,Gamma,Gamma",
+          "--disable-features",
+          "Delta",
+          "--no-sandbox",
+          "--disable-setuid-sandbox",
+          "--enable-unsafe-swiftshader",
+          "--disable-gpu",
+          "--disable-gpu-compositing",
+          "--disable-webgl2",
+          "--disable-software-rasterizer",
+          "--disable-dev-shm-usage"
+        ],
+        "ignoreDefaultArgs": [
+          "--mute-audio"
+        ]
+      },
+      "identity": {
+        "uid": 1000
+      },
+      "before": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "args": [
+            "--disable-dev-shm-usage",
+            "--disable-features=Gamma,Delta",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha,Beta,Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ],
+          "ignoreDefaultArgs": [
+            "--mute-audio"
+          ],
+          "chromiumSandbox": true
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--disable-dev-shm-usage",
+            "--disable-features=Gamma,Delta",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha,Beta,Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "after": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "args": [
+            "--disable-dev-shm-usage",
+            "--disable-features=Gamma,Delta",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha,Beta,Vulkan",
+            "--disable-software-rasterizer"
+          ],
+          "ignoreDefaultArgs": [
+            "--mute-audio"
+          ],
+          "chromiumSandbox": true
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--disable-dev-shm-usage",
+            "--disable-features=Gamma,Delta",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha,Beta,Vulkan",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "removed": [
+        "--disable-vulkan-surface"
+      ],
+      "added": []
+    },
+    {
+      "name": "default-options",
+      "inputOptions": {
+        "executablePath": "/usr/bin/chromium"
+      },
+      "identity": {
+        "uid": 1000
+      },
+      "before": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ]
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "after": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "chromiumSandbox": true,
+          "args": [
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-software-rasterizer"
+          ]
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "removed": [
+        "--disable-vulkan-surface"
+      ],
+      "added": []
+    },
+    {
+      "name": "parameterized-features",
+      "inputOptions": {
+        "executablePath": "/usr/bin/chromium",
+        "timeout": 12000,
+        "args": [
+          "--enable-features=Vulkan:Example/1,Alpha:param/value",
+          "--disable-features=Vulkan<Trial,Gamma"
+        ],
+        "ignoreDefaultArgs": []
+      },
+      "identity": {
+        "uid": 1000
+      },
+      "before": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "timeout": 12000,
+          "args": [
+            "--disable-features=Gamma",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha:param/value,Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ],
+          "ignoreDefaultArgs": [],
+          "headless": true,
+          "chromiumSandbox": true
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--disable-features=Gamma",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha:param/value,Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "after": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "timeout": 12000,
+          "args": [
+            "--disable-features=Gamma",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha:param/value,Vulkan",
+            "--disable-software-rasterizer"
+          ],
+          "ignoreDefaultArgs": [],
+          "headless": true,
+          "chromiumSandbox": true
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": false,
+          "sandbox": "CHROMIUM_SANDBOX",
+          "selectedArgs": [
+            "--disable-features=Gamma",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Alpha:param/value,Vulkan",
+            "--disable-software-rasterizer"
+          ]
+        }
+      },
+      "removed": [
+        "--disable-vulkan-surface"
+      ],
+      "added": []
+    },
+    {
+      "name": "explicit-root-test-only",
+      "inputOptions": {
+        "executablePath": "/usr/bin/chromium",
+        "headless": true,
+        "args": [
+          "--no-sandbox",
+          "--enable-unsafe-swiftshader",
+          "--use-angle=swiftshader",
+          "--disable-dev-shm-usage"
+        ]
+      },
+      "identity": {
+        "uid": 0,
+        "rootTestOptIn": true
+      },
+      "before": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "args": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer",
+            "--no-sandbox"
+          ],
+          "chromiumSandbox": false
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": true,
+          "sandbox": "EXPLICIT_ROOT_TEST_ONLY",
+          "selectedArgs": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-vulkan-surface",
+            "--disable-software-rasterizer",
+            "--no-sandbox"
+          ]
+        }
+      },
+      "after": {
+        "options": {
+          "executablePath": "/usr/bin/chromium",
+          "headless": true,
+          "args": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-software-rasterizer",
+            "--no-sandbox"
+          ],
+          "chromiumSandbox": false
+        },
+        "evidence": {
+          "backend": "vulkan",
+          "rootTestOnly": true,
+          "sandbox": "EXPLICIT_ROOT_TEST_ONLY",
+          "selectedArgs": [
+            "--disable-dev-shm-usage",
+            "--headless=new",
+            "--enable-gpu",
+            "--enable-webgl",
+            "--use-gl=angle",
+            "--use-angle=vulkan",
+            "--enable-features=Vulkan",
+            "--disable-software-rasterizer",
+            "--no-sandbox"
+          ]
+        }
+      },
+      "removed": [
+        "--disable-vulkan-surface"
+      ],
+      "added": []
+    }
+  ]
+}
