@@ -179,6 +179,22 @@
       "existingPassRerun": false,
       "imagePublished": false,
       "gpuExecuted": false
+    },
+    "VULKAN_SURFACE_ACTIONS_PREPARATION": {
+      "status": "PASS",
+      "scope": "WORKFLOW_AND_PACKAGING_PREPARATION_ONLY",
+      "result": "../vulkan-surface-actions-v1/evidence/RESULT.json",
+      "newSyntheticTestsPassed": 21,
+      "executionStatus": "BLOCKED_NOT_DISPATCHED",
+      "imageBuilt": false,
+      "imagePublished": false,
+      "gpuExecuted": false,
+      "existingPassRerun": false,
+      "nextPrerequisites": [
+        "NEW_WORKFLOW_NOT_REGISTERED_ON_DEFAULT_BRANCH",
+        "NO_SEPARATE_MANUAL_BUILD_DISPATCH_APPROVAL",
+        "LIVE_RUNNER_COST_PERMISSIONS_AND_DISK_GATES_NOT_EXECUTED"
+      ]
     }
   },
   "gpuExecutionApproved": false,
@@ -218,8 +234,8 @@
       "tests": 8
     }
   },
-  "nextAction": "Stop without retry. Environment operator must provide verified Docker storage capacity (or an appropriately configured copy-on-write Docker environment). A new build attempt requires a separate user instruction; do not change storage drivers or delete existing images in this task.",
-  "nextOwner": "ENVIRONMENT_OPERATOR_FOR_DOCKER_STORAGE; USER_FOR_NEW_BUILD_ATTEMPT_AUTHORIZATION",
+  "nextAction": "Preparation complete only. Obtain separate approval for default-branch workflow registration and manual candidate-only dispatch; fresh cost/permissions/overlay2 capacity gates must pass at runtime. No auto dispatch, old G2 rerun, local vfs retry or publication. Runner-local image retention needs a separate approved plan before GPU use.",
+  "nextOwner": "USER_FOR_SEPARATE_REGISTRATION_AND_DISPATCH_APPROVAL; MAINTAINER_FOR_FUTURE_SAFE_LOG_BACKUP",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -241,7 +257,7 @@
   "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
   "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "VULKAN_SURFACE_LOCAL_BUILD_BLOCKED_CAPACITY_PRIOR_PASSES_PRESERVED",
+  "scope": "VULKAN_SURFACE_ACTIONS_PREPARATION_PASS_EXECUTION_BLOCKED_PRIOR_PASSES_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "WARSceneEvidence": {
@@ -362,5 +378,21 @@
     "existingPassRerun": false,
     "imagePublished": false,
     "gpuExecuted": false
+  },
+  "vulkanSurfaceActionsPreparation": {
+    "status": "PASS",
+    "scope": "WORKFLOW_AND_PACKAGING_PREPARATION_ONLY",
+    "result": "../vulkan-surface-actions-v1/evidence/RESULT.json",
+    "newSyntheticTestsPassed": 21,
+    "executionStatus": "BLOCKED_NOT_DISPATCHED",
+    "imageBuilt": false,
+    "imagePublished": false,
+    "gpuExecuted": false,
+    "existingPassRerun": false,
+    "nextPrerequisites": [
+      "NEW_WORKFLOW_NOT_REGISTERED_ON_DEFAULT_BRANCH",
+      "NO_SEPARATE_MANUAL_BUILD_DISPATCH_APPROVAL",
+      "LIVE_RUNNER_COST_PERMISSIONS_AND_DISK_GATES_NOT_EXECUTED"
+    ]
   }
 }

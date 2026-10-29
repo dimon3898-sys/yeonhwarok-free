@@ -1,0 +1,58 @@
+name: WORLD ENGINE Vulkan surface candidate (manual, no publish)
+"on":
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: Enter BUILD_SURFACE_CANDIDATE_LOCAL_ONLY after separate approval
+        required: true
+        type: string
+      approved_head_sha:
+        description: Exact reviewed recovery-branch commit SHA (not the historical source commit)
+        required: true
+        type: string
+      zero_cost_confirmed:
+        description: Confirm current public standard-runner zero-cost eligibility and account budget stop controls
+        required: true
+        default: false
+        type: boolean
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: world-engine-vulkan-surface-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  surface-candidate:
+    if: github.event_name == 'workflow_dispatch' && github.run_attempt == 1 && github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.repository.private == false && github.ref == 'refs/heads/recovery/g1-capture-diagnostic-contract-20261028'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      TOOL: world-simulation-shorts-engine/recovery/vulkan-surface-actions-v1
+      WORK: surface-candidate-work
+      SIGNAL_APPROVAL: ${{ inputs.approval }}
+      APPROVED_HEAD_SHA: ${{ inputs.approved_head_sha }}
+      ZERO_COST_CONFIRMED: ${{ inputs.zero_cost_confirmed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Cost, identity, Docker driver and capacity gate before any pull
+        timeout-minutes: 3
+        run: python3 -I -B "$TOOL/actions_candidate.py" preflight --work "$WORK"
+      - name: Pull immutable G2 parent once
+        timeout-minutes: 8
+        run: python3 -I -B "$TOOL/actions_candidate.py" pull --work "$WORK"
+      - name: Stage only the profile and its new pin chain
+        timeout-minutes: 3
+        run: python3 -I -B "$TOOL/actions_candidate.py" stage --work "$WORK"
+      - name: Build one local candidate without RUN steps or network
+        timeout-minutes: 5
+        run: python3 -I -B "$TOOL/actions_candidate.py" build --work "$WORK"
+      - name: Verify only the new installed files and ENTRYPOINT linkage
+        timeout-minutes: 3
+        run: python3 -I -B "$TOOL/actions_candidate.py" verify --work "$WORK"
+      - name: Preserve bounded safe evidence in run logs, including on failure
+        if: always() && !cancelled()
+        timeout-minutes: 1
+        run: python3 -I -B "$TOOL/actions_candidate.py" collect --work "$WORK"
