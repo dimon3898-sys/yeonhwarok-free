@@ -195,6 +195,20 @@
         "NO_SEPARATE_MANUAL_BUILD_DISPATCH_APPROVAL",
         "LIVE_RUNNER_COST_PERMISSIONS_AND_DISK_GATES_NOT_EXECUTED"
       ]
+    },
+    "VULKAN_SURFACE_PUBLICATION_PREPARATION": {
+      "status": "PASS",
+      "scope": "PUBLICATION_CONTRACT_PREPARATION_AND_SYNTHETIC_TESTS_ONLY",
+      "result": "../vulkan-surface-publish-v1/evidence/RESULT.json",
+      "newPublicationSyntheticTestsPassed": 22,
+      "existing21Reused": true,
+      "existingPassRerun": false,
+      "executionStatus": "BLOCKED_DRAFT_POLICY_NOT_AUTHORIZED",
+      "candidateRepository": "ghcr.io/dimon3898-sys/world-engine-vulkan-surface-candidates",
+      "registryWrites": 0,
+      "imageBuilt": false,
+      "imagePublished": false,
+      "gpuExecuted": false
     }
   },
   "gpuExecutionApproved": false,
@@ -234,8 +248,8 @@
       "tests": 8
     }
   },
-  "nextAction": "Preparation complete only. Obtain separate approval for default-branch workflow registration and manual candidate-only dispatch; fresh cost/permissions/overlay2 capacity gates must pass at runtime. No auto dispatch, old G2 rerun, local vfs retry or publication. Runner-local image retention needs a separate approved plan before GPU use.",
-  "nextOwner": "USER_FOR_SEPARATE_REGISTRATION_AND_DISPATCH_APPROVAL; MAINTAINER_FOR_FUTURE_SAFE_LOG_BACKUP",
+  "nextAction": "Stop after publication preparation. Obtain separate approval for candidate-package provisioning/exclusive publisher ACL and scoped Secret setup, exact skopeo policy approval, default-branch registration and manual build/publication dispatch. Existing cost/overlay2 capacity gates must pass first. Do not dispatch, build, publish, retry, delete images or run GPU now.",
+  "nextOwner": "USER_FOR_SEPARATE_POLICY_ACL_CREDENTIAL_REGISTRATION_AND_DISPATCH_APPROVAL",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -257,7 +271,7 @@
   "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
   "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "VULKAN_SURFACE_ACTIONS_PREPARATION_PASS_EXECUTION_BLOCKED_PRIOR_PASSES_PRESERVED",
+  "scope": "VULKAN_SURFACE_PUBLICATION_PREPARATION_PASS_EXECUTION_BLOCKED_PRIOR_PASSES_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "WARSceneEvidence": {
@@ -394,5 +408,19 @@
       "NO_SEPARATE_MANUAL_BUILD_DISPATCH_APPROVAL",
       "LIVE_RUNNER_COST_PERMISSIONS_AND_DISK_GATES_NOT_EXECUTED"
     ]
+  },
+  "vulkanSurfacePublicationPreparation": {
+    "status": "PASS",
+    "scope": "PUBLICATION_CONTRACT_PREPARATION_AND_SYNTHETIC_TESTS_ONLY",
+    "result": "../vulkan-surface-publish-v1/evidence/RESULT.json",
+    "newPublicationSyntheticTestsPassed": 22,
+    "existing21Reused": true,
+    "existingPassRerun": false,
+    "executionStatus": "BLOCKED_DRAFT_POLICY_NOT_AUTHORIZED",
+    "candidateRepository": "ghcr.io/dimon3898-sys/world-engine-vulkan-surface-candidates",
+    "registryWrites": 0,
+    "imageBuilt": false,
+    "imagePublished": false,
+    "gpuExecuted": false
   }
 }

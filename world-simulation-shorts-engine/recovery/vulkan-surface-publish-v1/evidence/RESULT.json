@@ -1,0 +1,84 @@
+{
+  "schema": "WORLD_ENGINE_SURFACE_PUBLICATION_PREPARATION_V1",
+  "status": "PASS",
+  "scope": "PUBLICATION_CONTRACT_PREPARATION_AND_SYNTHETIC_TESTS_ONLY",
+  "baseCommit": "2cf19ea8f06fa6a9afd9631aa6b70f823a70373e",
+  "approvedSurfaceSourceCommit": "d259e61c96e83a97a8b97e797670786a434a240d",
+  "existingBuildVerificationReuse": "Original workflow step objects and original build/packaging scripts unchanged; original21PASS reused, not rerun",
+  "candidateRepository": "ghcr.io/dimon3898-sys/world-engine-vulkan-surface-candidates",
+  "successfulRepository": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine",
+  "successfulDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+  "tagFormat": "surface-v1-d259e61c96e8-<runID>-a1",
+  "newTests": {
+    "publicationContractCasesPassed": 13,
+    "publicationControlCasesPassed": 9,
+    "distinctNewSyntheticCasesPassed": 22,
+    "existing21CasesRerun": false,
+    "targetedRepeats": "Only new controls06/07 after durable mutation-intent addition and new control01 after reproducible baseline path correction",
+    "pythonSyntaxFiles": 4,
+    "externalSubprocessesMocked": true,
+    "liveRegistryCallsInTests": false,
+    "existingSourceOrRendererTestsRun": false
+  },
+  "permissionDesign": {
+    "jobToken": "contents:read packages:read unchanged",
+    "perStepGithubPermissionsClaimed": false,
+    "writeCredential": "Dedicated publisher secrets injected only into final publication step",
+    "requiredACL": "Candidate-only package writer; cannot write/delete successful package; no delete scope; exclusive writer proof required",
+    "credentialConfigured": false,
+    "aclVerifiedLive": false
+  },
+  "digestDesign": {
+    "expectedBeforeTransfer": "SHA256 exact offline registry-ready manifest; config digest equals tested imageID; all blob and diff-ID bindings validated",
+    "preTransferRegistry": "New unique tag must be absent; original successful tag and digest-addressed body must match pinned digest",
+    "transfer": "Single skopeo copy --preserve-digests --retry-times=0",
+    "postTransferRegistry": "Digestfile, tag raw body and digest-addressed raw body must match expected digest and tested configID; original success tag unchanged",
+    "dockerImageIdEqualsRegistryDigestClaimed": false,
+    "atomicRegistryTagCreationClaimed": false
+  },
+  "failureDesign": {
+    "exclusiveStageMarkers": true,
+    "pushAttemptsMax": 1,
+    "retryCount": 0,
+    "safeIntentBeforeMutation": true,
+    "rawCredentialsOrStderrPublished": false,
+    "remoteDeleteOrRollback": false,
+    "ambiguousMutationNeverPasses": true
+  },
+  "executionReadiness": {
+    "status": "BLOCKED",
+    "checkedInPolicy": "DRAFT_NOT_AUTHORIZED",
+    "blockers": [
+      "SEPARATE_PUBLICATION_APPROVAL_AND_APPROVED_POLICY_REQUIRED",
+      "CANDIDATE_PACKAGE_PROVISIONING_AND_EXCLUSIVE_PUBLISHER_ACL_EVIDENCE_REQUIRED",
+      "STEP_ONLY_PUBLISHER_SECRETS_NOT_CONFIGURED",
+      "EXACT_SKOPEO_VERSION_FEATURES_AND_EXPORT_CAPACITY_UNVERIFIED",
+      "WORKFLOW_NOT_REGISTERED_ON_DEFAULT_BRANCH",
+      "NO_MANUAL_DISPATCH_APPROVAL",
+      "LIVE_COST_PERMISSION_OVERLAY2_CAPACITY_GATES_NOT_EXECUTED"
+    ]
+  },
+  "actualExecution": {
+    "workflowRegistered": false,
+    "workflowDispatched": false,
+    "dockerInvocations": 0,
+    "skopeoInvocations": 0,
+    "imageBuilt": false,
+    "registryWriteRequests": 0,
+    "imagePublished": false,
+    "candidateImageID": null,
+    "candidateRegistryDigest": null,
+    "gpuExecuted": false,
+    "renderExecuted": false,
+    "oldG2WorkflowRerun": false
+  },
+  "limitations": [
+    "All publication events in test logs are synthetic fixtures, not registry operations",
+    "GHCR tags are mutable; absence check alone is not compare-and-set. Namespace separation plus independent exclusive-writer ACL proof is required",
+    "No actual image layout exported, transferred or read back",
+    "Unsupported skopeo conversion/layout must BLOCK without retry",
+    "A failed transfer may leave remote objects or a tag without a verified receipt; no automatic delete or retry",
+    "Safe log receipts require later authorized Git backup before expiration",
+    "GPU initialization is NOT_RUN_NOT_CLAIMED; WAR first GPU root cause remains UNKNOWN"
+  ]
+}
