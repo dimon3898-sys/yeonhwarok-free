@@ -1,0 +1,106 @@
+{
+  "schema": "WORLD_ENGINE_VULKAN_SURFACE_LOCAL_BUILD_ATTEMPT_V1",
+  "status": "BLOCKED",
+  "reason": "BLOCKED_CAPACITY_ESTIMATE",
+  "stoppedAt": "CAPACITY_PREFLIGHT_BEFORE_PARENT_PULL_AND_CANDIDATE_BUILD",
+  "baseSourceCommit": "d259e61c96e83a97a8b97e797670786a434a240d",
+  "recordedAtUTC": "2026-10-29T05:32:08.372161+00:00",
+  "branch": "recovery/g1-capture-diagnostic-contract-20261028",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+  "candidateImageID": null,
+  "candidateTagCreated": false,
+  "parentPullAttempts": 0,
+  "localBuildAttempts": 0,
+  "retryCount": 0,
+  "preconditions": {
+    "localDockerDaemonAccess": "CONFIRMED",
+    "dockerVersion": "28.4.0",
+    "storageDriver": "vfs",
+    "buildApiAuthorization": "NOT_EXERCISED_NO_PROBE_BUILD",
+    "executionMode": "LOCAL_CPU_ONLY_NO_EXTERNAL_PAID_RUNNER",
+    "capacity": "BLOCKED_CONSERVATIVE_ESTIMATE",
+    "dataRootCapacityObservation": "HOST_VISIBLE_DOCKER_ROOT_PATH; daemon storage namespace equivalence not independently proven"
+  },
+  "capacityEvidence": {
+    "schema": "WORLD_ENGINE_SURFACE_LOCAL_CAPACITY_PREFLIGHT_V1",
+    "parentDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+    "registryManifestVerified": true,
+    "driver": "vfs",
+    "parentCached": false,
+    "layerCount": 75,
+    "compressedLayerBytes": 803628632,
+    "vfsWeightedCompressedLayerBytes": 38824812402,
+    "freeBytes": 30017409024,
+    "estimatedRequiredBytes": 163889184200,
+    "reserveBytes": 8589934592,
+    "estimateBasis": "4x cumulative compressed prefixes for vfs (otherwise 4x compressed bytes), plus 8 GiB reserve; not measured expansion",
+    "status": "BLOCKED_CAPACITY_ESTIMATE",
+    "localCpuOnly": true,
+    "externalPaidRunnerRequested": false,
+    "gpuExecuted": false,
+    "pullAttempts": 0,
+    "buildAttempts": 0,
+    "retryCount": 0
+  },
+  "sourceFile": {
+    "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+    "sha256": "f55758af58a7c8724bddc097f05586b6d4cfdfa81133fa093636e335bca171c5",
+    "status": "REUSED_EXISTING_SINGLE_OPTION_PASS_NOT_REHASHED_OR_RETESTED"
+  },
+  "newManifestPins": {
+    "runtimeManifestSHA256": null,
+    "bootstrapSHA256": null,
+    "startupManifestSHA256": null,
+    "entrypointVerification": "NOT_RUN"
+  },
+  "newChecks": [
+    {
+      "name": "LOCAL_DOCKER_DAEMON_ACCESS",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "LOCAL_IMAGE_INVENTORY",
+      "status": "PASS",
+      "exitCode": 0
+    },
+    {
+      "name": "REGISTRY_PARENT_MANIFEST_IDENTITY",
+      "status": "PASS",
+      "note": "Read-only digest-addressed metadata verification, not prior runtime tests"
+    },
+    {
+      "name": "CAPACITY_GATE",
+      "status": "BLOCKED",
+      "exitCode": 2
+    },
+    {
+      "name": "CANDIDATE_CONNECTION_VERIFICATION",
+      "status": "NOT_RUN"
+    }
+  ],
+  "existingImagePreservation": {
+    "registryWriteRequests": 0,
+    "dockerBuildPullPushPruneRemoveInvocations": 0,
+    "existingTagsModified": false,
+    "existingImageDeleted": false,
+    "parentRegistryManifestDigestMatched": true,
+    "localImageInventoryCountBefore": 0,
+    "proofScope": "READ_ONLY_PARENT_MANIFEST_AND_NO_IMAGE_MUTATION_COMMANDS; no claim that parent was locally available"
+  },
+  "priorPassSuitesRerun": false,
+  "browserLaunched": false,
+  "gpuExecuted": false,
+  "renderExecuted": false,
+  "registryPublished": false,
+  "runtimeSourceModifiedThisTask": false,
+  "packagingToolStatus": "ONLY_NEW_CAPACITY_PREFLIGHT_IMPLEMENTED; staging/build tool not advanced after blocked prerequisite",
+  "limitations": [
+    "No actual pull or build failure occurred in this task; the prerequisite estimate failed",
+    "Required capacity is a conservative estimate, not measured expanded image storage",
+    "Compressed metadata and host-visible stat cannot prove actual daemon free capacity",
+    "Do not prescribe the estimate as a mandatory physical disk size",
+    "GPU initialization remains NOT_RUN_NOT_CLAIMED"
+  ],
+  "nextAction": "Stop without retry. Environment operator must provide verified Docker storage capacity (or an appropriately configured copy-on-write Docker environment). A new build attempt requires a separate user instruction; do not change storage drivers or delete existing images in this task."
+}

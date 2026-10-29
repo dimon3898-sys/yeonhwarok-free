@@ -164,6 +164,21 @@
       "imageBuilt": false,
       "imagePublished": false,
       "imageReflection": "NOT_APPLIED_SEPARATE_AUTHORIZED_PACKAGING_REQUIRED"
+    },
+    "VULKAN_SURFACE_LOCAL_CANDIDATE_BUILD": {
+      "status": "BLOCKED",
+      "reason": "BLOCKED_CAPACITY_ESTIMATE",
+      "scope": "ONE_LOCAL_CANDIDATE_ATTEMPT_STOPPED_BEFORE_PULL_BUILD",
+      "result": "../vulkan-surface-local-build-v1/evidence/RESULT.json",
+      "sourceCommit": "d259e61c96e83a97a8b97e797670786a434a240d",
+      "candidateImageID": null,
+      "parentDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+      "pullAttempts": 0,
+      "buildAttempts": 0,
+      "retryCount": 0,
+      "existingPassRerun": false,
+      "imagePublished": false,
+      "gpuExecuted": false
     }
   },
   "gpuExecutionApproved": false,
@@ -203,8 +218,8 @@
       "tests": 8
     }
   },
-  "nextAction": "Single-option source candidate is free-CPU-verified only. GPU initialization remains unresolved. Stop here; any image packaging/pin regeneration and subsequent GPU comparison require separate authorization.",
-  "nextOwner": "MAINTAINER_FOR_SEPARATE_PACKAGING_AUTHORIZATION_THEN_USER_FOR_BOUNDED_GPU_COMPARISON",
+  "nextAction": "Stop without retry. Environment operator must provide verified Docker storage capacity (or an appropriately configured copy-on-write Docker environment). A new build attempt requires a separate user instruction; do not change storage drivers or delete existing images in this task.",
+  "nextOwner": "ENVIRONMENT_OPERATOR_FOR_DOCKER_STORAGE; USER_FOR_NEW_BUILD_ATTEMPT_AUTHORIZATION",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -226,7 +241,7 @@
   "sceneSHA256": "cbdd4f42548294157ea5cb2728819220ef2b089f81713352f7e374083b663d95",
   "sceneSHA256Reason": "Compiled WAR Scene from actual free Node execution; final source envelope hash recorded separately in WARSceneEvidence.",
   "schema": "WORLD_ENGINE_RECOVERY_CHECKPOINT_V2",
-  "scope": "VULKAN_SURFACE_SINGLE_OPTION_CPU_PASS_PRIOR_PASSES_PRESERVED",
+  "scope": "VULKAN_SURFACE_LOCAL_BUILD_BLOCKED_CAPACITY_PRIOR_PASSES_PRESERVED",
   "sourceBaseline": "478c6c33648e94f662673cab533bf14b74133f91",
   "sourceCodeCommit": "af2acfc5f0ceb7200d70a4ea668b717fa6a72d32",
   "WARSceneEvidence": {
@@ -332,5 +347,20 @@
     "imageBuilt": false,
     "imagePublished": false,
     "imageReflection": "NOT_APPLIED_SEPARATE_AUTHORIZED_PACKAGING_REQUIRED"
+  },
+  "vulkanSurfaceLocalCandidateBuild": {
+    "status": "BLOCKED",
+    "reason": "BLOCKED_CAPACITY_ESTIMATE",
+    "scope": "ONE_LOCAL_CANDIDATE_ATTEMPT_STOPPED_BEFORE_PULL_BUILD",
+    "result": "../vulkan-surface-local-build-v1/evidence/RESULT.json",
+    "sourceCommit": "d259e61c96e83a97a8b97e797670786a434a240d",
+    "candidateImageID": null,
+    "parentDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+    "pullAttempts": 0,
+    "buildAttempts": 0,
+    "retryCount": 0,
+    "existingPassRerun": false,
+    "imagePublished": false,
+    "gpuExecuted": false
   }
 }
