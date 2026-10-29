@@ -1,0 +1,95 @@
+{
+  "schema": "WORLD_ENGINE_GHCR_DISPATCH_REVIEW_BLOCK_V1",
+  "status": "BLOCKED",
+  "reason": "AUTOMATIC_APPROVAL_REVIEW_REJECTED_EXCLUSIVE_WINDOW_ATTESTATION",
+  "userConfirmation": {
+    "text": "현재 다른 PC·Codex·자동화에서 world-engine-vulkan-surface-candidates에 게시하도록 지시했거나 실행 중인 작업은 없습니다.",
+    "acceptedAs": "USER_REPORT_NO_OTHER_INSTRUCTED_OR_CURRENTLY_RUNNING_PUBLISHER",
+    "oneCopyApprovalReused": true,
+    "gpuForbidden": true
+  },
+  "bindings": {
+    "headSHA": "2df517d0bb78c210762ecf0e1ec07546c75dbce9",
+    "policySHA256": "223d6ff1834da63ac2f6e95ce9469b35f35c31faa77416bdd9f952611e7c98a6",
+    "workflowSHA256": "d01167024d188e872463ecd1a78f30c15f9733a900e2636057b490e6c3d9fa76",
+    "unchanged": true
+  },
+  "currentReadOnlyFindings": {
+    "candidateAbsentOwnerUI": {
+      "observedAtUnixMs": 1793313031829,
+      "displayedStatus": 404,
+      "proofSHA256": "0704825e2e44d2eb01029bdb1602b66b2c799b008bd88e6ab6953114af0413e7",
+      "transportStatusIndependentlyCaptured": false,
+      "sourceURL": "https://github.com/users/dimon3898-sys/packages/container/package/world-engine-vulkan-surface-candidates"
+    },
+    "successfulPackageACL": {
+      "observedAtUnixMs": 1793313030322,
+      "proofSHA256": "c72337a8f87a5da04135afe25fc0201fe1d159a6b7d664ca9fe5dc65e3d8863b",
+      "sourceRepository": "dimon3898-sys/yeonhwarok-free",
+      "globalInheritFromSource": true,
+      "actionsAccess": [
+        {
+          "repository": "dimon3898-sys/yeonhwarok-free",
+          "role": "Admin"
+        }
+      ],
+      "bootstrapLinked": false,
+      "bootstrapInheritance": false,
+      "bootstrapActionsRole": "NONE",
+      "bootstrapCanWrite": false,
+      "bootstrapCanDelete": false
+    },
+    "bootstrapRepositoryPublic": true,
+    "bootstrapActiveRuns": 0,
+    "engineInProgressRuns": 0,
+    "engineQueuedRuns": 0,
+    "proofAgeMsAtPreparation": 43416,
+    "maxProofAgeSeconds": 600,
+    "cost": "EXISTING_ACCOUNT_ZERO_BUDGET_STOP_AND_PUBLIC_STANDARD_RUNNER_EVIDENCE_REUSED",
+    "priorSkopeoVersionProof": "REUSED_NOT_RERUN",
+    "runnerPreflight": "NOT_EXECUTED_DISPATCH_BLOCKED"
+  },
+  "automaticApprovalReview": {
+    "action": "Submit Run workflow for approved one-time GHCR parent image copy",
+    "result": "REJECTED_BEFORE_BROWSER_CLICK",
+    "reason": "This submits the irreversible one-time GHCR registry mutation, but the attestation falsely upgrades “no instructed/running publisher” into confirmed namespace exclusivity; the required prerequisite is not established, so the conditional authorization does not cover this dispatch.",
+    "bypassAttempted": false,
+    "repeatAttempted": false
+  },
+  "correctiveActions": {
+    "unsubmittedOwnerInputCleared": true,
+    "draftNamespaceExclusiveWindowConfirmed": null,
+    "draftStatus": "INVALID_NOT_DISPATCHABLE",
+    "originalImagesAndTagsChanged": false
+  },
+  "actualRunReadback": {
+    "totalCount": 1,
+    "runs": [
+      {
+        "id": 40872438159,
+        "name": "WORLD ENGINE - skopeo read-only version probe",
+        "status": "completed",
+        "conclusion": "success",
+        "url": "https://github.com/dimon3898-sys/world-engine-ghcr-candidate-bootstrap/actions/runs/40872438159"
+      }
+    ],
+    "firstRegistrationRuns": 0
+  },
+  "effects": {
+    "browserDispatchSubmissions": 0,
+    "copyAttempts": 0,
+    "retries": 0,
+    "registryWrites": 0,
+    "firstRegistrationRunURL": null,
+    "candidatePackageURL": null,
+    "candidateTag": null,
+    "candidateDigest": null,
+    "gpuExecuted": false,
+    "imageBuilt": false,
+    "oldPassRerun": false,
+    "codeChanged": false,
+    "permissionsChanged": false
+  },
+  "remainingCondition": "Owner-established exclusive interval from the start of this one copy through its completion, covering other PCs, Codex sessions and automations; not merely a snapshot that no publisher is currently running.",
+  "nextAction": "Keep BLOCKED and do not retry. Request specific authorization covering that exclusive interval; never claim an unknown interval confirmed. If later authorized, refresh only expired owner observations before considering a new submission. Stop before permission handoff after eventual independently verified registration."
+}
