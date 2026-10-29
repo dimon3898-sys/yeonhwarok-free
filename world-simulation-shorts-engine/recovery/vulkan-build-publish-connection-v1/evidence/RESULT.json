@@ -1,0 +1,120 @@
+{
+  "schema": "WORLD_ENGINE_VULKAN_BUILD_PUBLISH_CONNECTION_PREPARATION_V1",
+  "status": "PASS",
+  "scope": "MINIMAL_BUILD_PUBLICATION_CONNECTION_AND_NEW_FREE_SYNTHETIC_TESTS_ONLY",
+  "baseCommit": "aca4b6d46ca2d70d715bebeb983262aebfd3cf3b",
+  "profileSourceCommit": "d259e61c96e83a97a8b97e797670786a434a240d",
+  "parentDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+  "routeDecision": {
+    "selected": "EXISTING_SEPARATE_CANDIDATE_PACKAGE_WORKFLOW",
+    "candidateRepository": "ghcr.io/dimon3898-sys/world-engine-vulkan-surface-candidates",
+    "tagFormat": "surface-v1-d259e61c96e8-<runID>-a1",
+    "requiredPublisher": "NON_OWNER_CANDIDATE_ONLY_WRITE_NO_ADMIN_NO_DELETE_SCOPE_NO_OLD_PACKAGE_WRITE_DELETE",
+    "exclusiveAutomatedWriterEvidenceRequired": true,
+    "actualACLVerified": false,
+    "sameSuccessfulPackageUniqueTagSelected": false,
+    "samePackageRejectionReason": "Package-level write can modify existing successful tags; unique tag names do not provide a separate permission boundary or atomic creation",
+    "bootstrapExpanded": false,
+    "liveProvisioningAdded": false
+  },
+  "existingConnectionReused": {
+    "workflow": ".github/workflows/world-engine-vulkan-surface-publish-candidate.yml",
+    "alreadySequencesBuildVerifyPreparePublish": true,
+    "buildWork": "surface-candidate-work",
+    "publishWork": "surface-publish-work",
+    "receipts": ["PREFLIGHT", "BUILD", "CONNECTION_VERIFY", "IMAGE_SCOPE", "STAGE_RECEIPT"],
+    "runtimeSourceFiles": 353,
+    "unchangedRuntimeRows": 352,
+    "overlayFiles": 4,
+    "newWorkflowOrFrameworkAdded": false
+  },
+  "minimalChange": {
+    "file": "../vulkan-surface-publish-v1/publish_candidate.py",
+    "insertedLines": 7,
+    "deletedLines": 0,
+    "guards": [
+      "policy_gate rejects namespace owner case-insensitively and invalid publisher usernames",
+      "prepare binds export tag to tested BUILD candidateImageID before export",
+      "publish binds REGISTRY_READY candidateImageID to current BUILD candidateImageID before credentials or mutation"
+    ],
+    "priorBehaviorQualification": "Existing config-digest validation already rejected untested exported bytes; no unobserved wrong-image publication is asserted",
+    "aliasRaceAfterNewPrecheck": "Still checked by unchanged registry-ready config digest and tested diff-ID validation",
+    "originalPublishSourceSHA256": "1776aa91ea8e2a9348294d950177e98373a8597f6714c3d5a76f6ea5374b1a41"
+  },
+  "newFreeVerification": {
+    "newCasesPassed": 10,
+    "newCasesFailed": 0,
+    "exitCode": 0,
+    "suiteExecutions": 1,
+    "retryCount": 0,
+    "log": "new-connection-tests.log",
+    "actualReceiptAndRegistryValidatorsUsed": true,
+    "dockerSkopeoRegistryEffectsMocked": true,
+    "subprocessAndNetworkCallsGuarded": true,
+    "candidateFixturesSynthetic": true,
+    "recordedPublicParentManifestReusedReadOnly": true,
+    "actualImagePublicationOrGPUProven": false
+  },
+  "priorPassReuse": {
+    "build21Reused": true,
+    "publication22Reused": true,
+    "firstRegistration14Reused": true,
+    "bootstrap23Reused": true,
+    "allOtherExistingPASSReused": true,
+    "priorPASSInvalidated": false,
+    "priorSuitesReexecuted": 0,
+    "newValidationReason": "Only newly added identity guards and the existing real-shaped receipt-to-publication seam previously mocked in controller tests"
+  },
+  "independentSourceReview": {
+    "verdict": "PASS_PREPARATION_ONLY",
+    "exactSevenLinesAcrossThreeGuards": true,
+    "noExistingSafetyControlWeakened": true,
+    "liveACLNotProvenByNewGuards": true
+  },
+  "readOnlyReadinessObserved": {
+    "recoveryHeadBefore": "aca4b6d46ca2d70d715bebeb983262aebfd3cf3b",
+    "mainHeadBefore": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3",
+    "buildOnlyCandidateWorkflowPresentOnMain": true,
+    "publicationWorkflowPresentOnMain": false,
+    "candidatePackageExistenceEstablishedThisTask": false,
+    "candidateACLOrCredentialReadinessEstablished": false
+  },
+  "preservation": {
+    "actionsCandidateAndPackagerUnchanged": true,
+    "publicationContractUnchanged": true,
+    "workflowsAndPolicyUnchanged": true,
+    "policyStatus": "DRAFT_NOT_AUTHORIZED",
+    "bootstrapArtifactsUnchanged": true,
+    "topicGPTJSONWorldEngineStructureUnchanged": true,
+    "rendererSceneCameraNativeGuardUnchanged": true,
+    "successfulImagesTagsDigestUnchangedByThisTask": true,
+    "permissionsNotExpanded": true,
+    "noAutomaticRetryAdded": true
+  },
+  "actualExecution": {
+    "status": "BLOCKED_PENDING_REAL_PERMISSION_EVIDENCE_AND_SEPARATE_APPROVAL",
+    "publicationWorkflowRegisteredByThisTask": false,
+    "workflowDispatchedByThisTask": false,
+    "dockerInvocations": 0,
+    "imageBuilds": 0,
+    "registryWrites": 0,
+    "gpuExecutions": 0,
+    "renders": 0,
+    "secretsCreated": 0,
+    "aclChanges": 0,
+    "defaultBranchChanges": 0,
+    "candidateImageID": null,
+    "candidateRegistryDigest": null,
+    "gpuInitialization": "NOT_RUN_NOT_CLAIMED"
+  },
+  "requiredApprovalAndEvidenceForOneRealRun": [
+    "Real candidate package and reviewed candidate-only normal writer ACL, without old successful-package write/delete or Admin/delete scope",
+    "Exclusive automated writer and owner-admin acknowledgment; no implicit bootstrap or permission expansion",
+    "Reviewed approved policy and skopeo version, separately provisioned final-step publisher credentials without revealing values",
+    "Approval to register the existing publication workflow on main and dispatch the exact reviewed recovery commit for build1/publication1 only",
+    "Existing build and publication approval strings plus fresh public-standard-runner zero-cost and budget confirmation",
+    "Existing live overlay2/capacity/export-space/tool-feature gates must pass; all failures preserve evidence and stop without retry"
+  ],
+  "stopAfterPreparation": true,
+  "nextGPUApprovalSeparate": true
+}

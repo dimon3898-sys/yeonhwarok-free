@@ -1,0 +1,30 @@
+--- a/world-simulation-shorts-engine/recovery/vulkan-surface-publish-v1/publish_candidate.py
++++ b/world-simulation-shorts-engine/recovery/vulkan-surface-publish-v1/publish_candidate.py
+@@ -71,6 +71,9 @@
+         and re.fullmatch('[a-f0-9]{64}', policy.get('aclEvidenceSHA256') or '')
+         and isinstance(policy.get('publisherIdentity'), str) and policy['publisherIdentity'],
+         'PUBLISHER_ACL_PROOF_REQUIRED')
++    require(re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}', policy['publisherIdentity'])
++        and policy['publisherIdentity'].lower() != 'dimon3898-sys',
++        'CANDIDATE_ONLY_NON_OWNER_PUBLISHER_REQUIRED')
+     require(isinstance(policy.get('approvedSkopeoVersion'),str) and policy['approvedSkopeoVersion'],
+         'REVIEWED_SKOPEO_VERSION_REQUIRED')
+     expected = {'GITHUB_ACTIONS':'true','GITHUB_EVENT_NAME':'workflow_dispatch',
+@@ -148,6 +151,8 @@
+     image_id=evidence['BUILD']['candidateImageID']; tag=evidence['BUILD']['candidateTag']
+     image=json.loads(command(['docker','--host=unix:///var/run/docker.sock','image','inspect',image_id]).stdout)[0]
+     require(image['Id']==image_id,'VERIFIED_LOCAL_IMAGE_CHANGED')
++    tagged=json.loads(command(['docker','--host=unix:///var/run/docker.sock','image','inspect',tag]).stdout)[0]
++    require(tagged['Id']==image_id,'BUILD_PUBLISH_TAG_NOT_TESTED_IMAGE')
+     need=2*image['Size']+2*1024**3
+     require(shutil.disk_usage(work).free>=need,'INSUFFICIENT_REGISTRY_EXPORT_CAPACITY')
+     tool=skopeo(work); anonymous=work/'private/anonymous-auth.json'
+@@ -177,6 +182,8 @@
+     ready=load(work/'evidence/REGISTRY_READY.json');require(ready.get('status')=='PASS','REGISTRY_READY_NOT_PASS')
+     require(not (build_work/'evidence/FAILURE.json').exists(),'BUILD_OR_VERIFICATION_FAILED')
+     evidence=receipts(build_work);contract.validate_evidence(evidence,reviewed_head=os.environ['GITHUB_SHA'])
++    require(ready['candidateImageID']==evidence['BUILD']['candidateImageID'],
++        'PUBLISH_READY_BUILD_CONNECTION_CHANGED')
+     require(digest(json.dumps(evidence,sort_keys=True,separators=(',',':')).encode())==ready['evidenceSHA256'],'VALIDATION_RECEIPTS_CHANGED')
+     destination=contract.validate_destination(ready['destination'],os.environ['GITHUB_RUN_ID'],1,os.environ['GITHUB_SHA'])
+     tool=skopeo(work);layout=work/'registry-ready'
