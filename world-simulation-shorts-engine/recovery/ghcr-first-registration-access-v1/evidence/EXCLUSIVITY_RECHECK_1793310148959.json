@@ -1,0 +1,113 @@
+{
+  "schema": "WORLD_ENGINE_GHCR_EXCLUSIVITY_RECHECK_V1",
+  "status": "BLOCKED",
+  "reason": "EXTERNAL_INDEPENDENT_PUBLISHERS_NOT_EXCLUDED",
+  "scope": "CURRENT_OWNER_ABSENCE_AND_VISIBLE_ACTIONS_READ_ONLY_NO_EXECUTION",
+  "userStatement": {
+    "noOtherPublisherInstructedForThisTask": true,
+    "independentExternalPublishersAbsenceConfirmed": false,
+    "copyAuthorization": "EXISTING_ONE_COPY_APPROVAL_CONDITIONAL_ON_CONFIRMED_EXCLUSIVITY",
+    "gpuAuthorization": false
+  },
+  "reviewedRecoveryHeadSHA": "04de96ba9abaa40a52b0359b59486025e133ff71",
+  "bindings": {
+    "bootstrapRepository": "dimon3898-sys/world-engine-ghcr-candidate-bootstrap",
+    "headSHA": "2df517d0bb78c210762ecf0e1ec07546c75dbce9",
+    "policySHA256": "223d6ff1834da63ac2f6e95ce9469b35f35c31faa77416bdd9f952611e7c98a6",
+    "workflowSHA256": "d01167024d188e872463ecd1a78f30c15f9733a900e2636057b490e6c3d9fa76",
+    "headUnchanged": true
+  },
+  "reusedEvidence": "OWNER_UI_ACCESS_OBSERVATIONS.json",
+  "recheckReason": "The prior candidate-absence observation was older than the existing 600-second freshness limit. User explicitly requested a current absence/concurrency check. No prior PASS test was rerun.",
+  "candidateAbsence": {
+    "status": "404_VISIBLE_IN_AUTHENTICATED_OWNER_SESSION",
+    "observedAtUnixMs": 1793310148959,
+    "sourceURL": "https://github.com/users/dimon3898-sys/packages/container/package/world-engine-vulkan-surface-candidates",
+    "displayedText": "404 “This is not the web page you are looking for”",
+    "displayedStatusCode": 404,
+    "transportStatusIndependentlyCaptured": false,
+    "currentSessionReused": true,
+    "scope": "POINT_IN_TIME_ABSENCE_ONLY"
+  },
+  "actionsObservations": [
+    {
+      "kind": "bootstrapRuns",
+      "url": "https://api.github.com/repos/dimon3898-sys/world-engine-ghcr-candidate-bootstrap/actions/runs?per_page=100",
+      "observedAtUnixMs": 1793310143684,
+      "totalCount": 1,
+      "runs": [
+        {
+          "id": 40872438159,
+          "name": "WORLD ENGINE - skopeo read-only version probe",
+          "status": "completed",
+          "conclusion": "success",
+          "event": "workflow_dispatch",
+          "headSHA": "9dd2eac49dc3cd98adb9186e05b1bb97eaffd197",
+          "attempt": 1,
+          "url": "https://github.com/dimon3898-sys/world-engine-ghcr-candidate-bootstrap/actions/runs/40872438159"
+        }
+      ]
+    },
+    {
+      "kind": "originalInProgress",
+      "url": "https://api.github.com/repos/dimon3898-sys/yeonhwarok-free/actions/runs?status=in_progress&per_page=100",
+      "observedAtUnixMs": 1793310143684,
+      "totalCount": 0,
+      "runs": []
+    },
+    {
+      "kind": "originalQueued",
+      "url": "https://api.github.com/repos/dimon3898-sys/yeonhwarok-free/actions/runs?status=queued&per_page=100",
+      "observedAtUnixMs": 1793310143685,
+      "totalCount": 0,
+      "runs": []
+    }
+  ],
+  "observedActivityConclusion": "Bootstrap has only one completed historical skopeo probe and no first-registration execution. Existing engine repository has zero in_progress and zero queued runs at the recorded observation times.",
+  "limits": [
+    "Actions reads cover only the two named repositories and the recorded status filters; they are not an account-wide publisher inventory.",
+    "External PC/PAT/GitHub App/other repository publishers are not excluded by the observed absence.",
+    "Point-in-time absence cannot establish an exclusive interval through copy completion.",
+    "The existing workflow concurrency group serializes its dispatches; it is not a namespace-wide lock.",
+    "No atomic namespace reservation is supplied by the existing registration client."
+  ],
+  "contractEvidence": [
+    {
+      "path": ".github/workflows/world-engine-ghcr-first-registration.yml",
+      "commit": "2df517d0bb78c210762ecf0e1ec07546c75dbce9",
+      "lines": "35-39",
+      "observedText": "Candidate absence and the owner's exclusive namespace window remain mandatory."
+    },
+    {
+      "path": "README.txt",
+      "commit": "2df517d0bb78c210762ecf0e1ec07546c75dbce9",
+      "lines": "58-59",
+      "requirement": "exclusive namespace window with no concurrent external publisher"
+    },
+    {
+      "path": "tools/bootstrap_registration.py",
+      "commit": "2df517d0bb78c210762ecf0e1ec07546c75dbce9",
+      "lines": "171-172",
+      "requirement": "namespaceExclusiveWindowConfirmed is True",
+      "assessment": "Cannot truthfully populate true from available evidence or the user's limited declaration."
+    }
+  ],
+  "namespaceExclusiveWindowConfirmed": null,
+  "dispatchDecision": "NOT_DISPATCHED_USER_CONDITION_NOT_MET",
+  "effects": {
+    "firstRegistrationRunURL": null,
+    "candidateTag": null,
+    "candidateDigest": null,
+    "copyAttempts": 0,
+    "retries": 0,
+    "registryWrites": 0,
+    "imageBuilds": 0,
+    "gpuExecutions": 0,
+    "oldPassReruns": 0,
+    "codeChanges": 0,
+    "settingsChanges": 0,
+    "permissionsChanged": 0
+  },
+  "nextRequiredEvidence": "An owner-established interval excluding all other publishers to this candidate namespace, including independently configured external publishers. A repeated 404 or another empty run list will not resolve this blocker.",
+  "nextAction": "Remain BLOCKED. Resume only when that exclusive interval is established; then refresh only expired live absence/access observations and use the existing single-copy approval. No retry or permission bypass."
+}
