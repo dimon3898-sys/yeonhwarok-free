@@ -1,0 +1,92 @@
+name: WORLD ENGINE - isolated GHCR first registration
+
+on:
+  workflow_dispatch:
+    inputs:
+      approval:
+        description: Exact separately approved FIRST_REGISTER_CANDIDATE_PARENT_COPY_ONCE
+        required: true
+        type: string
+      reviewed_head:
+        description: Reviewed bootstrap repository commit SHA (40 lowercase hex)
+        required: true
+        type: string
+      policy_sha256:
+        description: Reviewed BOOTSTRAP_POLICY.json SHA256 (64 lowercase hex)
+        required: true
+        type: string
+      zero_cost_confirmed:
+        description: Fresh confirmation of zero cost for this public standard runner
+        required: true
+        default: false
+        type: boolean
+      budget_stop_confirmed:
+        description: Applicable account budget stop control is confirmed
+        required: true
+        default: false
+        type: boolean
+      owner_attestation:
+        description: Non-secret owner evidence JSON; see README.txt (maximum 8KB)
+        required: true
+        type: string
+
+permissions: {}
+
+# Serializes different dispatches; never cancels an in-progress registry mutation.
+# Candidate absence and the owner's exclusive namespace window remain mandatory.
+concurrency:
+  group: world-engine-candidate-first-registration
+  cancel-in-progress: false
+
+jobs:
+  first-registration:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository == 'dimon3898-sys/world-engine-ghcr-candidate-bootstrap' &&
+      github.ref == 'refs/heads/main' &&
+      github.actor == 'dimon3898-sys' &&
+      github.triggering_actor == 'dimon3898-sys' &&
+      github.run_attempt == 1 &&
+      inputs.approval == 'FIRST_REGISTER_CANDIDATE_PARENT_COPY_ONCE' &&
+      inputs.reviewed_head == github.sha &&
+      inputs.zero_cost_confirmed == true &&
+      inputs.budget_stop_confirmed == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # GitHub grants permissions per job, not per step. Only this isolated
+    # bootstrap job has packages:write; the original repository is never a caller.
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Read exactly the reviewed bootstrap commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+          submodules: false
+          lfs: false
+
+      - name: Check draft policy, owner evidence, parent and free execution gates
+        run: >-
+          python3 -I -B tools/bootstrap_registration.py preflight
+          --policy BOOTSTRAP_POLICY.json
+          --workflow .github/workflows/world-engine-ghcr-first-registration.yml
+          --evidence-dir "$RUNNER_TEMP/world-engine-ghcr-bootstrap"
+
+      - name: One separately approved immutable parent copy and provisional readback
+        env:
+          GHCR_BOOTSTRAP_TOKEN: ${{ github.token }}
+        run: >-
+          python3 -I -B tools/bootstrap_registration.py register
+          --policy BOOTSTRAP_POLICY.json
+          --workflow .github/workflows/world-engine-ghcr-first-registration.yml
+          --evidence-dir "$RUNNER_TEMP/world-engine-ghcr-bootstrap"
+
+# No push/PR/schedule/workflow_call triggers, builds, installs, caches, artifacts,
+# repository writes, registry cleanup, automatic retries or normal publication.
+# The client flushes bounded safe intent/outcome receipts to the run log.
