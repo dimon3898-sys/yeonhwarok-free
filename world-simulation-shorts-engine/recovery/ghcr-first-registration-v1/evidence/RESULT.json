@@ -1,0 +1,80 @@
+{
+  "schema": "WORLD_ENGINE_GHCR_FIRST_REGISTRATION_PREPARATION_V1",
+  "status": "PASS",
+  "scope": "SEPARATE_FIRST_REGISTRATION_CONTRACT_ONLY_NOT_PACKAGE_CREATION",
+  "baseCommit": "c0e72af3adad760a5f3742b7d51ac3cc1d69278b",
+  "githubPermissionBasis": {
+    "tokenScope": "Dedicated bootstrap repository own GITHUB_TOKEN is repository-scoped",
+    "oldPackageBoundary": "Existing success package must have no link, inheritance or Actions write/admin grant to bootstrap repository, established read-only before/after",
+    "firstCreation": "GHCR first publication creates package; new package defaults private and workflow publication auto-links repository, but actual linkage must be read back",
+    "newPackageAdmin": "Bootstrap publisher can obtain admin on NEWcandidate; acknowledged, never described as absence of candidate delete capability",
+    "normalHandoff": "Candidate granular ACL after creation, disable inheritance/bootstrap access, wait completed job/token expiry; normal publisher non-owner Write-only, no old-package rights; owner admins explicitly acknowledged",
+    "emptyPackageCreationApi": "Not found in official documented Packages API; do not invent an endpoint"
+  },
+  "design": {
+    "bootstrapRepository": "dimon3898-sys/world-engine-ghcr-candidate-bootstrap",
+    "candidatePackage": "ghcr.io/dimon3898-sys/world-engine-vulkan-surface-candidates",
+    "seedSourceDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+    "seedTagFormat": "bootstrap-parent-9378a86d8134-<runID>-a1",
+    "seedIsVulkanCandidate": false,
+    "seedMethod": "Future separately approved exact-parent registry copy; no rebuild/relabel/digest change",
+    "normalPublisherAutomaticallyEnabled": false,
+    "bootstrapWorkflowOrClientImplemented": false
+  },
+  "newSyntheticEvidence": {
+    "distinctCasesPassed": 14,
+    "testExecutionCompletedBeforeRecoverySteering": true,
+    "targetedHardeningLogs": [
+      "registration-owner-proof-tests.log",
+      "registration-binding-proof-tests.log"
+    ],
+    "testsRerunDuringRecovery": 0,
+    "oldPassSuitesRerun": false,
+    "externalEffectsInTests": false
+  },
+  "preservedSourceSHA256": {
+    "registration_contract.py": "16287be23c51d9964992e92cebf6203b8c49d343a7f82a219af34a2a6604bd00",
+    "test_registration_contract.py": "a265af36f1317545cfe73eec61887b3acae69e98da0b69dc154dce31a2db90d1"
+  },
+  "executionStatus": "BLOCKED_DRAFT_POLICY_AND_REAL_PERMISSION_EVIDENCE_NOT_PROVIDED",
+  "liveBlockers": [
+    "DEDICATED_BOOTSTRAP_REPOSITORY_NOT_PROVISIONED_OR_VERIFIED",
+    "AUTHORITATIVE_OWNER_PACKAGE_ABSENCE_AND_OLD_PACKAGE_ACL_EXCLUSION_REQUIRED",
+    "SEPARATE_FIRST_PARENT_COPY_APPROVAL_REQUIRED",
+    "REVIEWED_MANUAL_BOOTSTRAP_WORKFLOW_AND_COST_TOOL_PERMISSIONS_REQUIRED",
+    "CREATED_PACKAGE_ASSOCIATION_PRIVATE_VISIBILITY_AND_DIGEST_RECEIPTS_NOT_AVAILABLE",
+    "BOOTSTRAP_TOKEN_EXPIRY_DISABLED_WORKFLOW_AND_NORMAL_ACL_HANDOFF_NOT_AVAILABLE"
+  ],
+  "existingCodePreservation": {
+    "publisherPolicyUnchanged": true,
+    "publicationCodeUnchanged": true,
+    "allExistingWorkflowAndImageCodeUnchanged": true,
+    "old21And22PASSReused": true
+  },
+  "actualEffects": {
+    "newRepositoryCreated": false,
+    "packageCreated": false,
+    "secretCreated": false,
+    "defaultBranchChanged": false,
+    "actionsDispatched": false,
+    "dockerExecuted": false,
+    "imageBuilt": false,
+    "registryWrites": 0,
+    "gpuExecuted": false
+  },
+  "references": [
+    "https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry",
+    "https://docs.github.com/en/actions/concepts/security/github_token",
+    "https://docs.github.com/en/packages/managing-github-packages-using-github-actions-workflows/publishing-and-installing-a-package-with-github-actions",
+    "https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility",
+    "https://docs.github.com/en/actions/reference/workflows-and-actions/reusing-workflow-configurations",
+    "https://docs.github.com/en/rest/packages/packages"
+  ],
+  "limitations": [
+    "Proof validators consume declared evidence; they do not independently query GitHub or grant permissions",
+    "Current draft is not executable and does not loosen the existing normal policy",
+    "The initial seed is the unchanged old parent, not the Vulkan candidate",
+    "Unknown or unauthorized404 never proves package absence",
+    "Actual GitHub ACLs and live package creation eligibility remain unverified"
+  ]
+}
