@@ -96,7 +96,7 @@ def comparison():
 
 def review_d9_exception():
     """Read-only exception readiness. Never authorizes registry publication."""
-    backup = module(REL / 'label-packaging-v1/backup_build_evidence.py', 'backup_reused')
+    backup = module(Path('label355-safe-evidence') / REL / 'label-packaging-v1/backup_build_evidence.py', 'backup_review_pinned')
     names = ('PREFLIGHT.json', 'INSTALLED_RESULT.json', 'OCI_RESULT.json', 'BUILD_RESULT.json', 'IMAGE_CONFIG_SAFE.json')
     receipts = {name: backup.safe_evidence_bytes(name, (BUILT / name).read_bytes()) for name in names}
     current = receipts['BUILD_RESULT.json']['imageId']
