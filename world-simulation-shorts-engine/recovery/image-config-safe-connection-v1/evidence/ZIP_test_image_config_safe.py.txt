@@ -1,0 +1,27 @@
+import copy, unittest
+from image_config_safe import *
+ID='sha256:'+'a'*64
+BASE={'Id':ID,'Config':{'Entrypoint':['/usr/bin/tini'],'Cmd':None,'User':'0','Env':['SECRET=do-not-export']},'RootFS':{'Type':'layers','Layers':['sha256:'+'b'*64]},'Os':'linux','Architecture':'amd64'}
+class Test(unittest.TestCase):
+ def test_produce(self):
+  d=produce([BASE],ID,PARENT);self.assertEqual(validate(d),d);self.assertNotIn('SECRET',str(d))
+ def test_missing_parent(self):
+  with self.assertRaises(ValueError):produce([BASE],ID,'')
+ def test_wrong_id(self):
+  with self.assertRaises(ValueError):produce([BASE],'sha256:'+'c'*64,PARENT)
+ def test_extra_field(self):
+  d=produce([BASE],ID,PARENT);d['Env']='secret'
+  with self.assertRaises(ValueError):validate(d)
+ def test_wrong_layers(self):
+  d=produce([BASE],ID,PARENT);d['rootfsDiffIDs']=[]
+  with self.assertRaises(ValueError):validate(d)
+ def test_bad_boolean(self):
+  d=produce([BASE],ID,PARENT);d['gpuExecuted']=0
+  with self.assertRaises(ValueError):validate(d)
+ def test_duplicate(self):
+  with self.assertRaises(ValueError):parse(b'{"x":1,"x":2}')
+ def test_nonfinite(self):
+  with self.assertRaises(ValueError):parse(b'{"x":NaN}')
+ def test_oversize(self):
+  with self.assertRaises(ValueError):parse(b' '*131073)
+if __name__=='__main__':unittest.main()

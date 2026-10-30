@@ -1,0 +1,10 @@
+WORLD ENGINE — CODEX ONE-STAGE HANDOFF
+TARGET: review/label355-runner-temp-static-fix-20261030 (nontriggering review branch)
+REPO: dimon3898-sys/yeonhwarok-free
+PRECONDITION: Read CHECKPOINT.json and existing evidence; skip all existing PASS.
+FIRST INCOMPLETE: producer image_config_safe.py not committed to safe branch.
+COPY only image_config_safe.py to world-simulation-shorts-engine/recovery/label-packaging-v1/image_config_safe.py.
+Existing backup_build_evidence.py on safe branch already contains IMAGE_CONFIG_SAFE schema; do not repeat its implementation.
+Validate only new producer-to-existing-consumer contract on safe branch, checking strict fields, bounds, sensitive-data exclusions, parent provenance requirement, and no overwrites. Prior local 9/9 and contract 11/11 PASS are evidence; do not rerun unless new differences invalidate them. If tests need changing, state why and minimal scope.
+Preserve focused evidence, SHA256, CHECKPOINT and exact remote readback. No push to triggering recovery/label355-build-only-draft-20261030; no Actions, image build, GHCR, GPU, main edits, retries.
+Stop on HEAD change, mismatch, or blocked tool access. Report actual PASS/BLOCKED, SHA, commit, new evidence and next first incomplete step.
