@@ -1,5 +1,5 @@
 name: WORLD ENGINE label355 candidate build DRAFT (disabled)
-# Isolated, non-executable candidate workflow. No GHCR publication or GPU.
+# No automatic trigger, no GHCR push, no GPU. Explicitly disabled pending gates.
 on:
   workflow_dispatch:
 permissions:
@@ -9,38 +9,58 @@ concurrency:
   cancel-in-progress: false
 jobs:
   candidate-build:
-    # Deliberately disabled: live cost/allowance and capacity evidence plus reviewed
-    # installed-image verifier are missing. Never remove without a separate gate.
     if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      BASE_SHA: 9693132920bb269b6b6fefa1ed5ecd1e9e7e3237
       PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
       PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
+      VERIFIER: world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
+      ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.BASE_SHA }}
           persist-credentials: false
-      - name: Fail closed on unapproved billing gate
+      - name: BLOCKED until fresh cost and capacity approval
         run: |
-          echo "BLOCKED: fresh billing/allowance attestation required"
+          echo "BLOCKED: live account allowance and exact-parent Docker capacity must be proven before pull"
           exit 1
-      # Only after billing gate approval: use the proven G2 preflight pattern
-      # (registry manifest compressed bytes * 4 + 8GiB reserve, DockerRootDir free
-      # measured on this runner, fixed parent digest verified before any pull).
-      - name: Prepare exact 355-source context without rebuilding prior PASS
+      # After approval only: reuse proven G2 preflight method with current
+      # parent digest and measured daemon free space, not historical numbers.
+      - name: Prepare exact 355-source context
         if: ${{ false }}
         run: |
           python3 -B "$PKG" prepare --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/label355-context"
           python3 -B "$PKG" verify --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/label355-context"
-      - name: One candidate pull and offline build only
+      - name: One pull and one offline candidate build
         if: ${{ false }}
         run: |
           docker pull "$PARENT"
           docker build --network none --pull=false -t world-engine-label355:unpublished "$RUNNER_TEMP/label355-context"
-      # Installed-image verification remains unimplemented: DO NOT enable the
-      # build until an actual verifier checks all 355 hashes, OCI entrypoint,
-      # bootstrap chain and UID1000 file access and preserves evidence.
-      # No docker login/push, registry writes, GPU, or main branch mutations.
+      - name: Inspect OCI config and exact ENTRYPOINT before container validation
+        if: ${{ false }}
+        run: |
+          docker image inspect world-engine-label355:unpublished > "$RUNNER_TEMP/label355-oci.json"
+          python3 - <<'PY'
+          import json,os
+          p=json.load(open(os.environ['RUNNER_TEMP']+'/label355-oci.json'))[0]
+          e=json.load(open('world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json'))
+          c=p['Config']
+          assert c['Entrypoint']==e['entrypoint'],'OCI_ENTRYPOINT_MISMATCH'
+          assert c.get('Cmd') is None,'OCI_CMD_CHANGED'
+          assert c.get('User') in ('','0','root','0:0'),'OCI_USER_CHANGED'
+          print('OCI_DECLARED_CONFIG_MATCH')
+          PY
+      - name: Verify 355 installed files and UID1000 without GPU
+        if: ${{ false }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/label355-evidence"
+          chmod 0777 "$RUNNER_TEMP/label355-evidence"
+          docker run --rm --network none --read-only --user 1000:1000 \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/$VERIFIER,dst=/verify.py,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json,dst=/expected.json,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/label355-evidence,dst=/evidence" \
+            --entrypoint /usr/bin/python3 world-engine-label355:unpublished \
+            -I -B /verify.py --root "$ROOT" --expected /expected.json --out /evidence/INSTALLED_RESULT.json
+      # Before enabling: implement bounded evidence preservation even on failure.
+      # No docker login, docker push, registry write, GPU, retry, or main change.
