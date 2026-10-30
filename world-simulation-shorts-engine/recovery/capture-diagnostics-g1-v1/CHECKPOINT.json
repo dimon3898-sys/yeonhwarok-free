@@ -481,6 +481,25 @@
       "retryCount": 0,
       "oldPASSSuitesRerun": false,
       "gpuExecuted": false
+    },
+    "LABEL355_RUNNER_TEMP_STATIC_FIX_PREPARED_20261030": {
+      "status": "PASS",
+      "scope": "SINGLE_RUNNER_TEMP_CONTEXT_FIX_STATIC_ONLY_SAFE_BRANCH",
+      "sourceCommit": "7efe029da0c372e97f376e9f332d01aad723d0fc",
+      "safeBranch": "review/label355-runner-temp-static-fix-20261030",
+      "targetBranch": "recovery/label355-build-only-draft-20261030",
+      "result": "../runner-temp-context-fix-v1/evidence/RESULT.json",
+      "actionlintVersion": "1.7.12",
+      "actionlintExitCode": 0,
+      "yamlSyntax": "PASS",
+      "changedShellSyntax": "PASS",
+      "appliedToExecutionBranch": false,
+      "executionGate": "BLOCKED_FIXED_BEFORE_HEAD_CONFLICT",
+      "existingPASSReexecuted": false,
+      "actionsExecuted": 0,
+      "imageBuilds": 0,
+      "ghcrWrites": 0,
+      "gpuRuns": 0
     }
   },
   "gpuExecutionApproved": false,
@@ -520,7 +539,7 @@
       "tests": 8
     }
   },
-  "nextAction": "Correct only the DOCKER_CONFIG job-env reference using RUNNER_TEMP inside a step, then validate GitHub Actions expression contexts before any separately authorized new dispatch. Preserve source af934796 and all old PASS evidence. Do not rerun this failed Actions run or start an alternate build automatically.",
+  "nextAction": "Stop after safe-branch preservation only. Job-env runner.temp is removed in review/label355-runner-temp-static-fix-20261030, with step-local RUNNER_TEMP export and path-only GITHUB_ENV propagation; actionlint/YAML/bash syntax PASS. Execution target recovery/label355-build-only-draft-20261030 is untouched at7efe029d. Fixed github.event.before07ba1ad... conflicts with current targetHEAD and is unchanged; target integration/new execution requires a separate gate decision. No merge/push to target, rerun41024915935, Actions, image build, GHCR or GPU. All lockedPASS reused.",
   "nextOwner": "CODEX_AFTER_EXPLICIT_RESUME",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
@@ -1010,5 +1029,24 @@
     "evidenceDirectory": "world-simulation-shorts-engine/recovery/label355-publication-v1/evidence/actions-41024915935",
     "result": "world-simulation-shorts-engine/recovery/label355-publication-v1/evidence/actions-41024915935/RESULT.json",
     "liveGatesExecuted": false
+  },
+  "runnerTempStaticFixPrepared": {
+    "status": "PASS",
+    "scope": "SINGLE_RUNNER_TEMP_CONTEXT_FIX_STATIC_ONLY_SAFE_BRANCH",
+    "sourceCommit": "7efe029da0c372e97f376e9f332d01aad723d0fc",
+    "safeBranch": "review/label355-runner-temp-static-fix-20261030",
+    "targetBranch": "recovery/label355-build-only-draft-20261030",
+    "result": "../runner-temp-context-fix-v1/evidence/RESULT.json",
+    "actionlintVersion": "1.7.12",
+    "actionlintExitCode": 0,
+    "yamlSyntax": "PASS",
+    "changedShellSyntax": "PASS",
+    "appliedToExecutionBranch": false,
+    "executionGate": "BLOCKED_FIXED_BEFORE_HEAD_CONFLICT",
+    "existingPASSReexecuted": false,
+    "actionsExecuted": 0,
+    "imageBuilds": 0,
+    "ghcrWrites": 0,
+    "gpuRuns": 0
   }
 }

@@ -1,0 +1,21 @@
+--- .github/workflows/world-engine-label355-build-only-DRAFT.yml@7efe029d
++++ .github/workflows/world-engine-label355-build-only-DRAFT.yml@safe-static-fix
+@@ -23,7 +23,6 @@
+     runs-on: ubuntu-24.04
+     timeout-minutes: 30
+     env:
+-      DOCKER_CONFIG: ${{ runner.temp }}/label355-docker-auth
+       PUBLISHER: label355-control/world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
+       PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+       PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
+@@ -89,8 +88,10 @@
+         env:
+           GHCR_JOB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         run: |
++          export DOCKER_CONFIG="$RUNNER_TEMP/label355-docker-auth"
+           mkdir -p "$DOCKER_CONFIG"
+           chmod 0700 "$DOCKER_CONFIG"
++          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
+           printf '%s' "$GHCR_JOB_TOKEN" | docker --host=unix:///var/run/docker.sock login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+           python3 -B "$PUBLISHER" preflight
+       - name: Apply current user billing confirmation

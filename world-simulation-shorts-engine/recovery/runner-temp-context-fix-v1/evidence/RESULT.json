@@ -1,0 +1,92 @@
+{
+  "schema": "WORLD_ENGINE_RUNNER_TEMP_SINGLE_STATIC_FIX_RESULT_V1",
+  "status": "PASS",
+  "scope": "STATIC_FIX_PREPARED_ON_NONTRIGGERING_BRANCH_ONLY_NOT_GHCR_PUBLICATION_PASS",
+  "dateAsiaSeoul": "2026-10-30",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "sourceCommit": "7efe029da0c372e97f376e9f332d01aad723d0fc",
+  "failedWorkflowCommit": "bf00c12a171ccdc8d3dd68b0f736b0f0157431d9",
+  "failedRun": 41024915935,
+  "failedRunAttempt": 1,
+  "failedRunReexecuted": false,
+  "targetBranch": "recovery/label355-build-only-draft-20261030",
+  "safeBranch": "review/label355-runner-temp-static-fix-20261030",
+  "targetBranchUpdated": false,
+  "changedWorkflow": ".github/workflows/world-engine-label355-build-only-DRAFT.yml",
+  "singleDefect": {
+    "line": 26,
+    "column": 22,
+    "error": "Unrecognized named-value: runner in job-level env",
+    "removed": "DOCKER_CONFIG: ${{ runner.temp }}/label355-docker-auth",
+    "addedToFirstAuthStep": [
+      "export DOCKER_CONFIG=\"$RUNNER_TEMP/label355-docker-auth\"",
+      "printf 'DOCKER_CONFIG=%s\\n' \"$DOCKER_CONFIG\" >> \"$GITHUB_ENV\""
+    ],
+    "existingMkdirAndChmod0700Retained": true,
+    "credentialsWrittenToGITHUB_ENV": false,
+    "laterDockerAuthenticationPathPreserved": true,
+    "noExistingDedicatedCleanupStep": true,
+    "noCleanupPolicyAdded": true
+  },
+  "staticVerification": {
+    "yamlSyntax": "PASS",
+    "githubActionsContext": "PASS",
+    "actionlintVersion": "1.7.12",
+    "actionlintExitCode": 0,
+    "externalShellcheckPyflakes": "DISABLED_NOT_INSTALLED_OR_REQUIRED_FOR_SINGLE_CONTEXT_DEFECT",
+    "changedAuthScriptBashSyntaxExitCode": 0,
+    "allOtherParsedWorkflowFieldsAndStepsUnchanged": true,
+    "triggerAuditWorkflows": 56,
+    "triggerAuditPushWorkflows": 53,
+    "safeBranchMatches": 0,
+    "createOrOtherAutomaticTriggers": 0
+  },
+  "executionGate": {
+    "schema": "WORLD_ENGINE_RUNNER_TEMP_EXECUTION_GATE_REVIEW_V1",
+    "status": "BLOCKED",
+    "reason": "FIXED_GITHUB_EVENT_BEFORE_CONFLICTS_WITH_CURRENT_TARGET_HEAD",
+    "requiredBefore": "07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4",
+    "currentTargetHead": "7efe029da0c372e97f376e9f332d01aad723d0fc",
+    "ifNextDirectPushBefore": "7efe029da0c372e97f376e9f332d01aad723d0fc",
+    "conditionWouldMatch": false,
+    "conditionEdited": false,
+    "targetBranch": "recovery/label355-build-only-draft-20261030",
+    "safeBranch": "review/label355-runner-temp-static-fix-20261030",
+    "targetPushOrMergeAuthorized": false,
+    "actionsDispatchAuthorized": false,
+    "scope": "READ_ONLY_SEPARATE_EXECUTION_GATE_NOT_STATIC_FIX_FAILURE",
+    "nextAction": "Stop on safe static branch. A separate execution-gate decision must review the fixed-before condition before any target integration or new run; do not change it in this task."
+  },
+  "lockedPass": {
+    "existingPASSGatesPreserved": 20,
+    "oldSuitesReexecuted": 0,
+    "sourceAndRenderCodeChanged": false,
+    "labelAnd10sAnd355PackagingAnd102And23Reused": true,
+    "actual355ImageBuildAndInstalledVerificationReused": true,
+    "existingSuccessfulImagesTagsDigestsUnchanged": true
+  },
+  "effects": {
+    "actionsExecuted": 0,
+    "dispatches": 0,
+    "workflowReruns": 0,
+    "imageBuilds": 0,
+    "ghcrWrites": 0,
+    "gpuRuns": 0,
+    "mainEdits": 0,
+    "targetBranchPushes": 0,
+    "targetBranchMerges": 0
+  },
+  "evidence": {
+    "staticResult": "STATIC_RESULT.json",
+    "diff": "WORKFLOW_CHANGE.patch",
+    "actionlintLog": "actionlint.log",
+    "shellSyntaxLog": "bash-syntax.log",
+    "safeBranchTriggers": "TRIGGER_AUDIT.json",
+    "executionGate": "EXECUTION_GATE.json",
+    "toolIdentity": "TOOL_RECEIPT.json",
+    "sha256": "SHA256_MANIFEST.json"
+  },
+  "firstIncompleteStage": "SEPARATE_EXECUTION_GATE_BEFORE_TARGET_INTEGRATION",
+  "stoppedAt": "FIXED_BEFORE_HEAD_CONFLICT_RECORDED_AFTER_STATIC_VALIDATION_NO_TARGET_EXECUTION",
+  "nextAction": "Review the fixed github.event.before and target integration in a separate execution gate. Do not alter it, merge/push target, rerun the failed run, or publish/build in this task."
+}
