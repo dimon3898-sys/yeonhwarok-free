@@ -102,7 +102,7 @@ export function validateExecutionPermit({plan,planWire,approval,packageWire,expe
  let parsedPlan,parsedRuntime;try{parsedPlan=JSON.parse(planText);parsedRuntime=JSON.parse(packageText);}catch{throw Error('HANDOFF_EXECUTION_JSON_INVALID');}
  check(canonicalJSON(parsedPlan)===canonicalJSON(plan),'HANDOFF_PLAN_WIRE_CHANGED');
  check(hex(expectedPlanSHA256)&&sha(planWire)===expectedPlanSHA256&&approval.planSHA256===expectedPlanSHA256,'HANDOFF_APPROVED_PLAN_SHA_MISMATCH');
- check(plan.schema===PLAN_SCHEMA&&plan.durationSeconds===6&&plan.totalFrames===180&&plan.fps===30&&plan.aspectRatio==='9:16'&&canonicalJSON(plan.resolution)==='{"height":1920,"width":1080}','HANDOFF_SIX_SECOND_PLAN_REQUIRED');
+ check(plan.schema===PLAN_SCHEMA&&[6,10].includes(plan.durationSeconds)&&plan.totalFrames===plan.durationSeconds*30&&plan.fps===30&&plan.aspectRatio==='9:16'&&canonicalJSON(plan.resolution)==='{"height":1920,"width":1080}','HANDOFF_SIX_SECOND_PLAN_REQUIRED');
  check(canonicalJSON(plan.audioSettings)==='{"enabled":false,"mode":"SILENT"}'&&['GENERAL','FICTIONAL'].includes(plan.simulationType),'HANDOFF_NONHISTORICAL_SILENT_SCOPE_REQUIRED');
  const render=plan.renderProfile;
  check(plain(render)&&render.profileId===PROFILE&&render.backend==='vulkan'&&hex(render.sourceClosureSHA256)&&digest(render.imageDigest),'HANDOFF_NVIDIA_RENDER_PROFILE_REQUIRED');
@@ -116,10 +116,10 @@ export function validateExecutionPermit({plan,planWire,approval,packageWire,expe
  const cost=money(approval.maxCostAmount),rate=money(approval.gpuHourlyRate);
  check(BigInt(approval.maxWallSeconds)*rate<=cost*3600n,'HANDOFF_GPU_COST_LIMIT_EXCEEDED');
  check(typeof plan.runtimeWireJSON==='string'&&plan.runtimeWireJSON===packageText&&hex(expectedPackageSHA256)&&sha(packageWire)===expectedPackageSHA256&&plan.runtimeWireSHA256===expectedPackageSHA256,'HANDOFF_RUNTIME_WIRE_SHA_MISMATCH');
- check(plain(plan.runtime)&&canonicalJSON(parsedRuntime)===canonicalJSON(plan.runtime)&&parsedRuntime.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2'&&parsedRuntime.totalFrames===180,'HANDOFF_RUNTIME_PLAN_MISMATCH');
+ check(plain(plan.runtime)&&canonicalJSON(parsedRuntime)===canonicalJSON(plan.runtime)&&parsedRuntime.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2'&&parsedRuntime.totalFrames===plan.totalFrames&&(parsedRuntime.durationSeconds===undefined?6:parsedRuntime.durationSeconds)===plan.durationSeconds,'HANDOFF_RUNTIME_PLAN_MISMATCH');
  check(Array.isArray(parsedRuntime.segments)&&parsedRuntime.segments.length>=1&&parsedRuntime.segments.length<=16,'HANDOFF_RUNTIME_SEGMENTS_REQUIRED');
- let cursor=0;for(const segment of parsedRuntime.segments){check(plain(segment)&&segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor&&segment.endFrame<=180,'HANDOFF_RUNTIME_FRAME_RANGE_INVALID');cursor=segment.endFrame;}
- check(cursor===180&&hex(plan.sourceQualificationSHA256),'HANDOFF_SOURCE_QUALIFICATION_REQUIRED');
+ let cursor=0;for(const segment of parsedRuntime.segments){check(plain(segment)&&segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor&&segment.endFrame<=plan.totalFrames,'HANDOFF_RUNTIME_FRAME_RANGE_INVALID');cursor=segment.endFrame;}
+ check(cursor===plan.totalFrames&&hex(plan.sourceQualificationSHA256),'HANDOFF_SOURCE_QUALIFICATION_REQUIRED');
  const executionSeconds=Math.min(600,approval.maxWallSeconds,Math.floor((deadline-nowMs)/1000));
  check(executionSeconds>=1,'HANDOFF_GPU_APPROVAL_EXPIRED');
  return {profile:PROFILE,planSHA256:expectedPlanSHA256,runtimePackageSHA256:expectedPackageSHA256,

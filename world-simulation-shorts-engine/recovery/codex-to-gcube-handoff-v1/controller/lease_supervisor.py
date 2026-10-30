@@ -21,7 +21,7 @@ import re
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from common import RECOVERY, canonical, load, sha, validate_plan, verify_manifest
+from common import RECOVERY, canonical, duration_contract, load, sha, validate_plan, verify_manifest
 from nvidia_backend import approval_limit, cache
 _stop_requested = False
 
@@ -67,12 +67,14 @@ def parent_identity(pid):
 
 def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                             environment, output, capture_factory=subprocess.Popen,
-                            _cpu_test_before_cleanup=None, monitor=None):
+                            _cpu_test_before_cleanup=None, monitor=None, total_frames=180):
     """Internal function; production CLI constructs command from pinned inputs.
 
     A failed cleanup remains unresolved. The original descriptor is kept open
     until owned descendants have been checked, including after parent death.
     """
+    if type(total_frames) is not int or total_frames not in (180, 300):
+        raise RuntimeError('HANDOFF_CAPTURE_FRAME_CONTRACT_REQUIRED')
     validate_lease_descriptor(lease_fd, lease_path)
     if (parent['pid'] != os.getppid() or parent_identity(parent['pid']) != parent
             or parent['uid'] != os.getuid() or not 0 < seconds <= 600):
@@ -116,10 +118,12 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
             if row.get('stage') != 'ACTUAL_FRAME_DRAW':
                 continue
             if (type(row.get('renderedFrames')) is not int or row['renderedFrames'] != count + 1
-                    or row.get('totalFrames') != 180 or row.get('frame') != count):
+                    or row.get('totalFrames') != total_frames or row.get('frame') != count
+                    or total_frames == 300 and (type(row.get('totalFrames')) is not int or type(row.get('frame')) is not int)
+                    or count >= total_frames):
                 raise RuntimeError('HANDOFF_ACTUAL_FRAME_PROGRESS_INVALID')
             count += 1
-            atomic(Path(output) / 'actual-progress.json', {'processedFrames': count, 'totalFrames': 180})
+            atomic(Path(output) / 'actual-progress.json', {'processedFrames': count, 'totalFrames': total_frames})
     try:
         if select.select([parent_fd], [], [], 0)[0]:
             raise RuntimeError('HANDOFF_PARENT_EXITED_BEFORE_CAPTURE')
@@ -228,6 +232,7 @@ def run(args):
     image = plan['renderProfile']['imageDigest']
     backend = NvidiaPresentationBackend(args.manifest_file, args.manifest_sha256, image)
     backend._verify(plan, 'GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1')
+    timing = duration_contract(plan)
     if sha(canonical(plan)) != args.plan_sha256:
         raise RuntimeError('HANDOFF_PRIVATE_PLAN_CHANGED')
     permit = approval_limit(approval, plan, image)
@@ -271,7 +276,7 @@ def run(args):
     result = supervise_owned_capture(command, lease_fd=args.lease_fd, lease_path=lease_path,
         parent={'pid': args.parent_pid, 'startTicks': args.parent_start, 'uid': os.getuid()},
         seconds=min(seconds, (deadline - datetime.now(timezone.utc)).total_seconds()),
-        environment=environment, output=job, monitor=monitor)
+        environment=environment, output=job, monitor=monitor, total_frames=timing['totalFrames'])
     with cache().PrivateTree(job) as private:
         private.write_json('CAPTURE_PROCESS_RESULT.json', result)
     return result

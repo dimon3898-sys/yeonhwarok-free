@@ -107,10 +107,22 @@ def verify_manifest(file, expected, *, repo=REPO, require_external=False):
             'externalParentContractVerified': require_external}
 
 
+def duration_contract(plan):
+    """Read only the two validated Studio sample durations; never infer 10s."""
+    if (not isinstance(plan, dict) or type(plan.get('durationSeconds')) is not int
+            or plan['durationSeconds'] not in {6, 10}
+            or type(plan.get('totalFrames')) is not int
+            or plan['totalFrames'] != plan['durationSeconds'] * 30
+            or type(plan.get('fps')) is not int or plan['fps'] != 30):
+        raise RuntimeError('HANDOFF_EXACT_NONHISTORICAL_SIX_SECOND_PLAN_REQUIRED')
+    return {'durationSeconds': plan['durationSeconds'], 'totalFrames': plan['totalFrames'], 'fps': 30}
+
+
 def validate_plan(plan, *, image_digest, source_sha):
+    timing = duration_contract(plan)
+    frames = timing['totalFrames']
     if (not isinstance(plan, dict) or plan.get('schema') != PLAN
-            or plan.get('totalFrames') != 180 or plan.get('durationSeconds') != 6
-            or plan.get('fps') != 30 or plan.get('resolution') != {'width': 1080, 'height': 1920}
+            or plan.get('resolution') != {'width': 1080, 'height': 1920}
             or plan.get('aspectRatio') != '9:16'
             or plan.get('audioSettings') != {'enabled': False, 'mode': 'SILENT'}
             or plan.get('simulationType') not in {'GENERAL', 'FICTIONAL'}):
@@ -123,7 +135,9 @@ def validate_plan(plan, *, image_digest, source_sha):
     wire, runtime = plan.get('runtimeWireJSON'), plan.get('runtime')
     if (not isinstance(wire, str) or len(wire.encode()) > 8 * 1024 ** 2
             or sha(wire.encode()) != plan.get('runtimeWireSHA256')
-            or not isinstance(runtime, dict) or json.loads(wire) != runtime or runtime.get('totalFrames') != 180
+            or not isinstance(runtime, dict) or json.loads(wire) != runtime or runtime.get('totalFrames') != frames
+            or (timing['durationSeconds'] == 10 and runtime.get('durationSeconds') != 10)
+            or ('durationSeconds' in runtime and runtime['durationSeconds'] != timing['durationSeconds'])
             or not SHA.fullmatch(str(plan.get('sourceQualificationSHA256')))):
         raise RuntimeError('HANDOFF_RUNTIME_WIRE_BINDING_CHANGED')
     cursor = 0
@@ -135,6 +149,6 @@ def validate_plan(plan, *, image_digest, source_sha):
                 or scene.get('metadata', {}).get('output') != {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False}):
             raise RuntimeError('HANDOFF_SCENE_FRAME_BINDING_CHANGED')
         cursor = segment['endFrame']
-    if cursor != 180:
+    if cursor != frames:
         raise RuntimeError('HANDOFF_SCENE_FRAME_COVERAGE_CHANGED')
     return True

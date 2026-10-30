@@ -30,20 +30,25 @@ export const PUBLIC_CODES=Object.freeze([
  'UP2_ENGINE_UNSUPPORTED','UP2_FLOW_OBJECT_NOT_DRAWN','UP2_FLOW_ROUTE_NOT_DRAWN','UP2_FRAME_NOT_DRAWN',
  'UP2_FRAME_RANGE','UP2_FREE_FRAME_SCOPE','UP2_MARKER_RESERVATION_CAPACITY','UP2_ORIGINAL_MARKER_DESIGN_REQUIRED',
  'UP2_SOURCE_BINDING_REQUIRED','UP2_SOURCE_MUTATION','UP2_SUPPLIED_MARKER_FULL_ROI_OUTSIDE_SAFE']);
-const frame=n=>Number.isSafeInteger(n)&&n>=0&&n<180?n:null;
-export function safeFailure(value){
+function timingScope({durationSeconds=6,totalFrames=180}={}){
+ if(![6,10].includes(durationSeconds)||totalFrames!==durationSeconds*30)throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+ return{durationSeconds,totalFrames};
+}
+const frame=(n,totalFrames=180)=>Number.isSafeInteger(n)&&n>=0&&n<totalFrames?n:null;
+export function safeFailure(value,timing){
  if(!value||typeof value!=='object'||!OPERATIONS.includes(value.operationId)||!SOURCES.includes(value.sourceId))return null;
+ const{totalFrames}=timingScope(timing);
  const code=PUBLIC_CODES.includes(value.errorCode)?value.errorCode:'UNCLASSIFIED_EXCEPTION';
- return{operationId:value.operationId,sourceId:value.sourceId,line:null,column:null,frameIndex:frame(value.frameIndex),
+ return{operationId:value.operationId,sourceId:value.sourceId,line:null,column:null,frameIndex:frame(value.frameIndex,totalFrames),
   failureKind:FAILURE_KINDS.includes(value.failureKind)?value.failureKind:'UNCLASSIFIED_EXCEPTION',
   errorCode:code,recognized:code!=='UNCLASSIFIED_EXCEPTION',exceptionType:EXCEPTIONS.includes(value.exceptionType)?value.exceptionType:'UNKNOWN'};
 }
-export function classifyException(error,operationId='INPUT_CANVAS',sourceId='CAPTURE_ADAPTER',frameIndex=null){
+export function classifyException(error,operationId='INPUT_CANVAS',sourceId='CAPTURE_ADAPTER',frameIndex=null,timing){
  const disk=['EACCES','EPERM','ENOSPC','EDQUOT','EFBIG','EIO'].includes(error?.code);
  const exact=disk?storageCode(error):PUBLIC_CODES.includes(error?.message)?error.message:'UNCLASSIFIED_EXCEPTION';
  return safeFailure({operationId,sourceId,frameIndex,errorCode:exact,exceptionType:error?.name,
   failureKind:disk?'STORAGE_FAILURE':exact==='CAPTURE_ASSET_HTTP_FAILED'?'ASSET_HTTP_FAILURE':exact!=='UNCLASSIFIED_EXCEPTION'?'DOMAIN_ERROR':
-   ['RUNTIME_IMPORT','NATIVE_GUARD_IMPORT'].includes(operationId)?'MODULE_IMPORT_FAILURE':'UNCLASSIFIED_EXCEPTION'});
+   ['RUNTIME_IMPORT','NATIVE_GUARD_IMPORT'].includes(operationId)?'MODULE_IMPORT_FAILURE':'UNCLASSIFIED_EXCEPTION'},timing);
 }
 export function storageCode(error){
  return ['EACCES','EPERM'].includes(error?.code)?'DIAGNOSTIC_STORAGE_PERMISSION':
@@ -65,8 +70,9 @@ export async function atomicPrivateJSON(file,value,{maximum=16384}={}){
   try{await directory.sync();}finally{await directory.close();}
  }finally{await handle?.close();await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
 }
-export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA256=null,write=atomicPrivateJSON}={}){
- const state={schema:SCHEMA,runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
+export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA256=null,durationSeconds=6,totalFrames=180,write=atomicPrivateJSON}={}){
+ const timing=timingScope({durationSeconds,totalFrames});
+ const state={schema:SCHEMA,...(durationSeconds===10?timing:{}),runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
   imageDigest:/^sha256:[a-f0-9]{64}$/.test(imageDigest??'')?imageDigest:null,
   sceneSHA256:/^[a-f0-9]{64}$/.test(sceneSHA256??'')?sceneSHA256:null,
   operationId:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
@@ -83,15 +89,15 @@ export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA2
   async event(raw){
    if(!raw||!OPERATIONS.includes(raw.operationId)||!['START','END','FAIL','CLEANUP_FAIL'].includes(raw.phase))
     throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
-   state.operationId=raw.operationId;state.frameIndex=frame(raw.frameIndex);
+   state.operationId=raw.operationId;state.frameIndex=frame(raw.frameIndex,totalFrames);
    if(raw.phase==='END')state.lastCompletedOperation=raw.operationId;
-   const failure=safeFailure(raw.failure);
+   const failure=safeFailure(raw.failure,timing);
    if(raw.phase==='FAIL'&&failure&&!state.firstFailure)state.firstFailure=failure;
    if(raw.phase==='CLEANUP_FAIL'&&failure&&!state.cleanupFailure)state.cleanupFailure=failure;
    return persist();
   },
   async fail(failure,{cleanup=false}={}){return api.event({operationId:failure?.operationId??'INPUT_CANVAS',phase:cleanup?'CLEANUP_FAIL':'FAIL',failure});},
-  async completeFrame(count){if(Number.isSafeInteger(count)&&count>=0&&count<=180)state.renderedFrames=count;return persist();},
+  async completeFrame(count){if(Number.isSafeInteger(count)&&count>=0&&count<=totalFrames)state.renderedFrames=count;return persist();},
   async proofCompleted(){state.nativeProofCompleted=true;return persist();}
  };return api;
 }
@@ -99,6 +105,8 @@ export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA2
 // Self-contained function serialized by Playwright; no Node closures cross realms.
 export function initializeBrowserDiagnostics(config){
  const{codes,operations,sources,exceptions}=config;let firstFailure=null,cleanupFailure=null,active='INPUT_CANVAS',source='CAPTURE_ADAPTER',frameIndex=null;
+ const totalFrames=config.durationSeconds===10&&config.totalFrames===300?300:180;
+ if((config.durationSeconds!==undefined||config.totalFrames!==undefined)&&!((config.durationSeconds===6&&config.totalFrames===180)||(config.durationSeconds===10&&config.totalFrames===300)))throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
  function classify(error){const known=codes.includes(error?.message),code=known?error.message:'UNCLASSIFIED_EXCEPTION';
   return{operationId:active,sourceId:source,line:null,column:null,frameIndex,errorCode:code,recognized:known,
    exceptionType:exceptions.includes(error?.name)?error.name:'UNKNOWN',failureKind:code==='CAPTURE_ASSET_HTTP_FAILED'?'ASSET_HTTP_FAILURE':
@@ -108,7 +116,7 @@ export function initializeBrowserDiagnostics(config){
  const api={
   async run(operationId,task,{sourceId='CAPTURE_ADAPTER',frame=null}={}){
    if(!operations.includes(operationId)||!sources.includes(sourceId))throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
-   const previous=[active,source,frameIndex];active=operationId;source=sourceId;frameIndex=Number.isSafeInteger(frame)&&frame>=0&&frame<180?frame:null;
+   const previous=[active,source,frameIndex];active=operationId;source=sourceId;frameIndex=Number.isSafeInteger(frame)&&frame>=0&&frame<totalFrames?frame:null;
    try{await send('START');const value=await task();await send('END');[active,source,frameIndex]=previous;return value;}
    catch(error){if(!firstFailure)firstFailure=classify(error);await send('FAIL',firstFailure).catch(()=>{});throw error;}
   },
@@ -121,7 +129,8 @@ export function initializeBrowserDiagnostics(config){
 }
 export async function attachPageDiagnostics(page,recorder){
  await page.exposeFunction('__weCaptureCheckpoint',raw=>recorder.event(raw));
- await page.evaluate(initializeBrowserDiagnostics,{schema:SCHEMA,codes:PUBLIC_CODES,operations:OPERATIONS,sources:SOURCES,exceptions:EXCEPTIONS});
+ const state=recorder.snapshot();
+ await page.evaluate(initializeBrowserDiagnostics,{schema:SCHEMA,codes:PUBLIC_CODES,operations:OPERATIONS,sources:SOURCES,exceptions:EXCEPTIONS,...(state.durationSeconds===10?timingScope(state):{})});
 }
 export async function evaluateDiagnosed(page,callback,arg,{recorder,timeoutMs}={}){
  let crashed=false,timer;const onCrash=()=>{crashed=true;};page.on('crash',onCrash);
@@ -129,19 +138,19 @@ export async function evaluateDiagnosed(page,callback,arg,{recorder,timeoutMs}={
   if(!Number.isFinite(timeoutMs)||timeoutMs<=0)throw Object.assign(new Error('CAPTURE_PAGE_TIMEOUT'),{name:'TimeoutError'});
   const result=await Promise.race([page.evaluate(callback,arg),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(new Error('CAPTURE_PAGE_TIMEOUT'),{name:'TimeoutError'})),Math.min(timeoutMs,2147483647));})]);
   if(result?.schema!==SCHEMA||typeof result.ok!=='boolean')throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
-  const failure=safeFailure(result.firstFailure);
+  const failure=safeFailure(result.firstFailure,recorder.snapshot());
   if(result.ok===false){if(!failure)throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');await recorder.fail(failure);throw Object.assign(Error(failure.errorCode),{captureFailure:failure});}
-  if(result.cleanupFailure)await recorder.fail(safeFailure(result.cleanupFailure),{cleanup:true});
+  if(result.cleanupFailure)await recorder.fail(safeFailure(result.cleanupFailure,recorder.snapshot()),{cleanup:true});
   return result.value;
  }catch(error){
   if(error?.captureFailure)throw error;
   const state=recorder.snapshot(),kind=crashed?'PAGE_CRASH':page.isClosed()?'PAGE_CLOSED':error?.name==='TimeoutError'?'PAGE_TIMEOUT':'EVALUATION_TRANSPORT_FAILURE';
   const code={PAGE_CRASH:'CAPTURE_PAGE_CRASH',PAGE_CLOSED:'CAPTURE_PAGE_CLOSED',PAGE_TIMEOUT:'CAPTURE_PAGE_TIMEOUT',EVALUATION_TRANSPORT_FAILURE:'CAPTURE_EVALUATION_TRANSPORT_FAILED'}[kind];
-  const failure=safeFailure({operationId:state.operationId??'INPUT_CANVAS',sourceId:'CAPTURE_ADAPTER',frameIndex:state.frameIndex,errorCode:code,failureKind:kind,exceptionType:error?.name});
+  const failure=safeFailure({operationId:state.operationId??'INPUT_CANVAS',sourceId:'CAPTURE_ADAPTER',frameIndex:state.frameIndex,errorCode:code,failureKind:kind,exceptionType:error?.name},state);
   await recorder.fail(failure);throw Object.assign(Error(code),{captureFailure:failure});
  }finally{clearTimeout(timer);page.off('crash',onCrash);}
 }
 export async function preserveCleanup(recorder,tasks){
- for(const task of tasks)try{await task();}catch(error){await recorder.fail(classifyException(error,'CLEANUP'),{cleanup:true});}
+ for(const task of tasks)try{await task();}catch(error){await recorder.fail(classifyException(error,'CLEANUP','CAPTURE_ADAPTER',null,recorder.snapshot()),{cleanup:true});}
  return recorder.snapshot();
 }

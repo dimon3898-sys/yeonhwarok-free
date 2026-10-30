@@ -15,7 +15,7 @@ from contextlib import contextmanager
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from common import PROFILE, RECOVERY, canonical, load, sha
+from common import PROFILE, RECOVERY, canonical, duration_contract, load, sha
 from nvidia_backend import NvidiaPresentationBackend, approval_limit, cache, lease_helper, _runtime_environment
 from lease_supervisor import original_lease_descriptor, parent_identity
 
@@ -78,16 +78,22 @@ def _write_runtime(job, wire):
 
 
 def _validate_capture(output, plan):
+    timing = duration_contract(plan)
+    total_frames, duration = timing['totalFrames'], timing['durationSeconds']
+    label = 'SIX' if duration == 6 else 'TEN'
     video = output / 'VIDEO.mp4'
     with cache().PrivateTree(output) as directory:
         receipt = directory.json('CAPTURE_RECEIPT.json')
         frames = directory.json('FRAME_EVIDENCE.json')
-    if (receipt.get('schema') != 'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1'
+    if (receipt.get('schema') != f'WORLD_ENGINE_NVIDIA_{label}_SECOND_CAPTURE_V1'
             or receipt.get('status') != 'TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'
             or receipt.get('packageSHA256') != plan['runtimeWireSHA256']
             or receipt.get('sourceQualificationSHA256') != plan['sourceQualificationSHA256']
             or receipt.get('softwareOnly') is not False or receipt.get('nvidiaVerified') is not True
-            or receipt.get('renderedFrames') != 180 or receipt.get('totalFrames') != 180
+            or receipt.get('renderedFrames') != total_frames or receipt.get('totalFrames') != total_frames
+            or duration == 10 and (type(receipt.get('durationSeconds')) is not int
+                or receipt.get('durationSeconds') != 10
+                or any(type(receipt.get(key)) is not int for key in ('renderedFrames', 'totalFrames')))
             or receipt.get('visualQualityApproved') is not False
             or receipt.get('video', {}).get('sha256') != sha(video.read_bytes())):
         raise RuntimeError('HANDOFF_NVIDIA_CAPTURE_RECEIPT_INVALID')
@@ -114,24 +120,29 @@ def _validate_capture(output, plan):
     if (len(streams) != 1 or streams[0].get('codec_type') != 'video'
             or streams[0].get('codec_name') != 'h264' or streams[0].get('width') != 1080
             or streams[0].get('height') != 1920 or streams[0].get('r_frame_rate') != '30/1'
-            or int(streams[0].get('nb_read_frames', '-1')) != 180
-            or abs(float(info.get('format', {}).get('duration', -1)) - 6) > .001):
-        raise RuntimeError('HANDOFF_VIDEO_180_FRAME_CONTRACT_FAILED')
+            or int(streams[0].get('nb_read_frames', '-1')) != total_frames
+            or abs(float(info.get('format', {}).get('duration', -1)) - duration) > .001):
+        raise RuntimeError(f'HANDOFF_VIDEO_{total_frames}_FRAME_CONTRACT_FAILED')
     decoded = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(video), '-f', 'null', '-'],
                              capture_output=True, timeout=45, check=False)
     if decoded.returncode or decoded.stderr:
         raise RuntimeError('HANDOFF_VIDEO_FULL_DECODE_FAILED')
     rows = frames.get('frames', [])
-    if (len(rows) != 180 or [row.get('frame') for row in rows] != list(range(180))
+    if (len(rows) != total_frames or [row.get('frame') for row in rows] != list(range(total_frames))
+            or duration == 10 and (type(frames.get('durationSeconds')) is not int
+                or frames.get('durationSeconds') != 10 or type(frames.get('totalFrames')) is not int
+                or frames.get('totalFrames') != total_frames
+                or any(type(row.get('frame')) is not int for row in rows))
             or any(row.get('diagnostic', {}).get('glError') != 0 for row in rows)):
         raise RuntimeError('HANDOFF_ACTUAL_FRAME_EVIDENCE_INVALID')
-    return {'schema': 'WORLD_ENGINE_NVIDIA_SIX_SECOND_MEDIA_VERIFY_V1',
-            'videoSHA256': sha(video.read_bytes()), 'frames': 180, 'width': 1080,
-            'height': 1920, 'fps': 30, 'durationSeconds': 6, 'fullDecode': 'PASS',
+    return {'schema': f'WORLD_ENGINE_NVIDIA_{label}_SECOND_MEDIA_VERIFY_V1',
+            'videoSHA256': sha(video.read_bytes()), 'frames': total_frames, 'width': 1080,
+            'height': 1920, 'fps': 30, 'durationSeconds': duration, 'fullDecode': 'PASS',
             'audioStreams': 0, 'visualQuality': 'USER_VIDEO_REVIEW_REQUIRED'}
 
 
-def _export(job, output, export_root, control_root):
+def _export(job, output, export_root, control_root, plan=None):
+    timing = duration_contract(plan) if plan is not None else {'durationSeconds': 6, 'totalFrames': 180, 'fps': 30}
     delivery = load('_handoff_original_export_media', RECOVERY / 'production-studio-mvp-v1/studio_delivery.py')
     private_base = Path(control_root) / 'handoff-export-private'
     with cache().PrivateTree(private_base, create=True):
@@ -143,7 +154,7 @@ def _export(job, output, export_root, control_root):
                 os.fchmod(target.fileno(), 0o600); target.flush(); os.fsync(target.fileno())
             public.write_json('QUALITY_SUMMARY.json', {
                 'schema': 'WORLD_ENGINE_STUDIO_SAFE_QA_V1', 'technicalVerification': 'PASS',
-                'frames': 180, 'fps': 30, 'width': 1080, 'height': 1920, 'durationSeconds': 6,
+                'frames': timing['totalFrames'], 'fps': 30, 'width': 1080, 'height': 1920, 'durationSeconds': timing['durationSeconds'],
                 'audioStreams': 0, 'sfxEnabled': False, 'videoDecodedPixelsUnchanged': True,
                 'fullDecode': 'PASS', 'visualQuality': 'USER_VIDEO_REVIEW_REQUIRED',
                 'externalDownloadVerified': False, 'finalPromotion': False})
@@ -161,6 +172,7 @@ def _run(args):
     image = plan['renderProfile']['imageDigest']
     backend = NvidiaPresentationBackend(args.manifest_file, args.manifest_sha256, image)
     backend._verify(plan, PROFILE)
+    timing = duration_contract(plan)
     if sha(canonical(plan)) != args.plan_sha256:
         raise RuntimeError('HANDOFF_PRIVATE_PLAN_CHANGED')
     approval_limit(approval, plan, image)
@@ -208,7 +220,7 @@ def _run(args):
                     with cache().PrivateTree(job) as directory:
                         row = directory.json(progress.name)
                     count = row.get('processedFrames')
-                    if type(count) is not int or not state['processedFrames'] <= count <= 180:
+                    if type(count) is not int or not state['processedFrames'] <= count <= timing['totalFrames']:
                         raise RuntimeError('HANDOFF_CAPTURE_PROGRESS_INVALID')
                     if count != state['processedFrames']:
                         save(processedFrames=count,
@@ -238,8 +250,8 @@ def _run(args):
                 with cache().PrivateTree(job) as directory:
                     directory.write_json('MEDIA_VERIFICATION.json', validation)
                 save(phase='EXPORT')
-                exported = _export(job, output, exports, control)
-            save(state='COMPLETED', phase='COMPLETE', processedFrames=180,
+                exported = _export(job, output, exports, control, plan)
+            save(state='COMPLETED', phase='COMPLETE', processedFrames=timing['totalFrames'],
                  completedScenes=len(plan['runtime']['segments']), gpuRenderingVerified=True,
                  result=exported, errorCode=None)
     except BaseException as error:

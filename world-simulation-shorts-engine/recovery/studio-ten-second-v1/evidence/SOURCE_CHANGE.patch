@@ -1,0 +1,1008 @@
+--- a/world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs
++++ b/world-simulation-shorts-engine/recovery/capture-page-evaluation-evidence-v1/candidate_capture_vulkan.mjs
+@@ -25,7 +25,7 @@
+ 
+ export function validateRuntimeRequest(request){
+  check(request?.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2','UP2_RUNTIME_REQUEST_SCHEMA');
+- check(Number.isSafeInteger(request.totalFrames)&&request.totalFrames>=2&&request.totalFrames<=240,'UP2_RUNTIME_TOTAL_FRAMES');
++ check([6,10].includes(request.durationSeconds===undefined?6:request.durationSeconds)&&request.totalFrames===(request.durationSeconds===undefined?6:request.durationSeconds)*30,'UP2_RUNTIME_TOTAL_FRAMES');
+  check(hex(request.sourceInputSHA256),'UP2_SOURCE_INPUT_HASH_REQUIRED');check(Array.isArray(request.segments)&&request.segments.length>=1&&request.segments.length<=16,'UP2_RUNTIME_SEGMENTS');
+  let cursor=0;for(const[index,segment]of request.segments.entries()){check(segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor,'UP2_SEGMENT_FRAME_GAP_OR_OVERLAP');
+   validateScenePlan(segment.scene);check(segment.scene.timing.total_frames===segment.endFrame-segment.startFrame&&segment.scene.timing.fps===30&&segment.scene.metadata.output.width===1080&&segment.scene.metadata.output.height===1920,'UP2_SEGMENT_SCENE_TIMING');
+@@ -68,7 +68,7 @@
+   sourceRows.push({segmentIndex:index,startFrame:item.startFrame,endFrame:item.endFrame,sourceId:prepared.regionEvidence.sourceId,sourceOriginalSHA256:source.sourceOriginalSHA256,styleId:prepared.sourceStyle.styleId,terrainSHA256:source.sha256,bounds:copy(source.bounds),cameraEnvelope:copy(presentationPlan.coverageBounds),terrainTreatment:prepared.terrainTreatment,nativeResolution:copy(prepared.regionEvidence.sourceDimensions),outputResolution:copy(source.dimensions),sourceGeometryBinding:compileExistingEnginePlan(item.scene).sourceGeometryBinding});
+  }
+  const sourceQualification={schema:'WORLD_ENGINE_PRESENTATION_SOURCES_V2',segments:sourceRowsFor(segments),totalFrames:request.totalFrames},sourceQualificationWireJSON=canonicalJSON(sourceQualification);
+- return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',totalFrames:request.totalFrames,transitions:copy(request.transitions),sourceInputSHA256:request.sourceInputSHA256,inputTrace:copy(request.inputTrace??null),segments,sourceBindings,sourceQualification,sourceQualificationWireJSON,sourceQualificationSHA256:hash(sourceQualificationWireJSON)};
++ return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',...(request.durationSeconds===10?{durationSeconds:10}:{}),totalFrames:request.totalFrames,transitions:copy(request.transitions),sourceInputSHA256:request.sourceInputSHA256,inputTrace:copy(request.inputTrace??null),segments,sourceBindings,sourceQualification,sourceQualificationWireJSON,sourceQualificationSHA256:hash(sourceQualificationWireJSON)};
+ }
+ async function makeLoopback(payload,cacheRoot){
+  const trace=[],aliases=new Map([['/three.js',path.join(ENGINE,'web/vendor/three/0.170.0/three.module.js')],['/web/map_infographic_v1/graphic_layout.mjs',path.join(ENGINE,'recovery/g2-final-recovery-v1/layout_extension.mjs')],['/web/map_infographic_v1/graphic_layout_legacy.mjs',path.join(ENGINE,'web/map_infographic_v1/graphic_layout.mjs')]]);
+@@ -85,13 +85,13 @@
+ export async function captureVulkanDerived({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot=process.env.WORLD_ENGINE_NODE_DEPS,probeFrames=null,prepareOnly=false,rootTestOnly=false,executionDeadline,privateWorkspaceRoot,publicExportRoot}={}){
+  check(!prepareOnly&&probeFrames===null&&Number.isFinite(executionDeadline),'GCUBE_FULL_CAPTURE_AUTHORITY_REQUIRED');
+  check(Date.now()<executionDeadline,'GCUBE_REVIEW_DEADLINE_EXCEEDED');
+- check(hex(expectedSHA256),'UP2_EXPECTED_PACKAGE_SHA_REQUIRED');const raw=await readFile(packageFile);check(hash(raw)===expectedSHA256,'UP2_PACKAGE_SHA_MISMATCH');const request=JSON.parse(raw);check(request.totalFrames===180,'GCUBE_EXACT_180_FRAMES_REQUIRED');
++ check(hex(expectedSHA256),'UP2_EXPECTED_PACKAGE_SHA_REQUIRED');const raw=await readFile(packageFile);check(hash(raw)===expectedSHA256,'UP2_PACKAGE_SHA_MISMATCH');const request=JSON.parse(raw);check([6,10].includes(request.durationSeconds===undefined?6:request.durationSeconds)&&request.totalFrames===(request.durationSeconds===undefined?6:request.durationSeconds)*30,'GCUBE_EXACT_180_FRAMES_REQUIRED');
+  await newPrivateRoot(outputRoot,{privateWorkspaceRoot,publicExportRoot});const payload=await prepareRuntimeRequest({request,cacheRoot:path.join(outputRoot,'sources'),privateWorkspaceRoot,publicExportRoot});
+  if(expectedSourceQualificationSHA256!==undefined)check(hex(expectedSourceQualificationSHA256)&&payload.sourceQualificationSHA256===expectedSourceQualificationSHA256,'UP2_PRECLAIM_SOURCE_QUALIFICATION_CHANGED');
+  await writeFile(path.join(outputRoot,'REQUEST.json'),raw,{flag:'wx',mode:0o600});await writeJSON(path.join(outputRoot,'RUNTIME.json'),payload);
+  if(prepareOnly){const result={schema:'WORLD_ENGINE_PRESENTATION_PREPARATION_V2',status:'CPU_PREPARATION_PASS_NOT_DRAW',packageSHA256:expectedSHA256,sourceQualification:payload.sourceQualification,sourceQualificationWireJSON:payload.sourceQualificationWireJSON,sourceQualificationSHA256:payload.sourceQualificationSHA256,softwareOnly:true,nvidiaVerified:false};await writeJSON(path.join(outputRoot,'PREPARATION_RECEIPT.json'),result);return result;}
+- const receipt={schema:'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1',status:'RUNNING',packageSHA256:expectedSHA256,sourceInputSHA256:request.sourceInputSHA256,sourceQualificationSHA256:payload.sourceQualificationSHA256,totalFrames:request.totalFrames,renderedFrames:0,softwareOnly:false,nvidiaVerified:false,visualQualityApproved:false,paidExecutionAttempted:false,providerBillingStopControlled:false,startedAt:new Date().toISOString(),transitions:copy(request.transitions),inputTrace:copy(request.inputTrace??null),sourceCredits:payload.segments.map((s,index)=>({segmentIndex:index,sourceId:s.regionEvidence.sourceId,license:s.sourceStyle.license,attribution:s.regionEvidence.attribution,sourceURL:s.sourceStyle.sourceOriginal.url,sourceOriginalSHA256:s.sourceStyle.terrainAsset.sourceOriginalSHA256,terrainSHA256:s.sourceStyle.terrainAsset.sha256}))};
+- const recorder=createRecorder({outputRoot,runId:path.basename(path.dirname(outputRoot)),imageDigest:process.env.WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST,sceneSHA256:request.segments.length===1?hash(canonicalJSON(request.segments[0].scene)):null});
++ const receipt={schema:request.durationSeconds===10?'WORLD_ENGINE_NVIDIA_TEN_SECOND_CAPTURE_V1':'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1',...(request.durationSeconds===10?{durationSeconds:10}:{}),status:'RUNNING',packageSHA256:expectedSHA256,sourceInputSHA256:request.sourceInputSHA256,sourceQualificationSHA256:payload.sourceQualificationSHA256,totalFrames:request.totalFrames,renderedFrames:0,softwareOnly:false,nvidiaVerified:false,visualQualityApproved:false,paidExecutionAttempted:false,providerBillingStopControlled:false,startedAt:new Date().toISOString(),transitions:copy(request.transitions),inputTrace:copy(request.inputTrace??null),sourceCredits:payload.segments.map((s,index)=>({segmentIndex:index,sourceId:s.regionEvidence.sourceId,license:s.sourceStyle.license,attribution:s.regionEvidence.attribution,sourceURL:s.sourceStyle.sourceOriginal.url,sourceOriginalSHA256:s.sourceStyle.terrainAsset.sourceOriginalSHA256,terrainSHA256:s.sourceStyle.terrainAsset.sha256}))};
++ const recorder=createRecorder({outputRoot,...(request.durationSeconds===10?{durationSeconds:10,totalFrames:300}:{}),runId:path.basename(path.dirname(outputRoot)),imageDigest:process.env.WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST,sceneSHA256:request.segments.length===1?hash(canonicalJSON(request.segments[0].scene)):null});
+  let primaryError=null;
+  let browser,encoder,encoderExit,service;let diagnosticStage='BEFORE_PAGE_EVALUATION';const evidence=[],errors=[],runtimeEvidence=[],started=performance.now();
+  try{
+@@ -141,7 +141,7 @@
+  finally{await preserveCleanup(recorder,[()=>encoder?.kill('SIGTERM'),()=>browser?.close(),()=>service?new Promise((resolve,reject)=>service.server.close(error=>error?reject(error):resolve())):undefined]);receipt.elapsedSeconds=(performance.now()-started)/1000;receipt.finishedAt=new Date().toISOString();receipt.browserErrors=errors;receipt.captureOperations=recorder.snapshot();
+   try{
+   await recorder.event({phase:'START',operationId:'EXPORT'});
+-  await writeJSON(path.join(outputRoot,'FRAME_EVIDENCE.json'),{schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_FRAMES_V1',frames:evidence});await writeJSON(path.join(outputRoot,'HTTP_ASSET_BINDINGS.json'),service?.trace??[]);receipt.frameEvidence={file:'FRAME_EVIDENCE.json',sha256:hash(await readFile(path.join(outputRoot,'FRAME_EVIDENCE.json')))};await atomicPrivateJSON(path.join(outputRoot,'CAPTURE_RECEIPT.json'),receipt,{maximum:24*1024**2});
++  await writeJSON(path.join(outputRoot,'FRAME_EVIDENCE.json'),{schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_FRAMES_V1',...(request.durationSeconds===10?{durationSeconds:10,totalFrames:300}:{}),frames:evidence});await writeJSON(path.join(outputRoot,'HTTP_ASSET_BINDINGS.json'),service?.trace??[]);receipt.frameEvidence={file:'FRAME_EVIDENCE.json',sha256:hash(await readFile(path.join(outputRoot,'FRAME_EVIDENCE.json')))};await atomicPrivateJSON(path.join(outputRoot,'CAPTURE_RECEIPT.json'),receipt,{maximum:24*1024**2});
+   await recorder.event({phase:'END',operationId:'EXPORT'});
+   const names=(await readdir(outputRoot)).filter(n=>n!=='SHA256SUMS').sort(),lines=[];for(const name of names){const file=path.join(outputRoot,name);if((await lstat(file)).isFile())lines.push(hash(await readFile(file))+'  '+name);}await writeFile(path.join(outputRoot,'SHA256SUMS'),lines.join('\n')+'\n',{flag:'wx',mode:0o600});
+   }catch(error){await recorder.fail(classifyException(error,'EXPORT'),{cleanup:Boolean(primaryError)});if(!primaryError)primaryError=error;}
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+@@ -400,8 +400,8 @@
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json",
+-      "sha256": "58866cad0bd351c95f9c4a09153e2528fdce7ffab0ec1cbb798fc64bfd75e217",
+-      "bytes": 1646
++      "sha256": "35dcdc3fee8db0e1d223b850c8e2534c711aa8a3f68aeb90862320b6c82f6288",
++      "bytes": 1658
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/attempts/INITIAL_GENERATED_SOURCE_MANIFEST.json",
+@@ -425,13 +425,18 @@
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/build_variants.py",
+-      "sha256": "c08e865ac157be085c2d349623f5f43501aa37bd5378fa02a547ed91744aea5b",
+-      "bytes": 14120
++      "sha256": "5df58438b80983f4106e1b6bfea8ad2f9f8ad42fea00cd3c97d047fb161d369c",
++      "bytes": 15093
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs",
+-      "sha256": "c5ec860e25027cc0dad46f7d7dd8e5c7e78f7f7c4dda3d905dce43ddaeb80614",
+-      "bytes": 10109
++      "sha256": "f76fcb2853d79399039aa2b1745388546bc588ff88c47cc53b01275ad2ecd1e8",
++      "bytes": 10463
++    },
++    {
++      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs",
++      "sha256": "46f32cbaa6b9c78026ea21cf41a5b6a0911e6ff5468d36d08f2deb8f180ab142",
++      "bytes": 13227
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs",
+@@ -445,38 +450,43 @@
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+-      "sha256": "92a05474a162ffd41238abc24cc5e433838c80192d77f462f67990178fc08809",
+-      "bytes": 10696
++      "sha256": "4306430e64633d67745b706b7c4992b77d12bb1bf3a8d64352b82d07936d17b2",
++      "bytes": 10841
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+-      "sha256": "abbe5bc89afa6399570a00c91a0cdf083f12bf5a7ebdba38786eca649e121182",
+-      "bytes": 23366
++      "sha256": "39bdff1d9190ab8102c812209e64001fd6b633c0ac424d9427f1ca409aa9f592",
++      "bytes": 23849
++    },
++    {
++      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py",
++      "sha256": "9e971c5523cdd4f8e7f855ab756859b5930eaa6064ce37449538c7ffc715b5ee",
++      "bytes": 3296
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/common.py",
+-      "sha256": "9a861e139154ae4424340dcd134ef55e65ed6e9413b26d87a07be07fd000e214",
+-      "bytes": 7360
++      "sha256": "fa84a038175ac5bb4aa1929111401d498d29af61e70f01b2199f10020266d0bd",
++      "bytes": 8155
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py",
+-      "sha256": "f68baed1eac0329cefdb3d78d2162d3a2ece7d2dc7d0ead878f5a90821c60be5",
+-      "bytes": 15189
++      "sha256": "1a6c650228cbca7b99da6ff8219b1b715afe3f4dd3f358d0fa6a267fecdf0b89",
++      "bytes": 16182
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+-      "sha256": "4329dc7c28dc7ca5e9c368e398d3f5fa87ec1a1ad3fcfb76971fa5a176365c56",
+-      "bytes": 17007
++      "sha256": "06c7bb84236ab9bdef5044a5b6ceac2b3743eae044c163218953f671d31b7bee",
++      "bytes": 17753
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py",
+-      "sha256": "bd1eb96c9633d5bb17532c61e3004521e579bf44cb692d51762da40138d149cd",
+-      "bytes": 10068
++      "sha256": "f8c3679be386455b67db94ce1d23f71e1dc218bc01948202d26410ee5a59dfd5",
++      "bytes": 10797
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+-      "sha256": "5ade50beefc2cbca93ad2bc3bd8ba2e49199bc8f2acef1c43ff0eb90ba041723",
+-      "bytes": 15458
++      "sha256": "607819492638a2cc5af398899b51f2309f71c703b97d434689f33dec90553014",
++      "bytes": 17312
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/preserved_mvp_sources.json",
+@@ -484,6 +494,11 @@
+       "bytes": 1446
+     },
+     {
++      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py",
++      "sha256": "26c438b134e524afdb13a5ecf0f62dbc83494e1b0ce441b51590fa9bdcf50da4",
++      "bytes": 17997
++    },
++    {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/serve.py",
+       "sha256": "b0e8b2f6ffa3d15e3e8fbb8e2547d3c6112c9623485ad9c6045a614a4a6c72cb",
+       "bytes": 27133
+@@ -510,8 +525,8 @@
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js",
+-      "sha256": "e3c156d1b337d4f6b0223367976a9af316245a299093966d140f5153c2109e7c",
+-      "bytes": 8163
++      "sha256": "e93ee09106de643e8e3ed3e646db947e246a84bb1dafac0f0198f12190e9d500",
++      "bytes": 9066
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/handler.py",
+@@ -1470,8 +1485,8 @@
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs",
+-      "sha256": "70708100feb7a479eb108431ac83219c51270ff1a75dc5b727df093faf1a4a1c",
+-      "bytes": 42766
++      "sha256": "3fe9c12b3f16a2d632d458caf7724142815d6ca2c16b052854d24f00b2bd8216",
++      "bytes": 42955
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs",
+@@ -1495,8 +1510,8 @@
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/studio_adapter.py",
+-      "sha256": "489e8a205dddaddf0d96bbb3645e6e24aa0682de644f69b7c7ad29154c439c52",
+-      "bytes": 20741
++      "sha256": "65fecf554bb8e5cbb3f234027c2e3865894407066cfc5ea8efafdc8ac7fb5d12",
++      "bytes": 21662
+     },
+     {
+       "path": "world-simulation-shorts-engine/recovery/universal-production-v3/ci.py",
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json
+@@ -6,8 +6,8 @@
+       "original": "world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs",
+       "originalSHA256": "fc17ceb56499184a6f4ae6888d617f7b1b67e4fd508320eb295493161596753e",
+       "variant": "capture_vulkan.generated.mjs",
+-      "variantSHA256": "abbe5bc89afa6399570a00c91a0cdf083f12bf5a7ebdba38786eca649e121182",
+-      "diff": "backend/capture_vulkan.generated.mjs.patch",
++      "variantSHA256": "39bdff1d9190ab8102c812209e64001fd6b633c0ac424d9427f1ca409aa9f592",
++      "diff": "../studio-ten-second-v1/evidence/CAPTURE_VARIANT.patch",
+       "oldFileModified": false
+     },
+     {
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/build_variants.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/build_variants.py
+@@ -19,6 +19,8 @@
+     return source.replace(old,new)
+ 
+ def derive_capture(source):
++    source=replace(source,"check(Number.isSafeInteger(request.totalFrames)&&request.totalFrames>=2&&request.totalFrames<=240,'UP2_RUNTIME_TOTAL_FRAMES');", "check([6,10].includes(request.durationSeconds===undefined?6:request.durationSeconds)&&request.totalFrames===(request.durationSeconds===undefined?6:request.durationSeconds)*30,'UP2_RUNTIME_TOTAL_FRAMES');")
++    source=replace(source,"return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',totalFrames:request.totalFrames", "return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',...(request.durationSeconds===10?{durationSeconds:10}:{}),totalFrames:request.totalFrames")
+     old_private="async function newPrivateRoot(root){check(typeof root==='string'&&path.isAbsolute(root)&&within(root,'/workspace')&&!within(root,REPO),'UP2_NEW_PRIVATE_ROOT_REQUIRED');for(let p=path.dirname(root);p!==path.dirname(p);p=path.dirname(p)){const stat=await lstat(p);check(stat.isDirectory()&&!stat.isSymbolicLink()&&!(stat.mode&0o022),'UP2_PRIVATE_ROOT_ANCESTOR_UNSAFE');}await mkdir(root,{mode:0o700});const stat=await lstat(root);check(stat.isDirectory()&&!stat.isSymbolicLink()&&stat.uid===process.getuid()&&!(stat.mode&0o077),'UP2_PRIVATE_ROOT_PERMISSIONS');}"
+     source=replace(source,old_private,"// New profile only: explicit qualified POSIX root, never inferred /workspace.\n")
+     source=replace(source,"import {compilePresentationCameraPlan,assertPresentationBoundaryContinuity} from './presentation_plan.mjs';", "import {compilePresentationCameraPlan,assertPresentationBoundaryContinuity} from '../universal-presentation-v2/presentation_plan.mjs';\nimport {buildVulkanLaunchOptions} from './backend/profile_contract.mjs';\nimport {createFreshPrivateDirectory as newPrivateRoot} from './backend/private_workspace.mjs';")
+@@ -31,9 +33,9 @@
+     source=replace(source,"await newPrivateRoot(cacheRoot);", "await newPrivateRoot(cacheRoot,{privateWorkspaceRoot,publicExportRoot});")
+     source=replace(source,"export async function capturePresentation({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot=process.env.WORLD_ENGINE_NODE_DEPS,probeFrames=null,prepareOnly=false}={}){", "export async function captureVulkanDerived({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot=process.env.WORLD_ENGINE_NODE_DEPS,probeFrames=null,prepareOnly=false,rootTestOnly=false,executionDeadline,privateWorkspaceRoot,publicExportRoot}={}){\n check(!prepareOnly&&probeFrames===null&&Number.isFinite(executionDeadline),'GCUBE_FULL_CAPTURE_AUTHORITY_REQUIRED');\n check(Date.now()<executionDeadline,'GCUBE_REVIEW_DEADLINE_EXCEEDED');")
+     source=replace(source,"await newPrivateRoot(outputRoot);const payload=await prepareRuntimeRequest({request,cacheRoot:path.join(outputRoot,'sources')});", "await newPrivateRoot(outputRoot,{privateWorkspaceRoot,publicExportRoot});const payload=await prepareRuntimeRequest({request,cacheRoot:path.join(outputRoot,'sources'),privateWorkspaceRoot,publicExportRoot});")
+-    source=replace(source,"const request=JSON.parse(raw);", "const request=JSON.parse(raw);check(request.totalFrames===180,'GCUBE_EXACT_180_FRAMES_REQUIRED');")
++    source=replace(source,"const request=JSON.parse(raw);", "const request=JSON.parse(raw);check([6,10].includes(request.durationSeconds===undefined?6:request.durationSeconds)&&request.totalFrames===(request.durationSeconds===undefined?6:request.durationSeconds)*30,'GCUBE_EXACT_180_FRAMES_REQUIRED');")
+     source=replace(source,"['/recovery/universal-presentation-v2/',HERE]", "['/recovery/universal-presentation-v2/',path.join(ENGINE,'recovery/universal-presentation-v2')],['/recovery/codex-to-gcube-handoff-v1/',HERE]")
+-    source=replace(source,"schema:'WORLD_ENGINE_PRESENTATION_CAPTURE_V2'", "schema:'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1'")
++    source=replace(source,"schema:'WORLD_ENGINE_PRESENTATION_CAPTURE_V2'", "schema:request.durationSeconds===10?'WORLD_ENGINE_NVIDIA_TEN_SECOND_CAPTURE_V1':'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1',...(request.durationSeconds===10?{durationSeconds:10}:{})")
+     source=replace(source,"renderedFrames:0,softwareOnly:true,nvidiaVerified:false", "renderedFrames:0,softwareOnly:false,nvidiaVerified:false")
+     source=replace(source,"paidExecuted:false", "paidExecutionAttempted:false,providerBillingStopControlled:false")
+     launch="browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader','--disable-dev-shm-usage']});"
+@@ -54,7 +56,7 @@
+     source=replace(source,"for(const frame of frames){const capture=await page.evaluate", "for(const frame of frames){check(Date.now()<executionDeadline,'GCUBE_REVIEW_DEADLINE_EXCEEDED');const capture=await page.evaluate")
+     source=replace(source,"window.currentSegment=index;initialized=window.runtime.evidence;", "window.currentSegment=index;const{runThreeNativeDraws}=await import('/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs');const proof=await runThreeNativeDraws({runtime:window.runtime,canvas});initialized={...window.runtime.evidence,nativeStability:proof};")
+     source=replace(source,"if(capture.initialized)runtimeEvidence.push({segmentIndex:capture.segmentIndex,...capture.initialized});", "if(capture.initialized){runtimeEvidence.push({segmentIndex:capture.segmentIndex,...capture.initialized});receipt.nativeStability.push({segmentIndex:capture.segmentIndex,...capture.initialized.nativeStability});}")
+-    source=replace(source,"schema:'WORLD_ENGINE_PRESENTATION_FRAMES_V2'", "schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_FRAMES_V1'")
++    source=replace(source,"schema:'WORLD_ENGINE_PRESENTATION_FRAMES_V2'", "schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_FRAMES_V1',...(request.durationSeconds===10?{durationSeconds:10,totalFrames:300}:{})")
+     source=replace(source,"   check(stream?.codec_name==='h264'", "   check(probe.streams.filter(s=>s.codec_type==='video').length===1&&!probe.streams.some(s=>s.codec_type==='audio'),'GCUBE_SILENT_SINGLE_VIDEO_STREAM_REQUIRED');\n   check(stream?.codec_name==='h264'")
+     start=source.index("if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){")
+     source=source[:start]+"// Library-only derived adapter; the gated capture_nvidia.mjs entry owns execution.\n"
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs
+@@ -69,7 +69,7 @@
+ }
+ 
+ export async function prepareNvidiaRuntimeRequest({request,cacheRoot,privateWorkspaceRoot,publicExportRoot}={}){
+- check(request?.totalFrames===180,'GCUBE_EXACT_180_FRAMES_REQUIRED');
++ check([6,10].includes(request?.durationSeconds===undefined?6:request.durationSeconds)&&request?.totalFrames===(request?.durationSeconds===undefined?6:request.durationSeconds)*30,'GCUBE_EXACT_180_FRAMES_REQUIRED');
+  await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
+  await verifyGeneratedSources();
+  const {prepareRuntimeRequest}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
+@@ -98,7 +98,8 @@
+  const variants=await verifyGeneratedSources();
+  const {captureVulkanDerived}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
+  const receipt=await captureVulkanDerived({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot,rootTestOnly,executionDeadline:permit.deadlineUnixMilliseconds,privateWorkspaceRoot,publicExportRoot});
+- check(receipt.schema==='WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1'&&receipt.status==='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'&&receipt.softwareOnly===false&&receipt.nvidiaVerified===true&&receipt.totalFrames===180&&receipt.renderedFrames===180&&receipt.video?.frames===180&&receipt.video?.fullDecode==='PASS','HANDOFF_HARDWARE_CAPTURE_RECEIPT_REQUIRED');
++ const totalFrames=plan.value.totalFrames,tenSecond=plan.value.durationSeconds===10;
++ check(receipt.schema===(tenSecond?'WORLD_ENGINE_NVIDIA_TEN_SECOND_CAPTURE_V1':'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1')&&(!tenSecond||receipt.durationSeconds===10)&&receipt.status==='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'&&receipt.softwareOnly===false&&receipt.nvidiaVerified===true&&receipt.totalFrames===totalFrames&&receipt.renderedFrames===totalFrames&&receipt.video?.frames===totalFrames&&receipt.video?.fullDecode==='PASS','HANDOFF_HARDWARE_CAPTURE_RECEIPT_REQUIRED');
+  await verifyGeneratedSources();
+  return{...receipt,executionPermit:{...permit,authorizationSHA256:expectedAuthorizationSHA256},sourceVariants:variants,rootTestOnly,productionEligible:!rootTestOnly,providerBillingStopControlled:false,visualQualityApproved:false};
+ }
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs
+@@ -30,20 +30,25 @@
+  'UP2_ENGINE_UNSUPPORTED','UP2_FLOW_OBJECT_NOT_DRAWN','UP2_FLOW_ROUTE_NOT_DRAWN','UP2_FRAME_NOT_DRAWN',
+  'UP2_FRAME_RANGE','UP2_FREE_FRAME_SCOPE','UP2_MARKER_RESERVATION_CAPACITY','UP2_ORIGINAL_MARKER_DESIGN_REQUIRED',
+  'UP2_SOURCE_BINDING_REQUIRED','UP2_SOURCE_MUTATION','UP2_SUPPLIED_MARKER_FULL_ROI_OUTSIDE_SAFE']);
+-const frame=n=>Number.isSafeInteger(n)&&n>=0&&n<180?n:null;
+-export function safeFailure(value){
++function timingScope({durationSeconds=6,totalFrames=180}={}){
++ if(![6,10].includes(durationSeconds)||totalFrames!==durationSeconds*30)throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
++ return{durationSeconds,totalFrames};
++}
++const frame=(n,totalFrames=180)=>Number.isSafeInteger(n)&&n>=0&&n<totalFrames?n:null;
++export function safeFailure(value,timing){
+  if(!value||typeof value!=='object'||!OPERATIONS.includes(value.operationId)||!SOURCES.includes(value.sourceId))return null;
++ const{totalFrames}=timingScope(timing);
+  const code=PUBLIC_CODES.includes(value.errorCode)?value.errorCode:'UNCLASSIFIED_EXCEPTION';
+- return{operationId:value.operationId,sourceId:value.sourceId,line:null,column:null,frameIndex:frame(value.frameIndex),
++ return{operationId:value.operationId,sourceId:value.sourceId,line:null,column:null,frameIndex:frame(value.frameIndex,totalFrames),
+   failureKind:FAILURE_KINDS.includes(value.failureKind)?value.failureKind:'UNCLASSIFIED_EXCEPTION',
+   errorCode:code,recognized:code!=='UNCLASSIFIED_EXCEPTION',exceptionType:EXCEPTIONS.includes(value.exceptionType)?value.exceptionType:'UNKNOWN'};
+ }
+-export function classifyException(error,operationId='INPUT_CANVAS',sourceId='CAPTURE_ADAPTER',frameIndex=null){
++export function classifyException(error,operationId='INPUT_CANVAS',sourceId='CAPTURE_ADAPTER',frameIndex=null,timing){
+  const disk=['EACCES','EPERM','ENOSPC','EDQUOT','EFBIG','EIO'].includes(error?.code);
+  const exact=disk?storageCode(error):PUBLIC_CODES.includes(error?.message)?error.message:'UNCLASSIFIED_EXCEPTION';
+  return safeFailure({operationId,sourceId,frameIndex,errorCode:exact,exceptionType:error?.name,
+   failureKind:disk?'STORAGE_FAILURE':exact==='CAPTURE_ASSET_HTTP_FAILED'?'ASSET_HTTP_FAILURE':exact!=='UNCLASSIFIED_EXCEPTION'?'DOMAIN_ERROR':
+-   ['RUNTIME_IMPORT','NATIVE_GUARD_IMPORT'].includes(operationId)?'MODULE_IMPORT_FAILURE':'UNCLASSIFIED_EXCEPTION'});
++   ['RUNTIME_IMPORT','NATIVE_GUARD_IMPORT'].includes(operationId)?'MODULE_IMPORT_FAILURE':'UNCLASSIFIED_EXCEPTION'},timing);
+ }
+ export function storageCode(error){
+  return ['EACCES','EPERM'].includes(error?.code)?'DIAGNOSTIC_STORAGE_PERMISSION':
+@@ -65,8 +70,9 @@
+   try{await directory.sync();}finally{await directory.close();}
+  }finally{await handle?.close();await unlink(temporary).catch(error=>{if(error.code!=='ENOENT')throw error;});}
+ }
+-export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA256=null,write=atomicPrivateJSON}={}){
+- const state={schema:SCHEMA,runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
++export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA256=null,durationSeconds=6,totalFrames=180,write=atomicPrivateJSON}={}){
++ const timing=timingScope({durationSeconds,totalFrames});
++ const state={schema:SCHEMA,...(durationSeconds===10?timing:{}),runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
+   imageDigest:/^sha256:[a-f0-9]{64}$/.test(imageDigest??'')?imageDigest:null,
+   sceneSHA256:/^[a-f0-9]{64}$/.test(sceneSHA256??'')?sceneSHA256:null,
+   operationId:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
+@@ -83,15 +89,15 @@
+   async event(raw){
+    if(!raw||!OPERATIONS.includes(raw.operationId)||!['START','END','FAIL','CLEANUP_FAIL'].includes(raw.phase))
+     throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+-   state.operationId=raw.operationId;state.frameIndex=frame(raw.frameIndex);
++   state.operationId=raw.operationId;state.frameIndex=frame(raw.frameIndex,totalFrames);
+    if(raw.phase==='END')state.lastCompletedOperation=raw.operationId;
+-   const failure=safeFailure(raw.failure);
++   const failure=safeFailure(raw.failure,timing);
+    if(raw.phase==='FAIL'&&failure&&!state.firstFailure)state.firstFailure=failure;
+    if(raw.phase==='CLEANUP_FAIL'&&failure&&!state.cleanupFailure)state.cleanupFailure=failure;
+    return persist();
+   },
+   async fail(failure,{cleanup=false}={}){return api.event({operationId:failure?.operationId??'INPUT_CANVAS',phase:cleanup?'CLEANUP_FAIL':'FAIL',failure});},
+-  async completeFrame(count){if(Number.isSafeInteger(count)&&count>=0&&count<=180)state.renderedFrames=count;return persist();},
++  async completeFrame(count){if(Number.isSafeInteger(count)&&count>=0&&count<=totalFrames)state.renderedFrames=count;return persist();},
+   async proofCompleted(){state.nativeProofCompleted=true;return persist();}
+  };return api;
+ }
+@@ -99,6 +105,8 @@
+ // Self-contained function serialized by Playwright; no Node closures cross realms.
+ export function initializeBrowserDiagnostics(config){
+  const{codes,operations,sources,exceptions}=config;let firstFailure=null,cleanupFailure=null,active='INPUT_CANVAS',source='CAPTURE_ADAPTER',frameIndex=null;
++ const totalFrames=config.durationSeconds===10&&config.totalFrames===300?300:180;
++ if((config.durationSeconds!==undefined||config.totalFrames!==undefined)&&!((config.durationSeconds===6&&config.totalFrames===180)||(config.durationSeconds===10&&config.totalFrames===300)))throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+  function classify(error){const known=codes.includes(error?.message),code=known?error.message:'UNCLASSIFIED_EXCEPTION';
+   return{operationId:active,sourceId:source,line:null,column:null,frameIndex,errorCode:code,recognized:known,
+    exceptionType:exceptions.includes(error?.name)?error.name:'UNKNOWN',failureKind:code==='CAPTURE_ASSET_HTTP_FAILED'?'ASSET_HTTP_FAILURE':
+@@ -108,7 +116,7 @@
+  const api={
+   async run(operationId,task,{sourceId='CAPTURE_ADAPTER',frame=null}={}){
+    if(!operations.includes(operationId)||!sources.includes(sourceId))throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+-   const previous=[active,source,frameIndex];active=operationId;source=sourceId;frameIndex=Number.isSafeInteger(frame)&&frame>=0&&frame<180?frame:null;
++   const previous=[active,source,frameIndex];active=operationId;source=sourceId;frameIndex=Number.isSafeInteger(frame)&&frame>=0&&frame<totalFrames?frame:null;
+    try{await send('START');const value=await task();await send('END');[active,source,frameIndex]=previous;return value;}
+    catch(error){if(!firstFailure)firstFailure=classify(error);await send('FAIL',firstFailure).catch(()=>{});throw error;}
+   },
+@@ -121,7 +129,8 @@
+ }
+ export async function attachPageDiagnostics(page,recorder){
+  await page.exposeFunction('__weCaptureCheckpoint',raw=>recorder.event(raw));
+- await page.evaluate(initializeBrowserDiagnostics,{schema:SCHEMA,codes:PUBLIC_CODES,operations:OPERATIONS,sources:SOURCES,exceptions:EXCEPTIONS});
++ const state=recorder.snapshot();
++ await page.evaluate(initializeBrowserDiagnostics,{schema:SCHEMA,codes:PUBLIC_CODES,operations:OPERATIONS,sources:SOURCES,exceptions:EXCEPTIONS,...(state.durationSeconds===10?timingScope(state):{})});
+ }
+ export async function evaluateDiagnosed(page,callback,arg,{recorder,timeoutMs}={}){
+  let crashed=false,timer;const onCrash=()=>{crashed=true;};page.on('crash',onCrash);
+@@ -129,19 +138,19 @@
+   if(!Number.isFinite(timeoutMs)||timeoutMs<=0)throw Object.assign(new Error('CAPTURE_PAGE_TIMEOUT'),{name:'TimeoutError'});
+   const result=await Promise.race([page.evaluate(callback,arg),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Object.assign(new Error('CAPTURE_PAGE_TIMEOUT'),{name:'TimeoutError'})),Math.min(timeoutMs,2147483647));})]);
+   if(result?.schema!==SCHEMA||typeof result.ok!=='boolean')throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+-  const failure=safeFailure(result.firstFailure);
++  const failure=safeFailure(result.firstFailure,recorder.snapshot());
+   if(result.ok===false){if(!failure)throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');await recorder.fail(failure);throw Object.assign(Error(failure.errorCode),{captureFailure:failure});}
+-  if(result.cleanupFailure)await recorder.fail(safeFailure(result.cleanupFailure),{cleanup:true});
++  if(result.cleanupFailure)await recorder.fail(safeFailure(result.cleanupFailure,recorder.snapshot()),{cleanup:true});
+   return result.value;
+  }catch(error){
+   if(error?.captureFailure)throw error;
+   const state=recorder.snapshot(),kind=crashed?'PAGE_CRASH':page.isClosed()?'PAGE_CLOSED':error?.name==='TimeoutError'?'PAGE_TIMEOUT':'EVALUATION_TRANSPORT_FAILURE';
+   const code={PAGE_CRASH:'CAPTURE_PAGE_CRASH',PAGE_CLOSED:'CAPTURE_PAGE_CLOSED',PAGE_TIMEOUT:'CAPTURE_PAGE_TIMEOUT',EVALUATION_TRANSPORT_FAILURE:'CAPTURE_EVALUATION_TRANSPORT_FAILED'}[kind];
+-  const failure=safeFailure({operationId:state.operationId??'INPUT_CANVAS',sourceId:'CAPTURE_ADAPTER',frameIndex:state.frameIndex,errorCode:code,failureKind:kind,exceptionType:error?.name});
++  const failure=safeFailure({operationId:state.operationId??'INPUT_CANVAS',sourceId:'CAPTURE_ADAPTER',frameIndex:state.frameIndex,errorCode:code,failureKind:kind,exceptionType:error?.name},state);
+   await recorder.fail(failure);throw Object.assign(Error(code),{captureFailure:failure});
+  }finally{clearTimeout(timer);page.off('crash',onCrash);}
+ }
+ export async function preserveCleanup(recorder,tasks){
+- for(const task of tasks)try{await task();}catch(error){await recorder.fail(classifyException(error,'CLEANUP'),{cleanup:true});}
++ for(const task of tasks)try{await task();}catch(error){await recorder.fail(classifyException(error,'CLEANUP','CAPTURE_ADAPTER',null,recorder.snapshot()),{cleanup:true});}
+  return recorder.snapshot();
+ }
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs
+@@ -102,7 +102,7 @@
+  let parsedPlan,parsedRuntime;try{parsedPlan=JSON.parse(planText);parsedRuntime=JSON.parse(packageText);}catch{throw Error('HANDOFF_EXECUTION_JSON_INVALID');}
+  check(canonicalJSON(parsedPlan)===canonicalJSON(plan),'HANDOFF_PLAN_WIRE_CHANGED');
+  check(hex(expectedPlanSHA256)&&sha(planWire)===expectedPlanSHA256&&approval.planSHA256===expectedPlanSHA256,'HANDOFF_APPROVED_PLAN_SHA_MISMATCH');
+- check(plan.schema===PLAN_SCHEMA&&plan.durationSeconds===6&&plan.totalFrames===180&&plan.fps===30&&plan.aspectRatio==='9:16'&&canonicalJSON(plan.resolution)==='{"height":1920,"width":1080}','HANDOFF_SIX_SECOND_PLAN_REQUIRED');
++ check(plan.schema===PLAN_SCHEMA&&[6,10].includes(plan.durationSeconds)&&plan.totalFrames===plan.durationSeconds*30&&plan.fps===30&&plan.aspectRatio==='9:16'&&canonicalJSON(plan.resolution)==='{"height":1920,"width":1080}','HANDOFF_SIX_SECOND_PLAN_REQUIRED');
+  check(canonicalJSON(plan.audioSettings)==='{"enabled":false,"mode":"SILENT"}'&&['GENERAL','FICTIONAL'].includes(plan.simulationType),'HANDOFF_NONHISTORICAL_SILENT_SCOPE_REQUIRED');
+  const render=plan.renderProfile;
+  check(plain(render)&&render.profileId===PROFILE&&render.backend==='vulkan'&&hex(render.sourceClosureSHA256)&&digest(render.imageDigest),'HANDOFF_NVIDIA_RENDER_PROFILE_REQUIRED');
+@@ -116,10 +116,10 @@
+  const cost=money(approval.maxCostAmount),rate=money(approval.gpuHourlyRate);
+  check(BigInt(approval.maxWallSeconds)*rate<=cost*3600n,'HANDOFF_GPU_COST_LIMIT_EXCEEDED');
+  check(typeof plan.runtimeWireJSON==='string'&&plan.runtimeWireJSON===packageText&&hex(expectedPackageSHA256)&&sha(packageWire)===expectedPackageSHA256&&plan.runtimeWireSHA256===expectedPackageSHA256,'HANDOFF_RUNTIME_WIRE_SHA_MISMATCH');
+- check(plain(plan.runtime)&&canonicalJSON(parsedRuntime)===canonicalJSON(plan.runtime)&&parsedRuntime.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2'&&parsedRuntime.totalFrames===180,'HANDOFF_RUNTIME_PLAN_MISMATCH');
++ check(plain(plan.runtime)&&canonicalJSON(parsedRuntime)===canonicalJSON(plan.runtime)&&parsedRuntime.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2'&&parsedRuntime.totalFrames===plan.totalFrames&&(parsedRuntime.durationSeconds===undefined?6:parsedRuntime.durationSeconds)===plan.durationSeconds,'HANDOFF_RUNTIME_PLAN_MISMATCH');
+  check(Array.isArray(parsedRuntime.segments)&&parsedRuntime.segments.length>=1&&parsedRuntime.segments.length<=16,'HANDOFF_RUNTIME_SEGMENTS_REQUIRED');
+- let cursor=0;for(const segment of parsedRuntime.segments){check(plain(segment)&&segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor&&segment.endFrame<=180,'HANDOFF_RUNTIME_FRAME_RANGE_INVALID');cursor=segment.endFrame;}
+- check(cursor===180&&hex(plan.sourceQualificationSHA256),'HANDOFF_SOURCE_QUALIFICATION_REQUIRED');
++ let cursor=0;for(const segment of parsedRuntime.segments){check(plain(segment)&&segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor&&segment.endFrame<=plan.totalFrames,'HANDOFF_RUNTIME_FRAME_RANGE_INVALID');cursor=segment.endFrame;}
++ check(cursor===plan.totalFrames&&hex(plan.sourceQualificationSHA256),'HANDOFF_SOURCE_QUALIFICATION_REQUIRED');
+  const executionSeconds=Math.min(600,approval.maxWallSeconds,Math.floor((deadline-nowMs)/1000));
+  check(executionSeconds>=1,'HANDOFF_GPU_APPROVAL_EXPIRED');
+  return {profile:PROFILE,planSHA256:expectedPlanSHA256,runtimePackageSHA256:expectedPackageSHA256,
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
+@@ -24,7 +24,7 @@
+ 
+ export function validateRuntimeRequest(request){
+  check(request?.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2','UP2_RUNTIME_REQUEST_SCHEMA');
+- check(Number.isSafeInteger(request.totalFrames)&&request.totalFrames>=2&&request.totalFrames<=240,'UP2_RUNTIME_TOTAL_FRAMES');
++ check([6,10].includes(request.durationSeconds===undefined?6:request.durationSeconds)&&request.totalFrames===(request.durationSeconds===undefined?6:request.durationSeconds)*30,'UP2_RUNTIME_TOTAL_FRAMES');
+  check(hex(request.sourceInputSHA256),'UP2_SOURCE_INPUT_HASH_REQUIRED');check(Array.isArray(request.segments)&&request.segments.length>=1&&request.segments.length<=16,'UP2_RUNTIME_SEGMENTS');
+  let cursor=0;for(const[index,segment]of request.segments.entries()){check(segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor,'UP2_SEGMENT_FRAME_GAP_OR_OVERLAP');
+   validateScenePlan(segment.scene);check(segment.scene.timing.total_frames===segment.endFrame-segment.startFrame&&segment.scene.timing.fps===30&&segment.scene.metadata.output.width===1080&&segment.scene.metadata.output.height===1920,'UP2_SEGMENT_SCENE_TIMING');
+@@ -67,7 +67,7 @@
+   sourceRows.push({segmentIndex:index,startFrame:item.startFrame,endFrame:item.endFrame,sourceId:prepared.regionEvidence.sourceId,sourceOriginalSHA256:source.sourceOriginalSHA256,styleId:prepared.sourceStyle.styleId,terrainSHA256:source.sha256,bounds:copy(source.bounds),cameraEnvelope:copy(presentationPlan.coverageBounds),terrainTreatment:prepared.terrainTreatment,nativeResolution:copy(prepared.regionEvidence.sourceDimensions),outputResolution:copy(source.dimensions),sourceGeometryBinding:compileExistingEnginePlan(item.scene).sourceGeometryBinding});
+  }
+  const sourceQualification={schema:'WORLD_ENGINE_PRESENTATION_SOURCES_V2',segments:sourceRowsFor(segments),totalFrames:request.totalFrames},sourceQualificationWireJSON=canonicalJSON(sourceQualification);
+- return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',totalFrames:request.totalFrames,transitions:copy(request.transitions),sourceInputSHA256:request.sourceInputSHA256,inputTrace:copy(request.inputTrace??null),segments,sourceBindings,sourceQualification,sourceQualificationWireJSON,sourceQualificationSHA256:hash(sourceQualificationWireJSON)};
++ return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',...(request.durationSeconds===10?{durationSeconds:10}:{}),totalFrames:request.totalFrames,transitions:copy(request.transitions),sourceInputSHA256:request.sourceInputSHA256,inputTrace:copy(request.inputTrace??null),segments,sourceBindings,sourceQualification,sourceQualificationWireJSON,sourceQualificationSHA256:hash(sourceQualificationWireJSON)};
+ }
+ async function makeLoopback(payload,cacheRoot){
+  const trace=[],aliases=new Map([['/three.js',path.join(ENGINE,'web/vendor/three/0.170.0/three.module.js')],['/web/map_infographic_v1/graphic_layout.mjs',path.join(ENGINE,'recovery/g2-final-recovery-v1/layout_extension.mjs')],['/web/map_infographic_v1/graphic_layout_legacy.mjs',path.join(ENGINE,'web/map_infographic_v1/graphic_layout.mjs')]]);
+@@ -84,12 +84,12 @@
+ export async function captureVulkanDerived({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot=process.env.WORLD_ENGINE_NODE_DEPS,probeFrames=null,prepareOnly=false,rootTestOnly=false,executionDeadline,privateWorkspaceRoot,publicExportRoot}={}){
+  check(!prepareOnly&&probeFrames===null&&Number.isFinite(executionDeadline),'GCUBE_FULL_CAPTURE_AUTHORITY_REQUIRED');
+  check(Date.now()<executionDeadline,'GCUBE_REVIEW_DEADLINE_EXCEEDED');
+- check(hex(expectedSHA256),'UP2_EXPECTED_PACKAGE_SHA_REQUIRED');const raw=await readFile(packageFile);check(hash(raw)===expectedSHA256,'UP2_PACKAGE_SHA_MISMATCH');const request=JSON.parse(raw);check(request.totalFrames===180,'GCUBE_EXACT_180_FRAMES_REQUIRED');
++ check(hex(expectedSHA256),'UP2_EXPECTED_PACKAGE_SHA_REQUIRED');const raw=await readFile(packageFile);check(hash(raw)===expectedSHA256,'UP2_PACKAGE_SHA_MISMATCH');const request=JSON.parse(raw);check([6,10].includes(request.durationSeconds===undefined?6:request.durationSeconds)&&request.totalFrames===(request.durationSeconds===undefined?6:request.durationSeconds)*30,'GCUBE_EXACT_180_FRAMES_REQUIRED');
+  await newPrivateRoot(outputRoot,{privateWorkspaceRoot,publicExportRoot});const payload=await prepareRuntimeRequest({request,cacheRoot:path.join(outputRoot,'sources'),privateWorkspaceRoot,publicExportRoot});
+  if(expectedSourceQualificationSHA256!==undefined)check(hex(expectedSourceQualificationSHA256)&&payload.sourceQualificationSHA256===expectedSourceQualificationSHA256,'UP2_PRECLAIM_SOURCE_QUALIFICATION_CHANGED');
+  await writeFile(path.join(outputRoot,'REQUEST.json'),raw,{flag:'wx',mode:0o600});await writeJSON(path.join(outputRoot,'RUNTIME.json'),payload);
+  if(prepareOnly){const result={schema:'WORLD_ENGINE_PRESENTATION_PREPARATION_V2',status:'CPU_PREPARATION_PASS_NOT_DRAW',packageSHA256:expectedSHA256,sourceQualification:payload.sourceQualification,sourceQualificationWireJSON:payload.sourceQualificationWireJSON,sourceQualificationSHA256:payload.sourceQualificationSHA256,softwareOnly:true,nvidiaVerified:false};await writeJSON(path.join(outputRoot,'PREPARATION_RECEIPT.json'),result);return result;}
+- const receipt={schema:'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1',status:'RUNNING',packageSHA256:expectedSHA256,sourceInputSHA256:request.sourceInputSHA256,sourceQualificationSHA256:payload.sourceQualificationSHA256,totalFrames:request.totalFrames,renderedFrames:0,softwareOnly:false,nvidiaVerified:false,visualQualityApproved:false,paidExecutionAttempted:false,providerBillingStopControlled:false,startedAt:new Date().toISOString(),transitions:copy(request.transitions),inputTrace:copy(request.inputTrace??null),sourceCredits:payload.segments.map((s,index)=>({segmentIndex:index,sourceId:s.regionEvidence.sourceId,license:s.sourceStyle.license,attribution:s.regionEvidence.attribution,sourceURL:s.sourceStyle.sourceOriginal.url,sourceOriginalSHA256:s.sourceStyle.terrainAsset.sourceOriginalSHA256,terrainSHA256:s.sourceStyle.terrainAsset.sha256}))};
++ const receipt={schema:request.durationSeconds===10?'WORLD_ENGINE_NVIDIA_TEN_SECOND_CAPTURE_V1':'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1',...(request.durationSeconds===10?{durationSeconds:10}:{}),status:'RUNNING',packageSHA256:expectedSHA256,sourceInputSHA256:request.sourceInputSHA256,sourceQualificationSHA256:payload.sourceQualificationSHA256,totalFrames:request.totalFrames,renderedFrames:0,softwareOnly:false,nvidiaVerified:false,visualQualityApproved:false,paidExecutionAttempted:false,providerBillingStopControlled:false,startedAt:new Date().toISOString(),transitions:copy(request.transitions),inputTrace:copy(request.inputTrace??null),sourceCredits:payload.segments.map((s,index)=>({segmentIndex:index,sourceId:s.regionEvidence.sourceId,license:s.sourceStyle.license,attribution:s.regionEvidence.attribution,sourceURL:s.sourceStyle.sourceOriginal.url,sourceOriginalSHA256:s.sourceStyle.terrainAsset.sourceOriginalSHA256,terrainSHA256:s.sourceStyle.terrainAsset.sha256}))};
+  let browser,encoder,encoderExit,service;const evidence=[],errors=[],runtimeEvidence=[],started=performance.now();
+  try{
+   check(typeof depsRoot==='string'&&path.isAbsolute(depsRoot),'UP2_PRIVATE_PLAYWRIGHT_REQUIRED');const require=createRequire(path.join(depsRoot,'package.json')),{chromium}=require('playwright');receipt.dependencies={node:process.version,playwright:require('playwright/package.json').version};
+@@ -129,7 +129,7 @@
+   }else receipt.status='ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO';check(errors.length===0,'UP2_BROWSER_ERROR');receipt.runtime={backend:runtimeEvidence[0]?.backend,segments:runtimeEvidence};
+  }catch(error){receipt.status='FAILED';receipt.failure={code:String(error.message).slice(0,4000)};throw error;}
+  finally{encoder?.kill('SIGTERM');await browser?.close();if(service)await new Promise(resolve=>service.server.close(resolve));receipt.elapsedSeconds=(performance.now()-started)/1000;receipt.finishedAt=new Date().toISOString();receipt.browserErrors=errors;
+-  await writeJSON(path.join(outputRoot,'FRAME_EVIDENCE.json'),{schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_FRAMES_V1',frames:evidence});await writeJSON(path.join(outputRoot,'HTTP_ASSET_BINDINGS.json'),service?.trace??[]);receipt.frameEvidence={file:'FRAME_EVIDENCE.json',sha256:hash(await readFile(path.join(outputRoot,'FRAME_EVIDENCE.json')))};await writeJSON(path.join(outputRoot,'CAPTURE_RECEIPT.json'),receipt);
++  await writeJSON(path.join(outputRoot,'FRAME_EVIDENCE.json'),{schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_FRAMES_V1',...(request.durationSeconds===10?{durationSeconds:10,totalFrames:300}:{}),frames:evidence});await writeJSON(path.join(outputRoot,'HTTP_ASSET_BINDINGS.json'),service?.trace??[]);receipt.frameEvidence={file:'FRAME_EVIDENCE.json',sha256:hash(await readFile(path.join(outputRoot,'FRAME_EVIDENCE.json')))};await writeJSON(path.join(outputRoot,'CAPTURE_RECEIPT.json'),receipt);
+   const names=(await readdir(outputRoot)).filter(n=>n!=='SHA256SUMS').sort(),lines=[];for(const name of names){const file=path.join(outputRoot,name);if((await lstat(file)).isFile())lines.push(hash(await readFile(file))+'  '+name);}await writeFile(path.join(outputRoot,'SHA256SUMS'),lines.join('\n')+'\n',{flag:'wx',mode:0o600});
+  }
+  return receipt;
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/common.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/common.py
+@@ -107,10 +107,22 @@
+             'externalParentContractVerified': require_external}
+ 
+ 
++def duration_contract(plan):
++    """Read only the two validated Studio sample durations; never infer 10s."""
++    if (not isinstance(plan, dict) or type(plan.get('durationSeconds')) is not int
++            or plan['durationSeconds'] not in {6, 10}
++            or type(plan.get('totalFrames')) is not int
++            or plan['totalFrames'] != plan['durationSeconds'] * 30
++            or type(plan.get('fps')) is not int or plan['fps'] != 30):
++        raise RuntimeError('HANDOFF_EXACT_NONHISTORICAL_SIX_SECOND_PLAN_REQUIRED')
++    return {'durationSeconds': plan['durationSeconds'], 'totalFrames': plan['totalFrames'], 'fps': 30}
++
++
+ def validate_plan(plan, *, image_digest, source_sha):
++    timing = duration_contract(plan)
++    frames = timing['totalFrames']
+     if (not isinstance(plan, dict) or plan.get('schema') != PLAN
+-            or plan.get('totalFrames') != 180 or plan.get('durationSeconds') != 6
+-            or plan.get('fps') != 30 or plan.get('resolution') != {'width': 1080, 'height': 1920}
++            or plan.get('resolution') != {'width': 1080, 'height': 1920}
+             or plan.get('aspectRatio') != '9:16'
+             or plan.get('audioSettings') != {'enabled': False, 'mode': 'SILENT'}
+             or plan.get('simulationType') not in {'GENERAL', 'FICTIONAL'}):
+@@ -123,7 +135,9 @@
+     wire, runtime = plan.get('runtimeWireJSON'), plan.get('runtime')
+     if (not isinstance(wire, str) or len(wire.encode()) > 8 * 1024 ** 2
+             or sha(wire.encode()) != plan.get('runtimeWireSHA256')
+-            or not isinstance(runtime, dict) or json.loads(wire) != runtime or runtime.get('totalFrames') != 180
++            or not isinstance(runtime, dict) or json.loads(wire) != runtime or runtime.get('totalFrames') != frames
++            or (timing['durationSeconds'] == 10 and runtime.get('durationSeconds') != 10)
++            or ('durationSeconds' in runtime and runtime['durationSeconds'] != timing['durationSeconds'])
+             or not SHA.fullmatch(str(plan.get('sourceQualificationSHA256')))):
+         raise RuntimeError('HANDOFF_RUNTIME_WIRE_BINDING_CHANGED')
+     cursor = 0
+@@ -135,6 +149,6 @@
+                 or scene.get('metadata', {}).get('output') != {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False}):
+             raise RuntimeError('HANDOFF_SCENE_FRAME_BINDING_CHANGED')
+         cursor = segment['endFrame']
+-    if cursor != 180:
++    if cursor != frames:
+         raise RuntimeError('HANDOFF_SCENE_FRAME_COVERAGE_CHANGED')
+     return True
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py
+@@ -21,7 +21,7 @@
+ HERE = Path(__file__).resolve().parent
+ if str(HERE) not in sys.path:
+     sys.path.insert(0, str(HERE))
+-from common import RECOVERY, canonical, load, sha, validate_plan, verify_manifest
++from common import RECOVERY, canonical, duration_contract, load, sha, validate_plan, verify_manifest
+ from nvidia_backend import approval_limit, cache
+ _stop_requested = False
+ 
+@@ -67,12 +67,14 @@
+ 
+ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
+                             environment, output, capture_factory=subprocess.Popen,
+-                            _cpu_test_before_cleanup=None, monitor=None):
++                            _cpu_test_before_cleanup=None, monitor=None, total_frames=180):
+     """Internal function; production CLI constructs command from pinned inputs.
+ 
+     A failed cleanup remains unresolved. The original descriptor is kept open
+     until owned descendants have been checked, including after parent death.
+     """
++    if type(total_frames) is not int or total_frames not in (180, 300):
++        raise RuntimeError('HANDOFF_CAPTURE_FRAME_CONTRACT_REQUIRED')
+     validate_lease_descriptor(lease_fd, lease_path)
+     if (parent['pid'] != os.getppid() or parent_identity(parent['pid']) != parent
+             or parent['uid'] != os.getuid() or not 0 < seconds <= 600):
+@@ -116,10 +118,12 @@
+             if row.get('stage') != 'ACTUAL_FRAME_DRAW':
+                 continue
+             if (type(row.get('renderedFrames')) is not int or row['renderedFrames'] != count + 1
+-                    or row.get('totalFrames') != 180 or row.get('frame') != count):
++                    or row.get('totalFrames') != total_frames or row.get('frame') != count
++                    or total_frames == 300 and (type(row.get('totalFrames')) is not int or type(row.get('frame')) is not int)
++                    or count >= total_frames):
+                 raise RuntimeError('HANDOFF_ACTUAL_FRAME_PROGRESS_INVALID')
+             count += 1
+-            atomic(Path(output) / 'actual-progress.json', {'processedFrames': count, 'totalFrames': 180})
++            atomic(Path(output) / 'actual-progress.json', {'processedFrames': count, 'totalFrames': total_frames})
+     try:
+         if select.select([parent_fd], [], [], 0)[0]:
+             raise RuntimeError('HANDOFF_PARENT_EXITED_BEFORE_CAPTURE')
+@@ -228,6 +232,7 @@
+     image = plan['renderProfile']['imageDigest']
+     backend = NvidiaPresentationBackend(args.manifest_file, args.manifest_sha256, image)
+     backend._verify(plan, 'GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1')
++    timing = duration_contract(plan)
+     if sha(canonical(plan)) != args.plan_sha256:
+         raise RuntimeError('HANDOFF_PRIVATE_PLAN_CHANGED')
+     permit = approval_limit(approval, plan, image)
+@@ -271,7 +276,7 @@
+     result = supervise_owned_capture(command, lease_fd=args.lease_fd, lease_path=lease_path,
+         parent={'pid': args.parent_pid, 'startTicks': args.parent_start, 'uid': os.getuid()},
+         seconds=min(seconds, (deadline - datetime.now(timezone.utc)).total_seconds()),
+-        environment=environment, output=job, monitor=monitor)
++        environment=environment, output=job, monitor=monitor, total_frames=timing['totalFrames'])
+     with cache().PrivateTree(job) as private:
+         private.write_json('CAPTURE_PROCESS_RESULT.json', result)
+     return result
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py
+@@ -20,7 +20,7 @@
+ HERE = Path(__file__).resolve().parent
+ if str(HERE) not in sys.path:
+     sys.path.insert(0, str(HERE))
+-from common import PROFILE, RECOVERY, REPO, canonical, load, mvp, sha, validate_plan, verify_manifest
++from common import PROFILE, RECOVERY, REPO, canonical, duration_contract, load, mvp, sha, validate_plan, verify_manifest
+ 
+ base = mvp()
+ JOB = re.compile(r'studio-[0-9a-f]{32}\Z')
+@@ -147,7 +147,8 @@
+                 if not re.fullmatch(r'[A-Z][A-Z0-9_]{1,95}', code):
+                     code = 'HANDOFF_PREFLIGHT_OPERATION_FAILED'
+                 checks.append({'name': name, 'status': 'BLOCKED', 'code': code})
+-        check('NVIDIA_SIX_SECOND_SOURCE_AND_MODE', lambda: self._verify(plan, profile))
++        check('NVIDIA_TEN_SECOND_SOURCE_AND_MODE' if isinstance(plan, dict) and plan.get('durationSeconds') == 10
++              else 'NVIDIA_SIX_SECOND_SOURCE_AND_MODE', lambda: self._verify(plan, profile))
+         if checks[-1]['status'] != 'PASS':
+             return {'checks': checks, 'renderAllowed': False, 'gpuRenderingVerified': False,
+                     'scope': PROFILE, 'hardwareCaptureNotYetPerformed': True}
+@@ -194,12 +195,17 @@
+         # test. Its strict public report is still rechecked by GateController.
+         runtime = load('_handoff_preserved_health_runtime', RECOVERY / 'production-studio-mvp-v1/studio_runtime.py')
+         check('EXISTING_PHYSICAL_GPU_HEALTH', runtime._health)
+-        return {'checks': checks, 'renderAllowed': all(row['status'] == 'PASS' for row in checks),
+-                'gpuRenderingVerified': False, 'frames': 180, 'scenes': len(plan.get('runtime', {}).get('segments', [])),
++        timing = duration_contract(plan)
++        result = {'checks': checks, 'renderAllowed': all(row['status'] == 'PASS' for row in checks),
++                'gpuRenderingVerified': False, 'frames': timing['totalFrames'], 'scenes': len(plan.get('runtime', {}).get('segments', [])),
+                 'scope': PROFILE, 'hardwareCaptureNotYetPerformed': True}
++        if timing['durationSeconds'] == 10:
++            result['durationSeconds'] = 10
++        return result
+ 
+     def start_studio_job(self, plan, profile, approval_path, audio_spec, request_id, *, control_root, export_root):
+         self._verify(plan, profile)
++        timing = duration_contract(plan)
+         if audio_spec != {'enabled': False} or not REQUEST_ID.fullmatch(str(request_id)):
+             raise RuntimeError('HANDOFF_SILENT_OWNER_START_REQUIRED')
+         control_root, export_root, approval_path = map(Path, (control_root, export_root, approval_path))
+@@ -219,8 +225,10 @@
+                 with jobs.child(job_id, create=True) as job:
+                     state = {'jobId': job_id, 'state': 'QUEUED', 'phase': 'SOURCE_VERIFY',
+                         'totalScenes': len(plan['runtime']['segments']), 'completedScenes': 0,
+-                        'processedFrames': 0, 'totalFrames': 180, 'requiresGpu': True,
++                        'processedFrames': 0, 'totalFrames': timing['totalFrames'], 'requiresGpu': True,
+                         'gpuRenderingVerified': False, 'createdAt': _now()}
++                    if timing['durationSeconds'] == 10:
++                        state['durationSeconds'] = 10
+                     bounded = approval_limit(approval, plan, self.image_digest)
+                     state['executionDeadline'] = (datetime.now(timezone.utc) +
+                         timedelta(seconds=bounded['maxWallSeconds'])).isoformat()
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py
+@@ -9,7 +9,7 @@
+ HERE = Path(__file__).resolve().parent
+ if str(HERE) not in sys.path:
+     sys.path.insert(0, str(HERE))
+-from common import PLAN, PROFILE, REQUEST, RECOVERY, canonical, load, mvp, sha, verify_manifest
++from common import PLAN, PROFILE, REQUEST, RECOVERY, canonical, duration_contract, load, mvp, sha, verify_manifest
+ 
+ base = mvp()
+ 
+@@ -119,16 +119,19 @@
+             module.verify_prepared_sources = verify_profile_sources
+             self._source_normalizer = module.StudioController(
+                 control_root=self.control_root / 'handoff-source-normalization',
+-                export_root=self.export_root, allow_free_data_review=True)
++                export_root=self.export_root, allow_free_data_review=True,
++                allow_ten_second_sample=True)
+         module = sys.modules['_handoff_preserved_cpu_source_normalizer']
+         cpu = self._source_normalizer._normal({**deepcopy(value), 'schema': module.REQUEST_SCHEMA})
+         pipeline = cpu['sourcePipeline']
+         if (pipeline.get('simulationType') not in {'GENERAL', 'FICTIONAL'}
+-                or pipeline.get('totalFrames') != 180 or pipeline.get('fps') != 30
++                or pipeline.get('totalFrames') not in {180, 300} or pipeline.get('fps') != 30
++                or (pipeline.get('totalFrames') == 300 and pipeline.get('durationSeconds') != 10)
+                 or pipeline.get('ready') is not True
+                 or pipeline.get('sourceAdmission', {}).get('status') != 'PASS'):
+             invalid('HANDOFF_QUALIFIED_NONHISTORICAL_180_FRAMES_REQUIRED')
+-        plan = {'schema': PLAN, 'totalFrames': 180, 'durationSeconds': 6, 'fps': 30,
++        frames = pipeline['totalFrames']
++        plan = {'schema': PLAN, 'totalFrames': frames, 'durationSeconds': frames // 30, 'fps': 30,
+             'resolution': {'width': 1080, 'height': 1920}, 'aspectRatio': '9:16',
+             'audioSettings': {'enabled': False, 'mode': 'SILENT'},
+             'simulationType': pipeline['simulationType'],
+@@ -141,10 +144,20 @@
+             'sourceBindings': deepcopy(pipeline['sourceBindings']),
+             'sourceQualification': deepcopy(pipeline['sourceAdmission']['sourceQualification']),
+             'originalInputSHA256': pipeline['compilerInputSHA256']}
++        duration_contract(plan)
+         return {'schema': 'WORLD_ENGINE_NVIDIA_STUDIO_SUBMISSION_V1',
+                 'title': cpu['title'], 'profile': PROFILE, 'videoPlan': plan,
+                 'sfx': {'enabled': False}, 'sourceTrace': {'cpuSourceQualificationReused': True,
+                     'freeProfileStartCalled': False, 'sourceInputSHA256': pipeline['compilerInputSHA256']}}
++
++    def _preflight_record(self, root, record):
++        result = super()._preflight_record(root, record)
++        timing = duration_contract(record['submission']['videoPlan'])
++        if timing['durationSeconds'] == 10:
++            # The preserved coordinator deliberately drops backend timing facts.
++            # Surface only this new sample's validated duration for owner consent.
++            result.update(durationSeconds=10, totalFrames=300)
++        return result
+ 
+     def resume(self, *args, **kwargs):
+         # No new GPU work is silently reauthorized or restarted in this bounded
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py
+@@ -15,7 +15,7 @@
+ 
+ HERE = Path(__file__).resolve().parent
+ sys.path.insert(0, str(HERE))
+-from common import PROFILE, RECOVERY, canonical, load, sha
++from common import PROFILE, RECOVERY, canonical, duration_contract, load, sha
+ from nvidia_backend import NvidiaPresentationBackend, approval_limit, cache, lease_helper, _runtime_environment
+ from lease_supervisor import original_lease_descriptor, parent_identity
+ 
+@@ -78,16 +78,22 @@
+ 
+ 
+ def _validate_capture(output, plan):
++    timing = duration_contract(plan)
++    total_frames, duration = timing['totalFrames'], timing['durationSeconds']
++    label = 'SIX' if duration == 6 else 'TEN'
+     video = output / 'VIDEO.mp4'
+     with cache().PrivateTree(output) as directory:
+         receipt = directory.json('CAPTURE_RECEIPT.json')
+         frames = directory.json('FRAME_EVIDENCE.json')
+-    if (receipt.get('schema') != 'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1'
++    if (receipt.get('schema') != f'WORLD_ENGINE_NVIDIA_{label}_SECOND_CAPTURE_V1'
+             or receipt.get('status') != 'TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'
+             or receipt.get('packageSHA256') != plan['runtimeWireSHA256']
+             or receipt.get('sourceQualificationSHA256') != plan['sourceQualificationSHA256']
+             or receipt.get('softwareOnly') is not False or receipt.get('nvidiaVerified') is not True
+-            or receipt.get('renderedFrames') != 180 or receipt.get('totalFrames') != 180
++            or receipt.get('renderedFrames') != total_frames or receipt.get('totalFrames') != total_frames
++            or duration == 10 and (type(receipt.get('durationSeconds')) is not int
++                or receipt.get('durationSeconds') != 10
++                or any(type(receipt.get(key)) is not int for key in ('renderedFrames', 'totalFrames')))
+             or receipt.get('visualQualityApproved') is not False
+             or receipt.get('video', {}).get('sha256') != sha(video.read_bytes())):
+         raise RuntimeError('HANDOFF_NVIDIA_CAPTURE_RECEIPT_INVALID')
+@@ -114,24 +120,29 @@
+     if (len(streams) != 1 or streams[0].get('codec_type') != 'video'
+             or streams[0].get('codec_name') != 'h264' or streams[0].get('width') != 1080
+             or streams[0].get('height') != 1920 or streams[0].get('r_frame_rate') != '30/1'
+-            or int(streams[0].get('nb_read_frames', '-1')) != 180
+-            or abs(float(info.get('format', {}).get('duration', -1)) - 6) > .001):
+-        raise RuntimeError('HANDOFF_VIDEO_180_FRAME_CONTRACT_FAILED')
++            or int(streams[0].get('nb_read_frames', '-1')) != total_frames
++            or abs(float(info.get('format', {}).get('duration', -1)) - duration) > .001):
++        raise RuntimeError(f'HANDOFF_VIDEO_{total_frames}_FRAME_CONTRACT_FAILED')
+     decoded = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(video), '-f', 'null', '-'],
+                              capture_output=True, timeout=45, check=False)
+     if decoded.returncode or decoded.stderr:
+         raise RuntimeError('HANDOFF_VIDEO_FULL_DECODE_FAILED')
+     rows = frames.get('frames', [])
+-    if (len(rows) != 180 or [row.get('frame') for row in rows] != list(range(180))
++    if (len(rows) != total_frames or [row.get('frame') for row in rows] != list(range(total_frames))
++            or duration == 10 and (type(frames.get('durationSeconds')) is not int
++                or frames.get('durationSeconds') != 10 or type(frames.get('totalFrames')) is not int
++                or frames.get('totalFrames') != total_frames
++                or any(type(row.get('frame')) is not int for row in rows))
+             or any(row.get('diagnostic', {}).get('glError') != 0 for row in rows)):
+         raise RuntimeError('HANDOFF_ACTUAL_FRAME_EVIDENCE_INVALID')
+-    return {'schema': 'WORLD_ENGINE_NVIDIA_SIX_SECOND_MEDIA_VERIFY_V1',
+-            'videoSHA256': sha(video.read_bytes()), 'frames': 180, 'width': 1080,
+-            'height': 1920, 'fps': 30, 'durationSeconds': 6, 'fullDecode': 'PASS',
++    return {'schema': f'WORLD_ENGINE_NVIDIA_{label}_SECOND_MEDIA_VERIFY_V1',
++            'videoSHA256': sha(video.read_bytes()), 'frames': total_frames, 'width': 1080,
++            'height': 1920, 'fps': 30, 'durationSeconds': duration, 'fullDecode': 'PASS',
+             'audioStreams': 0, 'visualQuality': 'USER_VIDEO_REVIEW_REQUIRED'}
+ 
+ 
+-def _export(job, output, export_root, control_root):
++def _export(job, output, export_root, control_root, plan=None):
++    timing = duration_contract(plan) if plan is not None else {'durationSeconds': 6, 'totalFrames': 180, 'fps': 30}
+     delivery = load('_handoff_original_export_media', RECOVERY / 'production-studio-mvp-v1/studio_delivery.py')
+     private_base = Path(control_root) / 'handoff-export-private'
+     with cache().PrivateTree(private_base, create=True):
+@@ -143,7 +154,7 @@
+                 os.fchmod(target.fileno(), 0o600); target.flush(); os.fsync(target.fileno())
+             public.write_json('QUALITY_SUMMARY.json', {
+                 'schema': 'WORLD_ENGINE_STUDIO_SAFE_QA_V1', 'technicalVerification': 'PASS',
+-                'frames': 180, 'fps': 30, 'width': 1080, 'height': 1920, 'durationSeconds': 6,
++                'frames': timing['totalFrames'], 'fps': 30, 'width': 1080, 'height': 1920, 'durationSeconds': timing['durationSeconds'],
+                 'audioStreams': 0, 'sfxEnabled': False, 'videoDecodedPixelsUnchanged': True,
+                 'fullDecode': 'PASS', 'visualQuality': 'USER_VIDEO_REVIEW_REQUIRED',
+                 'externalDownloadVerified': False, 'finalPromotion': False})
+@@ -161,6 +172,7 @@
+     image = plan['renderProfile']['imageDigest']
+     backend = NvidiaPresentationBackend(args.manifest_file, args.manifest_sha256, image)
+     backend._verify(plan, PROFILE)
++    timing = duration_contract(plan)
+     if sha(canonical(plan)) != args.plan_sha256:
+         raise RuntimeError('HANDOFF_PRIVATE_PLAN_CHANGED')
+     approval_limit(approval, plan, image)
+@@ -208,7 +220,7 @@
+                     with cache().PrivateTree(job) as directory:
+                         row = directory.json(progress.name)
+                     count = row.get('processedFrames')
+-                    if type(count) is not int or not state['processedFrames'] <= count <= 180:
++                    if type(count) is not int or not state['processedFrames'] <= count <= timing['totalFrames']:
+                         raise RuntimeError('HANDOFF_CAPTURE_PROGRESS_INVALID')
+                     if count != state['processedFrames']:
+                         save(processedFrames=count,
+@@ -238,8 +250,8 @@
+                 with cache().PrivateTree(job) as directory:
+                     directory.write_json('MEDIA_VERIFICATION.json', validation)
+                 save(phase='EXPORT')
+-                exported = _export(job, output, exports, control)
+-            save(state='COMPLETED', phase='COMPLETE', processedFrames=180,
++                exported = _export(job, output, exports, control, plan)
++            save(state='COMPLETED', phase='COMPLETE', processedFrames=timing['totalFrames'],
+                  completedScenes=len(plan['runtime']['segments']), gpuRenderingVerified=True,
+                  result=exported, errorCode=None)
+     except BaseException as error:
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py
+@@ -42,8 +42,17 @@
+     "PAGE_TIMEOUT", "PAGE_CRASH", "PAGE_CLOSED", "EVALUATION_TRANSPORT_FAILURE", "STORAGE_FAILURE"})
+ EXCEPTIONS = frozenset({"Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "TimeoutError", "DOMException", "UNKNOWN"})
+ 
+-def safe_failure(value):
+-    if (not isinstance(value, dict) or value.get("operationId") not in OPERATIONS
++def frame_limit(value):
++    # Diagnostic bounds never authorize a capture. Only the explicit supported
++    # 10s/300 pair extends the default six-second diagnostic range.
++    return 300 if (isinstance(value, dict) and type(value.get("durationSeconds")) is int
++        and value["durationSeconds"] == 10 and type(value.get("totalFrames")) is int
++        and value["totalFrames"] == 300) else 180
++
++
++def safe_failure(value, *, total_frames=180):
++    if (type(total_frames) is not int or total_frames not in (180, 300)
++            or not isinstance(value, dict) or value.get("operationId") not in OPERATIONS
+             or value.get("sourceId") not in SOURCES):
+         return None
+     code = safe_code(value.get("errorCode")) or "UNCLASSIFIED_EXCEPTION"
+@@ -52,7 +61,7 @@
+         "errorCode": code, "recognized": code != "UNCLASSIFIED_EXCEPTION",
+         "exceptionType": value.get("exceptionType") if value.get("exceptionType") in EXCEPTIONS else "UNKNOWN",
+         "failureKind": value.get("failureKind") if value.get("failureKind") in FAILURE_KINDS else "UNCLASSIFIED_EXCEPTION",
+-        "frameIndex": index if type(index) is int and 0 <= index < 180 else None}
++        "frameIndex": index if type(index) is int and 0 <= index < total_frames else None}
+ 
+ def safe_identifier(value, pattern):
+     return value if type(value) is str and re.fullmatch(pattern, value) else None
+@@ -61,21 +70,26 @@
+ def safe_operations(value):
+     if not isinstance(value, dict) or value.get("schema") != "WORLD_ENGINE_CAPTURE_OPERATIONS_V1":
+         return None
++    total_frames = frame_limit(value)
+     count, sequence = value.get("renderedFrames"), value.get("sequence")
+     observed = value.get("observedAtUnixMs")
+-    return {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
++    result = {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
+         "runId": safe_identifier(value.get("runId"), r"studio-[a-f0-9]{32}"),
+         "imageDigest": safe_identifier(value.get("imageDigest"), r"sha256:[a-f0-9]{64}"),
+         "sceneSHA256": safe_identifier(value.get("sceneSHA256"), r"[a-f0-9]{64}"),
+         "observedAtUnixMs": observed if type(observed) is int and 0 <= observed <= 9007199254740991 else None,
+         "operationId": value.get("operationId") if value.get("operationId") in OPERATIONS else None,
+         "lastCompletedOperation": value.get("lastCompletedOperation") if value.get("lastCompletedOperation") in OPERATIONS else None,
+-        "firstFailure": safe_failure(value.get("firstFailure")), "cleanupFailure": safe_failure(value.get("cleanupFailure")),
++        "firstFailure": safe_failure(value.get("firstFailure"), total_frames=total_frames),
++        "cleanupFailure": safe_failure(value.get("cleanupFailure"), total_frames=total_frames),
+         "nativeProofCompleted": value.get("nativeProofCompleted") is True,
+-        "renderedFrames": count if type(count) is int and 0 <= count <= 180 else None,
++        "renderedFrames": count if type(count) is int and 0 <= count <= total_frames else None,
+         "sequence": sequence if type(sequence) is int and 0 <= sequence <= 1000000 else None,
+         "evidenceStatus": value.get("evidenceStatus") if value.get("evidenceStatus") in {"LOCAL_ATOMIC_CHECKPOINT", "LOCAL_WRITE_FAILED", "NOT_WRITTEN"} else "UNKNOWN",
+         "storageError": value.get("storageError") if value.get("storageError") in {"DIAGNOSTIC_STORAGE_PERMISSION", "DIAGNOSTIC_STORAGE_NO_SPACE", "DIAGNOSTIC_STORAGE_TOO_LARGE", "DIAGNOSTIC_STORAGE_IO"} else None}
++    if total_frames == 300:
++        result.update(durationSeconds=10, totalFrames=300)
++    return result
+ 
+ 
+ def storage_exit_code(error):
+@@ -185,7 +199,7 @@
+         "capture": {"code": inner["errorCode"] if inner else (safe_code(text) or "UNCLASSIFIED_EXCEPTION"), "messageCategory": message_category(text),
+             "operations": operations,
+             "diagnosticStage": safe_stage,
+-            "renderedFrames": frames if type(frames) is int and 0 <= frames <= 180 else (operations or {}).get("renderedFrames"),
++            "renderedFrames": frames if type(frames) is int and 0 <= frames <= frame_limit(receipt) else (operations or {}).get("renderedFrames"),
+             "nvidiaVerified": (receipt or {}).get("nvidiaVerified") is True},
+         "missingEvidence": {"first": first is None, "capture": receipt is None, "checkpoint": checkpoint is None}}
+     content = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js
+@@ -2,18 +2,19 @@
+ const $=id=>document.getElementById(id);
+ const key='world-engine-nvidia-six-second-job-v1';
+ const savedJob=localStorage.getItem(key);
+-const state={csrf:null,busy:false,submission:null,job:/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(savedJob||'')?savedJob:null,timer:null,startKey:null,expires:null};
++const state={csrf:null,busy:false,submission:null,job:/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(savedJob||'')?savedJob:null,timer:null,startKey:null,expires:null,requestedDuration:6};
+ const terminal=new Set(['complete','completed','failed','blocked','interrupted','cancelled']);
+ function fail(code){throw new Error(code);}
+ function showError(error){$('error').hidden=false;const code=/^[A-Z][A-Z0-9_]{0,119}$/.test(error?.message||'')?error.message:'REQUEST_FAILED';$('error-text').textContent=`작업을 진행하지 못했습니다. 오류 코드: ${code}`;}
+ async function request(url,body){let response;try{response=await fetch(url,{method:body===undefined?'GET':'POST',credentials:'same-origin',headers:body===undefined?{}:{'Content-Type':'application/json','X-Studio-CSRF':state.csrf||''},body:body===undefined?undefined:JSON.stringify(body)});}catch{fail('NETWORK_FAILED');}let data;try{data=await response.json();}catch{fail('INVALID_SERVER_RESPONSE');}if(response.status===401){location.assign('/login');fail('AUTH_REQUIRED');}if(!response.ok)fail(data.error?.code||'REQUEST_FAILED');return data;}
+-function clearSubmission(){state.submission=null;state.startKey=null;state.expires=null;$('consent').checked=false;$('start-section').hidden=true;$('start').disabled=true;}
++function clearSubmission(){state.submission=null;state.startKey=null;state.expires=null;state.requestedDuration=6;$('consent').checked=false;$('start-section').hidden=true;$('start').disabled=true;drawDuration({});}
+ function updateButtons(){for(const id of ['load-example','input-file','prompt','preflight','refresh','logout'])$(id).disabled=state.busy;$('start').disabled=state.busy||!state.submission||!$('consent').checked;}
+ async function busy(action){if(state.busy)return;state.busy=true;$('error').hidden=true;updateButtons();try{await action();}catch(error){showError(error);}finally{state.busy=false;updateButtons();}}
+-function body(){const text=$('prompt').value.trim();if(!text||new TextEncoder().encode(text).length>4*1024*1024)fail('INPUT_SIZE_INVALID');let prompt;try{prompt=JSON.parse(text);}catch{fail('INPUT_JSON_INVALID');}if(!prompt||typeof prompt!=='object'||Array.isArray(prompt))fail('INPUT_JSON_OBJECT_REQUIRED');return{schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_REQUEST_V1',prompt,sceneId:'__timeline__'};}
++function body(){const text=$('prompt').value.trim();if(!text||new TextEncoder().encode(text).length>4*1024*1024)fail('INPUT_SIZE_INVALID');let prompt;try{prompt=JSON.parse(text);}catch{fail('INPUT_JSON_INVALID');}if(!prompt||typeof prompt!=='object'||Array.isArray(prompt))fail('INPUT_JSON_OBJECT_REQUIRED');state.requestedDuration=prompt.data?.durationSeconds===10?10:6;return{schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_REQUEST_V1',prompt,sceneId:'__timeline__'};}
+ function approvedBudget(value){const budget=value?.budget;const seconds=budget?.maxWallSeconds,expiry=Date.parse(budget?.validUntil||'');return!!budget&&Number.isSafeInteger(seconds)&&seconds>0&&Number.isFinite(Number(budget.gpuHourlyRate))&&Number(budget.gpuHourlyRate)>0&&Number.isFinite(Number(budget.maxCostAmount))&&Number(budget.maxCostAmount)>0&&/^[A-Z]{3}$/.test(budget.currency||'')&&Number.isFinite(expiry)&&expiry>Date.now();}
+-function drawPreflight(value){const target=$('checks');target.replaceChildren();const heading=document.createElement('p');heading.textContent=value.ready===true?(approvedBudget(value)?'서버 사전검사를 통과했습니다.':'승인 요금·비용·만료 시각을 확인할 수 없어 제작을 차단했습니다.'):'실행 전 확인할 항목이 있습니다.';target.append(heading);for(const check of value.checks||[]){const row=document.createElement('p');row.textContent=`${check.name||'검사'}: ${check.status||'미확인'}${check.code?' · '+check.code:''}`;target.append(row);}if(value.error?.code){const row=document.createElement('p');row.textContent=`오류 코드: ${value.error.code}`;target.append(row);}const budget=value.budget||{};$('budget').textContent=`승인 비용 상한: ${budget.maxCostAmount??'미확인'} ${budget.currency??''} · 정책에 등록된 시간당 요금: ${budget.gpuHourlyRate??'미확인'} ${budget.currency??''} · 승인 만료: ${budget.validUntil??'미확인'} · 이번 실행 상한: ${Number.isSafeInteger(budget.maxWallSeconds)?Math.min(600,budget.maxWallSeconds):'미확인'}초 · 자동 재시도: 0회`;
+- return value.valid===true&&value.ready===true&&value.requiresGpu===true&&approvedBudget(value);}
++function drawDuration(value){const seconds=value?.durationSeconds??6,frames=value?.totalFrames??180;if(!((seconds===6&&frames===180)||(seconds===10&&frames===300))||seconds!==state.requestedDuration)return false;document.title=`WORLD ENGINE · ${seconds}초 GPU 검수`;document.querySelector('header h1').textContent=`${seconds}초 GPU 검수`;document.querySelector('header h1 + p').textContent=`1080×1920 · 30fps · ${frames}프레임 · 무음`;const text=[...$('consent').parentNode.childNodes].find(node=>node.nodeType===3);if(!text)return false;text.textContent=`표시된 승인 한도 안에서 ${seconds}초 영상 1개를 제작합니다.`;return true;}
++function drawPreflight(value){const timing=drawDuration(value),target=$('checks');target.replaceChildren();const heading=document.createElement('p');heading.textContent=!timing?'영상 길이·프레임 사전검사 확인이 필요합니다.':value.ready===true?(approvedBudget(value)?'서버 사전검사를 통과했습니다.':'승인 요금·비용·만료 시각을 확인할 수 없어 제작을 차단했습니다.'):'실행 전 확인할 항목이 있습니다.';target.append(heading);for(const check of value.checks||[]){const row=document.createElement('p');row.textContent=`${check.name||'검사'}: ${check.status||'미확인'}${check.code?' · '+check.code:''}`;target.append(row);}if(value.error?.code){const row=document.createElement('p');row.textContent=`오류 코드: ${value.error.code}`;target.append(row);}const budget=value.budget||{};$('budget').textContent=`승인 비용 상한: ${budget.maxCostAmount??'미확인'} ${budget.currency??''} · 정책에 등록된 시간당 요금: ${budget.gpuHourlyRate??'미확인'} ${budget.currency??''} · 승인 만료: ${budget.validUntil??'미확인'} · 이번 실행 상한: ${Number.isSafeInteger(budget.maxWallSeconds)?Math.min(600,budget.maxWallSeconds):'미확인'}초 · 자동 재시도: 0회`;
++ return timing&&value.valid===true&&value.ready===true&&value.requiresGpu===true&&approvedBudget(value);}
+ function facts(pairs){const target=$('job-facts');target.replaceChildren();for(const[label,value]of pairs){const name=document.createElement('dt'),field=document.createElement('dd');name.textContent=label;field.textContent=value===undefined||value===null?'미측정':String(value);target.append(name,field);}}
+ async function result(){const value=await request(`/api/jobs/${encodeURIComponent(state.job)}/result`);$('result-section').hidden=false;$('downloads').replaceChildren();$('video').hidden=true;for(const file of value.downloads||[]){if(!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(file.name||''))continue;const href=`/api/jobs/${encodeURIComponent(state.job)}/downloads/${encodeURIComponent(file.name)}`,link=document.createElement('a');link.href=href;link.download=file.name;link.textContent=`${file.name} 다운로드${/^[a-f0-9]{64}$/.test(file.sha256||'')?' · SHA-256 '+file.sha256:''}`;$('downloads').append(link);if(file.name.endsWith('.mp4')){$('video').src=href;$('video').hidden=false;}}const storage=value.dropbox||{};$('storage').textContent=`저장소 내 검증: ${storage.mountedReadbackVerified===true||storage.mountReadbackVerified===true?'확인됨':'미확인'} · 외부 다운로드 SHA 검증: ${storage.externalDownloadVerified===true?'확인됨':'미확인'}`;}
+ async function refresh(){if(!state.job)return;clearTimeout(state.timer);const value=await request(`/api/jobs/${encodeURIComponent(state.job)}`);$('job-section').hidden=false;facts([['작업 ID',value.jobId||state.job],['상태',value.state],['단계',value.phase],['완료 장면',value.completedScenes],['전체 장면',value.totalScenes],['처리 프레임',value.processedFrames],['전체 프레임',value.totalFrames],['경과 시간(초)',value.elapsedSeconds],['오류 코드',value.errorCode]]);const status=String(value.state||'').toLowerCase();if(['complete','completed'].includes(status))await result();else if(!terminal.has(status))state.timer=setTimeout(()=>refresh().catch(showError),2500);}
+--- a/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
++++ b/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+@@ -3,13 +3,13 @@
+   "files": {
+     "bootstrap.py": {
+       "bytes": 14285,
+-      "sha256": "f56ba454a3a9174154d3600a61c5cc4123b5911b007c9abbb3d985f283ead3dc"
++      "sha256": "6051a7ed2f9adf0a06cd2d07ba19a9f3d015e19781915cda121082c48ecfefee"
+     },
+     "worker.py": {
+       "bytes": 10317,
+       "sha256": "75edd4919e545b06f0bab139a3ad106f11a26f072896a8cf4f1983165b0157b0"
+     }
+   },
+-  "runtimeManifestSHA256": "138f5ff4761e2fa3589e15493ded5401afe1ec4dfa0dc5ad5a725e03e53b9270",
++  "runtimeManifestSHA256": "c3a9a313456d7d193ee5be0b673ca27158340055ef52ef92ae9b4d7a61462661",
+   "schema": "WORLD_ENGINE_STUDIO_COLD_START_FILES_V2"
+ }
+--- a/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
++++ b/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
+@@ -23,7 +23,7 @@
+ PROXY = Path('/opt/world-engine-studio-https-proxy-fix')
+ HTTPS = Path('/opt/world-engine-studio-https-bootstrap')
+ RUN = Path('/run/world-engine-cold-start')
+-SOURCE_SHA = '138f5ff4761e2fa3589e15493ded5401afe1ec4dfa0dc5ad5a725e03e53b9270'
++SOURCE_SHA = 'c3a9a313456d7d193ee5be0b673ca27158340055ef52ef92ae9b4d7a61462661'
+ IMAGE = 'sha256:8ef393d3ed96db57f4b82b3c092c0393e7c1a2d8cdf01c88d8f56b9d24eba5da'
+ SOURCE_SUFFIX = 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
+ SERVE_SUFFIX = 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/serve.py'
+--- a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs
++++ b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs
+@@ -254,7 +254,7 @@
+ function errorIssue(error,field){const code=String(error.message??error);return issue(/UNKNOWN|UNSUPPORTED|NOT_CONNECTED/u.test(code)?'UNSUPPORTED':/REQUIRED/u.test(code)?'NEEDS_INPUT':'INVALID',code,field,'The connected existing contract rejected this input; no fallback was rendered.',{action:'Correct the referenced field using PRESENTATION_INPUT_CONTRACT.md'});}
+ 
+ /** Natural text + authoritative attached data. Region qualification is a real independent gate. */
+-export async function analyzePresentationPrompt(input,{evidenceRegistry=[],qualifyRegion=defaultQualifier}={}){
++export async function analyzePresentationPrompt(input,{evidenceRegistry=[],qualifyRegion=defaultQualifier,allowTenSecondStudioSample=false}={}){
+  const result={schema:RESULT_SCHEMA,compilerVersion:VERSION,status:'INVALID',issues:[],clarifications:[],sceneResults:[],renderRequests:[],renderableSceneIds:[],blockedSceneIds:[],transitionPlan:[],
+   unrestrictedLanguageUnderstanding:false,externalLLMUsed:false,paidExecutionAllowed:false,historicalRenderAllowed:false};
+  let envelope;
+@@ -276,7 +276,8 @@
+  const shared=envelope.presentation??{},ids=new Set(Array.isArray(data.scenes)?data.scenes.map(x=>x?.sceneId).filter(text):[]);
+  unknown(shared.sceneOverrides,[...ids],'$.presentation.sceneOverrides',result.issues);
+  validateExplicitSpans(nl,data,envelope.region,result.issues);
+- if(Number.isSafeInteger(result.totalFrames)&&result.totalFrames>240)result.issues.push(issue('UNSUPPORTED','BOUNDED_COMPOSITE_PREVIEW_LIMIT','$.data.durationSeconds','The free composite preview is limited to240frames; preserved long production code is unchanged.',{maximumFrames:240,maximumSecondsAt30fps:8}));
++ const tenSecondStudioSample=allowTenSecondStudioSample===true&&data.durationSeconds===10&&data.fps===30&&result.totalFrames===300;
++ if(Number.isSafeInteger(result.totalFrames)&&result.totalFrames>240&&!tenSecondStudioSample)result.issues.push(issue('UNSUPPORTED','BOUNDED_COMPOSITE_PREVIEW_LIMIT','$.data.durationSeconds','The free composite preview is limited to240frames; preserved long production code is unchanged.',{maximumFrames:240,maximumSecondsAt30fps:8}));
+  const legacy=analyzePrompt(data,{evidenceRegistry});
+  if(result.issues.length){
+   // Input errors remain visible even when a natural-language request needs clarification.
+--- a/world-simulation-shorts-engine/recovery/universal-presentation-v2/studio_adapter.py
++++ b/world-simulation-shorts-engine/recovery/universal-presentation-v2/studio_adapter.py
+@@ -71,12 +71,13 @@
+         raise StudioError('UP2_DATA_PROCESSOR_RESULT_INVALID') from None
+ 
+ 
+-def compile_prompt(prompt, evidence_registry):
++def compile_prompt(prompt, evidence_registry, *, allow_ten_second_sample=False):
+     value = node_json("import{readFileSync}from'node:fs';"
+         "const p=JSON.parse(readFileSync(0,'utf8'));"
+         "const{analyzePresentationPrompt}=await import(p.module);"
+-        "process.stdout.write(JSON.stringify(await analyzePresentationPrompt(p.input,{evidenceRegistry:p.registry})));",
+-        {'module': (HERE / 'presentation_prompt.mjs').as_uri(), 'input': prompt, 'registry': evidence_registry})
++        "process.stdout.write(JSON.stringify(await analyzePresentationPrompt(p.input,{evidenceRegistry:p.registry,allowTenSecondStudioSample:p.allowTenSecondStudioSample})));",
++        {'module': (HERE / 'presentation_prompt.mjs').as_uri(), 'input': prompt, 'registry': evidence_registry,
++         'allowTenSecondStudioSample': allow_ten_second_sample is True})
+     if value.get('schema') != 'WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2':
+         raise StudioError('UP2_COMPILER_SCHEMA_INVALID')
+     return value
+@@ -115,7 +116,7 @@
+     return result
+ 
+ 
+-def selected_segments(analyzed, scene_id):
++def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False):
+     requests = analyzed.get('renderRequests', [])
+     if scene_id == TIMELINE_ID:
+         if analyzed.get('status') != 'PASS' or analyzed.get('blockedSceneIds'):
+@@ -127,7 +128,8 @@
+             if row.get('startFrame') != end or type(row.get('endFrame')) is not int or row['endFrame'] <= end:
+                 raise StudioError('UP2_CONTIGUOUS_TIMELINE_REQUIRED')
+             end = row['endFrame']
+-        if not rows or not 2 <= end <= 240:
++        maximum = 300 if allow_ten_second_sample is True and analyzed.get('totalFrames') == 300 else 240
++        if not rows or not 2 <= end <= maximum:
+             raise StudioError('UP2_BOUNDED_TIMELINE_REQUIRED')
+         transitions = deepcopy(analyzed.get('transitionPlan', []))
+         expected = [{'type': 'CUT', 'frame': row['startFrame']} for row in rows[1:]]
+@@ -152,7 +154,7 @@
+ 
+ class StudioController(manager.StudioController):
+     def __init__(self, *, control_root, export_root, evidence_registry=None, expected_registry_sha256=None,
+-                 allow_free_data_review=False, **kwargs):
++                 allow_free_data_review=False, allow_ten_second_sample=False, **kwargs):
+         root, exports = Path(control_root), Path(export_root)
+         if (not root.is_absolute() or root.is_relative_to(REPO) or root.is_symlink()
+                 or root.resolve().is_relative_to(exports.resolve()) or exports.resolve().is_relative_to(root.resolve())):
+@@ -160,6 +162,7 @@
+         self.registry_file = Path(evidence_registry) if evidence_registry else None
+         self.registry_pin = expected_registry_sha256
+         self.allow_free_data_review = allow_free_data_review is True
++        self.allow_ten_second_sample = allow_ten_second_sample is True
+         super().__init__(control_root=root, export_root=exports, source_root=HERE,
+             expected_index_sha256=sha(canonical({'schema': PROFILE, 'registryPin': self.registry_pin})),
+             image_digest=legacy.BASELINE_IMAGE_PROVENANCE, allow_software_source_review=True)
+@@ -245,12 +248,15 @@
+                 or value.get('schema') != REQUEST_SCHEMA or not isinstance(value.get('prompt'), dict)
+                 or not isinstance(value.get('sceneId'), str)):
+             raise StudioError('UP2_EXPLICIT_PRESENTATION_INPUT_REQUIRED', status=400)
+-        analyzed = compile_prompt(value['prompt'], self._registry())
++        extended = getattr(self, 'allow_ten_second_sample', False)
++        analyzed = (compile_prompt(value['prompt'], self._registry(), allow_ten_second_sample=True)
++                    if extended else compile_prompt(value['prompt'], self._registry()))
+         simulation = analyzed.get('simulationType')
+         if simulation not in {'GENERAL', 'FICTIONAL', 'HISTORICAL'}:
+             raise StudioError('UP2_SIMULATION_TYPE_REQUIRED', status=422,
+                 fields=[{'issues': analyzed.get('issues', [])}])
+-        rows, total, cuts = selected_segments(analyzed, value['sceneId'])
++        rows, total, cuts = (selected_segments(analyzed, value['sceneId'], allow_ten_second_sample=True)
++                            if extended else selected_segments(analyzed, value['sceneId']))
+         for row in rows:
+             scene = row.get('scene', {})
+             if (scene.get('metadata', {}).get('schema') != 'PLANNER_SCENE_JSON_V1'
+@@ -260,6 +266,8 @@
+         runtime = {'schema': 'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2', 'segments': [runtime_segment(row) for row in rows],
+             'totalFrames': total, 'transitions': cuts, 'sourceInputSHA256': analyzed.get('inputSHA256'),
+             'inputTrace': deepcopy(analyzed.get('inputTrace', []))}
++        if extended and total == 300:
++            runtime['durationSeconds'] = 10
+         # Strings preserve the actual Planner member ordering across sorted
+         # private JSON persistence. Semantic and wire hashes are independent.
+         wire = json.dumps(runtime, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+@@ -271,7 +279,7 @@
+         identity = {'requestSHA256': request_sha, 'runtimeSemanticSHA256': semantic_sha,
+             'runtimeWireSHA256': wire_sha, 'sourceAdmission': admission, 'sourceBindings': bindings,
+             'sourceRegistrySHA256': self.registry_pin}
+-        return {'schema': SCHEMA, 'title': str(value['prompt'].get('prompt', 'Presentation review'))[:180],
++        result = {'schema': SCHEMA, 'title': str(value['prompt'].get('prompt', 'Presentation review'))[:180],
+             'profile': PROFILE, 'videoPlan': runtime, 'sfx': {'enabled': False},
+             'sourcePipeline': {'ready': not historical and admission['status'] == 'PASS',
+                 'mode': 'FREE_PRESENTATION_REVIEW', 'scope': PROFILE, 'simulationType': simulation,
+@@ -287,6 +295,9 @@
+                     'status': analyzed.get('status'), 'issues': analyzed.get('issues', []),
+                     'clarifications': analyzed.get('clarifications', []), 'sceneResults': analyzed.get('sceneResults', [])},
+                 'actualRuntime': 'SOURCE_CHECKOUT_NOT_OCI_IMAGE'}}
++        if extended and total == 300:
++            result['sourcePipeline']['durationSeconds'] = 10
++        return result
+ 
+     def _preflight_record(self, root, record):
+         pipeline = record['submission']['sourcePipeline']

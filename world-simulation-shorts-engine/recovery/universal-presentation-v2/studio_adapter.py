@@ -71,12 +71,13 @@ def node_json(script, payload, *, timeout=90):
         raise StudioError('UP2_DATA_PROCESSOR_RESULT_INVALID') from None
 
 
-def compile_prompt(prompt, evidence_registry):
+def compile_prompt(prompt, evidence_registry, *, allow_ten_second_sample=False):
     value = node_json("import{readFileSync}from'node:fs';"
         "const p=JSON.parse(readFileSync(0,'utf8'));"
         "const{analyzePresentationPrompt}=await import(p.module);"
-        "process.stdout.write(JSON.stringify(await analyzePresentationPrompt(p.input,{evidenceRegistry:p.registry})));",
-        {'module': (HERE / 'presentation_prompt.mjs').as_uri(), 'input': prompt, 'registry': evidence_registry})
+        "process.stdout.write(JSON.stringify(await analyzePresentationPrompt(p.input,{evidenceRegistry:p.registry,allowTenSecondStudioSample:p.allowTenSecondStudioSample})));",
+        {'module': (HERE / 'presentation_prompt.mjs').as_uri(), 'input': prompt, 'registry': evidence_registry,
+         'allowTenSecondStudioSample': allow_ten_second_sample is True})
     if value.get('schema') != 'WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2':
         raise StudioError('UP2_COMPILER_SCHEMA_INVALID')
     return value
@@ -115,7 +116,7 @@ def verify_prepared_sources(prepared, admission=None, prepared_wire=None):
     return result
 
 
-def selected_segments(analyzed, scene_id):
+def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False):
     requests = analyzed.get('renderRequests', [])
     if scene_id == TIMELINE_ID:
         if analyzed.get('status') != 'PASS' or analyzed.get('blockedSceneIds'):
@@ -127,7 +128,8 @@ def selected_segments(analyzed, scene_id):
             if row.get('startFrame') != end or type(row.get('endFrame')) is not int or row['endFrame'] <= end:
                 raise StudioError('UP2_CONTIGUOUS_TIMELINE_REQUIRED')
             end = row['endFrame']
-        if not rows or not 2 <= end <= 240:
+        maximum = 300 if allow_ten_second_sample is True and analyzed.get('totalFrames') == 300 else 240
+        if not rows or not 2 <= end <= maximum:
             raise StudioError('UP2_BOUNDED_TIMELINE_REQUIRED')
         transitions = deepcopy(analyzed.get('transitionPlan', []))
         expected = [{'type': 'CUT', 'frame': row['startFrame']} for row in rows[1:]]
@@ -152,7 +154,7 @@ def runtime_segment(row):
 
 class StudioController(manager.StudioController):
     def __init__(self, *, control_root, export_root, evidence_registry=None, expected_registry_sha256=None,
-                 allow_free_data_review=False, **kwargs):
+                 allow_free_data_review=False, allow_ten_second_sample=False, **kwargs):
         root, exports = Path(control_root), Path(export_root)
         if (not root.is_absolute() or root.is_relative_to(REPO) or root.is_symlink()
                 or root.resolve().is_relative_to(exports.resolve()) or exports.resolve().is_relative_to(root.resolve())):
@@ -160,6 +162,7 @@ class StudioController(manager.StudioController):
         self.registry_file = Path(evidence_registry) if evidence_registry else None
         self.registry_pin = expected_registry_sha256
         self.allow_free_data_review = allow_free_data_review is True
+        self.allow_ten_second_sample = allow_ten_second_sample is True
         super().__init__(control_root=root, export_root=exports, source_root=HERE,
             expected_index_sha256=sha(canonical({'schema': PROFILE, 'registryPin': self.registry_pin})),
             image_digest=legacy.BASELINE_IMAGE_PROVENANCE, allow_software_source_review=True)
@@ -245,12 +248,15 @@ class StudioController(manager.StudioController):
                 or value.get('schema') != REQUEST_SCHEMA or not isinstance(value.get('prompt'), dict)
                 or not isinstance(value.get('sceneId'), str)):
             raise StudioError('UP2_EXPLICIT_PRESENTATION_INPUT_REQUIRED', status=400)
-        analyzed = compile_prompt(value['prompt'], self._registry())
+        extended = getattr(self, 'allow_ten_second_sample', False)
+        analyzed = (compile_prompt(value['prompt'], self._registry(), allow_ten_second_sample=True)
+                    if extended else compile_prompt(value['prompt'], self._registry()))
         simulation = analyzed.get('simulationType')
         if simulation not in {'GENERAL', 'FICTIONAL', 'HISTORICAL'}:
             raise StudioError('UP2_SIMULATION_TYPE_REQUIRED', status=422,
                 fields=[{'issues': analyzed.get('issues', [])}])
-        rows, total, cuts = selected_segments(analyzed, value['sceneId'])
+        rows, total, cuts = (selected_segments(analyzed, value['sceneId'], allow_ten_second_sample=True)
+                            if extended else selected_segments(analyzed, value['sceneId']))
         for row in rows:
             scene = row.get('scene', {})
             if (scene.get('metadata', {}).get('schema') != 'PLANNER_SCENE_JSON_V1'
@@ -260,6 +266,8 @@ class StudioController(manager.StudioController):
         runtime = {'schema': 'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2', 'segments': [runtime_segment(row) for row in rows],
             'totalFrames': total, 'transitions': cuts, 'sourceInputSHA256': analyzed.get('inputSHA256'),
             'inputTrace': deepcopy(analyzed.get('inputTrace', []))}
+        if extended and total == 300:
+            runtime['durationSeconds'] = 10
         # Strings preserve the actual Planner member ordering across sorted
         # private JSON persistence. Semantic and wire hashes are independent.
         wire = json.dumps(runtime, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
@@ -271,7 +279,7 @@ class StudioController(manager.StudioController):
         identity = {'requestSHA256': request_sha, 'runtimeSemanticSHA256': semantic_sha,
             'runtimeWireSHA256': wire_sha, 'sourceAdmission': admission, 'sourceBindings': bindings,
             'sourceRegistrySHA256': self.registry_pin}
-        return {'schema': SCHEMA, 'title': str(value['prompt'].get('prompt', 'Presentation review'))[:180],
+        result = {'schema': SCHEMA, 'title': str(value['prompt'].get('prompt', 'Presentation review'))[:180],
             'profile': PROFILE, 'videoPlan': runtime, 'sfx': {'enabled': False},
             'sourcePipeline': {'ready': not historical and admission['status'] == 'PASS',
                 'mode': 'FREE_PRESENTATION_REVIEW', 'scope': PROFILE, 'simulationType': simulation,
@@ -287,6 +295,9 @@ class StudioController(manager.StudioController):
                     'status': analyzed.get('status'), 'issues': analyzed.get('issues', []),
                     'clarifications': analyzed.get('clarifications', []), 'sceneResults': analyzed.get('sceneResults', [])},
                 'actualRuntime': 'SOURCE_CHECKOUT_NOT_OCI_IMAGE'}}
+        if extended and total == 300:
+            result['sourcePipeline']['durationSeconds'] = 10
+        return result
 
     def _preflight_record(self, root, record):
         pipeline = record['submission']['sourcePipeline']

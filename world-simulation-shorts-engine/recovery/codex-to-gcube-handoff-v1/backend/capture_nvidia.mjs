@@ -69,7 +69,7 @@ export function classifyCaptureFailure(error){
 }
 
 export async function prepareNvidiaRuntimeRequest({request,cacheRoot,privateWorkspaceRoot,publicExportRoot}={}){
- check(request?.totalFrames===180,'GCUBE_EXACT_180_FRAMES_REQUIRED');
+ check([6,10].includes(request?.durationSeconds===undefined?6:request.durationSeconds)&&request?.totalFrames===(request?.durationSeconds===undefined?6:request.durationSeconds)*30,'GCUBE_EXACT_180_FRAMES_REQUIRED');
  await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
  await verifyGeneratedSources();
  const {prepareRuntimeRequest}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
@@ -98,7 +98,8 @@ export async function captureNvidiaPresentation({packageFile,outputRoot,expected
  const variants=await verifyGeneratedSources();
  const {captureVulkanDerived}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
  const receipt=await captureVulkanDerived({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot,rootTestOnly,executionDeadline:permit.deadlineUnixMilliseconds,privateWorkspaceRoot,publicExportRoot});
- check(receipt.schema==='WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1'&&receipt.status==='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'&&receipt.softwareOnly===false&&receipt.nvidiaVerified===true&&receipt.totalFrames===180&&receipt.renderedFrames===180&&receipt.video?.frames===180&&receipt.video?.fullDecode==='PASS','HANDOFF_HARDWARE_CAPTURE_RECEIPT_REQUIRED');
+ const totalFrames=plan.value.totalFrames,tenSecond=plan.value.durationSeconds===10;
+ check(receipt.schema===(tenSecond?'WORLD_ENGINE_NVIDIA_TEN_SECOND_CAPTURE_V1':'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1')&&(!tenSecond||receipt.durationSeconds===10)&&receipt.status==='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'&&receipt.softwareOnly===false&&receipt.nvidiaVerified===true&&receipt.totalFrames===totalFrames&&receipt.renderedFrames===totalFrames&&receipt.video?.frames===totalFrames&&receipt.video?.fullDecode==='PASS','HANDOFF_HARDWARE_CAPTURE_RECEIPT_REQUIRED');
  await verifyGeneratedSources();
  return{...receipt,executionPermit:{...permit,authorizationSHA256:expectedAuthorizationSHA256},sourceVariants:variants,rootTestOnly,productionEligible:!rootTestOnly,providerBillingStopControlled:false,visualQualityApproved:false};
 }

@@ -20,7 +20,7 @@ import json
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from common import PROFILE, RECOVERY, REPO, canonical, load, mvp, sha, validate_plan, verify_manifest
+from common import PROFILE, RECOVERY, REPO, canonical, duration_contract, load, mvp, sha, validate_plan, verify_manifest
 
 base = mvp()
 JOB = re.compile(r'studio-[0-9a-f]{32}\Z')
@@ -147,7 +147,8 @@ class NvidiaPresentationBackend:
                 if not re.fullmatch(r'[A-Z][A-Z0-9_]{1,95}', code):
                     code = 'HANDOFF_PREFLIGHT_OPERATION_FAILED'
                 checks.append({'name': name, 'status': 'BLOCKED', 'code': code})
-        check('NVIDIA_SIX_SECOND_SOURCE_AND_MODE', lambda: self._verify(plan, profile))
+        check('NVIDIA_TEN_SECOND_SOURCE_AND_MODE' if isinstance(plan, dict) and plan.get('durationSeconds') == 10
+              else 'NVIDIA_SIX_SECOND_SOURCE_AND_MODE', lambda: self._verify(plan, profile))
         if checks[-1]['status'] != 'PASS':
             return {'checks': checks, 'renderAllowed': False, 'gpuRenderingVerified': False,
                     'scope': PROFILE, 'hardwareCaptureNotYetPerformed': True}
@@ -194,12 +195,17 @@ class NvidiaPresentationBackend:
         # test. Its strict public report is still rechecked by GateController.
         runtime = load('_handoff_preserved_health_runtime', RECOVERY / 'production-studio-mvp-v1/studio_runtime.py')
         check('EXISTING_PHYSICAL_GPU_HEALTH', runtime._health)
-        return {'checks': checks, 'renderAllowed': all(row['status'] == 'PASS' for row in checks),
-                'gpuRenderingVerified': False, 'frames': 180, 'scenes': len(plan.get('runtime', {}).get('segments', [])),
+        timing = duration_contract(plan)
+        result = {'checks': checks, 'renderAllowed': all(row['status'] == 'PASS' for row in checks),
+                'gpuRenderingVerified': False, 'frames': timing['totalFrames'], 'scenes': len(plan.get('runtime', {}).get('segments', [])),
                 'scope': PROFILE, 'hardwareCaptureNotYetPerformed': True}
+        if timing['durationSeconds'] == 10:
+            result['durationSeconds'] = 10
+        return result
 
     def start_studio_job(self, plan, profile, approval_path, audio_spec, request_id, *, control_root, export_root):
         self._verify(plan, profile)
+        timing = duration_contract(plan)
         if audio_spec != {'enabled': False} or not REQUEST_ID.fullmatch(str(request_id)):
             raise RuntimeError('HANDOFF_SILENT_OWNER_START_REQUIRED')
         control_root, export_root, approval_path = map(Path, (control_root, export_root, approval_path))
@@ -219,8 +225,10 @@ class NvidiaPresentationBackend:
                 with jobs.child(job_id, create=True) as job:
                     state = {'jobId': job_id, 'state': 'QUEUED', 'phase': 'SOURCE_VERIFY',
                         'totalScenes': len(plan['runtime']['segments']), 'completedScenes': 0,
-                        'processedFrames': 0, 'totalFrames': 180, 'requiresGpu': True,
+                        'processedFrames': 0, 'totalFrames': timing['totalFrames'], 'requiresGpu': True,
                         'gpuRenderingVerified': False, 'createdAt': _now()}
+                    if timing['durationSeconds'] == 10:
+                        state['durationSeconds'] = 10
                     bounded = approval_limit(approval, plan, self.image_digest)
                     state['executionDeadline'] = (datetime.now(timezone.utc) +
                         timedelta(seconds=bounded['maxWallSeconds'])).isoformat()

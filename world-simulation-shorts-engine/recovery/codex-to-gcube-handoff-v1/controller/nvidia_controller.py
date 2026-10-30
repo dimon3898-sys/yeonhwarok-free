@@ -9,7 +9,7 @@ import json
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from common import PLAN, PROFILE, REQUEST, RECOVERY, canonical, load, mvp, sha, verify_manifest
+from common import PLAN, PROFILE, REQUEST, RECOVERY, canonical, duration_contract, load, mvp, sha, verify_manifest
 
 base = mvp()
 
@@ -119,16 +119,19 @@ class NvidiaPresentationController(base.StudioController):
             module.verify_prepared_sources = verify_profile_sources
             self._source_normalizer = module.StudioController(
                 control_root=self.control_root / 'handoff-source-normalization',
-                export_root=self.export_root, allow_free_data_review=True)
+                export_root=self.export_root, allow_free_data_review=True,
+                allow_ten_second_sample=True)
         module = sys.modules['_handoff_preserved_cpu_source_normalizer']
         cpu = self._source_normalizer._normal({**deepcopy(value), 'schema': module.REQUEST_SCHEMA})
         pipeline = cpu['sourcePipeline']
         if (pipeline.get('simulationType') not in {'GENERAL', 'FICTIONAL'}
-                or pipeline.get('totalFrames') != 180 or pipeline.get('fps') != 30
+                or pipeline.get('totalFrames') not in {180, 300} or pipeline.get('fps') != 30
+                or (pipeline.get('totalFrames') == 300 and pipeline.get('durationSeconds') != 10)
                 or pipeline.get('ready') is not True
                 or pipeline.get('sourceAdmission', {}).get('status') != 'PASS'):
             invalid('HANDOFF_QUALIFIED_NONHISTORICAL_180_FRAMES_REQUIRED')
-        plan = {'schema': PLAN, 'totalFrames': 180, 'durationSeconds': 6, 'fps': 30,
+        frames = pipeline['totalFrames']
+        plan = {'schema': PLAN, 'totalFrames': frames, 'durationSeconds': frames // 30, 'fps': 30,
             'resolution': {'width': 1080, 'height': 1920}, 'aspectRatio': '9:16',
             'audioSettings': {'enabled': False, 'mode': 'SILENT'},
             'simulationType': pipeline['simulationType'],
@@ -141,10 +144,20 @@ class NvidiaPresentationController(base.StudioController):
             'sourceBindings': deepcopy(pipeline['sourceBindings']),
             'sourceQualification': deepcopy(pipeline['sourceAdmission']['sourceQualification']),
             'originalInputSHA256': pipeline['compilerInputSHA256']}
+        duration_contract(plan)
         return {'schema': 'WORLD_ENGINE_NVIDIA_STUDIO_SUBMISSION_V1',
                 'title': cpu['title'], 'profile': PROFILE, 'videoPlan': plan,
                 'sfx': {'enabled': False}, 'sourceTrace': {'cpuSourceQualificationReused': True,
                     'freeProfileStartCalled': False, 'sourceInputSHA256': pipeline['compilerInputSHA256']}}
+
+    def _preflight_record(self, root, record):
+        result = super()._preflight_record(root, record)
+        timing = duration_contract(record['submission']['videoPlan'])
+        if timing['durationSeconds'] == 10:
+            # The preserved coordinator deliberately drops backend timing facts.
+            # Surface only this new sample's validated duration for owner consent.
+            result.update(durationSeconds=10, totalFrames=300)
+        return result
 
     def resume(self, *args, **kwargs):
         # No new GPU work is silently reauthorized or restarted in this bounded

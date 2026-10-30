@@ -42,8 +42,17 @@ FAILURE_KINDS = frozenset({"DOMAIN_ERROR", "UNCLASSIFIED_EXCEPTION", "MODULE_IMP
     "PAGE_TIMEOUT", "PAGE_CRASH", "PAGE_CLOSED", "EVALUATION_TRANSPORT_FAILURE", "STORAGE_FAILURE"})
 EXCEPTIONS = frozenset({"Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "TimeoutError", "DOMException", "UNKNOWN"})
 
-def safe_failure(value):
-    if (not isinstance(value, dict) or value.get("operationId") not in OPERATIONS
+def frame_limit(value):
+    # Diagnostic bounds never authorize a capture. Only the explicit supported
+    # 10s/300 pair extends the default six-second diagnostic range.
+    return 300 if (isinstance(value, dict) and type(value.get("durationSeconds")) is int
+        and value["durationSeconds"] == 10 and type(value.get("totalFrames")) is int
+        and value["totalFrames"] == 300) else 180
+
+
+def safe_failure(value, *, total_frames=180):
+    if (type(total_frames) is not int or total_frames not in (180, 300)
+            or not isinstance(value, dict) or value.get("operationId") not in OPERATIONS
             or value.get("sourceId") not in SOURCES):
         return None
     code = safe_code(value.get("errorCode")) or "UNCLASSIFIED_EXCEPTION"
@@ -52,7 +61,7 @@ def safe_failure(value):
         "errorCode": code, "recognized": code != "UNCLASSIFIED_EXCEPTION",
         "exceptionType": value.get("exceptionType") if value.get("exceptionType") in EXCEPTIONS else "UNKNOWN",
         "failureKind": value.get("failureKind") if value.get("failureKind") in FAILURE_KINDS else "UNCLASSIFIED_EXCEPTION",
-        "frameIndex": index if type(index) is int and 0 <= index < 180 else None}
+        "frameIndex": index if type(index) is int and 0 <= index < total_frames else None}
 
 def safe_identifier(value, pattern):
     return value if type(value) is str and re.fullmatch(pattern, value) else None
@@ -61,21 +70,26 @@ def safe_identifier(value, pattern):
 def safe_operations(value):
     if not isinstance(value, dict) or value.get("schema") != "WORLD_ENGINE_CAPTURE_OPERATIONS_V1":
         return None
+    total_frames = frame_limit(value)
     count, sequence = value.get("renderedFrames"), value.get("sequence")
     observed = value.get("observedAtUnixMs")
-    return {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
+    result = {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
         "runId": safe_identifier(value.get("runId"), r"studio-[a-f0-9]{32}"),
         "imageDigest": safe_identifier(value.get("imageDigest"), r"sha256:[a-f0-9]{64}"),
         "sceneSHA256": safe_identifier(value.get("sceneSHA256"), r"[a-f0-9]{64}"),
         "observedAtUnixMs": observed if type(observed) is int and 0 <= observed <= 9007199254740991 else None,
         "operationId": value.get("operationId") if value.get("operationId") in OPERATIONS else None,
         "lastCompletedOperation": value.get("lastCompletedOperation") if value.get("lastCompletedOperation") in OPERATIONS else None,
-        "firstFailure": safe_failure(value.get("firstFailure")), "cleanupFailure": safe_failure(value.get("cleanupFailure")),
+        "firstFailure": safe_failure(value.get("firstFailure"), total_frames=total_frames),
+        "cleanupFailure": safe_failure(value.get("cleanupFailure"), total_frames=total_frames),
         "nativeProofCompleted": value.get("nativeProofCompleted") is True,
-        "renderedFrames": count if type(count) is int and 0 <= count <= 180 else None,
+        "renderedFrames": count if type(count) is int and 0 <= count <= total_frames else None,
         "sequence": sequence if type(sequence) is int and 0 <= sequence <= 1000000 else None,
         "evidenceStatus": value.get("evidenceStatus") if value.get("evidenceStatus") in {"LOCAL_ATOMIC_CHECKPOINT", "LOCAL_WRITE_FAILED", "NOT_WRITTEN"} else "UNKNOWN",
         "storageError": value.get("storageError") if value.get("storageError") in {"DIAGNOSTIC_STORAGE_PERMISSION", "DIAGNOSTIC_STORAGE_NO_SPACE", "DIAGNOSTIC_STORAGE_TOO_LARGE", "DIAGNOSTIC_STORAGE_IO"} else None}
+    if total_frames == 300:
+        result.update(durationSeconds=10, totalFrames=300)
+    return result
 
 
 def storage_exit_code(error):
@@ -185,7 +199,7 @@ def export_failure(job_root, destination, *, deadline_seconds=5):
         "capture": {"code": inner["errorCode"] if inner else (safe_code(text) or "UNCLASSIFIED_EXCEPTION"), "messageCategory": message_category(text),
             "operations": operations,
             "diagnosticStage": safe_stage,
-            "renderedFrames": frames if type(frames) is int and 0 <= frames <= 180 else (operations or {}).get("renderedFrames"),
+            "renderedFrames": frames if type(frames) is int and 0 <= frames <= frame_limit(receipt) else (operations or {}).get("renderedFrames"),
             "nvidiaVerified": (receipt or {}).get("nvidiaVerified") is True},
         "missingEvidence": {"first": first is None, "capture": receipt is None, "checkpoint": checkpoint is None}}
     content = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()

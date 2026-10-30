@@ -254,7 +254,7 @@ function finalize(result){result.status=statusOf(result.issues);result.clarifica
 function errorIssue(error,field){const code=String(error.message??error);return issue(/UNKNOWN|UNSUPPORTED|NOT_CONNECTED/u.test(code)?'UNSUPPORTED':/REQUIRED/u.test(code)?'NEEDS_INPUT':'INVALID',code,field,'The connected existing contract rejected this input; no fallback was rendered.',{action:'Correct the referenced field using PRESENTATION_INPUT_CONTRACT.md'});}
 
 /** Natural text + authoritative attached data. Region qualification is a real independent gate. */
-export async function analyzePresentationPrompt(input,{evidenceRegistry=[],qualifyRegion=defaultQualifier}={}){
+export async function analyzePresentationPrompt(input,{evidenceRegistry=[],qualifyRegion=defaultQualifier,allowTenSecondStudioSample=false}={}){
  const result={schema:RESULT_SCHEMA,compilerVersion:VERSION,status:'INVALID',issues:[],clarifications:[],sceneResults:[],renderRequests:[],renderableSceneIds:[],blockedSceneIds:[],transitionPlan:[],
   unrestrictedLanguageUnderstanding:false,externalLLMUsed:false,paidExecutionAllowed:false,historicalRenderAllowed:false};
  let envelope;
@@ -276,7 +276,8 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
  const shared=envelope.presentation??{},ids=new Set(Array.isArray(data.scenes)?data.scenes.map(x=>x?.sceneId).filter(text):[]);
  unknown(shared.sceneOverrides,[...ids],'$.presentation.sceneOverrides',result.issues);
  validateExplicitSpans(nl,data,envelope.region,result.issues);
- if(Number.isSafeInteger(result.totalFrames)&&result.totalFrames>240)result.issues.push(issue('UNSUPPORTED','BOUNDED_COMPOSITE_PREVIEW_LIMIT','$.data.durationSeconds','The free composite preview is limited to240frames; preserved long production code is unchanged.',{maximumFrames:240,maximumSecondsAt30fps:8}));
+ const tenSecondStudioSample=allowTenSecondStudioSample===true&&data.durationSeconds===10&&data.fps===30&&result.totalFrames===300;
+ if(Number.isSafeInteger(result.totalFrames)&&result.totalFrames>240&&!tenSecondStudioSample)result.issues.push(issue('UNSUPPORTED','BOUNDED_COMPOSITE_PREVIEW_LIMIT','$.data.durationSeconds','The free composite preview is limited to240frames; preserved long production code is unchanged.',{maximumFrames:240,maximumSecondsAt30fps:8}));
  const legacy=analyzePrompt(data,{evidenceRegistry});
  if(result.issues.length){
   // Input errors remain visible even when a natural-language request needs clarification.
