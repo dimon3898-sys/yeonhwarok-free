@@ -50,8 +50,20 @@ def safe_evidence_bytes(name,raw):
              and type(value['uid']) is int and value['uid']==1000 and value['gpuExecuted'] is False
              and value['scope']=='INSTALLED_FILES_AND_UID1000_ONLY_OCI_HOST_CHECK_SEPARATE',"EVIDENCE_VALUE_INVALID")
         need(all(type(value[k]) is str and re.fullmatch('[a-f0-9]{64}',value[k]) for k in ['runtimeManifestSHA256','startupManifestSHA256']),"EVIDENCE_VALUE_INVALID")
+    elif name=='OCI_RESULT.json':
+        need(set(value)=={'schema','status','imageId','entrypointMatch','cmdUnchanged','userUnchanged','scope','gpuExecuted'},"EVIDENCE_FIELDS_INVALID")
+        need(value['schema']=='WORLD_ENGINE_LABEL355_OCI_RESULT_V1' and value['status']=='PASS'
+             and type(value['imageId']) is str and re.fullmatch('sha256:[a-f0-9]{64}',value['imageId'])
+             and value['entrypointMatch'] is True and value['cmdUnchanged'] is True and value['userUnchanged'] is True
+             and value['scope']=='ACTUAL_CANDIDATE_OCI_CONFIG_ONLY' and value['gpuExecuted'] is False,"EVIDENCE_VALUE_INVALID")
+    elif name=='BUILD_RESULT.json':
+        need(set(value)=={'schema','status','imageId','parentDigest','expectedSourceRows','scope','gpuExecuted'},"EVIDENCE_FIELDS_INVALID")
+        need(value['schema']=='WORLD_ENGINE_LABEL355_BUILD_RESULT_V1' and value['status']=='IDENTITY_ONLY'
+             and type(value['imageId']) is str and re.fullmatch('sha256:[a-f0-9]{64}',value['imageId'])
+             and value['parentDigest']==PARENT and type(value['expectedSourceRows']) is int and value['expectedSourceRows']==355
+             and value['scope']=='CANDIDATE_IMAGE_IDENTITY_ONLY_NOT_BUILD_OR_INSTALLED_VALIDATION'
+             and value['gpuExecuted'] is False,"EVIDENCE_VALUE_INVALID")
     else:
-        # No OCI_RESULT/BUILD_RESULT producer format has been reviewed yet.
         raise RuntimeError("UNREVIEWED_EVIDENCE_SCHEMA")
     return value
 def collect_evidence(root):

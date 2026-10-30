@@ -1,0 +1,97 @@
+{
+  "schema": "WORLD_ENGINE_OCI_BUILD_EVIDENCE_SCHEMA_RESULT_V1",
+  "status": "PASS",
+  "scope": "NEW_OCI_BUILD_PRODUCER_CONSUMER_SCHEMA_CONTRACT_ONLY",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "branch": "recovery/label355-build-only-draft-20261030",
+  "baseCommit": "fa3dbb203839f7a8e0933607d5738221f4856d5a",
+  "dateAsiaSeoul": "2026-10-30",
+  "changedProductionFiles": [
+    "world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py"
+  ],
+  "newFocusedCasesPassed": 23,
+  "producerContract": {
+    "source": "world-simulation-shorts-engine/recovery/label-packaging-v1/produce_image_results.py",
+    "producerEdited": false,
+    "actualProducerFunctionExecuted": true,
+    "inputKind": "SYNTHETIC_INSPECT_WITH_PINNED_DECLARED_ENTRYPOINT_NO_REAL_IMAGE",
+    "oci": {
+      "fields": 8,
+      "schema": "WORLD_ENGINE_LABEL355_OCI_RESULT_V1",
+      "status": "PASS",
+      "scope": "ACTUAL_CANDIDATE_OCI_CONFIG_ONLY",
+      "imageId": "sha256:[a-f0-9]{64}",
+      "entrypointMatch": true,
+      "cmdUnchanged": true,
+      "userUnchanged": true,
+      "gpuExecuted": false
+    },
+    "build": {
+      "fields": 7,
+      "schema": "WORLD_ENGINE_LABEL355_BUILD_RESULT_V1",
+      "status": "IDENTITY_ONLY",
+      "parentDigest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+      "expectedSourceRows": 355,
+      "scope": "CANDIDATE_IMAGE_IDENTITY_ONLY_NOT_BUILD_OR_INSTALLED_VALIDATION",
+      "gpuExecuted": false
+    },
+    "returnValuesMutated": false,
+    "buildPassPromotionAllowed": false,
+    "provenanceNote": "Schema acceptance cannot establish actual image existence, successful build, installed source validation or live OCI correctness."
+  },
+  "verification": {
+    "initialCases": 3,
+    "initialFailures": 0,
+    "initialErrors": 3,
+    "initialExitCode": 1,
+    "initialError": "UNREVIEWED_EVIDENCE_SCHEMA",
+    "initialLog": "schema-initial.log",
+    "repairedCasesRechecked": 3,
+    "newNegativeCasesFirstExecution": 20,
+    "finalCases": 23,
+    "finalPassed": 23,
+    "finalExitCode": 0,
+    "finalLog": "schema-focused.log",
+    "actualNewSchemaCollectionAndIndexPrepared": true,
+    "indexStatus": "PREPARED_NOT_REMOTE_BACKED_UP",
+    "missingExtraPrivateFieldsRejected": true,
+    "strictBooleanAndIntegerTypes": true,
+    "imageIdParentScopeExact": true,
+    "filenameSchemaSwapsRejected": true
+  },
+  "preservation": {
+    "prior102Reexecuted": false,
+    "allOtherHistoricalPASSReexecuted": false,
+    "oldPreflightInstalledBranchesUnchanged": true,
+    "sharedParserSizePathAndSnapshotChecksUnchanged": true,
+    "producerAndOtherHelpersUnchanged": true,
+    "workflowUnchanged": true,
+    "runtimeSourceManifestAndBootstrapUnchanged": true,
+    "mainUnchanged": true,
+    "existingSuccessfulImagesTagsDigestsUnchanged": true
+  },
+  "effects": {
+    "imageBuilds": 0,
+    "imageInspections": 0,
+    "dockerCommands": 0,
+    "ghcrWrites": 0,
+    "actionsDispatched": 0,
+    "gpuRuns": 0,
+    "helperGitPushes": 0,
+    "newPaidResourcesRequested": 0
+  },
+  "resolvedBlocker": "Unreviewed OCI_RESULT/BUILD_RESULT schemas are now connected to their actual producer contract; BUILD remains identity-only.",
+  "remainingBlocked": [
+    "Current free cost/capacity and authorized Docker API access not proven; existing candidate-build prerequisite BLOCKED remains",
+    "Actual candidate image build and installed355-file/OCI/UID1000 verification NOT_RUN",
+    "Actual remote evidence helper execution and separate publication/GPU gates NOT_RUN"
+  ],
+  "firstIncompleteStage": "LIVE_BUILD_PREFLIGHT_COST_CAPACITY_DOCKER_ACCESS",
+  "evidence": {
+    "producerOutputContract": "PRODUCER_CONTRACT_RECEIPT.json",
+    "tests": "FOCUSED_TEST_RESULT.json",
+    "sourceDiff": "SOURCE_CHANGE.patch",
+    "sha256": "SHA256_MANIFEST.json"
+  },
+  "stopAfterCommit": true
+}

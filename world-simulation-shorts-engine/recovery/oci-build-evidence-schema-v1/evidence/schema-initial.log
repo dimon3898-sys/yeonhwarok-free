@@ -1,0 +1,45 @@
+test_01_actual_producer_oci_accepted_unchanged (__main__.NewOciBuildSchemas.test_01_actual_producer_oci_accepted_unchanged) ... ERROR
+test_02_actual_producer_build_stays_identity_only (__main__.NewOciBuildSchemas.test_02_actual_producer_build_stays_identity_only) ... ERROR
+test_03_actual_pair_collected_without_claiming_image_build (__main__.NewOciBuildSchemas.test_03_actual_pair_collected_without_claiming_image_build) ... ERROR
+
+======================================================================
+ERROR: test_01_actual_producer_oci_accepted_unchanged (__main__.NewOciBuildSchemas.test_01_actual_producer_oci_accepted_unchanged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/oci-build-evidence-schema-v1/test_oci_build_schema.py", line 64, in test_01_actual_producer_oci_accepted_unchanged
+    result=consumer.safe_evidence_bytes('OCI_RESULT.json',self.raw['OCI_RESULT.json'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py", line 55, in safe_evidence_bytes
+    raise RuntimeError("UNREVIEWED_EVIDENCE_SCHEMA")
+RuntimeError: UNREVIEWED_EVIDENCE_SCHEMA
+
+======================================================================
+ERROR: test_02_actual_producer_build_stays_identity_only (__main__.NewOciBuildSchemas.test_02_actual_producer_build_stays_identity_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/oci-build-evidence-schema-v1/test_oci_build_schema.py", line 68, in test_02_actual_producer_build_stays_identity_only
+    result=consumer.safe_evidence_bytes('BUILD_RESULT.json',self.raw['BUILD_RESULT.json'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py", line 55, in safe_evidence_bytes
+    raise RuntimeError("UNREVIEWED_EVIDENCE_SCHEMA")
+RuntimeError: UNREVIEWED_EVIDENCE_SCHEMA
+
+======================================================================
+ERROR: test_03_actual_pair_collected_without_claiming_image_build (__main__.NewOciBuildSchemas.test_03_actual_pair_collected_without_claiming_image_build)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/oci-build-evidence-schema-v1/test_oci_build_schema.py", line 73, in test_03_actual_pair_collected_without_claiming_image_build
+    index,payloads=consumer.collect_evidence(self.summaries)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py", line 70, in collect_evidence
+    safe_evidence_bytes(f.name,data);total+=len(data);payloads[f.name]=data
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/oci-build-schema-v1/repo/world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py", line 55, in safe_evidence_bytes
+    raise RuntimeError("UNREVIEWED_EVIDENCE_SCHEMA")
+RuntimeError: UNREVIEWED_EVIDENCE_SCHEMA
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.003s
+
+FAILED (errors=3)
+{"schema": "WORLD_ENGINE_NEW_OCI_BUILD_SCHEMA_TEST_RESULT_V1", "status": "BLOCKED", "cases": 3, "passed": 0, "oldPASSReexecutions": 0, "actualImageBuilds": 0, "dockerCommands": 0, "actionsDispatched": 0, "gpuRuns": 0, "scope": "SYNTHETIC_PRODUCER_CONSUMER_CONTRACT_ONLY"}
