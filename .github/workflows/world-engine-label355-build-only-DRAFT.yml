@@ -16,15 +16,17 @@ jobs:
       PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
       PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
       VERIFIER: world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
+      PREFLIGHT: world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py
       ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: BLOCKED until fresh cost and capacity approval
+      - name: Fresh cost and daemon capacity gate (disabled until billing attestation)
+        id: preflight
         run: |
-          echo "BLOCKED: live account allowance and exact-parent Docker capacity must be proven before pull"
-          exit 1
+          mkdir -p "$RUNNER_TEMP/label355-evidence"
+          python3 -B "$PREFLIGHT" --out "$RUNNER_TEMP/label355-evidence/PREFLIGHT.json" --billing-attestation "$RUNNER_TEMP/live-billing-attestation.json"
       # After approval only: reuse proven G2 preflight method with current
       # parent digest and measured daemon free space, not historical numbers.
       - name: Prepare exact 355-source context
@@ -62,5 +64,14 @@ jobs:
             --mount "type=bind,src=$RUNNER_TEMP/label355-evidence,dst=/evidence" \
             --entrypoint /usr/bin/python3 world-engine-label355:unpublished \
             -I -B /verify.py --root "$ROOT" --expected /expected.json --out /evidence/INSTALLED_RESULT.json
-      # Before enabling: implement bounded evidence preservation even on failure.
+      - name: Preserve bounded safe evidence on failure
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-label355-safe-${{ github.run_id }}
+          path: ${{ runner.temp }}/label355-evidence/
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 9
+      # Artifact is temporary; permanent recovery-branch evidence backup is NOT yet connected.
       # No docker login, docker push, registry write, GPU, retry, or main change.
