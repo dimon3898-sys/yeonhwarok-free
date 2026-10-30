@@ -42,20 +42,15 @@ jobs:
         run: |
           docker pull "$PARENT"
           docker build --network none --pull=false -t world-engine-label355:unpublished "$RUNNER_TEMP/label355-context"
-      - name: Inspect OCI config and exact ENTRYPOINT before container validation
+      - name: Produce reviewed OCI and identity-only BUILD receipts
         if: ${{ false }}
         run: |
           docker image inspect world-engine-label355:unpublished > "$RUNNER_TEMP/label355-oci.json"
-          python3 - <<'PY'
-          import json,os
-          p=json.load(open(os.environ['RUNNER_TEMP']+'/label355-oci.json'))[0]
-          e=json.load(open('world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json'))
-          c=p['Config']
-          assert c['Entrypoint']==e['entrypoint'],'OCI_ENTRYPOINT_MISMATCH'
-          assert c.get('Cmd') is None,'OCI_CMD_CHANGED'
-          assert c.get('User') in ('','0','root','0:0'),'OCI_USER_CHANGED'
-          print('OCI_DECLARED_CONFIG_MATCH')
-          PY
+          python3 -B world-simulation-shorts-engine/recovery/label-packaging-v1/produce_image_results.py \
+            --inspect "$RUNNER_TEMP/label355-oci.json" \
+            --expected world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json \
+            --oci-out "$RUNNER_TEMP/label355-evidence/OCI_RESULT.json" \
+            --build-out "$RUNNER_TEMP/label355-evidence/BUILD_RESULT.json"
       - name: Verify 355 installed files and UID1000 without GPU
         if: ${{ false }}
         run: |
@@ -81,7 +76,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
           compression-level: 9
-      # This remains disabled until explicit evidence-write authorization and review.
+      # Existing recovery backup helper is connected but stays disabled.\n      # Requires reviewed token permissions and explicit evidence-write authorization.
       # No automatic dispatch, docker login, docker push, GPU, or main change.
       - name: Permanent evidence backup to existing recovery branch (disabled)
         if: ${{ false }}
