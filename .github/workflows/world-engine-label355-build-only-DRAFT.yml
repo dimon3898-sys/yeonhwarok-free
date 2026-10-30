@@ -1,10 +1,11 @@
-name: WORLD ENGINE label355 candidate build once (no publish)
+name: WORLD ENGINE label355 rebuild and new GHCR tag once
 on:
   push:
     branches: [recovery/label355-build-only-draft-20261030]
     paths: ['.github/workflows/world-engine-label355-build-only-DRAFT.yml']
 permissions:
   contents: read
+  packages: write
 concurrency:
   group: world-engine-label355-build-only
   cancel-in-progress: false
@@ -17,11 +18,13 @@ jobs:
       github.run_attempt == 1 &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
       github.event.repository.private == false &&
-      github.event.before == 'af9347963b4405dac66cdbe0ad6c6898c3d42ea0' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_LABEL355_BUILD_ONCE_20261030'
+      github.event.before == '07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_LABEL355_PUBLISH_ONCE_20261030'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
+      DOCKER_CONFIG: ${{ runner.temp }}/label355-docker-auth
+      PUBLISHER: label355-control/world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
       PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
       PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
       VERIFIER: world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
@@ -63,17 +66,38 @@ jobs:
             world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198/RUNTIME_SOURCE_MANIFEST.json
             world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198/STARTUP_MANIFEST.json
             world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198/image-config.json
+            world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/build_g2_image.py
             world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
             world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py
             world-simulation-shorts-engine/recovery/label-packaging-v1/produce_image_results.py
             world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
             world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py
             world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json
+      - name: Read only publication control from this guarded commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: label355-control
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
+            world-simulation-shorts-engine/recovery/label355-publication-v1/OWNER_OBSERVATIONS.json
+      - name: Authenticate scoped GHCR token without registry write
+        id: registry_gate
+        timeout-minutes: 3
+        env:
+          GHCR_JOB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p "$DOCKER_CONFIG"
+          chmod 0700 "$DOCKER_CONFIG"
+          printf '%s' "$GHCR_JOB_TOKEN" | docker --host=unix:///var/run/docker.sock login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          python3 -B "$PUBLISHER" preflight
       - name: Apply current user billing confirmation
         run: |
           mkdir -p "$RUNNER_TEMP/label355-evidence"
           cat > "$RUNNER_TEMP/live-billing-attestation.json" <<'JSON'
-          {"accountCurrent":true,"actionsBudgetUSD":0,"stopUsageAtLimit":true,"paymentMethodRegistered":false,"basis":"af934796 live account observations plus explicit current user confirmation on 2026-10-30"}
+          {"accountCurrent":true,"actionsBudgetUSD":0,"stopUsageAtLimit":true,"paymentMethodRegistered":false,"basis":"2026-10-30 08:10Z live billing budget/storage and package Admin observations; explicit current user no-card/no-PayPal confirmation reused"}
           JSON
       - name: Live Docker and actual daemon capacity gate before pull
         id: preflight
@@ -120,6 +144,9 @@ jobs:
             --expected world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json \
             --oci-out "$RUNNER_TEMP/label355-evidence/OCI_RESULT.json" \
             --build-out "$RUNNER_TEMP/label355-evidence/BUILD_RESULT.json"
+      - name: Compare previous successful image ID with rebuilt candidate
+        id: comparison
+        run: python3 -B "$PUBLISHER" comparison
       - name: Verify actual 355 files bootstrap worker SHA256 and UID1000
         id: installed
         timeout-minutes: 2
@@ -131,6 +158,18 @@ jobs:
             --mount "type=bind,src=$RUNNER_TEMP/label355-evidence,dst=/evidence" \
             --entrypoint /usr/bin/python3 "$TAG" \
             -I -B /verify.py --root "$ROOT" --expected /expected.json --out /evidence/INSTALLED_RESULT.json
+      - name: Publish exactly one new tag after all candidate checks pass
+        id: publish
+        timeout-minutes: 10
+        run: python3 -B "$PUBLISHER" publish
+      - name: Verify anonymous remote digest config and every layer access
+        id: remote
+        timeout-minutes: 5
+        run: python3 -B "$PUBLISHER" remote
+      - name: Preserve publication evidence even after failure
+        id: publication_evidence
+        if: always() && !cancelled()
+        run: python3 -B "$PUBLISHER" export
       - name: Preserve bounded safe evidence without registry or Git write
         id: evidence
         if: always() && !cancelled()
@@ -150,10 +189,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: world-engine-label355-safe-${{ github.run_id }}
-          path: ${{ runner.temp }}/label355-evidence/
+          path: |
+            ${{ runner.temp }}/label355-evidence/
+            ${{ runner.temp }}/label355-publication/
           if-no-files-found: error
           retention-days: 1
           compression-level: 9
           include-hidden-files: false
 # Evidence is retrieved and committed through the authorized GitHub connector.
-# No workflow rerun, registry write, GPU, main modification, or old test suite.
+# One authorized build and new-tag push; no workflow rerun, GPU, main modification, or old test suite.

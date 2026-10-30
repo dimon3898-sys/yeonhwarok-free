@@ -509,8 +509,8 @@
       "tests": 8
     }
   },
-  "nextAction": "Authorized build-only task complete. Do not repeat this build or old PASS suites. Any later build, durable image export/publication or GPU execution requires the applicable separate authorization.",
-  "nextOwner": "NONE_AUTHORIZED_BUILD_ONLY_TASK_COMPLETE",
+  "nextAction": "Execute guarded live runner gates; build same source once, verify actual candidate, publish one new tag only on PASS, verify anonymous remote digest/config/layer accessibility, preserve evidence. No retries.",
+  "nextOwner": "CODEX",
   "originalCHECKPOINT": {
     "historicalG1NotRunDoesNotOverrideCurrentPass": true,
     "historicalStatus": "DESIGN_COMPLETE_RUNTIME_NOT_MODIFIED",
@@ -958,5 +958,30 @@
     "gpuExecuted": false,
     "visualQuality": "NOT_RUN_NOT_CLAIMED",
     "resolvesHistoricalBlocker": "LIVE_PAYMENT_METHOD_STATUS_UNCONFIRMED via current explicit user confirmation; historical records remain intact"
+  },
+  "label355Publication20261030": {
+    "status": "AUTHORIZED_PENDING_LIVE_RUNNER_GATES",
+    "sourceCommit": "af9347963b4405dac66cdbe0ad6c6898c3d42ea0",
+    "previousSuccessfulRunID": 41015249885,
+    "previousEvidenceCommit": "07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4",
+    "previousImageID": "sha256:a175c1b01fda0513625a171e74987951d8c11ad083d8583fc297f4fcff2271cc",
+    "branch": "recovery/label355-build-only-draft-20261030",
+    "expectedPredecessor": "07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4",
+    "dispatchCommitMessage": "WORLD_ENGINE_LABEL355_PUBLISH_ONCE_20261030",
+    "maxBuildAttempts": 1,
+    "maxPublicationAttempts": 1,
+    "maxWorkflowAttempts": 1,
+    "retries": 0,
+    "buildAttempts": 0,
+    "publicationAttempts": 0,
+    "existingGateRecordsPreserved": 30,
+    "oldPASSSuitesRerun": false,
+    "gpuExecuted": false,
+    "mainChanged": false,
+    "publicationDestination": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:label355-v1-af9347963b44-<run-id>",
+    "existingTagsMayChange": false,
+    "stopOnFailure": true,
+    "workflow": ".github/workflows/world-engine-label355-build-only-DRAFT.yml",
+    "nextAction": "Execute guarded live runner gates; build same source once, verify actual candidate, publish one new tag only on PASS, verify anonymous remote digest/config/layer accessibility, preserve evidence. No retries."
   }
 }
