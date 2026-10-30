@@ -1,0 +1,85 @@
+{
+  "schema": "WORLD_ENGINE_GHCR_PUBLISHER_CONTROL_PLAN_V1",
+  "status": "BLOCKED_MINIMUM_CHANGE_TARGETS_NOT_YET_VERIFIABLE",
+  "methodSelected": "Temporarily isolate publishing to the bootstrap repository by disabling other token-issuing paths and restricting credentials that can alter or reopen those paths.",
+  "candidateRepository": "ghcr.io/dimon3898-sys/world-engine-vulkan-surface-candidates",
+  "implementationReady": false,
+  "approvedForPermissionChanges": false,
+  "rationale": "Official documentation provides repository Actions controls, app repository scoping and app suspension. No documented personal-namespace precreation candidate-name reservation was established. Default GITHUB_TOKEN read permission or workflow concurrency alone is not a namespace-wide deny.",
+  "sequence": [
+    {
+      "step": 1,
+      "action": "Read actual detailed scopes and repository access for the two observed fine-grained tokens and two installed apps, plus authorized app grants and bootstrap write principals.",
+      "status": "BLOCKED_BROWSER_SUDO_AND_TRANSPORT"
+    },
+    {
+      "step": 2,
+      "action": "Build a concrete minimal before/after permission diff. Disable Actions on only enabled non-bootstrap token-issuing repositories; restrict only proven principals able to alter bootstrap workflow/policy/refs, dispatch or reenable an alternative publisher, or create a new repository that bypasses the restricted inventory.",
+      "status": "TARGETS_NOT_YET_PROVEN_NO_SETTINGS_CHANGED"
+    },
+    {
+      "step": 3,
+      "action": "Record restoration values and obtain user approval for those exact changes.",
+      "status": "NOT_REQUESTED_NO_REVIEWABLE_MINIMUM_DIFF_YET"
+    },
+    {
+      "step": 4,
+      "action": "After approved controls are applied, establish expiry or revocation of already issued publisher tokens. Do not treat a settings toggle alone as immediate token revocation.",
+      "status": "NOT_PERFORMED"
+    },
+    {
+      "step": 5,
+      "action": "Review remaining owner/session and credential-minting paths. If exclusivity is still not technically established, keep BLOCKED. Do not populate a true attestation from unknown facts.",
+      "status": "NOT_PERFORMED"
+    },
+    {
+      "step": 6,
+      "action": "Only after technical control and all original execution gates hold, consider the separately approved one-copy step. This investigation does not dispatch it.",
+      "status": "FORBIDDEN_UNTIL_CONTROL_ESTABLISHED"
+    }
+  ],
+  "concreteControlOptionsWithinSelectedMethod": [
+    {
+      "control": "Repository Settings > Actions > General > Disable actions",
+      "scope": "Only a proven non-bootstrap repository",
+      "impact": "Temporarily pauses that repository's CI/automation; does not edit the successful package ACL.",
+      "restore": "Restore the exact previously recorded Actions settings. Do not automatically rerun jobs.",
+      "limitations": "Repository credentials with administration authority could restore the setting; already-issued token expiry must be separately established."
+    },
+    {
+      "control": "Installed app Repository access restriction, or Suspend only if needed",
+      "scope": "Only an app whose actual grant enables the competing path",
+      "impact": "Potentially interrupts connected tools or deployments. Suspending ChatGPT Codex Connector would interrupt the current connector.",
+      "restore": "Restore the exact selected repositories or Unsuspend via the owner's browser.",
+      "limitations": "App authorization and unrelated tokens are separate; application-wide suspension is not automatically the minimum change."
+    },
+    {
+      "control": "Fine-grained token repository/permission restriction, only if an indirect publication path is proven",
+      "scope": "Only the relevant observed token permissions",
+      "impact": "May pause its existing automation; no token deletion or rotation is planned.",
+      "restore": "Restore recorded repository selection and permission values after separate approval as necessary.",
+      "limitations": "Actual editability and affected scope remain unverified; no credential alteration is authorized."
+    }
+  ],
+  "protectedResources": [
+    "Existing successful package ACL",
+    "Existing image tags and digest",
+    "Existing renderer and Scene",
+    "yeonhwarok-free main"
+  ],
+  "uncontrollableOrUnproven": [
+    "A package that does not yet exist has no observed candidate-specific precreation ACL.",
+    "A trusted account owner may create credentials or undo settings; the plan does not claim to defeat that authority.",
+    "Unknown token scopes and account sessions cannot be treated as blocked.",
+    "Already-issued tokens require actual expiry evidence; no immediate invalidation is assumed.",
+    "Unknown repository-creation privileges cannot be assumed unable to create an alternative token-issuing repository."
+  ],
+  "userNextAction": "Provide only non-secret Repository access and Permissions sections from the two existing fine-grained token detail pages and the two installed app Configure pages, or resume once the remote browser service can read those pages. Do not change settings or supply codes/token values.",
+  "documentation": [
+    "https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility",
+    "https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens",
+    "https://docs.github.com/en/apps/using-github-apps/reviewing-and-modifying-installed-github-apps",
+    "https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository",
+    "https://docs.github.com/en/actions/concepts/security/github_token"
+  ]
+}

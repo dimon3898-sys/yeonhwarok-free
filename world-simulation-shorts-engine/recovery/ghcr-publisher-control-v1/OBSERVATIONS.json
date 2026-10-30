@@ -1,0 +1,88 @@
+{
+  "schema": "WORLD_ENGINE_PUBLISHER_CONTROL_OBSERVATIONS_V1",
+  "status": "PARTIAL_READ_ONLY_OBSERVATIONS",
+  "recordedAt": "2026-10-30T00:21:40.531Z",
+  "source": "Observed authenticated GitHub UI and connected GitHub installation metadata in this conversation. No credential values read.",
+  "baselineCommit": "c052b7c688846eee78a809649500c9f30c762897",
+  "observedInventory": {
+    "classicPAT": {
+      "count": 0,
+      "uiText": "No personal access token created",
+      "sourceURL": "https://github.com/settings/tokens",
+      "scope": "Account classic PAT list observed before interruption; not re-polled"
+    },
+    "authorizedOAuthApps": {
+      "count": 0,
+      "uiText": "No authorized OAuth Apps",
+      "sourceURL": "https://github.com/settings/applications"
+    },
+    "fineGrainedPAT": {
+      "count": 2,
+      "sourceURL": "https://github.com/settings/personal-access-tokens",
+      "directPackagesSupport": "Not supported according to official current documentation",
+      "indirectActionsContentsWorkflowsAdministrationScopes": "UNOBSERVED_SUDO_REQUIRED",
+      "tokenNamesOmittedFromPublicReceipt": true
+    },
+    "installedGitHubApps": {
+      "count": 2,
+      "sourceURL": "https://github.com/settings/installations",
+      "apps": [
+        {
+          "name": "ChatGPT Codex Connector",
+          "installationId": 163492151,
+          "repositorySelection": "all",
+          "repositorySelectionEvidence": "Connected list_installations tool; actual response",
+          "detailedPermissions": "UNOBSERVED_SUDO_REQUIRED"
+        },
+        {
+          "name": "Railway App",
+          "installationId": 157942959,
+          "repositorySelection": "UNOBSERVED",
+          "detailedPermissions": "UNOBSERVED_SUDO_REQUIRED"
+        }
+      ]
+    },
+    "repositoryInventory": {
+      "connectorAccessibleOwnerRepositories": 5,
+      "accountWideCompleteness": "NOT_ESTABLISHED",
+      "privateRepositoryNamesOmittedFromPublicReceipt": true
+    },
+    "bootstrapPublisher": {
+      "repository": "dimon3898-sys/world-engine-ghcr-candidate-bootstrap",
+      "type": "Future approved GitHub Actions job-scoped GITHUB_TOKEN",
+      "requestedPermission": "packages:write",
+      "source": "Existing reviewed workflow at 2df517d0bb78c210762ecf0e1ec07546c75dbce9",
+      "tokenIssuedByThisTask": false
+    }
+  },
+  "unresolved": [
+    "Fine-grained PAT repository selection and Actions/Contents/Workflows/Administration scopes",
+    "Installed app detailed permissions and Railway repository selection",
+    "Authorized GitHub App user-token grants",
+    "Complete account repository inventory and existing Actions policy settings",
+    "Bootstrap non-owner collaborators and other workflow-writing authentication paths",
+    "An authoritative basis for expiry/revocation of already-issued publisher credentials after any proposed control change",
+    "Permissions to create a new repository or alter bootstrap policy/workflow/ref and issue a competing job"
+  ],
+  "accessFailure": {
+    "sudo": "GitHub Confirm access email reauthentication required",
+    "secureCredentialRequest": "TIMED_OUT",
+    "postRebootRead": "ABORTED_WITHOUT_STATE_RESULT",
+    "singleControlReset": "TIMED_OUT_AFTER_300_SECONDS",
+    "githubConnector": "RESPONDING",
+    "newBrowserRetriesPlanned": false
+  },
+  "untouched": {
+    "priorPassTestsRerun": false,
+    "packageAbsenceRechecked": false,
+    "actionsRunListsRechecked": false,
+    "permissionsChanged": false,
+    "packageACLChanged": false,
+    "workflowExecuted": false,
+    "imageCopied": false,
+    "imageBuilt": false,
+    "gpuExecuted": false
+  },
+  "credentialSecretsSaved": false,
+  "notes": "Counts and access observations describe the recorded UI state only. They do not establish an exclusive interval or a complete publisher inventory."
+}
