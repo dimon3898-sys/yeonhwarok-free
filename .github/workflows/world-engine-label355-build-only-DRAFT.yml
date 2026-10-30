@@ -18,7 +18,7 @@ jobs:
       github.run_attempt == 1 &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
       github.event.repository.private == false &&
-      github.event.before == '7efe029da0c372e97f376e9f332d01aad723d0fc' &&
+      github.event.before == 'e83ac5b423b77e730815ec73334ad67209ac6a6e' &&
       github.event.head_commit.message == 'WORLD_ENGINE_LABEL355_PUBLISH_ONCE_20261030'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -28,6 +28,8 @@ jobs:
       PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
       VERIFIER: world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
       PREFLIGHT: world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py
+      SAFE_IMAGE_CONFIG: label355-safe-evidence/world-simulation-shorts-engine/recovery/label-packaging-v1/image_config_safe.py
+      SAFE_BACKUP: label355-safe-evidence/world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py
       ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
       TAG: world-engine-label355:unpublished-${{ github.run_id }}
     steps:
@@ -82,6 +84,16 @@ jobs:
           sparse-checkout: |
             world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
             world-simulation-shorts-engine/recovery/label355-publication-v1/OWNER_OBSERVATIONS.json
+      - name: Read pinned safe image evidence helpers only
+        uses: actions/checkout@v4
+        with:
+          ref: e163de2602a486196ec75683ddf0609bdcffb2ed
+          path: label355-safe-evidence
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/label-packaging-v1/image_config_safe.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py
       - name: Authenticate scoped GHCR token without registry write
         id: registry_gate
         timeout-minutes: 3
@@ -145,9 +157,6 @@ jobs:
             --expected world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json \
             --oci-out "$RUNNER_TEMP/label355-evidence/OCI_RESULT.json" \
             --build-out "$RUNNER_TEMP/label355-evidence/BUILD_RESULT.json"
-      - name: Compare previous successful image ID with rebuilt candidate
-        id: comparison
-        run: python3 -B "$PUBLISHER" comparison
       - name: Verify actual 355 files bootstrap worker SHA256 and UID1000
         id: installed
         timeout-minutes: 2
@@ -159,8 +168,51 @@ jobs:
             --mount "type=bind,src=$RUNNER_TEMP/label355-evidence,dst=/evidence" \
             --entrypoint /usr/bin/python3 "$TAG" \
             -I -B /verify.py --root "$ROOT" --expected /expected.json --out /evidence/INSTALLED_RESULT.json
+      - name: Capture and validate safe image config before D9
+        id: safe_config
+        timeout-minutes: 2
+        run: |
+          docker --host=unix:///var/run/docker.sock image inspect --format '{{json .RepoDigests}}' "$PARENT" > "$RUNNER_TEMP/label355-parent-repodigests.json"
+          python3 -B - <<'PY'
+          import importlib.util, json, os, pathlib, subprocess
+          def need(ok, code):
+              if not ok:
+                  raise RuntimeError(code)
+          temp = pathlib.Path(os.environ['RUNNER_TEMP'])
+          evidence = temp / 'label355-evidence'
+          spec = importlib.util.spec_from_file_location('pinned_safe_backup', os.environ['SAFE_BACKUP'])
+          backup = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(backup)
+          preflight = backup.safe_evidence_bytes('PREFLIGHT.json', (evidence / 'PREFLIGHT.json').read_bytes())
+          built = backup.safe_evidence_bytes('BUILD_RESULT.json', (evidence / 'BUILD_RESULT.json').read_bytes())
+          oci = backup.safe_evidence_bytes('OCI_RESULT.json', (evidence / 'OCI_RESULT.json').read_bytes())
+          backup.safe_evidence_bytes('INSTALLED_RESULT.json', (evidence / 'INSTALLED_RESULT.json').read_bytes())
+          parent_ref = os.environ['PARENT']
+          parent_digest = parent_ref.rsplit('@', 1)[-1]
+          ghcr = json.loads((temp / 'label355-publication/GHCR_PREFLIGHT.json').read_bytes())
+          context = json.loads((temp / 'context-verify.json').read_bytes())
+          pulled_parent = json.loads((temp / 'label355-parent-repodigests.json').read_bytes())
+          need(preflight['parentDigest'] == parent_digest and ghcr.get('status') == 'PASS'
+               and ghcr.get('existingG2TagDigest') == parent_digest, 'SAFE_CONFIG_PARENT_PROVENANCE')
+          need(context.get('status') == 'PASS' and context.get('parentImage') == parent_ref,
+               'SAFE_CONFIG_CONTEXT_PARENT')
+          need(type(pulled_parent) is list and parent_ref in pulled_parent, 'SAFE_CONFIG_PULLED_PARENT')
+          need(built['imageId'] == oci['imageId'], 'SAFE_CONFIG_CANDIDATE_ID')
+          subprocess.run(['python3', '-B', os.environ['SAFE_IMAGE_CONFIG'],
+              '--inspect', str(temp / 'label355-oci.json'), '--image-id', built['imageId'],
+              '--verified-parent-digest', preflight['parentDigest'],
+              '--out', str(evidence / 'IMAGE_CONFIG_SAFE.json')], check=True)
+          captured = backup.safe_evidence_bytes('IMAGE_CONFIG_SAFE.json',
+              (evidence / 'IMAGE_CONFIG_SAFE.json').read_bytes())
+          need(captured['imageId'] == built['imageId'], 'SAFE_CONFIG_RECEIPT_ID')
+          print('IMAGE_CONFIG_SAFE_VALIDATED')
+          PY
+      - name: Compare previous successful image ID with rebuilt candidate
+        id: comparison
+        run: python3 -B "$PUBLISHER" comparison
       - name: Publish exactly one new tag after all candidate checks pass
         id: publish
+        if: ${{ steps.installed.outcome == 'success' && steps.safe_config.outcome == 'success' && steps.comparison.outcome == 'success' }}
         timeout-minutes: 10
         run: python3 -B "$PUBLISHER" publish
       - name: Verify anonymous remote digest config and every layer access
@@ -176,7 +228,7 @@ jobs:
         if: always() && !cancelled()
         timeout-minutes: 1
         run: |
-          python3 -B world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py --evidence "$RUNNER_TEMP/label355-evidence" --index "$RUNNER_TEMP/label355-evidence/SAFE_INDEX.json"
+          python3 -B "$SAFE_BACKUP" --evidence "$RUNNER_TEMP/label355-evidence" --index "$RUNNER_TEMP/label355-evidence/SAFE_INDEX.json"
           python3 - <<'PY'
           import base64,hashlib,json,os,pathlib
           root=pathlib.Path(os.environ['RUNNER_TEMP'])/'label355-evidence'
