@@ -1,0 +1,91 @@
+test_01_synthetic355_normal_actual_uid1000 (__main__.Installed355Cases.test_01_synthetic355_normal_actual_uid1000) ... ok
+test_02_expected_count_rejected (__main__.Installed355Cases.test_02_expected_count_rejected) ... ok
+test_03_manifest_hash_rejected (__main__.Installed355Cases.test_03_manifest_hash_rejected) ... ok
+test_04_source_hash_rejected (__main__.Installed355Cases.test_04_source_hash_rejected) ... ok
+test_05_duplicate_source_path_rejected (__main__.Installed355Cases.test_05_duplicate_source_path_rejected) ... ok
+test_06_parent_traversal_rejected (__main__.Installed355Cases.test_06_parent_traversal_rejected) ... ok
+test_07_source_symlink_rejected (__main__.Installed355Cases.test_07_source_symlink_rejected) ... ok
+test_08_source_read_permission_denied_is_not_pass (__main__.Installed355Cases.test_08_source_read_permission_denied_is_not_pass) ... ok
+test_09_uid_other_than1000_rejected (__main__.Installed355Cases.test_09_uid_other_than1000_rejected) ... ok
+test_10_bootstrap_byte_hash_rejected (__main__.Installed355Cases.test_10_bootstrap_byte_hash_rejected) ... ok
+test_11_stale_bootstrap_source_pin_rejected (__main__.Installed355Cases.test_11_stale_bootstrap_source_pin_rejected) ... FAIL
+test_12_missing_startup_worker_rejected (__main__.Installed355Cases.test_12_missing_startup_worker_rejected) ... FAIL
+test_13_startup_worker_hash_rejected (__main__.Installed355Cases.test_13_startup_worker_hash_rejected) ... FAIL
+test_14_manifest_symlink_rejected (__main__.Installed355Cases.test_14_manifest_symlink_rejected) ... FAIL
+test_15_startup_symlink_rejected (__main__.Installed355Cases.test_15_startup_symlink_rejected) ... FAIL
+test_16_root_symlink_rejected (__main__.Installed355Cases.test_16_root_symlink_rejected) ... FAIL
+test_17_startup_link_hash_rejected (__main__.Installed355Cases.test_17_startup_link_hash_rejected) ... ok
+test_18_startup_manifest_hash_rejected (__main__.Installed355Cases.test_18_startup_manifest_hash_rejected) ... ok
+
+======================================================================
+FAIL: test_11_stale_bootstrap_source_pin_rejected (__main__.Installed355Cases.test_11_stale_bootstrap_source_pin_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 118, in test_11_stale_bootstrap_source_pin_rejected
+    self.rejected('BOOTSTRAP_SOURCE_PIN')
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 69, in rejected
+    with self.assertRaisesRegex((RuntimeError,PermissionError,ValueError),pattern):self.invoke(root)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'PermissionError'>, <class 'ValueError'>) not raised
+
+======================================================================
+FAIL: test_12_missing_startup_worker_rejected (__main__.Installed355Cases.test_12_missing_startup_worker_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 121, in test_12_missing_startup_worker_rejected
+    (self.root/WORKER).unlink();self.rejected('WORKER')
+                                ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 69, in rejected
+    with self.assertRaisesRegex((RuntimeError,PermissionError,ValueError),pattern):self.invoke(root)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'PermissionError'>, <class 'ValueError'>) not raised
+
+======================================================================
+FAIL: test_13_startup_worker_hash_rejected (__main__.Installed355Cases.test_13_startup_worker_hash_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 124, in test_13_startup_worker_hash_rejected
+    (self.root/WORKER).write_bytes(b'# changed synthetic worker\n');self.rejected('WORKER_SHA')
+                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 69, in rejected
+    with self.assertRaisesRegex((RuntimeError,PermissionError,ValueError),pattern):self.invoke(root)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'PermissionError'>, <class 'ValueError'>) not raised
+
+======================================================================
+FAIL: test_14_manifest_symlink_rejected (__main__.Installed355Cases.test_14_manifest_symlink_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 128, in test_14_manifest_symlink_rejected
+    self.rejected('SYMLINK')
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 69, in rejected
+    with self.assertRaisesRegex((RuntimeError,PermissionError,ValueError),pattern):self.invoke(root)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'PermissionError'>, <class 'ValueError'>) not raised
+
+======================================================================
+FAIL: test_15_startup_symlink_rejected (__main__.Installed355Cases.test_15_startup_symlink_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 132, in test_15_startup_symlink_rejected
+    self.rejected('SYMLINK')
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 69, in rejected
+    with self.assertRaisesRegex((RuntimeError,PermissionError,ValueError),pattern):self.invoke(root)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'PermissionError'>, <class 'ValueError'>) not raised
+
+======================================================================
+FAIL: test_16_root_symlink_rejected (__main__.Installed355Cases.test_16_root_symlink_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 136, in test_16_root_symlink_rejected
+    self.rejected('SYMLINK',root=link)
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 69, in rejected
+    with self.assertRaisesRegex((RuntimeError,PermissionError,ValueError),pattern):self.invoke(root)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'PermissionError'>, <class 'ValueError'>) not raised
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.365s
+
+FAILED (failures=6)

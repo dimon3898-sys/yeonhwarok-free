@@ -1,0 +1,121 @@
+test_01_new_script_python_syntax (__main__.NewPreflightTests.test_01_new_script_python_syntax) ... ok
+test_02_normal_overlay_preflight_output (__main__.NewPreflightTests.test_02_normal_overlay_preflight_output) ... ok
+test_03_missing_billing_is_safe_failure_before_external_calls (__main__.NewPreflightTests.test_03_missing_billing_is_safe_failure_before_external_calls) ... ERROR
+test_04_missing_cost_fields_retry_and_repository_are_blocked (__main__.NewPreflightTests.test_04_missing_cost_fields_retry_and_repository_are_blocked) ... ok
+test_05_boolean_budget_cannot_substitute_zero_usd (__main__.NewPreflightTests.test_05_boolean_budget_cannot_substitute_zero_usd) ... FAIL
+test_06_registry_header_hash_mismatch_is_blocked (__main__.NewPreflightTests.test_06_registry_header_hash_mismatch_is_blocked) ... ok
+test_07_fixed_parent_hash_mismatch_is_blocked (__main__.NewPreflightTests.test_07_fixed_parent_hash_mismatch_is_blocked) ... ok
+test_08_cli_permission_denial_does_not_print_private_error_detail (__main__.NewPreflightTests.test_08_cli_permission_denial_does_not_print_private_error_detail) ... FAIL
+test_09_local_daemon_endpoint_ignores_redirect_selectors_preserves_credentials (__main__.NewPreflightTests.test_09_local_daemon_endpoint_ignores_redirect_selectors_preserves_credentials) ... FAIL
+test_10_vfs_cumulative_layers_capacity_is_not_underestimated (__main__.NewPreflightTests.test_10_vfs_cumulative_layers_capacity_is_not_underestimated) ... FAIL
+test_11_invalid_layer_sizes_do_not_lower_capacity_estimate (__main__.NewPreflightTests.test_11_invalid_layer_sizes_do_not_lower_capacity_estimate) ... FAIL
+test_12_unknown_driver_and_relative_daemon_root_are_blocked (__main__.NewPreflightTests.test_12_unknown_driver_and_relative_daemon_root_are_blocked) ... FAIL
+test_13_network_denial_is_safe_before_docker (__main__.NewPreflightTests.test_13_network_denial_is_safe_before_docker) ... ok
+test_14_insufficient_capacity_blocks_without_success_receipt (__main__.NewPreflightTests.test_14_insufficient_capacity_blocks_without_success_receipt) ... ok
+test_15_oversized_attestation_is_rejected_before_external_calls (__main__.NewPreflightTests.test_15_oversized_attestation_is_rejected_before_external_calls) ... FAIL
+test_16_duplicate_billing_keys_are_not_silently_overridden (__main__.NewPreflightTests.test_16_duplicate_billing_keys_are_not_silently_overridden) ... FAIL
+test_17_registry_manifest_read_is_bounded (__main__.NewPreflightTests.test_17_registry_manifest_read_is_bounded) ... FAIL
+
+======================================================================
+ERROR: test_03_missing_billing_is_safe_failure_before_external_calls (__main__.NewPreflightTests.test_03_missing_billing_is_safe_failure_before_external_calls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 99, in test_03_missing_billing_is_safe_failure_before_external_calls
+    self.invoke()
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 81, in invoke
+    module.main()
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py", line 12, in main
+    att=json.loads(pathlib.Path(a.billing_attestation).read_text())
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/world-preflight-new-iz60kmd5/billing.json'
+
+======================================================================
+FAIL: test_05_boolean_budget_cannot_substitute_zero_usd (__main__.NewPreflightTests.test_05_boolean_budget_cannot_substitute_zero_usd)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 116, in test_05_boolean_budget_cannot_substitute_zero_usd
+    with self.assertRaisesRegex(RuntimeError, 'LIVE_BILLING_ATTESTATION_REQUIRED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_08_cli_permission_denial_does_not_print_private_error_detail (__main__.NewPreflightTests.test_08_cli_permission_denial_does_not_print_private_error_detail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 139, in test_08_cli_permission_denial_does_not_print_private_error_detail
+    self.assertNotIn('SYNTHETIC_PRIVATE_ERROR_DETAIL', captured.getvalue())
+AssertionError: 'SYNTHETIC_PRIVATE_ERROR_DETAIL' unexpectedly found in 'BLOCKED:SYNTHETIC_PRIVATE_ERROR_DETAIL\n'
+
+======================================================================
+FAIL: test_09_local_daemon_endpoint_ignores_redirect_selectors_preserves_credentials (__main__.NewPreflightTests.test_09_local_daemon_endpoint_ignores_redirect_selectors_preserves_credentials)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 146, in test_09_local_daemon_endpoint_ignores_redirect_selectors_preserves_credentials
+    self.assertIn('--host=unix:///var/run/docker.sock', args)
+AssertionError: '--host=unix:///var/run/docker.sock' not found in ('docker', 'info', '--format', '{{.DockerRootDir}}')
+
+======================================================================
+FAIL: test_10_vfs_cumulative_layers_capacity_is_not_underestimated (__main__.NewPreflightTests.test_10_vfs_cumulative_layers_capacity_is_not_underestimated)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 154, in test_10_vfs_cumulative_layers_capacity_is_not_underestimated
+    with self.assertRaisesRegex(RuntimeError, 'BLOCKED_DAEMON_CAPACITY'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_11_invalid_layer_sizes_do_not_lower_capacity_estimate (__main__.NewPreflightTests.test_11_invalid_layer_sizes_do_not_lower_capacity_estimate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 160, in test_11_invalid_layer_sizes_do_not_lower_capacity_estimate
+    with self.assertRaisesRegex(RuntimeError, 'PARENT_LAYER_INVALID'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_12_unknown_driver_and_relative_daemon_root_are_blocked (__main__.NewPreflightTests.test_12_unknown_driver_and_relative_daemon_root_are_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 164, in test_12_unknown_driver_and_relative_daemon_root_are_blocked
+    with self.assertRaisesRegex(RuntimeError, 'DOCKER_STORAGE_DRIVER_UNSUPPORTED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_15_oversized_attestation_is_rejected_before_external_calls (__main__.NewPreflightTests.test_15_oversized_attestation_is_rejected_before_external_calls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 180, in test_15_oversized_attestation_is_rejected_before_external_calls
+    with self.assertRaisesRegex(RuntimeError, 'BILLING_ATTESTATION_SIZE_LIMIT'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_16_duplicate_billing_keys_are_not_silently_overridden (__main__.NewPreflightTests.test_16_duplicate_billing_keys_are_not_silently_overridden)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 185, in test_16_duplicate_billing_keys_are_not_silently_overridden
+    with self.assertRaisesRegex(RuntimeError, 'LIVE_BILLING_ATTESTATION_REQUIRED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_17_registry_manifest_read_is_bounded (__main__.NewPreflightTests.test_17_registry_manifest_read_is_bounded)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 189, in test_17_registry_manifest_read_is_bounded
+    with self.assertRaisesRegex(RuntimeError, 'PARENT_MANIFEST_SIZE_LIMIT'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.028s
+
+FAILED (failures=9, errors=1)
+{"schema": "WORLD_ENGINE_NEW_PREFLIGHT_FOCUSED_TESTS_V1", "status": "BLOCKED", "cases": 17, "failures": 9, "errors": 1, "realDockerCalls": 0, "realNetworkCalls": 0, "oldPASSSuitesRun": 0}

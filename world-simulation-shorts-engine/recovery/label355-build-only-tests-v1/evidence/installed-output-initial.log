@@ -1,0 +1,84 @@
+test_25_output_cannot_overwrite_expected (__main__.Installed355Cases.test_25_output_cannot_overwrite_expected) ... FAIL
+test_26_output_cannot_overwrite_verified_source (__main__.Installed355Cases.test_26_output_cannot_overwrite_verified_source) ... FAIL
+test_27_output_cannot_be_inside_verified_root (__main__.Installed355Cases.test_27_output_cannot_be_inside_verified_root) ... FAIL
+test_28_output_cannot_be_verified_root_directory (__main__.Installed355Cases.test_28_output_cannot_be_verified_root_directory) ... FAIL
+test_29_output_cannot_overwrite_existing_regular_file (__main__.Installed355Cases.test_29_output_cannot_overwrite_existing_regular_file) ... FAIL
+test_30_output_symlink_cannot_clobber_target (__main__.Installed355Cases.test_30_output_symlink_cannot_clobber_target) ... FAIL
+
+======================================================================
+FAIL: test_25_output_cannot_overwrite_expected (__main__.Installed355Cases.test_25_output_cannot_overwrite_expected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 182, in test_25_output_cannot_overwrite_expected
+    self.reject_output(self.expected)
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 176, in reject_output
+    with self.assertRaisesRegex((RuntimeError,OSError),'OUTPUT|SYMLINK'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_26_output_cannot_overwrite_verified_source (__main__.Installed355Cases.test_26_output_cannot_overwrite_verified_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 185, in test_26_output_cannot_overwrite_verified_source
+    self.reject_output(self.root/self.rows[0]['path'])
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 176, in reject_output
+    with self.assertRaisesRegex((RuntimeError,OSError),'OUTPUT|SYMLINK'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_27_output_cannot_be_inside_verified_root (__main__.Installed355Cases.test_27_output_cannot_be_inside_verified_root)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 188, in test_27_output_cannot_be_inside_verified_root
+    target=self.root/'untracked-result.json';self.reject_output(target);self.assertFalse(target.exists())
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 176, in reject_output
+    with self.assertRaisesRegex((RuntimeError,OSError),'OUTPUT|SYMLINK'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_28_output_cannot_be_verified_root_directory (__main__.Installed355Cases.test_28_output_cannot_be_verified_root_directory)
+----------------------------------------------------------------------
+IsADirectoryError: [Errno 21] Is a directory: '/tmp/new-installed355-00w4e7my/synthetic-root'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 191, in test_28_output_cannot_be_verified_root_directory
+    self.reject_output(self.root)
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 176, in reject_output
+    with self.assertRaisesRegex((RuntimeError,OSError),'OUTPUT|SYMLINK'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "OUTPUT|SYMLINK" does not match "[Errno 21] Is a directory: '/tmp/new-installed355-00w4e7my/synthetic-root'"
+
+======================================================================
+FAIL: test_29_output_cannot_overwrite_existing_regular_file (__main__.Installed355Cases.test_29_output_cannot_overwrite_existing_regular_file)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 195, in test_29_output_cannot_overwrite_existing_regular_file
+    self.reject_output(target);self.assertEqual(target.read_bytes(),before)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 176, in reject_output
+    with self.assertRaisesRegex((RuntimeError,OSError),'OUTPUT|SYMLINK'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'OSError'>) not raised
+
+======================================================================
+FAIL: test_30_output_symlink_cannot_clobber_target (__main__.Installed355Cases.test_30_output_symlink_cannot_clobber_target)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 200, in test_30_output_symlink_cannot_clobber_target
+    self.reject_output(link);self.assertEqual(target.read_bytes(),before)
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_verify_installed_355.py", line 176, in reject_output
+    with self.assertRaisesRegex((RuntimeError,OSError),'OUTPUT|SYMLINK'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (<class 'RuntimeError'>, <class 'OSError'>) not raised
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.284s
+
+FAILED (failures=6)

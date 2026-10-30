@@ -1,0 +1,50 @@
+{
+  "schema": "WORLD_ENGINE_NEW_REMOTE_BACKUP_FOCUSED_RESULT_V1",
+  "status": "PASS",
+  "distinctCasesPassed": 27,
+  "baseline": {
+    "cases": 21,
+    "passed": 10,
+    "failed": 11,
+    "exitCode": 1,
+    "log": "remote-backup-initial.log"
+  },
+  "targetedRepairs": {
+    "cases": 13,
+    "passed": 13,
+    "exitCode": 0,
+    "log": "remote-backup-targeted.log",
+    "recheckedPreviouslySuccessfulCases": [
+      4,
+      6
+    ],
+    "reason": "Positivefixture now uses exact producer parent/basis; permission fixture follows bounded open API"
+  },
+  "indexTypeFailure": {
+    "cases": 1,
+    "failed": 1,
+    "exitCode": 1,
+    "log": "remote-backup-index-types-initial.log"
+  },
+  "repairedTypeAndNewGuards": {
+    "cases": 6,
+    "passed": 6,
+    "exitCode": 0,
+    "log": "remote-backup-new-guards.log"
+  },
+  "minimalRepairs": [
+    "Recompute index from bounded reviewed summaries and exact actual bytes; reject forged totals/rows/schema/noninteger metadata",
+    "Freeze validated payload/index bytes before any checkout; preserve evidence on push/readback failure",
+    "Require approval, first attempt, repository and matching run-ID-only destination; reject path/symlink escape",
+    "Require expected origin fetch/push URLs and repository root; push only fixed recovery branch without force",
+    "Fetch again after push before exact remote readback; no retry",
+    "CLI reports safe error code rather than raw process output"
+  ],
+  "sourceSHA256": "b155351d1b54a135bac87c26878c1668f3571e953a88dd516063fb9a3ef4ec9d",
+  "helperGitNetworkPushesExecuted": 0,
+  "imageBuilds": 0,
+  "actionsDispatched": 0,
+  "gpuRuns": 0,
+  "oldPASSSuitesRun": 0,
+  "scope": "MOCKED_GIT_STATE_MACHINE_AND_SYNTHETIC_EVIDENCE_ONLY_NOT_REAL_BACKUP_PASS"
+}

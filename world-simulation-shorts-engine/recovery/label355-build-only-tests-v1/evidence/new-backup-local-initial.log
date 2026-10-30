@@ -1,0 +1,83 @@
+test_01_normal_closed_summary_is_hashed_exactly (__main__.NewBackupLocal.test_01_normal_closed_summary_is_hashed_exactly) ... ok
+test_02_unknown_private_files_are_never_read_or_indexed (__main__.NewBackupLocal.test_02_unknown_private_files_are_never_read_or_indexed) ... ok
+test_03_empty_safe_set_is_blocked (__main__.NewBackupLocal.test_03_empty_safe_set_is_blocked) ... ok
+test_04_size_over_limit_is_blocked_without_output (__main__.NewBackupLocal.test_04_size_over_limit_is_blocked_without_output) ... ok
+test_05_symlink_payload_is_skipped (__main__.NewBackupLocal.test_05_symlink_payload_is_skipped) ... ok
+test_06_permission_denial_is_fail_closed (__main__.NewBackupLocal.test_06_permission_denial_is_fail_closed) ... ok
+test_07_index_must_not_overwrite_payload (__main__.NewBackupLocal.test_07_index_must_not_overwrite_payload) ... FAIL
+test_08_existing_index_must_not_be_overwritten (__main__.NewBackupLocal.test_08_existing_index_must_not_be_overwritten) ... FAIL
+test_09_oversized_payload_is_rejected_before_open (__main__.NewBackupLocal.test_09_oversized_payload_is_rejected_before_open) ... FAIL
+test_10_allowed_filename_cannot_export_plaintext (__main__.NewBackupLocal.test_10_allowed_filename_cannot_export_plaintext) ... FAIL
+test_11_unknown_private_fields_are_rejected (__main__.NewBackupLocal.test_11_unknown_private_fields_are_rejected) ... FAIL
+test_12_symlink_evidence_root_is_rejected (__main__.NewBackupLocal.test_12_symlink_evidence_root_is_rejected) ... FAIL
+
+======================================================================
+FAIL: test_07_index_must_not_overwrite_payload (__main__.NewBackupLocal.test_07_index_must_not_overwrite_payload)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 67, in test_07_index_must_not_overwrite_payload
+    with self.assertRaisesRegex(RuntimeError,'INDEX_PATH_REQUIRED'):self.call(p)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_08_existing_index_must_not_be_overwritten (__main__.NewBackupLocal.test_08_existing_index_must_not_be_overwritten)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 71, in test_08_existing_index_must_not_be_overwritten
+    with self.assertRaisesRegex(RuntimeError,'INDEX_ALREADY_EXISTS'):self.call()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_09_oversized_payload_is_rejected_before_open (__main__.NewBackupLocal.test_09_oversized_payload_is_rejected_before_open)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 79, in test_09_oversized_payload_is_rejected_before_open
+    with self.assertRaisesRegex(RuntimeError,'EVIDENCE_SIZE_LIMIT'):self.call()
+                                                                    ^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 32, in call
+    module.main()
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py", line 13, in main
+    data=f.read_bytes();total+=len(data)
+         ^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 76, in no_payload_open
+    if path==p:raise AssertionError('OVERSIZED_PAYLOAD_OPENED')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: OVERSIZED_PAYLOAD_OPENED
+
+======================================================================
+FAIL: test_10_allowed_filename_cannot_export_plaintext (__main__.NewBackupLocal.test_10_allowed_filename_cannot_export_plaintext)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 82, in test_10_allowed_filename_cannot_export_plaintext
+    with self.assertRaisesRegex(RuntimeError,'EVIDENCE_JSON_INVALID'):self.call()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_11_unknown_private_fields_are_rejected (__main__.NewBackupLocal.test_11_unknown_private_fields_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 86, in test_11_unknown_private_fields_are_rejected
+    with self.assertRaisesRegex(RuntimeError,'EVIDENCE_FIELDS_INVALID'):self.call()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_12_symlink_evidence_root_is_rejected (__main__.NewBackupLocal.test_12_symlink_evidence_root_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_build_evidence.py", line 91, in test_12_symlink_evidence_root_is_rejected
+    with self.assertRaisesRegex(RuntimeError,'EVIDENCE_SYMLINK_FORBIDDEN'):module.main()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.006s
+
+FAILED (failures=6)
+{"schema": "WORLD_ENGINE_NEW_LOCAL_BACKUP_TEST_RESULT_V1", "cases": 12, "passed": 6, "failures": ["test_07_index_must_not_overwrite_payload", "test_08_existing_index_must_not_be_overwritten", "test_09_oversized_payload_is_rejected_before_open", "test_10_allowed_filename_cannot_export_plaintext", "test_11_unknown_private_fields_are_rejected", "test_12_symlink_evidence_root_is_rejected"], "existingSuiteExecutions": 0, "networkRequests": 0, "processStarts": 0}

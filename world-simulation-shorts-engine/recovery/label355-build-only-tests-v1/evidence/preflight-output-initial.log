@@ -1,0 +1,76 @@
+test_20_output_cannot_clobber_billing_proof (__main__.NewPreflightTests.test_20_output_cannot_clobber_billing_proof) ... FAIL
+test_21_existing_output_is_preserved_and_blocked_before_external_calls (__main__.NewPreflightTests.test_21_existing_output_is_preserved_and_blocked_before_external_calls) ... FAIL
+test_22_output_symlink_cannot_overwrite_an_existing_file (__main__.NewPreflightTests.test_22_output_symlink_cannot_overwrite_an_existing_file) ... FAIL
+test_23_output_symlink_ancestor_and_relative_paths_are_blocked (__main__.NewPreflightTests.test_23_output_symlink_ancestor_and_relative_paths_are_blocked) ... FAIL
+test_24_output_race_uses_exclusive_creation_and_preserves_new_owner_file (__main__.NewPreflightTests.test_24_output_race_uses_exclusive_creation_and_preserves_new_owner_file) ... FAIL
+test_25_new_fresh_output_has_exclusive_creation_and_valid_receipt (__main__.NewPreflightTests.test_25_new_fresh_output_has_exclusive_creation_and_valid_receipt) ... FAIL
+
+======================================================================
+FAIL: test_20_output_cannot_clobber_billing_proof (__main__.NewPreflightTests.test_20_output_cannot_clobber_billing_proof)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 210, in test_20_output_cannot_clobber_billing_proof
+    with self.assertRaisesRegex(RuntimeError,'PREFLIGHT_OUTPUT_FRESH_PATH_REQUIRED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_21_existing_output_is_preserved_and_blocked_before_external_calls (__main__.NewPreflightTests.test_21_existing_output_is_preserved_and_blocked_before_external_calls)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 217, in test_21_existing_output_is_preserved_and_blocked_before_external_calls
+    with self.assertRaisesRegex(RuntimeError,'PREFLIGHT_OUTPUT_FRESH_PATH_REQUIRED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_22_output_symlink_cannot_overwrite_an_existing_file (__main__.NewPreflightTests.test_22_output_symlink_cannot_overwrite_an_existing_file)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 224, in test_22_output_symlink_cannot_overwrite_an_existing_file
+    with self.assertRaisesRegex(RuntimeError,'PREFLIGHT_OUTPUT_FRESH_PATH_REQUIRED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_23_output_symlink_ancestor_and_relative_paths_are_blocked (__main__.NewPreflightTests.test_23_output_symlink_ancestor_and_relative_paths_are_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 231, in test_23_output_symlink_ancestor_and_relative_paths_are_blocked
+    with self.assertRaisesRegex(RuntimeError,'PREFLIGHT_OUTPUT_FRESH_PATH_REQUIRED'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_24_output_race_uses_exclusive_creation_and_preserves_new_owner_file (__main__.NewPreflightTests.test_24_output_race_uses_exclusive_creation_and_preserves_new_owner_file)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 246, in test_24_output_race_uses_exclusive_creation_and_preserves_new_owner_file
+    with self.assertRaisesRegex(RuntimeError,'PREFLIGHT_OUTPUT_UNAVAILABLE'): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: RuntimeError not raised
+
+======================================================================
+FAIL: test_25_new_fresh_output_has_exclusive_creation_and_valid_receipt (__main__.NewPreflightTests.test_25_new_fresh_output_has_exclusive_creation_and_valid_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_preflight_build_only.py", line 257, in test_25_new_fresh_output_has_exclusive_creation_and_valid_receipt
+    self.assertEqual(modes,['x'])
+AssertionError: Lists differ: ['w'] != ['x']
+
+First differing element 0:
+'w'
+'x'
+
+- ['w']
+?   ^
+
++ ['x']
+?   ^
+
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.009s
+
+FAILED (failures=6)
+{"schema": "WORLD_ENGINE_NEW_PREFLIGHT_FOCUSED_TESTS_V1", "status": "BLOCKED", "cases": 6, "failures": 6, "errors": 0, "realDockerCalls": 0, "realNetworkCalls": 0, "oldPASSSuitesRun": 0}

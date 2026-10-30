@@ -1,0 +1,68 @@
+{
+  "schema": "WORLD_ENGINE_NEW_INSTALLED355_CODE_FOCUSED_RESULT_V1",
+  "status": "PASS",
+  "scope": "SYNTHETIC_TINY_355_ROW_FIXTURES_ONLY_NOT_AN_INSTALLED_IMAGE",
+  "sourceFile": "world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py",
+  "sourceSHA256": "d39d9d01fc694404e628c91d9d76a6667a949b000a1305feed64e20861ba3b1f",
+  "testSHA256": "3f5be1502f3629036a208b1955ac2c32b0d1455cf1d55194239aa76a193e0e2f",
+  "distinctCasesPassed": 31,
+  "initialRun": {
+    "cases": 18,
+    "passed": 12,
+    "failed": 6,
+    "exitCode": 1,
+    "log": "installed-initial.log"
+  },
+  "targetedAffectedOnly": {
+    "cases": 6,
+    "passed": 6,
+    "failed": 0,
+    "exitCode": 0,
+    "log": "installed-targeted.log"
+  },
+  "newGuardCases": {
+    "cases": 6,
+    "passed": 6,
+    "failed": 0,
+    "exitCode": 0,
+    "log": "installed-new-guards.log"
+  },
+  "defectsConfirmed": [
+    "Pinned bootstrap could contain stale SOURCE_SHA and still PASS",
+    "Startup worker could be absent or changed and still PASS",
+    "Root, runtime manifest and startup manifest symlinks were followed and could still PASS",
+    "Output could overwrite expected metadata or a verified source and still returnPASS, and existing/symlink targets were overwritten"
+  ],
+  "minimalFix": [
+    "Read bounded regular files without following symlinks, including ancestors and root",
+    "Check exact bootstrap SOURCE_SHA points to the expected runtime SHA",
+    "Verify startup worker file bytes and SHA256",
+    "Reject ambiguous source and startup row sizes and noncanonical manifest paths",
+    "Require fresh canonical absolute output outside verified root and distinct from expected input; exclusive no-follow creation prevents clobber/race"
+  ],
+  "outputSchemaAndFieldsUnchanged": true,
+  "actualUid": 1000,
+  "syntheticFilesPerFixture": 355,
+  "realRuntimeSourceClosureRehashed": false,
+  "actualInstalledImageVerified": false,
+  "existingPASSSuitesReexecuted": false,
+  "imageBuilds": 0,
+  "gpuRuns": 0,
+  "networkRequests": 0,
+  "actionsRuns": 0,
+  "outputGuardInitial": {
+    "cases": 6,
+    "passed": 0,
+    "failed": 6,
+    "exitCode": 1,
+    "log": "installed-output-initial.log"
+  },
+  "outputGuardTargetedAndNewPositive": {
+    "cases": 7,
+    "passed": 7,
+    "failed": 0,
+    "exitCode": 0,
+    "log": "installed-output-targeted.log"
+  },
+  "original24CasesReusedAfterOutputFix": true
+}

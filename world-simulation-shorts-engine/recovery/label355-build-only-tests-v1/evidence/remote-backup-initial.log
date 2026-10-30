@@ -1,0 +1,147 @@
+test_01_approval_required (__main__.RemoteBackupTests.test_01_approval_required) ... ok
+test_02_retry_forbidden (__main__.RemoteBackupTests.test_02_retry_forbidden) ... ok
+test_03_wrong_repository (__main__.RemoteBackupTests.test_03_wrong_repository) ... ok
+test_04_mocked_normal_backup_exact_bytes (__main__.RemoteBackupTests.test_04_mocked_normal_backup_exact_bytes) ... ok
+test_05_hash_mismatch_blocks (__main__.RemoteBackupTests.test_05_hash_mismatch_blocks) ... ok
+test_06_permission_denied_blocks (__main__.RemoteBackupTests.test_06_permission_denied_blocks) ... ok
+test_07_forged_total_blocks (__main__.RemoteBackupTests.test_07_forged_total_blocks) ... FAIL
+test_08_oversized_payload_with_forged_total_blocks (__main__.RemoteBackupTests.test_08_oversized_payload_with_forged_total_blocks) ... FAIL
+test_09_duplicate_index_rows_block (__main__.RemoteBackupTests.test_09_duplicate_index_rows_block) ... FAIL
+test_10_wrong_index_schema_blocks (__main__.RemoteBackupTests.test_10_wrong_index_schema_blocks) ... FAIL
+test_11_destination_traversal_blocks (__main__.RemoteBackupTests.test_11_destination_traversal_blocks) ... FAIL
+test_12_run_id_destination_mismatch_blocks (__main__.RemoteBackupTests.test_12_run_id_destination_mismatch_blocks) ... FAIL
+test_13_symlink_index_blocks (__main__.RemoteBackupTests.test_13_symlink_index_blocks) ... FAIL
+test_14_validated_bytes_frozen_before_git (__main__.RemoteBackupTests.test_14_validated_bytes_frozen_before_git) ... FAIL
+test_15_remote_push_denial_no_retry (__main__.RemoteBackupTests.test_15_remote_push_denial_no_retry) ... ok
+test_16_dirty_worktree_blocks_checkout (__main__.RemoteBackupTests.test_16_dirty_worktree_blocks_checkout) ... ok
+test_17_wrong_origin_blocks_before_fetch (__main__.RemoteBackupTests.test_17_wrong_origin_blocks_before_fetch) ... FAIL
+test_18_remote_readback_requires_fresh_fetch (__main__.RemoteBackupTests.test_18_remote_readback_requires_fresh_fetch) ... FAIL
+test_19_oversized_index_blocks (__main__.RemoteBackupTests.test_19_oversized_index_blocks) ... ok
+test_20_allowed_filename_cannot_carry_raw_private_text (__main__.RemoteBackupTests.test_20_allowed_filename_cannot_carry_raw_private_text) ... FAIL
+test_21_existing_destination_blocks (__main__.RemoteBackupTests.test_21_existing_destination_blocks) ... ok
+
+======================================================================
+FAIL: test_07_forged_total_blocks (__main__.RemoteBackupTests.test_07_forged_total_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 124, in test_07_forged_total_blocks
+    self.index['totalBytes']=1;self.write_index();self.blocked_before_git()
+                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_08_oversized_payload_with_forged_total_blocks (__main__.RemoteBackupTests.test_08_oversized_payload_with_forged_total_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 129, in test_08_oversized_payload_with_forged_total_blocks
+    self.write_index();self.blocked_before_git()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_09_duplicate_index_rows_block (__main__.RemoteBackupTests.test_09_duplicate_index_rows_block)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 133, in test_09_duplicate_index_rows_block
+    self.write_index();self.blocked_before_git()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_10_wrong_index_schema_blocks (__main__.RemoteBackupTests.test_10_wrong_index_schema_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 136, in test_10_wrong_index_schema_blocks
+    self.index['schema']='SYNTHETIC_UNKNOWN';self.write_index();self.blocked_before_git()
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_11_destination_traversal_blocks (__main__.RemoteBackupTests.test_11_destination_traversal_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 139, in test_11_destination_traversal_blocks
+    self.destination=PREFIX+'42/../synthetic-escape';self.blocked_before_git()
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_12_run_id_destination_mismatch_blocks (__main__.RemoteBackupTests.test_12_run_id_destination_mismatch_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 142, in test_12_run_id_destination_mismatch_blocks
+    self.destination=PREFIX+'99';self.blocked_before_git()
+                                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_13_symlink_index_blocks (__main__.RemoteBackupTests.test_13_symlink_index_blocks)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 147, in test_13_symlink_index_blocks
+    self.blocked_before_git()
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_14_validated_bytes_frozen_before_git (__main__.RemoteBackupTests.test_14_validated_bytes_frozen_before_git)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 151, in test_14_validated_bytes_frozen_before_git
+    self.invoke();self.assertEqual((Path(self.destination)/'PREFLIGHT.json').read_bytes(),self.data)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: b'SYNTHETIC_CHANGED_AFTER_VALIDATION' != b'{"capacityEstimateBasis": "4x compressed [389 chars]"}\n'
+
+======================================================================
+FAIL: test_17_wrong_origin_blocks_before_fetch (__main__.RemoteBackupTests.test_17_wrong_origin_blocks_before_fetch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 166, in test_17_wrong_origin_blocks_before_fetch
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+======================================================================
+FAIL: test_18_remote_readback_requires_fresh_fetch (__main__.RemoteBackupTests.test_18_remote_readback_requires_fresh_fetch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 172, in test_18_remote_readback_requires_fresh_fetch
+    self.assertTrue(any(c[:2]==('git','fetch') for c in self.calls[push+1:show]))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_20_allowed_filename_cannot_carry_raw_private_text (__main__.RemoteBackupTests.test_20_allowed_filename_cannot_carry_raw_private_text)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 180, in test_20_allowed_filename_cannot_carry_raw_private_text
+    self.write_index();self.blocked_before_git()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/work/label355-focused-tests-v1/repo/world-simulation-shorts-engine/recovery/label355-build-only-tests-v1/test_backup_to_recovery.py", line 88, in blocked_before_git
+    with self.assertRaises(Exception): self.invoke()
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Exception not raised
+
+----------------------------------------------------------------------
+Ran 21 tests in 0.087s
+
+FAILED (failures=11)
