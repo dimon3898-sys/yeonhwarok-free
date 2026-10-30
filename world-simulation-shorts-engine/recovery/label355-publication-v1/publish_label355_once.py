@@ -94,6 +94,22 @@ def comparison():
         'acceptanceBasis': 'Same immutable source and parent; new actual installed SHA256 and OCI checks required. Image-ID equality alone is not the source-integrity gate.'})
     need(current == OLD_ID, 'BLOCKED_IMAGE_ID_MISMATCH_CAUSE_UNVERIFIED')
 
+def review_d9_exception():
+    """Read-only exception readiness. Never authorizes registry publication."""
+    backup = module(REL / 'label-packaging-v1/backup_build_evidence.py', 'backup_reused')
+    names = ('PREFLIGHT.json', 'INSTALLED_RESULT.json', 'OCI_RESULT.json', 'BUILD_RESULT.json', 'IMAGE_CONFIG_SAFE.json')
+    receipts = {name: backup.safe_evidence_bytes(name, (BUILT / name).read_bytes()) for name in names}
+    current = receipts['BUILD_RESULT.json']['imageId']
+    comparison = read(OUT / 'IMAGE_ID_COMPARISON.json')
+    need(current == receipts['OCI_RESULT.json']['imageId'] == receipts['IMAGE_CONFIG_SAFE.json']['imageId'] == comparison['newImageID'], 'D9_EXCEPTION_IMAGE_ID_CHAIN')
+    need(receipts['INSTALLED_RESULT.json']['installedFilesVerified'] == 355 and receipts['INSTALLED_RESULT.json']['uid'] == 1000, 'D9_EXCEPTION_INSTALLED')
+    need(receipts['PREFLIGHT.json']['parentDigest'] == receipts['BUILD_RESULT.json']['parentDigest'] == receipts['IMAGE_CONFIG_SAFE.json']['parentDigest'] == PARENT, 'D9_EXCEPTION_PARENT')
+    need(comparison['previousImageID'] == OLD_ID and comparison['imageIDsEqual'] is False, 'D9_EXCEPTION_COMPARISON')
+    need(read(OUT / 'GHCR_PREFLIGHT.json')['status'] == 'PASS', 'D9_EXCEPTION_PREFLIGHT')
+    write('D9_EXCEPTION_REVIEW.json', {'status':'REVIEW_READY_NOT_PUBLICATION_AUTHORIZED', 'newImageID':current, 'previousImageID':OLD_ID, 'sourceCommit':SOURCE, 'cause':'UNVERIFIED', 'registryWrites':0})
+    # Deliberate fail-closed: review is not a publication approval or D9 bypass.
+    raise RuntimeError('D9_EXCEPTION_REVIEW_ONLY_PUBLICATION_BLOCKED')
+
 def publish():
     backup = module(REL / 'label-packaging-v1/backup_build_evidence.py', 'backup_reused')
     receipts = {name: backup.safe_evidence_bytes(name, (BUILT / name).read_bytes()) for name in backup.ALLOW}
@@ -164,7 +180,7 @@ def export():
             print('LABEL355_PUBLISH_EVIDENCE=' + json.dumps({'name': name, 'bytes': len(raw), 'sha256': sha(raw), 'base64': base64.b64encode(raw).decode()}, sort_keys=True))
 
 if __name__ == '__main__':
-    modes = {'preflight': preflight, 'comparison': comparison, 'publish': publish, 'remote': remote, 'export': export}
+    modes = {'preflight': preflight, 'comparison': comparison, 'publish': publish, 'remote': remote, 'export': export, 'review_d9_exception': review_d9_exception}
     try:
         modes[sys.argv[1]]()
     except Exception as error:
