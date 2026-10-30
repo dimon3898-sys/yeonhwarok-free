@@ -35,7 +35,11 @@ def main():
     require(digest(startup_raw)==expected["startupManifestSHA256"],"STARTUP_SHA")
     startup=json.loads(startup_raw)
     require(startup["runtimeManifestSHA256"]==expected["runtimeManifestSHA256"],"STARTUP_LINK")
-    require((root/bootstrap_rel).is_file(),"BOOTSTRAP_MISSING")
+    bootstrap=root/bootstrap_rel
+    require(bootstrap.is_file() and not bootstrap.is_symlink(),"BOOTSTRAP_MISSING")
+    pinned=startup["files"]["bootstrap.py"]
+    bootstrap_raw=read(bootstrap)
+    require(len(bootstrap_raw)==pinned["bytes"] and digest(bootstrap_raw)==pinned["sha256"],"BOOTSTRAP_SHA")
     # Must be run as UID1000 to prove the actual runtime identity can read files.
     require(os.geteuid()==1000,"UID1000_REQUIRED")
     result={"schema":"WORLD_ENGINE_INSTALLED_LABEL355_VERIFICATION_V1","status":"PASS","installedFilesVerified":checked,"uid":os.geteuid(),"runtimeManifestSHA256":digest(manifest_raw),"startupManifestSHA256":digest(startup_raw),"scope":"INSTALLED_FILES_AND_UID1000_ONLY_OCI_HOST_CHECK_SEPARATE","gpuExecuted":False}
