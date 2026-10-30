@@ -18,12 +18,11 @@ jobs:
       github.run_attempt == 1 &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
       github.event.repository.private == false &&
-      github.event.before == '07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4' &&
+      github.event.before == '7efe029da0c372e97f376e9f332d01aad723d0fc' &&
       github.event.head_commit.message == 'WORLD_ENGINE_LABEL355_PUBLISH_ONCE_20261030'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      DOCKER_CONFIG: ${{ runner.temp }}/label355-docker-auth
       PUBLISHER: label355-control/world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
       PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
       PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
@@ -89,8 +88,10 @@ jobs:
         env:
           GHCR_JOB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          export DOCKER_CONFIG="$RUNNER_TEMP/label355-docker-auth"
           mkdir -p "$DOCKER_CONFIG"
           chmod 0700 "$DOCKER_CONFIG"
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
           printf '%s' "$GHCR_JOB_TOKEN" | docker --host=unix:///var/run/docker.sock login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           python3 -B "$PUBLISHER" preflight
       - name: Apply current user billing confirmation
