@@ -22,7 +22,7 @@ def main():
     image_id=item["Id"]
     need(type(image_id) is str and re.fullmatch(r"sha256:[a-f0-9]{64}",image_id),"IMAGE_ID")
     oci={"schema":"WORLD_ENGINE_LABEL355_OCI_RESULT_V1","status":"PASS","imageId":image_id,"entrypointMatch":True,"cmdUnchanged":True,"userUnchanged":True,"scope":"ACTUAL_CANDIDATE_OCI_CONFIG_ONLY","gpuExecuted":False}
-    build={"schema":"WORLD_ENGINE_LABEL355_BUILD_RESULT_V1","status":"PASS","imageId":image_id,"parentDigest":PARENT,"sourceRows":355,"scope":"CANDIDATE_IMAGE_IDENTITY_ONLY_NOT_INSTALLED_VALIDATION","gpuExecuted":False}
+    build={"schema":"WORLD_ENGINE_LABEL355_BUILD_RESULT_V1","status":"IDENTITY_ONLY","imageId":image_id,"parentDigest":PARENT,"expectedSourceRows":355,"scope":"CANDIDATE_IMAGE_IDENTITY_ONLY_NOT_BUILD_OR_INSTALLED_VALIDATION","gpuExecuted":False}
     for target,value in [(a.oci_out,oci),(a.build_out,build)]:
         with pathlib.Path(target).open("x",encoding="utf-8") as f:json.dump(value,f,sort_keys=True,indent=2);f.write("\n")
 if __name__=="__main__":
