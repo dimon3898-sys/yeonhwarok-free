@@ -401,6 +401,9 @@
                   "REVEAL",
                   "PRESERVE_PROVIDED"
                 ]
+              },
+              "labels": {
+                "$ref": "#/$defs/presentationLabels"
               }
             },
             "required": []
@@ -432,6 +435,9 @@
             "REVEAL",
             "PRESERVE_PROVIDED"
           ]
+        },
+        "labels": {
+          "$ref": "#/$defs/presentationLabels"
         }
       },
       "required": []
@@ -1424,6 +1430,132 @@
           ]
         }
       }
+    },
+    "presentationLabels": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "const": true
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+              },
+              "role": {
+                "enum": [
+                  "COUNTRY",
+                  "EVENT",
+                  "NUMERIC"
+                ]
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 48,
+                "description": "At most24 NFC graphemes and160 UTF8 bytes in the pinned Korean font scope: Hangul syllables, basic Latin letters/numbers and explicit ASCII punctuation. No control/bidi/HTML delimiters or unverified font fallback. Text is supplied, never inferred.",
+                "pattern": "^[\\uac00-\\ud7a3A-Za-z0-9 .,:;!?%+\\-/()\\[\\]{}=_'\"#&@$]+$"
+              },
+              "locationId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+              },
+              "anchor": {
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  },
+                  {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  }
+                ],
+                "minItems": 2,
+                "maxItems": 2,
+                "description": "Optional compiled anchor must exactly equal the referenced supplied location anchor."
+              },
+              "eventId": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
+              },
+              "startFrame": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "endFrame": {
+                "type": "integer",
+                "minimum": 4
+              },
+              "revealFrames": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "exitFrames": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 30
+              },
+              "priority": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "text",
+              "locationId",
+              "startFrame",
+              "endFrame"
+            ],
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "role": {
+                      "enum": [
+                        "EVENT",
+                        "NUMERIC"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "eventId"
+                  ]
+                },
+                "else": {
+                  "not": {
+                    "required": [
+                      "eventId"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "enabled",
+        "items"
+      ],
+      "description": "Explicit optional visible-label consumer; location/event/timing bindings are validated against the compiled Scene."
     }
   }
 }

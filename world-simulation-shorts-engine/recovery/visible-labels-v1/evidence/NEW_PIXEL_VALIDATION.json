@@ -1,0 +1,150 @@
+{
+  "schema": "WORLD_ENGINE_NEW_LABEL_CPU_PIXEL_FINAL_V1",
+  "status": "PASS",
+  "distinctCasesPassed": 11,
+  "failedCasesRemaining": 0,
+  "cases": [
+    {
+      "name": "01_exact_pinned_korean_font_and_real_country_glyph_pixels",
+      "status": "PASS"
+    },
+    {
+      "name": "02_event_and_numeric_text_have_actual_white_fill_and_dark_outline",
+      "status": "PASS"
+    },
+    {
+      "name": "03_yellow_pin_has_dark_center_and_thin_anchor_connector_pixels",
+      "status": "PASS"
+    },
+    {
+      "name": "04_existing_projection_pan_zoom_and_slot_hysteresis_do_not_drift",
+      "status": "PASS"
+    },
+    {
+      "name": "05_priority_collision_repositions_and_suppresses_without_event_occlusion",
+      "status": "PASS"
+    },
+    {
+      "name": "06_later_lower_priority_labels_never_cover_earlier_pin_pixels",
+      "status": "PASS"
+    },
+    {
+      "name": "07_reveal_hold_exit_use_scene_frames_and_leave_no_residual_pixels",
+      "status": "PASS"
+    },
+    {
+      "name": "08_safe_viewport_edges_and_responsive_canvas_keep_all_pixels_inside",
+      "status": "PASS"
+    },
+    {
+      "name": "09_offscreen_or_unsupported_projection_is_not_fabricated",
+      "status": "PASS"
+    },
+    {
+      "name": "10_compositor_uses_y_down_texture_same_framebuffer_and_owned_disposal",
+      "status": "PASS"
+    },
+    {
+      "name": "11_unsupported_raw_glyphs_cannot_use_an_ambient_fallback_font",
+      "status": "PASS"
+    }
+  ],
+  "initialLog": "new-label-pixels-initial.log",
+  "targetedLog": "new-label-pixels-targeted.log",
+  "initialFailure": "Case08 exposed one-pixel connector-cap alpha outside safeviewport",
+  "minimalFix": "Actual Canvas2D clip to safeArea; raw glyph whitelist rejects unsupported fallback text",
+  "targetedOnlyCases": [
+    "08",
+    "11"
+  ],
+  "previousSuccessfulCasesReexecuted": 0,
+  "existingPASSSuitesReexecuted": false,
+  "font": {
+    "path": "world-simulation-shorts-engine/web/fonts/NotoSansCJKkr-Bold.otf",
+    "sha256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+    "expectedSHA256": "da1f44844b4d65fc6eef82a0979404a38c78a4a5639b8e9ecf3590dc4cb880b0",
+    "bytes": 16997968,
+    "familyAlias": "Gate1Bold"
+  },
+  "observations": {
+    "country": {
+      "whiteInteriorPixels": 6327,
+      "darkGlyphInteriorPixels": 1538,
+      "box": [
+        345.5,
+        693,
+        518.5,
+        764
+      ]
+    },
+    "eventNumeric": {
+      "EVENT": {
+        "whiteGlyphPixels": 2392,
+        "darkOutlinePixels": 2221
+      },
+      "NUMERIC": {
+        "whiteGlyphPixels": 2379,
+        "darkOutlinePixels": 1711
+      }
+    },
+    "pin": {
+      "yellowPixels": 282,
+      "darkCenterRGBA": [
+        36,
+        38,
+        44,
+        255
+      ],
+      "connector": [
+        [
+          432,
+          764
+        ],
+        [
+          432,
+          864
+        ]
+      ]
+    },
+    "motion": {
+      "frames": 12,
+      "maximumAnchorError": 0,
+      "stableSlots": true
+    },
+    "collision": {
+      "visible": 3,
+      "suppressed": 13,
+      "primaryEventUnoccluded": true
+    },
+    "timing": {
+      "frames": [
+        19,
+        20,
+        29,
+        40,
+        70,
+        79,
+        80
+      ],
+      "alpha": [
+        0,
+        0.1,
+        1,
+        1,
+        1,
+        0.1,
+        0
+      ]
+    },
+    "compositor": {
+      "actualGPUExecuted": false,
+      "transparent": true,
+      "flipY": false,
+      "sameFramebufferRequired": true,
+      "autoClearDisabledRequired": true
+    }
+  },
+  "actualGPUExecuted": false,
+  "fullWorldEngineTerrainRendered": false,
+  "referenceParityClaimed": false
+}

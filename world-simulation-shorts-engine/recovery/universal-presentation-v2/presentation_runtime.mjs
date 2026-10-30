@@ -13,6 +13,7 @@ import {createMovingGraphicPass} from '../../web/map_infographic_v1/graphic_moti
 import {auditRuntimeLayout} from '../../web/map_infographic_v1/graphic_layout.mjs';
 import {compileReferenceCameraTrack,evaluateReferenceCameraTrackFrame} from '../../web/map_infographic_v1/reference_camera_adapter_v1.mjs';
 import {evaluatePresentationCameraFrame,projectBounds,reprojectFlowPresentation,assertMovingProjectionAdmission,compilePresentationEnginePlan} from './presentation_plan.mjs';
+import {createPresentationLabelPass} from './presentation_label_layer.mjs';
 
 export const PRESENTATION_RUNTIME_SCHEMA='WORLD_ENGINE_PRESENTATION_RUNTIME_V2';
 const copy=x=>structuredClone(x),assert=(v,c)=>{if(!v)throw Error(c);};
@@ -35,10 +36,12 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
  assert(backend.includes('SwiftShader'),'UP2_FREE_SOFTWARE_BACKEND_REQUIRED');
  const renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:false});renderer.setPixelRatio(1);renderer.setSize(1080,1920,false);renderer.autoClear=false;
  renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
+ let labelPass=null;
  let factory,graphics,last,lastBasePixels,disposed=false;const passes=[];
  try{
   factory=await createMapInfographicRenderer({canvas,plan:nativePlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment});
   graphics=await createMovingGraphicPass({renderer,factory,width:1080,height:1920});
+  if(p.labels?.enabled===true&&p.labels.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
   // Derived plans are created in their consuming JS realm. The frozen owner's
   // canonical check is retained; JSON is the transport for authored inputs,
   // not a promise that Node/Chromium Math.log coefficients are bit-identical.
@@ -104,6 +107,7 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    const featurePixels=factory.readPixels();let featureChangedPixels=0;for(let i=0;i<featurePixels.length;i+=4)if(featurePixels[i]!==basePixels[i]||featurePixels[i+1]!==basePixels[i+1]||featurePixels[i+2]!==basePixels[i+2]||featurePixels[i+3]!==basePixels[i+3])featureChangedPixels++;
    if(features.some(f=>f.engine==='EXISTING_FLOW_V2'&&f.routeFraction>0)||features.some(f=>f.engine==='EXISTING_AREA_V3'&&f.sourceAreas.some(a=>a.alpha>0&&a.coverage>0)))assert(featureChangedPixels>0,'UP2_ACTUAL_FEATURE_PIXELS_MISSING');
    renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
+   const labelDraw=labelPass?labelPass.draw({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:markerRows}):null;
    gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');
    last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,nvidiaVerified:false,qualityApproved:false,
     camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},
@@ -111,7 +115,9 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
     layout:{valid:layoutAudit.validation.valid,visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
     material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,defaultCountryTintEnabled:false,classification:source.classification},
     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
-    featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};return last;
+    featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
+   if(labelDraw){last.layout.visiblePresentationLabels=labelDraw.visibleCount>0;last.presentationLabels=copy(labelDraw);}
+   return last;
   }
   const truthfulFactoryEvidence=copy(factory.evidence);if(sourceStyle.styleId==='GLOBAL_RGB_SOURCE_NATIVE_COVERAGE')truthfulFactoryEvidence.sourceRelief='ACTUAL_GLOBAL_RGB_AND_EXISTING_NATIVE_RELIEF_PROXY_NO_DEM_OR_BAKED_HILLSHADE_CLAIM';
   return{drawFrame,readPixels:factory.readPixels,readBasePixels:()=>{assert(lastBasePixels,'UP2_FRAME_NOT_DRAWN');return lastBasePixels;},png:()=>canvas.toDataURL('image/png'),project,

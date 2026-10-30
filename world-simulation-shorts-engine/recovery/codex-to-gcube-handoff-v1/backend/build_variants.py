@@ -8,7 +8,7 @@ HERE=Path(__file__).resolve().parent.parent
 UP2=HERE.parent/'universal-presentation-v2'
 PINS={
     'capture_presentation.mjs':'fc17ceb56499184a6f4ae6888d617f7b1b67e4fd508320eb295493161596753e',
-    'presentation_runtime.mjs':'631d69debd02ed24584a72499febc5f541d3adcfc411095906c444c03e90d0a6',
+    'presentation_runtime.mjs':'62461ee8f49265554d3858848ec106586937e62ae4fb3ce90c39a96909266d72',
     'region_source.mjs':'bf89be2fa74d3b55f6651106cb35171c10ceaffd802bb505dbd3d31cca2bd008',
 }
 
@@ -63,6 +63,7 @@ def derive_capture(source):
     return source
 
 def derive_runtime(source):
+    source=replace(source,"from './presentation_label_layer.mjs';", "from '../universal-presentation-v2/presentation_label_layer.mjs';")
     source=replace(source,"from './presentation_plan.mjs';", "from '../universal-presentation-v2/presentation_plan.mjs';\nimport {assertNvidiaVulkanContext,validateNativeStability} from './backend/native_guard.mjs';")
     source=replace(source,"PRESENTATION_RUNTIME_SCHEMA='WORLD_ENGINE_PRESENTATION_RUNTIME_V2'", "PRESENTATION_RUNTIME_SCHEMA='WORLD_ENGINE_NVIDIA_PRESENTATION_RUNTIME_V1'")
     source=replace(source,"export async function createPresentationRuntime(","export async function createNvidiaPresentationRuntime(")

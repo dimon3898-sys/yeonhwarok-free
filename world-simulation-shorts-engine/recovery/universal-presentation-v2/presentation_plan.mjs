@@ -5,6 +5,7 @@ import {compileExistingEnginePlan} from '../../web/map_infographic_v1/planner_en
 import {compileFlowRoute,evaluateFlowFrame,sampleFlowRoute} from '../../web/map_infographic_v1/flow_core_v2.mjs';
 import {evaluateGeographicLineReveal} from '../../web/map_infographic_v1/event_line_v1.mjs';
 import {compileAreaPlan} from '../../web/map_infographic_v1/area_core_v3.mjs';
+import {validateLabelSpec} from './presentation_labels.mjs';
 
 export const PRESENTATION_VERSION='WORLD_ENGINE_PRESENTATION_PLAN_V2';
 const copy=v=>structuredClone(v),ok=(v,c)=>{if(!v)throw Error(c);};
@@ -21,7 +22,7 @@ export function unprojectBounds(bounds,pixel){return[bounds[0]+pixel[0]/1080*(bo
 
 /** Unknown/unconsumed controls fail rather than being accepted as metadata. */
 export function validatePresentation(input,{scene,region}={}){
- keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility'],'PRESENTATION');
+ keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels'],'PRESENTATION');
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  result.initialStateVisibility=input.initialStateVisibility??'REVEAL';
@@ -60,6 +61,7 @@ export function validatePresentation(input,{scene,region}={}){
   ok(frame(h.startFrame,n)&&frame(h.endFrame,n,true)&&h.endFrame-h.startFrame>=2,'PRESENTATION_HIGHLIGHT_TIMING_INVALID');
  }
  result.highlights=copy(highlights);
+ if(input.labels!==undefined)result.labels=validateLabelSpec(input.labels,{scene,highlights});
  const cuts=input.transitions??[];ok(Array.isArray(cuts),'PRESENTATION_TRANSITION_ARRAY_REQUIRED');
  for(const t of cuts){keys(t,['type','frame'],'PRESENTATION_TRANSITION');ok(t.type==='CUT'&&Number.isSafeInteger(t.frame)&&t.frame>=0,'PRESENTATION_CUT_REQUIRED');}
  result.transitions=copy(cuts);return result;
