@@ -92,6 +92,7 @@ def comparison():
         'newImageID': current, 'imageIDsEqual': current == OLD_ID, 'sourceCommit': SOURCE,
         'previousRunID': 41015249885, 'previousEvidenceCommit': '07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4',
         'acceptanceBasis': 'Same immutable source and parent; new actual installed SHA256 and OCI checks required. Image-ID equality alone is not the source-integrity gate.'})
+    need(current == OLD_ID, 'BLOCKED_IMAGE_ID_MISMATCH_CAUSE_UNVERIFIED')
 
 def publish():
     backup = module(REL / 'label-packaging-v1/backup_build_evidence.py', 'backup_reused')

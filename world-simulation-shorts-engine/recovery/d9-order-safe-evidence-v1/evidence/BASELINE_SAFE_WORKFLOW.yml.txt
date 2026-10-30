@@ -1,0 +1,201 @@
+name: WORLD ENGINE label355 rebuild and new GHCR tag once
+on:
+  push:
+    branches: [recovery/label355-build-only-draft-20261030]
+    paths: ['.github/workflows/world-engine-label355-build-only-DRAFT.yml']
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: world-engine-label355-build-only
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  candidate-build:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_LABEL355_PUBLISH_ONCE_20261030'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      PUBLISHER: label355-control/world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
+      PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+      PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
+      VERIFIER: world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
+      PREFLIGHT: world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py
+      ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
+      TAG: world-engine-label355:unpublished-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: af9347963b4405dac66cdbe0ad6c6898c3d42ea0
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/build_variants.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/common.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/PRESENTATION_PROMPT.schema.json
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_label_layer.mjs
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_labels.mjs
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/studio_adapter.py
+            world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198/RUNTIME_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198/STARTUP_MANIFEST.json
+            world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/evidence/ci-40767632198/image-config.json
+            world-simulation-shorts-engine/recovery/capture-diagnostics-g2-v1/build_g2_image.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/produce_image_results.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py
+            world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json
+      - name: Read only publication control from this guarded commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: label355-control
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
+            world-simulation-shorts-engine/recovery/label355-publication-v1/OWNER_OBSERVATIONS.json
+      - name: Authenticate scoped GHCR token without registry write
+        id: registry_gate
+        timeout-minutes: 3
+        env:
+          GHCR_JOB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export DOCKER_CONFIG="$RUNNER_TEMP/label355-docker-auth"
+          mkdir -p "$DOCKER_CONFIG"
+          chmod 0700 "$DOCKER_CONFIG"
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
+          printf '%s' "$GHCR_JOB_TOKEN" | docker --host=unix:///var/run/docker.sock login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          python3 -B "$PUBLISHER" preflight
+      - name: Apply current user billing confirmation
+        run: |
+          mkdir -p "$RUNNER_TEMP/label355-evidence"
+          cat > "$RUNNER_TEMP/live-billing-attestation.json" <<'JSON'
+          {"accountCurrent":true,"actionsBudgetUSD":0,"stopUsageAtLimit":true,"paymentMethodRegistered":false,"basis":"2026-10-30 08:10Z live billing budget/storage and package Admin observations; explicit current user no-card/no-PayPal confirmation reused"}
+          JSON
+      - name: Live Docker and actual daemon capacity gate before pull
+        id: preflight
+        timeout-minutes: 3
+        run: |
+          python3 -B "$PREFLIGHT" --out "$RUNNER_TEMP/label355-evidence/PREFLIGHT.json" --billing-attestation "$RUNNER_TEMP/live-billing-attestation.json"
+          cat "$RUNNER_TEMP/label355-evidence/PREFLIGHT.json"
+      - name: Prepare and read back exact candidate context
+        id: context
+        timeout-minutes: 2
+        run: |
+          python3 -B "$PKG" prepare --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/label355-context" > "$RUNNER_TEMP/context-prepare.json"
+          python3 -B "$PKG" verify --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/label355-context" > "$RUNNER_TEMP/context-verify.json"
+          echo EXACT_355_SOURCE_CONTEXT_READY
+      - name: Pull immutable parent once
+        id: pull
+        timeout-minutes: 10
+        run: docker --host=unix:///var/run/docker.sock pull "$PARENT"
+      - name: Reuse G2 post-pull space gate immediately before build
+        id: build_space
+        timeout-minutes: 1
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, shutil, subprocess
+          root=subprocess.check_output(['docker','--host=unix:///var/run/docker.sock','info','--format','{{.DockerRootDir}}'],text=True).strip()
+          context=pathlib.Path(os.environ['RUNNER_TEMP'])/'label355-context'
+          size=sum(p.stat().st_size for p in context.rglob('*') if p.is_file())
+          free=shutil.disk_usage(root).free
+          required=size*3+2*1024**3
+          print('PREBUILD_CAPACITY='+json.dumps({'freeBytes':free,'requiredBytes':required,'contextBytes':size,'basis':'G2 context x3 + 2GiB reserve'},sort_keys=True))
+          if free<required: raise SystemExit('BLOCKED_PREBUILD_CAPACITY')
+          PY
+      - name: Build candidate exactly once offline
+        id: build
+        timeout-minutes: 5
+        run: docker --host=unix:///var/run/docker.sock build --network none --pull=false -t "$TAG" "$RUNNER_TEMP/label355-context"
+      - name: Produce reviewed actual OCI and image identity receipts
+        id: oci
+        timeout-minutes: 1
+        run: |
+          docker --host=unix:///var/run/docker.sock image inspect "$TAG" > "$RUNNER_TEMP/label355-oci.json"
+          python3 -B world-simulation-shorts-engine/recovery/label-packaging-v1/produce_image_results.py \
+            --inspect "$RUNNER_TEMP/label355-oci.json" \
+            --expected world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json \
+            --oci-out "$RUNNER_TEMP/label355-evidence/OCI_RESULT.json" \
+            --build-out "$RUNNER_TEMP/label355-evidence/BUILD_RESULT.json"
+      - name: Compare previous successful image ID with rebuilt candidate
+        id: comparison
+        run: python3 -B "$PUBLISHER" comparison
+      - name: Verify actual 355 files bootstrap worker SHA256 and UID1000
+        id: installed
+        timeout-minutes: 2
+        run: |
+          chmod 0777 "$RUNNER_TEMP/label355-evidence"
+          docker --host=unix:///var/run/docker.sock run --rm --network none --read-only --user 1000:1000 \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/$VERIFIER,dst=/verify.py,readonly" \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/CONTEXT_PLAN.json,dst=/expected.json,readonly" \
+            --mount "type=bind,src=$RUNNER_TEMP/label355-evidence,dst=/evidence" \
+            --entrypoint /usr/bin/python3 "$TAG" \
+            -I -B /verify.py --root "$ROOT" --expected /expected.json --out /evidence/INSTALLED_RESULT.json
+      - name: Publish exactly one new tag after all candidate checks pass
+        id: publish
+        timeout-minutes: 10
+        run: python3 -B "$PUBLISHER" publish
+      - name: Verify anonymous remote digest config and every layer access
+        id: remote
+        timeout-minutes: 5
+        run: python3 -B "$PUBLISHER" remote
+      - name: Preserve publication evidence even after failure
+        id: publication_evidence
+        if: always() && !cancelled()
+        run: python3 -B "$PUBLISHER" export
+      - name: Preserve bounded safe evidence without registry or Git write
+        id: evidence
+        if: always() && !cancelled()
+        timeout-minutes: 1
+        run: |
+          python3 -B world-simulation-shorts-engine/recovery/label-packaging-v1/backup_build_evidence.py --evidence "$RUNNER_TEMP/label355-evidence" --index "$RUNNER_TEMP/label355-evidence/SAFE_INDEX.json"
+          python3 - <<'PY'
+          import base64,hashlib,json,os,pathlib
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'label355-evidence'
+          index=json.loads((root/'SAFE_INDEX.json').read_bytes())
+          for name in [r['name'] for r in index['files']]+['SAFE_INDEX.json']:
+              raw=(root/name).read_bytes()
+              print('LABEL355_SAFE_EVIDENCE='+json.dumps({'name':name,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'base64':base64.b64encode(raw).decode()},sort_keys=True))
+          PY
+      - name: Preserve safe artifact for one day
+        if: always() && !cancelled() && steps.evidence.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-label355-safe-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/label355-evidence/
+            ${{ runner.temp }}/label355-publication/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+          include-hidden-files: false
+# Evidence is retrieved and committed through the authorized GitHub connector.
+# One authorized build and new-tag push; no workflow rerun, GPU, main modification, or old test suite.

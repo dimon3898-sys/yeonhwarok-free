@@ -1,0 +1,117 @@
+{
+  "schema": "WORLD_ENGINE_D9_ORDER_SAFE_EVIDENCE_PREPARATION_RESULT_V1",
+  "status": "PASS",
+  "scope": "D9_ORDER_AND_SAFE_EVIDENCE_PREPARATION_STATIC_AND_SYNTHETIC_ONLY",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "safeBranch": "review/label355-runner-temp-static-fix-20261030",
+  "safeBaseCommit": "e163de2602a486196ec75683ddf0609bdcffb2ed",
+  "executionBranch": "recovery/label355-build-only-draft-20261030",
+  "executionHead": "e83ac5b423b77e730815ec73334ad67209ac6a6e",
+  "dateAsiaSeoul": "2026-10-30",
+  "changedOperationalFiles": [
+    ".github/workflows/world-engine-label355-build-only-DRAFT.yml",
+    "world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py"
+  ],
+  "sourceSelection": {
+    "runtimeCommit": "af9347963b4405dac66cdbe0ad6c6898c3d42ea0",
+    "runtimeCheckoutUnchanged": true,
+    "helperCommit": "e163de2602a486196ec75683ddf0609bdcffb2ed",
+    "helperCheckoutPath": "label355-safe-evidence",
+    "helperFiles": [
+      "image_config_safe.py",
+      "backup_build_evidence.py"
+    ],
+    "helperCheckoutCredentialsPersisted": false,
+    "wholeBranchesMerged": false
+  },
+  "newOrder": [
+    "OCI_RESULT_and_BUILD_IDENTITY_ONLY",
+    "INSTALLED_355_VERIFICATION",
+    "IMAGE_CONFIG_SAFE_GENERATION_AND_SCHEMA_VALIDATION",
+    "D9_IMAGE_ID_COMPARISON_STOP_ON_MISMATCH",
+    "GHCR_PUBLISH_AFTER_ALL_SUCCESS"
+  ],
+  "safetyConnections": {
+    "verifiedParentDigestSources": [
+      "Validated PREFLIGHT.parentDigest",
+      "GHCR_PREFLIGHT.existingG2TagDigest and PASS",
+      "Verified context.parentImage and PASS",
+      "Pulled fixed-parent RepoDigests contains PARENT reference"
+    ],
+    "parentArgumentTakenFromValidatedPreflight": true,
+    "producerRunsWithSubprocessCheckTrue": true,
+    "newSafeReceiptValidatedByPinnedBackup": true,
+    "candidateIdBoundBeforeAndAfterGeneration": true,
+    "rawInspectOutsideEvidenceAndPublicationArtifacts": true,
+    "rawInspectOrEnvironmentValuesExported": false,
+    "preD9IndexCreated": false,
+    "finalAlwaysBackupUsesPinnedValidator": true,
+    "finalIndexCreationCount": 1,
+    "d9Guard": "need(current == OLD_ID, 'BLOCKED_IMAGE_ID_MISMATCH_CAUSE_UNVERIFIED')",
+    "publisherChange": "One exact existing target guard line copied into divergent safe publisher; no other publisher edits",
+    "explicitPublishPrerequisites": [
+      "installed.success",
+      "safe_config.success",
+      "comparison.success"
+    ],
+    "implicitGitHubSuccessConditionRetained": true
+  },
+  "verification": {
+    "newCasesPassed": 12,
+    "testRuns": 1,
+    "testExitCode": 0,
+    "failures": 0,
+    "automaticRetries": 0,
+    "actionlintVersion": "1.7.12",
+    "actionlintExitCode": 0,
+    "yamlSyntax": "PASS",
+    "changedShellSyntax": "PASS",
+    "inlinePythonSyntax": "PASS",
+    "newTestsUseOnlyStubsOrExtractedComparisonAst": true,
+    "oldProducerConsumerOrRuntimeCasesExecuted": 0,
+    "logs": [
+      "new-workflow-controls.log",
+      "actionlint.log"
+    ],
+    "existingGeneratorBackupContractReusedFromFixedHelperHash": true
+  },
+  "lockedPass": {
+    "oldPASSGatesPreserved": 22,
+    "allHistoricalSuitesReexecuted": 0,
+    "labelPackaging102Schemas23ImageBuildGenerator9Contract11Connection3Reused": true,
+    "runtimeSourceManifestBootstrapBuildContextUnchanged": true,
+    "successfulImagesTagsDigestUnchanged": true
+  },
+  "branchSafety": {
+    "priorTriggerEvidenceReused": "world-simulation-shorts-engine/recovery/image-config-safe-connection-v1/evidence/SAFE_BRANCH_REUSE_RECEIPT.json",
+    "modifiedWorkflowOnBlockUnchanged": true,
+    "reviewBranchNotInAnyAutomaticPushAllowlist": true,
+    "executionTargetNotUpdated": true,
+    "mainUnchanged": true
+  },
+  "effects": {
+    "actionsExecuted": 0,
+    "imageBuilds": 0,
+    "ghcrWrites": 0,
+    "gpuRuns": 0,
+    "targetPushes": 0,
+    "targetMerges": 0,
+    "wholeBranchMerges": 0,
+    "newPaidResourcesRequested": 0
+  },
+  "remainingBlocked": [
+    "Prepared changes are not integrated into execution branch; integration/run requires a separate execution gate",
+    "Rebuild authorization is exhausted; no further build/publication execution approved",
+    "Existing image-ID mismatch cause remains unverified; D9 still refuses publication",
+    "Fixed github.event.before values were not altered: safe07ba1ad..., target7efe029..., currenttargete83ac5b...; a next target push does not match the current target guard"
+  ],
+  "firstIncompleteStage": "SEPARATE_TARGET_INTEGRATION_AND_NEW_EXECUTION_AUTHORIZATION_GATE",
+  "evidence": {
+    "diff": "ACTUAL_CHANGE.patch",
+    "focused": "FOCUSED_CONTROL_RESULT.json",
+    "static": "STATIC_RESULT.json",
+    "hashes": "SHA256_MANIFEST.json",
+    "pins": "PINNED_HELPERS_AND_TRIGGER_RECEIPT.json"
+  },
+  "stopAfterSafeCommit": true
+}
