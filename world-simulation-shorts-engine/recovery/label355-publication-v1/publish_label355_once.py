@@ -92,7 +92,6 @@ def comparison():
         'newImageID': current, 'imageIDsEqual': current == OLD_ID, 'sourceCommit': SOURCE,
         'previousRunID': 41015249885, 'previousEvidenceCommit': '07ba1ad253bd1b1d055aa33f6f9386e1f9cb03f4',
         'acceptanceBasis': 'Same immutable source and parent; new actual installed SHA256 and OCI checks required. Image-ID equality alone is not the source-integrity gate.'})
-    need(current == OLD_ID, 'BLOCKED_IMAGE_ID_MISMATCH_CAUSE_UNVERIFIED')
 
 def publish():
     backup = module(REL / 'label-packaging-v1/backup_build_evidence.py', 'backup_reused')
@@ -101,6 +100,8 @@ def publish():
     need(installed['runtimeManifestSHA256'] == '1427779c7a52af90f37478de3ba11e1ddb664149f5b13dbd87fb05142be0252e', 'PREVIOUS_RUNTIME_MANIFEST_MISMATCH')
     need(installed['startupManifestSHA256'] == 'f8afb5c2f944dea13f7a990a7c2c8e8c65c9c028bd7228f501aa6feace98ef89', 'PREVIOUS_STARTUP_MANIFEST_MISMATCH')
     current = receipts['BUILD_RESULT.json']['imageId']
+    retained = read(TEMP / 'label355-retention/RETENTION_RESULT.json')
+    need(retained['status'] == 'PASS' and retained['imageID'] == current, 'PERMANENT_IMAGE_BACKUP_REQUIRED')
     need(current == receipts['OCI_RESULT.json']['imageId'] == read(OUT / 'IMAGE_ID_COMPARISON.json')['newImageID'], 'RECEIPT_ID_MISMATCH')
     need(docker('image', 'inspect', '--format', '{{.Id}}', os.environ['TAG']) == current, 'CANDIDATE_CHANGED')
     need(read(OUT / 'GHCR_PREFLIGHT.json')['status'] == 'PASS', 'PREFLIGHT_REQUIRED')
