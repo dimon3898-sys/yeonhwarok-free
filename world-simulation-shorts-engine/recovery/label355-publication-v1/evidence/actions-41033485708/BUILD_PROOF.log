@@ -1,0 +1,117 @@
+##[group]Run docker --host=unix:///var/run/docker.sock build --network none --pull=false -t "$TAG" "$RUNNER_TEMP/label355-context"
+2026-10-30T09:27:24.7203572Z docker --host=unix:///var/run/docker.sock build --network none --pull=false -t "$TAG" "$RUNNER_TEMP/label355-context"
+2026-10-30T09:27:24.7234467Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-30T09:27:24.7234824Z env:
+2026-10-30T09:27:24.7235356Z   PUBLISHER: label355-control/world-simulation-shorts-engine/recovery/label355-publication-v1/publish_label355_once.py
+2026-10-30T09:27:24.7236277Z   PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+2026-10-30T09:27:24.7237053Z   PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
+2026-10-30T09:27:24.7237705Z   VERIFIER: world-simulation-shorts-engine/recovery/label-packaging-v1/verify_installed_355.py
+2026-10-30T09:27:24.7238397Z   PREFLIGHT: world-simulation-shorts-engine/recovery/label-packaging-v1/preflight_build_only.py
+2026-10-30T09:27:24.7238997Z   ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
+2026-10-30T09:27:24.7239432Z   TAG: world-engine-label355:unpublished-41033485708
+2026-10-30T09:27:24.7239822Z   DOCKER_CONFIG: /home/runner/work/_temp/label355-docker-auth
+2026-10-30T09:27:24.7240155Z ##[endgroup]
+2026-10-30T09:27:25.0577587Z #0 building with "default" instance using docker driver
+2026-10-30T09:27:25.0578054Z 
+2026-10-30T09:27:25.0578247Z #1 [internal] load build definition from Dockerfile
+2026-10-30T09:27:25.0578713Z #1 transferring dockerfile: 8.40kB done
+2026-10-30T09:27:25.0579082Z #1 DONE 0.0s
+2026-10-30T09:27:25.0579247Z 
+2026-10-30T09:27:25.0580025Z #2 [internal] load metadata for ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+2026-10-30T09:27:25.0581361Z #2 DONE 0.0s
+2026-10-30T09:27:25.0581520Z 
+2026-10-30T09:27:25.0581660Z #3 [internal] load .dockerignore
+2026-10-30T09:27:25.0582009Z #3 transferring context: 2B done
+2026-10-30T09:27:25.0582325Z #3 DONE 0.0s
+2026-10-30T09:27:25.0582466Z 
+2026-10-30T09:27:25.0582585Z #4 [internal] load build context
+2026-10-30T09:27:25.0582932Z #4 transferring context: 481.90kB 0.0s done
+2026-10-30T09:27:25.0583292Z #4 DONE 0.0s
+2026-10-30T09:27:25.0583433Z 
+2026-10-30T09:27:25.0584039Z #5 [ 1/26] FROM ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+2026-10-30T09:27:25.0691919Z #5 DONE 0.2s
+2026-10-30T09:27:25.1776289Z 
+2026-10-30T09:27:25.1778769Z #6 [ 2/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json]
+2026-10-30T09:27:25.1782831Z #6 DONE 0.0s
+2026-10-30T09:27:25.1782978Z 
+2026-10-30T09:27:25.1784130Z #7 [ 3/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json]
+2026-10-30T09:27:25.1785402Z #7 DONE 0.0s
+2026-10-30T09:27:25.1785516Z 
+2026-10-30T09:27:25.1786548Z #8 [ 4/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/build_variants.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/build_variants.py]
+2026-10-30T09:27:25.1787753Z #8 DONE 0.0s
+2026-10-30T09:27:25.1787872Z 
+2026-10-30T09:27:25.1789165Z #9 [ 5/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs]
+2026-10-30T09:27:25.1790807Z #9 DONE 0.0s
+2026-10-30T09:27:25.1791074Z 
+2026-10-30T09:27:25.1792233Z #10 [ 6/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs]
+2026-10-30T09:27:25.1793542Z #10 DONE 0.0s
+2026-10-30T09:27:25.1793658Z 
+2026-10-30T09:27:25.1794703Z #11 [ 7/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs]
+2026-10-30T09:27:25.1795915Z #11 DONE 0.0s
+2026-10-30T09:27:25.1796023Z 
+2026-10-30T09:27:25.1797074Z #12 [ 8/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs]
+2026-10-30T09:27:25.1798282Z #12 DONE 0.0s
+2026-10-30T09:27:25.1798390Z 
+2026-10-30T09:27:25.1799488Z #13 [ 9/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py]
+2026-10-30T09:27:25.1801396Z #13 DONE 0.0s
+2026-10-30T09:27:25.1801520Z 
+2026-10-30T09:27:25.1802991Z #14 [10/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/common.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/common.py]
+2026-10-30T09:27:25.1804168Z #14 DONE 0.0s
+2026-10-30T09:27:25.1804278Z 
+2026-10-30T09:27:25.1805359Z #15 [11/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py]
+2026-10-30T09:27:25.1806591Z #15 DONE 0.0s
+2026-10-30T09:27:25.1806710Z 
+2026-10-30T09:27:25.1807740Z #16 [12/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py]
+2026-10-30T09:27:25.1809184Z #16 DONE 0.0s
+2026-10-30T09:27:25.2809304Z 
+2026-10-30T09:27:25.2811300Z #17 [13/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py]
+2026-10-30T09:27:25.2813234Z #17 DONE 0.0s
+2026-10-30T09:27:25.2813693Z 
+2026-10-30T09:27:25.2815980Z #18 [14/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py]
+2026-10-30T09:27:25.2817666Z #18 DONE 0.0s
+2026-10-30T09:27:25.2817940Z 
+2026-10-30T09:27:25.2820595Z #19 [15/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py]
+2026-10-30T09:27:25.2822580Z #19 DONE 0.0s
+2026-10-30T09:27:25.2822813Z 
+2026-10-30T09:27:25.2823796Z #20 [16/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js]
+2026-10-30T09:27:25.2825301Z #20 DONE 0.0s
+2026-10-30T09:27:25.2825427Z 
+2026-10-30T09:27:25.2826717Z #21 [17/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs]
+2026-10-30T09:27:25.2828893Z #21 DONE 0.0s
+2026-10-30T09:27:25.2829025Z 
+2026-10-30T09:27:25.2830522Z #22 [18/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json]
+2026-10-30T09:27:25.2832651Z #22 DONE 0.0s
+2026-10-30T09:27:25.2832996Z 
+2026-10-30T09:27:25.2834496Z #23 [19/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py]
+2026-10-30T09:27:25.2836305Z #23 DONE 0.0s
+2026-10-30T09:27:25.2836673Z 
+2026-10-30T09:27:25.2838792Z #24 [20/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/PRESENTATION_PROMPT.schema.json, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/PRESENTATION_PROMPT.schema.json]
+2026-10-30T09:27:25.2841246Z #24 DONE 0.0s
+2026-10-30T09:27:25.2841369Z 
+2026-10-30T09:27:25.2842777Z #25 [21/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_label_layer.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_label_layer.mjs]
+2026-10-30T09:27:25.2844528Z #25 DONE 0.0s
+2026-10-30T09:27:25.2844698Z 
+2026-10-30T09:27:25.2845709Z #26 [22/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_labels.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_labels.mjs]
+2026-10-30T09:27:25.2847601Z #26 DONE 0.0s
+2026-10-30T09:27:25.4704431Z 
+2026-10-30T09:27:25.4732512Z #27 [23/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs]
+2026-10-30T09:27:25.4734541Z #27 DONE 0.0s
+2026-10-30T09:27:25.4734831Z 
+2026-10-30T09:27:25.4740081Z #28 [24/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs]
+2026-10-30T09:27:25.4742581Z #28 DONE 0.0s
+2026-10-30T09:27:25.4742792Z 
+2026-10-30T09:27:25.4745376Z #29 [25/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs]
+2026-10-30T09:27:25.4747796Z #29 DONE 0.0s
+2026-10-30T09:27:25.4748083Z 
+2026-10-30T09:27:25.4749980Z #30 [26/26] COPY --chown=0:0 --chmod=0644 [overlay/world-simulation-shorts-engine/recovery/universal-presentation-v2/studio_adapter.py, /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/universal-presentation-v2/studio_adapter.py]
+2026-10-30T09:27:25.4752348Z #30 DONE 0.0s
+2026-10-30T09:27:25.4752560Z 
+2026-10-30T09:27:25.4752707Z #31 exporting to image
+2026-10-30T09:27:25.4753093Z #31 exporting layers
+2026-10-30T09:27:35.0374153Z #31 exporting layers 9.7s done
+2026-10-30T09:27:35.0660743Z #31 writing image sha256:3d52540ff84fa3414b2acbc1043e2c600933572827150cc48ae51b7bc247774e done
+2026-10-30T09:27:35.0661938Z #31 naming to docker.io/library/world-engine-label355:unpublished-41033485708 done
+2026-10-30T09:27:35.0662652Z #31 DONE 9.7s
+2026-10-30T09:27:35.0768147Z 
+2026-10-30T09:27:24.7112229Z PREBUILD_CAPACITY={"basis": "G2 context x3 + 2GiB reserve", "contextBytes": 486182, "freeBytes": 90010415104, "requiredBytes": 2148942194}
+2026-10-30T09:27:35.2077209Z BLOCKED_RuntimeError:BLOCKED_IMAGE_ID_MISMATCH_CAUSE_UNVERIFIED
