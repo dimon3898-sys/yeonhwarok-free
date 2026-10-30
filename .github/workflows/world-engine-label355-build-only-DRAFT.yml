@@ -1,7 +1,5 @@
 name: WORLD ENGINE label355 candidate build DRAFT (disabled)
-# REVIEW ONLY. No push trigger; no build, registry publication or GPU.
-# Existing G2 success method is the reference; this draft is intentionally disabled
-# until live billing/capacity/permissions and 355-image validation gates are reviewed.
+# Isolated, non-executable candidate workflow. No GHCR publication or GPU.
 on:
   workflow_dispatch:
 permissions:
@@ -11,20 +9,38 @@ concurrency:
   cancel-in-progress: false
 jobs:
   candidate-build:
+    # Deliberately disabled: live cost/allowance and capacity evidence plus reviewed
+    # installed-image verifier are missing. Never remove without a separate gate.
     if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      BASE_SHA: 9693132920bb269b6b6fefa1ed5ecd1e9e7e3237
+      PARENT: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
+      PKG: world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py
     steps:
       - uses: actions/checkout@v4
-      - name: Preserve explicit BLOCKED state until live preflight is approved
+        with:
+          ref: ${{ env.BASE_SHA }}
+          persist-credentials: false
+      - name: Fail closed on unapproved billing gate
         run: |
-          echo 'BLOCKED: candidate build disabled pending reviewed live cost/capacity and OCI/UID1000 validation'
+          echo "BLOCKED: fresh billing/allowance attestation required"
           exit 1
-# Required before enabling:
-# - pin source to 9693132920bb269b6b6fefa1ed5ecd1e9e7e3237
-# - use exact G2 parent sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da
-# - run current cost/capacity/permission preflight BEFORE parent pull
-# - use existing package_labels.py prepare/verify for fresh 355-source context
-# - docker pull once, docker build once --network none --pull=false
-# - verify image 355 source SHA256, OCI config/entrypoint, bootstrap, UID1000 access
-# - preserve bounded evidence; no GHCR login/push, no GPU, no rerun, no main change
+      # Only after billing gate approval: use the proven G2 preflight pattern
+      # (registry manifest compressed bytes * 4 + 8GiB reserve, DockerRootDir free
+      # measured on this runner, fixed parent digest verified before any pull).
+      - name: Prepare exact 355-source context without rebuilding prior PASS
+        if: ${{ false }}
+        run: |
+          python3 -B "$PKG" prepare --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/label355-context"
+          python3 -B "$PKG" verify --repo "$GITHUB_WORKSPACE" --context "$RUNNER_TEMP/label355-context"
+      - name: One candidate pull and offline build only
+        if: ${{ false }}
+        run: |
+          docker pull "$PARENT"
+          docker build --network none --pull=false -t world-engine-label355:unpublished "$RUNNER_TEMP/label355-context"
+      # Installed-image verification remains unimplemented: DO NOT enable the
+      # build until an actual verifier checks all 355 hashes, OCI entrypoint,
+      # bootstrap chain and UID1000 file access and preserves evidence.
+      # No docker login/push, registry writes, GPU, or main branch mutations.
