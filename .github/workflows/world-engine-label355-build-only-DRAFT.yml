@@ -21,6 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Build-only draft and its new verifiers are not on default branch.
+          # package_labels.py still pins the exact validated 355-source bytes.
+          ref: recovery/label355-build-only-draft-20261030
           persist-credentials: false
       - name: Fresh cost and daemon capacity gate (disabled until billing attestation)
         id: preflight
