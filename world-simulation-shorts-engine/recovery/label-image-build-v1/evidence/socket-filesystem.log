@@ -1,0 +1,6 @@
+COMMAND: read-only uid/gid/socket/path metadata and host-visible filesystem usage
+EXIT_CODE: 0
+{"uid": 1000, "gid": 1000, "supplementaryGroups": [], "paths": {"/var/run/docker.sock": {"exists": true, "uid": 65534, "gid": 1000, "mode": "0o660", "isSocket": true, "isDirectory": false, "readable": true, "writable": true}, "/var/lib/docker": {"exists": true, "uid": 65534, "gid": 65534, "mode": "0o710", "isSocket": false, "isDirectory": true, "readable": false, "writable": false, "filesystemFreeBytes": 29966688256}, "/workspace": {"exists": true, "uid": 1000, "gid": 1000, "mode": "0o755", "isSocket": false, "isDirectory": true, "readable": true, "writable": true, "filesystemFreeBytes": 29966688256}}}
+COMMAND: ps -C dockerd -o pid=,uid=,comm=
+EXIT_CODE: 0
+    123 65534 dockerd

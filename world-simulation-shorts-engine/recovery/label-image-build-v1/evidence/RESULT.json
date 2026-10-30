@@ -1,0 +1,85 @@
+{
+  "schema": "WORLD_ENGINE_355_SOURCE_CANDIDATE_IMAGE_BUILD_RESULT_V1",
+  "status": "BLOCKED",
+  "reason": "DOCKER_LOCAL_SOCKET_CONNECT_OPERATION_NOT_PERMITTED",
+  "sourceBaseline": "9693132920bb269b6b6fefa1ed5ecd1e9e7e3237",
+  "evidenceParentCommit": "32737008d8187d55f3d7b0cbdec8aa48dc30a45f",
+  "branch": "recovery/g1-capture-diagnostic-contract-20261028",
+  "dateAsiaSeoul": "2026-10-30",
+  "userAuthorizedMaximumCandidateBuilds": 1,
+  "candidateImageBuilt": false,
+  "candidateImageID": null,
+  "candidateTagCreated": false,
+  "stoppedAt": "LOCAL_DOCKER_ACCESS_PREFLIGHT_BEFORE_PARENT_PULL_CONTEXT_REGENERATION_BUILD_OR_IMAGE_VALIDATION",
+  "preconditions": {
+    "dockerAccess": "BLOCKED_CONNECT_OPERATION_NOT_PERMITTED",
+    "buildApiAuthorization": "NOT_EXERCISED",
+    "currentCost": "UNCONFIRMED",
+    "currentDaemonCapacity": "UNCONFIRMED",
+    "hostVisibleFreeBytes": 29966688256,
+    "hostVisibleFreeGiB": 27.908653259277344,
+    "hostFreeIsNotDaemonCapacityProof": true
+  },
+  "actualError": {
+    "command": "docker --host=unix:///var/run/docker.sock info --format '{{json .}}' (with endpoint/context/TLS selectors cleared)",
+    "exitCode": 1,
+    "message": "permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get \"http://%2Fvar%2Frun%2Fdocker.sock/v1.51/info\": dial unix /var/run/docker.sock: connect: operation not permitted",
+    "uid": 1000,
+    "socket": {
+      "uid": 65534,
+      "gid": 1000,
+      "mode": "0660",
+      "readable": true,
+      "writable": true
+    },
+    "daemonProcessVisible": true,
+    "causeNotEstablished": "Exact sandbox/daemon policy; do not infer ordinary Unix permission mismatch or change socket mode"
+  },
+  "checks": {
+    "existing355SourcePackaging21": "REUSED_SKIP",
+    "allPriorPASS": "REUSED_SKIP",
+    "dockerAccessPreflight": "BLOCKED",
+    "localBuild": "NOT_RUN",
+    "image355SHA256Integrity": "NOT_RUN_BLOCKED_NO_CANDIDATE",
+    "actualOCIEntrypoint": "NOT_RUN_BLOCKED_NO_CANDIDATE",
+    "bootstrapImageConnection": "NOT_RUN_BLOCKED_NO_CANDIDATE",
+    "uid1000ImageAccess": "NOT_RUN_BLOCKED_NO_CANDIDATE"
+  },
+  "attempts": {
+    "dockerInfo": 1,
+    "parentPull": 0,
+    "imageBuild": 0,
+    "retry": 0,
+    "imageContainers": 0
+  },
+  "preservation": {
+    "existingPASSSuitesReexecuted": 0,
+    "priorPASSGateObjectsPreserved": 17,
+    "sourceRuntimeAndPackagingCodeChanged": false,
+    "sourceManifestPinsChanged": false,
+    "priorPreparedContextReexecuted": false,
+    "successfulImagesTagsDigestUnchanged": true,
+    "registryWrites": 0,
+    "actionsDispatched": 0,
+    "gpuRuns": 0,
+    "newPaidResourcesRequested": 0,
+    "daemonRestarts": 0,
+    "socketPermissionChanges": 0,
+    "storageDriverChanges": 0,
+    "imagePrunesDeletes": 0,
+    "mainEdits": 0,
+    "interveningRemotePlanningCommitPreserved": true
+  },
+  "evidence": {
+    "preflight": "PREFLIGHT.json",
+    "dockerLog": "docker-access.log",
+    "filesystemLog": "socket-filesystem.log",
+    "hashIndex": "SHA256_MANIFEST.json"
+  },
+  "remainingPrerequisites": [
+    "Authorized local Docker API access must succeed before a build; exact connection policy failure requires environment/operator recovery",
+    "Current daemon storage driver/data-root capacity and fixed-parent availability remain unknown; host-path free27.91GiB alone is insufficient",
+    "Current cost/allowance evidence must be available; oldG2 publicActions evidence is not live proof for this executor"
+  ],
+  "nextAction": "Environment/operator restores permitted Docker API access and supplies current free cost/capacity evidence. This task stops with build approval unused0/1. No automatic retry or alternative runner dispatch."
+}

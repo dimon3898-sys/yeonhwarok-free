@@ -1,0 +1,118 @@
+{
+  "schema": "WORLD_ENGINE_355_SOURCE_LOCAL_BUILD_PREFLIGHT_V1",
+  "status": "BLOCKED",
+  "reason": "DOCKER_LOCAL_SOCKET_CONNECT_OPERATION_NOT_PERMITTED",
+  "sourceBaseline": "9693132920bb269b6b6fefa1ed5ecd1e9e7e3237",
+  "evidenceParentCommit": "32737008d8187d55f3d7b0cbdec8aa48dc30a45f",
+  "existingSourcePassReexecuted": false,
+  "managedEnvironment": {
+    "environmentId": "ccarenv_b64_Y2NhcmVudl9kNTYxZTc3NWIyNjg4MTkxYWYyNjViYzMwMzU5ZTJmMw",
+    "specRevision": "6",
+    "observedSpecRevision": "6",
+    "observationsCurrent": true,
+    "observedPhase": "running",
+    "networkPolicy": {
+      "mode": "unrestricted",
+      "state": "enforced"
+    }
+  },
+  "docker": {
+    "endpoint": "unix:///var/run/docker.sock",
+    "endpointSelectorsClearedForCommand": [
+      "DOCKER_HOST",
+      "DOCKER_CONTEXT",
+      "DOCKER_TLS",
+      "DOCKER_TLS_VERIFY",
+      "DOCKER_CERT_PATH"
+    ],
+    "dockerConfigAndRegistryCredentialsUnchanged": true,
+    "clientVersion": "28.4.0",
+    "infoExitCode": 1,
+    "apiAccess": "BLOCKED",
+    "buildApiAuthorization": "NOT_EXERCISED",
+    "error": "permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get \"http://%2Fvar%2Frun%2Fdocker.sock/v1.51/info\": dial unix /var/run/docker.sock: connect: operation not permitted",
+    "daemonProcessObserved": {
+      "pid": 123,
+      "uid": 65534,
+      "comm": "dockerd"
+    },
+    "daemonResponseReceived": false,
+    "driver": null,
+    "dataRoot": null,
+    "parentCached": null
+  },
+  "filesystemObservations": {
+    "uid": 1000,
+    "gid": 1000,
+    "supplementaryGroups": [],
+    "paths": {
+      "/var/run/docker.sock": {
+        "exists": true,
+        "uid": 65534,
+        "gid": 1000,
+        "mode": "0o660",
+        "isSocket": true,
+        "isDirectory": false,
+        "readable": true,
+        "writable": true
+      },
+      "/var/lib/docker": {
+        "exists": true,
+        "uid": 65534,
+        "gid": 65534,
+        "mode": "0o710",
+        "isSocket": false,
+        "isDirectory": true,
+        "readable": false,
+        "writable": false,
+        "filesystemFreeBytes": 29966688256
+      },
+      "/workspace": {
+        "exists": true,
+        "uid": 1000,
+        "gid": 1000,
+        "mode": "0o755",
+        "isSocket": false,
+        "isDirectory": true,
+        "readable": true,
+        "writable": true,
+        "filesystemFreeBytes": 29966688256
+      }
+    }
+  },
+  "capacity": {
+    "status": "UNCONFIRMED_NOT_PASS",
+    "hostVisibleFreeBytes": 29966688256,
+    "hostVisibleFreeGiB": 27.908653259277344,
+    "daemonStorageNamespaceEquivalenceVerified": false,
+    "driverNotObserved": true,
+    "historicalVfsEstimateBytes": 163889184200,
+    "historicalEstimateCurrentOrMeasured": false,
+    "reason": "LOCAL_SOCKET_API_UNAVAILABLE; host-path free bytes alone do not prove daemon build capacity"
+  },
+  "cost": {
+    "status": "UNCONFIRMED_NOT_PASS",
+    "historicalG2CostEvidenceReusedAsLiveProof": false,
+    "actionsRunnerRequested": false,
+    "externalPaidRunnerRequested": false,
+    "newPaidResourcesRequested": 0,
+    "currentProviderBillingVerified": false,
+    "reason": "No billable service requested; existing managed-environment billing/allowance not exposed by supported environment_status. Stop before build on first failed prerequisite."
+  },
+  "attempts": {
+    "localSocketInfo": 1,
+    "parentPull": 0,
+    "imageBuild": 0,
+    "automaticRetry": 0,
+    "containerStarts": 0
+  },
+  "prohibitedEffects": {
+    "registryWrites": 0,
+    "actionsDispatched": 0,
+    "gpuRuns": 0,
+    "successfulImageMutations": 0,
+    "mainEdits": 0
+  },
+  "stoppedAt": "LOCAL_DOCKER_ACCESS_PREFLIGHT_BEFORE_PARENT_PULL_CONTEXT_REGENERATION_BUILD_OR_IMAGE_VALIDATION",
+  "causeLimits": "Unix mode/group allow access and daemon process is visible, but socket connection is denied. Exact sandbox/daemon authorization policy root cause not established; no restart, chmod, driver change, or bypass attempted."
+}
