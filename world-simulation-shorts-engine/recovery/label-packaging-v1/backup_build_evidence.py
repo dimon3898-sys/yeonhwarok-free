@@ -2,7 +2,7 @@
 """Bounded evidence preparation only; no git push or registry operation."""
 import argparse,hashlib,json,pathlib,re,stat,sys
 MAX_BYTES=5*1024*1024
-ALLOW={"PREFLIGHT.json","INSTALLED_RESULT.json","OCI_RESULT.json","BUILD_RESULT.json"}
+ALLOW={"PREFLIGHT.json","INSTALLED_RESULT.json","OCI_RESULT.json","BUILD_RESULT.json","IMAGE_CONFIG_SAFE.json"}
 PARENT="sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da"
 def need(ok,code):
     if not ok:raise RuntimeError(code)
@@ -63,6 +63,21 @@ def safe_evidence_bytes(name,raw):
              and value['parentDigest']==PARENT and type(value['expectedSourceRows']) is int and value['expectedSourceRows']==355
              and value['scope']=='CANDIDATE_IMAGE_IDENTITY_ONLY_NOT_BUILD_OR_INSTALLED_VALIDATION'
              and value['gpuExecuted'] is False,"EVIDENCE_VALUE_INVALID")
+    elif name=='IMAGE_CONFIG_SAFE.json':
+        required={'schema','status','imageId','parentDigest','os','architecture','rootfsType','rootfsDiffIDs','entrypointSHA256','cmdSHA256','userSHA256','historySHA256','historyCount','gpuExecuted'}
+        need(set(value)==required,"EVIDENCE_FIELDS_INVALID")
+        need(value['schema']=='WORLD_ENGINE_IMAGE_CONFIG_SAFE_V1'
+             and value['status']=='CAPTURED_NOT_COMPARED'
+             and type(value['imageId']) is str and re.fullmatch('sha256:[a-f0-9]{64}',value['imageId'])
+             and value['parentDigest']==PARENT and value['os']=='linux'
+             and value['architecture']=='amd64' and value['rootfsType']=='layers'
+             and type(value['rootfsDiffIDs']) is list
+             and 0<len(value['rootfsDiffIDs'])<=1024
+             and all(type(x) is str and re.fullmatch('sha256:[a-f0-9]{64}',x) for x in value['rootfsDiffIDs'])
+             and all(type(value[k]) is str and re.fullmatch('[a-f0-9]{64}',value[k])
+                     for k in ('entrypointSHA256','cmdSHA256','userSHA256','historySHA256'))
+             and type(value['historyCount']) is int and 0<=value['historyCount']<=4096
+             and value['gpuExecuted'] is False and len(raw)<=131072,"EVIDENCE_VALUE_INVALID")
     else:
         raise RuntimeError("UNREVIEWED_EVIDENCE_SCHEMA")
     return value
