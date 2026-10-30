@@ -78,5 +78,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 1
           compression-level: 9
-      # Artifact is temporary; permanent recovery-branch evidence backup is NOT yet connected.
-      # No docker login, docker push, registry write, GPU, retry, or main change.
+      # This remains disabled until explicit evidence-write authorization and review.
+      # No automatic dispatch, docker login, docker push, GPU, or main change.
+      - name: Permanent evidence backup to existing recovery branch (disabled)
+        if: ${{ false }}
+        env:
+          WORLD_ENGINE_LABEL355_BACKUP_APPROVED: "false"
+        run: |
+          python3 -B world-simulation-shorts-engine/recovery/label-packaging-v1/backup_to_recovery.py --evidence "$RUNNER_TEMP/label355-evidence" --destination "world-simulation-shorts-engine/recovery/label-image-build-v1/evidence/actions-${GITHUB_RUN_ID}"
