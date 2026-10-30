@@ -1,0 +1,122 @@
+{
+  "schema": "WORLD_ENGINE_LABEL_PACKAGING_SOURCE_RESULT_V1",
+  "status": "PASS",
+  "scope": "SOURCE_CONTEXT_RUNTIME_ADMISSION_AND_DECLARED_OCI_ENTRYPOINT_ONLY",
+  "baseCommit": "5e4ed42496c45333126c08166571598d9fcf0495",
+  "branch": "recovery/g1-capture-diagnostic-contract-20261028",
+  "dateAsiaSeoul": "2026-10-30",
+  "confirmedDefects": [
+    {
+      "file": "codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs",
+      "condition": "Original runtime pin remained pre-label631d69de while current manifest requires62461ee8",
+      "actualBeforeFixError": "HANDOFF_EXACT_VARIANT_SET_REQUIRED",
+      "minimalRepair": "Refresh one original-runtime SHA; no execution policy change"
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/backend/build_variants.py",
+      "condition": "Runtime derivation omitted existing instrumented diagnostic adapter",
+      "minimalRepair": "Preserve existing instrumentation exactly; add read-only snapshot verification, no runtime byte edits"
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "condition": "native_guard row2726bytes/3dcdaa11 did not match actual source and successfulG2 row3084bytes/49718b6d",
+      "minimalRepair": "Restore row to unchanged source and inherited successfulG2 proof; do not change native_guard code"
+    },
+    {
+      "file": "vulkan-surface-actions-v1/package_candidate.py",
+      "condition": "Historical fixed353-source/four-file profile-only packager cannot package355-label closure",
+      "minimalRepair": "Leave old verified tool unchanged; isolated fixed-snapshot source context tool"
+    }
+  ],
+  "closure": {
+    "runtimeRows": 355,
+    "changedG2Rows": 20,
+    "newModules": 2,
+    "inheritedG2RowsReused": 333,
+    "packagerInheritedSourceReads": 0,
+    "whole355IntegrityReexecuted": false,
+    "runtimeManifestSHA256": "1427779c7a52af90f37478de3ba11e1ddb664149f5b13dbd87fb05142be0252e",
+    "bootstrapSHA256": "8b8a9494db2a7e225cb100b2f175ba3c7b0caede021f399e627bd80235fdafa5",
+    "startupManifestSHA256": "f8afb5c2f944dea13f7a990a7c2c8e8c65c9c028bd7228f501aa6feace98ef89",
+    "overlayFiles": 25,
+    "contextFilesIncludingDockerfile": 26,
+    "fixedParentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da",
+    "declaredEntrypointChangedIndices": [
+      10,
+      14
+    ],
+    "actualCandidateOCIConfigVerified": false,
+    "parentImageInspectedAgain": false
+  },
+  "newTests": {
+    "distinctPassed": 21,
+    "runtimeLinkCases": 5,
+    "variantLinkCases": 6,
+    "contextCases": 10,
+    "suiteExecutionCounts": [
+      1,
+      1,
+      1
+    ],
+    "exitCodes": [
+      0,
+      0,
+      0
+    ],
+    "failed": 0,
+    "actualFunctions": [
+      "validateVariantManifest",
+      "verifyGeneratedSources",
+      "build_variants.verify_existing",
+      "build_variants.derive_runtime",
+      "package_labels.prepare",
+      "package_labels.verify"
+    ],
+    "logs": [
+      "new-runtime-links.log",
+      "new-variant-linkage.log",
+      "new-package-context.log"
+    ]
+  },
+  "preservation": {
+    "allPriorPASSReused": true,
+    "existingPASSSuitesReexecuted": 0,
+    "priorLabel29AndDuration28Reexecuted": false,
+    "aviation6sGPUProofReused": true,
+    "tenSecondInputContractPreserved": true,
+    "labelModulesAndGeneratedRuntimeBytesChanged": false,
+    "rendererSceneCameraTerritoryUnchanged": true,
+    "nativeGuardCodeUnchanged": true,
+    "gpuSandboxLeaseActiveCleanupCostConsentControlsUnchanged": true,
+    "oldG2AndProfileOnlyPackagersUnchanged": true,
+    "successfulImagesTagsDigestsUnchanged": true,
+    "mainUnchanged": true,
+    "newChromiumOptions": 0
+  },
+  "evidence": {
+    "sourceContext": "CONTEXT_PLAN.json",
+    "declaredDockerfile": "Dockerfile.preview",
+    "runtimeLinkResults": "NEW_RUNTIME_LINK_RESULTS.json",
+    "contextResults": "NEW_CONTEXT_TEST_RESULT.json",
+    "pinRepairs": "PIN_REPAIR_RECEIPT.json",
+    "baselineValidator": "BASELINE_SOURCE_ADMISSION.json",
+    "baselineGitMetadata": "BASELINE_GIT_TREE_ROWS.json",
+    "changedSources": "SOURCE_CHANGE.patch",
+    "sha256Index": "SHA256_MANIFEST.json"
+  },
+  "remainingBlocked": [
+    "Candidate image build and installed355-file/bootstrap/OCI/UID1000 verification NOT_RUN; needs separate approved build route and current free capacity/cost/permission gates",
+    "GHCR publication NOT_RUN; existing ACL and approval blockers unchanged",
+    "Actual NVIDIA10s/300 label frames/video/nativecamera/terrain/readability and reference acceptance NOT_RUN; separateGPU approval required"
+  ],
+  "actualEffects": {
+    "imagePulls": 0,
+    "imageBuilds": 0,
+    "ghcrWrites": 0,
+    "actionsDispatched": 0,
+    "gpuRuns": 0,
+    "paidOperations": 0,
+    "mainEdits": 0
+  },
+  "stopAfterRecoveryBranchCommit": true
+}

@@ -3,6 +3,7 @@ from pathlib import Path
 import difflib
 import hashlib
 import json
+import sys
 
 HERE=Path(__file__).resolve().parent.parent
 UP2=HERE.parent/'universal-presentation-v2'
@@ -74,6 +75,14 @@ def derive_runtime(source):
     source=replace(source,"softwareOnly:true", "softwareOnly:false")
     source=replace(source,"actualGPUVerified:false", "get actualGPUVerified(){return nativeStabilityProof!==null;}")
     source=replace(source,"get diagnostic(){return last;},dispose(){", "recordNativeStability(proof){validateNativeStability(proof,backend);nativeStabilityProof=copy(proof);},get diagnostic(){return last;},dispose(){")
+    # Preserve the already deployed diagnostic adapter when deriving the label
+    # runtime; regenerating an uninstrumented variant would discard evidence.
+    source=replace(source,"inputTrace=null}={}){", "inputTrace=null,diagnostics=null}={}){\n const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'PRESENTATION_RUNTIME'}):task();")
+    source=replace(source,"const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});assert(gl,'UP2_WEBGL2_REQUIRED');", "const gl=await observe('WEBGL_CONTEXT',()=>{const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:true});assert(gl,'UP2_WEBGL2_REQUIRED');return gl;});")
+    source=replace(source,"const{backend}=assertNvidiaVulkanContext(gl);", "const{backend}=await observe('RENDERER_IDENTIFICATION',()=>assertNvidiaVulkanContext(gl));")
+    source=replace(source,"factory=await createMapInfographicRenderer({canvas,plan:nativePlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment});", "factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:nativePlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment}));")
+    source=replace(source,"graphics=await createMovingGraphicPass({renderer,factory,width:1080,height:1920});", "graphics=await observe('GRAPHICS_PREPARATION',()=>createMovingGraphicPass({renderer,factory,width:1080,height:1920}));")
+    source=replace(source,"}catch(error){passes.forEach(pass=>pass.dispose());graphics?.dispose();factory?.dispose();renderer.dispose();throw error;}", "}catch(error){if(diagnostics){await diagnostics.cleanup(()=>passes.forEach(pass=>pass.dispose()));await diagnostics.cleanup(()=>graphics?.dispose());await diagnostics.cleanup(()=>factory?.dispose());await diagnostics.cleanup(()=>renderer.dispose());}\n  else{passes.forEach(pass=>pass.dispose());graphics?.dispose();factory?.dispose();renderer.dispose();}throw error;}")
     return source
 
 def derive_region(source):
@@ -91,6 +100,52 @@ def derive_region(source):
     source=replace(source,"  const e=prepared.regionEvidence;", "  await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});\n  const e=prepared.regionEvidence;")
     source=replace(source,"dir=path.dirname(png);check(within(png,'/workspace')&&!within(png,REPO)", "dir=path.dirname(png);await assertQualifiedPrivatePath(dir,{privateWorkspaceRoot,publicExportRoot});check(within(png,privateWorkspaceRoot)&&png!==privateWorkspaceRoot&&!within(png,REPO)")
     return source
+
+def verify_existing():
+    """Read-only packaging gate; do not regenerate historical variants/patches."""
+    repo=HERE.parents[2]
+    metadata=json.loads((HERE/'backend/GENERATED_SOURCE_MANIFEST.json').read_text())
+    targets={'capture_vulkan.generated.mjs':'capture_presentation.mjs',
+             'presentation_runtime_vulkan.generated.mjs':'presentation_runtime.mjs',
+             'region_source_vulkan.generated.mjs':'region_source.mjs'}
+    rows=metadata.get('variants',[])
+    if metadata.get('schema')!='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1' or len(rows)!=len(targets):
+        raise RuntimeError('GCUBE_EXISTING_VARIANT_MANIFEST_REQUIRED')
+    seen=set()
+    for row in rows:
+        target=row.get('variant')
+        if target not in targets or target in seen:
+            raise RuntimeError('GCUBE_EXISTING_VARIANT_SET_MISMATCH')
+        seen.add(target)
+        original=targets[target]
+        expected_original=str((UP2/original).relative_to(repo))
+        if row.get('original')!=expected_original or row.get('originalSHA256')!=PINS[original]:
+            raise RuntimeError('GCUBE_EXISTING_ORIGINAL_PIN_MISMATCH:'+original)
+        for file,expected in [(UP2/original,PINS[original]),(HERE/target,row.get('variantSHA256'))]:
+            if file.is_symlink() or not file.is_file():
+                raise RuntimeError('GCUBE_EXISTING_REGULAR_SOURCE_REQUIRED')
+            if hashlib.sha256(file.read_bytes()).hexdigest()!=expected:
+                raise RuntimeError('GCUBE_EXISTING_SOURCE_SHA_MISMATCH:'+file.name)
+    actual=(HERE/'presentation_runtime_vulkan.generated.mjs').read_bytes()
+    candidate=derive_runtime((UP2/'presentation_runtime.mjs').read_bytes().decode()).encode()
+    if actual!=candidate:
+        raise RuntimeError('GCUBE_EXISTING_RUNTIME_DERIVATION_MISMATCH')
+    closure=json.loads((HERE/'RUNTIME_SOURCE_MANIFEST.json').read_text())
+    label_hashes={}
+    for name in ['presentation_labels.mjs','presentation_label_layer.mjs']:
+        file=UP2/name
+        relative=str(file.relative_to(repo))
+        matches=[row for row in closure['files'] if row.get('path')==relative]
+        if len(matches)!=1 or file.is_symlink() or not file.is_file():
+            raise RuntimeError('GCUBE_LABEL_SOURCE_ROW_REQUIRED:'+name)
+        raw=file.read_bytes()
+        if matches[0].get('sha256')!=hashlib.sha256(raw).hexdigest() or matches[0].get('bytes')!=len(raw):
+            raise RuntimeError('GCUBE_LABEL_SOURCE_PIN_MISMATCH:'+name)
+        label_hashes[name]=hashlib.sha256(raw).hexdigest()
+    return {'schema':'WORLD_ENGINE_EXISTING_LABEL_VARIANT_LINKAGE_V1','status':'PASS',
+            'scope':'READ_ONLY_EXISTING_VARIANT_PINS_LABEL_MODULES_AND_RUNTIME_DERIVATION',
+            'variantRows':len(rows),'runtimeDerivationMatches':True,'labelModuleSHA256':label_hashes,
+            'historicalPatchRegeneration':'NOT_RUN','filesWritten':0,'gpuExecuted':False}
 
 def main():
     rows=[]
@@ -119,4 +174,10 @@ def main():
     if not manifest.exists():manifest.write_bytes(data)
     print(json.dumps(receipt))
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    if sys.argv[1:]==['--verify-existing']:
+        print(json.dumps(verify_existing(),sort_keys=True))
+    elif sys.argv[1:]:
+        raise RuntimeError('GCUBE_VARIANT_ARGUMENT_UNSUPPORTED')
+    else:
+        main()

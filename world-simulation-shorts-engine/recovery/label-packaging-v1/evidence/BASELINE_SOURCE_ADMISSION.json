@@ -1,0 +1,12 @@
+{
+  "baseCommit": "5e4ed42496c45333126c08166571598d9fcf0495",
+  "beforeOriginalRuntimePin": "631d69debd02ed24584a72499febc5f541d3adcfc411095906c444c03e90d0a6",
+  "captureSourceBytes": 10463,
+  "captureSourceSHA256": "f76fcb2853d79399039aa2b1745388546bc588ff88c47cc53b01275ad2ecd1e8",
+  "expectedFailure": "HANDOFF_EXACT_VARIANT_SET_REQUIRED",
+  "schema": "WORLD_ENGINE_LABEL_BASELINE_SOURCE_ADMISSION_V1",
+  "scope": "EXACT_BASELINE_PURE_VALIDATOR_ONLY_NO_GPU_OR_RENDERER",
+  "sourcePath": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs",
+  "validatorSource": "export function validateVariantManifest(metadata){\n check(metadata.schema==='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1'&&metadata.variants.length===3,'HANDOFF_VARIANT_MANIFEST_REQUIRED');\n const expectedVariants=new Map([\n  ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'fc17ceb56499184a6f4ae6888d617f7b1b67e4fd508320eb295493161596753e'}],\n  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'631d69debd02ed24584a72499febc5f541d3adcfc411095906c444c03e90d0a6'}],\n  ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'bf89be2fa74d3b55f6651106cb35171c10ceaffd802bb505dbd3d31cca2bd008'}],\n ]),seen=new Set();\n for(const row of metadata.variants){\n  check(typeof row.original==='string'&&row.original.startsWith('world-simulation-shorts-engine/recovery/universal-presentation-v2/')&&!row.original.split('/').includes('..')&&expectedVariants.has(row.variant),'HANDOFF_VARIANT_PATH_INVALID');\n  check(hex(row.originalSHA256)&&hex(row.variantSHA256),'HANDOFF_VARIANT_SHA_REQUIRED');\n  const expected=expectedVariants.get(row.variant);\n  check(expected&&!seen.has(row.variant)&&row.original===expected.original&&row.originalSHA256===expected.sha256,'HANDOFF_EXACT_VARIANT_SET_REQUIRED');seen.add(row.variant);\n }\n check(seen.size===expectedVariants.size,'HANDOFF_EXACT_VARIANT_SET_REQUIRED');\n return metadata.variants;\n}",
+  "validatorSourceSHA256": "23ed927b45baf7e898acfb99a3c0fa1e3d65f7b154eb868ef61a9765df92d785"
+}

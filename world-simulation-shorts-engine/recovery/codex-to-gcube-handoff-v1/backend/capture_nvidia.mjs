@@ -30,7 +30,7 @@ export function validateVariantManifest(metadata){
  check(metadata.schema==='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1'&&metadata.variants.length===3,'HANDOFF_VARIANT_MANIFEST_REQUIRED');
  const expectedVariants=new Map([
   ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'fc17ceb56499184a6f4ae6888d617f7b1b67e4fd508320eb295493161596753e'}],
-  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'631d69debd02ed24584a72499febc5f541d3adcfc411095906c444c03e90d0a6'}],
+  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'62461ee8f49265554d3858848ec106586937e62ae4fb3ce90c39a96909266d72'}],
   ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'bf89be2fa74d3b55f6651106cb35171c10ceaffd802bb505dbd3d31cca2bd008'}],
  ]),seen=new Set();
  for(const row of metadata.variants){

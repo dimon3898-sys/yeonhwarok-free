@@ -1,0 +1,116 @@
+{
+  "baseCommit": "5e4ed42496c45333126c08166571598d9fcf0495",
+  "cases": [
+    {
+      "evidence": {
+        "baselineCaptureSHA256": "f76fcb2853d79399039aa2b1745388546bc588ff88c47cc53b01275ad2ecd1e8",
+        "baselineCommit": "5e4ed42496c45333126c08166571598d9fcf0495",
+        "error": "HANDOFF_EXACT_VARIANT_SET_REQUIRED",
+        "scope": "NEW_LABEL_ORIGINAL_PIN_ADMISSION"
+      },
+      "name": "01_pinned_before_fix_validator_rejects_label_manifest",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "duplicateRejected": true,
+        "oldPinRejected": true,
+        "variantsAccepted": 3
+      },
+      "name": "02_fixed_entry_accepts_exact_manifest_and_rejects_old_runtime_pin",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actualPinnedFilesRead": 6,
+        "function": "verifyGeneratedSources",
+        "renderExecuted": false,
+        "scope": "NEWLY_INVALIDATED_LABEL_SNAPSHOT_ADMISSION_ONLY",
+        "variants": [
+          {
+            "sha256": "39bdff1d9190ab8102c812209e64001fd6b633c0ac424d9427f1ca409aa9f592",
+            "variant": "capture_vulkan.generated.mjs"
+          },
+          {
+            "sha256": "5fa5c63ef6793832c6a7d5569189c079fd375c70a4ade1489c6ac9e2a791c767",
+            "variant": "presentation_runtime_vulkan.generated.mjs"
+          },
+          {
+            "sha256": "4aea5991c945ee2091644e1f782e024c1a0567ac10b0afa6bc7c54893bbec94e",
+            "variant": "region_source_vulkan.generated.mjs"
+          }
+        ]
+      },
+      "name": "03_actual_generated_source_admission_for_new_label_snapshot",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actualNodeModuleLoads": 2,
+        "canvasOrWebGLCreated": false,
+        "modules": [
+          {
+            "bytes": 5302,
+            "export": "validateLabelSpec",
+            "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_labels.mjs",
+            "sha256": "c4527e3fc66e95e7f527be6bb17f2ecc780267747d1a627a530c95dcd31e6d58"
+          },
+          {
+            "bytes": 14214,
+            "export": "createPresentationLabelPass",
+            "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_label_layer.mjs",
+            "sha256": "b8548171d76041f77906f657bfffaa7c64d7997a58d8f23a2e1af6e03d2169b0"
+          }
+        ]
+      },
+      "name": "04_new_label_modules_load_from_runtime_closure_with_real_exports",
+      "status": "PASS"
+    },
+    {
+      "evidence": {
+        "actualCaptureMountsRead": true,
+        "edges": [
+          {
+            "from": "/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs",
+            "manifestPath": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_label_layer.mjs",
+            "resolvesTo": "/recovery/universal-presentation-v2/presentation_label_layer.mjs",
+            "specifier": "../universal-presentation-v2/presentation_label_layer.mjs"
+          },
+          {
+            "from": "/recovery/universal-presentation-v2/presentation_runtime.mjs",
+            "manifestPath": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_label_layer.mjs",
+            "resolvesTo": "/recovery/universal-presentation-v2/presentation_label_layer.mjs",
+            "specifier": "./presentation_label_layer.mjs"
+          },
+          {
+            "from": "/recovery/universal-presentation-v2/presentation_plan.mjs",
+            "manifestPath": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_labels.mjs",
+            "resolvesTo": "/recovery/universal-presentation-v2/presentation_labels.mjs",
+            "specifier": "./presentation_labels.mjs"
+          },
+          {
+            "from": "/recovery/universal-presentation-v2/presentation_label_layer.mjs",
+            "manifestPath": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_labels.mjs",
+            "resolvesTo": "/recovery/universal-presentation-v2/presentation_labels.mjs",
+            "specifier": "./presentation_labels.mjs"
+          }
+        ],
+        "httpRequests": 0,
+        "scope": "NEW_LABEL_EDGES_ONLY_INHERITED_GRAPH_NOT_REQUALIFIED",
+        "serverStarts": 0
+      },
+      "name": "05_capture_mounts_resolve_new_browser_label_edges_without_http",
+      "status": "PASS"
+    }
+  ],
+  "existingPASSSuitesRerun": false,
+  "failed": 0,
+  "gpuRuns": 0,
+  "imageBuilds": 0,
+  "networkRequests": 0,
+  "passed": 5,
+  "processExitCode": 0,
+  "schema": "WORLD_ENGINE_LABEL_PACKAGE_RUNTIME_LINK_TESTS_V1",
+  "serverStarts": 0,
+  "status": "PASS"
+}
