@@ -1,0 +1,243 @@
+{
+  "schema": "WORLD_ENGINE_CAPTURE_PATH_AUDIT_V3",
+  "sourceCommit": "8892b8c300153afc2eb86ef5e43ec8d41deaf83d",
+  "failedJobId": "studio-37dfbc8dab786a4d7c99cde6fae2f821",
+  "scope": "READ_ONLY_PINNED_SOURCE_COMPARISON_NO_GPU_NO_BROWSER_NO_PRIOR_PASS_RERUN",
+  "actualFailure": {
+    "code": "UP2_WEBGL2_REQUIRED",
+    "diagnosticStage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+    "frameIndex": null,
+    "exceptionType": "Error",
+    "reason": "DOMAIN_ERROR",
+    "renderedFrames": 0,
+    "cleanupVerified": true,
+    "evidenceSource": "Exact-job persisted safe diagnostic retrieved by parent agent",
+    "file": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs",
+    "function": "createNvidiaPresentationRuntime",
+    "condition": "canvas.getContext('webgl2', {alpha:false,antialias:false,preserveDrawingBuffer:true}) returned null",
+    "before": [
+      "assertNvidiaVulkanContext",
+      "THREE.WebGLRenderer",
+      "texture/font/label creation",
+      "native draw",
+      "frame loop",
+      "FFmpeg"
+    ],
+    "underlyingBrowserDriverCause": "NOT_PROVEN"
+  },
+  "scopeDifferences": [
+    {
+      "item": "context",
+      "startup": "OffscreenCanvas 32x32; alpha:false,antialias:false,preserveDrawingBuffer:true,powerPreference:high-performance",
+      "capture": "DOM canvas 1080x1920; alpha:false,antialias:false,preserveDrawingBuffer:true",
+      "classification": "GPU_ONLY_UNVERIFIED_NOT_A_PROVEN_BUG"
+    },
+    {
+      "item": "sandbox",
+      "startup": "probe launched with --no-sandbox",
+      "capture": "UID1000 Chromium sandbox enabled",
+      "classification": "INTENTIONAL_SAFETY_DIFFERENCE_PRESERVE"
+    },
+    {
+      "item": "executable",
+      "startup": "chromium_wrapper.py -> approved real Chromium",
+      "capture": "/usr/bin/chromium directly",
+      "classification": "STATIC_PARITY_MUST_BE_EXPLICIT"
+    }
+  ],
+  "checks": [
+    {
+      "name": "browser-start-and-runtime-module-import",
+      "status": "PASS",
+      "basis": "Actual exact-job diagnostic progressed into first-native-draw evaluate; browser launch and first runtime import evaluate completed"
+    },
+    {
+      "name": "input-source-and-manifest-verification",
+      "status": "SKIP",
+      "basis": "Locked PASS plus user-reported same-job preflight PASS; not rerun"
+    },
+    {
+      "name": "capture-command-plan-binding",
+      "status": "PASS",
+      "basis": "Static lease_supervisor.py:266–279 passes runtime/sourceQualification/approval/plan SHA and private/public roots; no shell injection command construction"
+    },
+    {
+      "name": "capture-dependency-readiness",
+      "status": "SKIP",
+      "basis": "Existing preflight dependency_facts checks node/ffmpeg/ffprobe/chromium/Playwright metadata; actual browser launch reached first evaluate"
+    },
+    {
+      "name": "GPU-context-availability",
+      "status": "FAIL",
+      "basis": "Exact-job UP2_WEBGL2_REQUIRED"
+    },
+    {
+      "name": "native-renderer-identity-and-three-draws",
+      "status": "NOT_RUN",
+      "basis": "Dependent on WebGL2 context; context returned null"
+    },
+    {
+      "name": "fonts-labels-textures-frame-loop-encoding",
+      "status": "NOT_RUN",
+      "basis": "All follow failed context creation in this job"
+    },
+    {
+      "name": "underlying-driver-sandbox-browser-reason",
+      "status": "BLOCKED",
+      "basis": "Safe export does not contain Chromium GPU-process stderr or contextcreationerror status; no GPU recreation permitted"
+    },
+    {
+      "name": "existing-diagnostic-export",
+      "status": "PASS",
+      "basis": "Exact safe domain error/stage/type/frame/cleanup preserved; existing diagnostic implementation reused"
+    }
+  ],
+  "additionalDiagnosticLimit": {
+    "file": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py",
+    "function": "supervise_owned_capture.consume",
+    "lines": [
+      93,
+      117
+    ],
+    "behavior": "Consumes bounded JSON progress/failure records, ignores non-JSON child output. CAPTURE_PROCESS_RESULT.json records successful process result only.",
+    "recommendation": "Use existing private receipt and safe export first. Do not invent original stderr or use another job."
+  },
+  "remainingGPUOnly": [
+    "Actual DOM WebGL2 creation under final sandboxed launch profile",
+    "NVIDIA/Vulkan renderer identity",
+    "native repeated pixel draws",
+    "300 actual frame draws and label appearance",
+    "FFmpeg/MP4 decode and external download in the next live workload"
+  ],
+  "executions": {
+    "browser": 0,
+    "GPU": 0,
+    "renders": 0,
+    "priorPASSSuites": 0,
+    "sourceEdits": 0,
+    "newFocusedTests": 0
+  },
+  "status": "BLOCKED",
+  "decision": "NO_RUNTIME_CHANGE_OR_IMAGE_BUILD: actual WebGL2 null is established, underlying driver/browser/sandbox cause is not available in exact-job safe evidence; preserve the deliberate launch policy.",
+  "staticObservations": [
+    {
+      "status": "NOT_RUN",
+      "findingCode": "STARTUP_AND_CAPTURE_VULKAN_ARGUMENTS_HAVE_DIFFERENT_SCOPES",
+      "category": "COVERAGE_GAP_NOT_PROVEN_RUNTIME_FAULT",
+      "evidence": [
+        {
+          "file": "world-simulation-shorts-engine/deployment/gcube/chromium_wrapper.py",
+          "function": "browser_arguments",
+          "lines": [
+            69,
+            82
+          ],
+          "nativeVulkanArguments": [
+            "--use-vulkan=native",
+            "--disable-vulkan-surface"
+          ]
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+          "function": "buildVulkanLaunchOptions",
+          "lines": [
+            34,
+            74
+          ],
+          "bothArgumentsRemovedOrOmitted": true
+        }
+      ],
+      "minimumCorrection": "No launch option change justified. Do not restore --disable-vulkan-surface or add --use-vulkan=native without causal GPU evidence.",
+      "minimumFocusedValidation": "No new test executed. Existing CPU-only surface option result is reused as history, not rerun and not a GPU initialization PASS.",
+      "relationshipToPriorPASS": "Existing health PASS and source-integrity PASS remain valid in their own scopes; neither proved launch-profile parity.",
+      "actualGPUFixProven": false,
+      "intentionalHistory": {
+        "receipt": "world-simulation-shorts-engine/recovery/vulkan-surface-option-v1/RESULT.json",
+        "patch": "world-simulation-shorts-engine/recovery/vulkan-surface-option-v1/SOURCE_DIFF.patch",
+        "sourceCommit": "d259e61c96e83a97a8b97e797670786a434a240d",
+        "beforeSourceSHA256": "92a05474a162ffd41238abc24cc5e433838c80192d77f462f67990178fc08809",
+        "afterSourceSHA256": "f55758af58a7c8724bddc097f05586b6d4cfdfa81133fa093636e335bca171c5",
+        "change": "Deliberately remove only --disable-vulkan-surface from final args while retaining its input stripping. --use-vulkan=native was not present in either historical capture output.",
+        "scope": "SINGLE_LAUNCH_OPTION_FUNCTION_CPU_ONLY_NOT_GPU_INITIALIZATION_PASS",
+        "rootCauseCorrectionEstablished": false
+      }
+    },
+    {
+      "status": "NOT_RUN",
+      "findingCode": "STARTUP_HEALTH_DOES_NOT_PROVE_CAPTURE_PROFILE_CONTEXT",
+      "category": "COVERAGE_GAP_NOT_PROVEN_JOB_CAUSE",
+      "evidence": [
+        {
+          "file": "world-simulation-shorts-engine/deployment/gcube/graphics_start.py",
+          "function": "select_graphics_profile",
+          "lines": [
+            35,
+            57
+          ],
+          "implicitProfiles": [
+            "vulkan",
+            "egl"
+          ]
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+          "function": "admit_gpu",
+          "lines": [
+            288,
+            298
+          ],
+          "selectedProfileExportedAs": "WORLD_ENGINE_GPU_PROFILE"
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_runtime.py",
+          "function": "_health",
+          "lines": [
+            181,
+            194
+          ],
+          "checks": [
+            "gpuRenderingVerified",
+            "testOnly",
+            "renderMode",
+            "model"
+          ],
+          "doesNotCheck": [
+            "gpuProfile",
+            "actualCaptureLaunchFingerprint",
+            "DOMCanvas1080x1920"
+          ]
+        },
+        {
+          "file": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+          "function": "NvidiaPresentationBackend._verify",
+          "lines": [
+            125,
+            138
+          ],
+          "requiresGPUBackendVulkan": true,
+          "selectedGPUProfileChecked": false
+        }
+      ],
+      "minimumCorrection": "No mandatory code change established. A future Vulkan-specific profile admission binding could reject an EGL-selected health report, but this job selected profile is unknown and such a guard would not prove actual capture WebGL2 availability.",
+      "minimumFocusedValidation": "Optional future narrow admission-contract tests could stub the safe health report, keeping legacy admission unchanged. They would validate rejection logic only, not cure UP2_WEBGL2_REQUIRED. No tests run now.",
+      "observedJobSelectedProfile": "UNAVAILABLE_IN_SAFE_FAILURE_EXPORT",
+      "actualGPUFixProven": false,
+      "scopeAlreadyDisclosed": {
+        "health": "STARTUP_HEALTH_NATIVE_ADMISSION_RECHECK_REQUIRED",
+        "preflightGpuRenderingVerified": false,
+        "preflightHardwareCaptureNotYetPerformed": true
+      }
+    }
+  ],
+  "nextMinimumAction": {
+    "scope": "SEPARATELY_AUTHORIZED_GPU_ONLY_CAPTURE_CONTEXT_DIAGNOSIS",
+    "requirements": [
+      "Use exact current capture launch builder, UID1000 sandbox and DOM canvas attributes; preserve current launch policy.",
+      "Obtain safe contextcreationerror status and bounded classified Chromium GPU-process initialization evidence for the actual profile before any frame rendering.",
+      "Do not repeat full 300-frame render to discover initial context availability.",
+      "Keep NVIDIA/Vulkan guard, no software fallback, cleanup and existing source integrity intact."
+    ],
+    "notExecuted": true,
+    "newFrameworkNeeded": false
+  }
+}

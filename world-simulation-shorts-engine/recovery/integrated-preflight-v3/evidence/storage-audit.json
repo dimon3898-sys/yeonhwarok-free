@@ -1,0 +1,229 @@
+{
+  "schema": "WORLD_ENGINE_GPU_FREE_STORAGE_AUDIT_V3",
+  "sourceCommit": "8892b8c300153afc2eb86ef5e43ec8d41deaf83d",
+  "sourceImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-integrity-v1-41281172622",
+  "sourceDigest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+  "scope": "READ_ONLY_STATIC_AUDIT_AND_EXISTING_EVIDENCE_REUSE",
+  "currentFailedJob": "studio-37dfbc8dab786a4d7c99cde6fae2f821",
+  "currentFailureReceiptExamined": false,
+  "confirmedRuntimeFaults": [],
+  "checks": [
+    {
+      "id": "ENCODER_COMMAND_AND_MEDIA_CONTRACT",
+      "status": "PASS",
+      "evidenceType": "STATIC_CODE_ONLY",
+      "finding": "Capture starts ffmpeg only after first native draw. image2pipe PNG,30fps,libx264,yuv420p,no audio,+faststart,target VIDEO.mp4. Both capture and worker verify1080x1920,H264,30fps,300frames,10seconds,full decode before export.",
+      "locations": [
+        "capture_vulkan.generated.mjs:116-131",
+        "nvidia_worker.py:_validate_capture"
+      ],
+      "minimalFix": null
+    },
+    {
+      "id": "ENCODER_BINARY_EXISTENCE_AND_MODULE_DEPENDENCIES",
+      "status": "SKIP",
+      "evidenceType": "USER_REPORTED_RECENT_PREFLIGHT_PASS_AND_UNCHANGED_PATH",
+      "finding": "Existing dependency_facts checks node/ffmpeg/ffprobe via PATH and /usr/bin/chromium, and validates Playwright metadata before render. No existing dependency check rerun. User reports the current10s preflight passed. A future deployed instance must run its normal preflight; this audit did not inspect a live container.",
+      "location": "nvidia_backend.py:86-117"
+    },
+    {
+      "id": "PRIVATE_OUTPUT_AND_PERMISSIONS",
+      "status": "PASS",
+      "evidenceType": "STATIC_CODE_ONLY",
+      "finding": "New capture output is an exclusive fresh0700 directory under approved private workspace. Ancestors, ownership,regular files,symlinks,and disjoint public export roots are checked; no chmod/chown repair of existing public data.",
+      "locations": [
+        "backend/private_workspace.mjs:14-36",
+        "capture_vulkan.generated.mjs:88-90",
+        "nvidia_backend.py:155-174"
+      ],
+      "minimalFix": null
+    },
+    {
+      "id": "MOUNTED_EXPORT_PIPELINE",
+      "status": "PASS",
+      "evidenceType": "STATIC_CODE_ONLY",
+      "finding": "Only fully validated final video and QUALITY_SUMMARY/SHA256SUMS are copied with exclusive creation and fsync, then exported to a fresh version under /world-storage; exact allowlist and streaming SHA readback required. No current finalMP4 exists to execute this path.",
+      "locations": [
+        "nvidia_worker.py:139-162",
+        "studio_delivery.py:120-198"
+      ]
+    },
+    {
+      "id": "MOUNT_STORAGE_ADAPTER_CPU_PASS",
+      "status": "SKIP",
+      "evidenceType": "PRESERVED_PRIOR_RESULT",
+      "finding": "Existing storage adapter result has40CPU cases reused plus15CI safety checks and mounted-view readback. It explicitly does not prove actualDropbox mount,remote durability,or external download. No test was rerun.",
+      "evidence": "gcube-storage-fix-v1/RESULT.json"
+    },
+    {
+      "id": "AUTHENTICATED_DOWNLOAD_API",
+      "status": "PASS",
+      "evidenceType": "STATIC_CODE_ONLY",
+      "finding": "COMPLETED-only controller.result verifies export SHA. GET /api/jobs/{jobId}/downloads/{name} is behind owner session and origin checks; filename/path allowlist and immutable private hash-checked snapshot preserve byte identity; Range is supported.",
+      "locations": [
+        "studio_controller.py:449-469",
+        "server.py:142-176",
+        "server.py:245-286",
+        "server.py:292-343"
+      ]
+    },
+    {
+      "id": "CURRENT_FINAL_MP4_REMOTE_DURABILITY_AND_DOWNLOAD",
+      "status": "NOT_RUN",
+      "evidenceType": "PREREQUISITE_MISSING",
+      "finding": "Requires a successful renderedMP4. Current exporter deliberately sets remotePersistenceVerified:false and externalDownloadVerified:false. Mounted readback alone must not be reported as durable external preservation. After success verify existing Dropbox finalMP4 via connected provider and independently confirm hash/download before stopping.",
+      "prerequisite": "VALIDATED_FINAL_MP4"
+    },
+    {
+      "id": "FAILED_INTERMEDIATE_RECOVERY",
+      "status": "PASS",
+      "evidenceType": "STATIC_LIMITATION_CONFIRMED",
+      "finding": "Capture finally writes private CAPTURE_RECEIPT/FRAME_EVIDENCE/HTTP bindings and hashes, and does not delete created frames or incompleteVIDEO. Failed-job intermediates are not automatically exported as reusable recovery media. Only bounded safe diagnostics are exported after verified descendant cleanup. Private artifacts may be lost after container replacement; recovery after stop is not proven.",
+      "locations": [
+        "capture_vulkan.generated.mjs:133-136",
+        "nvidia_worker.py:258-270",
+        "capture_diagnostics_safe.py:14-74"
+      ]
+    },
+    {
+      "id": "OLDER_DURABILITY_IMPLEMENTATION",
+      "status": "SKIP",
+      "evidenceType": "NOT_APPLICABLE_TO_CURRENT_IMAGE",
+      "finding": "studio-durability-v1 is a separate olderimage/path with CPU_IMPLEMENTED_EXTERNAL_RECOVERY_PENDING; actual externalproof blocked by DURABILITY_EXTERNAL_SECRETS_NOT_BOUND. Do not claim its77CPU tests or backup feature as currentNVIDIA durabilityPASS.",
+      "evidence": "studio-durability-v1/RESULT.md"
+    },
+    {
+      "id": "MULTI_ERROR_COLLECTION_EXISTING_BACKEND",
+      "status": "PASS",
+      "evidenceType": "STATIC_CODE_ONLY",
+      "finding": "Existing preflight catches independent checks for private state,mount,dependencies,disk/sharedmem,originallease,hardwarehealth and returns eachresult. It first gates source/profile verification; downstream executable checks do not run when sourceintegrity fails. This is safe dependency gating, not proof all possible GPU runtime errors are discoverable.",
+      "location": "nvidia_backend.py:138-204"
+    }
+  ],
+  "blockers": [
+    {
+      "code": "REMOTE_FINAL_MP4_PERSISTENCE_NOT_YET_PROVEN",
+      "stage": "POST_RENDER_DELIVERY",
+      "classification": "PREREQUISITE_MISSING",
+      "blockingFreeSourceRepair": false
+    }
+  ],
+  "remainingExecutionOnly": [
+    "Real browser/native Vulkan draw and per-frame capture",
+    "FFmpeg encoding of actualGPU PNGframes",
+    "FinalMP4 provider readback and owner download",
+    "Private intermediate survival across provider stop/redeploy"
+  ],
+  "sourceReferences": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+      "function": "dependency_facts / preflight",
+      "lines": [
+        86,
+        204
+      ],
+      "gitBlobSHA": "500cf083e072e2d31962542b72d41b478ff434d8",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "function": "_validate_capture / _export / _run",
+      "lines": [
+        70,
+        270
+      ],
+      "gitBlobSHA": "fb11773c0947671b6e872d1fd08b8ee62b96916a",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_delivery.py",
+      "function": "export_media / verify_export",
+      "lines": [
+        120,
+        198
+      ],
+      "gitBlobSHA": "37d42cd45cd8fc7bf0e38cb603b0d25fd17d7200",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_delivery.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py",
+      "function": "result",
+      "lines": [
+        449,
+        469
+      ],
+      "gitBlobSHA": "aaf7a02f6559ae2e6645a851223235cc0cb57ecc",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/production-studio-mvp-v1/studio_controller.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py",
+      "function": "verified_download_snapshot / _download_locked / _dispatch",
+      "lines": [
+        142,
+        343
+      ],
+      "gitBlobSHA": "97dff8de013af1f51425220a57d4b9f8b47d80e3",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/production-studio-mvp-v1/server.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py",
+      "function": "StorageSession.preflight",
+      "lines": [
+        361,
+        422
+      ],
+      "gitBlobSHA": "5c641157b3aa154bc891b07846d2489c4b8e7ef9",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py",
+      "function": "preserve_before_cleanup / export_after_cleanup",
+      "lines": [
+        14,
+        74
+      ],
+      "gitBlobSHA": "0809ee032a4a185ba9d5cba4f8c3d413cc3d93b1",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py",
+      "function": "supervise / main",
+      "lines": [
+        70,
+        281
+      ],
+      "gitBlobSHA": "141b918a7b5a6d85ba1fe2b29d3e7b5e58a376d2",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-durability-v1/RESULT.md",
+      "function": "separate image durability limitations",
+      "lines": [
+        1,
+        72
+      ],
+      "gitBlobSHA": "9e6e9538dab5716c4127393e3e36dd709f0255a8",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/studio-durability-v1/RESULT.md"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/RESULT.json",
+      "function": "previous preserved adapter evidence",
+      "lines": [
+        1,
+        120
+      ],
+      "gitBlobSHA": "44b086881bc88eea690020745781ae50a5ed078e",
+      "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/8892b8c300153afc2eb86ef5e43ec8d41deaf83d/world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/RESULT.json"
+    }
+  ],
+  "actions": {
+    "sourceEdits": 0,
+    "testRuns": 0,
+    "oldPASSReruns": 0,
+    "gpuStarts": 0,
+    "renders": 0,
+    "studioAccesses": 0,
+    "providerWrites": 0
+  },
+  "recommendation": "No evidence-supported storage or FFmpeg runtime fix from this audit. Reuse existing code and safetychecks. Root must correlate the exact current failure diagnostic before changing capture code. Do not add credentials,move private state to shared storage,or transplant the older durability subsystem."
+}
