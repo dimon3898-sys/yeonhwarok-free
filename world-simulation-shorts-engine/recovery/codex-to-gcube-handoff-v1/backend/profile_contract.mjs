@@ -69,6 +69,7 @@ export function buildVulkanLaunchOptions(options,{uid=process.getuid?.(),rootTes
  if(disable.length)result.push('--disable-features='+disable.join(','));
  result.push('--headless=new','--enable-gpu','--enable-webgl','--use-gl=angle',
   '--use-angle=vulkan','--enable-features='+features.join(','),
+  '--disable-vulkan-surface',
   '--disable-software-rasterizer');
  if(rootTestOptIn)result.push('--no-sandbox');
  const launch={...options,executablePath:executable,headless:true,chromiumSandbox:!rootTestOptIn,args:result};

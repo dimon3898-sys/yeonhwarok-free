@@ -1,0 +1,96 @@
+{
+  "schema": "WORLD_ENGINE_WEBGL_SURFACE_RESTORE_CHECKPOINT_V1",
+  "status": "OPTION_RESTORED_FOCUSED_PASS_IMAGE_PENDING",
+  "baseCommit": "a4e02aad71d7b60225c3c22d8a81ef58a4d212fc",
+  "branch": "recovery/webgl-surface-restore-20261101",
+  "parentImage": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-integrity-v1-41281172622",
+    "digest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50"
+  },
+  "restoredOption": "--disable-vulkan-surface",
+  "scope": "One explicit user-authorized success-profile option restoration plus required existing hash links. Causality remains unconfirmed.",
+  "runtimeChanges": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+      "beforeSHA256": "4306430e64633d67745b706b7c4992b77d12bb1bf3a8d64352b82d07936d17b2",
+      "sha256": "4e78b2d9f18107d70fda3c266c48d72103f7eaa63015b4dd1c1bb65e697e79a6",
+      "bytes": 10871
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "beforeSHA256": "3d39d18b1e822e804404894af8197444daa95503b36ca4c32486c72e4b1a5240",
+      "sha256": "c400e688bd8ab4fae3561f7479c8e502843237295d6ffadd18e89400d8474115",
+      "bytes": 97260
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "beforeSHA256": "4cc5dde854a9dcbfe4a720f7e332f1ca6f5ceaa6467095927b6782e69c94ef26",
+      "sha256": "967f0bc658d6d6a080ae60e6d37602edd41810eeed92fe05dc65313da248393c",
+      "bytes": 14285
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "beforeSHA256": "6c8d0d51b962f2081a5e12a8d41c00690a87012f5259d0e6cc602b546bc2eb43",
+      "sha256": "c8518da6dfd87a97ff494c24b9ec2c30854dd4648161676f294973d625bf05c4",
+      "bytes": 531
+    }
+  ],
+  "focusedValidation": {
+    "status": "PASS",
+    "runtimeNewTests": 5,
+    "packagingNewTests": 4,
+    "runsEach": 1,
+    "oldPASSReruns": 0
+  },
+  "independentReview": {
+    "status": "PASS_READ_ONLY",
+    "runtimeScope": "Exactly four files; generated manifest and WebGL2 bytes unchanged",
+    "buildSafety": "Reserve/archive before publish; fixed parent; one build and push; remote image identity check",
+    "oldWorkflows": "60 trigger headers inspected: 57 other explicit branch filters, 3 manual only"
+  },
+  "approval": {
+    "buildMaximum": 1,
+    "publicationMaximum": 1,
+    "GPUStartsMaximum": 0,
+    "renderMaximum": 0,
+    "automaticRetries": 0,
+    "gCubeSettingsChange": true
+  },
+  "gCubeBefore": {
+    "url": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+    "state": "Finished",
+    "nodeAssigned": false,
+    "imageTag": "dimon3898-sys/world-simulation-shorts-engine:capture-integrity-v1-41281172622",
+    "digestEnvironmentValues": "both match parent digest",
+    "storage": "/world-storage",
+    "containerCommand": "",
+    "httpPort": 8080,
+    "sharedMemoryGB": 3
+  },
+  "preserved": [
+    "main",
+    "old images and tags",
+    "355-source development PASS",
+    "CPU scene compilation PASS",
+    "existing capture diagnostics",
+    "Scene JSON",
+    "Storage",
+    "startup structure",
+    "UID1000 policy"
+  ],
+  "diagnosticCompatibility": "Old standalone diagnostic pins old profile SHA; preserved and not used with this new candidate.",
+  "remainingGPUOnly": [
+    "WebGL2 context initialization",
+    "NVIDIA/Vulkan native draw",
+    "10s 300-frame capture and MP4"
+  ],
+  "executions": {
+    "builds": 0,
+    "publications": 0,
+    "GPUStarts": 0,
+    "renders": 0,
+    "automaticRetries": 0,
+    "oldPASSReruns": 0
+  },
+  "nextAction": "One guarded image build, full backup and unique GHCR publication; then gCube image/digest settings only. No GPU deployment."
+}
