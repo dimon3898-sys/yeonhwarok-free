@@ -1,0 +1,69 @@
+{
+  "baseCommit": "c0e2e8961fdb154ad78a9197fbca9e9efd5249f9",
+  "branch": "recovery/capture-source-integrity-20261101",
+  "failure": {
+    "actualApprovedSHA256": "0161ac4177bb24b282aab28bb6f42b75d82841aedd81f8b574c8b8e90b33bffb",
+    "cause": "The capture-details overlay updated the capture source and outer runtime manifest but omitted the nested generated-source manifest capture pin.",
+    "code": "HANDOFF_CAPTURE_SOURCE_CHANGED",
+    "condition": "sha(file bytes) differs from originalSHA256 or variantSHA256 in backend/GENERATED_SOURCE_MANIFEST.json",
+    "function": "backend/capture_nvidia.mjs:verifyGeneratedSources",
+    "localReproduction": "ACTUAL_UNCHANGED_VERIFY_GENERATED_SOURCES",
+    "mismatchedFile": "capture_vulkan.generated.mjs",
+    "remoteEvidence": "USER_REPORTED_STUDIO_PREFLIGHT",
+    "staleExpectedSHA256": "39bdff1d9190ab8102c812209e64001fd6b633c0ac424d9427f1ca409aa9f592"
+  },
+  "focusedValidation": {
+    "browserLaunches": 0,
+    "compilerRuns": 0,
+    "gpuStarts": 0,
+    "log": "evidence/focused-integrity-tests.log",
+    "packagingSyntaxAndTriggerReview": "PASS",
+    "preparedContextMatchesReviewedFiles": true,
+    "priorPASSSuitesRun": 0,
+    "renders": 0,
+    "scope": [
+      "old pin rejects reported code",
+      "corrected pin accepts existing six source files",
+      "changed capture rejected",
+      "changed original rejected",
+      "changed other variant rejected",
+      "outer hash chain and unchanged source rows"
+    ],
+    "status": "PASS",
+    "suiteRuns": 1,
+    "tests": 6
+  },
+  "gCube": {
+    "nodeAssigned": false,
+    "settings": "PENDING_NEW_IMAGE",
+    "status": "Finished",
+    "workload": 5373
+  },
+  "ledger": {
+    "automaticRetries": 0,
+    "builds": 0,
+    "gpuStarts": 0,
+    "maxBuilds": 1,
+    "maxPublications": 1,
+    "publications": 0,
+    "renders": 0
+  },
+  "nextAction": "Publish one pin-only image with preserved parent and permanent backup, then update gCube image and both deployment digest variables without starting GPU.",
+  "parentDigest": "sha256:01c5e042c0ecd443419bbb92f46ce5234783aeef501aa2f4d6e5e5a0a2f27d17",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-details-v1-41279653219",
+  "preservedMain": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3",
+  "priorCaptureRuntimeFailureResolved": false,
+  "remoteStudioVerified": false,
+  "repair": {
+    "captureSourceChanged": false,
+    "derivedHashFiles": 3,
+    "integrityChecksBypassed": false,
+    "nestedPinFieldsChanged": 1,
+    "otherRuntimeRowsPreserved": 354,
+    "sourceRows": 355,
+    "verifierChanged": false,
+    "workerAndOriginalSourceHashesPreserved": true
+  },
+  "schema": "WORLD_ENGINE_CAPTURE_SOURCE_INTEGRITY_CHECKPOINT_V1",
+  "status": "FOCUSED_PASS_BUILD_PENDING"
+}
