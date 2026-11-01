@@ -1,0 +1,69 @@
+{
+  "baseCommit": "533f8ebe2e1cf700079c70c136ce572c24657f81",
+  "changedSources": [
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/handler.py",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js"
+  ],
+  "dockerfileSHA256": "f8bd6bac9c24284d941933036736f30b6ddf6bdcc07fd7e19b9869750767a33e",
+  "entrypoint": [
+    "/usr/bin/tini",
+    "-g",
+    "--",
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "--startup-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "--startup-manifest-sha256",
+    "87bc41eb6e7f43e338b6895c0e5526a880092dc7838eda79c79039f950e19dd4",
+    "--source-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "--source-manifest-sha256",
+    "9a31d9487191b7a4370a86728699c0b03f7224b24e59004cccbeae2a297ee402",
+    "--export-root",
+    "/world-storage"
+  ],
+  "gpuExecutions": 0,
+  "oldPASSReruns": 0,
+  "overlay": [
+    {
+      "bytes": 97260,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "sha256": "9a31d9487191b7a4370a86728699c0b03f7224b24e59004cccbeae2a297ee402"
+    },
+    {
+      "bytes": 22491,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py",
+      "sha256": "394431f444e02ea5af5603c08284d935d05f9b2a5626d2c9b41de8881955bff2"
+    },
+    {
+      "bytes": 12089,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js",
+      "sha256": "376c70796b7a0aba5b32755c5012b97c596f6fb6472383edcb35a92f9088b4b2"
+    },
+    {
+      "bytes": 4938,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/handler.py",
+      "sha256": "798c27364a449c1c85a7a568659cebca2fdc1c8e3b3b570bbd341a20d1d962d1"
+    },
+    {
+      "bytes": 531,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "sha256": "87bc41eb6e7f43e338b6895c0e5526a880092dc7838eda79c79039f950e19dd4"
+    },
+    {
+      "bytes": 14285,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "sha256": "ff3b1dcb693093c67c4024fb31b91cbb95ee437764887803365bb64e3803facf"
+    }
+  ],
+  "parentDigest": "sha256:cf4f58dd55ab1f9164ae01950150e231bb3b58e40773dcfb6c5db3ca16965fad",
+  "runtimeManifestSHA256": "9a31d9487191b7a4370a86728699c0b03f7224b24e59004cccbeae2a297ee402",
+  "runtimeSourceRows": 355,
+  "schema": "WORLD_ENGINE_UP2_OVERLAY_V1",
+  "startupManifestSHA256": "87bc41eb6e7f43e338b6895c0e5526a880092dc7838eda79c79039f950e19dd4",
+  "status": "PASS",
+  "unchangedSourceRowsReused": 352
+}

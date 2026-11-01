@@ -1,0 +1,35 @@
+{
+  "status": "PREPARED_NOT_APPLIED",
+  "workloadURL": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+  "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:up2-details-v1-41274003859",
+  "imageDigest": "sha256:f230489d451e1c517fda51c5a7938940d1f01db81e585daa106bfbd4828fa42f",
+  "environmentValuesForNextAuthorizedDeployment": {
+    "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST": "sha256:f230489d451e1c517fda51c5a7938940d1f01db81e585daa106bfbd4828fa42f",
+    "WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST": "sha256:f230489d451e1c517fda51c5a7938940d1f01db81e585daa106bfbd4828fa42f"
+  },
+  "containerCommand": "PRESERVE_EXISTING_EMPTY_SETTING_DO_NOT_OVERRIDE_ENTRYPOINT",
+  "storage": "PRESERVE_EXISTING_world-engine-test_TO_/world-storage",
+  "imageEntrypoint": [
+    "/usr/bin/tini",
+    "-g",
+    "--",
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "--startup-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "--startup-manifest-sha256",
+    "87bc41eb6e7f43e338b6895c0e5526a880092dc7838eda79c79039f950e19dd4",
+    "--source-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "--source-manifest-sha256",
+    "9a31d9487191b7a4370a86728699c0b03f7224b24e59004cccbeae2a297ee402",
+    "--export-root",
+    "/world-storage"
+  ],
+  "gpuStarted": false,
+  "deploymentSettingsChanged": false,
+  "renderingAuthorized": false,
+  "studioAccess": "PREVIOUS_ACCESS_REJECTION_NOT_RETRIED"
+}
