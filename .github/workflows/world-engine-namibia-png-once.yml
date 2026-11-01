@@ -1,0 +1,51 @@
+name: WORLD ENGINE original Namibia PNG recovery once
+on:
+  push:
+    branches: [recovery/namibia-png-20261101]
+    paths: ['.github/workflows/world-engine-namibia-png-once.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-namibia-png-20261101
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  recover-once:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '8bf86d4280c7506cf04551dd15e1a65e77bb800b' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_NAMIBIA_PNG_ONCE_20261101'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/namibia-png-recovery-v1/
+            world-simulation-shorts-engine/recovery/g2-renderer-recovery-v1/assets/terrain/namibia_desert_coast_ne1_native.png
+            world-simulation-shorts-engine/recovery/up2-detail-display-v1/build_once.py
+            world-simulation-shorts-engine/recovery/label355-publication-v1/retain_label355_image.py
+      - name: Add original PNG, verify only the addition, retain and publish once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B world-simulation-shorts-engine/recovery/namibia-png-recovery-v1/recover_once.py
+      - name: Preserve evidence after success or failure
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-namibia-png-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/namibia-evidence/
+            ${{ runner.temp }}/namibia-retention/*.json
+            ${{ runner.temp }}/namibia-context/Dockerfile
+          if-no-files-found: error
+          retention-days: 1
+# No GPU, renderer, compiler, prior PASS suite, deployment or existing tag mutation.
