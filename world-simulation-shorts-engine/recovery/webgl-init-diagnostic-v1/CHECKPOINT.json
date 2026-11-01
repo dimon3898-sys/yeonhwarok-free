@@ -1,0 +1,156 @@
+{
+  "schema": "WORLD_ENGINE_WEBGL_INITIALIZATION_PREPARATION_V1",
+  "status": "FREE_PREPARATION_READY_PENDING_SEPARATE_GPU_APPROVAL",
+  "sourceCheckpointCommit": "a5f3b8083fa34bbb8ea9311a223eb9121f25708f",
+  "failedJobId": "studio-37dfbc8dab786a4d7c99cde6fae2f821",
+  "existingFailure": {
+    "code": "UP2_WEBGL2_REQUIRED",
+    "stage": "PAGE_EVALUATE_FIRST_NATIVE_DRAW",
+    "renderedFrames": 0,
+    "underlyingDriverBrowserCause": "NOT_ESTABLISHED",
+    "diagnosticSHA256": "c03625f6136548749d6459090d2b3f43c53da27a049f863a27b1c8272b414ec4"
+  },
+  "image": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-integrity-v1-41281172622",
+    "digest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+    "changeNeeded": false,
+    "identityEvidence": "SKIP_LOCKED_PASS"
+  },
+  "gCube": {
+    "url": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+    "status": "Finished",
+    "nodeAssigned": false,
+    "containerCommand": "",
+    "port": 8080,
+    "storage": "/world-storage",
+    "settingsChanged": false,
+    "terminal": "DISABLED_WHILE_FINISHED; NORMAL_TERMINAL_AFTER_AUTHORIZED_DEPLOYMENT"
+  },
+  "authorization": {
+    "current": "FREE_PREPARATION_ONLY",
+    "paidExecution": "SEPARATE_USER_APPROVAL_REQUIRED_BY_REQUEST_SECTION_6",
+    "proposedGPU": "RTX 4080 SUPER x1",
+    "maxStarts": 1,
+    "maxContextDiagnostics": 1,
+    "maxSecondsFromDeployToStop": 1800,
+    "maxCostKRW": 2000,
+    "maxRenders": 0,
+    "maxAutomaticRetries": 0,
+    "approvalFlagIsNotUserApproval": true
+  },
+  "price": {
+    "source": "https://gcube.ai/ko/price",
+    "observedModel": "RTX4080S x 1 vRAM 16GB 안정적 사용",
+    "minHourlyDisplayedKRW": 252,
+    "maxHourlyDisplayedKRW": 360,
+    "halfHourDisplayedKRW": [
+      126,
+      180
+    ],
+    "taxIncludedInCalculator": "NOT_STATED",
+    "taxReference": "https://ncloud.com/marketplace/gcube states VAT excluded",
+    "halfHourWith10PercentTaxKRW": [
+      138.6,
+      198
+    ],
+    "notActualCharge": true,
+    "approvalScreenshot": "evidence/webgl-diagnostic-cost-20261101.jpg",
+    "deploymentPriceMustRemainWithinCap": true
+  },
+  "executionPlan": [
+    "After separate approval, preserve workload settings and deploy once. Record start time and cost baseline.",
+    "Use only normal authenticated gCube container terminal. If access or ready state is blocked, stop immediately; no Studio access or alternate routes.",
+    "Copy reviewed diagnostic files to a new temporary directory and check their SHA256. Inherit only existing controller-allowlisted worker environment, UID1000, GID and supplementary groups.",
+    "Use unchanged installed profile builder, /usr/bin/chromium, sandbox, loopback DOM canvas1080x1920 and original WebGL2 attributes. getContext once; draws, scene rendering and FFmpeg zero.",
+    "Collect bounded classified GPU initialization evidence, safe device identity and observed browser exit code. No raw credentials, entire environment or private paths in exported evidence.",
+    "Write fresh /world-storage/WORLD_ENGINE/webgl-init-<unique-run-id>/WEBGL_DIAGNOSTIC.json and SHA256SUMS. Read back through Dropbox; mount readback alone is not remote persistence.",
+    "Stop immediately after results or blocker; verify Finished and node unassigned. Begin shutdown by minute 25 at the latest to reserve time before the 30 minute cap. No scheduled shutdown task.",
+    "Prepare only a proven cause's minimum fix and focused free checks. No image build or additional GPU launch is implied."
+  ],
+  "beforeAttemptStopConditions": [
+    "rate/cap mismatch",
+    "wrong image or GPU model/count",
+    "terminal/authentication inaccessible",
+    "cannot establish UID1000 capture environment",
+    "export path unavailable or source pin mismatch",
+    "unexpected running capture/render job"
+  ],
+  "preserved": [
+    "runtime code",
+    "image and tags",
+    "main",
+    "Scene JSON",
+    "Storage",
+    "Container Command",
+    "port8080",
+    "previous PASS"
+  ],
+  "mainPreservedAt": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3",
+  "ledger": {
+    "gpuStarts": 0,
+    "contextDiagnostics": 0,
+    "renders": 0,
+    "builds": 0,
+    "publications": 0,
+    "automaticRetries": 0,
+    "oldPASSReruns": 0
+  },
+  "gpuResults": "NOT_RUN_PENDING_SEPARATE_APPROVAL",
+  "remainingGPUOnly": [
+    "NVIDIA device/driver in current allocation",
+    "same-profile Vulkan initialization",
+    "WebGL2 result and renderer/vendor",
+    "browser exit and cleanup",
+    "external diagnostic persistence"
+  ],
+  "notA300FrameRenderPASS": true,
+  "branch": "recovery/webgl-init-diagnostic-v1-20261101",
+  "newDiagnosticFiles": {
+    "diagnose_webgl_once.mjs": "357dad1840f5b5e06de089d42b5910c5e7a1185d92f1945ea60b2a7b4cad243c",
+    "capture_environment_runner.py": "b6789ed38928c777b056d9405acc913d05c608205bb098c6374cea8ede0bf96d"
+  },
+  "focusedValidation": {
+    "status": "PASS",
+    "uniqueNewTests": 11,
+    "scope": "New diagnostic redaction, bounded operations, approval gate, original capture input, environment selection, syntax, safe summary, closed error codes, software-renderer rejection. No old PASS suite rerun.",
+    "runs": [
+      {
+        "log": "focused-node-test.log",
+        "newPassed": 5
+      },
+      {
+        "log": "focused-python-test.log",
+        "newPassed": 4
+      },
+      {
+        "log": "focused-review-followup.log",
+        "newPassed": 1
+      },
+      {
+        "log": "focused-software-guard.log",
+        "newPassed": 1,
+        "previousTestSkippedByNameFilter": true
+      }
+    ],
+    "GPU": 0,
+    "browserLaunches": 0
+  },
+  "runtimeEnvironmentIdentity": {
+    "sourceCommit": "8892b8c300153afc2eb86ef5e43ec8d41deaf83d",
+    "basis": "Pinned worker and configuration do not mutate GPU environment after exec. Capture backend, worker and lease supervisor use the same existing allowlist. Runner selects only those keys from the pinned UID1000 worker and inherits groups/cwd.",
+    "rawEnvironmentPersisted": false,
+    "environmentValuesPrinted": false,
+    "helperRequiresExistingContainerAdminSession": true,
+    "liveWorkerIdentityCheck": "NOT_RUN_WHILE_FINISHED"
+  },
+  "diagnosticLimitations": [
+    "Standalone context-only observation does not execute scene preparation or runtime module imports. It preserves actual browser launch inputs, identity, canvas, context attributes, and capture environment.",
+    "NVIDIA/Vulkan identity evidence is renderer-string identification, not a native draw proof. Software renderers cannot pass.",
+    "A browser failure can leave CDP information unavailable; no alternative launch or second context is attempted.",
+    "Process cleanup observations are not provider billing-stop proof. gCube Finished and node release must be observed by Work.",
+    "Existing mandatory startup initialization remains unchanged; only the explicit same-profile diagnostic is limited to one context attempt.",
+    "The new code has free focused verification only; actual device, browser, export and container execution are NOT_RUN before separate approval."
+  ],
+  "operatorCommandTemplate": "python3 -I -B /tmp/world-engine-webgl-diagnostic-v1/capture_environment_runner.py --worker-pid <observed-existing-worker-pid> --runner /tmp/world-engine-webgl-diagnostic-v1/diagnose_webgl_once.mjs --runner-sha256 357dad1840f5b5e06de089d42b5910c5e7a1185d92f1945ea60b2a7b4cad243c --output /world-storage/WORLD_ENGINE/webgl-init-<fresh-run-id> --approved-single-diagnostic",
+  "fileTransfer": "Work transfers reviewed files via normal authenticated container terminal into a fresh root-owned directory (0755, code0644), checks both SHA256 values, then runs once. No user file copying required."
+}
