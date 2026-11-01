@@ -1,6 +1,6 @@
 {
   "schema": "WORLD_ENGINE_WEBGL_INITIALIZATION_PREPARATION_V1",
-  "status": "FREE_STARTUP_HANDOFF_REPAIR_PASS_GPU_NOT_RUN",
+  "status": "WEBGL2_REQUIRED_EXTENSIONS_FAILED_GPU_FINISHED",
   "sourceCheckpointCommit": "a5f3b8083fa34bbb8ea9311a223eb9121f25708f",
   "failedJobId": "studio-37dfbc8dab786a4d7c99cde6fae2f821",
   "existingFailure": {
@@ -25,7 +25,7 @@
     "storage": "/world-storage",
     "settingsChanged": false,
     "terminal": "DISABLED_WHILE_FINISHED; NORMAL_TERMINAL_AFTER_AUTHORIZED_DEPLOYMENT",
-    "terminationEventKST": "2026-11-02T03:37:18+09:00",
+    "terminationEventKST": "2026-11-02T07:29:35+09:00",
     "finishedObservedKST": "2026-11-01 16:42:59.911",
     "currentImage": "capture-evidence-v1-41297725682",
     "currentDigest": "sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf"
@@ -159,7 +159,7 @@
   "operatorCommandTemplate": "python3 -I -B /tmp/world-engine-webgl-diagnostic-v1/capture_environment_runner.py --worker-pid <observed-existing-worker-pid> --runner /tmp/world-engine-webgl-diagnostic-v1/diagnose_webgl_once.mjs --runner-sha256 357dad1840f5b5e06de089d42b5910c5e7a1185d92f1945ea60b2a7b4cad243c --output /world-storage/WORLD_ENGINE/webgl-init-<fresh-run-id> --approved-single-diagnostic",
   "fileTransfer": "Work transfers reviewed files via normal authenticated container terminal into a fresh root-owned directory (0755, code0644), checks both SHA256 values, then runs once. No user file copying required.",
   "preparationCommit": "315ed90d987e032f5c476a57a8f99b709c8211db",
-  "latestExecution": "executions/20261102-native-a1/EXECUTION_RESULT.json",
+  "latestExecution": "executions/20261102-handoff-a1/EXECUTION_RESULT.json",
   "lastFailure": {
     "code": "DIAG_ENVIRONMENT_LAUNCH_FAILED",
     "diagnosticStage": "WORKER_ENV_READ",
@@ -178,7 +178,7 @@
   },
   "executionEvidencePreservation": "GitHub terminal result, screenshots, execution ledger and SHA256; expected remote diagnostic directory NOT_FOUND. No fabricated WebGL receipt.",
   "priorPASSRelationship": "Existing eleven free checks remain PASS within their tested scope. They did not prove live container process/environment access. Deployment-level diagnostic readiness is BLOCKED.",
-  "nextMinimumAction": "Only after a fresh explicit paid-execution approval, run the prepared existing context-only diagnostic once with this repaired launcher; collect result and stop immediately",
+  "nextMinimumAction": "Free-only static review of current Vulkan ICD/loader linkage and WSI dependencies against required-extension selection; reuse existing graphics evidence. Do not rerun this diagnosis, restore the existing flag again, or modify options until a concrete missing linkage is established.",
   "postFailurePreparation": {
     "status": "FREE_FOCUSED_PASS_NOT_REMOTE_PASS",
     "file": "capture_environment_runner_v2.py",
@@ -230,38 +230,72 @@
     "result": "WORKER_ENV_READ_EACCES_BEFORE_BROWSER"
   },
   "previousNativePreparationStatus": "FREE_NATIVE_DETAIL_PREPARATION_PASS_GPU_NOT_RUN",
-  "previousExecution": "executions/20261101-0614b11d/EXECUTION_RESULT.json",
+  "previousExecution": "executions/20261102-native-a1/EXECUTION_RESULT.json",
   "latestExecutionIsAuthoritative": true,
   "currentExecution": {
-    "status": "BLOCKED_DIAGNOSTIC_LAUNCHER_GPU_STOPPED",
+    "status": "FAIL_WEBGL2_EXTENSION_REQUIREMENTS_GPU_STOPPED",
     "startsConsumed": 1,
     "diagnosticInvocations": 1,
-    "browserLaunches": 0,
-    "actualContextAttempts": 0,
+    "browserLaunches": 1,
+    "actualContextAttempts": 1,
     "renders": 0,
     "automaticRetries": 0,
     "builds": 0,
-    "publications": 0,
+    "imagePublications": 0,
+    "settingsChanges": 0,
+    "oldPASSReruns": 0,
     "remainingStarts": 0,
     "remainingDiagnosticInvocations": 0,
     "image": "capture-evidence-v1-41297725682",
     "imageDigest": "sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf",
-    "providerTerminationEventKST": "2026-11-02T03:37:18+09:00",
+    "providerTerminationEventKST": "2026-11-02T07:29:35+09:00",
     "finalProviderStatus": "Finished",
     "nodeAssigned": false,
     "billing": {
       "state": "CURRENT_POD_NOT_YET_REFLECTED",
       "actualChargeKRW": null,
+      "currentPod": "dep5373-59cf4c8774-frm4t",
       "usageDateUTC": "2026-11-01",
-      "expectedPod": "dep5373-59cf4c8774-h8g8t",
-      "lastVisible18HourPod": "dep5373-59cf4c8774-c7vx2",
-      "usageUrl": "https://gcube.ai/demand/ns74a360e2/workload/5373/usage/2026-11-01?m=&year=2026&month=11",
-      "maxHourlyKRW": 360,
+      "lastVisibleHourlyEntry": "18 UTC / dep5373-59cf4c8774-c7vx2",
+      "currentPodAbsent": true,
       "approvedCapKRW": 200,
-      "maximumApprovedDurationEstimatedKRW": 60,
-      "estimateIsNotFinalBill": true
+      "nodeReleased": true
     },
-    "nextMinimumAction": "Free preparation only: replace diagnostic cross-process environment/cwd acquisition with the existing startup environment handoff; verify equality of allowlisted graphics environment and cwd from code/mocks before another paid run. Do not add privileges or blindly substitute terminal environment. No repeat of current command."
+    "confirmedFailure": {
+      "code": "UP2_WEBGL2_REQUIRED",
+      "stage": "WEBGL_CONTEXT_CREATION",
+      "requiredExtensionsNotPresent": [
+        "VK_KHR_surface",
+        "VK_KHR_xcb_surface"
+      ],
+      "nativeVulkanError": -7,
+      "eglError": "EGL_NOT_INITIALIZED",
+      "evidencePointers": [
+        "browserStderr.nativeDetails.events[0:8]",
+        "failure",
+        "browserGPU.featureStatus",
+        "nvidia.devices",
+        "profile.selectedArgs"
+      ],
+      "locations": [
+        "vk_renderer.cpp:282",
+        "Display.cpp:1333",
+        "gl_display.cc:613"
+      ],
+      "rootCauseOfExtensionAbsence": "NOT_ESTABLISHED",
+      "previousLauncherEACCESPassed": true,
+      "restoredVulkanSurfaceFlagPresent": true,
+      "nvidiaQuerySucceeded": true
+    },
+    "diagnosticArtifact": {
+      "path": "/WORLD_ENGINE/webgl-init-handoff-20261102-a1/WEBGL_DIAGNOSTIC.json",
+      "fileId": "id:C4090FVAeZAAAAAAAAACqQ",
+      "bytes": 28329,
+      "sha256": "f90ba99b711dcc4d77b7f979b3c4af93009dc19484b2fa6656c01434d6fc6e9f",
+      "remoteSHA256Matched": true,
+      "remoteProviderPersistenceConfirmed": true
+    },
+    "nextMinimumAction": "Free-only static review of current Vulkan ICD/loader linkage and WSI dependencies against required-extension selection; reuse existing graphics evidence. Do not rerun this diagnosis, restore the existing flag again, or modify options until a concrete missing linkage is established."
   },
   "startupHandoffRepair": {
     "result": "environment-handoff-evidence/FOCUSED_RESULT.json",
@@ -273,10 +307,13 @@
     "newTestsPassed": 8,
     "testRuns": 1,
     "oldPASSReruns": 0,
-    "GPU": 0,
+    "GPU": 1,
     "imageBuilds": 0,
     "remotePASS": false,
     "originalWebGLCauseResolved": false,
-    "environmentDirectlyCompared": false
+    "environmentDirectlyCompared": false,
+    "remoteLauncherResult": "PASS_TO_BROWSER_AND_CONTEXT_ONCE",
+    "remoteWebGLResult": "FAIL_EXTENSION_REQUIREMENTS",
+    "executionEvidence": "executions/20261102-handoff-a1/EXECUTION_RESULT.json"
   }
 }
