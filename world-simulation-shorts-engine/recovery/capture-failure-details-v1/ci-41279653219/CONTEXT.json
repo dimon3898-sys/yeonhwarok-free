@@ -1,0 +1,63 @@
+{
+  "baseCommit": "d7045c7e0b3784b85faac3b1e375b7806388f684",
+  "changedSources": [
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py"
+  ],
+  "dockerfileSHA256": "5a3b0be3876c1efcbe690809721bcfb972b112ae5cde293a301c271cf1926db1",
+  "entrypoint": [
+    "/usr/bin/tini",
+    "-g",
+    "--",
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "--startup-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "--startup-manifest-sha256",
+    "3ca45c6f059733ad47957d6268e665904e1b6d7ed54f55f3ca4bef46d03fc07c",
+    "--source-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "--source-manifest-sha256",
+    "a164380a38e617035dc3045ed2d67f8fd2f565f3bf5f4628568f152bbf905e3f",
+    "--export-root",
+    "/world-storage"
+  ],
+  "gpuExecutions": 0,
+  "oldPASSReruns": 0,
+  "overlay": [
+    {
+      "bytes": 97260,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "sha256": "a164380a38e617035dc3045ed2d67f8fd2f565f3bf5f4628568f152bbf905e3f"
+    },
+    {
+      "bytes": 24193,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+      "sha256": "0161ac4177bb24b282aab28bb6f42b75d82841aedd81f8b574c8b8e90b33bffb"
+    },
+    {
+      "bytes": 21022,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py",
+      "sha256": "058792b217ec5a9dcf3816c545129722fe11f47d4e7ebb555c6a679874eca863"
+    },
+    {
+      "bytes": 531,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "sha256": "3ca45c6f059733ad47957d6268e665904e1b6d7ed54f55f3ca4bef46d03fc07c"
+    },
+    {
+      "bytes": 14285,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "sha256": "e185df4be3373e6519e170102614abff9543381736bc1ec742d50fef792759c0"
+    }
+  ],
+  "parentDigest": "sha256:db0594dda5a0965a5663632de38a009fe62356a4f479a607037060e0e1bea34e",
+  "runtimeManifestSHA256": "a164380a38e617035dc3045ed2d67f8fd2f565f3bf5f4628568f152bbf905e3f",
+  "runtimeSourceRows": 355,
+  "schema": "WORLD_ENGINE_CAPTURE_DETAILS_OVERLAY_V1",
+  "startupManifestSHA256": "3ca45c6f059733ad47957d6268e665904e1b6d7ed54f55f3ca4bef46d03fc07c",
+  "status": "PASS",
+  "unchangedSourceRowsReused": 353
+}
