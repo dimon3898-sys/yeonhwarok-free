@@ -1,6 +1,6 @@
 {
   "schema": "WORLD_ENGINE_WEBGL_SURFACE_RESTORE_CHECKPOINT_V1",
-  "status": "OPTION_RESTORED_FOCUSED_PASS_IMAGE_PENDING",
+  "status": "PASS_OPTION_RESTORED_IMAGE_PUBLISHED_GCUBE_SAVED_GPU_NOT_RUN",
   "baseCommit": "a4e02aad71d7b60225c3c22d8a81ef58a4d212fc",
   "branch": "recovery/webgl-surface-restore-20261101",
   "parentImage": {
@@ -85,12 +85,108 @@
     "10s 300-frame capture and MP4"
   ],
   "executions": {
-    "builds": 0,
-    "publications": 0,
+    "builds": 1,
+    "publications": 1,
     "GPUStarts": 0,
     "renders": 0,
     "automaticRetries": 0,
     "oldPASSReruns": 0
   },
-  "nextAction": "One guarded image build, full backup and unique GHCR publication; then gCube image/digest settings only. No GPU deployment."
+  "nextAction": "User deploys #5373, opens current Studio and enters Owner code, loads unchanged GENERIC_LABELS_10S.json, preflights then renders 10 seconds/300 frames once, downloads MP4 and stops deployment. Stop immediately on failure; this task did not authorize or perform GPU execution.",
+  "sourceCommit": "b130ea8917d9b5ff7c2102a2f7beb9231fd79d74",
+  "image": {
+    "builds": 1,
+    "digest": "sha256:c9fa126b0bf0d06c109bbe45f9fe14b5cc71de4282a4a57455b3b5f19d3366b5",
+    "gpuExecutions": 0,
+    "gpuStarts": 0,
+    "imageID": "sha256:a30d7b65e894ac1b70a52a19b14ce84917f7bb0b532b9fe233b5f1f916e8b1c5",
+    "imageRelease": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/surface-restore-image-backup-41288263483",
+    "oldPASSReruns": 0,
+    "oldTagUnchanged": true,
+    "priorCaptureFailureResolved": false,
+    "publications": 1,
+    "remoteStudioVerified": false,
+    "renders": 0,
+    "retries": 0,
+    "sourceCommit": "b130ea8917d9b5ff7c2102a2f7beb9231fd79d74",
+    "status": "PASS",
+    "successfulLaunchOptionRestored": true,
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:surface-restore-v1-41288263483",
+    "webgl2Verified": false
+  },
+  "build": {
+    "runID": 41288263483,
+    "jobID": 124793930751,
+    "attempt": 1,
+    "status": "success",
+    "url": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/41288263483"
+  },
+  "backup": {
+    "archiveBytes": 855595119,
+    "archiveFormat": "docker-save-gzip-split",
+    "assets": [
+      {
+        "browser_download_url": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/download/surface-restore-image-backup-41288263483/candidate-image.tar.gz.part-000",
+        "digest": "sha256:e3925893de4d7f3075515b41de905b25af2d106da5c49b4b52632c44e48303e7",
+        "id": 697741465,
+        "name": "candidate-image.tar.gz.part-000",
+        "size": 855595119
+      }
+    ],
+    "imageID": "sha256:a30d7b65e894ac1b70a52a19b14ce84917f7bb0b532b9fe233b5f1f916e8b1c5",
+    "parentDigest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+    "releaseTag": "surface-restore-image-backup-41288263483",
+    "releaseURL": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/surface-restore-image-backup-41288263483",
+    "restore": "Concatenate parts in numeric order, gzip -dc, then docker load. No rebuild required.",
+    "retries": 0,
+    "sourceCommit": "b130ea8917d9b5ff7c2102a2f7beb9231fd79d74",
+    "status": "PASS"
+  },
+  "gCubeSaved": {
+    "schema": "WORLD_ENGINE_GCUBE_SURFACE_RESTORE_SETTINGS_V1",
+    "status": "PASS_SAVED_READBACK_GPU_NOT_STARTED",
+    "workload": 5373,
+    "url": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+    "observedAtKST": "2026-11-01T17:23:58.647+09:00",
+    "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:surface-restore-v1-41288263483",
+    "digest": "sha256:c9fa126b0bf0d06c109bbe45f9fe14b5cc71de4282a4a57455b3b5f19d3366b5",
+    "digestEnvironment": {
+      "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST": "sha256:c9fa126b0bf0d06c109bbe45f9fe14b5cc71de4282a4a57455b3b5f19d3366b5",
+      "WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST": "sha256:c9fa126b0bf0d06c109bbe45f9fe14b5cc71de4282a4a57455b3b5f19d3366b5"
+    },
+    "readback": {
+      "imageTag": "dimon3898-sys/world-simulation-shorts-engine:surface-restore-v1-41288263483",
+      "storage": "/world-storage",
+      "storageSelection": "u:149",
+      "containerCommand": "",
+      "httpPort": 8080,
+      "maxConnections": 4,
+      "sharedMemoryGB": 3
+    },
+    "imageVerifiedByGCube": true,
+    "imageDigestEvidence": "CI remote tag/digest manifest equality and config digest equals verified image ID",
+    "UIAutoPortReset": {
+      "observed": 8000,
+      "restoredBeforeSave": 8080,
+      "savedReadback": 8080
+    },
+    "GPUState": "Finished",
+    "displayedState": "종료",
+    "nodeAssigned": false,
+    "lastDeploymentDisplayKST": "2026-11-01 16:40:17",
+    "priorTerminationEventKST": "2026-11-01 16:42:23",
+    "GPUStartsThisTask": 0,
+    "rendersThisTask": 0,
+    "StudioAccessesThisTask": 0,
+    "scheduledStopsCreated": 0,
+    "proof": "evidence/gcube-finished.jpg",
+    "proofSHA256": "ff5df152b99401f7e3d1652aa3f17057cb6e624f7b06dcb3169e6b81843c736d",
+    "existingSettingsPreservedExcept": [
+      "container image tag",
+      "two image identity digest values"
+    ]
+  },
+  "GPUFailureRootCauseConfirmed": false,
+  "actualWebGL2PASS": false,
+  "mainPreservedAt": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3"
 }
