@@ -1,7 +1,7 @@
-"""Response-only static UI decoration after the unchanged handler's guards.
+"""Mobile UI and bounded UP2 details after the unchanged owner/CSRF guards.
 
-This wrapper does not override request dispatch, authentication, CSRF, policy,
-login/setup/API/download routes, response headers, or controller admission.
+Dispatch and authentication delegate to the preserved handler. Only sanitized
+diagnostics attached to the original exception decorate its existing response.
 """
 from pathlib import Path
 import hashlib
@@ -37,15 +37,60 @@ def wrap_handler(base_handler, *, example_file, expected_example_sha256):
     index, script = ui_bytes(example_file, expected_example_sha256)
 
     class HandoffMobileHandler(base_handler):
+        def _authenticate(self, mutation=False):
+            token = super()._authenticate(mutation)
+            self._up2_authenticated = True
+            return token
+
+        def _dispatch(self):
+            # Handler instances may serve multiple requests on one connection.
+            self._up2_authenticated = False
+            self._up2_detail = None
+            try:
+                return super()._dispatch()
+            except Exception as error:
+                if (self._up2_authenticated and self.command == 'POST'
+                        and self.path in {'/api/preflight', '/api/submissions'}
+                        and getattr(error, 'code', None) == 'UP2_COMPLETE_TIMELINE_DATA_REQUIRED'):
+                    try:
+                        # Only the controller's already-sanitized immutable snapshot;
+                        # never read raw error.fields, messages, input or stderr here.
+                        encoded = getattr(error, '_up2_public_diagnostic_json', None)
+                        if type(encoded) is str and len(encoded) <= 16384:
+                            detail = json.loads(encoded)
+                            if (type(detail) is dict
+                                    and detail.get('schema') == 'WORLD_ENGINE_UP2_DIAGNOSTIC_V1'
+                                    and detail.get('code') == error.code
+                                    and detail.get('sceneIdEncoding') == 'ZERO_BASED_INPUT_SCENE_INDEX'
+                                    and detail.get('limit') == 16):
+                                self._up2_detail = detail
+                    except Exception:
+                        pass  # Preserve the identical exception and HTTP status.
+                raise
+
         def _send(self, status, body, content_type='application/json; charset=utf-8', extra=()):
             # The base _dispatch already checked target, Host/Origin and owner
             # authentication before serving these exact successful GET routes.
-            # Every other response is byte-for-byte delegated without change.
+            # Other successful responses are delegated without change.
             if self.command == 'GET' and status == 200:
                 if self.path == '/' and content_type.split(';', 1)[0] == 'text/html':
                     body = index
                 elif self.path == '/app.js' and content_type.split(';', 1)[0] == 'text/javascript':
                     body = script
+            detail = getattr(self, '_up2_detail', None)
+            self._up2_detail = None
+            if (detail is not None and getattr(self, '_up2_authenticated', False)
+                    and self.command == 'POST'
+                    and self.path in {'/api/preflight', '/api/submissions'}
+                    and type(status) is int and 400 <= status <= 599
+                    and type(body) is dict and type(body.get('error')) is dict
+                    and body['error'].get('code') == 'UP2_COMPLETE_TIMELINE_DATA_REQUIRED'):
+                try:
+                    body = {**body, 'error': {**body['error'], 'fields': detail['fields'],
+                        'diagnostic': {key: detail[key] for key in ('schema', 'sceneIdEncoding', 'limit')}}}
+                except Exception:
+                    pass
             return super()._send(status, body, content_type, extra)
 
     return HandoffMobileHandler
+

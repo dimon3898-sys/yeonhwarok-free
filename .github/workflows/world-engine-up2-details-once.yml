@@ -1,0 +1,57 @@
+name: WORLD ENGINE UP2 details one image publication
+on:
+  push:
+    branches: [recovery/up2-details-20261101]
+    paths: ['.github/workflows/world-engine-up2-details-once.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-up2-details-20261101
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  publish-once:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '533f8ebe2e1cf700079c70c136ce572c24657f81' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_UP2_DETAILS_ONCE_20261101'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/up2-detail-display-v1/
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/handler.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/mobile/app.js
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+            world-simulation-shorts-engine/recovery/label355-publication-v1/retain_label355_image.py
+      - name: Build retain and publish approved diagnostic overlay once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B world-simulation-shorts-engine/recovery/up2-detail-display-v1/build_once.py run
+      - name: Preserve bounded evidence after success or failure
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-up2-details-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/up2-evidence/
+            ${{ runner.temp }}/up2-retention/*.json
+            ${{ runner.temp }}/up2-context/Dockerfile
+            ${{ runner.temp }}/up2-context/overlay/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 9
+# No GPU, deployment, renderer, old test suite, existing tag or main mutation.
