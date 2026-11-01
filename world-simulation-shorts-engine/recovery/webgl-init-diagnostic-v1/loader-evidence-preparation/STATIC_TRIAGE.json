@@ -1,0 +1,94 @@
+{
+  "schema": "WORLD_ENGINE_VULKAN_STATIC_TRIAGE_V1",
+  "basisCommit": "c4850f853152b467507d53cefb0ed05befc0f562",
+  "confirmedFailure": {
+    "extensions": [
+      "VK_KHR_surface",
+      "VK_KHR_xcb_surface"
+    ],
+    "vulkanResult": -7,
+    "eglResult": "EGL_NOT_INITIALIZED",
+    "rootCause": "NOT_ESTABLISHED"
+  },
+  "newDecision": "Do not reinstall existing linked libraries or change matched launch options/sandbox. Prepare only missing in-process loader evidence in existing diagnostic.",
+  "findings": [
+    {
+      "item": "selected Chromium arguments and sandbox",
+      "status": "MATCHED_SAVED_EVIDENCE",
+      "basis": "Existing180frame success receipt and context-only failure profile have same9selectedArgs and CHROMIUM_SANDBOX. Full historicGPUargv remains unavailable."
+    },
+    {
+      "item": "Chromium/Playwright/Node versions",
+      "status": "MATCHED_SAVED_EVIDENCE",
+      "value": [
+        "155.0.8059.79",
+        "1.62.1",
+        "v24.19.0"
+      ]
+    },
+    {
+      "item": "NVIDIA ICD and directly linked libraries",
+      "status": "EXISTING_EVIDENCE_REUSED",
+      "basis": "Earlier pod sameimage UID1000 GRAPHICS_ACCESS: nvidia_icd.json->libGLX_nvidia.so.0; libGLX_nvidia/libEGL_nvidia/libvulkan ldd exit0; X11/Xext/xcb resolved. Not currentbrowser dynamicload evidence."
+    },
+    {
+      "item": "GPU device DAC permissions",
+      "status": "EXISTING_EVIDENCE_REUSED",
+      "basis": "Earlier pod UID1000 groups44/109,7GPU devices read/write. Does not prove current GPU subprocess sandbox access."
+    },
+    {
+      "item": "missing WORLD_ENGINE_CHROMIUM_REAL",
+      "status": "NOT_SUPPORTED_AS_CAUSE",
+      "basis": "Capture directly launches /usr/bin/chromium; image symlinks google-chrome-stable. This variable does not select capturebinary."
+    },
+    {
+      "item": "actual browser loader/ICD selection and rejection",
+      "status": "BLOCKED_MISSING_RUNTIME_EVIDENCE",
+      "basis": "Existing report has no Vulkan loader discovery/rejection record. Existing runtime allowlist omits VK_LOADER_DEBUG; adding gCube variable alone would not forward it. Existing collector only watchesstderr and filtersunknownnativepositive driverlines."
+    }
+  ],
+  "changesMustNotInclude": [
+    "renderer",
+    "browserargs",
+    "sandbox",
+    "ICD JSON",
+    "runtime environment allowlist",
+    "GPUsettings",
+    "Scene JSON"
+  ],
+  "nextEvidenceTarget": [
+    "actual attempted ICD/library from same browser child",
+    "first loader error or warning",
+    "whether loader events absent/truncated",
+    "context outcome and normalshutdown"
+  ],
+  "notRun": [
+    "actualGPU loadertrace",
+    "actualWebGL2success",
+    "firstnativeframe",
+    "10secondMP4"
+  ],
+  "counts": {
+    "gpuStarts": 0,
+    "renders": 0,
+    "imageBuilds": 0,
+    "publications": 0,
+    "oldPASSReruns": 0
+  },
+  "gpuLastObserved": {
+    "status": "Finished",
+    "nodeAssigned": false,
+    "eventKST": "2026-11-02T07:29:35+09:00",
+    "recheckedThisFreeTurn": false
+  },
+  "nextGpuAuthorization": "NOT_GRANTED_PREVIOUS_SINGLE_ATTEMPT_CONSUMED",
+  "noAutomaticRetry": true,
+  "preserved": [
+    "prior evidence",
+    "main",
+    "image tags",
+    "gCube settings",
+    "storage",
+    "originalcapture behavior"
+  ]
+}

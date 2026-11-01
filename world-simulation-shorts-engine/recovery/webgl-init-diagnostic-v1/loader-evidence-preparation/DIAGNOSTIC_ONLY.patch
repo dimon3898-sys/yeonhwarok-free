@@ -1,0 +1,130 @@
+--- a/diagnose_webgl_once.mjs
++++ b/diagnose_webgl_once.mjs
+@@ -135,6 +135,87 @@
+     truncated:bytesObserved>acceptedBytes||droppedLines>0||omittedEvents>0,rawOmitted:true};}
+  };
+ }
++// Diagnostic-only loader logging. It never changes driver selection, browser
++// arguments, sandboxing or the capture controller's environment allowlist.
++export function loaderDiagnosticLaunchOptions(options,environ=process.env){
++ return {...options,env:{...(options.env??environ),VK_LOADER_DEBUG:'error,warn,driver'}};
++}
++const loaderBasenames=new Set(['nvidia_icd.json','intel_icd.x86_64.json','intel_icd.i686.json',
++ 'lvp_icd.x86_64.json','lvp_icd.i686.json','radeon_icd.x86_64.json','radeon_icd.i686.json',
++ 'libGLX_nvidia.so.0','libEGL_nvidia.so.0','libvulkan.so.1','libvulkan_intel.so',
++ 'libvulkan_lvp.so','libvulkan_radeon.so','libX11.so.6','libXext.so.6','libxcb.so.1',
++ 'libxcb-dri3.so.0','libxcb-glx.so.0','libxcb-present.so.0','libxcb-sync.so.1',
++ 'libnvidia-glsi.so.580.159.03','libnvidia-tls.so.580.159.03',
++ 'libnvidia-glcore.so.580.159.03','libnvidia-gpucomp.so.580.159.03','libnvidia-glvkspirv.so.580.159.03']);
++const loaderSymbols=new Set(['vkGetInstanceProcAddr','vk_icdGetInstanceProcAddr',
++ 'vk_icdNegotiateLoaderICDInterfaceVersion','vkCreateInstance','vkEnumerateInstanceExtensionProperties']);
++const loaderLimits=Object.freeze({inputBytes:262144,lineBytes:8192,infoEvents:16,failureEvents:16});
++export function safeLoaderEvent(raw,source){
++ if(!['BROWSER_STDOUT','BROWSER_STDERR'].includes(source))return null;
++ const bytes=Buffer.isBuffer(raw)?raw:Buffer.from(String(raw));if(bytes.length>loaderLimits.lineBytes)return null;
++ const text=bytes.toString('utf8');
++ if(/owner[_ -]?code|password|secret|token|authorization|bearer|cookie|api[_ -]?key|credential|\benviron(?:ment)?\b|\bargv\b/i.test(text))return null;
++ const basenames=[...new Set((text.match(/[A-Za-z0-9_.+-]+/g)??[]).map(v=>v.replace(/\.+$/,'')).filter(v=>loaderBasenames.has(v)))].slice(0,4);
++ const recognized=/\[Vulkan Loader\]|\bloader_(?:icd_scan|scanned_icd_add|parse_icd_manifest|handle_load_library_error)\b|^(?:ERROR|WARNING|DRIVER|DEBUG)(?:\s|:|\|)/.test(text);
++ if(!recognized)return null;
++ let code,reason=null,failure=false;
++ if(/Searching for driver manifest files/.test(text))code='LOADER_MANIFEST_SEARCH';
++ else if(/Found ICD manifest file/.test(text))code='LOADER_MANIFEST_FOUND';
++ else if(/Searching for ICD drivers named/.test(text))code='LOADER_LIBRARY_LOOKUP';
++ else if(/wrong bit-type|wrong ELF class/.test(text)){code='LOADER_LIBRARY_LOAD_FAILED';reason='WRONG_BIT_TYPE';failure=true;}
++ else if(/doesn't support interface version compatible with loader/.test(text)){code='LOADER_INTERFACE_INCOMPATIBLE';reason='INTERFACE_INCOMPATIBLE';failure=true;}
++ else if(/(?:Could not get|Failed querying|Attempt to retrieve|doesn't export)/.test(text)&&/vk(?:_icd)?[A-Z]/.test(text)){
++  code='LOADER_SYMBOL_MISSING';reason='SYMBOL_MISSING';failure=true;
++ }
++ else if(/Failed loading library associated with ICD JSON|cannot open shared object file|Failed to open.*(?:library|ICD)|failed to load.*(?:library|ICD)/i.test(text)){
++  code='LOADER_LIBRARY_LOAD_FAILED';failure=true;
++ }
++ else if(/(?:ICD|driver).*ignored because.*(?:not selected|disabled)/.test(text))code='LOADER_DRIVER_FILTERED';
++ else if(/(?:loader_|\[Vulkan Loader\])/.test(text)&&/Permission denied|Operation not permitted|No such file or directory/.test(text)){
++  code='LOADER_ACCESS_FAILED';failure=true;
++ }
++ else if(/(?:^|\]\s*)ERROR\b/.test(text)){code='LOADER_UNCLASSIFIED_ERROR';failure=true;}
++ else if(/(?:^|\]\s*)WARNING\b/.test(text))code='LOADER_UNCLASSIFIED_WARNING';
++ else return null;
++ if(failure){if(/Permission denied|Operation not permitted/i.test(text))reason='PERMISSION_DENIED';
++  else if(/No such file or directory/i.test(text))reason='NOT_FOUND';reason??='UNSPECIFIED';}
++ return {source,code,failure,reason,basenames,symbols:[...new Set((text.match(/[A-Za-z_][A-Za-z_0-9]*/g)??[])
++  .filter(v=>loaderSymbols.has(v)))].slice(0,4),rawOmitted:true};
++}
++export function createLoaderDetailCollector(){
++ const streams=new Map(['BROWSER_STDOUT','BROWSER_STDERR'].map(source=>[source,{pending:Buffer.alloc(0),discard:false,bytesObserved:0}]));
++ const info=[],failures=[],seen=new Map();let acceptedBytes=0,droppedLines=0,omittedEvents=0,ignoredLines=0,ignoredErrorLines=0,observerErrors=0,lineOrdinal=0,finished=false;
++ const consume=(line,source)=>{lineOrdinal++;const event=safeLoaderEvent(line,source);if(!event){ignoredLines++;if(/(?:^|\]\s*)(?:ERROR|WARNING)\b/.test(line.toString('utf8')))ignoredErrorLines++;return;}
++  const key=JSON.stringify(event),prior=seen.get(key);if(prior){prior.occurrences=Math.min(prior.occurrences+1,1000000);return;}
++  const bucket=event.failure?failures:info,limit=event.failure?loaderLimits.failureEvents:loaderLimits.infoEvents;
++  if(bucket.length>=limit){omittedEvents++;return;}const retained={...event,firstLineOrdinal:lineOrdinal,occurrences:1};seen.set(key,retained);bucket.push(retained);};
++ return {
++  append(source,chunk){if(finished)return;const state=streams.get(source);if(!state){observerErrors++;return;}
++   try{const data=Buffer.from(chunk);state.bytesObserved+=data.length;const part=data.subarray(0,Math.max(0,loaderLimits.inputBytes-acceptedBytes));acceptedBytes+=part.length;
++    let start=0;for(let i=0;i<=part.length;i++){if(i!==part.length&&part[i]!==10)continue;const piece=part.subarray(start,i);
++     if(!state.discard){if(state.pending.length+piece.length>loaderLimits.lineBytes){state.pending=Buffer.alloc(0);state.discard=true;droppedLines++;}
++      else state.pending=Buffer.concat([state.pending,piece]);}
++     if(i<part.length){if(!state.discard)consume(state.pending,source);state.pending=Buffer.alloc(0);state.discard=false;}start=i+1;}
++    if(part.length<data.length&&state.pending.length){state.pending=Buffer.alloc(0);state.discard=true;droppedLines++;}
++   }catch{observerErrors++;}
++  },
++  observerError(){observerErrors++;},
++  finish(){if(!finished){for(const [source,state] of streams){if(state.pending.length&&!state.discard)consume(state.pending,source);state.pending=Buffer.alloc(0);}finished=true;}
++   const bytesObserved=Object.fromEntries([...streams].map(([source,state])=>[source,state.bytesObserved])),total=Object.values(bytesObserved).reduce((a,b)=>a+b,0);
++   const truncated=total>acceptedBytes||droppedLines>0||omittedEvents>0,events=[...failures,...info];
++   return {status:!events.length?'UNAVAILABLE':observerErrors||truncated||ignoredErrorLines?'EVIDENCE_INCOMPLETE':'EVIDENCE_RECORDED',
++    events,bytesObserved,acceptedBytes,inputLimitBytes:loaderLimits.inputBytes,lineLimitBytes:loaderLimits.lineBytes,
++    infoEventLimit:loaderLimits.infoEvents,failureEventLimit:loaderLimits.failureEvents,droppedLines,omittedEvents,ignoredLines,ignoredErrorLines,observerErrors,truncated,rawOmitted:true,
++    interpretation:'Manifest discovery and library lookup are not driver initialization success; absence of events is not a runtime PASS.'};}
++ };
++}
++export function observeLoaderStreams(child,collector){
++ for(const [key,source] of [['stdout','BROWSER_STDOUT'],['stderr','BROWSER_STDERR']]){
++  try{if(!child[key]||typeof child[key].on!=='function'){collector.observerError();continue;}
++   child[key].on('data',chunk=>collector.append(source,chunk));child[key].on('error',()=>collector.observerError());}
++  catch{collector.observerError();}
++ }
++}
+ export function scrubSystemInfo(value={}) {
+  const gpu=value.gpu??{},aux=gpu.auxAttributes??{},allowed={};
+  for(const key of ['glRenderer','glVendor','glVersion','glImplementationParts','glImplementation','vulkanVersion'])if(typeof aux[key]==='string')allowed[key]=safeIdentifier(aux[key]);
+@@ -158,7 +239,7 @@
+  await fs.mkdir(outputDirectory,{mode:0o700});
+  const report={schema:'WORLD_ENGINE_WEBGL_INITIALIZATION_DIAGNOSTIC_V1',status:'RUNNING',imageDigest:IMAGE_DIGEST,startedAt:new Date().toISOString(),contextAttempts:0,browserLaunches:0,renderedFrames:0,retries:0,stage:'PREPARATION',sourceJobId:'studio-891495c5c00dde815522baad54a6eb88',sourceJobIdMeaning:'COMPARISON_FAILED_JOB_NOT_THIS_DIAGNOSTIC',providerBillingStopControlled:false,limitations:['Context-only observation; no scene preparation, module imports, native draw, labels, frames or encoder.','No alternative flags or second context. Successful WebGL2 is not a 300-frame render PASS.','Export fsync and readback do not prove remote storage provider persistence.','Native excerpts retain only finite public graphics vocabulary; unknown reasons are omitted and excerpts are not full raw stderr.']};
+  let browser,server,child,exitObserved=false,closeObserved=false,restoreSpawn=()=>{},stderrTail='',stderrBytes=0;
+- const stderrHash=createHash('sha256'),categories=new Set(),nativeDetails=createNativeDetailCollector();
++ const stderrHash=createHash('sha256'),categories=new Set(),nativeDetails=createNativeDetailCollector(),loaderDetails=createLoaderDetailCollector();
+  const appendStderr=chunk=>{try{const data=Buffer.from(chunk);nativeDetails.append(data);const remaining=Math.max(0,1024*1024-stderrBytes);stderrBytes+=data.length;if(!remaining)return;const part=data.subarray(0,remaining);stderrHash.update(part);const sample=stderrTail+part.toString('utf8');classify(sample).forEach(code=>categories.add(code));stderrTail=sample.slice(-4096);}catch{report.stderrObserverError=true;}};
+  try{
+   await durableFile(outputDirectory,'RESERVATION.json',Buffer.from(JSON.stringify({schema:report.schema,status:'RESERVED_NOT_RUN',sourceJobId:report.sourceJobId,sourceJobIdMeaning:report.sourceJobIdMeaning,imageDigest:IMAGE_DIGEST,startedAt:report.startedAt,maxBrowserLaunches:1,maxContextAttempts:1,renderedFrames:0})+'\n'));
+@@ -168,7 +249,7 @@
+   report.profile={...launch.evidence,profileSHA256:PROFILE_SHA256,viewport:{width:1080,height:1920},deviceScaleFactor:1,canvas:{width:1080,height:1920,kind:'ATTACHED_DOM_CANVAS'},contextAttributes:{alpha:false,antialias:false,preserveDrawingBuffer:true},selectedStartupProfile:['vulkan','egl'].includes(process.env.WORLD_ENGINE_GPU_PROFILE)?process.env.WORLD_ENGINE_GPU_PROFILE:'UNAVAILABLE'};
+   const deps=process.env.WORLD_ENGINE_NODE_DEPS;check(typeof deps==='string'&&path.isAbsolute(deps),'DIAG_EXISTING_PLAYWRIGHT_ROOT_REQUIRED');
+   const original=childProcess.spawn;
+-  childProcess.spawn=function(...args){if(args[0]==='/usr/bin/chromium'&&child)throw Error('DIAG_SECOND_BROWSER_LAUNCH_FORBIDDEN');const result=original.apply(this,args);try{if(args[0]==='/usr/bin/chromium'){child=result;report.observedBrowserProcesses=1;result.stderr?.on('data',appendStderr);result.once('close',()=>{closeObserved=true;});result.once('exit',(code,signal)=>{exitObserved=true;report.browserExit={observed:true,code:Number.isInteger(code)?code:null,signal:/^SIG[A-Z0-9]+$/.test(signal??'')?signal:null};});}}catch{report.spawnObserverError=true;}return result;};
++  childProcess.spawn=function(...args){if(args[0]==='/usr/bin/chromium'&&child)throw Error('DIAG_SECOND_BROWSER_LAUNCH_FORBIDDEN');const result=original.apply(this,args);try{if(args[0]==='/usr/bin/chromium'){child=result;report.observedBrowserProcesses=1;observeLoaderStreams(result,loaderDetails);result.stderr?.on('data',appendStderr);result.once('close',()=>{closeObserved=true;});result.once('exit',(code,signal)=>{exitObserved=true;report.browserExit={observed:true,code:Number.isInteger(code)?code:null,signal:/^SIG[A-Z0-9]+$/.test(signal??'')?signal:null};});}}catch{report.spawnObserverError=true;loaderDetails.observerError();}return result;};
+   restoreSpawn=()=>{childProcess.spawn=original;};
+   const require=createRequire(path.join(deps,'package.json')),{chromium}=require('playwright');
+   report.dependencies={node:process.version,playwright:require('playwright/package.json').version};
+@@ -176,7 +257,7 @@
+   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+   const origin='http://127.0.0.1:'+server.address().port;
+   report.stage='BROWSER_LAUNCH';report.browserLaunches=1;
+-  try{browser=await bounded(chromium.launch(launch.options),35000,'DIAG_BROWSER_LAUNCH_TIMEOUT');}finally{restoreSpawn();}
++  try{browser=await bounded(chromium.launch(loaderDiagnosticLaunchOptions(launch.options)),35000,'DIAG_BROWSER_LAUNCH_TIMEOUT');}finally{restoreSpawn();}
+   report.dependencies.chromium=browser.version();
+   const page=await browser.newPage({viewport:{width:1080,height:1920},deviceScaleFactor:1});
+   page.setDefaultTimeout(20000);page.setDefaultNavigationTimeout(20000);
+@@ -212,6 +293,7 @@
+   try{const {stdout}=await promisify(childProcess.execFile)('nvidia-smi',['--query-gpu=name,driver_version','--format=csv,noheader,nounits'],{timeout:5000,maxBuffer:8192});report.nvidia={status:'QUERY_COMPLETE',devices:stdout.trim().split('\n').slice(0,8).map(line=>{const [model,driverVersion]=line.split(',').map(value=>value.trim());return {model:safeIdentifier(model),driverVersion:safeIdentifier(driverVersion)};})};}catch(error){report.nvidia={status:'QUERY_UNAVAILABLE',exitCode:Number.isInteger(error?.code)?error.code:null,error:safeTextEvidence(String(error?.message??''))};}
+   report.browserExit??={observed:exitObserved,code:null,signal:null};
+   report.browserStderr={categories:[...categories].sort(),bytesObserved:stderrBytes,hashedBytes:Math.min(stderrBytes,1024*1024),sha256:stderrHash.digest('hex'),truncated:stderrBytes>1024*1024,rawOmitted:true,nativeDetails:nativeDetails.finish()};
++  report.loaderDiagnostics={requestedBrowserLogging:'error,warn,driver',driverSelectionChanged:false,...loaderDetails.finish()};
+   report.finishedAt=new Date().toISOString();report.stage='RESULT_WRITTEN';
+   const bytes=Buffer.from(JSON.stringify(report,null,2)+'\n');await durableFile(outputDirectory,'WEBGL_DIAGNOSTIC.json',bytes);await durableFile(outputDirectory,'SHA256SUMS',Buffer.from(sha(bytes)+'  WEBGL_DIAGNOSTIC.json\n'));
+  }
+@@ -221,3 +303,4 @@
+  const args=process.argv.slice(2),output=args.find(value=>value.startsWith('--output='))?.slice('--output='.length);
+  runOnce({outputDirectory:output,approved:args.includes('--approved-single-diagnostic')}).then(report=>{process.stdout.write(JSON.stringify({status:report.status,contextAttempts:report.contextAttempts,browserLaunches:report.browserLaunches,renderedFrames:0,resultFile:'WEBGL_DIAGNOSTIC.json'})+'\n');process.exitCode=report.status==='PASS_CONTEXT_ONLY'?0:2;}).catch(error=>{process.stdout.write(JSON.stringify({status:'BLOCKED',code:safeFailureCode(error?.message),rawOmitted:true})+'\n');process.exitCode=2;});
+ }
++
