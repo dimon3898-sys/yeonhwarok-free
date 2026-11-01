@@ -163,6 +163,60 @@ def message_category(value):
     return "UNCLASSIFIED"
 
 
+def safe_capture_failure(value, *, total_frames=180):
+    """Export fixed codes/templates only; the original message stays private.
+
+    Playwright prefixes engine exceptions with an API and an exception class.
+    Removing only those exact prefixes recovers reviewed domain codes without
+    accepting arbitrary uppercase text as a public error code.
+    """
+    if not isinstance(value, dict) or not isinstance(value.get("code"), str):
+        return None
+    original = value["code"][:4000]
+    first_line = original.splitlines()[0] if original else ""
+    category = message_category(original)
+    remainder = first_line
+    api = ""
+    for prefix in ("page.evaluate:", "browserType.launch:", "page.goto:", "browser.newPage:"):
+        if remainder.startswith(prefix):
+            api = prefix
+            remainder = remainder[len(prefix):].lstrip()
+            break
+    exception_type = "UNKNOWN"
+    for name in sorted(EXCEPTIONS - {"UNKNOWN"}, key=len, reverse=True):
+        prefix = name + ":"
+        if remainder.startswith(prefix):
+            exception_type = name
+            remainder = remainder[len(prefix):].lstrip()
+            break
+    code = safe_code(remainder) or "UNCLASSIFIED_EXCEPTION"
+    reason = "DOMAIN_ERROR" if code != "UNCLASSIFIED_EXCEPTION" else "UNCLASSIFIED"
+    # Only fixed prefixes are recognized; no caller-controlled suffix survives.
+    if reason == "UNCLASSIFIED":
+        for prefix, candidate in (
+                ("Cannot read properties of undefined", "UNDEFINED_PROPERTY_READ"),
+                ("Cannot read properties of null", "NULL_PROPERTY_READ"),
+                ("Failed to fetch dynamically imported module", "MODULE_IMPORT_FAILED"),
+                ("Failed to resolve module specifier", "MODULE_SPECIFIER_UNRESOLVED"),
+                ("Target page, context or browser has been closed", "PAGE_OR_BROWSER_CLOSED")):
+            if remainder.startswith(prefix):
+                reason = candidate
+                break
+        if reason == "UNCLASSIFIED" and exception_type == "TypeError" and remainder.endswith(" is not a function"):
+            reason = "NOT_A_FUNCTION"
+        if reason == "UNCLASSIFIED" and exception_type == "ReferenceError":
+            reason = "REFERENCE_ERROR"
+        if reason == "UNCLASSIFIED" and exception_type == "SyntaxError":
+            reason = "SYNTAX_ERROR"
+    stage = value.get("diagnosticStage")
+    index = value.get("frameIndex")
+    return {"code": code, "diagnosticStage": stage if type(stage) is str and stage in DIAGNOSTIC_STAGES else None,
+        "frameIndex": index if type(index) is int and 0 <= index < total_frames else None,
+        "exceptionType": exception_type, "reason": reason,
+        "message": ((api + " ") if api else "") + exception_type + ": " + (code if code != "UNCLASSIFIED_EXCEPTION" else "[REDACTED]"),
+        "messageSHA256": hashlib.sha256(original.encode("utf-8", errors="replace")).hexdigest()}
+
+
 def export_failure(job_root, destination, *, deadline_seconds=5):
     if (isinstance(deadline_seconds, bool) or not isinstance(deadline_seconds, (float, int))
             or not 0 < deadline_seconds <= 5):
@@ -199,6 +253,7 @@ def export_failure(job_root, destination, *, deadline_seconds=5):
         "capture": {"code": inner["errorCode"] if inner else (safe_code(text) or "UNCLASSIFIED_EXCEPTION"), "messageCategory": message_category(text),
             "operations": operations,
             "diagnosticStage": safe_stage,
+            "failure": safe_capture_failure(failure, total_frames=frame_limit(receipt)),
             "renderedFrames": frames if type(frames) is int and 0 <= frames <= frame_limit(receipt) else (operations or {}).get("renderedFrames"),
             "nvidiaVerified": (receipt or {}).get("nvidiaVerified") is True},
         "missingEvidence": {"first": first is None, "capture": receipt is None, "checkpoint": checkpoint is None}}
@@ -316,4 +371,5 @@ if __name__ == "__main__":
             export_failure(args.job_root, args.destination, deadline_seconds=args.seconds)
     except Exception as error:
         raise SystemExit(storage_exit_code(error)) from None
+
 
