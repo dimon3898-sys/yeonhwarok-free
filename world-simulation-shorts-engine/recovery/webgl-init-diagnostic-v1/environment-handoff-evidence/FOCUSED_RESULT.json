@@ -1,0 +1,99 @@
+{
+  "schema": "WORLD_ENGINE_STARTUP_ENVIRONMENT_HANDOFF_REPAIR_V1",
+  "status": "FREE_FOCUSED_PASS_GPU_NOT_RUN",
+  "recordedAtUTC": "2026-11-01T18:55:50.257339+00:00",
+  "resolvedDiagnosticFailure": {
+    "execution": "executions/20261102-native-a1/EXECUTION_RESULT.json",
+    "code": "DIAG_ENVIRONMENT_LAUNCH_FAILED",
+    "stage": "WORKER_ENV_READ",
+    "errnoName": "EACCES",
+    "scope": "Remove diagnostic cross-process environ/cwd dependency; original WebGL root cause remains unresolved"
+  },
+  "runtimeImageUnchanged": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-evidence-v1-41297725682",
+    "digest": "sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf",
+    "imageConfigDigest": "sha256:db95dbe78073f27a5a2d0bbd8aecd960a6861c4cb909cfdbcdd84b424bc7381c",
+    "cwd": "/opt/world-engine-storage-fix"
+  },
+  "changes": {
+    "capture_environment_runner_v2.py": [
+      "Remove worker /proc/environ and /proc/cwd reads",
+      "Reuse only pinned pure startup child_environment; do not execute startup module/configuration",
+      "Apply original capture allowlist to explicitly selected container-exec keys",
+      "Reuse UID1000 home, existing private state/xdg and OCI working directory",
+      "Read-only guards for source pin, image digest, directory identity, cwd and unchanged worker identity",
+      "Report PINNED_STARTUP_CONTRACT and workerEnvironmentDirectlyCompared=false"
+    ],
+    "test_startup_handoff.py": "Eight new CPU mock tests only",
+    "startup_handoff_transfer_and_run.sh": "Fresh transfer directory/output and current reviewed payload; prepared, not executed"
+  },
+  "verification": {
+    "newTests": 8,
+    "passed": 8,
+    "failed": 0,
+    "testRuns": 1,
+    "oldPASSReruns": 0,
+    "realBrowserLaunches": 0,
+    "realChildProcessLaunchesInTests": 0,
+    "transferPayloadMatches": true,
+    "shellSyntax": "PASS",
+    "originalJavascriptSHA256": "a4245037e6a9b28fb8b336edcbbb4963da3ee4296880fcbccc6c5e670d83c311",
+    "originalJavascriptUnchanged": true,
+    "log": "environment-handoff-evidence/FOCUSED_TESTS.log"
+  },
+  "sourceContract": {
+    "sourceCommit": "b47e29d7b222e9357b56c5f8d89b4c4d7a98e9b0",
+    "startupPath": "/opt/world-engine-production-studio/bootstrap.py",
+    "startupSHA256": "9791501263fe146de64510a8747619bb0003ea53f296ec12a7b3335a9bba203a",
+    "sourceFixture": "evidence/startup-environment-source/production_bootstrap.py",
+    "controllerSHA256": "1b3114d43640a8e63b244e5134ca6ab4b1342d196fdf0b79539ed9f3a99d02d1",
+    "startupGraphicsTransform": [
+      "HOME from UID1000 passwd entry",
+      "XDG_RUNTIME_DIR from existing explicit private state root",
+      "WORLD_ENGINE_RENDER_MODE=gpu-required"
+    ],
+    "remainingAllowedGraphicsValues": "preserved verbatim including void, empty values and absent keys",
+    "cwdEvidence": "environment-handoff-evidence/IMAGE_CWD_CONTRACT.json",
+    "sourceReview": "bootstrap, HTTPS supervisor, worker and NVIDIA backend reviewed; no cwd override in these launch paths"
+  },
+  "limitations": [
+    "Container-exec base environment was not directly compared with live worker environment",
+    "GPU, Vulkan, EGL and WebGL2 initialization remain NOT_RUN for this repair",
+    "Original UP2_WEBGL2_REQUIRED root cause remains NOT_ESTABLISHED",
+    "Existing image and runtime code are unchanged; no remote readiness PASS claimed"
+  ],
+  "ledger": {
+    "gpuStarts": 0,
+    "diagnosticExecutions": 0,
+    "renders": 0,
+    "automaticRetries": 0,
+    "imageBuilds": 0,
+    "imagePublications": 0,
+    "deploymentSettingsChanges": 0,
+    "runtimeSourceChanges": 0
+  },
+  "next": {
+    "action": "Only after a fresh explicit paid-execution approval, run the prepared existing context-only diagnostic once with this repaired launcher; collect result and stop immediately",
+    "maxStarts": 1,
+    "maxContextAttempts": 1,
+    "maxMinutes": 10,
+    "maxCostKRW": 200,
+    "maxRenders": 0,
+    "maxRetries": 0,
+    "currentApproval": "NOT_GRANTED_FOR_NEXT_PAID_START",
+    "operatorCommand": "startup_handoff_transfer_and_run.sh",
+    "output": "/world-storage/webgl-init-handoff-20261102-a1",
+    "failurePolicy": "Stop immediately; no automatic retry, provider Finished and node release must be checked"
+  },
+  "preserved": [
+    "main",
+    "runtime source",
+    "image and tags",
+    "Storage",
+    "Container Command",
+    "port8080",
+    "existing Scene JSON",
+    "all existing PASS evidence",
+    "previous failed execution receipts"
+  ]
+}

@@ -11,7 +11,9 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import pwd
 import signal
+import stat
 import re
 import subprocess
 import sys
@@ -19,9 +21,14 @@ import sys
 CONTROLLER = Path('/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller')
 WORKER = b'/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/worker.py'
 BACKEND_SHA = '1b3114d43640a8e63b244e5134ca6ab4b1342d196fdf0b79539ed9f3a99d02d1'
+STARTUP_BOOTSTRAP = Path('/opt/world-engine-production-studio/bootstrap.py')
+STARTUP_BOOTSTRAP_SHA = '9791501263fe146de64510a8747619bb0003ea53f296ec12a7b3335a9bba203a'
+IMAGE_DIGEST = 'sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf'
+IMAGE_WORKDIR = Path('/opt/world-engine-storage-fix')
 STAGES = frozenset({'ARGUMENTS', 'APPROVAL', 'SOURCE_PIN', 'ENV_ALLOWLIST', 'RUNNER_PIN',
     'ADMIN_IDENTITY', 'WORKER_IDENTITY', 'WORKER_ENV_READ', 'WORKER_IDENTITY_RECHECK',
-    'WORKER_CWD', 'CHILD_LAUNCH', 'CHILD_WAIT', 'CHILD_TIMEOUT_CLEANUP',
+    'WORKER_CWD', 'STARTUP_ENV_CONTRACT', 'IMAGE_CWD_CONTRACT',
+    'CHILD_LAUNCH', 'CHILD_WAIT', 'CHILD_TIMEOUT_CLEANUP',
     'INNER_IDENTITY', 'LEASE_IMPORT', 'COMMON_GPU_LEASE', 'DIAGNOSTIC_LAUNCH',
     'DIAGNOSTIC_WAIT', 'DIAGNOSTIC_TIMEOUT_CLEANUP', 'RESULT_OUTPUT', 'UNKNOWN'})
 EXCEPTION_TYPES = frozenset({'FileNotFoundError', 'PermissionError', 'ProcessLookupError',
@@ -65,32 +72,58 @@ def allowed_environment_names(source):
     return names
 
 
-def selected_environment(stream, allowed):
-    # Read key first. For a non-allowlisted key, discard value bytes individually:
-    # no whole-environment buffer, full secret record, or decoded secret is created.
-    result, key, value, selected, in_value = {}, bytearray(), bytearray(), None, False
-    total = 0
-    while True:
-        byte = stream.read(1)
-        if not byte:
-            break
-        total += 1
-        require(total <= 1024 * 1024, 'DIAG_WORKER_ENV_TOO_LARGE')
-        if byte == b'\0':
-            if selected is not None:
-                result[selected] = value.decode('utf-8', 'surrogateescape')
-            key, value, selected, in_value = bytearray(), bytearray(), None, False
-        elif not in_value and byte == b'=':
-            in_value = True
-            name = key.decode('ascii', 'ignore')
-            selected = name if name in allowed else None
-        elif not in_value:
-            require(len(key) < 256, 'DIAG_WORKER_ENV_KEY_TOO_LONG')
-            key.extend(byte)
-        elif selected is not None:
-            require(len(value) < 65536, 'DIAG_WORKER_ENV_VALUE_TOO_LONG')
-            value.extend(byte)
-    return result
+def startup_environment(allowed, environ):
+    """Project the pinned, pure startup transform onto capture's existing allowlist.
+
+    Read only this container-exec process's allowed keys. Never inspect another
+    process's environ/cwd, read owner files, or rerun startup configuration.
+    This is a reconstruction, not a live comparison with the worker environment.
+    """
+    require(environ.get('WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST') == IMAGE_DIGEST
+            and environ.get('WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST') == IMAGE_DIGEST,
+            'DIAG_STARTUP_IMAGE_CONTRACT_CHANGED')
+    raw = STARTUP_BOOTSTRAP.read_bytes()
+    require(hashlib.sha256(raw).hexdigest() == STARTUP_BOOTSTRAP_SHA,
+            'DIAG_STARTUP_ENV_SOURCE_CHANGED')
+    tree = ast.parse(raw)
+    function = next(node for node in tree.body
+                    if isinstance(node, ast.FunctionDef) and node.name == 'child_environment')
+    assignment = next(node for node in tree.body if isinstance(node, ast.Assign)
+                      and any(isinstance(target, ast.Name) and target.id == 'SECRET_ENV'
+                              for target in node.targets))
+    # Execute only this reviewed pure function, never the module or prepare_configuration.
+    namespace = {'SECRET_ENV': ast.literal_eval(assignment.value)}
+    exec(compile(ast.Module(body=[function], type_ignores=[]), '<pinned-startup-environment>', 'exec'), namespace)
+    root = Path(environ.get('WORLD_ENGINE_STUDIO_STATE_ROOT', ''))
+    home = Path(pwd.getpwuid(1000).pw_dir)
+    require(root.is_absolute() and '..' not in root.parts
+            and not root.is_relative_to('/world-storage'), 'DIAG_EXISTING_STATE_ROOT_REQUIRED')
+    require(home.is_absolute(), 'DIAG_EXISTING_UID1000_HOME_REQUIRED')
+    for path in (root, root / 'xdg-runtime', home):
+        require(path.is_dir() and not any(p.is_symlink() for p in (path, *path.parents)),
+                'DIAG_EXISTING_STARTUP_DIRECTORY_REQUIRED')
+    for path in (root, root / 'xdg-runtime'):
+        info = path.stat()
+        require(info.st_uid == 1000 and stat.S_IMODE(info.st_mode) == 0o700,
+                'DIAG_EXISTING_PRIVATE_DIRECTORY_REQUIRED')
+    config = {'root': root, 'owner': root / 'owner-code',
+              'origin': environ.get('WORLD_ENGINE_STUDIO_PUBLIC_ORIGIN', ''), 'home': home,
+              'xdg': {key: root / suffix for key, suffix in
+                      [('XDG_RUNTIME_DIR', 'xdg-runtime'), ('XDG_CONFIG_HOME', 'xdg-config'),
+                       ('XDG_CACHE_HOME', 'xdg-cache')]}}
+    selected = {key: environ[key] for key in allowed if key in environ}
+    require(all(isinstance(value, str) and len(value) < 65536 for value in selected.values()),
+            'DIAG_CAPTURE_ENV_VALUE_INVALID')
+    transformed = namespace['child_environment'](selected, studio=True, config=config)
+    return {key: value for key, value in transformed.items() if key in allowed}
+
+
+def startup_working_directory():
+    # From the unchanged OCI config; startup, worker and backend inherit cwd.
+    require(Path.cwd() == IMAGE_WORKDIR and IMAGE_WORKDIR.is_dir()
+            and not any(p.is_symlink() for p in (IMAGE_WORKDIR, *IMAGE_WORKDIR.parents)),
+            'DIAG_IMAGE_WORKING_DIRECTORY_REQUIRED')
+    return str(IMAGE_WORKDIR)
 
 
 def worker_identity(pid):
@@ -121,9 +154,11 @@ def safe_stdout(data):
                 for key in ['diagnosticProcessExitCode', 'launcherExitCode']:
                     if type(value.get(key)) is int and -128 <= value[key] <= 255:
                         safe[key] = value[key]
-                for key in ['providerStopRequired', 'workerEnvironmentReused', 'commonGpuLeaseReused']:
+                for key in ['providerStopRequired', 'workerEnvironmentDirectlyCompared', 'commonGpuLeaseReused']:
                     if type(value.get(key)) is bool:
                         safe[key] = value[key]
+                if value.get('environmentSource') == 'PINNED_STARTUP_CONTRACT':
+                    safe['environmentSource'] = value['environmentSource']
                 if value.get('diagnosticStage') in STAGES:
                     safe['diagnosticStage'] = value['diagnosticStage']
                 if value.get('exceptionType') in EXCEPTION_TYPES:
@@ -159,7 +194,8 @@ def inner(args):
             stdout, _ = process.communicate(timeout=110)
             result = safe_stdout(stdout[:16384])
             result.update(diagnosticProcessExitCode=process.returncode, providerStopRequired=True,
-                          workerEnvironmentReused=True, commonGpuLeaseReused=True)
+                          environmentSource='PINNED_STARTUP_CONTRACT',
+                          workerEnvironmentDirectlyCompared=False, commonGpuLeaseReused=True)
         except subprocess.TimeoutExpired as error:
             failure = safe_exception(error, 'DIAGNOSTIC_WAIT')
             mark_stage('DIAGNOSTIC_TIMEOUT_CLEANUP')
@@ -190,14 +226,12 @@ def main(args):
     require(os.geteuid() == 0, 'DIAG_EXISTING_CONTAINER_ADMIN_SESSION_REQUIRED')
     mark_stage('WORKER_IDENTITY')
     identity = worker_identity(args.worker_pid)
-    proc = Path('/proc') / str(args.worker_pid)
-    mark_stage('WORKER_ENV_READ')
-    with (proc / 'environ').open('rb') as stream:
-        environment = selected_environment(stream, allowed)
+    mark_stage('STARTUP_ENV_CONTRACT')
+    environment = startup_environment(allowed, os.environ)
     mark_stage('WORKER_IDENTITY_RECHECK')
     require(worker_identity(args.worker_pid) == identity, 'DIAG_WORKER_CHANGED')
-    mark_stage('WORKER_CWD')
-    working_directory = os.readlink(proc / 'cwd')
+    mark_stage('IMAGE_CWD_CONTRACT')
+    working_directory = startup_working_directory()
 
     def drop_identity():
         os.setgroups(identity['groups'])
