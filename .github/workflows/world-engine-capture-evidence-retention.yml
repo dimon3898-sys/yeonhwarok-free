@@ -1,0 +1,59 @@
+name: WORLD ENGINE capture evidence retention once
+on:
+  push:
+    branches: [recovery/capture-evidence-retention-20261101]
+    paths: ['.github/workflows/world-engine-capture-evidence-retention.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-capture-evidence-retention-20261101
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  capture-evidence-once:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == 'c2340920a015b0f02b090a4cd2d19ed3e107b149' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_CAPTURE_EVIDENCE_RETENTION_ONCE_20261101'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/capture-evidence-retention-v1/
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+            world-simulation-shorts-engine/recovery/label355-publication-v1/retain_label355_image.py
+      - name: Check sealed focused evidence, build and retain one overlay, publish once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 -B world-simulation-shorts-engine/recovery/capture-evidence-retention-v1/build_once.py run
+      - name: Preserve evidence after success or failure
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-capture-evidence-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/capture-evidence-evidence/
+            ${{ runner.temp }}/capture-evidence-retention/*.json
+            ${{ runner.temp }}/capture-evidence-context/Dockerfile
+          if-no-files-found: error
+          retention-days: 1
+# No GPU, render, compiler, prior PASS suite, deployment or existing tag mutation.

@@ -17,13 +17,188 @@ import subprocess
 import sys
 import time
 import re
+import hashlib
 
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 from common import RECOVERY, canonical, duration_contract, load, sha, validate_plan, verify_manifest
-from nvidia_backend import approval_limit, cache
+from nvidia_backend import approval_limit, cache, _capture_diagnostic_environment
 _stop_requested = False
+
+
+# Strict values, not a general log redactor. Unknown content is never retained.
+_BROWSER_EXECUTABLES = {'/usr/bin/chromium', '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome', '/usr/bin/google-chrome-stable',
+    '/opt/google/chrome/chrome', '/opt/google/chrome/google-chrome'}
+_BROWSER_ARGS = {'--disable-dev-shm-usage', '--headless', '--headless=new',
+    '--headless=old', '--enable-gpu', '--enable-webgl', '--use-gl=angle',
+    '--use-gl=egl', '--use-gl=desktop', '--use-angle=vulkan', '--use-angle=gl',
+    '--use-angle=gles', '--use-angle=gl-egl', '--use-angle=default',
+    '--use-angle=swiftshader', '--use-vulkan=native', '--use-vulkan=swiftshader',
+    '--enable-features=Vulkan', '--enable-features=CDPScreenshotNewSurface',
+    '--disable-vulkan-surface', '--disable-software-rasterizer',
+    '--enable-unsafe-swiftshader', '--no-sandbox', '--disable-setuid-sandbox',
+    '--disable-gpu-sandbox', '--disable-gpu', '--disable-webgl',
+    '--ignore-gpu-blocklist', '--enable-automation', '--remote-debugging-pipe'}
+_NATIVE_CODES = {'VK_ERROR_OUT_OF_HOST_MEMORY', 'VK_ERROR_OUT_OF_DEVICE_MEMORY',
+    'VK_ERROR_INITIALIZATION_FAILED', 'VK_ERROR_DEVICE_LOST',
+    'VK_ERROR_MEMORY_MAP_FAILED', 'VK_ERROR_LAYER_NOT_PRESENT',
+    'VK_ERROR_EXTENSION_NOT_PRESENT', 'VK_ERROR_FEATURE_NOT_PRESENT',
+    'VK_ERROR_INCOMPATIBLE_DRIVER', 'VK_ERROR_FORMAT_NOT_SUPPORTED',
+    'VK_ERROR_UNKNOWN', 'VK_ERROR_SURFACE_LOST_KHR',
+    'VK_ERROR_NATIVE_WINDOW_IN_USE_KHR', 'EGL_NOT_INITIALIZED',
+    'EGL_BAD_ACCESS', 'EGL_BAD_ALLOC', 'EGL_BAD_ATTRIBUTE', 'EGL_BAD_CONFIG',
+    'EGL_BAD_CONTEXT', 'EGL_BAD_CURRENT_SURFACE', 'EGL_BAD_DISPLAY',
+    'EGL_BAD_MATCH', 'EGL_BAD_NATIVE_PIXMAP', 'EGL_BAD_NATIVE_WINDOW',
+    'EGL_BAD_PARAMETER', 'EGL_BAD_SURFACE', 'EGL_CONTEXT_LOST',
+    'GL_OUT_OF_MEMORY', 'GL_INVALID_OPERATION', 'GL_INVALID_VALUE',
+    'GL_INVALID_ENUM', 'GL_INVALID_FRAMEBUFFER_OPERATION', 'GL_CONTEXT_LOST'}
+_NATIVE_FUNCTIONS = {'vkCreateInstance', 'vkEnumeratePhysicalDevices',
+    'vkCreateDevice', 'vkGetInstanceProcAddr', 'vkGetDeviceProcAddr',
+    'eglInitialize', 'eglGetDisplay', 'eglCreateContext', 'eglMakeCurrent',
+    'InitializeSandbox', 'InitializeVulkan', 'CreateVulkanInstance',
+    'CreateVulkanDevice', 'InitializeGLOneOff', 'GetPlatformDisplay'}
+_BROWSER_SIGNALS = {'SIGABRT', 'SIGBUS', 'SIGFPE', 'SIGILL', 'SIGINT',
+    'SIGKILL', 'SIGPIPE', 'SIGQUIT', 'SIGSEGV', 'SIGTERM', 'SIGTRAP',
+    'SIGXCPU', 'SIGXFSZ'}
+_DRIVER_CAPABILITIES = {'compute', 'utility', 'graphics', 'video', 'display', 'compat32', 'all'}
+
+
+class _BrowserDiagnostics:
+    """Bounded safe facts from Playwright's existing pw:browser stream.
+
+    The launch text is Playwright's joined argument string, not OS attestation.
+    Full argv, arbitrary messages, paths, environment and UUIDs are not copied.
+    """
+    def __init__(self, environment):
+        digest = environment.get('WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST', '')
+        devices = environment.get('NVIDIA_VISIBLE_DEVICES')
+        caps = environment.get('NVIDIA_DRIVER_CAPABILITIES', '').split(',')
+        icd = environment.get('VK_ICD_FILENAMES')
+        self.value = {
+            'schema': 'WORLD_ENGINE_BROWSER_DIAGNOSTIC_V1',
+            'source': 'PLAYWRIGHT_BROWSER_STDIO', 'launchObserved': False,
+            'executable': {'knownPath': None, 'basename': None, 'pathSHA256': None},
+            'safeActualArgs': [], 'omittedArgumentCount': 0,
+            'argumentLineSHA256': None, 'fullArgvCaptured': False,
+            'browserExit': {'exitCode': None, 'signal': None, 'observed': False},
+            'nativeErrors': [], 'observedLines': 0, 'droppedLines': 0,
+            'truncated': False,
+            'expectedImageDigest': digest if re.fullmatch(r'sha256:[a-f0-9]{64}', digest) else None,
+            'graphicsEnvironment': {
+                'gpuBackend': environment.get('GPU_BACKEND') if environment.get('GPU_BACKEND') in {'vulkan', 'egl'} else None,
+                'renderMode': environment.get('WORLD_ENGINE_RENDER_MODE') if environment.get('WORLD_ENGINE_RENDER_MODE') in {'gpu-required', 'cpu'} else None,
+                'driverCapabilities': sorted(set(caps)) if caps and all(c in _DRIVER_CAPABILITIES for c in caps) else [],
+                'deviceSelectionClass': 'NOT_SET' if devices is None else 'ALL' if devices == 'all' else 'NONE' if devices in {'', 'none', 'void'} else 'EXPLICIT',
+                'deviceSelectionSHA256': hashlib.sha256(devices.encode()).hexdigest() if isinstance(devices, str) else None,
+                'vulkanICDOverrideSet': bool(icd),
+                'vulkanICDOverrideSHA256': hashlib.sha256(icd.encode()).hexdigest() if isinstance(icd, str) else None,
+                'libraryPathSet': bool(environment.get('LD_LIBRARY_PATH')),
+                'runtimeDirSet': bool(environment.get('XDG_RUNTIME_DIR')),
+                'displaySet': bool(environment.get('DISPLAY')),
+                'uid': os.geteuid(), 'gid': os.getegid(),
+                'nativeGraphicsInitializationVerified': False,
+            },
+        }
+        self._bytes = 0
+
+    def dropped(self):
+        self.value['droppedLines'] = min(1000000, self.value['droppedLines'] + 1)
+        self.value['truncated'] = True
+
+    def consume(self, line):
+        self.value['observedLines'] = min(1000000, self.value['observedLines'] + 1)
+        if len(line) > 16384 or self._bytes + len(line) > 262144:
+            self.dropped()
+            return
+        self._bytes += len(line)
+        try:
+            self._consume(line)
+        except Exception:
+            # Diagnostics cannot replace the original capture/progress failure.
+            self.dropped()
+
+    def _consume(self, line):
+        text = line.decode('utf-8', errors='replace')
+        if 'pw:browser ' not in text:
+            return
+        value = self.value
+        if '<launching> ' in text and not value['launchObserved']:
+            launch = text.split('<launching> ', 1)[1]
+            parts = launch.split()
+            if not parts:
+                return
+            executable, args = parts[0], parts[1:]
+            value['launchObserved'] = True
+            value['executable'] = {
+                'knownPath': executable if executable in _BROWSER_EXECUTABLES else None,
+                'basename': Path(executable).name if executable in _BROWSER_EXECUTABLES else None,
+                'pathSHA256': hashlib.sha256(executable.encode()).hexdigest(),
+            }
+            safe = [arg for arg in args if arg in _BROWSER_ARGS]
+            value['safeActualArgs'] = safe[:64]
+            value['omittedArgumentCount'] = min(1000000, len(args) - len(value['safeActualArgs']))
+            value['argumentLineSHA256'] = hashlib.sha256(line).hexdigest()
+            if len(safe) > 64:
+                value['truncated'] = True
+        match = re.search(r'<process did exit: exitCode=(null|-?\d{1,3}), signal=(null|SIG[A-Z0-9]{1,10})>', text)
+        if match:
+            code = None if match[1] == 'null' else int(match[1])
+            sig = None if match[2] == 'null' else match[2]
+            if (code is None or -255 <= code <= 255) and (sig is None or sig in _BROWSER_SIGNALS):
+                value['browserExit'] = {'exitCode': code, 'signal': sig, 'observed': True}
+        if not re.search(r'\[pid=\d+\]\[err\]', text):
+            return
+        words = set(re.findall(r'[A-Za-z_][A-Za-z_0-9]*', text))
+        codes, functions = sorted(words & _NATIVE_CODES), sorted(words & _NATIVE_FUNCTIONS)
+        lower = text.lower()
+        category = ('VULKAN' if any(c.startswith('VK_') for c in codes) else
+            'EGL' if any(c.startswith('EGL_') for c in codes) else
+            'OPENGL' if codes else
+            'DEVICE_ACCESS' if 'permission denied' in lower and any(w in lower for w in ('nvidia', 'vulkan', 'gpu', 'dri')) else
+            'SANDBOX' if 'sandbox' in lower and any(w in lower for w in ('failed', 'error', 'denied')) else
+            'VULKAN' if 'vulkan' in lower and any(w in lower for w in ('failed', 'error', 'not found', 'not supported')) else
+            'ANGLE' if 'angle' in lower and any(w in lower for w in ('failed', 'error')) else
+            'GPU_PROCESS' if 'gpu process' in lower and any(w in lower for w in ('failed', 'error', 'exited', 'crash')) else None)
+        if category:
+            event = {'category': category, 'codes': codes, 'functions': functions,
+                     'lineSHA256': hashlib.sha256(line).hexdigest()}
+            if len(value['nativeErrors']) < 32:
+                value['nativeErrors'].append(event)
+            else:
+                self.dropped()
+
+
+class _CaptureLineBuffer:
+    """Keep the JSON progress bound; discard overlong non-JSON log lines."""
+    def __init__(self, diagnostics):
+        self.pending = bytearray()
+        self.discarding = False
+        self.diagnostics = diagnostics
+
+    def feed(self, block):
+        complete = []
+        pieces = block.split(b'\n')
+        for index, piece in enumerate(pieces):
+            ended = index < len(pieces) - 1
+            if not self.discarding:
+                self.pending.extend(piece)
+                prefix = self.pending.lstrip()
+                structured = not prefix or prefix[:1] in (b'{', b'[')
+                limit = 128 * 1024 if structured else 16384
+                if len(self.pending) > limit:
+                    if structured:
+                        raise RuntimeError('HANDOFF_CAPTURE_PROGRESS_LIMIT')
+                    self.diagnostics.dropped()
+                    self.pending.clear()
+                    self.discarding = True
+            if ended:
+                if not self.discarding:
+                    complete.append(bytes(self.pending))
+                self.pending.clear()
+                self.discarding = False
+        return complete
 
 
 def request_stop(*_):
@@ -88,18 +263,22 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
     atomic = load('_handoff_original_atomic_record',
                   RECOVERY / 'universal-source-pipeline-v2/software_worker.py').atomic
     child, cleanup, stage, count = None, None, 'START', 0
-    started, pending, last_monitor = time.monotonic(), bytearray(), 0
+    started, last_monitor = time.monotonic(), 0
+    diagnostics = _BrowserDiagnostics(environment)
+    lines = _CaptureLineBuffer(diagnostics)
     reason, first_failure = None, None
+    def preserve_browser_snapshot():
+        try:
+            atomic(Path(output) / 'BROWSER_DIAGNOSTIC.json', diagnostics.value)
+        except Exception:
+            pass  # Diagnostic storage never alters firstFailure or the lease.
     def consume(block):
         nonlocal count, reason, first_failure
-        pending.extend(block)
-        if len(pending) > 128 * 1024:
-            raise RuntimeError('HANDOFF_CAPTURE_PROGRESS_LIMIT')
-        while b'\n' in pending:
-            line, _, rest = pending.partition(b'\n'); pending[:] = rest
+        for line in lines.feed(block):
             try:
                 row = json.loads(line)
             except (ValueError, UnicodeError):
+                diagnostics.consume(line)
                 continue
             if not isinstance(row, dict):
                 continue
@@ -110,6 +289,7 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                 if isinstance(code, str) and re.fullmatch(r'[A-Z][A-Z0-9_]{2,120}', code) and failed_stage in allowed:
                     first_failure = {'code': code, 'stage': failed_stage}
                     atomic(Path(output) / 'FIRST_CAPTURE_FAILURE.json', first_failure)
+                    preserve_browser_snapshot()
                     try:
                         from capture_diagnostics_safe import preserve_before_cleanup
                         preserve_before_cleanup(output)
@@ -128,7 +308,7 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
         if select.select([parent_fd], [], [], 0)[0]:
             raise RuntimeError('HANDOFF_PARENT_EXITED_BEFORE_CAPTURE')
         child = capture_factory(command, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT, env=environment,
+                                stderr=subprocess.STDOUT, env=_capture_diagnostic_environment(environment),
                                 start_new_session=True, close_fds=True)
         os.set_blocking(child.stdout.fileno(), False)
         with helpers.DescendantGuard(child.pid) as guard:
@@ -165,6 +345,9 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                     if not block:
                         break
                     consume(block)
+                if lines.pending and not lines.pending.lstrip().startswith((b'{', b'[')):
+                    diagnostics.consume(bytes(lines.pending))
+                preserve_browser_snapshot()
                 stage = 'DESCENDANT_CLEANUP'
             finally:
                 if _cpu_test_before_cleanup is not None:
@@ -207,6 +390,8 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                 atomic(Path(output) / 'LEASE_SUPERVISOR_RESULT.json', {
                     'stage': stage, 'reason': reason, 'cleanup': cleanup,
                     'firstFailure': first_failure,
+                    'captureProcessExitCode': child.returncode if child is not None else None,
+                    'browserDiagnostics': diagnostics.value,
                     'gpuBasicProbeRepeated': False, 'newLockCreated': False,
                     'inheritedOriginalLeaseHeldThroughCleanup': True, 'cleanupVerified': verified})
             except BaseException:
@@ -311,4 +496,5 @@ if __name__ == '__main__':
             print('HANDOFF_FAILURE_STATE_WRITE_FAILED', file=sys.stderr)
         print(safe, file=sys.stderr)
         raise SystemExit(1)
+
 

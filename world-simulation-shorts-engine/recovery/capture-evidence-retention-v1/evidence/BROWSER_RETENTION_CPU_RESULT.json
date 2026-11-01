@@ -1,0 +1,66 @@
+{
+  "schema": "WORLD_ENGINE_BROWSER_RETENTION_CPU_TEST_RESULT_V1",
+  "status": "PASS",
+  "command": "python world-simulation-shorts-engine/recovery/capture-evidence-retention-v1/tests/test_browser_retention.py -v",
+  "workingDirectory": "capture-evidence-retention-fix",
+  "recordedAtUTC": "2026-11-01T10:25:43.136341+00:00",
+  "executionTimestampUTC": null,
+  "executionTimestampReason": "The executor result reported duration but no absolute execution timestamp. This file preserves the completed output without rerunning tests.",
+  "reportedTestDurationSeconds": 0.23,
+  "exitCode": 0,
+  "testsPassed": 11,
+  "suiteExecutions": 1,
+  "suiteReruns": 0,
+  "testNames": [
+    "test_bad_progress_still_fails_with_existing_code",
+    "test_diagnostic_volume_and_line_bounds",
+    "test_fixed_debug_only_for_capture_child",
+    "test_json_progress_limit_is_preserved",
+    "test_launch_flags_are_actual_known_subset_not_full_argv",
+    "test_long_non_json_line_does_not_mask_following_progress",
+    "test_native_error_exact_allowlist_and_exit",
+    "test_real_cpu_failure_pipe_preserves_safe_facts_and_original_failure",
+    "test_snapshot_storage_failure_does_not_change_capture_reason",
+    "test_successful_cpu_progress_semantics_unchanged",
+    "test_unknown_executable_and_argument_values_are_never_copied"
+  ],
+  "validationScope": "New diagnostic helpers and actual supervisor function extracted from current source. Four real CPU Python child processes with mocked descendant cleanup/storage dependencies; no Chromium launch or GPU.",
+  "gpuStarts": 0,
+  "browserLaunches": 0,
+  "renders": 0,
+  "existingPassReruns": 0,
+  "sourceSHA256": {
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py": "1b3114d43640a8e63b244e5134ca6ab4b1342d196fdf0b79539ed9f3a99d02d1",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py": "02cc96808b0216c4b697ceab68053d45b1431ae8baa21a967d2cfdc55bd8c7e3",
+    "world-simulation-shorts-engine/recovery/capture-evidence-retention-v1/tests/test_browser_retention.py": "2329072288ac6509384d3fabd9ba5454003d52e2181043adb4808bc44dfd0e03"
+  },
+  "outputSHA256": "b01515497280b0250d19c2a6a018aea53424debedafb0142f9a1f9ba6581490e",
+  "additionalBoundCalculation": {
+    "executions": 1,
+    "worstCaseDiagnosticBytes": 44948,
+    "privateJSONReadLimit": 65536,
+    "nativeCodeCount": 33,
+    "nativeFunctionCount": 15,
+    "description": "32 events containing every allowed native code/function plus64 longest allowed args, all from current helper. No runtime/GPU invocation."
+  },
+  "officialPinnedReferences": [
+    {
+      "url": "https://github.com/microsoft/playwright/blob/v1.62.1/packages/utils/processLauncher.ts",
+      "blobSHA": "9c77c7a0ce3ad049ba3bb63db0896dfb7f3e09a5",
+      "lines": "133,175-190",
+      "purpose": "Existing launch/native stdout-stderr/process exit log formats"
+    },
+    {
+      "url": "https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/src/server/browserType.ts",
+      "blobSHA": "bed4f1d3e86a4d075d2d3312812b3afe324433f7",
+      "lines": "55,214-225",
+      "purpose": "browser logName and launchProcess log to progress"
+    },
+    {
+      "url": "https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/src/server/progress.ts",
+      "blobSHA": "78d32982572380f5c7622729c4886e20909324cb",
+      "lines": "55-61,97-102",
+      "purpose": "pw:browser log forwarding continues after launch progress ends"
+    }
+  ]
+}

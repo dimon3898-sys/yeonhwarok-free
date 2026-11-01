@@ -1,0 +1,38 @@
+{
+  "schema": "WORLD_ENGINE_CAPTURE_RETENTION_INDEPENDENT_REVIEW_V1",
+  "reviewedAtUTC": "2026-11-01T10:27:00.294207+00:00",
+  "status": "PASS_WITH_SCOPE_LIMITS",
+  "method": "STATIC_REVIEW_AND_EXISTING_NEW_TEST_LOG_READ_ONLY",
+  "reviewedRuntimeFiles": [
+    "controller/nvidia_backend.py",
+    "controller/lease_supervisor.py",
+    "controller/safe_capture_export.py"
+  ],
+  "runtimeFileBase": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/",
+  "mustFixFindings": [],
+  "reviewedProperties": [
+    "Fixed pw:browser DEBUG applies only to owned capture child; caller DEBUG and secrets are not forwarded.",
+    "JSON progress limit remains 128 KiB; oversized non-JSON lines are discarded without replacing the original progress failure.",
+    "Diagnostic byte, line, event and argument counts are bounded; only fixed allowlisted values and hashes are retained.",
+    "Browser process exit and capture Node process exit are recorded separately.",
+    "Original first-failure, descendant cleanup and lease behavior remain; public export requires cleanupVerified true.",
+    "Expected image digests are distinguished from actual image attestation, which remains unobserved.",
+    "Existing safe file-read, atomic file-write and no-overwrite export behavior is retained.",
+    "Packaging draft limits overlay to three runtime files and three integrity-link files, preserving pinned renderer and browser profile sources."
+  ],
+  "testEvidenceRead": {
+    "file": "/tmp/world-engine-retention-new-tests.log",
+    "newExportTestsPassed": 8,
+    "reviewerTestExecutions": 0
+  },
+  "packagingReview": "Draft statically reviewed; final source pins, overlay-bound focused evidence and packaging test result remain root-owned prerequisites.",
+  "failureRootCause": "UNCONFIRMED",
+  "gpuExecutions": 0,
+  "rendererExecutions": 0,
+  "reviewerCodeModifications": 0,
+  "oldPASSReruns": 0,
+  "actualRemotePermanentStorage": "NOT_RUN",
+  "webgl2GPUValidation": "NOT_RUN",
+  "remoteStudioValidation": "NOT_RUN",
+  "limits": "CPU fixture export survival and SHA recovery do not attest remote storage durability, deployed image identity or resolution of UP2_WEBGL2_REQUIRED."
+}

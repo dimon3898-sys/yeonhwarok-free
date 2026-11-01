@@ -1,4 +1,4 @@
-"""Read only three private receipts; publish fixed-schema, non-secret diagnostics.
+"""Read bounded private evidence; publish fixed-schema, non-secret diagnostics.
 Production callers MUST use capture_diagnostics_safe.export_after_cleanup, which
 isolates filesystem I/O in a time-bounded child. No raw logs are read or exported.
 """
@@ -217,6 +217,254 @@ def safe_capture_failure(value, *, total_frames=180):
         "messageSHA256": hashlib.sha256(original.encode("utf-8", errors="replace")).hexdigest()}
 
 
+
+# Runtime evidence is additive: legacy failure classification and cleanup gates
+# keep their original meaning. Metadata never attests a remote image or GPU PASS.
+SAFE_PROFILE_ARGS = frozenset({"--disable-dev-shm-usage", "--headless", "--headless=new",
+    "--enable-gpu", "--enable-webgl", "--use-gl=angle", "--use-angle=vulkan",
+    "--use-vulkan=native", "--enable-features=Vulkan", "--disable-vulkan-surface",
+    "--disable-software-rasterizer", "--no-sandbox", "--disable-setuid-sandbox",
+    "--enable-unsafe-swiftshader", "--disable-gpu", "--disable-webgl", "--disable-webgl2"})
+SAFE_GPU_MODELS = frozenset({"NVIDIA GeForce RTX 4080 SUPER", "NVIDIA GeForce RTX 4080",
+    "NVIDIA GeForce RTX 4090", "NVIDIA GeForce RTX 5090", "NVIDIA RTX A6000",
+    "NVIDIA A100-SXM4-40GB", "NVIDIA A100-SXM4-80GB", "NVIDIA H100 80GB HBM3"})
+
+
+def bounded_int(value, minimum=0, maximum=1000000):
+    return value if type(value) is int and minimum <= value <= maximum else None
+
+
+def safe_dependencies(value):
+    if not isinstance(value, dict):
+        return None
+    return {key: safe_identifier(value.get(key), r"v?[0-9]{1,4}(?:\.[0-9]{1,4}){2,3}(?:-[0-9]{1,4})?")
+            for key in ("node", "playwright", "chromium")}
+
+
+def safe_browser_profile(value):
+    if not isinstance(value, dict):
+        return None
+    args = value.get("selectedArgs")
+    source = args if type(args) is list else []
+    selected = [arg for arg in source[:64] if type(arg) is str and arg in SAFE_PROFILE_ARGS]
+    return {"backend": value.get("backend") if value.get("backend") in ("vulkan",) else None,
+        "rootTestOnly": value.get("rootTestOnly") if type(value.get("rootTestOnly")) is bool else None,
+        "sandbox": value.get("sandbox") if value.get("sandbox") in ("CHROMIUM_SANDBOX", "EXPLICIT_ROOT_TEST_ONLY") else None,
+        "selectedArgs": selected, "omittedArgumentCount": len(source) - len(selected),
+        "selectedArgsFullyRetained": type(args) is list and len(selected) == len(args),
+        "scope": "PROFILE_SELECTED_ARGS_NOT_FINAL_ARGV"}
+
+
+def safe_gpu_allocation(value):
+    if not isinstance(value, dict):
+        return None
+    model = value.get("model")
+    return {"model": model if type(model) is str and model in SAFE_GPU_MODELS else None,
+        "modelRecognized": type(model) is str and model in SAFE_GPU_MODELS,
+        "driverVersion": safe_identifier(value.get("driverVersion"), r"[0-9]{1,4}(?:\.[0-9]{1,4}){1,3}"),
+        "memoryTotalMiB": bounded_int(value.get("memoryTotalMiB"), 1, 1048576),
+        "uuidSHA256": safe_identifier(value.get("uuidSHA256"), r"[a-f0-9]{64}"),
+        "scope": "ALLOCATION_METADATA_NOT_GRAPHICS_INITIALIZATION_PROOF"}
+
+
+
+# Revalidate private collector fields before crossing the public export boundary.
+DIAGNOSTIC_EXECUTABLES = frozenset(['/opt/google/chrome/chrome',
+ '/opt/google/chrome/google-chrome',
+ '/usr/bin/chromium',
+ '/usr/bin/chromium-browser',
+ '/usr/bin/google-chrome',
+ '/usr/bin/google-chrome-stable'])
+DIAGNOSTIC_ARGS = frozenset(['--disable-dev-shm-usage',
+ '--disable-gpu',
+ '--disable-gpu-sandbox',
+ '--disable-setuid-sandbox',
+ '--disable-software-rasterizer',
+ '--disable-vulkan-surface',
+ '--disable-webgl',
+ '--enable-automation',
+ '--enable-features=CDPScreenshotNewSurface',
+ '--enable-features=Vulkan',
+ '--enable-gpu',
+ '--enable-unsafe-swiftshader',
+ '--enable-webgl',
+ '--headless',
+ '--headless=new',
+ '--headless=old',
+ '--ignore-gpu-blocklist',
+ '--no-sandbox',
+ '--remote-debugging-pipe',
+ '--use-angle=default',
+ '--use-angle=gl',
+ '--use-angle=gl-egl',
+ '--use-angle=gles',
+ '--use-angle=swiftshader',
+ '--use-angle=vulkan',
+ '--use-gl=angle',
+ '--use-gl=desktop',
+ '--use-gl=egl',
+ '--use-vulkan=native',
+ '--use-vulkan=swiftshader'])
+DIAGNOSTIC_NATIVE_CODES = frozenset(['EGL_BAD_ACCESS',
+ 'EGL_BAD_ALLOC',
+ 'EGL_BAD_ATTRIBUTE',
+ 'EGL_BAD_CONFIG',
+ 'EGL_BAD_CONTEXT',
+ 'EGL_BAD_CURRENT_SURFACE',
+ 'EGL_BAD_DISPLAY',
+ 'EGL_BAD_MATCH',
+ 'EGL_BAD_NATIVE_PIXMAP',
+ 'EGL_BAD_NATIVE_WINDOW',
+ 'EGL_BAD_PARAMETER',
+ 'EGL_BAD_SURFACE',
+ 'EGL_CONTEXT_LOST',
+ 'EGL_NOT_INITIALIZED',
+ 'GL_CONTEXT_LOST',
+ 'GL_INVALID_ENUM',
+ 'GL_INVALID_FRAMEBUFFER_OPERATION',
+ 'GL_INVALID_OPERATION',
+ 'GL_INVALID_VALUE',
+ 'GL_OUT_OF_MEMORY',
+ 'VK_ERROR_DEVICE_LOST',
+ 'VK_ERROR_EXTENSION_NOT_PRESENT',
+ 'VK_ERROR_FEATURE_NOT_PRESENT',
+ 'VK_ERROR_FORMAT_NOT_SUPPORTED',
+ 'VK_ERROR_INCOMPATIBLE_DRIVER',
+ 'VK_ERROR_INITIALIZATION_FAILED',
+ 'VK_ERROR_LAYER_NOT_PRESENT',
+ 'VK_ERROR_MEMORY_MAP_FAILED',
+ 'VK_ERROR_NATIVE_WINDOW_IN_USE_KHR',
+ 'VK_ERROR_OUT_OF_DEVICE_MEMORY',
+ 'VK_ERROR_OUT_OF_HOST_MEMORY',
+ 'VK_ERROR_SURFACE_LOST_KHR',
+ 'VK_ERROR_UNKNOWN'])
+DIAGNOSTIC_NATIVE_FUNCTIONS = frozenset(['CreateVulkanDevice',
+ 'CreateVulkanInstance',
+ 'GetPlatformDisplay',
+ 'InitializeGLOneOff',
+ 'InitializeSandbox',
+ 'InitializeVulkan',
+ 'eglCreateContext',
+ 'eglGetDisplay',
+ 'eglInitialize',
+ 'eglMakeCurrent',
+ 'vkCreateDevice',
+ 'vkCreateInstance',
+ 'vkEnumeratePhysicalDevices',
+ 'vkGetDeviceProcAddr',
+ 'vkGetInstanceProcAddr'])
+DIAGNOSTIC_SIGNALS = frozenset(['SIGABRT',
+ 'SIGBUS',
+ 'SIGFPE',
+ 'SIGILL',
+ 'SIGINT',
+ 'SIGKILL',
+ 'SIGPIPE',
+ 'SIGQUIT',
+ 'SIGSEGV',
+ 'SIGTERM',
+ 'SIGTRAP',
+ 'SIGXCPU',
+ 'SIGXFSZ'])
+DIAGNOSTIC_DRIVER_CAPABILITIES = frozenset(['all', 'compat32', 'compute', 'display', 'graphics', 'utility', 'video'])
+
+
+def safe_string_list(value, allowed, maximum):
+    return [item for item in value[:maximum] if type(item) is str and item in allowed] if type(value) is list else []
+
+
+def safe_browser_diagnostics(value):
+    if (not isinstance(value, dict) or value.get("schema") != "WORLD_ENGINE_BROWSER_DIAGNOSTIC_V1"
+            or value.get("source") != "PLAYWRIGHT_BROWSER_STDIO"):
+        return None
+    executable = value.get("executable")
+    executable = executable if isinstance(executable, dict) else {}
+    known_path = executable.get("knownPath")
+    known_path = known_path if type(known_path) is str and known_path in DIAGNOSTIC_EXECUTABLES else None
+    browser_exit = value.get("browserExit")
+    browser_exit = browser_exit if isinstance(browser_exit, dict) else {}
+    args = value.get("safeActualArgs")
+    args = args if type(args) is list else []
+    safe_args = safe_string_list(args, DIAGNOSTIC_ARGS, 64)
+    source_errors = value.get("nativeErrors")
+    source_errors = source_errors if type(source_errors) is list else []
+    errors = []
+    for event in source_errors[:32]:
+        if not isinstance(event, dict) or event.get("category") not in (
+                "VULKAN", "EGL", "OPENGL", "DEVICE_ACCESS", "SANDBOX", "ANGLE", "GPU_PROCESS"):
+            continue
+        errors.append({"category": event["category"],
+            "codes": safe_string_list(event.get("codes"), DIAGNOSTIC_NATIVE_CODES, 32),
+            "functions": safe_string_list(event.get("functions"), DIAGNOSTIC_NATIVE_FUNCTIONS, 16),
+            "lineSHA256": safe_identifier(event.get("lineSHA256"), r"[a-f0-9]{64}")})
+    env = value.get("graphicsEnvironment")
+    env = env if isinstance(env, dict) else {}
+    environment = {
+        "gpuBackend": env.get("gpuBackend") if env.get("gpuBackend") in ("vulkan", "egl") else None,
+        "renderMode": env.get("renderMode") if env.get("renderMode") in ("gpu-required", "cpu") else None,
+        "driverCapabilities": safe_string_list(env.get("driverCapabilities"), DIAGNOSTIC_DRIVER_CAPABILITIES, 7),
+        "deviceSelectionClass": env.get("deviceSelectionClass") if env.get("deviceSelectionClass") in ("NOT_SET", "ALL", "NONE", "EXPLICIT") else None,
+        "deviceSelectionSHA256": safe_identifier(env.get("deviceSelectionSHA256"), r"[a-f0-9]{64}"),
+        "vulkanICDOverrideSHA256": safe_identifier(env.get("vulkanICDOverrideSHA256"), r"[a-f0-9]{64}"),
+        "uid": bounded_int(env.get("uid"), 0, 4294967295),
+        "gid": bounded_int(env.get("gid"), 0, 4294967295),
+        "nativeGraphicsInitializationVerified": False}
+    for key in ("vulkanICDOverrideSet", "libraryPathSet", "runtimeDirSet", "displaySet"):
+        environment[key] = env.get(key) if type(env.get(key)) is bool else None
+    signal_value = browser_exit.get("signal")
+    omitted = bounded_int(value.get("omittedArgumentCount"))
+    return {"schema": "WORLD_ENGINE_BROWSER_DIAGNOSTIC_V1", "source": "PLAYWRIGHT_BROWSER_STDIO",
+        "launchObserved": value.get("launchObserved") is True,
+        "executable": {"knownPath": known_path,
+            "basename": Path(known_path).name if known_path else None,
+            "pathSHA256": safe_identifier(executable.get("pathSHA256"), r"[a-f0-9]{64}")},
+        "safeActualArgs": safe_args,
+        "omittedArgumentCount": min(1000000, (omitted or 0) + len(args) - len(safe_args)),
+        "argumentLineSHA256": safe_identifier(value.get("argumentLineSHA256"), r"[a-f0-9]{64}"),
+        "fullArgvCaptured": False,
+        "browserExit": {"exitCode": bounded_int(browser_exit.get("exitCode"), -255, 255),
+            "signal": signal_value if type(signal_value) is str and signal_value in DIAGNOSTIC_SIGNALS else None,
+            "observed": browser_exit.get("observed") is True},
+        "nativeErrors": errors,
+        "observedLines": bounded_int(value.get("observedLines")),
+        "droppedLines": bounded_int(value.get("droppedLines")),
+        "truncated": value.get("truncated") is True or len(args) > 64 or len(source_errors) > 32,
+        "expectedImageDigest": safe_identifier(value.get("expectedImageDigest"), r"sha256:[a-f0-9]{64}"),
+        "graphicsEnvironment": environment}
+
+
+def runtime_evidence(job, receipt, supervisor, plan, allocation, process=None, browser_snapshot=None):
+    profile = plan.get("renderProfile") if isinstance(plan, dict) else None
+    expected = safe_identifier(profile.get("imageDigest"), r"sha256:[a-f0-9]{64}") if isinstance(profile, dict) else None
+    browser = safe_browser_diagnostics(supervisor.get("browserDiagnostics")) or safe_browser_diagnostics(browser_snapshot)
+    environment_digest = browser.get("expectedImageDigest") if browser else None
+    expected_source = "PLAN" if expected else "CAPTURE_ENVIRONMENT" if environment_digest else "MISSING"
+    expected_agree = expected == environment_digest if expected and environment_digest else None
+    expected = expected or environment_digest
+    exit_code = bounded_int(supervisor.get("captureProcessExitCode"), -255, 255)
+    exit_source = "SUPERVISOR" if exit_code is not None else "MISSING"
+    if exit_code is None and isinstance(process, dict):
+        exit_code = bounded_int(process.get("exitCode"), -255, 255)
+        if exit_code is not None:
+            exit_source = "CAPTURE_PROCESS_RESULT"
+    return {"schema": "WORLD_ENGINE_CAPTURE_RUNTIME_EVIDENCE_V1",
+        "jobId": safe_identifier(job.name, r"studio-[a-f0-9]{32}"),
+        "dependencies": safe_dependencies((receipt or {}).get("dependencies")),
+        "browserProfile": safe_browser_profile((receipt or {}).get("browserProfile")),
+        "gpuAllocation": safe_gpu_allocation(allocation),
+        "imageIdentity": {"expectedImageDigest": expected,
+            "expectedSource": expected_source, "captureEnvironmentExpectedImageDigest": environment_digest,
+            "expectedDigestsAgree": expected_agree,
+            "actualImageDigest": None, "actualImageStatus": "NOT_OBSERVED_FROM_APPLICATION_PROCESS"},
+        "captureProcess": {"exitCode": exit_code, "source": exit_source,
+            "status": "OBSERVED" if exit_code is not None else "NOT_RECORDED",
+            "scope": "CAPTURE_NODE_PROCESS_NOT_BROWSER_PROCESS"},
+        "browserDiagnostics": browser,
+        "missingEvidence": {"plan": plan is None, "gpuAllocation": allocation is None,
+            "browserDiagnostics": browser is None},
+        "persistenceScope": "SHARED_EXPORT_WRITE_NOT_REMOTE_BACKUP_ATTESTATION"}
+
+
 def export_failure(job_root, destination, *, deadline_seconds=5):
     if (isinstance(deadline_seconds, bool) or not isinstance(deadline_seconds, (float, int))
             or not 0 < deadline_seconds <= 5):
@@ -237,6 +485,10 @@ def export_failure(job_root, destination, *, deadline_seconds=5):
         first = supervisor["firstFailure"]
     receipt = read_json_safe(job / "capture" / "CAPTURE_RECEIPT.json")
     checkpoint = read_json_safe(job / "capture" / "CAPTURE_OPERATION_CHECKPOINT.json")
+    plan = read_json_safe(job / "PLAN.json")
+    allocation = read_json_safe(job / "GPU_ALLOCATION.json")
+    process = read_json_safe(job / "CAPTURE_PROCESS_RESULT.json")
+    browser_snapshot = read_json_safe(job / "BROWSER_DIAGNOSTIC.json")
     operations = safe_operations(checkpoint) or safe_operations((receipt or {}).get("captureOperations"))
     inner = (operations or {}).get("firstFailure")
     failure = (receipt or {}).get("failure")
@@ -256,8 +508,11 @@ def export_failure(job_root, destination, *, deadline_seconds=5):
             "failure": safe_capture_failure(failure, total_frames=frame_limit(receipt)),
             "renderedFrames": frames if type(frames) is int and 0 <= frames <= frame_limit(receipt) else (operations or {}).get("renderedFrames"),
             "nvidiaVerified": (receipt or {}).get("nvidiaVerified") is True},
-        "missingEvidence": {"first": first is None, "capture": receipt is None, "checkpoint": checkpoint is None}}
+        "missingEvidence": {"first": first is None, "capture": receipt is None, "checkpoint": checkpoint is None},
+        "runtimeEvidence": runtime_evidence(job, receipt, supervisor, plan, allocation, process, browser_snapshot)}
     content = (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    if len(content) > LIMIT:
+        raise OSError(27, "DIAGNOSTIC_STORAGE_TOO_LARGE")
     digest = hashlib.sha256(content).hexdigest()
     parent = directory_fd(dest.parent)
     target = None
@@ -371,5 +626,6 @@ if __name__ == "__main__":
             export_failure(args.job_root, args.destination, deadline_seconds=args.seconds)
     except Exception as error:
         raise SystemExit(storage_exit_code(error)) from None
+
 
 

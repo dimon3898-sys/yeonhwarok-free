@@ -73,6 +73,14 @@ def _runtime_environment(environ=None):
     return {key: value for key, value in (os.environ if environ is None else environ).items() if key in names}
 
 
+def _capture_diagnostic_environment(environ):
+    # Only the owned capture child receives this fixed browser-log namespace.
+    # Never forward caller-selected DEBUG/DEBUG_FILE or arbitrary environment.
+    result = _runtime_environment(environ)
+    result.update(DEBUG='pw:browser', DEBUG_COLORS='0')
+    return result
+
+
 def lease_helper():
     directory = RECOVERY / 'universal-auto-video-v2'
     if str(directory) not in sys.path:
@@ -293,4 +301,5 @@ class NvidiaPresentationBackend:
 
     def start_studio_revision(self, *args, **kwargs):
         raise RuntimeError('HANDOFF_REVISION_NOT_SUPPORTED')
+
 
