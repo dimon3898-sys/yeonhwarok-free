@@ -1,6 +1,28 @@
 {
+  "backup": {
+    "archiveBytes": 855562133,
+    "archiveFormat": "docker-save-gzip-split",
+    "assets": [
+      {
+        "browser_download_url": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/download/capture-integrity-image-backup-41281172622/candidate-image.tar.gz.part-000",
+        "digest": "sha256:10a6bff4fd15c3a3ffa5865d9583cc1594415d41612f6abdea289f5adfbbddfd",
+        "id": 697544009,
+        "name": "candidate-image.tar.gz.part-000",
+        "size": 855562133
+      }
+    ],
+    "imageID": "sha256:7d2443b1712d30efe22fcc6f27d7e6e8517cd9f5f73e1b9296800ca7f59221a3",
+    "parentDigest": "sha256:01c5e042c0ecd443419bbb92f46ce5234783aeef501aa2f4d6e5e5a0a2f27d17",
+    "releaseTag": "capture-integrity-image-backup-41281172622",
+    "releaseURL": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-integrity-image-backup-41281172622",
+    "restore": "Concatenate parts in numeric order, gzip -dc, then docker load. No rebuild required.",
+    "retries": 0,
+    "sourceCommit": "b254dbaa0b8a76ad876cb45f717697016c77ef20",
+    "status": "PASS"
+  },
   "baseCommit": "c0e2e8961fdb154ad78a9197fbca9e9efd5249f9",
   "branch": "recovery/capture-source-integrity-20261101",
+  "buildSourceCommit": "b254dbaa0b8a76ad876cb45f717697016c77ef20",
   "failure": {
     "actualApprovedSHA256": "0161ac4177bb24b282aab28bb6f42b75d82841aedd81f8b574c8b8e90b33bffb",
     "cause": "The capture-details overlay updated the capture source and outer runtime manifest but omitted the nested generated-source manifest capture pin.",
@@ -34,23 +56,65 @@
     "tests": 6
   },
   "gCube": {
+    "command": "",
+    "environment": {
+      "WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+      "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50"
+    },
+    "existingCommand": "",
+    "existingPort": 8080,
+    "existingStorageMount": "/world-storage",
+    "gpuStartedByWork": false,
+    "imageDigest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-integrity-v1-41281172622",
+    "lastDeployedObserved": "2026-11-01 15:24:38 Asia/Seoul",
     "nodeAssigned": false,
-    "settings": "PENDING_NEW_IMAGE",
+    "port": 8080,
+    "preflightExecuted": false,
+    "settings": "SAVED_AND_READ_BACK",
     "status": "Finished",
+    "storage": "/world-storage",
+    "studioAccessAttempted": false,
     "workload": 5373
+  },
+  "image": {
+    "builds": 1,
+    "captureSourceIntegrityFixed": true,
+    "digest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+    "gpuExecutions": 0,
+    "gpuStarts": 0,
+    "imageID": "sha256:7d2443b1712d30efe22fcc6f27d7e6e8517cd9f5f73e1b9296800ca7f59221a3",
+    "imageRelease": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-integrity-image-backup-41281172622",
+    "oldPASSReruns": 0,
+    "oldTagUnchanged": true,
+    "priorCaptureFailureResolved": false,
+    "publications": 1,
+    "remoteStudioVerified": false,
+    "renders": 0,
+    "retries": 0,
+    "sourceCommit": "b254dbaa0b8a76ad876cb45f717697016c77ef20",
+    "status": "PASS",
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-integrity-v1-41281172622"
   },
   "ledger": {
     "automaticRetries": 0,
-    "builds": 0,
+    "builds": 1,
     "gpuStarts": 0,
     "maxBuilds": 1,
     "maxPublications": 1,
-    "publications": 0,
+    "publications": 1,
     "renders": 0
   },
-  "nextAction": "Publish one pin-only image with preserved parent and permanent backup, then update gCube image and both deployment digest variables without starting GPU.",
+  "nextAction": "User clicks Deploy, opens Studio, authenticates as Owner, loads unchanged GENERIC_LABELS_10S.json, runs preflight, and only if PASS starts the 10-second render. User downloads MP4 and stops deployment. A failed preflight must be preserved without blind retry.",
   "parentDigest": "sha256:01c5e042c0ecd443419bbb92f46ce5234783aeef501aa2f4d6e5e5a0a2f27d17",
   "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-details-v1-41279653219",
+  "preservedAssets": {
+    "existingJSONUnchanged": true,
+    "existingStorageAndStartupPreserved": true,
+    "main": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3",
+    "oldCaptureDiagnosticSourceUnchanged": true,
+    "oldTagUnchanged": true
+  },
   "preservedMain": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3",
   "priorCaptureRuntimeFailureResolved": false,
   "remoteStudioVerified": false,
@@ -64,6 +128,8 @@
     "verifierChanged": false,
     "workerAndOriginalSourceHashesPreserved": true
   },
+  "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/41281172622",
   "schema": "WORLD_ENGINE_CAPTURE_SOURCE_INTEGRITY_CHECKPOINT_V1",
-  "status": "FOCUSED_PASS_BUILD_PENDING"
+  "scopeLimit": "Local source-integrity repair and deployment settings PASS only; remote Studio preflight, prior capture runtime failure, and MP4 quality remain unverified.",
+  "status": "PASS_INTEGRITY_REPAIR_IMAGE_AND_GCUBE_SETTINGS_READY"
 }
