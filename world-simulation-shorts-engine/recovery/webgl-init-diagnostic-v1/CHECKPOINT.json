@@ -1,6 +1,6 @@
 {
   "schema": "WORLD_ENGINE_WEBGL_INITIALIZATION_PREPARATION_V1",
-  "status": "FREE_PREPARATION_READY_PENDING_SEPARATE_GPU_APPROVAL",
+  "status": "BLOCKED_DIAGNOSTIC_LAUNCHER_STOPPED",
   "sourceCheckpointCommit": "a5f3b8083fa34bbb8ea9311a223eb9121f25708f",
   "failedJobId": "studio-37dfbc8dab786a4d7c99cde6fae2f821",
   "existingFailure": {
@@ -24,11 +24,13 @@
     "port": 8080,
     "storage": "/world-storage",
     "settingsChanged": false,
-    "terminal": "DISABLED_WHILE_FINISHED; NORMAL_TERMINAL_AFTER_AUTHORIZED_DEPLOYMENT"
+    "terminal": "DISABLED_WHILE_FINISHED; NORMAL_TERMINAL_AFTER_AUTHORIZED_DEPLOYMENT",
+    "terminationEventKST": "2026-11-01 16:42:23",
+    "finishedObservedKST": "2026-11-01 16:42:59.911"
   },
   "authorization": {
-    "current": "FREE_PREPARATION_ONLY",
-    "paidExecution": "SEPARATE_USER_APPROVAL_REQUIRED_BY_REQUEST_SECTION_6",
+    "current": "APPROVED_SINGLE_EXECUTION_CONSUMED",
+    "paidExecution": "EXPLICIT_LATEST_USER_APPROVAL_USED_ONCE; NO_FURTHER_GPU_EXECUTION_AUTHORIZED",
     "proposedGPU": "RTX 4080 SUPER x1",
     "maxStarts": 1,
     "maxContextDiagnostics": 1,
@@ -36,7 +38,9 @@
     "maxCostKRW": 2000,
     "maxRenders": 0,
     "maxAutomaticRetries": 0,
-    "approvalFlagIsNotUserApproval": true
+    "approvalFlagIsNotUserApproval": true,
+    "remainingStarts": 0,
+    "remainingDiagnosticInvocations": 0
   },
   "price": {
     "source": "https://gcube.ai/ko/price",
@@ -87,21 +91,20 @@
   ],
   "mainPreservedAt": "08057b8fe7e094746d300ccc8cdebfce07fcf2a3",
   "ledger": {
-    "gpuStarts": 0,
-    "contextDiagnostics": 0,
+    "gpuStarts": 1,
+    "contextDiagnostics": 1,
     "renders": 0,
     "builds": 0,
     "publications": 0,
     "automaticRetries": 0,
-    "oldPASSReruns": 0
+    "oldPASSReruns": 0,
+    "actualContextAttemptCount": null
   },
-  "gpuResults": "NOT_RUN_PENDING_SEPARATE_APPROVAL",
+  "gpuResults": "BLOCKED_LAUNCHER_ERROR_NO_WEBGL_RESULT",
   "remainingGPUOnly": [
-    "NVIDIA device/driver in current allocation",
-    "same-profile Vulkan initialization",
-    "WebGL2 result and renderer/vendor",
-    "browser exit and cleanup",
-    "external diagnostic persistence"
+    "Actual NVIDIA/Vulkan and WebGL2 initialization unavailable because diagnostic launcher failed",
+    "Browser exit code unobserved",
+    "Original WebGL2 null cause remains unresolved"
   ],
   "notA300FrameRenderPASS": true,
   "branch": "recovery/webgl-init-diagnostic-v1-20261101",
@@ -141,7 +144,7 @@
     "rawEnvironmentPersisted": false,
     "environmentValuesPrinted": false,
     "helperRequiresExistingContainerAdminSession": true,
-    "liveWorkerIdentityCheck": "NOT_RUN_WHILE_FINISHED"
+    "liveWorkerIdentityCheck": "PID52_UID1000_OBSERVED; FULL_RUNNER_ENVIRONMENT_HANDOFF_BLOCKED"
   },
   "diagnosticLimitations": [
     "Standalone context-only observation does not execute scene preparation or runtime module imports. It preserves actual browser launch inputs, identity, canvas, context attributes, and capture environment.",
@@ -152,5 +155,38 @@
     "The new code has free focused verification only; actual device, browser, export and container execution are NOT_RUN before separate approval."
   ],
   "operatorCommandTemplate": "python3 -I -B /tmp/world-engine-webgl-diagnostic-v1/capture_environment_runner.py --worker-pid <observed-existing-worker-pid> --runner /tmp/world-engine-webgl-diagnostic-v1/diagnose_webgl_once.mjs --runner-sha256 357dad1840f5b5e06de089d42b5910c5e7a1185d92f1945ea60b2a7b4cad243c --output /world-storage/WORLD_ENGINE/webgl-init-<fresh-run-id> --approved-single-diagnostic",
-  "fileTransfer": "Work transfers reviewed files via normal authenticated container terminal into a fresh root-owned directory (0755, code0644), checks both SHA256 values, then runs once. No user file copying required."
+  "fileTransfer": "Work transfers reviewed files via normal authenticated container terminal into a fresh root-owned directory (0755, code0644), checks both SHA256 values, then runs once. No user file copying required.",
+  "preparationCommit": "315ed90d987e032f5c476a57a8f99b709c8211db",
+  "latestExecution": "executions/20261101-0614b11d/EXECUTION_RESULT.json",
+  "lastFailure": {
+    "code": "DIAG_ENVIRONMENT_LAUNCH_FAILED",
+    "location": "Standalone diagnostic launcher outer exception boundary",
+    "actualFailingOperation": "NOT_PRESERVED",
+    "exceptionType": "NOT_PRESERVED",
+    "errno": "NOT_PRESERVED",
+    "safeTerminalResult": "executions/20261101-0614b11d/TERMINAL_RESULT.json",
+    "differentFromOriginalWebGLFailure": true
+  },
+  "executionEvidencePreservation": "GitHub terminal result, screenshots, execution ledger and SHA256; expected remote diagnostic directory NOT_FOUND. No fabricated WebGL receipt.",
+  "priorPASSRelationship": "Existing eleven free checks remain PASS within their tested scope. They did not prove live container process/environment access. Deployment-level diagnostic readiness is BLOCKED.",
+  "nextMinimumAction": "Use prepared v2 safe launcher metadata to identify the exact operation/type/errno before changing environment or renderer. No source-path or browser-flag change is justified by current evidence. Any further paid allocation requires a new explicit approval; current approval has been consumed.",
+  "postFailurePreparation": {
+    "status": "FREE_FOCUSED_PASS_NOT_REMOTE_PASS",
+    "file": "capture_environment_runner_v2.py",
+    "sha256": "5ca79ab31482d37c12220100abdff9cc029f2effc0ebdbfc57f65db1009dc024",
+    "scope": "Preserve closed diagnosticStage, exceptionType, errno and errnoName when launcher fails. Original execution decisions, UID/environment/source gates, timeout and GPU settings unchanged.",
+    "diff": "capture_environment_runner_v2.patch",
+    "newFocusedTests": 3,
+    "testLog": "focused-runner-v2-errors.log",
+    "oldElevenTestsRerun": 0,
+    "remoteExecution": false,
+    "originalV1FilesPreserved": true,
+    "originalWebGLCauseFixed": false
+  },
+  "billing": {
+    "state": "FINAL_COST_NOT_YET_REFLECTED",
+    "currentExecutionPodMissingFromHourlyUsage": true,
+    "workloadStopped": true,
+    "approvedCapKRW": 2000
+  }
 }
