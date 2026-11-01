@@ -1,0 +1,160 @@
+{
+  "researchDate": "2026-11-01",
+  "scope": "Official primary NVIDIA, Vulkan loader, Chromium Linux sandbox, and Linux process-access sources; no live GPU execution",
+  "sources": [
+    {
+      "id": "N01",
+      "title": "NVIDIA Linux x86_64 driver 580.159.03 official download directory",
+      "url": "https://download.nvidia.com/XFree86/Linux-x86_64/580.159.03/",
+      "version": "580.159.03",
+      "verifiedFact": "The exact driver release is present in NVIDIA's official distribution, with .run entries dated 2026-04-24.",
+      "projectRelevance": "Confirms the historical successful driver version exists. Does not identify the latest failed host driver.",
+      "limitation": "Directory modification date is not asserted as a product release-note publication date."
+    },
+    {
+      "id": "N02",
+      "title": "NVIDIA 580.159.03 README: Installed Components",
+      "url": "https://download.nvidia.com/XFree86/Linux-x86_64/580.159.03/README/installedcomponents.html",
+      "version": "580.159.03",
+      "relevantLines": [
+        20,
+        23,
+        24,
+        26,
+        31,
+        44,
+        45
+      ],
+      "verifiedFact": "libGLX_nvidia.so.0 and libEGL_nvidia.so.0 can serve as Vulkan ICDs. The default ICD refers to libGLX_nvidia.so.0; the README discusses libEGL_nvidia.so.0 when X11 client libraries are unavailable.",
+      "projectRelevance": "Historical successful ICD libGLX_nvidia.so.0 is valid, not itself a fault. Loader dependencies and actual resolved libraries are distinguishing evidence.",
+      "limitation": "No missing X11 library, mismatched NVIDIA library, or broken symlink has been observed in the latest job."
+    },
+    {
+      "id": "N03",
+      "title": "NVIDIA Container Toolkit: Specialized Configurations with Docker",
+      "url": "https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/docker-specialized.html",
+      "version": "Latest documentation; includes 1.20.0 behavior notes; deployed host Toolkit version unknown",
+      "verifiedFact": "NVIDIA_DRIVER_CAPABILITIES selects injected driver capabilities. utility supports NVML/nvidia-smi; graphics supports OpenGL/EGL/Vulkan. all requests all available capabilities.",
+      "projectRelevance": "nvidia-smi recognition does not prove graphics initialization. The historical all setting is intent, not proof of current injection success.",
+      "limitation": "Current docs' CDI/JIT-CDI changes must not be assumed on a host with unrecorded Toolkit version and runtime mode."
+    },
+    {
+      "id": "N04",
+      "title": "NVIDIA Container Toolkit source: graphics discoverer",
+      "url": "https://github.com/NVIDIA/nvidia-container-toolkit/blob/main/internal/discover/graphics.go",
+      "version": "Current main source observed 2026-11-01; not the identified deployed host version",
+      "verifiedFact": "The Toolkit discovers graphics libraries, EGL vendor manifests, Vulkan ICD manifests, and related symlink hooks for container injection.",
+      "projectRelevance": "Immutable application image identity alone does not establish host-injected graphics-driver identity.",
+      "limitation": "Explains architecture, not proof of a missing mount in gCube."
+    },
+    {
+      "id": "N05",
+      "title": "Khronos Vulkan Loader: Driver Interface",
+      "url": "https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderDriverInterface.md",
+      "version": "Current primary documentation; some loader environment features have explicit Vulkan-header minimums",
+      "relevantLines": [
+        241,
+        242,
+        243,
+        250,
+        272,
+        274,
+        355,
+        360,
+        366,
+        370,
+        376,
+        377
+      ],
+      "verifiedFact": "VK_DRIVER_FILES supersedes VK_ICD_FILENAMES; otherwise standard discovery applies. Discovery of an ICD JSON does not guarantee resolution of its shared library. Elevated-privilege security contexts can ignore override variables and user paths.",
+      "projectRelevance": "Historical VK_ICD_FILENAMES=null is compatible with successful default discovery. The capture allowlist excludes newer override and XDG search variables, a conditional difference from health/host environments.",
+      "limitation": "The omitted variables are not known to have been set or required during the latest failed job. UID0 alone is not used as proof of secure execution."
+    },
+    {
+      "id": "N06",
+      "title": "Khronos Vulkan Loader: Loader Interface Architecture",
+      "url": "https://github.com/KhronosGroup/Vulkan-Loader/blob/main/docs/LoaderInterfaceArchitecture.md",
+      "version": "Current primary documentation; VK_DRIVER_FILES requires loaders built with Vulkan headers 1.3.207 or newer",
+      "verifiedFact": "Security-sensitive environment handling uses secure_getenv or platform-equivalent checks; elevated-privilege contexts can suppress environment overrides.",
+      "projectRelevance": "Root health and UID1000 capture require matching effective launch conditions before comparing Vulkan results.",
+      "limitation": "No AT_SECURE, setuid transition, file-capability, or effective loader behavior was collected from the latest capture process."
+    },
+    {
+      "id": "N07",
+      "title": "Chromium Linux Sandboxing",
+      "url": "https://chromium.googlesource.com/chromium/src/%2B/0b6120702e8f69ce43b34b02903a1d32a0be07d3/docs/linux/sandboxing.md",
+      "version": "Pinned documentation commit 0b6120702e8f69ce43b34b02903a1d32a0be07d3; generic Linux architecture, not an exact Chromium155 regression report",
+      "verifiedFact": "Linux Chromium uses namespace and seccomp sandbox layers; the GPU process uses seccomp-BPF.",
+      "projectRelevance": "Actual nonroot sandboxed capture and root no-sandbox health are different execution conditions.",
+      "limitation": "No sandbox denial, fatal namespace error, or matching Chromium155 defect is established. No sandbox bypass is recommended."
+    },
+    {
+      "id": "N08",
+      "title": "Linux man-pages: proc_pid_environ(5)",
+      "url": "https://man7.org/linux/man-pages/man5/proc_pid_environ.5.html",
+      "version": "Linux man-pages 6.19, page dated 2026-02-08",
+      "relevantLines": [
+        17,
+        25,
+        33,
+        34
+      ],
+      "verifiedFact": "/proc/PID/environ exposes the initial exec environment, not necessarily later modifications. Access is governed by PTRACE_MODE_READ_FSCREDS.",
+      "projectRelevance": "Diagnostic v1 reading another process's environ is not equivalent to Studio passing its own filtered environment. Generic launcher failure does not prove a renderer failure.",
+      "limitation": "The v1 response lacks the failed stage, exception class and errno; permission failure remains a hypothesis. No full environment dump is requested."
+    },
+    {
+      "id": "N09",
+      "title": "NVIDIA Container Toolkit: Troubleshooting",
+      "url": "https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/troubleshooting.html",
+      "version": "Latest primary documentation; applicability depends on installed Toolkit/runtime/cgroup mode",
+      "relevantLines": [
+        96,
+        99,
+        100,
+        102,
+        103,
+        110,
+        116
+      ],
+      "verifiedFact": "Documents conditional GPU device-access loss after container/runtime updates in legacy hook/cgroup configurations, including NVML Unknown Error symptoms; also documents distinct SELinux access errors.",
+      "projectRelevance": "Provider-side device access can vary independently of application image contents.",
+      "limitation": "No same-job NVML Unknown Error, SELinux denial, daemon reload, or matching runtime mode was observed; these are conditional mechanisms, not the confirmed WebGL2 cause."
+    },
+    {
+      "id": "N10",
+      "title": "NVIDIA 580.159.03 README: Known Issues",
+      "url": "https://download.nvidia.com/XFree86/Linux-x86_64/580.159.03/README/knownissues.html",
+      "version": "580.159.03",
+      "relevantLines": [
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "verifiedFact": "Vulkan device enumeration/presentation restrictions described depend on X server and X.Org version. Administrative restrictions on GPU performance counters are a separate feature.",
+      "projectRelevance": "Provides conditions for excluding blanket X-server and administrative-privilege prescriptions.",
+      "limitation": "No current X-server condition or performance-counter use was demonstrated. Neither issue is established as the capture failure."
+    }
+  ],
+  "projectCode": {
+    "repository": "dimon3898-sys/yeonhwarok-free",
+    "commit": "296402e71257c7847d0045215ca0cdaf3dd700d2",
+    "file": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+    "functions": [
+      "_runtime_environment",
+      "NvidiaPresentationBackend._verify",
+      "NvidiaPresentationBackend.preflight"
+    ],
+    "url": "https://github.com/dimon3898-sys/yeonhwarok-free/blob/296402e71257c7847d0045215ca0cdaf3dd700d2/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+    "observation": "Static read of cached repository source only. No function executed."
+  },
+  "unavailableSources": [
+    {
+      "url": "https://download.nvidia.com/XFree86/Linux-x86_64/580.159.03/README/faq.html",
+      "status": "Fetch timeout, not retried, not used as evidence"
+    }
+  ]
+}

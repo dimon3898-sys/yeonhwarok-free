@@ -1,0 +1,161 @@
+{
+  "schema": "WORLD_ENGINE_OFFICIAL_BROWSER_RESEARCH_V1",
+  "retrieved_utc_date": "2026-11-01",
+  "scope": "Primary-source research only. No operating code edits, GPU, builds, browser probes or PASS reruns.",
+  "sources": [
+    {
+      "id": "B01",
+      "title": "Using GPU hardware in headless Chrome",
+      "url": "https://chromium.googlesource.com/chromium/src.git/+/main/docs/gpu/using-gpu-hardware-in-headless-chrome.md",
+      "publisher": "Chromium",
+      "date": "main; exact document date not established",
+      "version_scope": "Current main guidance, not pinned Chromium155 source",
+      "relevant_condition": "Linux headless, enable-gpu, default OpenGL/X11 versus forced ANGLE Vulkan",
+      "project_link": "backend/profile_contract.mjs buildVulkanLaunchOptions",
+      "limit": "Flags are not proof of native driver initialization or device access."
+    },
+    {
+      "id": "B02",
+      "title": "Chrome Headless mode",
+      "url": "https://developer.chrome.com/docs/automation-and-testing/headless",
+      "publisher": "Google Chrome",
+      "date": "Retrieved 2026-11-01; page date not recorded",
+      "version_scope": "Unified headless from112; old headless shell separation from132.0.6793.0",
+      "relevant_condition": "Full Chrome versus standalone chrome-headless-shell",
+      "project_link": "System Chrome155 and headless:new",
+      "limit": "Mode history does not establish a specific155 WebGL defect."
+    },
+    {
+      "id": "B03",
+      "title": "Playwright Browsers",
+      "url": "https://playwright.dev/docs/browsers",
+      "publisher": "Microsoft Playwright",
+      "date": "Retrieved 2026-11-01; rolling documentation",
+      "version_scope": "Rolling documentation; exact1.62.1 browser manifest separately checked",
+      "relevant_condition": "Version-specific binaries and headless-shell versus channel Chromium",
+      "project_link": "Explicit /usr/bin/chromium bypasses bundled binary selection",
+      "limit": "Do not infer current failure binary from browser install defaults."
+    },
+    {
+      "id": "B04",
+      "title": "BrowserType API",
+      "url": "https://playwright.dev/docs/api/class-browsertype",
+      "publisher": "Microsoft Playwright",
+      "date": "Retrieved 2026-11-01; rolling documentation",
+      "version_scope": "Rolling API; exact source checked in B06",
+      "relevant_condition": "executablePath, customargs, chromiumSandbox, ignoreDefaultArgs",
+      "project_link": "buildVulkanLaunchOptions preserves security and default arguments",
+      "limit": "Custom binary compatibility warning is not proof of this failure."
+    },
+    {
+      "id": "B05",
+      "title": "Playwright v1.62.1 browsers.json",
+      "url": "https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/browsers.json",
+      "publisher": "Microsoft Playwright official repository",
+      "date": "Pinned v1.62.1; release page shows July30",
+      "version_scope": "Exact v1.62.1",
+      "retrieval": "GitHub fetch_file connector; browser/raw mirrors were inaccessible and not repeated",
+      "git_blob_sha": "25e42eae2b73a0a4211be65cacf51bb5b173ab8d",
+      "finding": "Chromium and chromium-headless-shell:151.0.7922.34, revision1234",
+      "project_link": "Historical capture receipt records external Chrome155.0.8059.79",
+      "limit": "Manifest is not the installed external binary or latest job version."
+    },
+    {
+      "id": "B06",
+      "title": "Playwright v1.62.1 Chromium default argument assembly",
+      "url": "https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/src/server/chromium/chromium.ts#L349-L414",
+      "publisher": "Microsoft Playwright official repository",
+      "date": "Pinned v1.62.1",
+      "version_scope": "Exact v1.62.1",
+      "retrieval": "GitHub fetch_file connector",
+      "git_blob_sha": "68d0a9096e21bae02a445abcd16866d249b1c107",
+      "finding": "Default switches and enable-unsafe-swiftshader precede userargs; headless adds headless; no-sandbox is only added when chromiumSandbox is nottrue.",
+      "project_link": "receipt.browserProfile.selectedArgs precedes chromium.launch and omits Playwright-added switches",
+      "limit": "Actual argv, flag precedence, native backend choice and effects still need job-bound runtime evidence."
+    },
+    {
+      "id": "B07",
+      "title": "Playwright v1.62.1 Chromium switches",
+      "url": "https://github.com/microsoft/playwright/blob/v1.62.1/packages/playwright-core/src/server/chromium/chromiumSwitches.ts",
+      "publisher": "Microsoft Playwright official repository",
+      "date": "Pinned v1.62.1",
+      "version_scope": "Exact v1.62.1",
+      "retrieval": "GitHub fetch_file connector",
+      "git_blob_sha": "7543642c624c991987b50a910d6236cb527cb7fc",
+      "finding": "Default switches can include enable-features=CDPScreenshotNewSurface, conditionally on PLAYWRIGHT_LEGACY_SCREENSHOT.",
+      "project_link": "Project also supplies enable-features=Vulkan",
+      "limit": "Multiple arguments alone do not prove a collision or WebGL failure."
+    },
+    {
+      "id": "B08",
+      "title": "Stable Channel Update for Desktop",
+      "url": "https://chromereleases.googleblog.com/2026/10/stable-channel-update-for-desktop_01668083673.html",
+      "publisher": "Google Chrome Releases",
+      "date": "2026-10-13",
+      "version_scope": "Linux155.0.8059.79",
+      "relevant_condition": "Exact historical system binary version release existence",
+      "project_link": "180frame success receipt browser version",
+      "limit": "Security fixes listed here are not causal evidence for context initialization failure."
+    },
+    {
+      "id": "B09",
+      "title": "ANGLE README",
+      "url": "https://chromium.googlesource.com/angle/angle/+/main/README.md",
+      "publisher": "ANGLE/Chromium",
+      "date": "main; retrieved2026-11-01",
+      "version_scope": "Current main, not the ANGLE revision embedded in Chrome155",
+      "relevant_condition": "GLES translation, Linux Vulkan support, EGL implementation",
+      "project_link": "use-gl=angle and use-angle=vulkan",
+      "limit": "Backend support is not device or driver initialization proof."
+    },
+    {
+      "id": "B10",
+      "title": "Supercharge Web AI model testing:WebGPU, WebGL, and Headless Chrome",
+      "url": "https://developer.chrome.com/blog/supercharge-web-ai-testing",
+      "publisher": "Google Chrome; Jason Mayes and Francois Beaufort",
+      "date": "2024-01-16",
+      "version_scope": "Historical Colab NVIDIA T4/V100, example NVIDIA525.105.17, newheadless; not155/580-specific",
+      "relevant_condition": "ANGLE Vulkan versus compositor Vulkan; VK_KHR_surface switch; driver-dependent headless acceleration",
+      "project_link": "Restored disable-vulkan-surface flag and outstanding graphics initialization",
+      "limit": "Do not copy the example no-sandbox, unsafeWebGPU or driver-install commands into WORLD ENGINE. This is a conditional upstream case, not the gCube root cause."
+    },
+    {
+      "id": "B11",
+      "title": "WebGL2 Specification — Context Creation",
+      "url": "https://registry.khronos.org/webgl/specs/latest/2.0/",
+      "publisher": "Khronos",
+      "date": "2026-06-30 Editor's Draft",
+      "version_scope": "WebGL2 normative design draft; not proof of Chrome155 conformance",
+      "relevant_condition": "Drawingbuffer creationfailure returns null and fires creationerror",
+      "project_link": "presentation_runtime_vulkan.generated.mjs getContextwebgl2 assert",
+      "limit": "null does not identify the native failing layer."
+    },
+    {
+      "id": "B12",
+      "title": "WebGL Specification — Context Creation Error Event",
+      "url": "https://registry.khronos.org/webgl/specs/latest/1.0/",
+      "publisher": "Khronos",
+      "date": "2026-06-30 Editor's Draft",
+      "version_scope": "Common WebGL event semantics referenced by WebGL2",
+      "relevant_condition": "Platform-dependent optional statusMessage",
+      "project_link": "Native cause is missing from latest safe diagnostic",
+      "limit": "statusMessage may be empty and needs safe handling; no listener implemented in this research."
+    },
+    {
+      "id": "B13",
+      "title": "Changes in Chromium headless in Playwrightv1.49 — official maintainer issue33566",
+      "url": "https://github.com/microsoft/playwright/issues/33566",
+      "publisher": "Microsoft Playwright; maintainer Dmitry Gozman",
+      "date": "2024-11-13",
+      "version_scope": "Headless change fromPlaywright1.49; historical mode compatibility",
+      "relevant_condition": "GPU/WebGL availability and performance can vary across headless implementations",
+      "project_link": "System Chrome/newheadless must not be compared as if bundledshell",
+      "limit": "This announcement is not a verified Chromium155 WebGL null bug."
+    }
+  ],
+  "retrieval_gaps": [
+    "Chromium issue40540071 and Chrome155 exact gpu_switches.cc were inaccessible through the web tool; not used as causal evidence and no repeated blocked access.",
+    "The failedjob diagnostic lacks actual image attestation, executable version, complete argv and nativeGPU stderr.",
+    "Exact ANGLE revision within system Chrome155 was not obtained."
+  ]
+}

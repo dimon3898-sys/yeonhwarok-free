@@ -1,0 +1,91 @@
+{
+  "schema": "WORLD_ENGINE_EXISTING_IMAGE_ENVIRONMENT_LINEAGE_COMPARISON_V1",
+  "sourceCommit": "a4e02aad71d7b60225c3c22d8a81ef58a4d212fc",
+  "successfulSourceCommit": "27f9fa5c133a65ed08824cf047116128bd9dfe5e",
+  "scope": "READ_ONLY_EXISTING_SOURCE_AND_CI_RECEIPTS_NO_NEW_EXECUTION",
+  "fixedParentDigestChain": [
+    {
+      "name": "G2",
+      "digest": "sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da"
+    },
+    {
+      "name": "label355",
+      "digest": "sha256:cf4f58dd55ab1f9164ae01950150e231bb3b58e40773dcfb6c5db3ca16965fad",
+      "overlay": "25 application/source-manifest/startup files; COPY only plus ENTRYPOINT hashes"
+    },
+    {
+      "name": "up2-details",
+      "digest": "sha256:f230489d451e1c517fda51c5a7938940d1f01db81e585daa106bfbd4828fa42f",
+      "overlay": "6 application/source-manifest/startup files; preserved 100 parent layers"
+    },
+    {
+      "name": "namibia",
+      "digest": "sha256:db0594dda5a0965a5663632de38a009fe62356a4f479a607037060e0e1bea34e",
+      "overlay": "1 PNG COPY; all parent layers and inherited configuration unchanged"
+    },
+    {
+      "name": "capture-details",
+      "digest": "sha256:01c5e042c0ecd443419bbb92f46ce5234783aeef501aa2f4d6e5e5a0a2f27d17",
+      "overlay": "5 capture/diagnostic/source-manifest/startup files; preserved 107 parent layers"
+    },
+    {
+      "name": "capture-integrity",
+      "digest": "sha256:2f0f1ee316e4474adf1502335307297385c746c998dda66f43d204a7418aaf50",
+      "overlay": "4 generated/source/startup-manifest/bootstrap files; preserved 112 parent layers"
+    }
+  ],
+  "findings": [
+    {
+      "item": "Image dependency files",
+      "status": "INHERITED_BY_FIXED_PARENT_BUILD_CHAIN",
+      "detail": "Preserved Dockerfile generators use FROM fixed digest, COPY application files and only required ENTRYPOINT hashes. No RUN/package install or browser/Playwright/Node/Vulkan-loader replacement and no ENV mutation in these overlays.",
+      "limit": "Not a fresh version observation from failed job. Host NVIDIA driver/device mounts are injected and not fixed by this image lineage."
+    },
+    {
+      "item": "Bootstrap environment setup",
+      "status": "SOURCE_UNCHANGED_EXCEPT_PIN",
+      "detail": "G2 and current recovery/studio-cold-start-v2/bootstrap.py both333lines; only differing source line26 SOURCE_SHA. child_environment use, supervise and spawning source unchanged."
+    },
+    {
+      "item": "Controller capture environment filtering",
+      "status": "SOURCE_IDENTICAL",
+      "detail": "nvidia_backend.py _runtime_environment lines63–74 identical between G2/current. Same allowlist preserves selected NVIDIA/Vulkan/display/library/runtime keys and rejects secrets. Actual safe env values for exact failed job not preserved."
+    },
+    {
+      "item": "Chromium/Playwright/Node actual failed job versions",
+      "status": "UNKNOWN_EXACT_JOB",
+      "detail": "Image inheritance supports same installed dependency content, but no receipt of actual failed job loaded versions was recovered by this audit."
+    },
+    {
+      "item": "GPU device and host driver at exact failed job",
+      "status": "UNKNOWN_EXACT_JOB",
+      "detail": "Do not substitute host observations from separate successful job or later launcher attempt for failed-job device mounts/driver evidence."
+    }
+  ],
+  "sourceEvidence": [
+    "world-simulation-shorts-engine/recovery/label-packaging-v1/evidence/Dockerfile.preview",
+    "world-simulation-shorts-engine/recovery/label-packaging-v1/package_labels.py:149",
+    "world-simulation-shorts-engine/recovery/label355-publication-v1/evidence/autonomous-41141502953/RESULT.json",
+    "world-simulation-shorts-engine/recovery/label355-publication-v1/evidence/autonomous-41141502953/OCI_RESULT.json",
+    "world-simulation-shorts-engine/recovery/up2-detail-display-v1/ci-41274003859/CANDIDATE.json",
+    "world-simulation-shorts-engine/recovery/up2-detail-display-v1/ci-41274003859/CONTEXT.json",
+    "world-simulation-shorts-engine/recovery/up2-detail-display-v1/build_once.py:233",
+    "world-simulation-shorts-engine/recovery/namibia-png-recovery-v1/Dockerfile",
+    "world-simulation-shorts-engine/recovery/namibia-png-recovery-v1/ci-41277841800/CANDIDATE.json",
+    "world-simulation-shorts-engine/recovery/capture-failure-details-v1/ci-41279653219/CANDIDATE.json",
+    "world-simulation-shorts-engine/recovery/capture-failure-details-v1/ci-41279653219/CONTEXT.json",
+    "world-simulation-shorts-engine/recovery/capture-failure-details-v1/build_once.py:233",
+    "world-simulation-shorts-engine/recovery/capture-source-integrity-v1/ci-41281172622/CANDIDATE.json",
+    "world-simulation-shorts-engine/recovery/capture-source-integrity-v1/ci-41281172622/CONTEXT.json",
+    "world-simulation-shorts-engine/recovery/capture-source-integrity-v1/build_once.py:254",
+    "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py"
+  ],
+  "testsRun": 0,
+  "gpuStarts": 0,
+  "browserAccesses": 0,
+  "runtimeChanges": 0,
+  "remoteMutations": 0,
+  "decision": "No dependency or environment change justified by these receipts. Treat existing dependency/runtime PASS as reused. Exact original WebGL2 cause not established.",
+  "researchReuseNote": "Historical comparison through capture-integrity, unchanged evidence snapshot. Current surface overlay is separately documented in research CHECKPOINT and prior webgl-surface-restore-v1/CHECKPOINT.json."
+}
