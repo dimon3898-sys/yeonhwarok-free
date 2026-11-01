@@ -18,7 +18,7 @@ import sys
 
 CONTROLLER = Path('/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller')
 WORKER = b'/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/worker.py'
-BACKEND_SHA = '06c7bb84236ab9bdef5044a5b6ceac2b3743eae044c163218953f671d31b7bee'
+BACKEND_SHA = '1b3114d43640a8e63b244e5134ca6ab4b1342d196fdf0b79539ed9f3a99d02d1'
 STAGES = frozenset({'ARGUMENTS', 'APPROVAL', 'SOURCE_PIN', 'ENV_ALLOWLIST', 'RUNNER_PIN',
     'ADMIN_IDENTITY', 'WORKER_IDENTITY', 'WORKER_ENV_READ', 'WORKER_IDENTITY_RECHECK',
     'WORKER_CWD', 'CHILD_LAUNCH', 'CHILD_WAIT', 'CHILD_TIMEOUT_CLEANUP',
