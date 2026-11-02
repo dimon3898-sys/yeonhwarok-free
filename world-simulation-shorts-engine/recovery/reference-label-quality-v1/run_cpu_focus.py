@@ -24,12 +24,14 @@ def main():
         mounts += ['--mount', f'type=bind,src={file},dst={IMAGE_ROOT}/{row["path"]},readonly']
     mounts += ['--mount', f'type=bind,src={repo / HERE},dst={IMAGE_ROOT}/{HERE},readonly',
                '--mount', f'type=bind,src={out},dst=/out']
+    reused = json.loads((repo / HERE / 'evidence/UNIT_PASS_REUSE.json').read_text())
+    for row in reused['files']:
+        assert hashlib.sha256((repo / row['path']).read_bytes()).hexdigest() == row['sha256'], 'UNIT_PASS_INVALIDATED'
+    print('UNCHANGED_NEW_UNIT_CHECKS_REUSED_FROM_41530820590', flush=True)
     tests = IMAGE_ROOT + '/' + HERE + '/tests/'
     command = '\n'.join([
         'set -euo pipefail',
         'mkdir -m 700 /workspace/quality-private',
-        'node ' + tests + 'test_quality_map.mjs',
-        'node ' + tests + 'test_quality_labels.mjs',
         'node ' + tests + 'test_quality_scene.mjs --private-root=/workspace/quality-private --public-root=/out --output=/out/scene',
         'node ' + tests + 'pixel_quality.mjs --prepared=/out/scene/PREPARED.json --output=/out/pixels --deps-root=/opt/rtx-package --chromium=/usr/bin/chromium',
     ])
@@ -42,6 +44,8 @@ def main():
             '-e', 'WORLD_ENGINE_NODE_DEPS=/opt/rtx-package', *mounts,
             '--entrypoint', '/bin/bash', PARENT, '-c', command]
     result = subprocess.run(args, timeout=600)
+    # Only public new test evidence; private working sources stay inside disposable tmpfs.
+    subprocess.run(['sudo', 'chmod', '-R', 'a+rX', str(out)], check=True)
     summary = {'schema':'WORLD_ENGINE_QUALITY_CPU_WORKFLOW_V1',
                'status':'PASS' if result.returncode == 0 else 'FAIL',
                'sourceCommit':os.environ['GITHUB_SHA'], 'sourceBaseCommit':seal['sourceBaseCommit'],

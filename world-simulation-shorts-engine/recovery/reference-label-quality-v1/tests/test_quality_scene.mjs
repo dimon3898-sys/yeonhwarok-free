@@ -5,6 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {compileScenePlan} from '../../../web/map_infographic_v1/planner_scene_v1.mjs';
+import {compileExistingEnginePlan} from '../../../web/map_infographic_v1/planner_engine_adapter_v1.mjs';
 import {evaluateAreaFrame} from '../../../web/map_infographic_v1/area_core_v3.mjs';
 import {analyzePresentationPrompt} from '../../universal-presentation-v2/presentation_prompt.mjs';
 import {canonicalJSON,pointInCountry} from '../../universal-presentation-v2/region_source.mjs';
@@ -38,20 +39,31 @@ check('real country polygon retained; artificial rectangles and counts removed',
  for(const {scene}of scenes){
   assert.equal(scene.geometries.length,2);
   const country=scene.geometries.find(g=>g.id==='COUNTRY_NAM');
-  const border=scene.geometries.find(g=>g.id==='NAM_BOUNDARY');
+  const border=scene.geometries.find(g=>g.id==='NAM_COAST_ACCENT');
   assert.equal(geometrySHA(country.geometry),polygonSHA);
-  assert.deepEqual(border.geometry,{type:'LineString',coordinates:country.geometry.coordinates[0]});
+  assert.deepEqual(border.geometry,{type:'LineString',coordinates:country.geometry.coordinates[0].slice(140,155)});
+  assert.equal(border.geometry.coordinates.length,15);
+  assert(border.geometry.coordinates.length<=128,'Existing area line capacity is preserved');
   assert(scene.areas.every(a=>a.geometry_ref==='COUNTRY_NAM'));
-  assert(scene.front_lines.every(f=>f.geometry_ref==='NAM_BOUNDARY'));
+  assert(scene.front_lines.every(f=>f.geometry_ref==='NAM_COAST_ACCENT'));
   assert.equal(scene.routes?.length??0,0);assert.equal(scene.metrics?.length??0,0);
   for(const location of scene.locations)assert(pointInCountry(location.anchor,
    {geometry_type:country.geometry.type,coordinates:country.geometry.coordinates}),location.id);
   assert(country.geometry.coordinates[0].some(p=>JSON.stringify(p)===JSON.stringify(
    scene.locations.find(l=>l.id==='NAM_COAST').anchor)));
+  assert(border.geometry.coordinates.some(p=>JSON.stringify(p)===JSON.stringify(
+   scene.locations.find(l=>l.id==='NAM_COAST').anchor)));
  }
  assert(presentations.every(p=>p.labels.items.every(l=>l.role!=='NUMERIC')));
  assert.equal(input.data.simulationType,'GENERAL');
  assert(input.data.scenes.every(s=>s.facts.source_notes.every(n=>n.note.includes('not historical'))));
+});
+check('new coast accent compiles inside the unchanged existing area line capacity',()=>{
+ for(const {scene}of scenes){
+  const engines=compileExistingEnginePlan(scene);
+  assert.equal(engines.plans.length,1);
+  assert.equal(engines.plans[0].engine,'EXISTING_AREA_V3');
+ }
 });
 check('source-state, color, country label and camera seam are continuous',()=>{
  assert.equal(assertPresentationBoundaryContinuity(
