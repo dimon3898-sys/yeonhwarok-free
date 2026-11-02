@@ -1,0 +1,81 @@
+name: WORLD ENGINE reference label quality overlay once
+on:
+  push:
+    branches: [quality/reference-labels-20261103-a1]
+    paths: ['.github/workflows/world-engine-reference-label-quality-once.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-reference-label-quality-20261103-a1
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  quality-overlay-once:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == 'f8c59c69103e722c460942618a08c269b9370be2' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE_LABEL_QUALITY_ONCE_20261103'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/reference-label-quality-v1/
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/region_source_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            world-simulation-shorts-engine/recovery/reference-director-v1/director_events.mjs
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+            world-simulation-shorts-engine/recovery/label355-publication-v1/retain_label355_image.py
+            world-simulation-shorts-engine/web/map_infographic_v1/renderer.mjs
+      - name: Use supported containerd image store for the preserved deep parent
+        run: |
+          docker info --format '{{json .DriverStatus}}'
+          sudo python3 - <<'PYCONFIG'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json'); d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PYCONFIG
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}' | tee "$RUNNER_TEMP/quality-docker-storage.txt"
+          python3 - <<'PYCHECK'
+          import json,subprocess
+          d=json.loads(subprocess.check_output(['docker','info','--format','{{json .DriverStatus}}']))
+          assert ['driver-type','io.containerd.snapshotter.v1'] in d,d
+          PYCHECK
+      - name: Check sealed new bytes, build and retain one overlay, publish once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          QUALITY_EXPECTED_PARENT: 'f8c59c69103e722c460942618a08c269b9370be2'
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-label-quality-v1/build_once.py run
+      - name: Preserve evidence after success or failure
+        if: always() && !cancelled()
+        uses: actions/upload-artifact@v4
+        with:
+          name: world-engine-quality-labels-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/quality-labels-evidence/
+            ${{ runner.temp }}/quality-labels-retention/*.json
+            ${{ runner.temp }}/quality-labels-context/Dockerfile
+          if-no-files-found: error
+          retention-days: 1
+# Exact parent is filled only after new focused tests and source seal are reviewed.
+# No GPU, scene render, old PASS suite, deployment or existing tag mutation.
