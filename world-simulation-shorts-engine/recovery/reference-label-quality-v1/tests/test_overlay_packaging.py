@@ -31,7 +31,9 @@ class QualityOverlayTest(unittest.TestCase):
  def test_overlay_only_and_preserved_startup(self):
   result=self.prepare();docker=(Path(self.tmp.name)/'context/Dockerfile').read_text()
   self.assertEqual(docker.splitlines()[0],'FROM '+build.PARENT)
-  self.assertEqual(docker.count('\nCOPY '),len(self.plan['overlay']))
+  self.assertEqual(docker.count('\nCOPY '),1)
+  self.assertNotIn('--chmod=0644',docker)
+  self.assertTrue(all(p.stat().st_mode & 0o777 == 0o755 for p in (Path(self.tmp.name)/'context').rglob('*') if p.is_dir()))
   self.assertNotIn('\nRUN ',docker)
   self.assertEqual(result['runtimeSourceRows'],355+len(self.plan['addedRuntimeSources']))
   self.assertEqual(result['entrypoint'][:7],['/usr/bin/tini','-g','--','/usr/bin/python3','-I','-B',build.IMAGE_ROOT+'/'+build.BOOTSTRAP])

@@ -39,6 +39,7 @@ def main():
             '--network', 'none', '--read-only', '--user', '1000:1000', '--cap-drop', 'ALL',
             '--security-opt', 'no-new-privileges', '--shm-size', '1g',
             '--tmpfs', '/tmp:rw,nosuid,size=512m',
+            '--tmpfs', '/home/engine:rw,nosuid,uid=1000,gid=1000,mode=0700,size=128m',
             '--tmpfs', '/workspace:rw,nosuid,uid=1000,gid=1000,mode=0755,size=1536m',
             '-e', 'NVIDIA_VISIBLE_DEVICES=void', '-e', 'PYTHONDONTWRITEBYTECODE=1',
             '-e', 'WORLD_ENGINE_NODE_DEPS=/opt/rtx-package/repo/cinematic-world-map', *mounts,
