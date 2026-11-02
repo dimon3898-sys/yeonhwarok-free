@@ -1,0 +1,59 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_LABEL_QUALITY_PACKAGING_REVIEW_V1",
+  "result": "PASS",
+  "reviewer": "quality_review",
+  "scope": "NEW_CONTAINERD_ARCHIVE_IDENTITY_AND_PREPUBLICATION_GUARDS_ONLY",
+  "reviewedFiles": [
+    {
+      "path": "retain_quality_image.py",
+      "sha256": "4f1a3ad51e1f885c8f5780cbb8caf0b75fc61fda83d22081a2c60a5c79c32621"
+    },
+    {
+      "path": "build_once.py",
+      "sha256": "a365e6be3e28f9c51db9d77707fde412bc5991806b637c4e2bf014c9314e2436"
+    },
+    {
+      "path": "tests/test_retention_identity.py",
+      "sha256": "b248eceb703d5a0d1c9458a26a2144af8bb33a80869869ea2b933b5b00cef1cb"
+    }
+  ],
+  "testCommand": "python -B -m unittest discover -s quality-work/repo/world-simulation-shorts-engine/recovery/reference-label-quality-v1/tests -p test_retention_identity.py -v",
+  "testResult": {
+    "passed": 9,
+    "failed": 0,
+    "skipped": 0,
+    "finalReviewRuns": 1,
+    "recordWrittenFromExistingResultWithoutRerun": true,
+    "testNames": [
+      "test_legacy_config_identity_compatible",
+      "test_missing_layer_rejected",
+      "test_one_platform_index_descriptor_identity",
+      "test_same_size_layer_corruption_rejected",
+      "test_single_platform_oci_manifest_id_is_not_config_id",
+      "test_swapped_compatible_layers_rejected",
+      "test_unknown_archive_identity_is_preserved_then_blocked",
+      "test_wrong_archive_root_rejected",
+      "test_wrong_config_descriptor_rejected"
+    ]
+  },
+  "reviewedChecks": [
+    "Every OCI layer blob is stream-hashed against its descriptor digest.",
+    "Docker-compatible Layers entries match the ordered OCI blob paths.",
+    "Duplicate tar members are rejected.",
+    "Exactly one archive root and one linux/amd64 image descriptor are admitted.",
+    "Retained PASS status, containerd identity mode, image ID, root digest and RootFS diff IDs are checked against the candidate before tagging and pushing.",
+    "Unknown archive identity is quarantined and uploaded before blocking publication.",
+    "Workflow activation is pinned to the frozen parent, exact activation message and first run attempt.",
+    "The derivative image uses one additive COPY layer and one build/push invocation."
+  ],
+  "counts": {
+    "gpuExecutions": 0,
+    "imageBuilds": 0,
+    "ghcrPublications": 0,
+    "oldPASSSuitesRerun": 0
+  },
+  "limitations": [
+    "Synthetic archive tests and source review do not establish real image build or publication success.",
+    "No NVIDIA rendering or reference-video quality validation was performed."
+  ]
+}

@@ -33,7 +33,7 @@ def main():
         'set -euo pipefail',
         'mkdir -m 700 /workspace/quality-private',
         'node ' + tests + 'test_quality_scene.mjs --private-root=/workspace/quality-private --public-root=/out --output=/out/scene',
-        'node ' + tests + 'pixel_quality.mjs --prepared=/out/scene/PREPARED.json --output=/out/pixels --deps-root=/opt/rtx-package --chromium=/usr/bin/chromium',
+        'node ' + tests + 'pixel_quality.mjs --prepared=/out/scene/PREPARED.json --output=/out/pixels --deps-root=/opt/rtx-package/repo/cinematic-world-map --chromium=/usr/bin/chromium',
     ])
     args = ['docker', 'run', '--rm', '--name', 'we-quality-cpu-' + os.environ['GITHUB_RUN_ID'],
             '--network', 'none', '--read-only', '--user', '1000:1000', '--cap-drop', 'ALL',
@@ -41,7 +41,7 @@ def main():
             '--tmpfs', '/tmp:rw,nosuid,size=512m',
             '--tmpfs', '/workspace:rw,nosuid,uid=1000,gid=1000,mode=0755,size=1536m',
             '-e', 'NVIDIA_VISIBLE_DEVICES=void', '-e', 'PYTHONDONTWRITEBYTECODE=1',
-            '-e', 'WORLD_ENGINE_NODE_DEPS=/opt/rtx-package', *mounts,
+            '-e', 'WORLD_ENGINE_NODE_DEPS=/opt/rtx-package/repo/cinematic-world-map', *mounts,
             '--entrypoint', '/bin/bash', PARENT, '-c', command]
     result = subprocess.run(args, timeout=600)
     # Only public new test evidence; private working sources stay inside disposable tmpfs.

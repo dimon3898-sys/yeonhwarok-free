@@ -1,0 +1,64 @@
+{
+  "schema": "WORLD_ENGINE_QUALITY_CPU_HARNESS_BLOCK_V1",
+  "runId": 41531504665,
+  "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/41531504665",
+  "status": "HARNESS_SETUP_CORRECTED_PIXEL_EXECUTION_PENDING",
+  "failure": {
+    "code": "MODULE_NOT_FOUND",
+    "module": "playwright",
+    "stage": "PIXEL_HARNESS_DEPENDENCY_LOAD",
+    "incorrectRequireRoot": "/opt/rtx-package/package.json",
+    "source": "Parent-reported A3 job log; before browser launch"
+  },
+  "cause": "The new free CPU harness supplied the image package root instead of the preserved successful capture Node dependency root.",
+  "correction": {
+    "file": "run_cpu_focus.py",
+    "changedFields": [
+      "pixel_quality.mjs --deps-root",
+      "WORLD_ENGINE_NODE_DEPS"
+    ],
+    "before": "/opt/rtx-package",
+    "after": "/opt/rtx-package/repo/cinematic-world-map",
+    "module": "playwright",
+    "reinstall": false,
+    "productionBrowserChanged": false,
+    "runtimeChanged": false
+  },
+  "dependencyEvidence": {
+    "sourceRef": "c4850f853152b467507d53cefb0ed05befc0f562",
+    "path": "world-simulation-shorts-engine/recovery/aviation-gpu-execution-evidence-20261030/ENVIRONMENT_OBSERVATIONS.json",
+    "successEnvironmentVariable": "WORLD_ENGINE_NODE_DEPS",
+    "value": "/opt/rtx-package/repo/cinematic-world-map",
+    "productionLoader": "capture_vulkan.generated.mjs createRequire(depsRoot/package.json).require(playwright)",
+    "moduleResolutionAfterCorrection": "NOT_RUN"
+  },
+  "reusedScenePass": {
+    "status": "PASS",
+    "sourceRunId": 41531504665,
+    "inputSHA256": "dc60829dbbfcf5888ea92f10827617daa8243c7029c0c6bb1f155bcb25af302c",
+    "sourceQualificationSHA256": "2c08b676b9752abe6c1b202150eb922cb589a84aaf04f02f2bb86c97cb9e5e22",
+    "files": {
+      "SCENE_RESULT.json": "1934480b8478bc4d178fbf47b32f7b1644d8f347a43d5bf2dbb8d40bcf6a2cae",
+      "CPU_FRAME_AUDIT.json": "16ddf2546a8957f1cab3ffd40e240e147956be1fe5b3a30ca3913a6cfbef366b"
+    },
+    "frames": 300,
+    "wholeCountrySafeFootprint": "PASS",
+    "cameraCoverage": "PASS",
+    "sceneSeam": "PASS",
+    "labelPixels": "NOT_RUN"
+  },
+  "dependentHarnessReview": {
+    "sourceAliases": "FOUR_EXACT_ALIASES_MATCH_BOTH_PRODUCTION_CAPTURE_SERVERS",
+    "fontURL": "Prepared nativePlan.assets.font.url, same V3/static mounts; original bytes already qualified by Scene preparation",
+    "chromiumPath": "/usr/bin/chromium, same existing executable selector; unchanged",
+    "browserLaunchProfile": "Existing free SwiftShader options, no production NVIDIA profile change",
+    "remaining": "Actual module resolve, browser launch, HTTP asset load and pixels require next free harness execution",
+    "markerSize": "MATCH: graphic_layout.mjs profile=plan.layout.measured; markerSize=profile.markerSize??plan.layout.markerSize; measured MARKER.box[2] uses that same value; harness already uses identical expression.",
+    "runtimeArguments": "MATCH: {canvas,...segment}, same as production capture caller; layout uses segment.presentationPlan.presentation, same owner as runtime."
+  },
+  "gpuStarts": 0,
+  "imageBuilds": 0,
+  "imagePublications": 0,
+  "fullVideoRenders": 0,
+  "oldPASSReruns": 0
+}

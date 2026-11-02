@@ -142,16 +142,18 @@ def prepare(repo, context):
     need(scene == {'path':scene['path'],'bytes':len(scene_raw),'sha256':sha(scene_raw)}, 'QUALITY_SCENE_CHANGED')
     entry = entrypoint(runtime_sha, sha(overlay[STARTUP]))
     dockerfile = 'FROM ' + PARENT + '\n'
-    for name in sorted(overlay):
-        dockerfile += 'COPY --chown=0:0 --chmod=0644 ' + json.dumps(['overlay/' + name, IMAGE_ROOT + '/' + name]) + '\n'
+    # One additive layer; preserve source directory modes instead of chmod0644 on directories.
+    dockerfile += 'COPY --chown=0:0 ' + json.dumps(['overlay/', IMAGE_ROOT + '/']) + '\n'
     dockerfile += 'ENTRYPOINT ' + json.dumps(entry) + '\n'
     need(sum(map(len, overlay.values())) < 3 * 1024**2, 'CONTEXT_SIZE_LIMIT')
     context.mkdir(parents=True, mode=0o755)
     for name, raw in {**{'overlay/' + n:b for n,b in overlay.items()}, 'Dockerfile':dockerfile.encode()}.items():
         path = context / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(raw); path.chmod(0o644)
+    for path in context.rglob('*'):
+        if path.is_dir(): path.chmod(0o755)
     return {**plan, 'parentDigest':PARENT_DIGEST, 'entrypoint':entry,
             'dockerfileSHA256':sha(dockerfile.encode()), 'unchangedSourceRowsReused':355-len(changed),
-            'browserOptionsUnchanged':True, 'captureSourceUnchanged':False, 'captureSourceChange':'EXACT_REFERENCE_DIRECTOR_FILE_ALIAS_ONLY', 'oldPASSReruns':0, 'gpuExecutions':0}
+            'newFilesystemLayers':1, 'browserOptionsUnchanged':True, 'captureSourceUnchanged':False, 'captureSourceChange':'EXACT_REFERENCE_DIRECTOR_FILE_ALIAS_ONLY', 'oldPASSReruns':0, 'gpuExecutions':0}
 
 
 def focused_validation(repo, plan):
@@ -193,7 +195,7 @@ def registry(reference):
         token = json.load(response)['token']
     req = urllib.request.Request('https://ghcr.io/v2/' + PACKAGE + '/manifests/' + reference,
         headers={'Authorization': 'Bearer ' + token,
-                 'Accept': 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json'})
+                 'Accept': 'application/vnd.docker.distribution.manifest.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json'})
     with urllib.request.urlopen(req, timeout=45) as response:
         raw = response.read(2 * 1024**2)
         digest = response.headers.get('Docker-Content-Digest')
@@ -217,12 +219,12 @@ def absent(tag):
 
 
 def retention(repo, temp):
-    file = repo / (REC + 'label355-publication-v1/retain_label355_image.py')
+    file = repo / (HERE + 'retain_quality_image.py')
     spec = importlib.util.spec_from_file_location('_quality_labels_reused_image_retention', file)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     module.ROOT = temp / 'quality-labels-retention'
-    module.ROOT.mkdir()
+    module.ROOT.mkdir(exist_ok=True)
     module.SOURCE = os.environ['GITHUB_SHA']
     module.PARENT = PARENT_DIGEST
     module.RELEASE_TAG = 'quality-labels-image-backup-' + os.environ['GITHUB_RUN_ID']
@@ -254,6 +256,8 @@ def main_run():
         tag_name = 'quality-labels-v1-' + os.environ['GITHUB_RUN_ID']
         target = IMAGE + ':' + tag_name
         absent(tag_name)
+        driver_status = json.loads(docker('info', '--format', '{{json .DriverStatus}}'))
+        need(['driver-type','io.containerd.snapshotter.v1'] in driver_status, 'CONTAINERD_IMAGE_STORE_REQUIRED')
         docker_root = docker('info', '--format', '{{.DockerRootDir}}')
         need(shutil.disk_usage(docker_root).free >= 12 * 1024**3, 'PREPULL_CAPACITY')
         auth_dir = temp / 'quality-labels-docker-auth'
@@ -274,13 +278,20 @@ def main_run():
         local_tag = 'world-engine-quality-labels:unpublished-' + os.environ['GITHUB_RUN_ID']
         os.environ['TAG'] = local_tag
         write('BUILD_ATTEMPT.json', {'attempt': 1, 'tag': local_tag})
-        docker_once(['build', '--network', 'none', '--pull=false', '-t', local_tag, str(context)])
+        docker_once(['build', '--platform', 'linux/amd64', '--provenance=false', '--sbom=false', '--network', 'none', '--pull=false', '-t', local_tag, str(context)])
         keep.archive()
         candidate = json.loads(docker('image', 'inspect', local_tag))[0]
+        retained = keep.read('RETENTION_RESULT.json')
+        need(retained.get('status') == 'PASS' and retained.get('identityMode') == 'CONTAINERD_DESCRIPTOR_AND_CONFIG' and
+             retained.get('imageID') == candidate['Id'] and
+             retained.get('archiveRootDigest') == candidate['Id'] and
+             retained.get('rootFSDiffIDs') == candidate['RootFS']['Layers'] and
+             re.fullmatch(r'sha256:[a-f0-9]{64}',retained.get('configDigest','')), 'ARCHIVE_CANDIDATE_IDENTITY_BEFORE_PUBLICATION')
         expected_config = dict(parent['Config'])
         expected_config['Entrypoint'] = plan['entrypoint']
         need(candidate['Config'] == expected_config, 'NEW_CONFIG_DIFFERS_BEYOND_STARTUP_HASHES')
         need(candidate['RootFS']['Layers'][:len(parent['RootFS']['Layers'])] == parent['RootFS']['Layers'], 'PARENT_LAYERS_NOT_PRESERVED')
+        need(len(candidate['RootFS']['Layers']) == len(parent['RootFS']['Layers']) + 1, 'EXACT_ONE_ADDITIVE_LAYER_REQUIRED')
         probe = "import hashlib,json,pathlib; p=json.loads(" + repr(json.dumps(plan['overlay'])) + "); root=pathlib.Path(" + repr(IMAGE_ROOT) + "); assert all((lambda b:len(b)==r['bytes'] and hashlib.sha256(b).hexdigest()==r['sha256'])((root/r['path']).read_bytes()) for r in p); assert len(json.loads((root/" + repr(RUNTIME) + ").read_bytes())['files'])==" + str(plan['runtimeSourceRows']) + "; print('QUALITY_LABELS_CHANGED_FILES_MATCH')"
         need(docker('run', '--rm', '--network', 'none', '--read-only', '--user', '1000:1000', '--entrypoint', '/usr/bin/python3', local_tag, '-I', '-B', '-c', probe) == 'QUALITY_LABELS_CHANGED_FILES_MATCH', 'CANDIDATE_CHANGED_FILES')
         write('CANDIDATE.json', {'status': 'PASS', 'imageID': candidate['Id'], 'parentDigest': PARENT_DIGEST,
@@ -297,9 +308,17 @@ def main_run():
         raw, digest = registry(tag_name)
         pinned, confirmed = registry(digest)
         manifest = json.loads(raw)
-        need(raw == pinned and digest == confirmed and manifest['config']['digest'] == candidate['Id'], 'REMOTE_VERIFIED_IDENTITY')
+        archive_identity = keep.read('RETENTION_RESULT.json')
+        need(raw == pinned and digest == confirmed and digest == archive_identity['archiveRootDigest'] == candidate['Id'], 'REMOTE_ROOT_DESCRIPTOR_IDENTITY')
+        if 'manifests' in manifest:
+            need(len(manifest['manifests']) == 1 and manifest['manifests'][0]['digest'] == archive_identity['imageManifestDigest'], 'REMOTE_SINGLE_PLATFORM_IDENTITY')
+            image_raw, image_digest = registry(archive_identity['imageManifestDigest'])
+            manifest = json.loads(image_raw)
+            need(image_digest == archive_identity['imageManifestDigest'], 'REMOTE_IMAGE_MANIFEST_IDENTITY')
+        need(manifest['config']['digest'] == archive_identity['configDigest'], 'REMOTE_CONFIG_IDENTITY')
         old_tag()
         write('RESULT.json', {'status': 'PASS', 'tag': target, 'digest': digest, 'imageID': candidate['Id'],
+              'configDigest': archive_identity['configDigest'], 'imageManifestDigest': archive_identity['imageManifestDigest'],
               'sourceCommit': os.environ['GITHUB_SHA'], 'imageRelease': keep.read('RETENTION_RESULT.json')['releaseURL'],
               'builds': 1, 'publications': 1, 'retries': 0, 'gpuExecutions': 0,
               'oldTagUnchanged': True, 'oldPASSReruns': 0, 'remoteStudioVerified': False,
