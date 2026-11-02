@@ -16,6 +16,8 @@ The country polygon is the preserved 235-point `COUNTRY_NAM` ring, unchanged fro
 
 `GENERAL` with `SYNTHETIC_TEST` data mode denotes authored presentation states, colors and ordered dates under the existing source policy. It does **not** claim that geography is invented, or that state dates describe war, sovereignty, occupation or observed border change. The existing generic area-state backend is named `WAR`; no engine or fact-admission policy is changed for this geographic showcase.
 
+The cartographic country-name anchor is `[20.2,-18.8]`, verified inside the unchanged country polygon. A5's actual-font layout found that the previous annotation point `[20.2,-19.8]` caused the country card to collide with Windhoek's label at frame 60, move right, and remain there through frame 149 under normal layout hysteresis; a fresh Scene then preferred the above slot at frame 150. Moving only this authored annotation north removes that collision. Windhoek, the coast point, country geometry, camera and layout engine are unchanged; new focused CPU validation must confirm the corrected seam.
+
 Only one actual country polygon is colored. No rectangular synthetic territory, invented numeric count, unsupported local detail, false 85 m measurement, count-up effect or new region dataset is introduced. Local reference zoom cannot be promised from this regional source and the unchanged full-country safety constraint. The candidate aims to test the missing visible styling and coordinated sequence first.
 
 ## Focused evidence

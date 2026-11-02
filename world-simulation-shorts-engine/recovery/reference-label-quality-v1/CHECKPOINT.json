@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_REFERENCE_LABEL_QUALITY_CHECKPOINT_V1",
-  "status": "CANDIDATE_SOURCE_AND_CPU_SCENE_PASS_PIXEL_PENDING_NOT_DEPLOYABLE",
-  "recordedAt": "2026-11-03T06:55:49.325169+09:00",
+  "status": "CANDIDATE_ANNOTATION_SEAM_FIX_READY_PENDING_ACTUAL_FONT_CPU_CONFIRMATION",
+  "recordedAt": "2026-11-03T07:05:47.201216+09:00",
   "sourceBaseCommit": "f276f19fc3c61c77e17e3683a8b8302523a379dc",
   "verifiedCandidateSourceCommit": "681504861c6926cd8fa49401fd04653932c94d43",
   "scope": "New opt-in quality Scene and existing map/label pixel consumer connections; no paid GPU execution authorized.",
@@ -15,8 +15,8 @@
   ],
   "candidateScene": {
     "path": "QUALITY_LABELS_10S.json",
-    "sha256": "dc60829dbbfcf5888ea92f10827617daa8243c7029c0c6bb1f155bcb25af302c",
-    "normalizedSHA256": "ab6079d04a1a4de3d94e043c66af2cf80cb87a54a651712cada4b82a16fd6d47",
+    "sha256": "281250a9f3c866d4d0a424da0d06a6e9a3cf4e2ab31660b879657e7ab0b3a24e",
+    "normalizedSHA256": "ead4c4f8beb8b541aa221366cdb249f20253eb70a2866f377a784cadfb9bc7c7",
     "countryPolygonSHA256": "dce5948b914856654d0018bf361bbb581a8a4cc39b43fca4bdb457ce0f8bedd8",
     "width": 1080,
     "height": 1920,
@@ -30,7 +30,12 @@
     "countryPolygonChanged": false,
     "coastAccent": "Exact contiguous COUNTRY_NAM outer-ring vertices [140,155); 15 points, existing line capacity unchanged",
     "measurementLine": "NOT_INCLUDED_NO_SOURCE_BOUND_METRIC",
-    "semantics": "GENERAL/SYNTHETIC_TEST denotes authored display dates/colors; real source polygon is preserved, no historical sovereignty or war claim."
+    "semantics": "GENERAL/SYNTHETIC_TEST denotes authored display dates/colors; real source polygon is preserved, no historical sovereignty or war claim.",
+    "previousSHA256": "dc60829dbbfcf5888ea92f10827617daa8243c7029c0c6bb1f155bcb25af302c",
+    "countryNameAnchor": [
+      20.2,
+      -18.8
+    ]
   },
   "lockedOriginalPass": {
     "policy": "Valid original-image/source evidence reused without rerun; not a claim that the new candidate has passed GPU or visual review.",
@@ -99,9 +104,27 @@
       "gpu": "NOT_RUN"
     },
     "scopeDistinction": "These 300 CPU metadata frames qualify the changed candidate. The old successful CPU/render PASS was not rerun.",
-    "pixelStatus": "PENDING_HARNESS_DEPENDENCY_ROOT_FIX",
-    "pixelBlocker": "The software pixel harness selected the wrong dependency root; source qualification and candidate scene preparation had already passed.",
-    "referenceVideoQuality": "NOT_RUN_REQUIRES_FUTURE_GPU_VIDEO_REVIEW"
+    "pixelStatus": "PENDING_AFTER_A5_COUNTRY_LABEL_SEAM_FIX",
+    "pixelBlocker": "A5 actual font/pixels exposed country layout slot change at the 150-frame seam; minimum input-only cartographic anchor fix prepared.",
+    "referenceVideoQuality": "NOT_RUN_REQUIRES_FUTURE_GPU_VIDEO_REVIEW",
+    "verifiedInputSHA256": "dc60829dbbfcf5888ea92f10827617daa8243c7029c0c6bb1f155bcb25af302c",
+    "currentInputPreparation": "PENDING_NEW_CANDIDATE_ACTUAL_SOURCE_CPU_CHECK",
+    "annotationSeamRepair": {
+      "evidence": "evidence/A5_COUNTRY_LABEL_SEAM.json",
+      "from": [
+        20.2,
+        -19.8
+      ],
+      "to": [
+        20.2,
+        -18.8
+      ],
+      "actualCountryMembership": "PASS",
+      "cachedActualMetricReplay": "PASS_ALL_300_COUNTRY_SLOTS_ABOVE_AND_EXACT_SEAM",
+      "freshActualFontAndPixels": "NOT_RUN",
+      "countryGeometryAndRealLocationsUnchanged": true,
+      "cameraAndLayoutEngineUnchanged": true
+    }
   },
   "image": {
     "status": "NOT_BUILT_PENDING_REQUIRED_PIXEL_PASS",
@@ -126,7 +149,7 @@
     "oldPassReruns": 0
   },
   "remaining": [
-    "Complete the corrected software pixel harness using the prepared actual-source candidate; retain measured-font layout and sparse-frame evidence",
+    "Run focused CPU confirmation of the country annotation anchor fix with actual font and sparse pixels; reuse unchanged successful source/layout feature evidence.",
     "Only after all required free checks pass, use the authorized single new image build/publication, preserve full image backup and verify digest identity",
     "Prepare gCube image/digest settings while preserving Storage, command, ports and stopped GPU state",
     "Obtain separate paid-execution approval before rendering the candidate; compare actual resulting video with 64306.mp4"

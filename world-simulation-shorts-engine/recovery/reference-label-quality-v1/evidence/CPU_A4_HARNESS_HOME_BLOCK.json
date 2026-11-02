@@ -1,0 +1,49 @@
+{
+  "schema": "WORLD_ENGINE_QUALITY_CPU_HARNESS_HOME_BLOCK_V1",
+  "status": "CPU_HARNESS_BROWSER_HOME_BLOCKED_FIX_PREPARED",
+  "runId": 41532985875,
+  "jobId": 125577667999,
+  "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/41532985875",
+  "jobURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/41532985875/job/125577667999",
+  "sourceCommit": "445575b2d42e66deae7ab6c8fbffa1d5dbd46a56",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf",
+  "evidenceSource": "GitHub workflow job logs read directly; bounded exact excerpts only",
+  "failure": {
+    "stage": "BROWSER_LAUNCH_BEFORE_PAGE",
+    "message": "browserType.launch: Target page, context or browser has been closed",
+    "stderr": [
+      "2026-11-02T21:57:56.9984599Z [pid=41][err] mkdir: cannot create directory '/home/engine/.local': Read-only file system",
+      "2026-11-02T21:57:56.9985299Z [pid=41][err] chrome_crashpad_handler: --database is required"
+    ],
+    "processExit": "2026-11-02T21:57:57.0000026Z   - [pid=41] <process did exit: exitCode=null, signal=SIGTRAP>",
+    "exitCode": null,
+    "signal": "SIGTRAP"
+  },
+  "confirmedCondition": "The new free CPU harness mounts a read-only container root and did not provide a writable /home/engine; the browser launcher failed creating /home/engine/.local and crashpad reported a missing database.",
+  "limits": "This is a free test-harness filesystem setup failure; it does not establish a new production WebGL2, map, label or renderer failure.",
+  "correction": {
+    "owner": "root",
+    "file": "run_cpu_focus.py",
+    "scope": "Disposable free CPU container only",
+    "tmpfs": "/home/engine:rw,nosuid,uid=1000,gid=1000,mode=0700,size=128m",
+    "plannedAction": "Add this single writable tmpfs mount; preserve read-only root and all existing security flags.",
+    "HOMEEnvironmentChanged": false,
+    "productionBrowserOptionsChanged": false,
+    "productionRuntimeChanged": false,
+    "reinstall": false,
+    "result": "NOT_RUN_AFTER_FIX"
+  },
+  "reuse": {
+    "scenePASS": "Existing A3 Scene and all-300-frame CPU metadata PASS remain valid; see CPU_A3_HARNESS_BLOCK.json",
+    "sourceInputSHA256": "dc60829dbbfcf5888ea92f10827617daa8243c7029c0c6bb1f155bcb25af302c",
+    "oldPASSReruns": 0
+  },
+  "counts": {
+    "gpuStarts": 0,
+    "imageBuilds": 0,
+    "imagePublications": 0,
+    "fullVideoRenders": 0
+  },
+  "pixelValidation": "NOT_RUN_BROWSER_LAUNCH_BLOCKED",
+  "referenceVideoQuality": "NOT_RUN"
+}
