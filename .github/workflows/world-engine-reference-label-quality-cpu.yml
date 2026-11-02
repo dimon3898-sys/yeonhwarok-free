@@ -32,6 +32,24 @@ jobs:
             world-simulation-shorts-engine/recovery/reference-director-v1/director_events.mjs
             world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
             world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+      - name: Use supported containerd image store for the preserved deep parent
+        run: |
+          docker info --format '{{json .DriverStatus}}'
+          sudo python3 - <<'PYCONFIG'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json'); d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PYCONFIG
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}' | tee "$RUNNER_TEMP/quality-docker-storage.txt"
+          python3 - <<'PYCHECK'
+          import json,subprocess
+          d=json.loads(subprocess.check_output(['docker','info','--format','{{json .DriverStatus}}']))
+          assert ['driver-type','io.containerd.snapshotter.v1'] in d,d
+          PYCHECK
       - name: Pull unchanged production parent for CPU-only tests
         run: docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf
       - name: New Scene and changed consumers only
