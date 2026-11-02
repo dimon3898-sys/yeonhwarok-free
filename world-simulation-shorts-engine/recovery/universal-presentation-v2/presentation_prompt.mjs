@@ -210,8 +210,8 @@ function deriveCamera(nl,scene,region,trace,issues,field){
  trace.push({field:field+'.camera',origin:'NL_DISPLAY_INTENT_FRAMED_FROM_SUPPLIED_GEOMETRY',value:copy(result),worldFactCreated:false});return result;
 }
 function localPresentation(shared,override,nl,scene,region,trace,issues,field){
- unknown(override,['camera','territoryColors','highlights','initialStateVisibility','labels'],field,issues);
- const value={};for(const key of ['camera','territoryColors','highlights','initialStateVisibility','labels'])if(override?.[key]!==undefined)value[key]=copy(override[key]);else if(shared[key]!==undefined)value[key]=copy(shared[key]);
+ unknown(override,['camera','territoryColors','highlights','initialStateVisibility','labels','mapStyle'],field,issues);
+ const value={};for(const key of ['camera','territoryColors','highlights','initialStateVisibility','labels','mapStyle'])if(override?.[key]!==undefined)value[key]=copy(override[key]);else if(shared[key]!==undefined)value[key]=copy(shared[key]);
  if(value.camera===undefined)value.camera=deriveCamera(nl,scene,region,trace,issues,field);
  else if(has(nl,'ROUTE_FOLLOW')&&value.camera?.mode!=='ROUTE_FOLLOW')issues.push(issue('CONFLICT','NATURAL_CAMERA_MODE_CONFLICT',field+'.camera','Natural-language route following conflicts with the attached keyframe camera. Neither is silently ignored.',{requestedMode:'ROUTE_FOLLOW',attachedMode:value.camera?.mode}));
  if(value.camera?.mode==='KEYFRAMES'&&Array.isArray(value.camera.keyframes)){
@@ -279,7 +279,7 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
  result.simulationType=data.simulationType;result.normalizedDataSHA256=hash(data);result.totalFrames=data.durationSeconds*data.fps;
  unknown(envelope.region,['center','bbox','countryId','countryName','sourceId','crs','legacyProfileId'],'$.region',result.issues);
  if(!object(envelope.region)||!point(envelope.region.center)||!Array.isArray(envelope.region.bbox)||envelope.region.bbox.length!==4||!envelope.region.bbox.every(Number.isFinite))result.issues.push(issue('NEEDS_INPUT','EXPLICIT_REGION_REQUIRED','$.region','Supply the source-covered center and [west,south,east,north] map range; places are not geocoded or guessed.',{center:[0,0],bbox:[-5,-8,5,8],crs:'EPSG:4326',sourceId:'AUTO'}));
- unknown(envelope.presentation,['camera','territoryColors','highlights','initialStateVisibility','sceneOverrides','transitions','labels'],'$.presentation',result.issues);
+ unknown(envelope.presentation,['camera','territoryColors','highlights','initialStateVisibility','sceneOverrides','transitions','labels','mapStyle'],'$.presentation',result.issues);
  const shared=envelope.presentation??{},ids=new Set(Array.isArray(data.scenes)?data.scenes.map(x=>x?.sceneId).filter(text):[]);
  unknown(shared.sceneOverrides,[...ids],'$.presentation.sceneOverrides',result.issues);
  validateExplicitSpans(nl,data,envelope.region,result.issues);

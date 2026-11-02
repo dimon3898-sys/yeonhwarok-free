@@ -404,6 +404,9 @@
               },
               "labels": {
                 "$ref": "#/$defs/presentationLabels"
+              },
+              "mapStyle": {
+                "$ref": "#/$defs/presentationMapStyle"
               }
             },
             "required": []
@@ -438,6 +441,9 @@
         },
         "labels": {
           "$ref": "#/$defs/presentationLabels"
+        },
+        "mapStyle": {
+          "$ref": "#/$defs/presentationMapStyle"
         }
       },
       "required": []
@@ -1512,6 +1518,19 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 100
+              },
+              "style": {
+                "const": "REFERENCE_V1"
+              },
+              "pin": {
+                "enum": [
+                  "HERO",
+                  "CONTEXT",
+                  "NONE"
+                ]
+              },
+              "reveal": {
+                "const": "GRAPHEME_POP"
               }
             },
             "required": [
@@ -1546,6 +1565,27 @@
                     ]
                   }
                 }
+              },
+              {
+                "if": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "pin"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "reveal"
+                      ]
+                    }
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "style"
+                  ]
+                }
               }
             ]
           }
@@ -1556,6 +1596,27 @@
         "items"
       ],
       "description": "Explicit optional visible-label consumer; location/event/timing bindings are validated against the compiled Scene."
+    },
+    "presentationMapStyle": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preset": {
+          "const": "COUNTRY_FOCUS_V1"
+        },
+        "revealFrames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 240
+        },
+        "countryFill": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "preset"
+      ]
     }
   }
 }

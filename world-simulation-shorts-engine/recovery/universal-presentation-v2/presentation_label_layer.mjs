@@ -1,7 +1,8 @@
 /** Additive measured glyph layer. The existing camera and renderer own projection.
  * No browser/GPU is created here; a caller supplies its already verified renderer.
  */
-import {validateLabelText} from './presentation_labels.mjs';
+import {validateLabelText,REFERENCE_LABEL_STYLE} from './presentation_labels.mjs';
+import {authoredPinSvg,popScale,graphemes} from '../reference-director-v1/director_events.mjs';
 export const LABEL_LAYER_SCHEMA='WORLD_ENGINE_PRESENTATION_LABEL_LAYER_V1';
 export const LABEL_FONT_FAMILY='Gate1Bold';
 const roles=Object.freeze({EVENT:3,NUMERIC:2,COUNTRY:1});
@@ -28,10 +29,15 @@ function validateItem(item){
   &&item.revealFrames+item.exitFrames<item.endFrame-item.startFrame
   &&Number.isSafeInteger(item.priority)&&item.priority>=0&&item.priority<=100,'UP2_LABEL_NORMALIZED_ITEM_REQUIRED');
  validateLabelText(item.text);
+ check(item.style===undefined||item.style===REFERENCE_LABEL_STYLE,'UP2_LABEL_STYLE_UNSUPPORTED');
+ check(item.style===REFERENCE_LABEL_STYLE||item.pin===undefined&&item.reveal===undefined,'UP2_LABEL_REFERENCE_STYLE_REQUIRED');
+ check(item.pin===undefined||['CONTEXT','HERO','NONE'].includes(item.pin),'UP2_LABEL_PIN_UNSUPPORTED');
+ check(item.reveal===undefined||item.reveal==='GRAPHEME_POP','UP2_LABEL_REVEAL_UNSUPPORTED');
 }
 function measuredSize(item,width,height,measure){
- const scale=Math.min(width/1080,height/1920),preferred={COUNTRY:36,EVENT:44,NUMERIC:52}[item.role]*scale;
- const min=Math.max(10,18*scale),paddingX=16*scale,paddingY=10*scale,maxWidth=Math.min(width*.48,width-64*scale);
+ const scale=Math.min(width/1080,height/1920),reference=item.style===REFERENCE_LABEL_STYLE,
+  preferred=(reference?{COUNTRY:48,EVENT:56,NUMERIC:52}:{COUNTRY:36,EVENT:44,NUMERIC:52})[item.role]*scale;
+ const min=Math.max(10,18*scale),paddingX=(reference?24:16)*scale,paddingY=(reference?24:10)*scale,maxWidth=Math.min(width*.48,width-64*scale);
  let size=Math.max(min,preferred),advance;
  for(let i=0;i<4;i++){
   const result=measure(item.text,font(size),item.role);advance=typeof result==='number'?result:result?.width;
@@ -42,7 +48,8 @@ function measuredSize(item,width,height,measure){
  check(advance+2*paddingX<=maxWidth+1e-6,'UP2_LABEL_TEXT_DOES_NOT_FIT');
  return{width:Math.ceil(advance+2*paddingX),height:Math.ceil(size*1.4+2*paddingY),fontSize:size,font:font(size),scale,paddingX};
 }
-function candidateOffsets(role,w,h,s){
+function candidateOffsets(role,w,h,s,referencePinHeight=null){
+ if(referencePinHeight!==null)return[[-w/2,-h-referencePinHeight-12*s],[70*s,-h-40*s],[-w-70*s,-h-40*s],[-w/2,44*s],[70*s,44*s],[-w-70*s,44*s]];
  const gap=44*s;
  if(role==='COUNTRY')return[[-w/2,-h-100*s],[gap,-h-100*s],[-w-gap,-h-100*s],[-w/2,100*s],[gap,100*s],[-w-gap,100*s]];
  if(role==='NUMERIC')return[[gap,44*s],[-w-gap,44*s],[gap,-h-gap],[-w-gap,-h-gap],[-w/2,100*s]];
@@ -96,22 +103,26 @@ export function layoutLabels({items,frame,project,width=1080,height=1920,safeAre
   let projected;try{projected=project(item.anchor);}catch{throw Error('UP2_LABEL_PROJECTION_UNSUPPORTED');}
   check(point(projected),'UP2_LABEL_PROJECTION_UNSUPPORTED');
   if(!within(projected,safe)){suppressed.push({id:item.id,reason:'ANCHOR_OUTSIDE_SAFE_VIEWPORT'});continue;}
-  const size=measuredSize(item,width,height,measureText),offsets=candidateOffsets(item.role,size.width,size.height,scale);
+  const reference=item.style===REFERENCE_LABEL_STYLE,pinStyle=reference?(item.pin??'CONTEXT'):null,
+   pinWidth=(pinStyle==='HERO'?116:49)*scale,pinHeight=(pinStyle==='HERO'?151:64)*scale;
+  const size=measuredSize(item,width,height,measureText),offsets=candidateOffsets(item.role,size.width,size.height,scale,reference?(pinStyle==='NONE'?0:pinHeight):null);
   if(size.width>safe[2]-safe[0]||size.height>safe[3]-safe[1]){suppressed.push({id:item.id,reason:'LABEL_DOES_NOT_FIT_SAFE_VIEWPORT'});continue;}
   const prior=previous?.slots?.[item.id],indices=offsets.map((_,i)=>i);
   if(Number.isSafeInteger(prior)&&prior>=0&&prior<indices.length)indices.splice(indices.indexOf(prior),1),indices.unshift(prior);
-  const pinBox=[projected[0]-13*scale,projected[1]-34*scale,projected[0]+13*scale,projected[1]+scale];
+  const pinBox=reference?[projected[0]-pinWidth/2-2*scale,projected[1]-pinHeight-2*scale,projected[0]+pinWidth/2+2*scale,projected[1]+2*scale]:[projected[0]-13*scale,projected[1]-34*scale,projected[0]+13*scale,projected[1]+scale];
   const higherPins=drawn.filter(row=>row.pinDrawn).map(row=>row.pinBox),protectedAndPins=[...protectedRects,...higherPins];
   let selected;
   for(const slot of indices){
    const offset=offsets[slot],x=clamp(projected[0]+offset[0],safe[0],safe[2]-size.width),y=clamp(projected[1]+offset[1],safe[1],safe[3]-size.height);
    const rect=[x,y,x+size.width,y+size.height],gap=10*scale;
-   if(within(projected,rect)||overlap(rect,pinBox,4*scale)||protectedAndPins.some(other=>overlap(rect,other,gap))||drawn.some(other=>overlap(rect,other.box,gap)))continue;
-   const connector=connectorFor(rect,projected,protectedAndPins,drawn,2+2*scale);if(!connector)continue;
-   const pinDrawn=!pins.has(item.locationId)&&within(pinBox.slice(0,2),safe)&&within(pinBox.slice(2),safe)
+   if(within(projected,rect)||(pinStyle!=='NONE'&&overlap(rect,pinBox,4*scale))||protectedAndPins.some(other=>overlap(rect,other,gap))||drawn.some(other=>overlap(rect,other.box,gap)))continue;
+   let connector=connectorFor(rect,projected,protectedAndPins,drawn,2+2*scale);if(!connector)continue;
+   const pinDrawn=pinStyle!=='NONE'&&!pins.has(item.locationId)&&within(pinBox.slice(0,2),safe)&&within(pinBox.slice(2),safe)
     &&!protectedAndPins.some(other=>overlap(pinBox,other))&&!drawn.some(other=>overlap(pinBox,other.box));
+   if(reference&&pinDrawn){connector=connectorFor(rect,projected,[...protectedAndPins,pinBox],drawn,2+2*scale);if(!connector)continue;}
    selected={id:item.id,role:item.role,text:item.text,locationId:item.locationId,eventId:item.eventId??null,anchor:copy(item.anchor),projected:[...projected],box:rect,connector,
-    pinDrawn,pinBox:pinDrawn?pinBox:null,alpha,fontSize:size.fontSize,font:size.font,slot,priority:item.priority};
+    pinDrawn,pinBox:pinDrawn?pinBox:null,alpha,fontSize:size.fontSize,font:size.font,slot,priority:item.priority,
+    ...(reference?{style:item.style,pin:pinStyle,reveal:item.reveal??null,startFrame:item.startFrame,pinScale:item.revealFrames===1?1:popScale(frame,item.startFrame,15)}:{})};
    break;
   }
   if(!selected){suppressed.push({id:item.id,reason:'OVERLAP_WITH_HIGHER_PRIORITY_OR_PRIMARY_EVENT'});continue;}
@@ -119,6 +130,40 @@ export function layoutLabels({items,frame,project,width=1080,height=1920,safeAre
  }
  return{schema:LABEL_LAYER_SCHEMA,enabled:true,frame,width,height,safeArea:safe,visibleCount:drawn.length,drawn,suppressed,slots,
   projectionOwner:'EXISTING_CURRENT_CAMERA_PROJECT_FUNCTION',layoutPolicy:'PRIORITY_THEN_STABLE_SLOT_HYSTERESIS',gpuVerified:false};
+}
+
+const referencePinPaths=new Map();
+function paintReferencePin(context,row,s){
+ check(typeof globalThis.Path2D==='function','UP2_LABEL_REFERENCE_PIN_PATH_REQUIRED');
+ let paths=referencePinPaths.get(row.pin);
+ if(!paths){
+  // Reuse the existing authored pin outline and actual even-odd transparent hole.
+  const svg=authoredPinSvg(row.pin),data=[...svg.matchAll(/<path d="([^"]+)"/g)].map(match=>match[1]);
+  check(data.length===2,'UP2_LABEL_REFERENCE_PIN_ASSET_REQUIRED');
+  paths=data.map(value=>new Path2D(value));referencePinPaths.set(row.pin,paths);
+ }
+ const w=row.pin==='HERO'?116:49,h=row.pin==='HERO'?151:64,k=s*row.pinScale;
+ if(k<=0)return;
+ context.save();context.translate(row.projected[0],row.projected[1]);context.scale(k,k);context.translate(-w/2,-h);
+ context.fillStyle='#FEE901';context.fill(paths[0],'evenodd');context.strokeStyle='#8C8200';context.lineWidth=1.5;context.stroke(paths[1]);context.restore();
+}
+function paintReferenceText(context,row,layout,cx,cy,s){
+ context.fillStyle=row.role==='COUNTRY'?'#191c22':'#fff';
+ context.strokeStyle='#2368ff';context.lineWidth=2*s;
+ context.shadowColor='#1764ff';context.shadowBlur=row.role==='COUNTRY'?0:16*s;
+ const draw=(text,x,y)=>{if(row.role!=='COUNTRY')context.strokeText(text,x,y);context.fillText(text,x,y);};
+ if(row.reveal!=='GRAPHEME_POP'){draw(row.text,cx,cy);return;}
+ // Same ease-out and four-frame glyph beats as reference-director. Local Scene
+ // frame replaces its hardcoded reference-movie frame; full word stays reserved.
+ const parts=graphemes(row.text),total=context.measureText(row.text).width;let prefix='',beat=0;
+ for(const part of parts){
+  const advance=context.measureText(prefix).width,next=context.measureText(prefix+part).width;prefix+=part;
+  if(/^\s+$/u.test(part))continue;
+  const progress=clamp((layout.frame-row.startFrame-beat++*4)/4,0,1),k=1-(1-progress)**3;
+  if(k<=0)continue;
+  const x=cx-total/2+(advance+next)/2;
+  context.save();context.globalAlpha=row.alpha*k;context.translate(x,cy);context.scale(k,k);draw(part,0,0);context.restore();
+ }
 }
 
 /** Paint only new label glyphs/plates/pins to a transparent surface. */
@@ -135,6 +180,7 @@ export function paintLabels(context,layout){
   context.beginPath();context.moveTo(...row.connector[0]);context.lineTo(...row.connector[1]);context.stroke();
  }
  for(const row of layout.drawn)if(row.pinDrawn){
+  if(row.style===REFERENCE_LABEL_STYLE){context.globalAlpha=row.alpha;paintReferencePin(context,row,s);continue;}
   const[x,y]=row.projected,r=12*s;context.globalAlpha=row.alpha;context.fillStyle='#ffd329';context.strokeStyle='#1f2228';context.lineWidth=Math.max(1,2*s);
   context.beginPath();context.moveTo(x,y);context.bezierCurveTo(x-r*1.2,y-r*1.2,x-r,y-r*2.7,x,y-r*2.7);context.bezierCurveTo(x+r,y-r*2.7,x+r*1.2,y-r*1.2,x,y);context.closePath();context.fill();context.stroke();
   context.beginPath();context.arc(x,y-r*1.75,r*.38,0,Math.PI*2);context.fillStyle='#24262c';context.fill();
@@ -143,9 +189,11 @@ export function paintLabels(context,layout){
   const[x0,y0,x1,y1]=row.box,cx=(x0+x1)/2,cy=(y0+y1)/2;context.globalAlpha=row.alpha;context.font=row.font;context.textAlign='center';context.textBaseline='middle';
   if(row.role==='COUNTRY'){
    context.fillStyle='#fff';context.fillRect(x0,y0,x1-x0,y1-y0);context.strokeStyle='#24262c';context.lineWidth=Math.max(1,1.5*s);context.strokeRect(x0+.75*s,y0+.75*s,x1-x0-1.5*s,y1-y0-1.5*s);
-   context.fillStyle='#191c22';context.fillText(row.text,cx,cy);
+   if(row.style===REFERENCE_LABEL_STYLE){context.save();paintReferenceText(context,row,layout,cx,cy,s);context.restore();}
+   else{context.fillStyle='#191c22';context.fillText(row.text,cx,cy);}
   }else{
-   context.lineWidth=Math.max(2,6*s);context.strokeStyle='#171a20';context.strokeText(row.text,cx,cy);context.fillStyle='#fff';context.fillText(row.text,cx,cy);
+   if(row.style===REFERENCE_LABEL_STYLE){context.save();paintReferenceText(context,row,layout,cx,cy,s);context.restore();}
+   else{context.lineWidth=Math.max(2,6*s);context.strokeStyle='#171a20';context.strokeText(row.text,cx,cy);context.fillStyle='#fff';context.fillText(row.text,cx,cy);}
   }
  }
  context.restore();return{paintedLabels:layout.drawn.length,paintedPins:layout.drawn.filter(row=>row.pinDrawn).length};
@@ -172,19 +220,28 @@ export function createPresentationLabelPass({renderer,THREE,width=1080,height=19
  const geometry=new THREE.PlaneGeometry(width,height),material=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthTest:false,depthWrite:false,toneMapped:false,side:THREE.DoubleSide});
  const mesh=new THREE.Mesh(geometry,material);mesh.position.set(width/2,height/2,0);mesh.frustumCulled=false;
  const scene=new THREE.Scene();scene.add(mesh);const camera=new THREE.OrthographicCamera(0,width,0,height,.1,10);camera.position.z=5;camera.updateMatrixWorld();
- let previous=null,disposed=false;
- return{
-  draw({labels,scene:sourceScene,frame,project,safeArea,protectedBoxes=[]}={}){
+ let previous=null,prepared=null,disposed=false;
+ function prepare({labels,scene:sourceScene,frame,project,safeArea,protectedBoxes=[]}={}){
    check(!disposed&&labels?.enabled===true&&Array.isArray(labels.items),'UP2_LABEL_ENABLED_CONTRACT_REQUIRED');
    check(renderer.autoClear===false,'UP2_LABEL_ADDITIVE_RENDERER_REQUIRED');
    check(Array.isArray(sourceScene?.locations),'UP2_LABEL_LOCATION_BINDING_REQUIRED');
    for(const item of labels.items){const location=sourceScene.locations.find(row=>row.id===item.locationId);check(location&&point(location.anchor)&&point(item.anchor)&&location.anchor.every((v,i)=>v===item.anchor[i]),'UP2_LABEL_LOCATION_BINDING_REQUIRED');}
-   const layout=layoutLabels({items:labels.items,frame,project,width,height,safeArea,protectedBoxes,previousLayout:previous,
+   prepared=layoutLabels({items:labels.items,frame,project,width,height,safeArea,protectedBoxes,previousLayout:previous,
     measureText:(text,fontValue)=>{context.font=fontValue;return context.measureText(text);}});
-   paintLabels(context,layout);previous=layout;
+   return prepared;
+ }
+ function drawPrepared(layout){
+   check(!disposed&&layout===prepared&&layout?.schema===LABEL_LAYER_SCHEMA,'UP2_LABEL_PREPARED_LAYOUT_REQUIRED');
+   check(renderer.autoClear===false,'UP2_LABEL_ADDITIVE_RENDERER_REQUIRED');
+   paintLabels(context,layout);previous=layout;prepared=null;
    if(layout.visibleCount){check(renderer.getRenderTarget?.()==null,'UP2_LABEL_CURRENT_FRAMEBUFFER_REQUIRED');texture.needsUpdate=true;renderer.resetState();renderer.render(scene,camera);}
    return layout;
-  },
-  dispose(){if(disposed)return;texture.dispose();material.dispose();geometry.dispose();disposed=true;previous=null;}
+ }
+ return{
+  // Runtime marker ownership is decided from actual admitted pins. Preparing is
+  // CPU-only and does not paint or commit hysteresis; the same result is drawn.
+  prepare,drawPrepared,
+  draw(args={}){return drawPrepared(prepare(args));},
+  dispose(){if(disposed)return;texture.dispose();material.dispose();geometry.dispose();disposed=true;previous=null;prepared=null;}
  };
 }

@@ -67,7 +67,7 @@ export async function prepareRuntimeRequest({request,cacheRoot}={}){
  return{schema:'WORLD_ENGINE_PREPARED_PRESENTATION_V2',totalFrames:request.totalFrames,transitions:copy(request.transitions),sourceInputSHA256:request.sourceInputSHA256,inputTrace:copy(request.inputTrace??null),segments,sourceBindings,sourceQualification,sourceQualificationWireJSON,sourceQualificationSHA256:hash(sourceQualificationWireJSON)};
 }
 async function makeLoopback(payload,cacheRoot){
- const trace=[],aliases=new Map([['/three.js',path.join(ENGINE,'web/vendor/three/0.170.0/three.module.js')],['/web/map_infographic_v1/graphic_layout.mjs',path.join(ENGINE,'recovery/g2-final-recovery-v1/layout_extension.mjs')],['/web/map_infographic_v1/graphic_layout_legacy.mjs',path.join(ENGINE,'web/map_infographic_v1/graphic_layout.mjs')]]);
+ const trace=[],aliases=new Map([['/recovery/reference-director-v1/director_events.mjs',path.join(ENGINE,'recovery/reference-director-v1/director_events.mjs')],['/three.js',path.join(ENGINE,'web/vendor/three/0.170.0/three.module.js')],['/web/map_infographic_v1/graphic_layout.mjs',path.join(ENGINE,'recovery/g2-final-recovery-v1/layout_extension.mjs')],['/web/map_infographic_v1/graphic_layout_legacy.mjs',path.join(ENGINE,'web/map_infographic_v1/graphic_layout.mjs')]]);
  for(const segment of payload.segments)aliases.set(segment.sourceStyle.terrainAsset.url,segment.sourceStyle.terrainAsset.file);
  const server=createServer(async(req,res)=>{let target='';try{
   const url=new URL(req.url,'http://localhost');target=decodeURIComponent(url.pathname);check(['GET','HEAD'].includes(req.method)&&!url.search&&!target.includes('..')&&!target.includes('\\'),'UP2_HTTP_READ_ONLY');let raw,type='application/octet-stream';

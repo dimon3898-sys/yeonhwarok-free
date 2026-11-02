@@ -2,6 +2,7 @@
 export const LABEL_ROLES=Object.freeze(['COUNTRY','EVENT','NUMERIC']);
 export const MAX_LABELS=16;
 export const MAX_LABEL_GRAPHEMES=24;
+export const REFERENCE_LABEL_STYLE='REFERENCE_V1';
 const own=(value,key)=>Object.prototype.hasOwnProperty.call(value,key);
 const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value)&&[Object.prototype,null].includes(Object.getPrototypeOf(value));
 const check=(value,code)=>{if(!value)throw Error(code);};
@@ -33,7 +34,7 @@ export function validateLabelSpec(spec,{scene,highlights=[]}={}){
  check(Array.isArray(spec.items)&&spec.items.length>=1&&spec.items.length<=MAX_LABELS,'PRESENTATION_LABEL_CAPACITY');
  const frames=scene.timing.total_frames,seen=new Set();
  const items=spec.items.map(item=>{
-  keys(item,['id','role','text','locationId','anchor','eventId','startFrame','endFrame','revealFrames','exitFrames','priority'],'PRESENTATION_LABEL');
+  keys(item,['id','role','text','locationId','anchor','eventId','startFrame','endFrame','revealFrames','exitFrames','priority','style','pin','reveal'],'PRESENTATION_LABEL');
   check(id(item.id)&&!seen.has(item.id),'PRESENTATION_LABEL_ID_INVALID');seen.add(item.id);
   check(LABEL_ROLES.includes(item.role),'PRESENTATION_LABEL_ROLE_INVALID');
   const text=validateLabelText(item.text);
@@ -48,13 +49,23 @@ export function validateLabelSpec(spec,{scene,highlights=[]}={}){
   check(Number.isSafeInteger(reveal)&&Number.isSafeInteger(exit)&&reveal>=1&&reveal<=30&&exit>=1&&exit<=30&&reveal+exit<duration,'PRESENTATION_LABEL_REVEAL_HOLD_EXIT_INVALID');
   const priority=item.priority??({COUNTRY:30,EVENT:100,NUMERIC:80}[item.role]);
   check(Number.isSafeInteger(priority)&&priority>=0&&priority<=100,'PRESENTATION_LABEL_PRIORITY_INVALID');
+  const styled=own(item,'style');
+  check(!styled||item.style===REFERENCE_LABEL_STYLE,'PRESENTATION_LABEL_STYLE_UNSUPPORTED');
+  check(styled||!own(item,'pin')&&!own(item,'reveal'),'PRESENTATION_LABEL_REFERENCE_STYLE_REQUIRED');
+  check(!own(item,'pin')||['CONTEXT','HERO','NONE'].includes(item.pin),'PRESENTATION_LABEL_PIN_UNSUPPORTED');
+  check(!own(item,'reveal')||item.reveal==='GRAPHEME_POP','PRESENTATION_LABEL_REVEAL_UNSUPPORTED');
+  if(item.reveal==='GRAPHEME_POP'){
+   const visible=[...new Intl.Segmenter('ko',{granularity:'grapheme'}).segment(text)].filter(x=>!/^\s+$/u.test(x.segment)).length;
+   check(visible*4+exit<duration,'PRESENTATION_LABEL_GLYPH_REVEAL_HOLD_REQUIRED');
+  }
   if(item.role==='COUNTRY')check(!own(item,'eventId'),'PRESENTATION_COUNTRY_LABEL_EVENT_FORBIDDEN');
   else{
    check(id(item.eventId),'PRESENTATION_LABEL_EVENT_REQUIRED');
    const events=highlights.filter(event=>event.id===item.eventId);
    check(events.length===1&&events[0].locationId===item.locationId&&Number.isSafeInteger(events[0].startFrame)&&Number.isSafeInteger(events[0].endFrame)&&item.startFrame>=events[0].startFrame&&item.endFrame<=events[0].endFrame,'PRESENTATION_LABEL_EVENT_LOCATION_OR_TIMING_MISMATCH');
   }
-  return{id:item.id,role:item.role,text,locationId:item.locationId,anchor:[...anchor],...(item.role==='COUNTRY'?{}:{eventId:item.eventId}),startFrame:item.startFrame,endFrame:item.endFrame,revealFrames:reveal,exitFrames:exit,priority};
+  return{id:item.id,role:item.role,text,locationId:item.locationId,anchor:[...anchor],...(item.role==='COUNTRY'?{}:{eventId:item.eventId}),startFrame:item.startFrame,endFrame:item.endFrame,revealFrames:reveal,exitFrames:exit,priority,
+   ...(styled?{style:REFERENCE_LABEL_STYLE,pin:item.pin??'CONTEXT',...(item.reveal?{reveal:item.reveal}:{})}:{})};
  });
  return{enabled:true,items};
 }

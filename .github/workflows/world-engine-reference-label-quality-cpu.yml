@@ -1,0 +1,76 @@
+name: WORLD ENGINE reference label quality focused CPU
+on:
+  push:
+    branches: [quality/reference-labels-20261103-a1]
+    paths:
+      - '.github/workflows/world-engine-reference-label-quality-cpu.yml'
+      - 'world-simulation-shorts-engine/recovery/reference-label-quality-v1/**'
+      - 'world-simulation-shorts-engine/recovery/universal-presentation-v2/**'
+      - 'world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/**'
+permissions:
+  contents: write
+  packages: read
+concurrency:
+  group: world-engine-reference-label-quality-cpu-20261103-a1
+  cancel-in-progress: false
+jobs:
+  focused-cpu:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      startsWith(github.event.head_commit.message, 'WORLD_ENGINE_QUALITY_CPU_')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/reference-label-quality-v1/
+            world-simulation-shorts-engine/recovery/universal-presentation-v2/
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/
+            world-simulation-shorts-engine/recovery/reference-director-v1/director_events.mjs
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json
+      - name: Pull unchanged production parent for CPU-only tests
+        run: docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:9e9301dec376a780f4fb2287fe092282baaef3d6cfdfc93532ea6763d9f9b0cf
+      - name: New Scene and changed consumers only
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-label-quality-v1/run_cpu_focus.py
+      - name: Retain focused evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-labels-cpu-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/quality-cpu-evidence/CPU_WORKFLOW_RESULT.json
+            ${{ runner.temp }}/quality-cpu-evidence/scene/SCENE_RESULT.json
+            ${{ runner.temp }}/quality-cpu-evidence/scene/ANALYSIS.json
+            ${{ runner.temp }}/quality-cpu-evidence/scene/CPU_FRAME_AUDIT.json
+            ${{ runner.temp }}/quality-cpu-evidence/pixels/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Permanent new evidence release
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'quality-cpu-evidence'
+          if not p.exists(): raise SystemExit(0)
+          selected=[x for x in p.rglob('*') if x.is_file() and x.name not in ('PREPARED.json','REQUEST.json')]
+          rows=[{'path':str(x.relative_to(p)),'bytes':x.stat().st_size,'sha256':hashlib.sha256(x.read_bytes()).hexdigest()} for x in selected]
+          (p/'SHA256.json').write_text(json.dumps(rows,indent=2)+'\n')
+          with zipfile.ZipFile(p.parent/'QUALITY_CPU_EVIDENCE.zip','x',zipfile.ZIP_DEFLATED) as z:
+              for f in selected+[p/'SHA256.json']: z.write(f,f.relative_to(p))
+          (p.parent/'quality-cpu-notes.txt').write_text('Focused CPU evidence for new opt-in map/label Scene. No GPU, image build or full video render. A CPU PASS is not reference-video quality approval.\n')
+          PY
+          if [ -f "$RUNNER_TEMP/QUALITY_CPU_EVIDENCE.zip" ]; then
+            gh release create "quality-labels-cpu-${GITHUB_RUN_ID}" "$RUNNER_TEMP/QUALITY_CPU_EVIDENCE.zip" --target "$GITHUB_SHA" --title "Quality label CPU evidence ${GITHUB_RUN_ID}" --notes-file "$RUNNER_TEMP/quality-cpu-notes.txt"
+          fi
+      - name: Stop only disposable CPU test container
+        if: always()
+        run: |
+          if docker container inspect "we-quality-cpu-${GITHUB_RUN_ID}" >/dev/null 2>&1; then docker rm -f "we-quality-cpu-${GITHUB_RUN_ID}"; fi
+# No GPU device request, image build, GHCR push, workload change, or old PASS suite.

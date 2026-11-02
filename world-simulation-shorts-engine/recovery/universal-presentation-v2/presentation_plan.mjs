@@ -22,9 +22,17 @@ export function unprojectBounds(bounds,pixel){return[bounds[0]+pixel[0]/1080*(bo
 
 /** Unknown/unconsumed controls fail rather than being accepted as metadata. */
 export function validatePresentation(input,{scene,region}={}){
- keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels'],'PRESENTATION');
+ keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels','mapStyle'],'PRESENTATION');
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
+ if(input.mapStyle!==undefined){
+  keys(input.mapStyle,['preset','revealFrames','countryFill'],'PRESENTATION_MAP_STYLE');
+  ok(input.mapStyle.preset==='COUNTRY_FOCUS_V1','PRESENTATION_MAP_STYLE_PRESET_UNSUPPORTED');
+  const revealFrames=input.mapStyle.revealFrames??18,countryFill=input.mapStyle.countryFill??false;
+  ok(Number.isSafeInteger(revealFrames)&&revealFrames>=1&&revealFrames<=n,'PRESENTATION_MAP_REVEAL_RANGE_INVALID');
+  ok(typeof countryFill==='boolean','PRESENTATION_MAP_FILL_BOOLEAN_REQUIRED');
+  result.mapStyle={preset:'COUNTRY_FOCUS_V1',revealFrames,countryFill};
+ }
  result.initialStateVisibility=input.initialStateVisibility??'REVEAL';
  ok(['REVEAL','PRESERVE_PROVIDED'].includes(result.initialStateVisibility),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
  if(result.initialStateVisibility==='PRESERVE_PROVIDED')ok(scene.event_type==='WAR'&&scene.timing.event_start_frame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
@@ -65,6 +73,63 @@ export function validatePresentation(input,{scene,region}={}){
  const cuts=input.transitions??[];ok(Array.isArray(cuts),'PRESENTATION_TRANSITION_ARRAY_REQUIRED');
  for(const t of cuts){keys(t,['type','frame'],'PRESENTATION_TRANSITION');ok(t.type==='CUT'&&Number.isSafeInteger(t.frame)&&t.frame>=0,'PRESENTATION_CUT_REQUIRED');}
  result.transitions=copy(cuts);return result;
+}
+
+/** Connect the existing country material/ribbon/glow passes only when authored.
+ * Native fixed-position text stays hidden: moving labels have their own owner. */
+export function presentationNativeMapOptions(presentation,frame){
+ const style=presentation?.mapStyle,primary=style?Math.min(1,(frame+1)/style.revealFrames):0;
+ return{mode:style?.countryFill?0:1,graphics:false,boundaries:!!style,glow:!!style,dem:false,
+  primaryMaterial:style?.countryFill?primary:0,reveal:{primary,marker:0,location:0,country:0,title:0,disclosure:0}};
+}
+
+/** The opt-in pin consumer owns a matching active highlight; avoid two markers.
+ * Unmatched supplied markers and all legacy label inputs retain their owner. */
+export function presentationReplacesHighlightMarker(presentation,highlight,frame){
+ return presentation?.labels?.enabled===true&&presentation.labels.items.some(item=>
+  item.style==='REFERENCE_V1'&&(item.pin??'CONTEXT')!=='NONE'&&
+  item.locationId===highlight.locationId&&item.eventId===highlight.id&&frame>=item.startFrame&&frame<item.endFrame);
+}
+
+/** Resolve pin ownership from drawable layout, retaining a native fallback.
+ * Reservations only grow; at most one pass per candidate can be added. */
+export function resolvePresentationMarkerLayout(markerRows,prepare){
+ const candidates=markerRows.filter(row=>row.qualityPinCandidate===true);
+ if(!candidates.length)return{markerRows,layout:null};
+ let rows=markerRows.filter(row=>row.qualityPinCandidate!==true),layout;
+ for(let iteration=0;iteration<=candidates.length;iteration++){
+  layout=prepare(rows);ok(Array.isArray(layout?.drawn),'PRESENTATION_PREPARED_LABEL_LAYOUT_REQUIRED');
+  const fallback=candidates.filter(marker=>!rows.includes(marker)&&!layout.drawn.some(label=>label.pinDrawn&&label.eventId===marker.id&&label.locationId===marker.locationId));
+  if(!fallback.length)return{markerRows:rows,layout};
+  rows=[...rows,...fallback];
+ }
+ throw Error('PRESENTATION_MARKER_LAYOUT_DID_NOT_SETTLE');
+}
+
+/** Protect the SAME current-projection country ribbons from area overpainting.
+ * Geographic rings are reused unchanged, including holes; no derived outlines. */
+export function presentationBoundarySegments({presentation,nativePlan,project}={}){
+ if(!presentation?.mapStyle)return[];
+ const theme=nativePlan.theme,result=[];
+ for(const record of nativePlan.geometries){
+  const primary=record.id===nativePlan.primary,secondary=nativePlan.secondary.includes(record.id);
+  if(!primary&&!secondary)continue;
+  const type=record.geometry_type??record.type,parts=type==='Polygon'?[record.coordinates]:type==='MultiPolygon'?record.coordinates:null;
+  ok(parts,'PRESENTATION_NATIVE_BOUNDARY_GEOMETRY_REQUIRED');
+  const width=primary?(theme.primaryEdgeWidth??theme.primaryWidth+2):(theme.secondaryEdgeWidth??theme.secondaryWidth+2),
+   // The existing separable blur samples to 3.230769 radii on each axis.
+   // Include diagonal support and bilinear taps rather than masking only the core.
+   glowSupport=primary?(theme.glowWidth??theme.primaryWidth+3)/2+Math.SQRT2*3.230769*theme.glowRadius+2:0,
+   radius=Math.max(width/2,glowSupport);
+  ok(Number.isFinite(radius)&&radius>=0&&radius<=64,'PRESENTATION_NATIVE_BOUNDARY_SUPPORT_INVALID');
+  for(const polygon of parts)for(const ring of polygon)for(let i=1;i<ring.length;i++){
+   const a=project(ring[i-1]),b=project(ring[i]);
+   ok(a.every(Number.isFinite)&&b.every(Number.isFinite),'PRESENTATION_NATIVE_BOUNDARY_PROJECTION_INVALID');
+   result.push({a,b,radiusPx:radius});
+  }
+ }
+ ok(result.length>0&&result.length<=8192,'PRESENTATION_NATIVE_BOUNDARY_CAPACITY');
+ return result;
 }
 
 export function boundsFromKeyframe(key,closest){
