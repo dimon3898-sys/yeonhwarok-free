@@ -1,0 +1,130 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_LABEL_FOCUSED_RESULT_V1",
+  "status": "PASS",
+  "recordedAtUTC": "2026-11-02T22:07:48.217268+00:00",
+  "evidenceAction": "PRESERVE_PREVIOUSLY_COMPLETED_LOCAL_EXECUTION_WITHOUT_RERUN",
+  "executionTimestamp": "NOT_RECORDED_IN_EXEC_OUTPUT",
+  "observedExecutionChunk": "9122d9",
+  "scope": "CHANGED_OPT_IN_LABEL_CONTRACT_AND_PIXEL_CONSUMER_ONLY",
+  "command": "QUALITY_CANVAS_MODULE=/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/@napi-rs/canvas QUALITY_BASELINE_LABEL_LAYER=/workspace/scratch/3db2c07c4108/label-advice/code-cache/presentation_label_layer.mjs node --test recovery/reference-label-quality-v1/tests/test_quality_labels.mjs",
+  "result": {
+    "tests": 11,
+    "pass": 11,
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "exitCode": 0
+  },
+  "checks": [
+    {
+      "status": "PASS",
+      "check": "Legacy normalized contract and layout do not acquire reference effects"
+    },
+    {
+      "status": "PASS",
+      "check": "Reference style is explicit, closed and must hold after final glyph"
+    },
+    {
+      "status": "PASS",
+      "check": "Full-size hero footprint reserved while existing pop curve plays"
+    },
+    {
+      "status": "PASS",
+      "check": "Current-camera projection moves reference pin and full word together"
+    },
+    {
+      "status": "PASS",
+      "check": "Existing reference SVG path and even-odd transparent hole reach canvas consumer"
+    },
+    {
+      "status": "PASS",
+      "check": "Per-glyph beats reach canvas calls, reserve full word and attach blue halo"
+    },
+    {
+      "status": "PASS",
+      "check": "One-frame country reveal preserves visible card and pin across an otherwise identical Scene seam"
+    },
+    {
+      "status": "PASS",
+      "check": "Overlap reservations and safe viewport suppress impossible quality placement"
+    },
+    {
+      "status": "PASS",
+      "check": "Exit timing clears reference label and pin output after endFrame"
+    },
+    {
+      "status": "PASS",
+      "check": "Runtime can decide marker fallback from actual prepared pins before one paint; stale/pre-consumed/disposed prepared layouts rejected"
+    },
+    {
+      "status": "PASS",
+      "check": "Actual CPU raster: hollow hero pin, blue halo, staggered glyph pixels, unchanged legacy layout and pixel hash"
+    }
+  ],
+  "pixelEvidence": {
+    "scope": "CPU_COMPONENT_PIXELS_ASCII_FIXTURE_ONLY",
+    "blueHaloPixels": 11519,
+    "settledWhiteGlyphPixels": 2125,
+    "earlyWhiteGlyphPixels": 750,
+    "heroHoleAlpha": 0,
+    "pinnedKoreanFontVerified": false,
+    "legacyPixelEquivalent": true,
+    "GPU": false
+  },
+  "sourceFiles": [
+    {
+      "path": "recovery/universal-presentation-v2/presentation_labels.mjs",
+      "sha256": "31ec7613113c2b872187bfdb194be5ef52d75829dd69f0e29916bca05622ac1d",
+      "bytes": 6183
+    },
+    {
+      "path": "recovery/universal-presentation-v2/presentation_label_layer.mjs",
+      "sha256": "bb0437e12780441458dd38b69cf6472aad09e063cfd0fb678810aa5452423391",
+      "bytes": 18723
+    },
+    {
+      "path": "recovery/reference-label-quality-v1/tests/test_quality_labels.mjs",
+      "sha256": "22b64e7a4782ddb231a769a5e3b7da4730b54bfd7180c96c2289b8994f3e2eda",
+      "bytes": 12569
+    },
+    {
+      "path": "recovery/reference-director-v1/director_events.mjs",
+      "sha256": "8dd029dedf2524e47dbbb89480f14d62da98be5ec985afc9050c385e67c70151",
+      "bytes": 22195
+    }
+  ],
+  "hashObservation": "Hashes recorded at preservation; owning agent made no changes to these source/test files after the reported 11/11 execution.",
+  "baseline": {
+    "commit": "f276f19fc3c61c77e17e3683a8b8302523a379dc",
+    "files": [
+      {
+        "path": "recovery/universal-presentation-v2/presentation_label_layer.mjs",
+        "sha256": "b8548171d76041f77906f657bfffaa7c64d7997a58d8f23a2e1af6e03d2169b0",
+        "bytes": 14214
+      },
+      {
+        "path": "recovery/universal-presentation-v2/presentation_labels.mjs",
+        "sha256": "c4527e3fc66e95e7f527be6bb17f2ecc780267747d1a627a530c95dcd31e6d58",
+        "bytes": 5302
+      }
+    ]
+  },
+  "limitations": [
+    "Local CPU raster used explicit ASCII fixture because pinned Korean font was not locally available at that execution. Actual pinned-font Scene layout and sampled pixels are separate CI evidence.",
+    "This result does not claim actual GPU rendering, reference-video parity, or continuity of the authored two-Scene camera/layout; the latter is separately checked by the Scene pixel tests."
+  ],
+  "countsForEvidencePreservation": {
+    "testExecutions": 0,
+    "GPUStarts": 0,
+    "renders": 0,
+    "builds": 0,
+    "oldPASSSuiteReruns": 0
+  },
+  "countsForReportedExecution": {
+    "focusedTestExecutions": 1,
+    "GPUStarts": 0,
+    "renders": 0,
+    "builds": 0,
+    "oldPASSSuiteReruns": 0
+  }
+}
