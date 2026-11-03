@@ -73,46 +73,119 @@
     {
       "finding": "Progress 1 is emitted after native frame0 stability proof, frame0 draw/readback/hash/PNG, checkpoint file write, and encoder stdin write plus required drain. It does not prove one encoded video frame.",
       "source": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
-      "lines": [102, 127],
+      "lines": [
+        102,
+        127
+      ],
       "incidentApplication": "Conditional on reported state reflecting this unchanged deployed progress contract; raw progress not retrieved."
     },
     {
       "finding": "elapsedSeconds is saved on state writes. During CAPTURE a progress change triggers the write; status returns the stored value. Frozen 12.43 seconds is last saved elapsed time, not proof of process age or death.",
       "sources": [
-        {"path": "../codex-to-gcube-handoff-v1/controller/nvidia_worker.py", "lines": [190, 233]},
-        {"path": "../codex-to-gcube-handoff-v1/controller/nvidia_backend.py", "lines": [262, 297]}
+        {
+          "path": "../codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+          "lines": [
+            190,
+            233
+          ]
+        },
+        {
+          "path": "../codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+          "lines": [
+            262,
+            297
+          ]
+        }
       ]
     },
     {
       "finding": "Supervisor enforces the approved total capture deadline, parent liveness and owned descendant cleanup. seconds is capped at 600. Individual page.evaluate and encoder drain do not have separate deadlines.",
       "sources": [
-        {"path": "../codex-to-gcube-handoff-v1/controller/lease_supervisor.py", "lines": [245, 360]},
-        {"path": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs", "lines": [118, 136]}
+        {
+          "path": "../codex-to-gcube-handoff-v1/controller/lease_supervisor.py",
+          "lines": [
+            245,
+            360
+          ]
+        },
+        {
+          "path": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+          "lines": [
+            118,
+            136
+          ]
+        }
       ],
       "incidentDeadline": "NOT_RETRIEVED"
     },
     {
       "finding": "CAPTURE_RECEIPT and FRAME_EVIDENCE are written in finally after browser cleanup. Browser diagnostic snapshots are written on exit/failure. Forced container stop can preclude completed evidence/export; this is a mechanism, not confirmed incident causation.",
       "sources": [
-        {"path": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs", "lines": [133, 136]},
-        {"path": "../codex-to-gcube-handoff-v1/controller/lease_supervisor.py", "lines": [270, 350]},
-        {"path": "../codex-to-gcube-handoff-v1/controller/nvidia_worker.py", "lines": [261, 269]},
-        {"path": "../codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py", "lines": [14, 81]}
+        {
+          "path": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+          "lines": [
+            133,
+            136
+          ]
+        },
+        {
+          "path": "../codex-to-gcube-handoff-v1/controller/lease_supervisor.py",
+          "lines": [
+            270,
+            350
+          ]
+        },
+        {
+          "path": "../codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+          "lines": [
+            261,
+            269
+          ]
+        },
+        {
+          "path": "../codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py",
+          "lines": [
+            14,
+            81
+          ]
+        }
       ]
     },
     {
       "finding": "Quality change to generated capture is one director_events HTTP alias. Capture loop, encoder handoff, progress and total deadline logic were not changed. New label/map loops are finite and synchronous; no direct stall defect established.",
       "sources": [
-        {"path": "../reference-label-quality-v1/evidence/capture_vulkan.generated.mjs.patch"},
-        {"path": "../universal-presentation-v2/presentation_label_layer.mjs", "lines": [87, 240]},
-        {"path": "../universal-presentation-v2/presentation_plan.mjs", "lines": [96, 106]}
+        {
+          "path": "../reference-label-quality-v1/evidence/capture_vulkan.generated.mjs.patch"
+        },
+        {
+          "path": "../universal-presentation-v2/presentation_label_layer.mjs",
+          "lines": [
+            87,
+            240
+          ]
+        },
+        {
+          "path": "../universal-presentation-v2/presentation_plan.mjs",
+          "lines": [
+            96,
+            106
+          ]
+        }
       ]
     },
     {
       "finding": "Prior A6 quality PASS covers 300 layout frames and 22 sparse software-drawn PNGs, not continuous NVIDIA capture-to-FFmpeg encoding. Frame0 PNG is 2770634 bytes. No previous PASS is invalidated by a failure outside that scope.",
       "sources": [
-        {"path": "../reference-label-quality-v1/evidence/A6_PIXEL_RESULT.json"},
-        {"path": "../reference-label-quality-v1/tests/pixel_quality.mjs", "lines": [83, 100]}
+        {
+          "path": "../reference-label-quality-v1/evidence/A6_PIXEL_RESULT.json"
+        },
+        {
+          "path": "../reference-label-quality-v1/tests/pixel_quality.mjs",
+          "lines": [
+            83,
+            100
+          ]
+        }
       ]
     },
     {
@@ -132,16 +205,22 @@
     "browserOptions": "UNCHANGED",
     "timeouts": "UNCHANGED",
     "scene": "UNCHANGED",
-    "nextMinimumAction": "Read-only recovery of the stopped Pod private job records through gCube's official retained-data/support path, without restart or paid reproduction.",
+    "nextMinimumAction": "Await provider response to the submitted one-time read-only recovery request; no duplicate request or paid reproduction.",
     "recordsNeeded": [
-      "state.json", "actual-progress.json", "BROWSER_DIAGNOSTIC.json",
-      "LEASE_SUPERVISOR_RESULT.json", "FIRST_CAPTURE_FAILURE.json", "GPU_ALLOCATION.json",
-      "capture/CAPTURE_RECEIPT.json", "capture/CAPTURE_OPERATION_CHECKPOINT.json",
-      "capture/FRAME_EVIDENCE.json", "capture/FRAME_000.png existence/size/SHA256",
+      "state.json",
+      "actual-progress.json",
+      "BROWSER_DIAGNOSTIC.json",
+      "LEASE_SUPERVISOR_RESULT.json",
+      "FIRST_CAPTURE_FAILURE.json",
+      "GPU_ALLOCATION.json",
+      "capture/CAPTURE_RECEIPT.json",
+      "capture/CAPTURE_OPERATION_CHECKPOINT.json",
+      "capture/FRAME_EVIDENCE.json",
+      "capture/FRAME_000.png existence/size/SHA256",
       "worker.log and lease-supervisor.stderr.log: only relevant sanitized excerpts, not credentials or full environment"
     ],
     "ifProviderCannotRecover": "Do not repeat the same render. Reuse the existing operation recorder with safe persistent retrieval before any separately approved single GPU attempt. Exact recorder wiring is not implemented or claimed fixed here.",
-    "supportMessageSent": false,
+    "supportMessageSent": true,
     "gpuRenderRecoveryPass": false
   },
   "preservation": {
@@ -162,5 +241,15 @@
     "operationalCodeEdits": 0,
     "oldPassReruns": 0,
     "deploymentSettingChanges": 0
+  },
+  "supportRequest": {
+    "status": "SUBMITTED_AWAITING_PROVIDER_RESPONSE",
+    "submissionCount": 1,
+    "confirmation": "문의가 접수 되었습니다.",
+    "url": "https://gcube.ai/demand/ns74a360e2/qna",
+    "title": "[워크로드 #5373] 1/300 프레임 진행 정체 — 종료 Pod 보존 기록 회수 요청",
+    "recordedAt": "2026-11-03T12:16:09.217Z",
+    "receipt": "SUPPORT_REQUEST.json",
+    "requestId": null
   }
 }
