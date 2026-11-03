@@ -1,0 +1,166 @@
+{
+  "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
+  "dateKST": "2026-11-03",
+  "status": "BLOCKED_INCIDENT_RAW_EVIDENCE_UNAVAILABLE",
+  "jobId": "studio-dd436342d68d518586dec4781daff497",
+  "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
+  "previousCheckpoint": "../reference-label-quality-v1/CHECKPOINT.json",
+  "incident": {
+    "source": "USER_REPORTED_SCREEN_AND_OBSERVATION",
+    "state": "RUNNING",
+    "phase": "CAPTURE",
+    "processedFrames": 1,
+    "totalFrames": 300,
+    "completedScenes": 0,
+    "totalScenes": 2,
+    "elapsedSecondsApproximate": 12.43,
+    "unchangedMinutesApproximate": 5,
+    "errorCode": null,
+    "rawStateRetrieved": false,
+    "rawCaptureReceiptRetrieved": false,
+    "cause": "UNCONFIRMED",
+    "previousWebGLFailureRecurrence": "NOT_ESTABLISHED"
+  },
+  "gCubeObservation": {
+    "url": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+    "state": "종료",
+    "nodeId": "—",
+    "containerTerminalEnabled": false,
+    "sshEnabled": false,
+    "savedImage": "dimon3898-sys/world-simulation-shorts-engine:quality-labels-v1-41535102499",
+    "latestDeploymentKST": "2026-11-03T20:22:04+09:00",
+    "latestEventNode": "wn7e9b3dce",
+    "latestEventPod": "dep5373-5c666fdc85-s699m",
+    "startEventKST": "2026-11-03T20:21:59+09:00",
+    "stopEventKST": "2026-11-03T20:30:32+09:00",
+    "stopEventText": "ADDED 20:30:32 Stopping container dep5373-0; type Normal; component kubelet; target Pod",
+    "incidentToPodBinding": "LATEST_DEPLOYMENT_CORRELATION_ONLY_NO_JOB_RAW_BINDING",
+    "availableManagementEvidence": "Container lifecycle events; menu contains edit/delete. No application log download exposed in inspected detail and event surfaces.",
+    "paidGpuStartedByThisReview": false,
+    "settingsChanged": false,
+    "studioAccessAttempts": 0
+  },
+  "preservedImage": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-labels-v1-41535102499",
+    "digest": "sha256:6b21a2c21d6c26bcb6ba91ee7c20c13d2deee8d53e30cf60fc5842bdd810d4b7",
+    "digestEvidence": "Existing published-image evidence reused; stopped Pod runtime digest not independently retrieved.",
+    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/quality-labels-image-backup-41535102499"
+  },
+  "storageInvestigation": {
+    "provider": "Dropbox",
+    "directory": "/WORLD_ENGINE",
+    "exactJobIdSearch": "NO_MATCH",
+    "directChildrenListed": 180,
+    "paginationComplete": true,
+    "expectedDiagnosticDirectory": "capture-diagnostic-studio-dd436342d68d518586dec4781daff497",
+    "expectedDiagnosticDirectoryPresent": false,
+    "existingOtherJobDiagnosticDirectories": 7,
+    "otherJobReceiptsUsedAsIncidentEvidence": false,
+    "recentDeploymentExportDirectoriesInspected": [
+      "world-engine-export-ce0e73347e4f56f7852f3f89",
+      "world-engine-export-a2cbb8fd9702110fbf211af1",
+      "world-engine-export-c36c634c13912571b03726a2",
+      "world-engine-export-df9f330ada63dfbe1d622f1d",
+      "world-engine-export-0fb8d236da7ea9d7ab52948e"
+    ],
+    "recentExportsResult": "Each contains exactly one storage-preflight JSON, 897 bytes; no capture receipt, progress record, application log or MP4.",
+    "privateJobDirectory": "<actual Studio control_root>/handoff-gpu-jobs/studio-dd436342d68d518586dec4781daff497",
+    "privateJobDirectoryAbsolutePath": "NOT_RETRIEVED",
+    "privateStorageAccessibility": "BLOCKED_STOPPED_CONTAINER_TERMINAL_AND_SSH_DISABLED",
+    "absenceScope": "No incident export found in connected Dropbox folder/search. Does not prove deleted container private files never existed or provider-side recoverability."
+  },
+  "confirmedCodeFindings": [
+    {
+      "finding": "Progress 1 is emitted after native frame0 stability proof, frame0 draw/readback/hash/PNG, checkpoint file write, and encoder stdin write plus required drain. It does not prove one encoded video frame.",
+      "source": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+      "lines": [102, 127],
+      "incidentApplication": "Conditional on reported state reflecting this unchanged deployed progress contract; raw progress not retrieved."
+    },
+    {
+      "finding": "elapsedSeconds is saved on state writes. During CAPTURE a progress change triggers the write; status returns the stored value. Frozen 12.43 seconds is last saved elapsed time, not proof of process age or death.",
+      "sources": [
+        {"path": "../codex-to-gcube-handoff-v1/controller/nvidia_worker.py", "lines": [190, 233]},
+        {"path": "../codex-to-gcube-handoff-v1/controller/nvidia_backend.py", "lines": [262, 297]}
+      ]
+    },
+    {
+      "finding": "Supervisor enforces the approved total capture deadline, parent liveness and owned descendant cleanup. seconds is capped at 600. Individual page.evaluate and encoder drain do not have separate deadlines.",
+      "sources": [
+        {"path": "../codex-to-gcube-handoff-v1/controller/lease_supervisor.py", "lines": [245, 360]},
+        {"path": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs", "lines": [118, 136]}
+      ],
+      "incidentDeadline": "NOT_RETRIEVED"
+    },
+    {
+      "finding": "CAPTURE_RECEIPT and FRAME_EVIDENCE are written in finally after browser cleanup. Browser diagnostic snapshots are written on exit/failure. Forced container stop can preclude completed evidence/export; this is a mechanism, not confirmed incident causation.",
+      "sources": [
+        {"path": "../codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs", "lines": [133, 136]},
+        {"path": "../codex-to-gcube-handoff-v1/controller/lease_supervisor.py", "lines": [270, 350]},
+        {"path": "../codex-to-gcube-handoff-v1/controller/nvidia_worker.py", "lines": [261, 269]},
+        {"path": "../codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py", "lines": [14, 81]}
+      ]
+    },
+    {
+      "finding": "Quality change to generated capture is one director_events HTTP alias. Capture loop, encoder handoff, progress and total deadline logic were not changed. New label/map loops are finite and synchronous; no direct stall defect established.",
+      "sources": [
+        {"path": "../reference-label-quality-v1/evidence/capture_vulkan.generated.mjs.patch"},
+        {"path": "../universal-presentation-v2/presentation_label_layer.mjs", "lines": [87, 240]},
+        {"path": "../universal-presentation-v2/presentation_plan.mjs", "lines": [96, 106]}
+      ]
+    },
+    {
+      "finding": "Prior A6 quality PASS covers 300 layout frames and 22 sparse software-drawn PNGs, not continuous NVIDIA capture-to-FFmpeg encoding. Frame0 PNG is 2770634 bytes. No previous PASS is invalidated by a failure outside that scope.",
+      "sources": [
+        {"path": "../reference-label-quality-v1/evidence/A6_PIXEL_RESULT.json"},
+        {"path": "../reference-label-quality-v1/tests/pixel_quality.mjs", "lines": [83, 100]}
+      ]
+    },
+    {
+      "finding": "Existing capture_operation_diagnostics.mjs provides a bounded-schema recorder and atomic operation checkpoints, but generated capture does not call it. It is a reuse option for a later evidence-preservation change, not a proven stall fix or new quality regression.",
+      "source": "../codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs"
+    }
+  ],
+  "remainingCauseClasses": [
+    "Frame1 page evaluation: drawing, readback, hash or PNG conversion",
+    "Frame1 encoder pipe/drain waiting",
+    "Supervisor/worker progress propagation interruption"
+  ],
+  "decision": {
+    "runtimePatch": "NOT_JUSTIFIED_WITHOUT_INCIDENT_CALLSITE_EVIDENCE",
+    "newImage": "NOT_BUILT",
+    "focusedTests": "NOT_RUN_NO_CODE_CHANGE",
+    "browserOptions": "UNCHANGED",
+    "timeouts": "UNCHANGED",
+    "scene": "UNCHANGED",
+    "nextMinimumAction": "Read-only recovery of the stopped Pod private job records through gCube's official retained-data/support path, without restart or paid reproduction.",
+    "recordsNeeded": [
+      "state.json", "actual-progress.json", "BROWSER_DIAGNOSTIC.json",
+      "LEASE_SUPERVISOR_RESULT.json", "FIRST_CAPTURE_FAILURE.json", "GPU_ALLOCATION.json",
+      "capture/CAPTURE_RECEIPT.json", "capture/CAPTURE_OPERATION_CHECKPOINT.json",
+      "capture/FRAME_EVIDENCE.json", "capture/FRAME_000.png existence/size/SHA256",
+      "worker.log and lease-supervisor.stderr.log: only relevant sanitized excerpts, not credentials or full environment"
+    ],
+    "ifProviderCannotRecover": "Do not repeat the same render. Reuse the existing operation recorder with safe persistent retrieval before any separately approved single GPU attempt. Exact recorder wiring is not implemented or claimed fixed here.",
+    "supportMessageSent": false,
+    "gpuRenderRecoveryPass": false
+  },
+  "preservation": {
+    "originalSuccessful68819Mp4": "UNCHANGED_EXISTING_PASS_REUSED",
+    "originalAndQualityScene": "UNCHANGED",
+    "imagesAndTags": "UNCHANGED",
+    "main": "UNCHANGED",
+    "qualityCpuPass": "PRESERVED_WITH_ORIGINAL_LIMITATIONS",
+    "existingCheckpoint": "UNCHANGED",
+    "existingData": "NO_WRITE_OR_DELETE"
+  },
+  "reviewExecutionCounts": {
+    "gpuStarts": 0,
+    "gpuRenders": 0,
+    "retries": 0,
+    "imageBuilds": 0,
+    "imagePublications": 0,
+    "operationalCodeEdits": 0,
+    "oldPassReruns": 0,
+    "deploymentSettingChanges": 0
+  }
+}
