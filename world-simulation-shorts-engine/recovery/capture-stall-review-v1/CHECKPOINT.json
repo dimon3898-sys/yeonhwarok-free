@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "dateKST": "2026-11-05",
-  "status": "IMAGE_PUBLISHED_GCUBE_CONFIGURED_STOPPED_GPU_APPROVAL_REQUIRED",
+  "status": "GPU_SESSION_STOPPED_AUTH_EXPIRED_USER_MANUAL_RENDER_HANDOFF",
   "jobId": "studio-dd436342d68d518586dec4781daff497",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
   "previousCheckpoint": "../reference-label-quality-v1/CHECKPOINT.json",
@@ -205,7 +205,7 @@
     "browserOptions": "UNCHANGED",
     "timeouts": "UNCHANGED",
     "scene": "UNCHANGED",
-    "nextMinimumAction": "Obtain a new explicit paid GPU approval. In that session verify actual export_root to external storage readback using the existing storage preflight before rendering the unchanged quality 10-second scene once. No replay of valid CPU/source/image PASS.",
+    "nextMinimumAction": "User requested the unchanged quality JSON for manual rendering. Preserve stopped state; no additional agent GPU execution. Setup challenge lasts120seconds; manual login after fresh load must complete before expiry. Do not claim the capture stall fixed.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -253,7 +253,7 @@
     "receipt": "SUPPORT_REQUEST.json",
     "requestId": null
   },
-  "lastUpdatedAt": "2026-11-05T09:39:51.003325+00:00",
+  "lastUpdatedAt": "2026-11-05T12:28:13.196230+00:00",
   "freePreparation20261105": {
     "status": "FREE_FOCUSED_CHECKS_PASS_INCIDENT_CAUSE_STILL_BLOCKED",
     "sourceRef": "da86936fdfdbd33e9472b3ba80bf4ae28bfa83ac",
@@ -413,5 +413,15 @@
     "actualMountReadback": false,
     "originalStallRootCause": "UNCONFIRMED",
     "referenceQualityMp4": "NOT_PROVEN"
+  },
+  "gpuSession20261105": {
+    "result": "executions/20261105-gpu-once-a1/RESULT.json",
+    "gpuStarts": 1,
+    "renders": 0,
+    "gpuState": "STOPPED_NODE_RELEASED",
+    "storage": "NEW_PREFLIGHT_EXTERNALLY_RETRIEVED",
+    "blocker": "STUDIO_SETUP_CHALLENGE_120_SECOND_EXPIRY_DURING_SECURE_ENTRY",
+    "userNext": "Provide existing unchanged QUALITY_LABELS_10S.json for manual rendering",
+    "newAgentGpuApprovalRequired": true
   }
 }

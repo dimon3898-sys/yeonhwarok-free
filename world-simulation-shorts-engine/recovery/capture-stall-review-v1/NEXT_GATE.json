@@ -1,6 +1,6 @@
 {
   "schema": "WORLD_ENGINE_RETENTION_NEXT_GATE_V1",
-  "stage": "GCUBE_CONFIGURED_STOPPED_AWAITING_SEPARATE_GPU_APPROVAL",
+  "stage": "USER_MANUAL_RENDER_HANDOFF_AFTER_STOPPED_APPROVED_SESSION",
   "sourceCommit": "8886c902638a58c4c5fb408cb30c4e0cddea8001",
   "baseImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-labels-v1-41535102499",
   "basePublishedDigest": "sha256:6b21a2c21d6c26bcb6ba91ee7c20c13d2deee8d53e30cf60fc5842bdd810d4b7",
@@ -72,13 +72,13 @@
     "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-retention-image-backup-42002690934"
   },
   "gCubeSettings": "image/GCUBE_SETTINGS.json",
-  "gpuApproval": "NOT_GRANTED_THIS_TURN",
+  "gpuApproval": "CONSUMED_ONE_START_NO_AUTOMATIC_RESTART",
   "nextSession": {
     "resource": "RTX 4080 Super x1, existing replica1",
     "proposedMaxMinutes": 30,
     "proposedCostCapKRW": 500,
     "maxRetries": 0,
-    "approvalStatus": "PROPOSAL_ONLY_REQUIRES_EXPLICIT_USER_APPROVAL",
+    "approvalStatus": "PRIOR_APPROVAL_CONSUMED_AGENT_RESTART_REQUIRES_NEW_APPROVAL",
     "displayedRate": "252–360 KRW/hour, VAT separate; observed in gCube settings 2026-11-05",
     "steps": [
       "After approval, start existing configured workload once; do not alter Scene or browser options.",
@@ -89,5 +89,7 @@
       "On success, verify 300 frames, 10s duration, 1080x1920,30fps, full decode, external MP4 readback and reference visual quality as distinct claims.",
       "Stop the gCube workload at completion or the approved duration/cost boundary; confirm stopped and node release."
     ]
-  }
+  },
+  "lastSessionResult": "executions/20261105-gpu-once-a1/RESULT.json",
+  "manualExample": "../reference-label-quality-v1/QUALITY_LABELS_10S.json"
 }
