@@ -172,11 +172,11 @@
     "cpuRun": 42031019500,
     "gpuState": "STOPPED_NODE_UNASSIGNED",
     "jobId": "studio-3575e3b2e0c90037eadcad96e5738e86",
-    "nextGate": "APPROVED_ONE_FIX_IMAGE_PUBLICATION_THEN_STOPPED_GCUBE_CONFIGURATION",
+    "nextGate": "FRESH_GPU_APPROVAL_THEN_ACTUAL_STORAGE_CHECKPOINT_READBACK_BEFORE_ONE_10S_RENDER",
     "report": "executions/20261105-user-render-a1/REPORT.md",
     "result": "executions/20261105-user-render-a1/INCIDENT.json",
     "sourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
-    "sourceFix": "CPU_REGRESSION_PASS_NOT_DEPLOYED",
+    "sourceFix": "CPU_PASS_IMAGE_PUBLISHED_CONFIGURED_NOT_GPU_VALIDATED",
     "storageFailure": "ACTIVE_CHECKPOINT_TIMEOUT"
   },
   "dateKST": "2026-11-06",
@@ -185,8 +185,8 @@
     "focusedTests": "New incident regressions: software baseline frame1 reproduced, candidate frames0/1/2/150/151/152 completed, UID1000 terminal cleanup and slow/helper timeout contracts passed, inner fsync latency checked separately as UID0. Historical PASS suites not rerun.",
     "gpuRenderRecoveryPass": false,
     "ifProviderCannotRecover": "CLOSED_PROVIDER_CONFIRMED_UNRECOVERABLE; DO_NOT_REPEAT_RAW_RECOVERY",
-    "newImage": "APPROVED_NOT_YET_BUILT",
-    "nextMinimumAction": "Publish sealed source image once, verify retained archive and registry identities, then update only stopped workload image and matching digest fields. No GPU start.",
+    "newImage": "PUBLISHED_AND_CONFIGURED_STOPPED",
+    "nextMinimumAction": "Obtain separate GPU approval; confirm actual mounted storage and active checkpoint external readback before one unchanged 10-second job. Stop on failure; no automatic retry.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -200,22 +200,37 @@
       "capture/FRAME_000.png existence/size/SHA256",
       "worker.log and lease-supervisor.stderr.log: only relevant sanitized excerpts, not credentials or full environment"
     ],
-    "runtimePatch": "FRAME1_VISIBILITY_GUARD_AND_TERMINAL_FAILURE_STORAGE_BUDGET_FIX_CPU_VALIDATED_NOT_DEPLOYED",
+    "runtimePatch": "CPU_VALIDATED_INSTALLED_SOURCE_VERIFIED_NOT_YET_GPU_VALIDATED",
     "scene": "UNCHANGED",
     "supportMessageSent": true,
     "timeouts": "UNCHANGED"
   },
   "frame1ImageStage20261106": {
+    "actualGcubeMountReadback": false,
+    "addedLayers": 1,
     "approval": "image-frame1/APPROVAL.json",
+    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/frame1-fix-image-backup-42102096738",
+    "digest": "sha256:dd79cad7aafcd2caefb1468c95f9fc28f8834c960135c6a038e208d04d221091",
     "functionalTestsRerun": 0,
+    "gCubeSettingChanges": 1,
+    "gpuRenderRecoveryPass": false,
     "gpuRenders": 0,
     "gpuStarts": 0,
+    "imageBuilds": 1,
+    "imagePublications": 1,
+    "installedUid1000SourceCheck": "PASS",
     "maxBuilds": 1,
     "maxPublications": 1,
     "preparation": "image-frame1/PREPARATION.json",
+    "preservedParentLayers": 128,
+    "referenceQualityMp4Pass": false,
+    "result": "executions/20261106-frame1-image-42102096738/RESULT.json",
     "retries": 0,
+    "runId": 42102096738,
+    "settingsEvidence": "executions/20261106-frame1-image-42102096738/GCUBE_SETTINGS.json",
     "sourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
-    "status": "PREPARATION_COMPLETE_NOT_EXECUTED"
+    "status": "IMAGE_PUBLISHED_GCUBE_CONFIGURED_STOPPED",
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:frame1-fix-v1-42102096738"
   },
   "freePreparation20261105": {
     "executionCounts": {
@@ -378,7 +393,7 @@
     "unchangedMinutesApproximate": 5
   },
   "jobId": "studio-dd436342d68d518586dec4781daff497",
-  "lastUpdatedAt": "2026-11-06 image preparation (KST)",
+  "lastUpdatedAt": "2026-11-06 KST after image publication and settings readback",
   "preservation": {
     "existingCheckpoint": "UNCHANGED",
     "existingData": "NO_WRITE_OR_DELETE",
@@ -413,7 +428,7 @@
   },
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
-  "status": "FIX_IMAGE_AND_STOPPED_GCUBE_SETTINGS_APPROVED_PREPARATION_COMPLETE",
+  "status": "FRAME1_FIX_IMAGE_PUBLISHED_GCUBE_CONFIGURED_STOPPED_GPU_VALIDATION_PENDING",
   "storageInvestigation": {
     "absenceScope": "Provider confirms deleted container private files and stdout/stderr cannot be recovered; original individual-file existence and capture cause remain unknown.",
     "directChildrenListed": 180,

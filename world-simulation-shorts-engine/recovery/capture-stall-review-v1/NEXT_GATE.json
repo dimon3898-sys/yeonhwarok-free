@@ -3,8 +3,16 @@
   "basePublishedDigest": "sha256:534e5afd33e73b9d3f3e49db3f4a7dc63a1ee25a91457611f2d4b4fcb00e1e4c",
   "baseRuntimeDigestFromDeletedPod": "NOT_RECOVERED",
   "buildOrPublishExecuted": true,
+  "candidateConfigured": true,
   "candidateDeployed": false,
+  "candidateRuntimeStarted": false,
   "candidateSeal": "evidence/INCIDENT_SOURCE_SEAL.json",
+  "completedFixImage": {
+    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/frame1-fix-image-backup-42102096738",
+    "digest": "sha256:dd79cad7aafcd2caefb1468c95f9fc28f8834c960135c6a038e208d04d221091",
+    "result": "executions/20261106-frame1-image-42102096738/RESULT.json",
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:frame1-fix-v1-42102096738"
+  },
   "completedImage": {
     "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-retention-image-backup-42002690934",
     "digest": "sha256:534e5afd33e73b9d3f3e49db3f4a7dc63a1ee25a91457611f2d4b4fcb00e1e4c",
@@ -23,11 +31,11 @@
     "Future GPU result must prove 300 frames, full decode, reference quality and external MP4 retrieval separately"
   ],
   "cpuValidation": "executions/20261105-user-render-a1/CPU_RESULT.json",
-  "currentFixBuildOrPublishExecuted": false,
+  "currentFixBuildOrPublishExecuted": true,
   "currentImageApproval": "image-frame1/APPROVAL.json",
   "currentIncident": "executions/20261105-user-render-a1/INCIDENT.json",
   "fixSourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
-  "gCubeSettings": "image/GCUBE_SETTINGS.json",
+  "gCubeSettings": "executions/20261106-frame1-image-42102096738/GCUBE_SETTINGS.json",
   "gpuApproval": "NOT_INCLUDED_FRESH_EXPLICIT_APPROVAL_REQUIRED",
   "lastSessionResult": "executions/20261105-gpu-once-a1/RESULT.json",
   "manualExample": "../reference-label-quality-v1/QUALITY_LABELS_10S.json",
@@ -43,6 +51,7 @@
       "After approval, start existing configured workload once; do not alter Scene or browser options.",
       "Read actual bootstrap storage-preflight result and independently retrieve the newly created file from the configured external storage. A mounted-path listing alone is not a remote retention PASS.",
       "If external readback fails, stop here and stop the workload. Do not render.",
+      "Before the paid rendering job, verify one active checkpoint can be exported through the actual admitted mount and independently retrieved. CPU/local timing tests do not prove gCube FUSE retention. Stop without rendering if this gate fails.",
       "Use the existing QUALITY_LABELS_10S.json, unchanged SHA256 281250a9f3c866d4d0a424da0d06a6e9a3cf4e2ab31660b879657e7ab0b3a24e. Execute one approved 10-second quality job.",
       "On a stall or failure, preserve the existing active checkpoint and relevant fixed-schema diagnostics. Do not automatically rerender or restart GPU.",
       "On success, verify 300 frames, 10s duration, 1080x1920,30fps, full decode, external MP4 readback and reference visual quality as distinct claims.",
@@ -152,5 +161,5 @@
   "runtimeSourceManifestSHA256": "51d01e873a2901bc0b0c585cd68b034dcdd71eb5f1ed3c0301949aba7c5f0598",
   "schema": "WORLD_ENGINE_RETENTION_NEXT_GATE_V1",
   "sourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
-  "stage": "APPROVED_FIX_IMAGE_PUBLICATION_THEN_STOPPED_GCUBE_CONFIGURATION"
+  "stage": "SEPARATE_GPU_APPROVAL_REQUIRED_ACTUAL_STORAGE_BEFORE_ONE_10S_RENDER"
 }
