@@ -1,10 +1,49 @@
 {
-  "schema": "WORLD_ENGINE_RETENTION_NEXT_GATE_V1",
-  "stage": "USER_MANUAL_RENDER_HANDOFF_AFTER_STOPPED_APPROVED_SESSION",
-  "sourceCommit": "8886c902638a58c4c5fb408cb30c4e0cddea8001",
   "baseImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-labels-v1-41535102499",
   "basePublishedDigest": "sha256:6b21a2c21d6c26bcb6ba91ee7c20c13d2deee8d53e30cf60fc5842bdd810d4b7",
   "baseRuntimeDigestFromDeletedPod": "NOT_RECOVERED",
+  "buildOrPublishExecuted": true,
+  "candidateDeployed": false,
+  "candidateSeal": "evidence/INCIDENT_SOURCE_SEAL.json",
+  "completedImage": {
+    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-retention-image-backup-42002690934",
+    "digest": "sha256:534e5afd33e73b9d3f3e49db3f4a7dc63a1ee25a91457611f2d4b4fcb00e1e4c",
+    "result": "executions/20261105-image-42002690934/RESULT.json",
+    "sourceCommit": "0415d18a6a07a1216631f665a7ff9b116de150c9",
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-retention-v1-42002690934"
+  },
+  "constraints": [
+    "Preserve existing image tags, successful MP4 and quality Scene",
+    "Do not rerun historical PASS tests",
+    "Use a new immutable tag; verify changed source pins and startup chain",
+    "Check image-stage authorization and zero-cost runner eligibility before image operations",
+    "Do not start GPU without a new explicit approval specifying resource, duration, cost and retries",
+    "After approved start, confirm actual export_root mount -> external storage retrieval before rendering",
+    "If mount/active checkpoint fails, stop at that gate; do not blindly render",
+    "Future GPU result must prove 300 frames, full decode, reference quality and external MP4 retrieval separately"
+  ],
+  "currentIncident": "executions/20261105-user-render-a1/INCIDENT.json",
+  "gCubeSettings": "image/GCUBE_SETTINGS.json",
+  "gpuApproval": "CONSUMED_ONE_START_NO_AUTOMATIC_RESTART",
+  "lastSessionResult": "executions/20261105-gpu-once-a1/RESULT.json",
+  "manualExample": "../reference-label-quality-v1/QUALITY_LABELS_10S.json",
+  "nextSession": {
+    "approvalStatus": "PRIOR_APPROVAL_CONSUMED_AGENT_RESTART_REQUIRES_NEW_APPROVAL",
+    "displayedRate": "252\u2013360 KRW/hour, VAT separate; observed in gCube settings 2026-11-05",
+    "maxRetries": 0,
+    "proposedCostCapKRW": 500,
+    "proposedMaxMinutes": 30,
+    "resource": "RTX 4080 Super x1, existing replica1",
+    "steps": [
+      "After approval, start existing configured workload once; do not alter Scene or browser options.",
+      "Read actual bootstrap storage-preflight result and independently retrieve the newly created file from the configured external storage. A mounted-path listing alone is not a remote retention PASS.",
+      "If external readback fails, stop here and stop the workload. Do not render.",
+      "Use the existing QUALITY_LABELS_10S.json, unchanged SHA256 281250a9f3c866d4d0a424da0d06a6e9a3cf4e2ab31660b879657e7ab0b3a24e. Execute one approved 10-second quality job.",
+      "On a stall or failure, preserve the existing active checkpoint and relevant fixed-schema diagnostics. Do not automatically rerender or restart GPU.",
+      "On success, verify 300 frames, 10s duration, 1080x1920,30fps, full decode, external MP4 readback and reference visual quality as distinct claims.",
+      "Stop the gCube workload at completion or the approved duration/cost boundary; confirm stopped and node release."
+    ]
+  },
   "overlay": [
     {
       "bytes": 27073,
@@ -53,43 +92,7 @@
     }
   ],
   "runtimeSourceManifestSHA256": "937cee91184b3e2d578e16b954a0a547aa74601a246e36927df8363c34f31385",
-  "buildOrPublishExecuted": true,
-  "constraints": [
-    "Preserve existing image tags, successful MP4 and quality Scene",
-    "Do not rerun historical PASS tests",
-    "Use a new immutable tag; verify changed source pins and startup chain",
-    "Check image-stage authorization and zero-cost runner eligibility before image operations",
-    "Do not start GPU without a new explicit approval specifying resource, duration, cost and retries",
-    "After approved start, confirm actual export_root mount -> external storage retrieval before rendering",
-    "If mount/active checkpoint fails, stop at that gate; do not blindly render",
-    "Future GPU result must prove 300 frames, full decode, reference quality and external MP4 retrieval separately"
-  ],
-  "completedImage": {
-    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-retention-v1-42002690934",
-    "digest": "sha256:534e5afd33e73b9d3f3e49db3f4a7dc63a1ee25a91457611f2d4b4fcb00e1e4c",
-    "sourceCommit": "0415d18a6a07a1216631f665a7ff9b116de150c9",
-    "result": "executions/20261105-image-42002690934/RESULT.json",
-    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-retention-image-backup-42002690934"
-  },
-  "gCubeSettings": "image/GCUBE_SETTINGS.json",
-  "gpuApproval": "CONSUMED_ONE_START_NO_AUTOMATIC_RESTART",
-  "nextSession": {
-    "resource": "RTX 4080 Super x1, existing replica1",
-    "proposedMaxMinutes": 30,
-    "proposedCostCapKRW": 500,
-    "maxRetries": 0,
-    "approvalStatus": "PRIOR_APPROVAL_CONSUMED_AGENT_RESTART_REQUIRES_NEW_APPROVAL",
-    "displayedRate": "252–360 KRW/hour, VAT separate; observed in gCube settings 2026-11-05",
-    "steps": [
-      "After approval, start existing configured workload once; do not alter Scene or browser options.",
-      "Read actual bootstrap storage-preflight result and independently retrieve the newly created file from the configured external storage. A mounted-path listing alone is not a remote retention PASS.",
-      "If external readback fails, stop here and stop the workload. Do not render.",
-      "Use the existing QUALITY_LABELS_10S.json, unchanged SHA256 281250a9f3c866d4d0a424da0d06a6e9a3cf4e2ab31660b879657e7ab0b3a24e. Execute one approved 10-second quality job.",
-      "On a stall or failure, preserve the existing active checkpoint and relevant fixed-schema diagnostics. Do not automatically rerender or restart GPU.",
-      "On success, verify 300 frames, 10s duration, 1080x1920,30fps, full decode, external MP4 readback and reference visual quality as distinct claims.",
-      "Stop the gCube workload at completion or the approved duration/cost boundary; confirm stopped and node release."
-    ]
-  },
-  "lastSessionResult": "executions/20261105-gpu-once-a1/RESULT.json",
-  "manualExample": "../reference-label-quality-v1/QUALITY_LABELS_10S.json"
+  "schema": "WORLD_ENGINE_RETENTION_NEXT_GATE_V1",
+  "sourceCommit": "8886c902638a58c4c5fb408cb30c4e0cddea8001",
+  "stage": "FOCUSED_CPU_INCIDENT_FIX_PENDING"
 }

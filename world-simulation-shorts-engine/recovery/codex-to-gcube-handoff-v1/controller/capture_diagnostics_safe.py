@@ -10,6 +10,7 @@ import sys
 import time
 
 _JOB = re.compile(r"studio-[a-f0-9]{32}\Z")
+_ACTIVE_STORAGE_SECONDS = 15
 
 
 class ActiveCheckpointMirror:
@@ -39,7 +40,7 @@ class ActiveCheckpointMirror:
             if self.process is not None:
                 code = self.process.poll()
                 if code is None:
-                    if not self.disabled and now - self.started >= 1.0:
+                    if not self.disabled and now - self.started >= _ACTIVE_STORAGE_SECONDS:
                         self.process.kill()
                         self.disabled = True
                         self.status = "ACTIVE_CHECKPOINT_TIMEOUT"
@@ -73,7 +74,7 @@ class ActiveCheckpointMirror:
             self.process = subprocess.Popen([sys.executable, "-I", "-S",
                 str(Path(__file__).with_name("safe_capture_export.py")),
                 "--job-root", str(self.job), "--destination", str(self.export / ("capture-checkpoint-" + self.job.name)),
-                "--active-checkpoint", "--seconds", "1"], stdin=subprocess.DEVNULL,
+                "--active-checkpoint", "--seconds", str(_ACTIVE_STORAGE_SECONDS)], stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env={}, close_fds=True)
             self.started = time.monotonic()
             self.last_sequence = sequence

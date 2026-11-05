@@ -289,6 +289,9 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                 if isinstance(code, str) and re.fullmatch(r'[A-Z][A-Z0-9_]{2,120}', code) and failed_stage in allowed:
                     first_failure = {'code': code, 'stage': failed_stage}
                     atomic(Path(output) / 'FIRST_CAPTURE_FAILURE.json', first_failure)
+                    # A terminal FAILED receipt must enter owned cleanup even
+                    # when an encoder child keeps the capture process alive.
+                    reason = code
                     preserve_browser_snapshot()
                     try:
                         from capture_diagnostics_safe import preserve_before_cleanup

@@ -107,7 +107,9 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
     }
    }
    const featurePixels=factory.readPixels();let featureChangedPixels=0;for(let i=0;i<featurePixels.length;i+=4)if(featurePixels[i]!==basePixels[i]||featurePixels[i+1]!==basePixels[i+1]||featurePixels[i+2]!==basePixels[i+2]||featurePixels[i+3]!==basePixels[i+3])featureChangedPixels++;
-   if(features.some(f=>f.engine==='EXISTING_FLOW_V2'&&f.routeFraction>0)||features.some(f=>f.engine==='EXISTING_AREA_V3'&&f.sourceAreas.some(a=>a.alpha>0&&a.coverage>0)))assert(featureChangedPixels>0,'UP2_ACTUAL_FEATURE_PIXELS_MISSING');
+   // RGBA8 rounds contributions below half a channel step to zero.
+   // The draw/geometry guards still apply; do not require a changed byte before visibility.
+   if(features.some(f=>f.engine==='EXISTING_FLOW_V2'&&f.routeFraction>0)||features.some(f=>f.engine==='EXISTING_AREA_V3'&&f.sourceAreas.some(a=>a.alpha>0.5/255&&a.coverage>0)))assert(featureChangedPixels>0,'UP2_ACTUAL_FEATURE_PIXELS_MISSING');
    renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
    const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:markerRows})):null;
    gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');

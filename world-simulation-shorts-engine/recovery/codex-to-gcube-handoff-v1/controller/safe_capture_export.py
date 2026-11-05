@@ -650,14 +650,14 @@ def read_active_shared_checkpoint(directory):
             os.close(descriptor)
 
 
-def export_active_checkpoint(job_root, destination, *, deadline_seconds=1):
+def export_active_checkpoint(job_root, destination, *, deadline_seconds=15):
     """Publish only an allowlisted in-progress checkpoint, not a cleanup permit.
 
     A single atomic envelope keeps its canonical snapshot hash with its content
     even if the container stops between writes. No raw job/log data leaves.
     Production invokes this in the existing bounded, empty-environment helper.
     """
-    if type(deadline_seconds) not in (float, int) or not 0 < deadline_seconds <= 1:
+    if type(deadline_seconds) not in (float, int) or not 0 < deadline_seconds <= 15:
         raise ValueError("DIAGNOSTIC_DEADLINE_INVALID")
     until = time.monotonic() + deadline_seconds
     def check():
