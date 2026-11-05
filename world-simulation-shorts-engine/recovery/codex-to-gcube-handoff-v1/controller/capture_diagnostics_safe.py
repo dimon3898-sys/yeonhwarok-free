@@ -7,8 +7,96 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 _JOB = re.compile(r"studio-[a-f0-9]{32}\Z")
+
+
+class ActiveCheckpointMirror:
+    """One bounded storage child at a time; no retries after a storage failure.
+
+    The worker polls this independently of frame progress. Only private local
+    checkpoint metadata is read in the worker; mounted I/O stays in the child.
+    The full post-cleanup export policy below is unchanged.
+    """
+    def __init__(self, job_root, export_root):
+        self.job, self.export = Path(job_root), Path(export_root)
+        self.process = None
+        self.started = 0.0
+        self.last_attempt = -1.0
+        self.last_sequence = 0
+        self.disabled = False
+        self.status = "ACTIVE_CHECKPOINT_WAITING"
+        if (not _JOB.fullmatch(self.job.name) or self.job.parent.name != "handoff-gpu-jobs"
+                or not self.job.is_absolute() or not self.export.is_absolute()
+                or ".." in self.export.parts):
+            self.disabled = True
+            self.status = "ACTIVE_CHECKPOINT_PATH_INVALID"
+
+    def tick(self):
+        try:
+            now = time.monotonic()
+            if self.process is not None:
+                code = self.process.poll()
+                if code is None:
+                    if not self.disabled and now - self.started >= 1.0:
+                        self.process.kill()
+                        self.disabled = True
+                        self.status = "ACTIVE_CHECKPOINT_TIMEOUT"
+                    return self.status
+                self.process = None
+                if not self.disabled:
+                    if code == 0:
+                        self.status = "ACTIVE_CHECKPOINT_MOUNTED_WRITE_CONFIRMED"
+                    else:
+                        self.disabled = True
+                        failures = {21: "ACTIVE_CHECKPOINT_PERMISSION", 22: "ACTIVE_CHECKPOINT_NO_SPACE",
+                            23: "ACTIVE_CHECKPOINT_TOO_LARGE", 25: "ACTIVE_CHECKPOINT_TIMEOUT"}
+                        self.status = failures.get(code, "ACTIVE_CHECKPOINT_STORAGE_FAILED")
+            if self.disabled or now - self.last_attempt < 1.0:
+                return self.status
+            self.last_attempt = now
+            source = self.job / "capture" / "CAPTURE_OPERATION_CHECKPOINT.json"
+            if not os.path.lexists(source):
+                return self.status
+            from safe_capture_export import read_json_safe
+            value = read_json_safe(source)
+            sequence = value.get("sequence") if isinstance(value, dict) else None
+            if (not isinstance(value, dict) or value.get("schema") != "WORLD_ENGINE_CAPTURE_OPERATIONS_V1"
+                    or value.get("runId") != self.job.name or type(sequence) is not int
+                    or not 1 <= sequence <= 1000000 or sequence < self.last_sequence):
+                self.disabled = True
+                self.status = "ACTIVE_CHECKPOINT_SOURCE_INVALID"
+                return self.status
+            if sequence == self.last_sequence:
+                return self.status
+            self.process = subprocess.Popen([sys.executable, "-I", "-S",
+                str(Path(__file__).with_name("safe_capture_export.py")),
+                "--job-root", str(self.job), "--destination", str(self.export / ("capture-checkpoint-" + self.job.name)),
+                "--active-checkpoint", "--seconds", "1"], stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env={}, close_fds=True)
+            self.started = time.monotonic()
+            self.last_sequence = sequence
+            if self.status == "ACTIVE_CHECKPOINT_WAITING":
+                self.status = "ACTIVE_CHECKPOINT_STARTED"
+            return self.status
+        except Exception:
+            self.disabled = True
+            self.status = "ACTIVE_CHECKPOINT_STORAGE_FAILED"
+            return self.status
+
+    def close(self):
+        """Stop only our storage child; never signal capture or touch its lease."""
+        if self.process is not None:
+            try:
+                if self.process.poll() is None:
+                    self.process.kill()
+                self.process.wait(timeout=0.5)
+                self.process = None
+            except Exception:
+                self.status = "ACTIVE_CHECKPOINT_CHILD_CLEANUP_UNCONFIRMED"
+        self.disabled = True
+        return self.status
 
 
 def preserve_before_cleanup(job_root):

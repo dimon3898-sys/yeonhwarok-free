@@ -193,6 +193,8 @@ def _run(args):
                      elapsedSeconds=time.monotonic() - started)
         with cache().PrivateTree(job) as directory:
             directory.write_json('state.json', state, replace=True)
+    from capture_diagnostics_safe import ActiveCheckpointMirror
+    checkpoint_mirror = ActiveCheckpointMirror(job, exports)
     try:
         with keep_original_lease_until_cleanup(original, job, holder, save):
             fd = original_lease_descriptor(Path(original.storage.PRIVATE_BASE) / 'CAPTURE.guard')
@@ -225,6 +227,12 @@ def _run(args):
                     if count != state['processedFrames']:
                         save(processedFrames=count,
                              completedScenes=sum(s['endFrame'] <= count for s in plan['runtime']['segments']))
+                checkpoint_status = checkpoint_mirror.tick()
+                if checkpoint_status != state.get('captureCheckpointStatus'):
+                    try:
+                        save(captureCheckpointStatus=checkpoint_status)
+                    except Exception:
+                        pass  # Diagnostic reporting must not replace capture outcome.
                 remaining = (deadline - datetime.now(timezone.utc)).total_seconds()
                 if remaining < -8:
                     # Never kill the last original-lease holder while cleanup
@@ -267,6 +275,8 @@ def _run(args):
             except Exception:
                 pass  # Preserve the original capture error and GPU cleanup result.
         raise
+    finally:
+        checkpoint_mirror.close()
     return state
 
 

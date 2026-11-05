@@ -36,7 +36,7 @@ def safe_code(value):
 
 OPERATIONS = frozenset({"INPUT_CANVAS", "RUNTIME_IMPORT", "RUNTIME_CREATE", "WEBGL_CONTEXT",
     "RENDERER_IDENTIFICATION", "MAP_TEXTURE_PREPARATION", "GRAPHICS_PREPARATION", "NATIVE_GUARD_IMPORT",
-    "NATIVE_CONTEXT_PROOF", "DRAW", "READBACK", "PROOF_VALIDATION", "PNG", "ENCODER", "EXPORT", "CLEANUP"})
+    "NATIVE_CONTEXT_PROOF", "DRAW", "READBACK", "PROOF_VALIDATION", "PNG", "ENCODER", "ENCODER_WRITE", "ENCODER_DRAIN", "PROGRESS", "PAGE_EVALUATION", "EXPORT", "CLEANUP"})
 SOURCES = frozenset({"CAPTURE_ADAPTER", "PRESENTATION_RUNTIME", "NATIVE_GUARD"})
 FAILURE_KINDS = frozenset({"DOMAIN_ERROR", "UNCLASSIFIED_EXCEPTION", "MODULE_IMPORT_FAILURE", "ASSET_HTTP_FAILURE",
     "PAGE_TIMEOUT", "PAGE_CRASH", "PAGE_CLOSED", "EVALUATION_TRANSPORT_FAILURE", "STORAGE_FAILURE"})
@@ -73,12 +73,15 @@ def safe_operations(value):
     total_frames = frame_limit(value)
     count, sequence = value.get("renderedFrames"), value.get("sequence")
     observed = value.get("observedAtUnixMs")
+    index, phase = value.get("frameIndex"), value.get("operationPhase")
     result = {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
         "runId": safe_identifier(value.get("runId"), r"studio-[a-f0-9]{32}"),
         "imageDigest": safe_identifier(value.get("imageDigest"), r"sha256:[a-f0-9]{64}"),
         "sceneSHA256": safe_identifier(value.get("sceneSHA256"), r"[a-f0-9]{64}"),
         "observedAtUnixMs": observed if type(observed) is int and 0 <= observed <= 9007199254740991 else None,
         "operationId": value.get("operationId") if value.get("operationId") in OPERATIONS else None,
+        "operationPhase": phase if type(phase) is str and phase in {"START", "END", "FAIL", "CLEANUP_FAIL"} else None,
+        "frameIndex": index if type(index) is int and 0 <= index < total_frames else None,
         "lastCompletedOperation": value.get("lastCompletedOperation") if value.get("lastCompletedOperation") in OPERATIONS else None,
         "firstFailure": safe_failure(value.get("firstFailure"), total_frames=total_frames),
         "cleanupFailure": safe_failure(value.get("cleanupFailure"), total_frames=total_frames),
@@ -610,11 +613,108 @@ def preserve_private_pending(job_root, *, deadline_seconds=1):
             os.close(parent)
 
 
+def export_active_checkpoint(job_root, destination, *, deadline_seconds=1):
+    """Publish only an allowlisted in-progress checkpoint, not a cleanup permit.
+
+    A single atomic envelope keeps its canonical snapshot hash with its content
+    even if the container stops between writes. No raw job/log data leaves.
+    Production invokes this in the existing bounded, empty-environment helper.
+    """
+    if type(deadline_seconds) not in (float, int) or not 0 < deadline_seconds <= 1:
+        raise ValueError("DIAGNOSTIC_DEADLINE_INVALID")
+    until = time.monotonic() + deadline_seconds
+    def check():
+        if time.monotonic() >= until:
+            raise TimeoutError("DIAGNOSTIC_DEADLINE_EXCEEDED")
+    job, dest = Path(job_root), Path(destination)
+    if (not re.fullmatch(r"studio-[a-f0-9]{32}", job.name)
+            or job.parent.name != "handoff-gpu-jobs"
+            or dest.name != "capture-checkpoint-" + job.name):
+        raise ValueError("DIAGNOSTIC_JOB_ID_INVALID")
+    private = directory_fd(job)
+    try:
+        info = os.fstat(private)
+        if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o700:
+            raise ValueError("DIAGNOSTIC_PRIVATE_JOB_REQUIRED")
+    finally:
+        os.close(private)
+    check()
+    operations = safe_operations(read_json_safe(job / "capture" / "CAPTURE_OPERATION_CHECKPOINT.json"))
+    if (operations is None or operations.get("runId") != job.name
+            or type(operations.get("sequence")) is not int or operations["sequence"] < 1
+            or operations.get("operationId") not in OPERATIONS
+            or operations.get("operationPhase") not in {"START", "END", "FAIL", "CLEANUP_FAIL"}):
+        raise ValueError("CAPTURE_DIAGNOSTIC_SCHEMA_INVALID")
+    snapshot = {"jobId": job.name, "operations": operations,
+        "cleanupStatus": "UNCONFIRMED_NOT_COMPLETION_OR_EXPORT_AUTHORIZATION",
+        "renderRecoveryPass": False,
+        "persistenceScope": "MOUNTED_VIEW_READBACK_NOT_EXTERNAL_BACKUP_ATTESTATION"}
+    canonical = lambda value: (json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    digest = hashlib.sha256(canonical(snapshot)).hexdigest()
+    envelope = {"schema": "WORLD_ENGINE_ACTIVE_CAPTURE_CHECKPOINT_V1",
+        "snapshot": snapshot, "sha256": digest}
+    body = canonical(envelope)
+    if len(body) > 16384:
+        raise OSError(27, "DIAGNOSTIC_STORAGE_TOO_LARGE")
+    parent, target, temporary = directory_fd(dest.parent), None, None
+    try:
+        check()
+        created = False
+        try:
+            os.mkdir(dest.name, mode=0o700, dir_fd=parent)
+            created = True
+        except FileExistsError:
+            pass
+        target = os.open(dest.name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent)
+        info = os.fstat(target)
+        if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o700:
+            raise ValueError("DIAGNOSTIC_EXPORT_DIRECTORY_INVALID")
+        if not created and os.path.lexists(dest / "CAPTURE_CHECKPOINT.json"):
+            previous = read_json_safe(dest / "CAPTURE_CHECKPOINT.json")
+            prior = previous.get("snapshot") if isinstance(previous, dict) else None
+            if (not isinstance(prior, dict) or prior.get("jobId") != job.name
+                    or previous.get("schema") != envelope["schema"]
+                    or hashlib.sha256(canonical(prior)).hexdigest() != previous.get("sha256")):
+                raise ValueError("DIAGNOSTIC_EXISTING_EXPORT_NOT_OWNED")
+            old = (prior.get("operations") or {}).get("sequence")
+            if type(old) is not int or old > operations["sequence"]:
+                raise ValueError("DIAGNOSTIC_SEQUENCE_INVALID")
+            if old == operations["sequence"]:
+                if previous != envelope:
+                    raise ValueError("DIAGNOSTIC_SEQUENCE_CHANGED")
+                return {"status": "UNCHANGED", "sha256": digest}
+        check()
+        temporary = ".checkpoint-" + os.urandom(12).hex()
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=target)
+        with os.fdopen(descriptor, "wb") as stream:
+            stream.write(body); stream.flush(); os.fsync(stream.fileno())
+        check()
+        os.rename(temporary, "CAPTURE_CHECKPOINT.json", src_dir_fd=target, dst_dir_fd=target)
+        temporary = None
+        os.fsync(target)
+        check()
+        if read_json_safe(dest / "CAPTURE_CHECKPOINT.json") != envelope:
+            raise ValueError("DIAGNOSTIC_EXPORT_READBACK_FAILED")
+        check()
+        return {"status": "EXPORTED", "sha256": digest}
+    finally:
+        if target is not None:
+            try:
+                if temporary is not None:
+                    os.unlink(temporary, dir_fd=target)
+            finally:
+                os.close(target)
+        os.close(parent)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--job-root", required=True)
     parser.add_argument("--destination")
-    parser.add_argument("--private-pending", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--private-pending", action="store_true")
+    mode.add_argument("--active-checkpoint", action="store_true")
     parser.add_argument("--seconds", type=float, required=True)
     args = parser.parse_args()
     try:
@@ -622,6 +722,10 @@ if __name__ == "__main__":
             if args.destination is not None:
                 raise ValueError("DIAGNOSTIC_PRIVATE_DESTINATION_FORBIDDEN")
             preserve_private_pending(args.job_root, deadline_seconds=args.seconds)
+        elif args.active_checkpoint:
+            if args.destination is None:
+                raise ValueError("DIAGNOSTIC_EXPORT_ROOT_INVALID")
+            export_active_checkpoint(args.job_root, args.destination, deadline_seconds=args.seconds)
         else:
             export_failure(args.job_root, args.destination, deadline_seconds=args.seconds)
     except Exception as error:

@@ -1,0 +1,33 @@
+name: WORLD ENGINE active checkpoint retention CPU
+on:
+  push:
+    branches: [recovery/capture-durable-20261105]
+    paths: ['.github/workflows/world-engine-active-retention-cpu.yml']
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-active-retention-cpu
+  cancel-in-progress: false
+jobs:
+  retention:
+    if: github.run_attempt == 1 && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/capture-stall-review-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - name: New UID1000 recorder and forced-stop contracts only
+        run: sudo python3 world-simulation-shorts-engine/recovery/capture-stall-review-v1/tests/retention_ci.py "$GITHUB_WORKSPACE" "$RUNNER_TEMP/retention-results"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: active-retention-cpu-${{ github.run_id }}
+          path: ${{ runner.temp }}/retention-results
+          retention-days: 14
+          if-no-files-found: error

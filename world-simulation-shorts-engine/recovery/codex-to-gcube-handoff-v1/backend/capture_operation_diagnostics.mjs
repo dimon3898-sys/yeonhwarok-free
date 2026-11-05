@@ -7,7 +7,7 @@ import path from 'node:path';
 export const SCHEMA='WORLD_ENGINE_CAPTURE_OPERATIONS_V1';
 export const OPERATIONS=Object.freeze(['INPUT_CANVAS','RUNTIME_IMPORT','RUNTIME_CREATE','WEBGL_CONTEXT',
  'RENDERER_IDENTIFICATION','MAP_TEXTURE_PREPARATION','GRAPHICS_PREPARATION','NATIVE_GUARD_IMPORT',
- 'NATIVE_CONTEXT_PROOF','DRAW','READBACK','PROOF_VALIDATION','PNG','ENCODER','EXPORT','CLEANUP']);
+ 'NATIVE_CONTEXT_PROOF','DRAW','READBACK','PROOF_VALIDATION','PNG','ENCODER','ENCODER_WRITE','ENCODER_DRAIN','PROGRESS','PAGE_EVALUATION','EXPORT','CLEANUP']);
 export const SOURCES=Object.freeze(['CAPTURE_ADAPTER','PRESENTATION_RUNTIME','NATIVE_GUARD']);
 export const FAILURE_KINDS=Object.freeze(['DOMAIN_ERROR','UNCLASSIFIED_EXCEPTION','MODULE_IMPORT_FAILURE',
  'ASSET_HTTP_FAILURE','PAGE_TIMEOUT','PAGE_CRASH','PAGE_CLOSED','EVALUATION_TRANSPORT_FAILURE','STORAGE_FAILURE']);
@@ -75,7 +75,7 @@ export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA2
  const state={schema:SCHEMA,...(durationSeconds===10?timing:{}),runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
   imageDigest:/^sha256:[a-f0-9]{64}$/.test(imageDigest??'')?imageDigest:null,
   sceneSHA256:/^[a-f0-9]{64}$/.test(sceneSHA256??'')?sceneSHA256:null,
-  operationId:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
+  operationId:null,operationPhase:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
   nativeProofCompleted:false,renderedFrames:0,sequence:0,evidenceStatus:'NOT_WRITTEN',storageError:null};
  let chain=Promise.resolve();
  function persist(){
@@ -89,14 +89,14 @@ export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA2
   async event(raw){
    if(!raw||!OPERATIONS.includes(raw.operationId)||!['START','END','FAIL','CLEANUP_FAIL'].includes(raw.phase))
     throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
-   state.operationId=raw.operationId;state.frameIndex=frame(raw.frameIndex,totalFrames);
+   state.operationId=raw.operationId;state.operationPhase=raw.phase;state.frameIndex=frame(raw.frameIndex,totalFrames);
    if(raw.phase==='END')state.lastCompletedOperation=raw.operationId;
    const failure=safeFailure(raw.failure,timing);
    if(raw.phase==='FAIL'&&failure&&!state.firstFailure)state.firstFailure=failure;
    if(raw.phase==='CLEANUP_FAIL'&&failure&&!state.cleanupFailure)state.cleanupFailure=failure;
    return persist();
   },
-  async fail(failure,{cleanup=false}={}){return api.event({operationId:failure?.operationId??'INPUT_CANVAS',phase:cleanup?'CLEANUP_FAIL':'FAIL',failure});},
+  async fail(failure,{cleanup=false}={}){return api.event({operationId:failure?.operationId??'INPUT_CANVAS',phase:cleanup?'CLEANUP_FAIL':'FAIL',frameIndex:failure?.frameIndex,failure});},
   async completeFrame(count){if(Number.isSafeInteger(count)&&count>=0&&count<=totalFrames)state.renderedFrames=count;return persist();},
   async proofCompleted(){state.nativeProofCompleted=true;return persist();}
  };return api;
