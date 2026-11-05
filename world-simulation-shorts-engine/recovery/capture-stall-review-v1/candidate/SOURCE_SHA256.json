@@ -1,0 +1,39 @@
+{
+  "schema": "WORLD_ENGINE_STALL_CONTEXT_CANDIDATE_V1",
+  "sourceCommit": "da86936fdfdbd33e9472b3ba80bf4ae28bfa83ac",
+  "status": "CANDIDATE_ONLY_NOT_APPLIED",
+  "purpose": "Preserve active operation phase and frame in safe export for a no-exception stall after one completed frame",
+  "operationalCodeChanged": false,
+  "gpuExecuted": false,
+  "buildExecuted": false,
+  "rootCauseFixed": false,
+  "unchanged": [
+    "runtime launch options",
+    "capture loop",
+    "timeout policy",
+    "cleanup and export gates",
+    "firstFailure contract",
+    "source manifests"
+  ],
+  "knownLimitations": [
+    "Generated capture does not yet call this recorder",
+    "No runtime GPU stall or permanent remote recovery has been exercised",
+    "Existing fail() top-level frame reset remains unchanged; firstFailure.frameIndex retains the failure frame"
+  ],
+  "files": [
+    {
+      "operationalPath": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs",
+      "baselineCopy": "baseline/backend/capture_operation_diagnostics.mjs",
+      "candidateCopy": "proposed/backend/capture_operation_diagnostics.mjs",
+      "baselineSHA256": "46f32cbaa6b9c78026ea21cf41a5b6a0911e6ff5468d36d08f2deb8f180ab142",
+      "candidateSHA256": "b8efce8a69914858fd50724b7440f59065bd780c504c20abc024cd2fb99323f5"
+    },
+    {
+      "operationalPath": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py",
+      "baselineCopy": "baseline/controller/safe_capture_export.py",
+      "candidateCopy": "proposed/controller/safe_capture_export.py",
+      "baselineSHA256": "a77a72508ad442d624738e2947457d5e69566c838e8bef547b059b4b5e4c7818",
+      "candidateSHA256": "ae2d4747b20c9e76ece0fcf912ce29d91aee9b0a176b9d5f2e64647bffba6e93"
+    }
+  ]
+}

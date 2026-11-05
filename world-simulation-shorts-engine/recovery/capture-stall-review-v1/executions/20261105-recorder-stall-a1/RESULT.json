@@ -1,0 +1,88 @@
+{
+  "schema": "WORLD_ENGINE_STALL_CONTEXT_FOCUS_V1",
+  "startedAt": "2026-11-05T01:03:06.914Z",
+  "status": "CANDIDATE_CONTEXT_EXPORT_FOCUS_PASS",
+  "sourceCommit": "da86936fdfdbd33e9472b3ba80bf4ae28bfa83ac",
+  "scope": "CPU_SYNTHETIC_NO_EXCEPTION_ACTIVE_FRAME_EXPORT",
+  "gpuExecuted": false,
+  "browserLaunched": false,
+  "renderExecuted": false,
+  "operationalCodeChanged": false,
+  "oldPassRerun": false,
+  "incidentCauseConfirmed": false,
+  "renderRecoveryPass": false,
+  "syntheticCase": {
+    "durationSeconds": 10,
+    "totalFrames": 300,
+    "renderedFrames": 1,
+    "frameIndex": 1,
+    "operationId": "DRAW",
+    "operationPhase": "START",
+    "firstFailure": null,
+    "frameNumbering": "ZERO_BASED"
+  },
+  "limits": [
+    "Not an execution of incident studio-dd436342d68d518586dec4781daff497",
+    "No browser crash, hardware stall, process kill, GPU, or permanent remote export exercised",
+    "Synthetic cleanupVerified=true is a fixture, not proof of production cleanup",
+    "Generated capture is not wired to the recorder by this candidate",
+    "Existing firstFailure, private-storage, size-limit and cleanup-gate PASS suites are reused, not rerun"
+  ],
+  "variants": [
+    {
+      "variant": "baseline",
+      "status": "EXPECTED_EXISTING_GAP_OBSERVED",
+      "checkpoint": {
+        "sha256": "0ee2bd560c50df2f00f40c9a9bf5d827bc4e6225a7b58ff09ff4bec859b5c370",
+        "bytes": 441,
+        "operationId": "DRAW",
+        "operationPhase": null,
+        "frameIndex": 1,
+        "renderedFrames": 1
+      },
+      "safeExport": {
+        "sha256": "1a7f7f5234c0b23bbeecf4b8a678ff87d2332d21ed2b7aed5340cac76a9b94f2",
+        "bytes": 1545,
+        "operationId": "DRAW",
+        "operationPhase": null,
+        "frameIndex": null,
+        "hasOperationPhase": false,
+        "hasFrameIndex": false
+      }
+    },
+    {
+      "variant": "proposed",
+      "status": "NEW_CONTRACT_PASS",
+      "checkpoint": {
+        "sha256": "f015e03820207a63e4821eaba35a75b153a9853421786c4949f7d3f8356b6e90",
+        "bytes": 466,
+        "operationId": "DRAW",
+        "operationPhase": "START",
+        "frameIndex": 1,
+        "renderedFrames": 1
+      },
+      "safeExport": {
+        "sha256": "bae116cc359b04c23cab2824d98eb0edcf282331e86f883c2b96e04d07a976b2",
+        "bytes": 1585,
+        "operationId": "DRAW",
+        "operationPhase": "START",
+        "frameIndex": 1,
+        "hasOperationPhase": true,
+        "hasFrameIndex": true
+      }
+    }
+  ],
+  "newFieldContracts": [
+    {
+      "field": "operationPhase",
+      "case": "non_string_sensitive_object",
+      "result": "NULL_NO_VALUE_DISCLOSURE"
+    },
+    {
+      "field": "frameIndex",
+      "case": "300_outside_zero_based_300_frame_scope",
+      "result": "NULL"
+    }
+  ],
+  "finishedAt": "2026-11-05T01:03:07.049Z"
+}

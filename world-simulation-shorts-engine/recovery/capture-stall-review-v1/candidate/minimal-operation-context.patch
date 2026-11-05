@@ -1,0 +1,38 @@
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs
+@@ -75,7 +75,7 @@
+  const state={schema:SCHEMA,...(durationSeconds===10?timing:{}),runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
+   imageDigest:/^sha256:[a-f0-9]{64}$/.test(imageDigest??'')?imageDigest:null,
+   sceneSHA256:/^[a-f0-9]{64}$/.test(sceneSHA256??'')?sceneSHA256:null,
+-  operationId:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
++  operationId:null,operationPhase:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
+   nativeProofCompleted:false,renderedFrames:0,sequence:0,evidenceStatus:'NOT_WRITTEN',storageError:null};
+  let chain=Promise.resolve();
+  function persist(){
+@@ -89,7 +89,7 @@
+   async event(raw){
+    if(!raw||!OPERATIONS.includes(raw.operationId)||!['START','END','FAIL','CLEANUP_FAIL'].includes(raw.phase))
+     throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+-   state.operationId=raw.operationId;state.frameIndex=frame(raw.frameIndex,totalFrames);
++   state.operationId=raw.operationId;state.operationPhase=raw.phase;state.frameIndex=frame(raw.frameIndex,totalFrames);
+    if(raw.phase==='END')state.lastCompletedOperation=raw.operationId;
+    const failure=safeFailure(raw.failure,timing);
+    if(raw.phase==='FAIL'&&failure&&!state.firstFailure)state.firstFailure=failure;
+--- a/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py
++++ b/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py
+@@ -73,12 +73,15 @@
+     total_frames = frame_limit(value)
+     count, sequence = value.get("renderedFrames"), value.get("sequence")
+     observed = value.get("observedAtUnixMs")
++    index, phase = value.get("frameIndex"), value.get("operationPhase")
+     result = {"schema": "WORLD_ENGINE_CAPTURE_OPERATIONS_V1",
+         "runId": safe_identifier(value.get("runId"), r"studio-[a-f0-9]{32}"),
+         "imageDigest": safe_identifier(value.get("imageDigest"), r"sha256:[a-f0-9]{64}"),
+         "sceneSHA256": safe_identifier(value.get("sceneSHA256"), r"[a-f0-9]{64}"),
+         "observedAtUnixMs": observed if type(observed) is int and 0 <= observed <= 9007199254740991 else None,
+         "operationId": value.get("operationId") if value.get("operationId") in OPERATIONS else None,
++        "operationPhase": phase if type(phase) is str and phase in {"START", "END", "FAIL", "CLEANUP_FAIL"} else None,
++        "frameIndex": index if type(index) is int and 0 <= index < total_frames else None,
+         "lastCompletedOperation": value.get("lastCompletedOperation") if value.get("lastCompletedOperation") in OPERATIONS else None,
+         "firstFailure": safe_failure(value.get("firstFailure"), total_frames=total_frames),
+         "cleanupFailure": safe_failure(value.get("cleanupFailure"), total_frames=total_frames),
