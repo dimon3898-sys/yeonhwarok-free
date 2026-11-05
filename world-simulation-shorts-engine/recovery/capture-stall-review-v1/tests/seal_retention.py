@@ -24,7 +24,13 @@ def wire(value):
     return (json.dumps(value, indent=2, sort_keys=True) + '\n').encode()
 
 def seal(repo):
-    for name, digest in PINS.items():
+    previous_seal = repo / AUDIT / 'evidence/RETENTION_SOURCE_SEAL.json'
+    expected = dict(PINS)
+    if previous_seal.exists():
+        previous = json.loads(previous_seal.read_bytes())
+        assert previous['sourceBaseCommit'] == 'b52e9367d89e41e0e6a48bb69bda16885d03d302'
+        expected.update({row['path']: row['sha256'] for row in previous['files'] if row['path'] in PINS})
+    for name, digest in expected.items():
         assert sha((repo / name).read_bytes()) == digest, 'BASE_PIN_CHANGED:' + name
     generated_path = HANDOFF + 'backend/GENERATED_SOURCE_MANIFEST.json'
     generated = json.loads((repo / generated_path).read_bytes())

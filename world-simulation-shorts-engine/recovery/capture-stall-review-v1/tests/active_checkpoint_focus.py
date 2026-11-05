@@ -6,6 +6,7 @@ The external-looking directory is a LOCAL fixture, not a mounted/cloud PASS.
 import ast
 from contextlib import contextmanager
 import hashlib
+import errno
 import importlib.util
 import json
 import os
@@ -189,6 +190,35 @@ def run(output):
             result["cases"].append({"case": "BLOCKED_STORAGE_CHILD", "status": "TIMEOUT_KILLED_AND_REAPED",
                 "tickSeconds": tick_seconds, "newChildStarts": 1, "automaticRetries": 0,
                 "renderErrorCodeTouched": False})
+
+            # Existing export adapter explicitly permits non-POSIX shared modes
+            # and unsupported fsync; private evidence rules must stay strict.
+            shared_job, shared_value = make_job(base, "e")
+            shared_target = exports / ("capture-checkpoint-" + shared_job.name)
+            exporter.export_active_checkpoint(shared_job, shared_target)
+            shared_target.chmod(0o755)
+            shared_file = shared_target / "CAPTURE_CHECKPOINT.json"
+            shared_file.chmod(0o644)
+            shared_value.update(operationId="ENCODER_DRAIN", sequence=4)
+            write(shared_job / "capture" / "CAPTURE_OPERATION_CHECKPOINT.json", shared_value)
+            storage = exporter.active_shared_storage()
+            with patch.object(storage.os, "fsync", side_effect=OSError(errno.EINVAL, "mock shared fsync unsupported")):
+                saved = exporter.export_active_checkpoint(shared_job, shared_target)
+            assert saved["status"] == "EXPORTED"
+            shared_envelope, shared_wire = inspect_envelope(shared_file)
+            assert shared_envelope["snapshot"]["operations"]["operationId"] == "ENCODER_DRAIN"
+            # Actual I/O errors still fail, leaving the previous whole envelope.
+            shared_value.update(sequence=5)
+            write(shared_job / "capture" / "CAPTURE_OPERATION_CHECKPOINT.json", shared_value)
+            with patch.object(storage.os, "fsync", side_effect=OSError(errno.EIO, "mock I/O failure")):
+                expect_error(lambda: exporter.export_active_checkpoint(shared_job, shared_target), OSError)
+            assert shared_file.read_bytes() == shared_wire
+            shared_job.chmod(0o755)
+            expect_error(lambda: exporter.export_active_checkpoint(shared_job, shared_target), ValueError)
+            result["cases"].append({"case": "EXISTING_SHARED_ADAPTER_COMPATIBILITY", "status": "PASS",
+                "public0755Directory0644Readback": True, "unsupportedFsyncToleratedWithoutRemoteDurabilityClaim": True,
+                "realIOErrorPreservesLastWholeEnvelope": True, "private0700GateRetained": True,
+                "actualFuseMount": False})
 
             tree = ast.parse((CONTROLLER / "nvidia_worker.py").read_text())
             loops = [node for node in ast.walk(tree) if isinstance(node, ast.While)

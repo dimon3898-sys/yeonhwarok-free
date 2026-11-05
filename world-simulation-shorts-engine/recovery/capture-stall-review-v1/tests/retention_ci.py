@@ -35,25 +35,22 @@ for name in ('capture_vulkan.generated.mjs', 'backend/capture_operation_diagnost
 aggregate = {'schema': 'WORLD_ENGINE_RETENTION_CPU_CI_V1', 'sourceBaseCommit': BASE,
     'headSHA': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo, text=True).strip(),
     'sourceSealSHA256': hashlib.sha256((repo / AUDIT / 'evidence/RETENTION_SOURCE_SEAL.json').read_bytes()).hexdigest(),
-    'uidUnderTest': 1000, 'status': 'RUNNING', 'gpuExecutions': 0, 'imageBuilds': 0,
+    'uidUnderTest': 1000, 'preservedWiringPassRun': 41969700208, 'revalidationReason': 'Active export switched from private POSIX metadata/fsync rules to existing shared adapter; active and forced-stop storage consumers only', 'status': 'RUNNING', 'gpuExecutions': 0, 'imageBuilds': 0,
     'oldPassSuitesRerun': 0, 'tests': []}
 try:
     with tempfile.TemporaryDirectory(prefix='we-retention-ci-') as temporary:
         root = Path(temporary)
         root.chmod(0o755)
         tree = root / 'source'
-        for name in ('codex-to-gcube-handoff-v1', 'capture-stall-review-v1'):
+        for name in ('codex-to-gcube-handoff-v1', 'capture-stall-review-v1', 'gcube-storage-fix-v1'):
             shutil.copytree(repo / REC / name, tree / REC / name, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
         for file in tree.rglob('*'):
             file.chmod(0o755 if file.is_dir() else 0o644)
-        baseline = root / 'baseline.mjs'
-        baseline.write_bytes(subprocess.check_output(['git', 'show', BASE + ':' + HANDOFF + 'capture_vulkan.generated.mjs'], cwd=repo))
         test_output = root / 'results'
         test_output.mkdir(mode=0o700)
         os.chown(test_output, 1000, 1000)
         tests = tree / AUDIT / 'tests'
         commands = [
-            ('wiring', [node, str(tests / 'capture_wiring_focus.mjs'), str(baseline), str(test_output / 'wiring')]),
             ('active', [sys.executable, '-B', str(tests / 'active_checkpoint_focus.py'), str(test_output / 'active')]),
             ('forced', [sys.executable, '-B', str(tests / 'forced_stop_retention.py'), str(test_output / 'forced'), node])]
         for name, command in commands:

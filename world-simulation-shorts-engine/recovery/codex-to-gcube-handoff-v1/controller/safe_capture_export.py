@@ -4,6 +4,7 @@ isolates filesystem I/O in a time-bounded child. No raw logs are read or exporte
 """
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -613,6 +614,42 @@ def preserve_private_pending(job_root, *, deadline_seconds=1):
             os.close(parent)
 
 
+_ACTIVE_STORAGE = None
+
+
+def active_shared_storage():
+    """Reuse the admitted untrusted-export adapter, never private read rules."""
+    global _ACTIVE_STORAGE
+    if _ACTIVE_STORAGE is None:
+        source = Path(__file__).resolve().parents[2] / "gcube-storage-fix-v1" / "storage.py"
+        spec = importlib.util.spec_from_file_location("_active_checkpoint_shared_storage", source)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        _ACTIVE_STORAGE = module
+    return _ACTIVE_STORAGE
+
+
+def read_active_shared_checkpoint(directory):
+    """Bounded public-only readback; FUSE mode/owner bits are not private proof."""
+    descriptor = None
+    try:
+        descriptor = os.open("CAPTURE_CHECKPOINT.json", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+        storage = active_shared_storage()
+        info = storage._file_info(descriptor, private=False)
+        if info.st_size > 16384:
+            return None
+        raw = storage._read_fd(descriptor, limit=16384)
+        if len(raw) > 16384:
+            return None
+        value = json.loads(raw)
+        return value if isinstance(value, dict) else None
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        return None
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+
+
 def export_active_checkpoint(job_root, destination, *, deadline_seconds=1):
     """Publish only an allowlisted in-progress checkpoint, not a cleanup permit.
 
@@ -666,11 +703,11 @@ def export_active_checkpoint(job_root, destination, *, deadline_seconds=1):
         except FileExistsError:
             pass
         target = os.open(dest.name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent)
-        info = os.fstat(target)
-        if info.st_uid != os.getuid() or stat.S_IMODE(info.st_mode) != 0o700:
-            raise ValueError("DIAGNOSTIC_EXPORT_DIRECTORY_INVALID")
-        if not created and os.path.lexists(dest / "CAPTURE_CHECKPOINT.json"):
-            previous = read_json_safe(dest / "CAPTURE_CHECKPOINT.json")
+        # This contains only fixed-schema public diagnostics, not private data.
+        # Shared FUSE mounts may synthesize ownership/modes and lack fsync.
+        storage = active_shared_storage()
+        if not created:
+            previous = read_active_shared_checkpoint(target)
             prior = previous.get("snapshot") if isinstance(previous, dict) else None
             if (not isinstance(prior, dict) or prior.get("jobId") != job.name
                     or previous.get("schema") != envelope["schema"]
@@ -688,13 +725,13 @@ def export_active_checkpoint(job_root, destination, *, deadline_seconds=1):
         descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
                              0o600, dir_fd=target)
         with os.fdopen(descriptor, "wb") as stream:
-            stream.write(body); stream.flush(); os.fsync(stream.fileno())
+            stream.write(body); stream.flush(); storage._shared_fsync(stream.fileno())
         check()
         os.rename(temporary, "CAPTURE_CHECKPOINT.json", src_dir_fd=target, dst_dir_fd=target)
         temporary = None
-        os.fsync(target)
+        storage._shared_fsync(target)
         check()
-        if read_json_safe(dest / "CAPTURE_CHECKPOINT.json") != envelope:
+        if read_active_shared_checkpoint(target) != envelope:
             raise ValueError("DIAGNOSTIC_EXPORT_READBACK_FAILED")
         check()
         return {"status": "EXPORTED", "sha256": digest}

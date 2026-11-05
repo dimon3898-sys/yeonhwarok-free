@@ -1,0 +1,90 @@
+{
+  "schema": "WORLD_ENGINE_CAPTURE_WIRING_FOCUS_V1",
+  "status": "NEW_CAPTURE_WIRING_FOCUS_PASS",
+  "startedAt": "2026-11-05T04:44:58.535Z",
+  "sourceSHA256": "b226b668f63ab577312e994a70e783fd3098d4deed3247baff12ac07759d559e",
+  "baselineSHA256": "40287882d55208dbab41de2b9fe5b8032b7bd3281255dabc475947cc8c66a7f2",
+  "scope": "NEW_OPERATION_WIRING_ONLY",
+  "gpuExecuted": false,
+  "browserLaunched": false,
+  "renderExecuted": false,
+  "oldPassRerun": false,
+  "incidentCauseConfirmed": false,
+  "renderRecoveryPass": false,
+  "cases": [
+    {
+      "case": "unchanged_frame_callback_result",
+      "frames": [
+        0,
+        1
+      ],
+      "status": "PASS"
+    },
+    {
+      "case": "existing_native_hooks_global_frame_context",
+      "globalFrame": 150,
+      "nativeLocalDrawFrame": 0,
+      "nativeFrameArgumentChanged": false,
+      "dependency": "NATIVE_GUARD_IMPORT_MOCKED",
+      "status": "PASS"
+    },
+    {
+      "case": "paused_browser_boundary",
+      "operation": "DRAW",
+      "frameIndex": 1,
+      "renderedFrames": 1,
+      "status": "PASS",
+      "checkpointSHA256": "60e003a11a88fb2189f296214006a615e2ad74651f1df0f2c8780da729836e92"
+    },
+    {
+      "case": "paused_browser_boundary",
+      "operation": "READBACK",
+      "frameIndex": 1,
+      "renderedFrames": 1,
+      "status": "PASS",
+      "checkpointSHA256": "0f8c517e4105385d3eb6afe14d6e9130e10fc07d477a816d173214b5ad086bee"
+    },
+    {
+      "case": "paused_browser_boundary",
+      "operation": "PROOF_VALIDATION",
+      "frameIndex": 1,
+      "renderedFrames": 1,
+      "status": "PASS",
+      "checkpointSHA256": "18fa1c538b829030b84abd3662f984b250869702dea5b1d7fd974e5256177797"
+    },
+    {
+      "case": "paused_browser_boundary",
+      "operation": "PNG",
+      "frameIndex": 1,
+      "renderedFrames": 1,
+      "status": "PASS",
+      "checkpointSHA256": "279f59b7e420c8c21218ccc5a10b2ad830344fcfffd6adf35e57bc25a13a784d"
+    },
+    {
+      "case": "original_domain_exception_preserved",
+      "message": "UP2_FRAME_GL_ERROR",
+      "operation": "READBACK",
+      "status": "PASS"
+    },
+    {
+      "case": "encoder_drain_wait_boundary",
+      "frameIndex": 1,
+      "renderedFrames": 1,
+      "status": "PASS",
+      "checkpointSHA256": "e5afe61c03c2ec17e3dfb6ecb1c013cde18b306b9ae72c6e69733d88ea4c0833"
+    }
+  ],
+  "staticPreservation": [
+    "UNCHANGED_BROWSER_LAUNCH_LINE",
+    "UNCHANGED_FFMPEG_LAUNCH_LINE",
+    "UNCHANGED_CLEANUP_AND_FINAL_RECEIPT_PATH",
+    "EXISTING_PAGE_EVALUATE_AND_SUPERVISOR_DEADLINE_RETAINED"
+  ],
+  "limits": [
+    "VM executes the real changed frame callback against a mock runtime, not pixels or a browser",
+    "Paused START callbacks model a wait boundary, not a reproduced GPU hang",
+    "Private atomic checkpoint only; durable remote retrieval and forced-container-stop survival are not tested here",
+    "Additional per-operation checkpoint fsync/CDP overhead requires a separately approved GPU run"
+  ],
+  "finishedAt": "2026-11-05T04:44:58.728Z"
+}
