@@ -1,0 +1,53 @@
+name: WORLD ENGINE sealed capture retention image once
+on:
+  push:
+    branches: [recovery/capture-durable-20261105]
+    paths: ['.github/workflows/world-engine-active-retention-image-once.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-capture-retention-image-20261105
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  retention-image-once:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '0312611584d2f03c552cd823a0f927f69c18130c' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_CAPTURE_RETENTION_IMAGE_ONCE_20261105'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/capture-stall-review-v1
+            world-simulation-shorts-engine/recovery/reference-label-quality-v1
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - name: Select supported containerd store for preserved deep parent
+        run: |
+          sudo python3 - <<'PYCONFIG'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json'); d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PYCONFIG
+          sudo systemctl restart docker
+          docker info --format '{{json .DriverStatus}}'
+      - name: Package sealed sources, verify installed startup, retain and publish once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RETENTION_EXPECTED_PARENT: '0312611584d2f03c552cd823a0f927f69c18130c'
+        run: python3 -B world-simulation-shorts-engine/recovery/capture-stall-review-v1/image/build_once.py run
+# Source/CPU PASS reused. No rendering, GPU allocation, deployment or existing tag mutation.
+# Evidence and complete image are retained in a new public Release before GHCR publication.
