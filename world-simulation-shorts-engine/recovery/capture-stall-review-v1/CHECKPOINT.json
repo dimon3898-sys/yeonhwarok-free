@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "dateKST": "2026-11-05",
-  "status": "SHARED_STORAGE_COMPATIBILITY_FOCUSED_VALIDATION_PENDING",
+  "status": "SOURCE_AND_CPU_RETENTION_READY_REMOTE_MOUNT_AND_GPU_PENDING",
   "jobId": "studio-dd436342d68d518586dec4781daff497",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
   "previousCheckpoint": "../reference-label-quality-v1/CHECKPOINT.json",
@@ -199,13 +199,13 @@
     "Supervisor/worker progress propagation interruption"
   ],
   "decision": {
-    "runtimePatch": "EXISTING_RECORDER_WIRING_AND_ACTIVE_SAFE_MIRROR_IMPLEMENTED_IN_SOURCE_NOT_DEPLOYED",
+    "runtimePatch": "EXISTING_RECORDER_WIRED_AND_ACTIVE_SAFE_EXPORT_IMPLEMENTED_TESTED_NOT_DEPLOYED",
     "newImage": "NOT_BUILT",
-    "focusedTests": "NEW_CPU_PIPE_AND_CANDIDATE_ACTIVE_CONTEXT_CONTRACT_PASS; EXISTING_PASS_SUITES_NOT_RERUN",
+    "focusedTests": "20_VALID_CASES_UID1000_AND_SOURCE_PIN_CHECKS; OLD_HISTORICAL_PASS_NOT_RERUN",
     "browserOptions": "UNCHANGED",
     "timeouts": "UNCHANGED",
     "scene": "UNCHANGED",
-    "nextMinimumAction": "Run only new UID1000 wiring and forced-stop retention contracts; no deleted-Pod raw recovery, image build, publication or GPU start.",
+    "nextMinimumAction": "Prepare one immutable image containing only the sealed retention source changes after image-stage authorization/preconditions are checked. No GPU start under this task. At the next separately approved GPU session verify actual export_root to Dropbox readback before any render; then execute only the approved quality job once.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -219,7 +219,7 @@
       "capture/FRAME_000.png existence/size/SHA256",
       "worker.log and lease-supervisor.stderr.log: only relevant sanitized excerpts, not credentials or full environment"
     ],
-    "ifProviderCannotRecover": "Reuse candidate phase/frame preservation and existing recorder. Generated capture wiring and safe durable retrieval during a no-exception hang are NOT_IMPLEMENTED; retain cleanup/auth/secret boundaries. No new diagnostic framework or timeout increase.",
+    "ifProviderCannotRecover": "CLOSED_PROVIDER_CONFIRMED_UNRECOVERABLE; DO_NOT_REPEAT_RAW_RECOVERY",
     "supportMessageSent": true,
     "gpuRenderRecoveryPass": false
   },
@@ -240,7 +240,8 @@
     "imagePublications": 0,
     "operationalCodeEdits": 0,
     "oldPassReruns": 0,
-    "deploymentSettingChanges": 0
+    "deploymentSettingChanges": 0,
+    "scope": "Original read-only incident review; current implementation counts are under activeRetention20261105"
   },
   "supportRequest": {
     "status": "REPLIED_PROVIDER_RAW_RECOVERY_UNAVAILABLE",
@@ -252,7 +253,7 @@
     "receipt": "SUPPORT_REQUEST.json",
     "requestId": null
   },
-  "lastUpdatedAt": "2026-11-05T01:05:07.065023+00:00",
+  "lastUpdatedAt": "2026-11-05T04:52:14.673734+00:00",
   "freePreparation20261105": {
     "status": "FREE_FOCUSED_CHECKS_PASS_INCIDENT_CAUSE_STILL_BLOCKED",
     "sourceRef": "da86936fdfdbd33e9472b3ba80bf4ae28bfa83ac",
@@ -336,13 +337,14 @@
       "pipe": "Production source-fragment fidelity and recorded result checked; conditional drain not separately counted; decode PASS is exit-code criterion.",
       "candidate": "Diff limited to phase preservation and safe phase/frame export; mock outputs consistent; no runtime incident recovery claim.",
       "testsRerun": 0
-    }
+    },
+    "historicalRecordNote": "Preserved as the original 2026-11-05 early preparation record. Waiting-for-support and unconnected-recorder statements are superseded by supportResponse and activeRetention20261105; original PASS evidence is unchanged."
   },
   "supportResponse": "SUPPORT_RESPONSE.json",
   "activeRetention20261105": {
     "sourceBaseCommit": "b52e9367d89e41e0e6a48bb69bda16885d03d302",
     "branch": "recovery/capture-durable-20261105",
-    "status": "SHARED_STORAGE_COMPATIBILITY_FOCUSED_VALIDATION_PENDING",
+    "status": "SOURCE_AND_CPU_RETENTION_READY_NOT_DEPLOYED",
     "inheritedUncommittedWork": "Recovered 5 modified runtime files and 2 unexecuted tests from prior Work scratch; prior files untouched.",
     "remoteSourceRows": 356,
     "retainedHistoricalPASS": "No old PASS invalidated or rerun. Candidate, PNG encode and quality evidence preserved.",
@@ -362,6 +364,26 @@
     "initialCasesPassed": 19,
     "preservedWiringCases": 8,
     "storageRevalidationReason": "Existing gcube-storage-fix-v1 adapter permits shared synthesized modes and unsupported fsync; inherited active helper incorrectly required private metadata. Change limited to active exporter and related pins; rerun only active storage and forced-stop consumers.",
-    "externalRoundtrip": "executions/20261105-retention-ci-41969700208/EXTERNAL_ROUNDTRIP.json"
+    "externalRoundtrip": "executions/20261105-retention-ci-41969700208/EXTERNAL_ROUNDTRIP.json",
+    "implementationCommit": "8886c902638a58c4c5fb408cb30c4e0cddea8001",
+    "currentCI": 41970182375,
+    "validCases": 20,
+    "sourcePinsVerified": 9,
+    "results": "RETENTION_RESULT.json",
+    "sourceSeal": "evidence/RETENTION_SOURCE_SEAL.json",
+    "privateSourceMode": "0700 directories / 0600 files strict",
+    "sharedExportSemantics": "Reuse existing admitted gcube-storage-fix-v1/storage.py for public fixed-schema readback and optional shared fsync; no chmod/chown of existing mounts",
+    "remainingGates": [
+      "NEW_IMAGE_NOT_BUILT_OR_PUBLISHED",
+      "ACTUAL_GCUBE_EXPORT_ROOT_TO_DROPBOX_ROUNDTRIP_NOT_TESTED",
+      "GPU_APPROVAL_REQUIRED_FOR_EVERY_START",
+      "ACTUAL_CAPTURE_STALL_ROOT_CAUSE_UNCONFIRMED",
+      "REFERENCE_QUALITY_MP4_NOT_YET_PROVEN"
+    ],
+    "nextExecutionPlan": "NEXT_GATE.json",
+    "runtimeSourceFilesChanged": 5,
+    "sourceSealFilesUpdated": 4,
+    "sourceValidation": "9 source pins verified on commit 8886c902638a58c4c5fb408cb30c4e0cddea8001",
+    "sourceRowsUnchanged": 356
   }
 }

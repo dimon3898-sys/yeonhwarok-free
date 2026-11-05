@@ -1,0 +1,67 @@
+{
+  "schema": "WORLD_ENGINE_RETENTION_NEXT_GATE_V1",
+  "stage": "IMAGE_PREPARATION_BEFORE_SEPARATELY_APPROVED_GPU",
+  "sourceCommit": "8886c902638a58c4c5fb408cb30c4e0cddea8001",
+  "baseImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-labels-v1-41535102499",
+  "basePublishedDigest": "sha256:6b21a2c21d6c26bcb6ba91ee7c20c13d2deee8d53e30cf60fc5842bdd810d4b7",
+  "baseRuntimeDigestFromDeletedPod": "NOT_RECOVERED",
+  "overlay": [
+    {
+      "bytes": 27073,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs",
+      "sha256": "b226b668f63ab577312e994a70e783fd3098d4deed3247baff12ac07759d559e"
+    },
+    {
+      "bytes": 13370,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs",
+      "sha256": "ef22250ddb12092a681474ddbf9f9f89350e64e748c669d793ab125ebb681b31"
+    },
+    {
+      "bytes": 40119,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py",
+      "sha256": "04366a7bfea54eebe610762ee2066ef61d01d162628f9a40b523438a597189cd"
+    },
+    {
+      "bytes": 7578,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py",
+      "sha256": "213c324651b7b3c4d48a64412582848686afa6b3e82304a50ef55efdf95626ab"
+    },
+    {
+      "bytes": 17845,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "sha256": "566ada4a11dc7d9a137ab5e5dac87d96c20d4178f0d0c12674a603dbc8c4b669"
+    },
+    {
+      "bytes": 2304,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json",
+      "sha256": "f64f98bc125052613b0aa57e1c4cc31dc0e360526d57e3d85198539eb0c12c84"
+    },
+    {
+      "bytes": 97477,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "sha256": "937cee91184b3e2d578e16b954a0a547aa74601a246e36927df8363c34f31385"
+    },
+    {
+      "bytes": 14285,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "sha256": "85a6c8069ebbeba89c10c7443928f8ebf7bbbc464d2778cd953fe418760ce7f6"
+    },
+    {
+      "bytes": 531,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "sha256": "bb439445af9de29f45cffaa4aa79da1cbb2ed0bc42e49b9dabc488d08a620abe"
+    }
+  ],
+  "runtimeSourceManifestSHA256": "937cee91184b3e2d578e16b954a0a547aa74601a246e36927df8363c34f31385",
+  "buildOrPublishExecuted": false,
+  "constraints": [
+    "Preserve existing image tags, successful MP4 and quality Scene",
+    "Do not rerun historical PASS tests",
+    "Use a new immutable tag; verify changed source pins and startup chain",
+    "Check image-stage authorization and zero-cost runner eligibility before image operations",
+    "Do not start GPU without a new explicit approval specifying resource, duration, cost and retries",
+    "After approved start, confirm actual export_root mount -> external storage retrieval before rendering",
+    "If mount/active checkpoint fails, stop at that gate; do not blindly render",
+    "Future GPU result must prove 300 frames, full decode, reference quality and external MP4 retrieval separately"
+  ]
+}
