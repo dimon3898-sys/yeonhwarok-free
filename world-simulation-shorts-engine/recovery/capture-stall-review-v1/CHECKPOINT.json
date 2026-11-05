@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "dateKST": "2026-11-05",
-  "status": "SOURCE_AND_CPU_RETENTION_READY_REMOTE_MOUNT_AND_GPU_PENDING",
+  "status": "IMAGE_PUBLISHED_GCUBE_CONFIGURED_STOPPED_GPU_APPROVAL_REQUIRED",
   "jobId": "studio-dd436342d68d518586dec4781daff497",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
   "previousCheckpoint": "../reference-label-quality-v1/CHECKPOINT.json",
@@ -200,12 +200,12 @@
   ],
   "decision": {
     "runtimePatch": "EXISTING_RECORDER_WIRED_AND_ACTIVE_SAFE_EXPORT_IMPLEMENTED_TESTED_NOT_DEPLOYED",
-    "newImage": "NOT_BUILT",
+    "newImage": "BUILT_RETAINED_PUBLISHED_CONFIGURED_NOT_STARTED",
     "focusedTests": "20_VALID_CASES_UID1000_AND_SOURCE_PIN_CHECKS; OLD_HISTORICAL_PASS_NOT_RERUN",
     "browserOptions": "UNCHANGED",
     "timeouts": "UNCHANGED",
     "scene": "UNCHANGED",
-    "nextMinimumAction": "Prepare one immutable image containing only the sealed retention source changes after image-stage authorization/preconditions are checked. No GPU start under this task. At the next separately approved GPU session verify actual export_root to Dropbox readback before any render; then execute only the approved quality job once.",
+    "nextMinimumAction": "Obtain a new explicit paid GPU approval. In that session verify actual export_root to external storage readback using the existing storage preflight before rendering the unchanged quality 10-second scene once. No replay of valid CPU/source/image PASS.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -253,7 +253,7 @@
     "receipt": "SUPPORT_REQUEST.json",
     "requestId": null
   },
-  "lastUpdatedAt": "2026-11-05T09:27:46.020966+00:00",
+  "lastUpdatedAt": "2026-11-05T09:39:51.003325+00:00",
   "freePreparation20261105": {
     "status": "FREE_FOCUSED_CHECKS_PASS_INCIDENT_CAUSE_STILL_BLOCKED",
     "sourceRef": "da86936fdfdbd33e9472b3ba80bf4ae28bfa83ac",
@@ -344,7 +344,7 @@
   "activeRetention20261105": {
     "sourceBaseCommit": "b52e9367d89e41e0e6a48bb69bda16885d03d302",
     "branch": "recovery/capture-durable-20261105",
-    "status": "SOURCE_AND_CPU_RETENTION_READY_NOT_DEPLOYED",
+    "status": "SOURCE_CPU_AND_IMAGE_READY_GCUBE_CONFIGURED_STOPPED",
     "inheritedUncommittedWork": "Recovered 5 modified runtime files and 2 unexecuted tests from prior Work scratch; prior files untouched.",
     "remoteSourceRows": 356,
     "retainedHistoricalPASS": "No old PASS invalidated or rerun. Candidate, PNG encode and quality evidence preserved.",
@@ -374,9 +374,8 @@
     "privateSourceMode": "0700 directories / 0600 files strict",
     "sharedExportSemantics": "Reuse existing admitted gcube-storage-fix-v1/storage.py for public fixed-schema readback and optional shared fsync; no chmod/chown of existing mounts",
     "remainingGates": [
-      "NEW_IMAGE_NOT_BUILT_OR_PUBLISHED",
+      "FRESH_EXPLICIT_GPU_APPROVAL_REQUIRED",
       "ACTUAL_GCUBE_EXPORT_ROOT_TO_DROPBOX_ROUNDTRIP_NOT_TESTED",
-      "GPU_APPROVAL_REQUIRED_FOR_EVERY_START",
       "ACTUAL_CAPTURE_STALL_ROOT_CAUSE_UNCONFIRMED",
       "REFERENCE_QUALITY_MP4_NOT_YET_PROVEN"
     ],
@@ -387,14 +386,32 @@
     "sourceRowsUnchanged": 356
   },
   "imageStage20261105": {
-    "status": "READY_FOR_ONE_FREE_CPU_IMAGE_BUILD",
+    "status": "IMAGE_PUBLISHED_GCUBE_CONFIGURED_STOPPED",
     "preparation": "image/PREPARATION.json",
     "maxBuilds": 1,
     "maxPublications": 1,
     "retries": 0,
     "gpuStarts": 0,
-    "gCubeSettingChanges": 0,
+    "gCubeSettingChanges": 1,
     "sourceCasesReused": 20,
-    "runtimeSourceChangedThisStage": false
+    "runtimeSourceChangedThisStage": false,
+    "result": "executions/20261105-image-42002690934/RESULT.json",
+    "runID": 42002690934,
+    "runURL": "https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/42002690934",
+    "sourceCommit": "0415d18a6a07a1216631f665a7ff9b116de150c9",
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:capture-retention-v1-42002690934",
+    "digest": "sha256:534e5afd33e73b9d3f3e49db3f4a7dc63a1ee25a91457611f2d4b4fcb00e1e4c",
+    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/capture-retention-image-backup-42002690934",
+    "imageBuilds": 1,
+    "imagePublications": 1,
+    "gpuRenders": 0,
+    "oldPASSReruns": 0,
+    "installedUid1000SourceCheck": "PASS",
+    "preservedParentLayers": 127,
+    "addedLayers": 1,
+    "settingsEvidence": "image/GCUBE_SETTINGS.json",
+    "actualMountReadback": false,
+    "originalStallRootCause": "UNCONFIRMED",
+    "referenceQualityMp4": "NOT_PROVEN"
   }
 }
