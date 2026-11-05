@@ -172,21 +172,21 @@
     "cpuRun": 42031019500,
     "gpuState": "STOPPED_NODE_UNASSIGNED",
     "jobId": "studio-3575e3b2e0c90037eadcad96e5738e86",
-    "nextGate": "NEW_FIX_IMAGE_BUILD_PUBLICATION_AND_GCUBE_CONFIGURATION",
+    "nextGate": "APPROVED_ONE_FIX_IMAGE_PUBLICATION_THEN_STOPPED_GCUBE_CONFIGURATION",
     "report": "executions/20261105-user-render-a1/REPORT.md",
     "result": "executions/20261105-user-render-a1/INCIDENT.json",
     "sourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
     "sourceFix": "CPU_REGRESSION_PASS_NOT_DEPLOYED",
     "storageFailure": "ACTIVE_CHECKPOINT_TIMEOUT"
   },
-  "dateKST": "2026-11-05",
+  "dateKST": "2026-11-06",
   "decision": {
     "browserOptions": "UNCHANGED",
     "focusedTests": "New incident regressions: software baseline frame1 reproduced, candidate frames0/1/2/150/151/152 completed, UID1000 terminal cleanup and slow/helper timeout contracts passed, inner fsync latency checked separately as UID0. Historical PASS suites not rerun.",
     "gpuRenderRecoveryPass": false,
     "ifProviderCannotRecover": "CLOSED_PROVIDER_CONFIRMED_UNRECOVERABLE; DO_NOT_REPEAT_RAW_RECOVERY",
-    "newImage": "PREVIOUS_RETENTION_IMAGE_STILL_CONFIGURED_FIX_IMAGE_NOT_BUILT",
-    "nextMinimumAction": "Review IMAGE_FIX_PLAN.json; publish one new fix image and update only image/digest settings within approved scope. Keep GPU stopped. A new paid GPU run requires its own explicit approval.",
+    "newImage": "APPROVED_NOT_YET_BUILT",
+    "nextMinimumAction": "Publish sealed source image once, verify retained archive and registry identities, then update only stopped workload image and matching digest fields. No GPU start.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -204,6 +204,18 @@
     "scene": "UNCHANGED",
     "supportMessageSent": true,
     "timeouts": "UNCHANGED"
+  },
+  "frame1ImageStage20261106": {
+    "approval": "image-frame1/APPROVAL.json",
+    "functionalTestsRerun": 0,
+    "gpuRenders": 0,
+    "gpuStarts": 0,
+    "maxBuilds": 1,
+    "maxPublications": 1,
+    "preparation": "image-frame1/PREPARATION.json",
+    "retries": 0,
+    "sourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
+    "status": "PREPARATION_COMPLETE_NOT_EXECUTED"
   },
   "freePreparation20261105": {
     "executionCounts": {
@@ -366,7 +378,7 @@
     "unchangedMinutesApproximate": 5
   },
   "jobId": "studio-dd436342d68d518586dec4781daff497",
-  "lastUpdatedAt": "2026-11-05T13:00:21.999772+00:00",
+  "lastUpdatedAt": "2026-11-06 image preparation (KST)",
   "preservation": {
     "existingCheckpoint": "UNCHANGED",
     "existingData": "NO_WRITE_OR_DELETE",
@@ -401,7 +413,7 @@
   },
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
-  "status": "FRAME1_FAILURE_REPRODUCED_AND_SOURCE_FIX_CPU_PASS_GPU_STOPPED_IMAGE_UPDATE_PENDING",
+  "status": "FIX_IMAGE_AND_STOPPED_GCUBE_SETTINGS_APPROVED_PREPARATION_COMPLETE",
   "storageInvestigation": {
     "absenceScope": "Provider confirms deleted container private files and stdout/stderr cannot be recovered; original individual-file existence and capture cause remain unknown.",
     "directChildrenListed": 180,
