@@ -169,21 +169,24 @@
   ],
   "currentIncident20261105": {
     "confirmedFailure": "DRAW_FRAME_1_UP2_ACTUAL_FEATURE_PIXELS_MISSING",
+    "cpuRun": 42031019500,
     "gpuState": "STOPPED_NODE_UNASSIGNED",
     "jobId": "studio-3575e3b2e0c90037eadcad96e5738e86",
-    "nextGate": "FOCUSED_CPU_FRAME1_CLEANUP_STORAGE",
+    "nextGate": "NEW_FIX_IMAGE_BUILD_PUBLICATION_AND_GCUBE_CONFIGURATION",
+    "report": "executions/20261105-user-render-a1/REPORT.md",
     "result": "executions/20261105-user-render-a1/INCIDENT.json",
-    "sourceFix": "CANDIDATE_CPU_PENDING_NOT_DEPLOYED",
+    "sourceCommit": "754b09262140b0ad5a48238843e0f98aaa8c4735",
+    "sourceFix": "CPU_REGRESSION_PASS_NOT_DEPLOYED",
     "storageFailure": "ACTIVE_CHECKPOINT_TIMEOUT"
   },
   "dateKST": "2026-11-05",
   "decision": {
     "browserOptions": "UNCHANGED",
-    "focusedTests": "20_VALID_CASES_UID1000_AND_SOURCE_PIN_CHECKS; OLD_HISTORICAL_PASS_NOT_RERUN",
+    "focusedTests": "New incident regressions: software baseline frame1 reproduced, candidate frames0/1/2/150/151/152 completed, UID1000 terminal cleanup and slow/helper timeout contracts passed, inner fsync latency checked separately as UID0. Historical PASS suites not rerun.",
     "gpuRenderRecoveryPass": false,
     "ifProviderCannotRecover": "CLOSED_PROVIDER_CONFIRMED_UNRECOVERABLE; DO_NOT_REPEAT_RAW_RECOVERY",
-    "newImage": "BUILT_RETAINED_PUBLISHED_CONFIGURED_NOT_STARTED",
-    "nextMinimumAction": "Verify the candidate only on new frame1/2 and segment151/152 software pixels, terminal-failure owned cleanup, and storage latency >1 second. No GPU or new image until source gate is complete.",
+    "newImage": "PREVIOUS_RETENTION_IMAGE_STILL_CONFIGURED_FIX_IMAGE_NOT_BUILT",
+    "nextMinimumAction": "Review IMAGE_FIX_PLAN.json; publish one new fix image and update only image/digest settings within approved scope. Keep GPU stopped. A new paid GPU run requires its own explicit approval.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -197,7 +200,7 @@
       "capture/FRAME_000.png existence/size/SHA256",
       "worker.log and lease-supervisor.stderr.log: only relevant sanitized excerpts, not credentials or full environment"
     ],
-    "runtimePatch": "EXISTING_RECORDER_WIRED_AND_ACTIVE_SAFE_EXPORT_IMPLEMENTED_TESTED_NOT_DEPLOYED",
+    "runtimePatch": "FRAME1_VISIBILITY_GUARD_AND_TERMINAL_FAILURE_STORAGE_BUDGET_FIX_CPU_VALIDATED_NOT_DEPLOYED",
     "scene": "UNCHANGED",
     "supportMessageSent": true,
     "timeouts": "UNCHANGED"
@@ -295,13 +298,13 @@
     "latestDeploymentKST": "2026-11-03T20:22:04+09:00",
     "latestEventNode": "wn7e9b3dce",
     "latestEventPod": "dep5373-5c666fdc85-s699m",
-    "nodeId": "\u2014",
+    "nodeId": "—",
     "paidGpuStartedByThisReview": false,
     "savedImage": "dimon3898-sys/world-simulation-shorts-engine:quality-labels-v1-41535102499",
     "settingsChanged": false,
     "sshEnabled": false,
     "startEventKST": "2026-11-03T20:21:59+09:00",
-    "state": "\uc885\ub8cc",
+    "state": "종료",
     "stopEventKST": "2026-11-03T20:30:32+09:00",
     "stopEventText": "ADDED 20:30:32 Stopping container dep5373-0; type Normal; component kubelet; target Pod",
     "studioAccessAttempts": 0,
@@ -363,7 +366,7 @@
     "unchangedMinutesApproximate": 5
   },
   "jobId": "studio-dd436342d68d518586dec4781daff497",
-  "lastUpdatedAt": "2026-11-05T12:52:59.083766+00:00",
+  "lastUpdatedAt": "2026-11-05T13:00:21.999772+00:00",
   "preservation": {
     "existingCheckpoint": "UNCHANGED",
     "existingData": "NO_WRITE_OR_DELETE",
@@ -398,7 +401,7 @@
   },
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
-  "status": "CURRENT_JOB_FRAME1_FAILURE_RECOVERED_GPU_STOPPED_FOCUSED_CPU_PENDING",
+  "status": "FRAME1_FAILURE_REPRODUCED_AND_SOURCE_FIX_CPU_PASS_GPU_STOPPED_IMAGE_UPDATE_PENDING",
   "storageInvestigation": {
     "absenceScope": "Provider confirms deleted container private files and stdout/stderr cannot be recovered; original individual-file existence and capture cause remain unknown.",
     "directChildrenListed": 180,
@@ -423,13 +426,13 @@
     "recentExportsResult": "Each contains exactly one storage-preflight JSON, 897 bytes; no capture receipt, progress record, application log or MP4."
   },
   "supportRequest": {
-    "confirmation": "\ubb38\uc758\uac00 \uc811\uc218 \ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+    "confirmation": "문의가 접수 되었습니다.",
     "receipt": "SUPPORT_REQUEST.json",
     "recordedAt": "2026-11-03T12:16:09.217Z",
     "requestId": null,
     "status": "REPLIED_PROVIDER_RAW_RECOVERY_UNAVAILABLE",
     "submissionCount": 1,
-    "title": "[\uc6cc\ud06c\ub85c\ub4dc #5373] 1/300 \ud504\ub808\uc784 \uc9c4\ud589 \uc815\uccb4 \u2014 \uc885\ub8cc Pod \ubcf4\uc874 \uae30\ub85d \ud68c\uc218 \uc694\uccad",
+    "title": "[워크로드 #5373] 1/300 프레임 진행 정체 — 종료 Pod 보존 기록 회수 요청",
     "url": "https://gcube.ai/demand/ns74a360e2/qna"
   },
   "supportResponse": "SUPPORT_RESPONSE.json"
