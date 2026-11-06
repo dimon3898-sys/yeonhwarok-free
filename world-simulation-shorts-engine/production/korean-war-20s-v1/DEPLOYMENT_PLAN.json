@@ -1,0 +1,129 @@
+{
+  "schema": "WORLD_ENGINE_KW20_DEPLOYMENT_PREPARATION_V1",
+  "status": "RECIPE_READY_NOT_BUILT_OR_PUBLISHED",
+  "candidateSourceCommit": "d7fee7623128a155a6e613d638f013d66f39f1af",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a",
+  "requiredOverlayFiles": [
+    {
+      "bytes": 97939,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "sha256": "20cdd3b7b2e5b15a37da6560c6b7f8cfeef1261aace7b716fad773d6634b6f5f"
+    },
+    {
+      "bytes": 2612,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json",
+      "sha256": "d1cc8a3c2231f2b1e425608918ec57b78406f656b85c840895c1b184e822b0ca"
+    },
+    {
+      "bytes": 10463,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs",
+      "sha256": "b8145d9f66074853103c61fc6cfae01591af8d775267d6bb618b51b07e5c6bb8"
+    },
+    {
+      "bytes": 21190,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs",
+      "sha256": "9eb6e636f6f9bd61d9354afa6a66d91edb4844e641de3f534240719e11c26673"
+    },
+    {
+      "bytes": 531,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "sha256": "696234871970b2a1ce0f85e93b57f2330bd643443e8f21a190c73030884b127f"
+    },
+    {
+      "bytes": 14285,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "sha256": "f3297969e67952842dd45fe3f21b28a58e9a7ff7413109ca7e9ae725deac2575"
+    },
+    {
+      "bytes": 49949,
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/PRESENTATION_PROMPT.schema.json",
+      "sha256": "1e8c4bed3f96e998f860cb8369dab3c7dc69d646aefc8749ad2f0e410bdcecf8"
+    },
+    {
+      "bytes": 23283,
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs",
+      "sha256": "8807f12df91f22c26270b867b630398294b7021b82e7e2a9aff32b807177bb1b"
+    },
+    {
+      "bytes": 20402,
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs",
+      "sha256": "1db70531787504e6a1a0404d1268cbedb7fcf766177b502365b431705dc9fc64"
+    },
+    {
+      "bytes": 40391,
+      "path": "world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/prompt_pipeline.mjs",
+      "sha256": "bce6632fe25cb600af161cd9a0bae0e79b6e42b5b8c93f50dfe05348a759cc1e"
+    },
+    {
+      "bytes": 585,
+      "path": "world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/reviewed_context_registry.mjs",
+      "sha256": "148ccc9e84c581ffe9d40ba08a25dce8bb28700253cfb26ed40cfa3e412a3004"
+    },
+    {
+      "bytes": 9934,
+      "path": "world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/evidence/REVIEWED_CONTEXT.json",
+      "sha256": "965c76d58095d6d40be848616753608d25ebf1cfb369a2618275fbe3f541696a"
+    }
+  ],
+  "requiredOriginalAssets": [
+    {
+      "bytes": 8099373,
+      "gitBlob": "b750cff7f55b3fe476ab9a0c21e70277fc56dea0",
+      "path": "world-simulation-shorts-engine/recovery/g2-final-recovery-v1/assets/terrain/korean_peninsula_ne1_native.png",
+      "sha256": "427f5efb7805a8d8d181e326694fcee62bc64c9dac1906c0641dd8d9beef6cf2"
+    }
+  ],
+  "entrypoint": [
+    "/usr/bin/tini",
+    "-g",
+    "--",
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "--startup-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "--startup-manifest-sha256",
+    "696234871970b2a1ce0f85e93b57f2330bd643443e8f21a190c73030884b127f",
+    "--source-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "--source-manifest-sha256",
+    "20cdd3b7b2e5b15a37da6560c6b7f8cfeef1261aace7b716fad773d6634b6f5f",
+    "--export-root",
+    "/world-storage"
+  ],
+  "dockerfileSHA256": "020cfe2b59b62a4482fb276ace179871d439c33f74c7b134b664dfd14a1b9c8e",
+  "expectedRuntimeSourceRows": 358,
+  "oldImagesScenesAndVideosMustRemainUnchanged": true,
+  "maximumBuilds": 1,
+  "maximumPublications": 1,
+  "automaticRetries": 0,
+  "gpuStarts": 0,
+  "gpuRenders": 0,
+  "gCubeChangePerformed": false,
+  "requiredBeforePublication": [
+    "New 600-frame candidate technical result and actual visual review",
+    "Image-publication authorization scope",
+    "Fresh unique tag",
+    "Installed file/startup/source verification as uid1000 without GPU"
+  ],
+  "requiredBeforePaidRun": [
+    "Published digest must match candidate source manifest and entrypoint",
+    "Actual gCube settings inspected while stopped",
+    "Explicit approval identifying two 10s inputs and maximum time/cost/retries",
+    "Actual mounted /world-storage marker must be readable through external storage before capture",
+    "Do not reuse prior jobs or rerender successful clips automatically"
+  ],
+  "paidApproval": {
+    "approved": false,
+    "requestedRenders": 2,
+    "framesEach": 300,
+    "totalFrames": 600,
+    "gpuType": null,
+    "maximumMinutes": null,
+    "maximumCostKRW": null,
+    "retries": 0
+  },
+  "mountedStorageStatus": "Recorder and connector tests reused; live gCube mount-to-external readback unverified",
+  "qualityPass": false
+}
