@@ -25,5 +25,6 @@ bootstrap.write_text(s)
 startup=bootstrap.parent/'STARTUP_MANIFEST.json';j=json.loads(startup.read_bytes());j['runtimeManifestSHA256']=sha(manifest.read_bytes());r=row(bootstrap);j['files']['bootstrap.py']={k:r[k] for k in ('bytes','sha256')};startup.write_bytes(encoded(j))
 result={'schema':'WORLD_ENGINE_KW20_SOURCE_SEAL_V1','sourceBaseCommit':'bbd2ff9b783d00da208a6296e91183b32905373c','parentImage':parent['parentImage'],'files':[row(ROOT/r['path']) for r in parent['files']],'runtimeManifestSHA256':sha(manifest.read_bytes()),'startupManifestSHA256':sha(startup.read_bytes()),'runtimeSourceRows':len(data['files']),'inputs':[row(HERE/f'KOREAN_WAR_20S_PART_{i:02d}.json') for i in (1,2)],'paidGpuApproved':False}
 result['files'] += [row(p) for p in extra if str(p.relative_to(ROOT)) not in {r['path'] for r in result['files']}]
+result['assets']=[{'path':'world-simulation-shorts-engine/recovery/g2-final-recovery-v1/assets/terrain/korean_peninsula_ne1_native.png','bytes':8099373,'sha256':'427f5efb7805a8d8d181e326694fcee62bc64c9dac1906c0641dd8d9beef6cf2','gitBlob':'b750cff7f55b3fe476ab9a0c21e70277fc56dea0'}]
 (HERE/'SOURCE_SEAL.json').write_bytes(encoded(result))
 print(json.dumps({'overlaidFiles':len(result['files']),'runtimeRows':len(data['files']),'newRuntimeBehavior':'Optional native boundary visibility only'}))

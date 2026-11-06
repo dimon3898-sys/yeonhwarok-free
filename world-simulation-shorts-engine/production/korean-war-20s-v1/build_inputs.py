@@ -109,6 +109,7 @@ for clip in range(2):
         n=clip*2+index;sid,dates,line=specs[n]
         rows.append({'sceneId':sid.lower(),'startFrame':index*150,'endFrame':(index+1)*150,'facts':facts(sid,dates,line,75 if n==2 else 18)})
     p=pres[clip*2].copy();p['transitions']=[{'type':'CUT','frame':150}];p['sceneOverrides']={specs[clip*2+1][0].lower():pres[clip*2+1]}
+    p['initialStateVisibility']='PRESERVE_AREA_REVEAL_LINE'
     data={'schema':'WORLD_ENGINE_PRESENTATION_PROMPT_V2','prompt':'한국전쟁 사건 지도. 제공한 지리 자료와 사건 라벨을 사용하는 10초 30fps 영상이다. 카메라 위치와 이름표는 첨부한 장면 설정을 사용한다. 두 장면을 전환한다.',
       'data':{'schema':'WORLD_ENGINE_DATA_PROMPT_V1','topic':'한국전쟁 사건 지도','simulationType':'GENERAL','durationSeconds':10,'fps':30,'resolution':{'width':1080,'height':1920},'scenes':rows},'region':region,'presentation':p}
     write(f'KOREAN_WAR_20S_PART_{clip+1:02d}.json',data)

@@ -43,8 +43,8 @@ export function validatePresentation(input,{scene,region}={}){
   }
  }
  result.initialStateVisibility=input.initialStateVisibility??'REVEAL';
- ok(['REVEAL','PRESERVE_PROVIDED'].includes(result.initialStateVisibility),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
- if(result.initialStateVisibility==='PRESERVE_PROVIDED')ok(scene.event_type==='WAR'&&scene.timing.event_start_frame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
+ ok(['REVEAL','PRESERVE_PROVIDED','PRESERVE_AREA_REVEAL_LINE'].includes(result.initialStateVisibility),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
+ if(result.initialStateVisibility!=='REVEAL')ok(scene.event_type==='WAR'&&scene.timing.event_start_frame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
  keys(input.camera,['mode','keyframes','routeId','zoom','followStrength'],'PRESENTATION_CAMERA');
  ok(['KEYFRAMES','ROUTE_FOLLOW'].includes(input.camera.mode),'PRESENTATION_CAMERA_MODE_UNSUPPORTED');
  if(input.camera.mode==='KEYFRAMES'){
@@ -216,10 +216,13 @@ export function evaluatePresentationCameraFrame(plan,frame){return evaluateRefer
  * This changes opacity endpoints only, never event time or geographic input. */
 export function compilePresentationEnginePlan({scene,presentation}={}){
  const engines=compileExistingEnginePlan(scene),mode=presentation?.initialStateVisibility??'REVEAL';
- ok(['REVEAL','PRESERVE_PROVIDED'].includes(mode),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
+ ok(['REVEAL','PRESERVE_PROVIDED','PRESERVE_AREA_REVEAL_LINE'].includes(mode),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
  if(mode==='REVEAL')return engines;
  ok(scene.event_type==='WAR'&&engines.globalEventStartFrame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
- return{...engines,plans:engines.plans.map(binding=>{if(binding.engine!=='EXISTING_AREA_V3')return binding;const plan=binding.plan,operations=plan.operations.map(op=>['AREA_REVEAL','FRONT_LINE'].includes(op.type)?{...copy(op),from:1,to:1}:copy(op));
+ // An independent clip can start with its supplied land area visible while a
+ // new line reveals. It makes no claim that a previous timeline scene exists.
+ const preserved=mode==='PRESERVE_AREA_REVEAL_LINE'?['AREA_REVEAL']:['AREA_REVEAL','FRONT_LINE'];
+ return{...engines,plans:engines.plans.map(binding=>{if(binding.engine!=='EXISTING_AREA_V3')return binding;const plan=binding.plan,operations=plan.operations.map(op=>preserved.includes(op.type)?{...copy(op),from:1,to:1}:copy(op));
   return{...binding,plan:compileAreaPlan(plan.intent,{fps:plan.fps,start_frame:plan.startFrame,total_frames:plan.totalFrames,operations}),presentationOperationBinding:{owner:'UNCHANGED_COMPILE_AREA_PLAN_PUBLIC_OPERATIONS',initialStateVisibility:mode,revealEndpoints:[1,1],originalGlobalClockPreserved:true,sourceGeometryChanged:false}};})};
 }
 
