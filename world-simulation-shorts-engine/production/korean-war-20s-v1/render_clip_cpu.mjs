@@ -12,7 +12,7 @@ import {promisify} from 'node:util';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url)),ENGINE=path.resolve(HERE,'../..'),REPO=path.dirname(ENGINE),
  hash=bytes=>createHash('sha256').update(bytes).digest('hex'),within=(file,root)=>file===root||file.startsWith(root+path.sep),args={};
-for(const arg of process.argv.slice(2)){const m=/^--(prepared|output|deps-root|chromium)=(.+)$/.exec(arg);assert(m&&!args[m[1]],'QUALITY_PIXEL_ARGUMENT');args[m[1]]=m[2];}
+for(const arg of process.argv.slice(2)){const m=/^--(prepared|output|deps-root|chromium|frames)=(.+)$/.exec(arg);assert(m&&!args[m[1]],'QUALITY_PIXEL_ARGUMENT');args[m[1]]=m[2];}
 for(const key of ['prepared','output','deps-root'])assert(path.isAbsolute(args[key]??''),'QUALITY_PIXEL_ABSOLUTE_'+key);
 const preparedFile=await realpath(args.prepared),payload=JSON.parse(await readFile(preparedFile,'utf8')),output=path.resolve(args.output);
 assert(payload.schema==='WORLD_ENGINE_PREPARED_PRESENTATION_V2'&&payload.totalFrames===300&&payload.segments.length===2,'QUALITY_PREPARED_10S_REQUIRED');
@@ -62,12 +62,14 @@ try{
  });
  const videoFile=path.join(output,'CLIP_10S_CPU_PREVIEW.mp4'),credit='Modern geographic context: Natural Earth Public Domain. Korean War event chronology: National Archives of Korea and MPVA. Direction diagram is not an observed unit route. No historical control polygons or precise landing beaches. CPU SwiftShader preview, not NVIDIA validation.';
  let stderr='';
- encoder=spawn('ffmpeg',['-hide_banner','-loglevel','error','-n','-f','image2pipe','-framerate','30','-vcodec','png','-i','pipe:0','-an','-c:v','libx264','-preset','veryfast','-crf','18','-pix_fmt','yuv420p','-metadata','comment='+credit,'-movflags','+faststart',videoFile],{stdio:['pipe','ignore','pipe']});
- encoder.stderr.on('data',data=>{stderr=(stderr+data).slice(-4096);});encoder.stdin.on('error',()=>{});encoderExit=once(encoder,'exit');
+ if(!args.frames){encoder=spawn('ffmpeg',['-hide_banner','-loglevel','error','-n','-f','image2pipe','-framerate','30','-vcodec','png','-i','pipe:0','-an','-c:v','libx264','-preset','veryfast','-crf','18','-pix_fmt','yuv420p','-metadata','comment='+credit,'-movflags','+faststart',videoFile],{stdio:['pipe','ignore','pipe']});
+ encoder.stderr.on('data',data=>{stderr=(stderr+data).slice(-4096);});encoder.stdin.on('error',()=>{});encoderExit=once(encoder,'exit');}
+ const probeOnly=!!args.frames,selected=probeOnly?args.frames.split(',').map(Number):null;
+ if(probeOnly)assert(selected.length>0&&new Set(selected).size===selected.length&&selected.every(f=>Number.isInteger(f)&&f>=0&&f<300),'PROBE_FRAMES_INVALID');
  const stills=new Set([0,30,75,105,149,150,185,210,240,299]);
- const critical=[96,149,150,240,299],cached=new Map(),saved=new Set(),order=[...critical,...Array.from({length:300},(_,i)=>i)];
+ const critical=[96,149,150,240,299],cached=new Map(),saved=new Set(),order=probeOnly?selected:[...critical,...Array.from({length:300},(_,i)=>i)];
  for(let index=0;index<order.length;index++){
-  const frame=order[index],probe=index<critical.length;
+  const frame=order[index],probe=!probeOnly&&index<critical.length;
   const result=cached.has(frame)?structuredClone(cached.get(frame)):await page.evaluate(async frame=>{
    const index=window.payload.segments.findIndex(s=>frame>=s.startFrame&&frame<s.endFrame),segment=window.payload.segments[index];
    if(window.currentSegment!==index){window.runtime?.dispose();const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;document.body.replaceChildren(canvas);window.runtime=await window.createRuntime({canvas,...segment});window.currentSegment=index;}
@@ -91,19 +93,20 @@ try{
   delete result.png;
   frames.push({frame,resultSHA256:result.rawSHA256,cameraBounds:result.diagnostic.camera.bounds,
    featureChangedPixels:result.diagnostic.featureChangedPixels,cyanPixels:result.cyanPixels,labels:result.diagnostic.presentationLabels,nonBlackPixels:result.nonBlackPixels});
-  if(stills.has(frame)&&!saved.has(frame)){await writeFile(path.join(output,`FRAME_${String(frame).padStart(3,'0')}.png`),png,{flag:'wx'});await writeJSON(`FRAME_${String(frame).padStart(3,'0')}.json`,result);}
+  if((probeOnly||stills.has(frame))&&!saved.has(frame)){await writeFile(path.join(output,`FRAME_${String(frame).padStart(3,'0')}.png`),png,{flag:'wx'});await writeJSON(`FRAME_${String(frame).padStart(3,'0')}.json`,result);}
+  if(probeOnly){console.log(JSON.stringify({stage:'REMAINING_CRITICAL_FRAME_DRAW',frame}));continue;}
   assert.equal(encoder.exitCode,null,'PREVIEW_ENCODER_EARLY_EXIT');
   if(!encoder.stdin.write(png))await Promise.race([once(encoder.stdin,'drain'),encoderExit.then(()=>{throw Error('PREVIEW_ENCODER_CLOSED');})]);
   if(frame%15===0||frame===299)console.log(JSON.stringify({stage:'NEW_SAMPLE_CPU_DRAW',frame,totalFrames:300}));
  }
- encoder.stdin.end();const [code]=await encoderExit;assert.equal(code,0,stderr);encoder=null;
+ if(!probeOnly){encoder.stdin.end();const [code]=await encoderExit;assert.equal(code,0,stderr);encoder=null;
  const execute=promisify(execFile),probe=JSON.parse((await execute('ffprobe',['-v','error','-show_streams','-show_format','-of','json',videoFile],{maxBuffer:2*1024**2})).stdout),v=probe.streams.find(s=>s.codec_type==='video');
  assert.equal(v.width,1080);assert.equal(v.height,1920);assert.equal(v.nb_frames,'300');assert.equal(v.avg_frame_rate,'30/1');assert.equal(Number(probe.format.duration),10);
  const decoded=await execute('ffmpeg',['-v','error','-i',videoFile,'-f','null','-'],{timeout:120000,maxBuffer:1024**2});assert.equal(decoded.stderr.trim(),'');
  const raw=await readFile(videoFile);video={file:path.basename(videoFile),bytes:raw.length,sha256:hash(raw),durationSeconds:10,frames:300,fps:30,width:1080,height:1920,fullDecode:'PASS',audioStreams:0};
  assert.deepEqual(pageErrors,[]);assert.deepEqual(frames[149].cameraBounds,frames[150].cameraBounds);
  const last=frames.at(-1).labels.drawn;assert(last.some(x=>x.alpha===1),'PREVIEW_FINAL_INFORMATION_HOLD_REQUIRED');
- status='PASS';
+ status='PASS';}else{assert.deepEqual(pageErrors,[]);status='PASS_SELECTED_FRAMES_ONLY';}
 }catch(error){failure=String(error.stack??error).slice(0,8000);throw error;}
 finally{
  encoder?.kill('SIGTERM');await browser?.close();if(server)await new Promise(resolve=>server.close(resolve));
@@ -111,6 +114,6 @@ finally{
  await writeJSON('CPU_PREVIEW_RESULT.json',{schema:'WORLD_ENGINE_REFERENCE_CPU_PREVIEW_V2',status,failure,video,
   framesDrawn:frames.length,softwareOnly:true,gpuExecutions:0,referenceQualityApproved:false,
   seamSamePixels:frames.length>150?frames[149].resultSHA256===frames[150].resultSHA256:null,
-  oldPASSReruns:0,scope:'NEW_SAMPLE_300_CONTIGUOUS_CPU_FRAMES_AND_ENCODE',limitations:['Not NVIDIA or gCube validation','Regional raster: no newly resolved local detail','Visual quality requires review']});
+  oldPASSReruns:0,scope:args.frames?'SELECTED_NEW_CLIP_02_FRAMES_ONLY_NO_MP4':'NEW_SAMPLE_300_CONTIGUOUS_CPU_FRAMES_AND_ENCODE',limitations:['Not NVIDIA or gCube validation','Regional raster: no newly resolved local detail','Visual quality requires review']});
  await writeJSON('HTTP_ASSET_BINDINGS.json',http);
 }

@@ -6,16 +6,17 @@ on:
 permissions:
   contents: write
   packages: read
+  actions: read
 concurrency:
   group: world-engine-kw20-20261106
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   preview:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '58683d9f5c5561de9206eb4c02030fbdfff3415c' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A5'
+      github.event.before == '4cae4a278bd3edfc11e9cb5e2c7235e864113d4a' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A6'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -40,8 +41,29 @@ jobs:
           PY
           sudo systemctl restart docker
           docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a
-      - name: Prepare new inputs and capture two ten-second CPU clips
-        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-v1/run_cpu_once.py
+      - name: Reuse A5 evidence after bounded whole-CPU attempt stops
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY2'
+          import hashlib,json,os,subprocess,time,zipfile
+          from pathlib import Path
+          out=Path(os.environ['RUNNER_TEMP'])/'kw20-previous';out.mkdir()
+          for attempt in range(24):
+              data=json.loads(subprocess.check_output(['gh','api','repos/dimon3898-sys/yeonhwarok-free/actions/runs/42209920397/artifacts']))
+              rows=[a for a in data['artifacts'] if a['name']=='kw20-42209920397' and not a['expired']]
+              if rows:break
+              time.sleep(10)
+          else:raise SystemExit('A5 evidence unavailable; do not repeat completed work')
+          a=rows[0];raw=subprocess.check_output(['gh','api',f'repos/dimon3898-sys/yeonhwarok-free/actions/artifacts/{a["id"]}/zip'])
+          assert 'sha256:'+hashlib.sha256(raw).hexdigest()==a['digest']
+          archive=out/'A5.zip';archive.write_bytes(raw)
+          with zipfile.ZipFile(archive) as z:z.extractall(out/'delivery')
+          with zipfile.ZipFile(out/'delivery/KW20_EVIDENCE.zip') as z:z.extractall(out/'evidence')
+          (out/'A5_ARTIFACT.json').write_text(json.dumps(a,indent=2)+'\n')
+          PY2
+      - name: Capture only remaining second-clip critical frames
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-v1/run_cpu_once.py --remaining-only
       - name: Preserve new evidence and any completed clip
         if: always()
         run: |
@@ -50,7 +72,7 @@ jobs:
           from pathlib import Path
           p=Path(os.environ['RUNNER_TEMP'])/'kw20-evidence';p.mkdir(exist_ok=True)
           dest=p/'delivery';dest.mkdir(exist_ok=True)
-          selection=[f for f in p.rglob('*') if f.is_file() and (f.suffix=='.png' or f.name.startswith('FRAME_') or f.name in ['REVIEW_SCOPE_CHECK.json','RUN_RESULT.json','INSTALLED_SOURCE.json','CHECK_RESULT.json','CHECK_FAILED.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','INPUT_RECEIPT_1.json','INPUT_RECEIPT_2.json','CPU_PREVIEW_RESULT.json','FRAME_EVIDENCE.json','COMPOSITION_RESULT.json','COMPOSE_COMPLETE.json','COMPOSE_FAILED.json','QUALITY_SUMMARY.json'])]
+          selection=[f for f in p.rglob('*') if f.is_file() and (f.suffix=='.png' or f.name.startswith('FRAME_') or f.name in ['REUSED_CHECKS.json','REUSED_CHECK_RESULT.json','REVIEW_SCOPE_CHECK.json','RUN_RESULT.json','INSTALLED_SOURCE.json','CHECK_RESULT.json','CHECK_FAILED.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','INPUT_RECEIPT_1.json','INPUT_RECEIPT_2.json','CPU_PREVIEW_RESULT.json','FRAME_EVIDENCE.json','COMPOSITION_RESULT.json','COMPOSE_COMPLETE.json','COMPOSE_FAILED.json','QUALITY_SUMMARY.json'])]
           with zipfile.ZipFile(dest/'KW20_EVIDENCE.zip','w',zipfile.ZIP_DEFLATED) as z:
               for f in selection:z.write(f,f.relative_to(p))
           for i in (1,2):
@@ -71,7 +93,7 @@ jobs:
           path: ${{ runner.temp }}/kw20-evidence/delivery/
           retention-days: 14
       - name: Preserve completed CPU candidate
-        if: success()
+        if: false
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
