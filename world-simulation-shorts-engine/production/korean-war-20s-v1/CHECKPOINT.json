@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_KW20_CHECKPOINT_V1",
-  "status": "A4_NEW_600_FRAME_CPU_OUTPUT_IN_PROGRESS",
-  "firstIncomplete": "Complete new 600 CPU frames and existing composition, then inspect actual video",
+  "status": "A5_VISIBLE_LAYOUT_SCOPE_FIX_PENDING",
+  "firstIncomplete": "Critical frames and actual 600-frame CPU output with corrected visible-layout scope",
   "protectedPass": [
     "Prior reference A3 300-frame output",
     "Prior capture durable recorder failure/stall simulations",
@@ -77,5 +77,31 @@
     "observationDate": "2026-11-06",
     "gpuExecuted": false,
     "oldGcubeStallResolvedClaimed": false
+  },
+  "newA4": {
+    "runId": 42207628661,
+    "jobId": 127858122222,
+    "commit": "d7fee7623128a155a6e613d638f013d66f39f1af",
+    "status": "FAIL_AT_FRAME_96",
+    "inputPreparationChecks": 17,
+    "inputPreparationStatus": "PASS",
+    "framesDrawn": 96,
+    "reason": "Hidden native regional-anchor layout exits safe area during camera movement although native graphics are not rendered",
+    "artifactId": 13497823285,
+    "cancelledByAgent": false
+  },
+  "a5MinimumRecheck": {
+    "invalidated": [
+      "A4 runtime source bindings and pixel evidence bind the old presentation runtime",
+      "A4 full 300-frame render never passed"
+    ],
+    "change": "REFERENCE_FOCUS_V2 does not audit non-drawn native graphics; valid=null distinguishes absence from PASS. Actual presentation pin/label safe-area, collision, source, pixel and GL checks remain unchanged.",
+    "scope": "Both sealed CPU/NVIDIA variants, fresh prepared source-binding receipt, previously uncompleted critical frames first, then one new output per frame",
+    "priorPassReused": [
+      "Seven reviewed-source scope checks",
+      "Existing recorder/connector mocks",
+      "Prior Namibia/reference video",
+      "Existing composer regression suite"
+    ]
   }
 }

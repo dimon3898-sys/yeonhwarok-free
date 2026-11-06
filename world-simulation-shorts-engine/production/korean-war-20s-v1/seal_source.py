@@ -8,11 +8,23 @@ def encoded(x):return (json.dumps(x,indent=2,sort_keys=True)+'\n').encode()
 def row(p):
     b=p.read_bytes();return {'path':str(p.relative_to(ROOT)),'bytes':len(b),'sha256':sha(b)}
 parent=json.loads((REC/'reference-sample-v2/SOURCE_SEAL.json').read_bytes())
+generated=REC/'codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json'
+verifier=generated.parent/'capture_nvidia.mjs'
+g=json.loads(generated.read_bytes());v=verifier.read_text()
+for variant in g['variants']:
+    original=ROOT/variant['original'];new=sha(original.read_bytes());old=variant['originalSHA256']
+    if new!=old:
+        assert v.count(old)==1
+        v=v.replace(old,new)
+    variant['originalSHA256']=new
+    variant['variantSHA256']=sha((generated.parent.parent/variant['variant']).read_bytes())
+generated.write_bytes(encoded(g));verifier.write_text(v)
 manifest=REC/'codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json'
 data=json.loads(manifest.read_bytes())
 allowed={str(REC.relative_to(ROOT))+'/universal-presentation-v2/'+n for n in ['presentation_plan.mjs','PRESENTATION_PROMPT.schema.json']}
 extra=[REC/'universal-data-pipeline-v1'/n for n in ['prompt_pipeline.mjs','reviewed_context_registry.mjs','evidence/REVIEWED_CONTEXT.json']]
 allowed.update(str(p.relative_to(ROOT)) for p in extra)
+allowed.update(str(p.relative_to(ROOT)) for p in [generated,verifier,generated.parent.parent/'presentation_runtime_vulkan.generated.mjs',REC/'universal-presentation-v2/presentation_runtime.mjs'])
 for r in data['files']:
     if r['path'] in allowed:r.update(row(ROOT/r['path']))
 known={r['path'] for r in data['files']}

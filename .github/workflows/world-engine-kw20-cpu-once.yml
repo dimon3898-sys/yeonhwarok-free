@@ -14,8 +14,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == 'a0da2036495d33a63498991b9609263b86eba749' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A4'
+      github.event.before == '58683d9f5c5561de9206eb4c02030fbdfff3415c' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A5'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -50,7 +50,7 @@ jobs:
           from pathlib import Path
           p=Path(os.environ['RUNNER_TEMP'])/'kw20-evidence';p.mkdir(exist_ok=True)
           dest=p/'delivery';dest.mkdir(exist_ok=True)
-          selection=[f for f in p.rglob('*') if f.is_file() and (f.suffix=='.png' or f.name in ['REVIEW_SCOPE_CHECK.json','RUN_RESULT.json','INSTALLED_SOURCE.json','CHECK_RESULT.json','CHECK_FAILED.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','INPUT_RECEIPT_1.json','INPUT_RECEIPT_2.json','CPU_PREVIEW_RESULT.json','FRAME_EVIDENCE.json','COMPOSITION_RESULT.json','COMPOSE_COMPLETE.json','COMPOSE_FAILED.json','QUALITY_SUMMARY.json'])]
+          selection=[f for f in p.rglob('*') if f.is_file() and (f.suffix=='.png' or f.name.startswith('FRAME_') or f.name in ['REVIEW_SCOPE_CHECK.json','RUN_RESULT.json','INSTALLED_SOURCE.json','CHECK_RESULT.json','CHECK_FAILED.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','INPUT_RECEIPT_1.json','INPUT_RECEIPT_2.json','CPU_PREVIEW_RESULT.json','FRAME_EVIDENCE.json','COMPOSITION_RESULT.json','COMPOSE_COMPLETE.json','COMPOSE_FAILED.json','QUALITY_SUMMARY.json'])]
           with zipfile.ZipFile(dest/'KW20_EVIDENCE.zip','w',zipfile.ZIP_DEFLATED) as z:
               for f in selection:z.write(f,f.relative_to(p))
           for i in (1,2):

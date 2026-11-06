@@ -65,8 +65,10 @@ try{
  encoder=spawn('ffmpeg',['-hide_banner','-loglevel','error','-n','-f','image2pipe','-framerate','30','-vcodec','png','-i','pipe:0','-an','-c:v','libx264','-preset','veryfast','-crf','18','-pix_fmt','yuv420p','-metadata','comment='+credit,'-movflags','+faststart',videoFile],{stdio:['pipe','ignore','pipe']});
  encoder.stderr.on('data',data=>{stderr=(stderr+data).slice(-4096);});encoder.stdin.on('error',()=>{});encoderExit=once(encoder,'exit');
  const stills=new Set([0,30,75,105,149,150,185,210,240,299]);
- for(let frame=0;frame<300;frame++){
-  const result=await page.evaluate(async frame=>{
+ const critical=[96,149,150,240,299],cached=new Map(),saved=new Set(),order=[...critical,...Array.from({length:300},(_,i)=>i)];
+ for(let index=0;index<order.length;index++){
+  const frame=order[index],probe=index<critical.length;
+  const result=cached.has(frame)?structuredClone(cached.get(frame)):await page.evaluate(async frame=>{
    const index=window.payload.segments.findIndex(s=>frame>=s.startFrame&&frame<s.endFrame),segment=window.payload.segments[index];
    if(window.currentSegment!==index){window.runtime?.dispose();const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;document.body.replaceChildren(canvas);window.runtime=await window.createRuntime({canvas,...segment});window.currentSegment=index;}
    const diagnostic=window.runtime.drawFrame(frame-segment.startFrame),pixels=window.runtime.readPixels();let nonBlackPixels=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]||pixels[i+1]||pixels[i+2])nonBlackPixels++;
@@ -82,10 +84,14 @@ try{
   assert.equal(result.diagnostic.presentationLabels.visibleCount,segment.presentation.labels.items.filter(x=>local>=x.startFrame&&local<x.endFrame).length,'PREVIEW_ACTIVE_LABEL_MISSING');
   assert.equal(result.diagnostic.presentationMap.areaViewportPolicy,'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY');
   const accent=segment.presentation.mapStyle.lineAccentFrames;if(accent&&local>=accent[0]&&local<accent[1]){assert(result.diagnostic.features.some(x=>x.lineAccent?.fronts?.some(f=>f.drawn)),'PREVIEW_SOURCE_DIRECTION_NOT_DRAWN_'+frame);}
-  const png=Buffer.from(result.png,'base64');delete result.png;
+  const png=Buffer.from(result.png,'base64');
+  assert.equal(result.diagnostic.layout.nativeAuditScope,'NATIVE_GRAPHICS_NOT_DRAWN');
+  assert.equal(result.diagnostic.layout.valid,null,'HIDDEN_NATIVE_LAYOUT_MUST_NOT_CLAIM_PASS');
+  if(probe){cached.set(frame,structuredClone(result));await writeFile(path.join(output,`FRAME_${String(frame).padStart(3,'0')}.png`),png,{flag:'wx'});await writeJSON(`FRAME_${String(frame).padStart(3,'0')}.json`,{...result,png:undefined});saved.add(frame);console.log(JSON.stringify({stage:'NEW_CRITICAL_FRAME_DRAW',frame}));continue;}
+  delete result.png;
   frames.push({frame,resultSHA256:result.rawSHA256,cameraBounds:result.diagnostic.camera.bounds,
    featureChangedPixels:result.diagnostic.featureChangedPixels,cyanPixels:result.cyanPixels,labels:result.diagnostic.presentationLabels,nonBlackPixels:result.nonBlackPixels});
-  if(stills.has(frame)){await writeFile(path.join(output,`FRAME_${String(frame).padStart(3,'0')}.png`),png,{flag:'wx'});await writeJSON(`FRAME_${String(frame).padStart(3,'0')}.json`,result);}
+  if(stills.has(frame)&&!saved.has(frame)){await writeFile(path.join(output,`FRAME_${String(frame).padStart(3,'0')}.png`),png,{flag:'wx'});await writeJSON(`FRAME_${String(frame).padStart(3,'0')}.json`,result);}
   assert.equal(encoder.exitCode,null,'PREVIEW_ENCODER_EARLY_EXIT');
   if(!encoder.stdin.write(png))await Promise.race([once(encoder.stdin,'drain'),encoderExit.then(()=>{throw Error('PREVIEW_ENCODER_CLOSED');})]);
   if(frame%15===0||frame===299)console.log(JSON.stringify({stage:'NEW_SAMPLE_CPU_DRAW',frame,totalFrames:300}));

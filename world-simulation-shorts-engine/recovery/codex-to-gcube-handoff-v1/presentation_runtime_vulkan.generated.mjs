@@ -97,10 +97,16 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    const gutter=Math.min((bounds[0]-source.bounds[0])/source.pixelSpacing[0],(bounds[1]-source.bounds[1])/source.pixelSpacing[1],(source.bounds[2]-bounds[2])/source.pixelSpacing[0],(source.bounds[3]-bounds[3])/source.pixelSpacing[1]);
    assert(gutter>=1-1e-8,'UP2_CURRENT_SOURCE_COVERAGE_FAILED');
    for(const location of scene.locations){const expected=projectBounds(bounds,location.anchor),actual=project(location.anchor);assert(Math.hypot(actual[0]-expected[0],actual[1]-expected[1])<1e-6,'UP2_CURRENT_COORDINATE_MISMATCH');}
-   const layoutAudit=auditRuntimeLayout({plan:layoutPlan,screen:project});assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
+   const mapOptions=presentationNativeMapOptions(p,frame);
+   // Reference presentation draws its own source-bound pins and labels below.
+   // Hidden native graphics have no current-screen layout obligation. Keep
+   // their absence explicit rather than marking an unperformed audit PASS.
+   const hiddenNative=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'&&mapOptions.graphics===false;
+   const layoutAudit=hiddenNative?{validation:{valid:null},scope:'NATIVE_GRAPHICS_NOT_DRAWN'}:auditRuntimeLayout({plan:layoutPlan,screen:project});
+   if(!hiddenNative)assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(frame),preparedLabel=null;
    if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:rows})));
-   const mapOptions=presentationNativeMapOptions(p,frame),native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:visualPlan,project});
+   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:visualPlan,project});
    const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=frame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
@@ -135,7 +141,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
     camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},
     fixedModelCamera:{sourceFrame:presentationPlan.analysisSourceFrame,state:presentationPlan.analysisCamera,scope:'UNCHANGED_FLOW_TIMING_ONLY_NEVER_CURRENT_MOVING_CAMERA'},
-    layout:{valid:layoutAudit.validation.valid,visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
+    layout:{valid:layoutAudit.validation.valid,nativeAuditScope:layoutAudit.scope??'CURRENT_NATIVE_LAYOUT',visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
     material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
     featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
