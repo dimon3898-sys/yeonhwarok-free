@@ -9,14 +9,14 @@ permissions:
   actions: read
 concurrency:
   group: world-engine-kw20-20261106
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   preview:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '4cae4a278bd3edfc11e9cb5e2c7235e864113d4a' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A6'
+      github.event.before == '9e73143e537b355463b3a19a2e80e6422574374b' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A7'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -41,7 +41,7 @@ jobs:
           PY
           sudo systemctl restart docker
           docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a
-      - name: Reuse A5 evidence after bounded whole-CPU attempt stops
+      - name: Reuse preserved A4 input analysis without rerunning suites
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -49,24 +49,22 @@ jobs:
           import hashlib,json,os,subprocess,time,zipfile
           from pathlib import Path
           out=Path(os.environ['RUNNER_TEMP'])/'kw20-previous';out.mkdir()
-          for attempt in range(24):
-              data=json.loads(subprocess.check_output(['gh','api','repos/dimon3898-sys/yeonhwarok-free/actions/runs/42209920397/artifacts']))
-              rows=[a for a in data['artifacts'] if a['name']=='kw20-42209920397' and not a['expired']]
-              if rows:break
-              time.sleep(10)
-          else:raise SystemExit('A5 evidence unavailable; do not repeat completed work')
+          data=json.loads(subprocess.check_output(['gh','api','repos/dimon3898-sys/yeonhwarok-free/actions/runs/42207628661/artifacts']))
+          rows=[a for a in data['artifacts'] if a['id']==13497823285 and not a['expired']]
+          assert len(rows)==1,'Preserved A4 evidence required'
           a=rows[0];raw=subprocess.check_output(['gh','api',f'repos/dimon3898-sys/yeonhwarok-free/actions/artifacts/{a["id"]}/zip'])
           assert 'sha256:'+hashlib.sha256(raw).hexdigest()==a['digest']
-          archive=out/'A5.zip';archive.write_bytes(raw)
+          archive=out/'A4.zip';archive.write_bytes(raw)
           with zipfile.ZipFile(archive) as z:z.extractall(out/'delivery')
           with zipfile.ZipFile(out/'delivery/KW20_EVIDENCE.zip') as z:z.extractall(out/'evidence')
-          (out/'A5_ARTIFACT.json').write_text(json.dumps(a,indent=2)+'\n')
+          (out/'A4_ARTIFACT.json').write_text(json.dumps(a,indent=2)+'\n')
           PY2
-      - name: Capture only remaining second-clip critical frames
+      - name: Capture bounded key frames with recoverable PNG evidence
         run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-v1/run_cpu_once.py --remaining-only
       - name: Preserve new evidence and any completed clip
         if: always()
         run: |
+          if [ -d "${RUNNER_TEMP}/kw20-evidence" ]; then sudo chmod -R a+rX "${RUNNER_TEMP}/kw20-evidence"; fi
           python3 - <<'PY'
           import hashlib,json,os,shutil,zipfile
           from pathlib import Path

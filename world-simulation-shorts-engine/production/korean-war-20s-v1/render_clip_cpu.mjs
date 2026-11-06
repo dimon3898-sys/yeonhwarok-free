@@ -114,6 +114,6 @@ finally{
  await writeJSON('CPU_PREVIEW_RESULT.json',{schema:'WORLD_ENGINE_REFERENCE_CPU_PREVIEW_V2',status,failure,video,
   framesDrawn:frames.length,softwareOnly:true,gpuExecutions:0,referenceQualityApproved:false,
   seamSamePixels:frames.length>150?frames[149].resultSHA256===frames[150].resultSHA256:null,
-  oldPASSReruns:0,scope:args.frames?'SELECTED_NEW_CLIP_02_FRAMES_ONLY_NO_MP4':'NEW_SAMPLE_300_CONTIGUOUS_CPU_FRAMES_AND_ENCODE',limitations:['Not NVIDIA or gCube validation','Regional raster: no newly resolved local detail','Visual quality requires review']});
+  oldPASSReruns:0,scope:args.frames?'SELECTED_FRAMES_ONLY_NO_MP4':'NEW_SAMPLE_300_CONTIGUOUS_CPU_FRAMES_AND_ENCODE',limitations:['Not NVIDIA or gCube validation','Regional raster: no newly resolved local detail','Visual quality requires review']});
  await writeJSON('HTTP_ASSET_BINDINGS.json',http);
 }
