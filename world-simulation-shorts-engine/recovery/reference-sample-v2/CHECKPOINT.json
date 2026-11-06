@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_REFERENCE_SAMPLE_CHECKPOINT_V2",
   "dateKST": "2026-11-06",
-  "status": "NEW_SAMPLE_PREPARED_CPU_VALIDATION_PENDING",
+  "status": "INPUT_AND_SOURCE_PASS_NEW_DRAW_BLOCKED_HIDDEN_NATIVE_TITLE",
   "sourceBaseCommit": "e12c5e8bfc1de3e6c1484e77554b9d6ee5bee1a6",
   "previousCheckpoint": "../capture-stall-review-v1/CHECKPOINT.json",
   "reference": "64306.mp4",
@@ -19,8 +19,21 @@
     "runtimeImageOrJobBinding": "NOT_INFERRED_FROM_MP4",
     "visualReview": "Camera scale change too small; whole-country recolor obscures coast emphasis; oversized hero pin; final coast label exits at9s"
   },
-  "preserved": ["Original successful10s MP4", "QUALITY_LABELS_10S.json", "existing source geometry and coordinates", "frame1 fix", "durable recorder", "old PASS suites", "main and recovery branch"],
-  "newWork": ["opt-in viewport clipping through existing GPU polygon pass", "existing native border style tokens", "new input camera and label timing", "matching generated runtime and exact source pins"],
+  "preserved": [
+    "Original successful10s MP4",
+    "QUALITY_LABELS_10S.json",
+    "existing source geometry and coordinates",
+    "frame1 fix",
+    "durable recorder",
+    "old PASS suites",
+    "main and recovery branch"
+  ],
+  "newWork": [
+    "opt-in viewport clipping through existing GPU polygon pass",
+    "existing native border style tokens",
+    "new input camera and label timing",
+    "matching generated runtime and exact source pins"
+  ],
   "verificationScope": "Only new preset and new300-frame sample; no historical PASS invalidated or rerun",
   "sourceLimitation": "Existing native raster spacing1/60degree; regional visual sample, not newly resolved city/street/small-island detail",
   "imageBuilds": 0,
@@ -29,5 +42,16 @@
   "gpuStarts": 0,
   "gpuRenders": 0,
   "currentDeployedImageSupportsNewInput": false,
-  "nextGate": "CPU source/prepare verification and complete software preview, then actual visual review before considering image publication or paid GPU"
+  "nextGate": "CPU source/prepare verification and complete software preview, then actual visual review before considering image publication or paid GPU",
+  "cpuRunA1": 42181008735,
+  "preservedNewPass": {
+    "checks": 8,
+    "inputSourceAndCamera": "evidence/A1_CHECK_RESULT.json"
+  },
+  "remainingFailure": {
+    "stage": "FIRST_DRAW",
+    "code": "MEASURED_LAYOUT_INVALID_NO_SAFE_PRIMARY_CLEAR_TITLE_PLACEMENT",
+    "cause": "Hidden native title still demanded primary-free space in close framing",
+    "fix": "New preset only: disable undrawn native title information and retain actual visible-label layout checks"
+  }
 }

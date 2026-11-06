@@ -41,7 +41,11 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
  let factory,graphics,last,lastBasePixels,disposed=false,nativeStabilityProof=null;const passes=[];
  try{
   const visualPlan={...nativePlan,theme:presentationMapTheme(p,nativePlan.theme)};
-  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment}));
+  // Native title is not drawn by presentation mode. Do not reserve a clear-country
+  // title slot in the new close view; visible presentation labels keep their checks.
+  const layoutPlan=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?{...visualPlan,scale:{...visualPlan.scale,
+   information:{...visualPlan.scale.information,title:false}}}:nativePlan;
+  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment}));
   graphics=await observe('GRAPHICS_PREPARATION',()=>createMovingGraphicPass({renderer,factory,width:1080,height:1920}));
   if(p.labels?.enabled===true&&p.labels.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
   // Derived plans are created in their consuming JS realm. The frozen owner's
@@ -67,7 +71,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
     // Native country border owns the outline; existing source line owns the coast accent.
     style.AREA.coreColor[3]=0;style.AREA.glowGain=0;
     style.FRONT={...style.FRONT,coreColor:accent?[.08,.95,1,1]:[1,.87,.1,.2],
-     width:accent?7:2,glowColor:[.05,.8,1,1],glowRadius:accent?9:1,glowGain:accent?.28:0};
+     width:accent?7:2,glowColor:[.05,.8,1,1],glowRadius:accent?9:1,glowGain:accent ? .28 : 0};
    }
    const pass=createAreaOverlayPass({canvas,style});passes.push(pass);colorPasses.set(key,pass);
   }return colorPasses.get(key);}
@@ -93,7 +97,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    const gutter=Math.min((bounds[0]-source.bounds[0])/source.pixelSpacing[0],(bounds[1]-source.bounds[1])/source.pixelSpacing[1],(source.bounds[2]-bounds[2])/source.pixelSpacing[0],(source.bounds[3]-bounds[3])/source.pixelSpacing[1]);
    assert(gutter>=1-1e-8,'UP2_CURRENT_SOURCE_COVERAGE_FAILED');
    for(const location of scene.locations){const expected=projectBounds(bounds,location.anchor),actual=project(location.anchor);assert(Math.hypot(actual[0]-expected[0],actual[1]-expected[1])<1e-6,'UP2_CURRENT_COORDINATE_MISMATCH');}
-   const layoutAudit=auditRuntimeLayout({plan:nativePlan,screen:project});assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
+   const layoutAudit=auditRuntimeLayout({plan:layoutPlan,screen:project});assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(frame),preparedLabel=null;
    if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:rows})));
    const mapOptions=presentationNativeMapOptions(p,frame),native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:visualPlan,project});
