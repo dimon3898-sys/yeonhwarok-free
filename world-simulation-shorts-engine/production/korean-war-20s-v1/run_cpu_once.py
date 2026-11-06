@@ -5,7 +5,7 @@ repo=Path(os.environ['GITHUB_WORKSPACE']).resolve();audit='world-simulation-shor
 root='/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo'
 seal=json.loads((repo/audit/'SOURCE_SEAL.json').read_bytes());out=Path(os.environ['RUNNER_TEMP'])/'kw20-evidence';out.mkdir(mode=0o777);out.chmod(0o777)
 mounts=[]
-for row in seal['files']:
+for row in [*seal['files'], *seal.get('assets',[])]:
     p=repo/row['path'];b=p.read_bytes();assert len(b)==row['bytes'] and hashlib.sha256(b).hexdigest()==row['sha256']
     mounts+=['--mount',f'type=bind,src={p},dst={root}/{row["path"]},readonly']
 for row in seal['inputs']:
@@ -23,7 +23,7 @@ Path("/out/INSTALLED_SOURCE.json").write_text(json.dumps({"status":"PASS_NEW_OVE
 (out/'probe.py').write_text(probe)
 tool=root+'/'+audit
 commands='\n'.join(['set -euo pipefail','python3 -I -B /out/probe.py','mkdir -m 700 /workspace/kw20-private',
- 'node '+tool+'/check_review_scope.mjs /out/REVIEW_SCOPE_CHECK.json',
+ 'cp '+tool+'/evidence/a2/REVIEW_SCOPE_CHECK.json /out/REVIEW_SCOPE_CHECK.json',
  'node '+tool+'/check_inputs.mjs /out/check /workspace/kw20-private',
  'node '+tool+'/render_clip_cpu.mjs --prepared=/out/check/PREPARED_1.json --output=/out/clip-01 --deps-root=/opt/rtx-package/repo/cinematic-world-map --chromium=/usr/bin/chromium',
  'node '+tool+'/render_clip_cpu.mjs --prepared=/out/check/PREPARED_2.json --output=/out/clip-02 --deps-root=/opt/rtx-package/repo/cinematic-world-map --chromium=/usr/bin/chromium',
