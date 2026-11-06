@@ -70,8 +70,9 @@ try{
    const index=window.payload.segments.findIndex(s=>frame>=s.startFrame&&frame<s.endFrame),segment=window.payload.segments[index];
    if(window.currentSegment!==index){window.runtime?.dispose();const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;document.body.replaceChildren(canvas);window.runtime=await window.createRuntime({canvas,...segment});window.currentSegment=index;}
    const diagnostic=window.runtime.drawFrame(frame-segment.startFrame),pixels=window.runtime.readPixels();let nonBlackPixels=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]||pixels[i+1]||pixels[i+2])nonBlackPixels++;
+   let cyanPixels=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]<130&&pixels[i+1]>180&&pixels[i+2]>210)cyanPixels++;
    const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',pixels))].map(x=>x.toString(16).padStart(2,'0')).join('');
-   return{frame,segmentIndex:index,diagnostic,nonBlackPixels,rawSHA256:digest,png:window.runtime.png().split(',')[1]};
+   return{frame,segmentIndex:index,diagnostic,nonBlackPixels,cyanPixels,rawSHA256:digest,png:window.runtime.png().split(',')[1]};
   },frame);
   assert(result.nonBlackPixels>1080*1920*.2,'PREVIEW_BLACK_FRAME');assert.equal(result.diagnostic.glError,0);
   assert(result.diagnostic.backend.includes('SwiftShader'),'PREVIEW_CPU_ONLY');
@@ -80,9 +81,10 @@ try{
   const segment=payload.segments[result.segmentIndex],local=frame-segment.startFrame;
   assert.equal(result.diagnostic.presentationLabels.visibleCount,segment.presentation.labels.items.filter(x=>local>=x.startFrame&&local<x.endFrame).length,'PREVIEW_ACTIVE_LABEL_MISSING');
   assert.equal(result.diagnostic.presentationMap.areaViewportPolicy,'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY');
+  if(frame>=185){assert(result.cyanPixels>100,'PREVIEW_COAST_ACCENT_PIXELS_MISSING_'+frame);assert(result.diagnostic.features.some(x=>x.lineAccent?.fronts?.some(f=>f.drawn)),'PREVIEW_COAST_SOURCE_LINE_NOT_DRAWN_'+frame);}
   const png=Buffer.from(result.png,'base64');delete result.png;
   frames.push({frame,resultSHA256:result.rawSHA256,cameraBounds:result.diagnostic.camera.bounds,
-   featureChangedPixels:result.diagnostic.featureChangedPixels,labels:result.diagnostic.presentationLabels,nonBlackPixels:result.nonBlackPixels});
+   featureChangedPixels:result.diagnostic.featureChangedPixels,cyanPixels:result.cyanPixels,labels:result.diagnostic.presentationLabels,nonBlackPixels:result.nonBlackPixels});
   if(stills.has(frame)){await writeFile(path.join(output,`FRAME_${String(frame).padStart(3,'0')}.png`),png,{flag:'wx'});await writeJSON(`FRAME_${String(frame).padStart(3,'0')}.json`,result);}
   assert.equal(encoder.exitCode,null,'PREVIEW_ENCODER_EARLY_EXIT');
   if(!encoder.stdin.write(png))await Promise.race([once(encoder.stdin,'drain'),encoderExit.then(()=>{throw Error('PREVIEW_ENCODER_CLOSED');})]);
