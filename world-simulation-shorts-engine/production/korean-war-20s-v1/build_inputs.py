@@ -38,9 +38,17 @@ while unused:
 area=lambda ring:abs(sum(a[0]*b[1]-b[0]*a[1] for a,b in zip(ring,ring[1:])))/2
 rings.sort(key=area,reverse=True)
 land={'type':'MultiPolygon','coordinates':[[ring] for ring in rings]}
-coast={'type':'LineString','coordinates':rings[0]}
+# The preserved Area line pass accepts 128 segments. This is an explicitly
+# generalized modern context outline, not a historical frontline. Keep original
+# vertices; terrain and land polygons retain their original full detail.
+main=rings[0]
+stride=max(1,(len(main)-2+127)//128)
+outline=main[:-1:stride]
+outline.append(outline[0])
+assert len(outline)<=129
+coast={'type':'LineString','coordinates':outline}
 direction={'type':'LineString','coordinates':[city['Incheon'],city['Seoul']]}
-write('sources/GEOGRAPHIC_DERIVATION.json',{'schema':'WORLD_ENGINE_GEOGRAPHIC_CONTEXT_DERIVATION_V1','method':'Exact shared-edge cancellation and source-edge cycle traversal','sourceEdges':original,'sharedEdgesRemovedTwice':shared*2,'retainedEdges':len(remaining),'outputRings':len(rings),'inventedVertices':0,'historicalControlPolygon':False,'sourceGitBlob':'9d99f26dc470fcdbd08b062c813005acbdf73ccb','directionMeaning':'Straight diagram of verified Incheon-to-Seoul campaign direction; not a unit track or road.','directionSource':'https://unarchives.mpva.go.kr/contents/map'})
+write('sources/GEOGRAPHIC_DERIVATION.json',{'schema':'WORLD_ENGINE_GEOGRAPHIC_CONTEXT_DERIVATION_V1','method':'Exact shared-edge cancellation and source-edge cycle traversal for area; deterministic original-vertex decimation for optional context line only','sourceEdges':original,'sharedEdgesRemovedTwice':shared*2,'retainedAreaEdges':len(remaining),'contextLineVertices':len(outline),'contextLineStride':stride,'outputRings':len(rings),'inventedVertices':0,'historicalControlPolygon':False,'sourceGitBlob':'9d99f26dc470fcdbd08b062c813005acbdf73ccb','directionMeaning':'Straight diagram of verified Incheon-to-Seoul campaign direction; not a unit track or road.','directionSource':'https://unarchives.mpva.go.kr/contents/map'})
 write('sources/LAND_CONTEXT.geojson',{'type':'Feature','properties':{'meaning':'Modern generalized land context, not 1950 control or shoreline reconstruction'},'geometry':land})
 
 GEO='PINNED_GEOGRAPHIC_CONTEXT'
@@ -62,7 +70,7 @@ def facts(sid,dates,line='LAND_OUTLINE',reveal=18):
       'stages':[{'id':sid+'_CONTEXT','date':dates[0],'label':'Geographic background emphasis, not military control','area_refs':['KOREAN_LAND_CONTEXT'],'front_refs':[line]},{'id':sid+'_HOLD','date':dates[1],'label':'Same land context; no occupation change','area_refs':['KOREAN_LAND_CONTEXT'],'front_refs':[line]}],
       'routes':[],'markers':[],'text':[],
       'camera':{'anchor':[127.6,37.0],'target_geometry_refs':['KOREAN_LAND_CONTEXT'],'minimum_context_geometry_refs':['KOREAN_LAND_CONTEXT'],'detail_policy':'FACT_BASED_VISUAL_GRADE'},
-      'native_context':{'country_ids':['COUNTRY_KOR','COUNTRY_PRK'],'primary_country_id':'COUNTRY_KOR','secondary_country_ids':['COUNTRY_PRK'],'context_location_ids':['SEOUL']},'scale':{'preferred':'REGIONAL'},
+      'native_context':{'country_ids':['COUNTRY_KOR'],'primary_country_id':'COUNTRY_KOR','secondary_country_ids':[],'context_location_ids':['SEOUL']},'scale':{'preferred':'REGIONAL'},
       'scene_timing':{'fps':30,'total_frames':150,'duration_seconds':5,'camera_lock_frame':0,'event_start_frame':0,'initial_reveal_frames':reveal,'state_transition_frames':90-reveal,'final_hold_frames':60,'action_frames':90,'frame_policy':'INTEGER_DETERMINISTIC','blank_interstage_frames':0}}
 
 def camera(rows):return {'mode':'KEYFRAMES','keyframes':[{'frame':f,'center':c,'zoom':z} for f,c,z in rows]}

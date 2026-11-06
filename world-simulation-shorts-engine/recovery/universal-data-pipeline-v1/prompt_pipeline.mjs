@@ -5,6 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {compileScenePlan, validateFactDataset, validateScenePlan} from '../../web/map_infographic_v1/planner_scene_v1.mjs';
 import {compileExistingEnginePlan} from '../../web/map_infographic_v1/planner_engine_adapter_v1.mjs';
+import {reviewedContextRecords} from './reviewed_context_registry.mjs';
 
 export const SCHEMA = 'WORLD_ENGINE_DATA_PROMPT_V1';
 export const COMPILER_VERSION = 'universal-data-pipeline-v1.0.0';
@@ -151,7 +152,10 @@ function checkEvidence(scene, facts, field, registry, out) {
   if (!Array.isArray(rows) || !rows.length) {
     out.push(issue('NEEDS_INPUT', 'REVIEWED_EVIDENCE_REQUIRED', field + '.historicalEvidence', 'Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact.', {historicalEvidence: [{recordId: 'approved_record', sourceId: 'source_1', claimId: 'approved_claim', geometryIds: [], stageIds: []}]})); return;
   }
-  const records = Array.isArray(registry) ? registry : registry?.records ?? [];
+  // Built-in records are server-owned and digest-pinned; caller flags cannot
+  // create or replace them. Existing explicitly supplied server records remain.
+  const supplied = Array.isArray(registry) ? registry : registry?.records ?? [];
+  const records = [...reviewedContextRecords(), ...(Array.isArray(supplied) ? supplied : []).filter(r => !String(r?.id ?? '').startsWith('KW20_CONTEXT_'))];
   if (![facts.source_notes, facts.geometries].every(rows => Array.isArray(rows) && rows.every(object)) || facts.stages !== undefined && (!Array.isArray(facts.stages) || facts.stages.some(row => !object(row)))) return;
   const boundGeometries = new Set(), boundStages = new Set(), boundSources = new Set();
   for (const [i, binding] of rows.entries()) {
@@ -175,7 +179,7 @@ function checkEvidence(scene, facts, field, registry, out) {
       const geometry = facts.geometries?.find(row => row.id === gid);
       if (!geometry || geometry.source_id !== binding.sourceId || found.geometrySHA256ById?.[gid] !== sha(geometry.geometry))
         out.push(issue('CONFLICT', 'EVIDENCE_GEOMETRY_MISMATCH', where + '.geometryIds', 'Supplied geometry is not the reviewed geometry for this claim.', {geometryId: gid, action: 'Supply matching reviewed geometry; partial lines cannot qualify full territories'}));
-      else if (['Polygon', 'MultiPolygon'].includes(geometry.geometry.type) && found.scope !== 'FULL_TERRITORY')
+      else if (['Polygon', 'MultiPolygon'].includes(geometry.geometry.type) && found.scope !== 'FULL_TERRITORY' && !staticGeographicContext(found, facts, src, gid))
         out.push(issue('NEEDS_INPUT', 'EVIDENCE_SCOPE_INSUFFICIENT', where + '.geometryIds', 'A partial-front/event-date review does not establish complete occupation polygons.', {requiredScope: 'FULL_TERRITORY'}));
       else boundGeometries.add(gid);
     }
@@ -190,6 +194,19 @@ function checkEvidence(scene, facts, field, registry, out) {
     'No reviewed claim binds this exact geometry.', {geometryId: geometry.id, action: 'Provide reviewed geographic evidence, not a document hash alone'}));
   for (const stage of facts.stages ?? []) if (!boundStages.has(stage.id)) out.push(issue('NEEDS_INPUT', 'UNREVIEWED_STAGE_DATE', field + '.facts.stages.' + stage.id, 'No reviewed claim qualifies this stage date.', {stageId: stage.id}));
   for (const src of facts.source_notes ?? []) if (!boundSources.has(src.id)) out.push(issue('NEEDS_INPUT', 'UNREVIEWED_SOURCE_CLAIM', field + '.facts.source_notes.' + src.id, 'No admitted claim binds this source.', {sourceId: src.id}));
+}
+function staticGeographicContext(record, facts, source, geometryId) {
+  // An unchanged modern land background is not a historical control area.
+  // Exact fact/geometry hashes are checked above; the distinct scope must never
+  // admit ownership, expansion or a polygon morph, even in a bad registry row.
+  const stages = facts.stages ?? [], first = stages[0]?.area_refs;
+  return record.scope === 'GEOGRAPHIC_CONTEXT' && record.historicalOwnershipAllowed === false
+    && record.geometryMeaning === 'UNCHANGED_MODERN_LAND_CONTEXT'
+    && source.source_type === 'GEOGRAPHIC_CONTEXT'
+    && facts.semantic_mode === 'ILLUSTRATIVE_FACT_BASED_VISUAL'
+    && Array.isArray(first) && first.length === 1 && first[0] === geometryId
+    && stages.length >= 2 && stages.every(s => JSON.stringify(s.area_refs) === JSON.stringify(first))
+    && !facts.factions?.length && !facts.territories?.length;
 }
 function timingFor(facts, frames, fps) {
   const hold = Math.max(2, Math.floor(frames * .25)), action = frames - hold;

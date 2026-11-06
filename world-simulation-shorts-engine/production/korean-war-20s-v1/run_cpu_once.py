@@ -23,6 +23,7 @@ Path("/out/INSTALLED_SOURCE.json").write_text(json.dumps({"status":"PASS_NEW_OVE
 (out/'probe.py').write_text(probe)
 tool=root+'/'+audit
 commands='\n'.join(['set -euo pipefail','python3 -I -B /out/probe.py','mkdir -m 700 /workspace/kw20-private',
+ 'node '+tool+'/check_review_scope.mjs /out/REVIEW_SCOPE_CHECK.json',
  'node '+tool+'/check_inputs.mjs /out/check /workspace/kw20-private',
  'node '+tool+'/render_clip_cpu.mjs --prepared=/out/check/PREPARED_1.json --output=/out/clip-01 --deps-root=/opt/rtx-package/repo/cinematic-world-map --chromium=/usr/bin/chromium',
  'node '+tool+'/render_clip_cpu.mjs --prepared=/out/check/PREPARED_2.json --output=/out/clip-02 --deps-root=/opt/rtx-package/repo/cinematic-world-map --chromium=/usr/bin/chromium',
