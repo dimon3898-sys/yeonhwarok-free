@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_REFERENCE_SAMPLE_CHECKPOINT_V2",
   "dateKST": "2026-11-06",
-  "status": "CPU_PREVIEW_RUNNING_COAST_ACCENT_MASK_FIX_PREPARED",
+  "status": "A2_CPU_VIDEO_PASS_A3_COAST_ACCENT_RUNNING",
   "sourceBaseCommit": "e12c5e8bfc1de3e6c1484e77554b9d6ee5bee1a6",
   "previousCheckpoint": "../capture-stall-review-v1/CHECKPOINT.json",
   "reference": "64306.mp4",
@@ -42,17 +42,15 @@
   "gpuStarts": 0,
   "gpuRenders": 0,
   "currentDeployedImageSupportsNewInput": false,
-  "nextGate": "CPU source/prepare verification and complete software preview, then actual visual review before considering image publication or paid GPU",
+  "nextGate": "Finish A3 coast accent visual check; preserve and deliver actual MP4 bytes. No image build or GPU approval inferred",
   "cpuRunA1": 42181008735,
   "preservedNewPass": {
     "checks": 8,
     "inputSourceAndCamera": "evidence/A1_CHECK_RESULT.json"
   },
   "remainingFailure": {
-    "stage": "FIRST_DRAW",
-    "code": "MEASURED_LAYOUT_INVALID_NO_SAFE_PRIMARY_CLEAR_TITLE_PLACEMENT",
-    "cause": "Hidden native title still demanded primary-free space in close framing",
-    "fix": "New preset only: disable undrawn native title information and retain actual visible-label layout checks"
+    "priorFirstDraw": "RESOLVED_IN_A2",
+    "current": "A3_COAST_ACCENT_VISUAL_CHECK_PENDING"
   },
   "cpuRunA2": 42181515679,
   "nextChangeReason": {
@@ -61,5 +59,20 @@
     "minimumScope": "New preset active line-accent frames185..299 only; same existing line shader and unchanged source geometry; area boundary mask preserved",
     "oldPASSInvalidated": false,
     "newInputAndGuardChecks": "REUSE_A1_PASS"
+  },
+  "cpuRunA3": 42182103432,
+  "cpuA2Video": {
+    "sha256": "95cd5d9eba9c13b0419a360a5d7e01bda8218c91c70efebf93b5f18a6e2dfbe2",
+    "bytes": 3103700,
+    "technical": "PASS",
+    "evidence": "evidence/A2_CPU_PREVIEW_RESULT.json",
+    "visualReview": "evidence/A2_VISUAL_REVIEW.json",
+    "artifactId": 13486791131
+  },
+  "publicationBlocker": {
+    "scope": "Optional GitHub release page only",
+    "error": "HTTP403 Resource not accessible by integration",
+    "renderAndArtifactUpload": "PASS",
+    "policy": "Do not rerender to repair publication; use existing artifact bytes"
   }
 }
