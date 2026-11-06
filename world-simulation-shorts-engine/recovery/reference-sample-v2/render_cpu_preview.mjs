@@ -1,4 +1,4 @@
-/** Focused free CPU pixels over the new Scene. No NVIDIA launch or MP4 encode. */
+/** New 300-frame CPU preview and MP4 encode. No NVIDIA execution. */
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir,realpath} from 'node:fs/promises';
 import path from 'node:path';

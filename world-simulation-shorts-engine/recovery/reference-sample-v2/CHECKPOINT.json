@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_REFERENCE_SAMPLE_CHECKPOINT_V2",
   "dateKST": "2026-11-06",
-  "status": "A2_CPU_VIDEO_PASS_A3_COAST_ACCENT_RUNNING",
+  "status": "CPU_SAMPLE_DELIVERED_IMAGE_NOT_BUILT",
   "sourceBaseCommit": "e12c5e8bfc1de3e6c1484e77554b9d6ee5bee1a6",
   "previousCheckpoint": "../capture-stall-review-v1/CHECKPOINT.json",
   "reference": "64306.mp4",
@@ -48,10 +48,7 @@
     "checks": 8,
     "inputSourceAndCamera": "evidence/A1_CHECK_RESULT.json"
   },
-  "remainingFailure": {
-    "priorFirstDraw": "RESOLVED_IN_A2",
-    "current": "A3_COAST_ACCENT_VISUAL_CHECK_PENDING"
-  },
+  "remainingFailure": null,
   "cpuRunA2": 42181515679,
   "nextChangeReason": {
     "item": "New coast accent visibility",
@@ -70,9 +67,87 @@
     "artifactId": 13486791131
   },
   "publicationBlocker": {
-    "scope": "Optional GitHub release page only",
-    "error": "HTTP403 Resource not accessible by integration",
-    "renderAndArtifactUpload": "PASS",
-    "policy": "Do not rerender to repair publication; use existing artifact bytes"
-  }
+    "A2": "Optional release page returned HTTP403; its completed MP4 and artifact were preserved without a rerun",
+    "A3": "RESOLVED: workflow succeeded and final release assets are available"
+  },
+  "lastCompletedGate": "NEW_SAMPLE_CPU_VIDEO_AND_TARGETED_VISUAL_REVIEW",
+  "firstIncompleteGate": "DEPLOYABLE_IMAGE_PUBLICATION_SCOPE_AND_BUILD",
+  "sourceCandidateCommit": "d470fef63b3e02ea4482de835dfc66e30d09097b",
+  "workflowConclusion": "SUCCESS",
+  "finalVideo": {
+    "file": "REFERENCE_SAMPLE_10S_CPU_PREVIEW.mp4",
+    "bytes": 3101444,
+    "sha256": "ee34a8a18e55f8c4a50f6a50e47068e16aac540216ad1c74c61cec35a1cf3a35",
+    "durationSeconds": 10,
+    "frames": 300,
+    "fps": 30,
+    "width": 1080,
+    "height": 1920,
+    "fullDecode": "PASS",
+    "audioStreams": 0,
+    "release": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/reference-sample-cpu-42182103432",
+    "artifactId": 13487233072,
+    "userDelivery": "Final MP4 made available; no automatic gCube deployment"
+  },
+  "finalVerification": {
+    "installedSource": "evidence/A3_INSTALLED_SOURCE.json",
+    "prepareVerify": "evidence/A3_CHECK_RESULT.json",
+    "cpuVideo": "evidence/A3_CPU_PREVIEW_RESULT.json",
+    "visualReview": "evidence/A3_VISUAL_REVIEW.json",
+    "newUnitInputChecks": {
+      "pass": 8,
+      "originalRun": 42181008735,
+      "laterRuns": "REUSED"
+    },
+    "all300FramesDrawn": true,
+    "fullDecode": "PASS",
+    "coastAccent115Frames": "PASS",
+    "nvidiaOrGcube": "NOT_RUN",
+    "referenceEquivalence": "NOT_CLAIMED"
+  },
+  "actualRuntimeFilesChanged": [
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/presentation_runtime_vulkan.generated.mjs",
+    "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "world-simulation-shorts-engine/recovery/universal-presentation-v2/PRESENTATION_PROMPT.schema.json",
+    "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs",
+    "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs"
+  ],
+  "newInput": {
+    "bytes": 72890,
+    "path": "world-simulation-shorts-engine/recovery/reference-sample-v2/REFERENCE_SAMPLE_10S_V2.json",
+    "sha256": "0c8ad3c3803e2ec5221534069391d1d326d6d2fb3d9c806feabc9ff1bb7bf287"
+  },
+  "remainingBlockers": [
+    "Unchanged deployed image does not support REFERENCE_FOCUS_V2; do not submit the new JSON to that image",
+    "Image build/publication and gCube application have not been performed",
+    "Paid GPU execution requires a separate approval each time",
+    "Existing regional raster cannot reproduce reference street/island closeup texture"
+  ],
+  "nextAction": "Review delivered visual sample; confirm image-publication scope before building/pinning a deployable candidate. Actual gCube/GPU render remains separately gated.",
+  "cpuAttemptHistory": [
+    {
+      "run": 42181008735,
+      "candidate": "A1",
+      "framesDrawn": 0,
+      "outcome": "New input/geometry checks PASS; hidden-title draw blocked"
+    },
+    {
+      "run": 42181515679,
+      "candidate": "A2",
+      "framesDrawn": 300,
+      "outcome": "Video PASS; coast visual mask identified; optional release403"
+    },
+    {
+      "run": 42182103432,
+      "candidate": "A3",
+      "framesDrawn": 300,
+      "outcome": "Video, coast pixels, artifact and release PASS",
+      "queuedBeforeA2EvidenceAvailable": true
+    }
+  ],
+  "historicalPassSuitesRerun": 0
 }
