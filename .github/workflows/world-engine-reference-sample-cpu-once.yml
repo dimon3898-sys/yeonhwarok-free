@@ -1,0 +1,88 @@
+name: WORLD ENGINE reference sample CPU preview once
+on:
+  push:
+    branches: [quality/reference-sample-20261106]
+    paths: ['.github/workflows/world-engine-reference-sample-cpu-once.yml']
+permissions:
+  contents: write
+  packages: read
+concurrency:
+  group: world-engine-reference-sample-20261106
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == 'e12c5e8bfc1de3e6c1484e77554b9d6ee5bee1a6' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE_SAMPLE_CPU_20261106_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/reference-sample-v2
+            world-simulation-shorts-engine/recovery/reference-label-quality-v1
+            world-simulation-shorts-engine/recovery/universal-presentation-v2
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - name: Read unchanged parent image, CPU only
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+          docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a
+      - name: Check new preset and render new sample on CPU
+        run: python3 -B world-simulation-shorts-engine/recovery/reference-sample-v2/run_cpu_once.py
+      - name: Package new preview evidence
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,shutil,zipfile
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'reference-sample-evidence';p.mkdir(exist_ok=True)
+          names=['RUN_RESULT.json','INSTALLED_SOURCE.json','check/CHECK_RESULT.json','preview/CPU_PREVIEW_RESULT.json','preview/FRAME_EVIDENCE.json']
+          files=[p/n for n in names if (p/n).is_file()]+list((p/'preview').glob('FRAME_*.png'))
+          with zipfile.ZipFile(p/'REFERENCE_SAMPLE_EVIDENCE.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for f in files:z.write(f,f.relative_to(p))
+          v=p/'preview/REFERENCE_SAMPLE_10S_CPU_PREVIEW.mp4'
+          if v.is_file():shutil.copy2(v,p/v.name)
+          q=Path('world-simulation-shorts-engine/recovery/reference-sample-v2/REFERENCE_SAMPLE_10S_V2.json');shutil.copy2(q,p/q.name)
+          selected=[p/'REFERENCE_SAMPLE_EVIDENCE.zip',p/q.name]+([p/v.name] if v.is_file() else [])
+          (p/'SHA256SUMS').write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n' for f in selected))
+          (p/'NOTES.txt').write_text('New reference-style sample and CPU-only preview. Requires the new opt-in preset; not compatible with the unchanged deployed image. No GPU, GHCR image build/publication, or gCube settings change. No reference-quality approval is inferred.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference-sample-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/reference-sample-evidence/REFERENCE_SAMPLE_EVIDENCE.zip
+            ${{ runner.temp }}/reference-sample-evidence/REFERENCE_SAMPLE_10S_CPU_PREVIEW.mp4
+            ${{ runner.temp }}/reference-sample-evidence/REFERENCE_SAMPLE_10S_V2.json
+            ${{ runner.temp }}/reference-sample-evidence/SHA256SUMS
+            ${{ runner.temp }}/reference-sample-evidence/NOTES.txt
+          retention-days: 14
+      - name: Preserve completed preview
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "reference-sample-cpu-${GITHUB_RUN_ID}" \
+            "${RUNNER_TEMP}/reference-sample-evidence/REFERENCE_SAMPLE_EVIDENCE.zip" \
+            "${RUNNER_TEMP}/reference-sample-evidence/REFERENCE_SAMPLE_10S_CPU_PREVIEW.mp4" \
+            "${RUNNER_TEMP}/reference-sample-evidence/REFERENCE_SAMPLE_10S_V2.json" \
+            "${RUNNER_TEMP}/reference-sample-evidence/SHA256SUMS" \
+            --target "$GITHUB_SHA" --title 'WORLD ENGINE reference sample CPU preview' \
+            --notes-file "${RUNNER_TEMP}/reference-sample-evidence/NOTES.txt"
+      - name: Remove only disposable CPU container
+        if: always()
+        run: |
+          if docker container inspect "we-reference-sample-${GITHUB_RUN_ID}" >/dev/null 2>&1; then docker rm -f "we-reference-sample-${GITHUB_RUN_ID}"; fi

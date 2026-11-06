@@ -12,7 +12,7 @@ import {selectEventLineStyle} from '../../web/map_infographic_v1/event_style_v1.
 import {createMovingGraphicPass} from '../../web/map_infographic_v1/graphic_motion_pass_v4.mjs';
 import {auditRuntimeLayout} from '../../web/map_infographic_v1/graphic_layout.mjs';
 import {compileReferenceCameraTrack,evaluateReferenceCameraTrackFrame} from '../../web/map_infographic_v1/reference_camera_adapter_v1.mjs';
-import {evaluatePresentationCameraFrame,projectBounds,reprojectFlowPresentation,assertMovingProjectionAdmission,compilePresentationEnginePlan,presentationNativeMapOptions,presentationBoundarySegments,presentationReplacesHighlightMarker,resolvePresentationMarkerLayout} from '../universal-presentation-v2/presentation_plan.mjs';
+import {evaluatePresentationCameraFrame,projectBounds,reprojectFlowPresentation,assertMovingProjectionAdmission,compilePresentationEnginePlan,presentationNativeMapOptions,presentationMapTheme,presentationAreaViewport,presentationBoundarySegments,presentationReplacesHighlightMarker,resolvePresentationMarkerLayout} from '../universal-presentation-v2/presentation_plan.mjs';
 import {assertNvidiaVulkanContext,validateNativeStability} from './backend/native_guard.mjs';
 import {createPresentationLabelPass} from '../universal-presentation-v2/presentation_label_layer.mjs';
 
@@ -40,7 +40,8 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
  let labelPass=null;
  let factory,graphics,last,lastBasePixels,disposed=false,nativeStabilityProof=null;const passes=[];
  try{
-  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:nativePlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment}));
+  const visualPlan={...nativePlan,theme:presentationMapTheme(p,nativePlan.theme)};
+  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan:nativePlan,outputRenderer:renderer,terrainTreatment}));
   graphics=await observe('GRAPHICS_PREPARATION',()=>createMovingGraphicPass({renderer,factory,width:1080,height:1920}));
   if(p.labels?.enabled===true&&p.labels.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
   // Derived plans are created in their consuming JS realm. The frozen owner's
@@ -60,8 +61,14 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   for(const location of scene.locations){const actual=factory.screen(location.anchor),model=analysisProject(location.anchor);assert(Math.hypot(actual[0]-model[0],actual[1]-model[1])<1e-6,'UP2_ANALYSIS_PROJECTION_MISMATCH');}
   const baseline=copy(graphics.baseline),nativeMarker=baseline.find(i=>i.kind==='MARKER');assert(nativeMarker,'UP2_ORIGINAL_MARKER_DESIGN_REQUIRED');
   const colorPasses=new Map(),defaultAreaStyle=selectAreaStyle({primaryMaterialColor:nativePlan.theme.primary});
-  function areaPass(stateId){const key=stateId??'__DEFAULT__';if(!colorPasses.has(key)){
+  function areaPass(stateId,accent=false){const key=(stateId??'__DEFAULT__')+(accent?'_ACCENT':'');if(!colorPasses.has(key)){
    const style=copy(defaultAreaStyle),color=p.territoryColors?.[stateId];if(color)style.AREA.fillColor=copy(color);
+   if(p.mapStyle?.preset==='REFERENCE_FOCUS_V2'){
+    // Native country border owns the outline; existing source line owns the coast accent.
+    style.AREA.coreColor[3]=0;style.AREA.glowGain=0;
+    style.FRONT={...style.FRONT,coreColor:accent?[.08,.95,1,1]:[1,.87,.1,.2],
+     width:accent?7:2,glowColor:[.05,.8,1,1],glowRadius:accent?9:1,glowGain:accent?.28:0};
+   }
    const pass=createAreaOverlayPass({canvas,style});passes.push(pass);colorPasses.set(key,pass);
   }return colorPasses.get(key);}
   const bindings=engines.plans.map(binding=>{
@@ -89,14 +96,16 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    const layoutAudit=auditRuntimeLayout({plan:nativePlan,screen:project});assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(frame),preparedLabel=null;
    if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:rows})));
-   const mapOptions=presentationNativeMapOptions(p,frame),native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan,project});
+   const mapOptions=presentationNativeMapOptions(p,frame),native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:visualPlan,project});
    const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=frame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
      const controls=evaluateAreaFrame(binding.plan,binding.plan.startFrame+localFrame,{project}),groups=[...new Set(controls.areas.map(a=>a.state_id??'__DEFAULT__'))];if(!groups.length)groups.push('__DEFAULT__');
-     for(const area of controls.areas)if(area.alpha>0)assert(flatPoints(area.geometry).every(q=>inside(project(q),safe)),'UP2_AREA_SOURCE_FOOTPRINT_OUTSIDE_SAFE');
+     const areaViewport=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?[0,0,1080,1920]:safe;
+     for(const area of controls.areas)if(area.alpha>0)presentationAreaViewport({geometry:area.geometry,project,safeArea:safe,presentation:p});
+     const accentRange=p.mapStyle?.lineAccentFrames,accent=!!accentRange&&frame>=accentRange[0]&&frame<accentRange[1];
      const draws=groups.map((id,index)=>{const subset={...controls,areas:controls.areas.filter(a=>(a.state_id??'__DEFAULT__')===id),fronts:index===0?controls.fronts:[],impacts:index===0?controls.impacts:[],propagations:index===0?controls.propagations:[]};
-      return{stateId:id,color:p.territoryColors?.[id]??defaultAreaStyle.AREA.fillColor,draw:areaPass(id).draw({controls:subset,project,safeArea:safe,protectedGraphics:markerRows,primaryMaterialColor:nativePlan.theme.primary,boundarySegments})};});
+      return{stateId:id,color:p.territoryColors?.[id]??defaultAreaStyle.AREA.fillColor,draw:areaPass(id,accent).draw({controls:subset,project,safeArea:areaViewport,protectedGraphics:markerRows,primaryMaterialColor:nativePlan.theme.primary,boundarySegments})};});
      for(const item of controls.areas)if(item.alpha>0&&item.coverage>0)assert(draws.some(d=>d.draw.areas.some(a=>a.id===item.id&&a.drawn)),'UP2_AREA_NOT_DRAWN');
      features.push({id:binding.id,engine:binding.engine,state:controls.state,stateId:controls.stateId,activeFeatures:controls.activeFeatures,presentationOperationBinding:copy(binding.presentationOperationBinding??null),sourceAreas:controls.areas.map(a=>({id:a.id,stateId:a.state_id,geometry:copy(a.geometry),coverage:a.coverage,alpha:a.alpha})),sourceFronts:controls.fronts.map(f=>({id:f.id,geometry:copy(f.geometry),alpha:f.alpha,revealFraction:f.revealFraction})),draws});
     }else{
@@ -121,7 +130,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
     material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
     featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
-   if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false};
+   if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false,areaViewportPolicy:p.mapStyle.preset==='REFERENCE_FOCUS_V2'?'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY':'WHOLE_SOURCE_SAFE',effectiveTheme:copy(visualPlan.theme)};
    if(labelDraw){last.layout.visiblePresentationLabels=labelDraw.visibleCount>0;last.presentationLabels=copy(labelDraw);}
    return last;
   }

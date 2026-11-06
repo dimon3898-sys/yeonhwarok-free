@@ -1602,7 +1602,10 @@
       "additionalProperties": false,
       "properties": {
         "preset": {
-          "const": "COUNTRY_FOCUS_V1"
+          "enum": [
+            "COUNTRY_FOCUS_V1",
+            "REFERENCE_FOCUS_V2"
+          ]
         },
         "revealFrames": {
           "type": "integer",
@@ -1612,6 +1615,16 @@
         "countryFill": {
           "type": "boolean",
           "default": false
+        },
+        "lineAccentFrames": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 300
+          }
         }
       },
       "required": [

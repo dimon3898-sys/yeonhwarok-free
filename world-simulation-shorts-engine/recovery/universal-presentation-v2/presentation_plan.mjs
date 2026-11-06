@@ -26,12 +26,17 @@ export function validatePresentation(input,{scene,region}={}){
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  if(input.mapStyle!==undefined){
-  keys(input.mapStyle,['preset','revealFrames','countryFill'],'PRESENTATION_MAP_STYLE');
-  ok(input.mapStyle.preset==='COUNTRY_FOCUS_V1','PRESENTATION_MAP_STYLE_PRESET_UNSUPPORTED');
+  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames'],'PRESENTATION_MAP_STYLE');
+  ok(['COUNTRY_FOCUS_V1','REFERENCE_FOCUS_V2'].includes(input.mapStyle.preset),'PRESENTATION_MAP_STYLE_PRESET_UNSUPPORTED');
   const revealFrames=input.mapStyle.revealFrames??18,countryFill=input.mapStyle.countryFill??false;
   ok(Number.isSafeInteger(revealFrames)&&revealFrames>=1&&revealFrames<=n,'PRESENTATION_MAP_REVEAL_RANGE_INVALID');
   ok(typeof countryFill==='boolean','PRESENTATION_MAP_FILL_BOOLEAN_REQUIRED');
-  result.mapStyle={preset:'COUNTRY_FOCUS_V1',revealFrames,countryFill};
+  result.mapStyle={preset:input.mapStyle.preset,revealFrames,countryFill};
+  if(input.mapStyle.lineAccentFrames!==undefined){
+   const range=input.mapStyle.lineAccentFrames;
+   ok(input.mapStyle.preset==='REFERENCE_FOCUS_V2'&&Array.isArray(range)&&range.length===2&&range.every(Number.isSafeInteger)&&range[0]>=0&&range[1]<=n&&range[1]>range[0],'PRESENTATION_LINE_ACCENT_RANGE_INVALID');
+   result.mapStyle.lineAccentFrames=[...range];
+  }
  }
  result.initialStateVisibility=input.initialStateVisibility??'REVEAL';
  ok(['REVEAL','PRESERVE_PROVIDED'].includes(result.initialStateVisibility),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
@@ -77,6 +82,34 @@ export function validatePresentation(input,{scene,region}={}){
 
 /** Connect the existing country material/ribbon/glow passes only when authored.
  * Native fixed-position text stays hidden: moving labels have their own owner. */
+/** Explicit close framing reuses native polygon clipping; source geometry is never trimmed. */
+export function presentationMapTheme(presentation,theme){
+ if(presentation?.mapStyle?.preset!=='REFERENCE_FOCUS_V2')return theme;
+ return{...theme,primaryWidth:4,primaryEdgeWidth:7,primaryCoreColor:[1,1,.9,1],
+  primaryEdgeColor:[.12,.10,.02,.8],glowWidth:9,glowRadius:3,glowGain:.22,glowColor:[1,.85,.03,1]};
+}
+export function presentationAreaViewport({geometry,project,safeArea,presentation,width=1080,height=1920}){
+ const polygons=geometry.type==='Polygon'?[geometry.coordinates]:geometry.type==='MultiPolygon'?geometry.coordinates:null;
+ ok(polygons?.length,'UP2_AREA_POLYGON_REQUIRED');
+ const rings=polygons.map(poly=>poly.map(ring=>ring.map(project))),points=rings.flat(2);
+ ok(points.every(p=>Array.isArray(p)&&p.length===2&&p.every(Number.isFinite)),'UP2_AREA_PROJECTED_POINT_REQUIRED');
+ if(presentation?.mapStyle?.preset!=='REFERENCE_FOCUS_V2'){
+  ok(points.every(p=>contains(p,safeArea)),'UP2_AREA_SOURCE_FOOTPRINT_OUTSIDE_SAFE');
+  return{safeArea:[...safeArea],clipped:false};
+ }
+ const viewport=[0,0,width,height],corners=[[0,0],[width,0],[width,height],[0,height]];
+ const ringInside=(p,ring)=>{let inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){
+  const a=ring[i],b=ring[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])inside=!inside;
+ }return inside;};
+ const segmentVisible=(a,b)=>{let lo=0,hi=1;for(let axis=0;axis<2;axis++){
+  const delta=b[axis]-a[axis];if(Math.abs(delta)<1e-12){if(a[axis]<viewport[axis]||a[axis]>viewport[axis+2])return false;continue;}
+  let t0=(viewport[axis]-a[axis])/delta,t1=(viewport[axis+2]-a[axis])/delta;if(t0>t1)[t0,t1]=[t1,t0];lo=Math.max(lo,t0);hi=Math.min(hi,t1);if(lo>hi)return false;
+ }return true;};
+ const visible=rings.some(poly=>corners.some(p=>ringInside(p,poly[0])&&!poly.slice(1).some(hole=>ringInside(p,hole)))||poly.some(ring=>ring.some(p=>contains(p,viewport))||ring.slice(1).some((p,i)=>segmentVisible(ring[i],p))));
+ ok(visible,'UP2_AREA_SOURCE_OUTSIDE_VIEWPORT');
+ return{safeArea:viewport,clipped:!points.every(p=>contains(p,viewport)),sourceGeometryChanged:false};
+}
+
 export function presentationNativeMapOptions(presentation,frame){
  const style=presentation?.mapStyle,primary=style?Math.min(1,(frame+1)/style.revealFrames):0;
  return{mode:style?.countryFill?0:1,graphics:false,boundaries:!!style,glow:!!style,dem:false,
