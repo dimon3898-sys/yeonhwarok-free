@@ -186,7 +186,7 @@
     "gpuRenderRecoveryPass": false,
     "ifProviderCannotRecover": "CLOSED_PROVIDER_CONFIRMED_UNRECOVERABLE; DO_NOT_REPEAT_RAW_RECOVERY",
     "newImage": "PUBLISHED_AND_CONFIGURED_STOPPED",
-    "nextMinimumAction": "Obtain separate GPU approval; confirm actual mounted storage and active checkpoint external readback before one unchanged 10-second job. Stop on failure; no automatic retry.",
+    "nextMinimumAction": "Validate corrected pin through exact production NVIDIA source-preparation facade on free CPU; do not render or rebuild before new image approval.",
     "recordsNeeded": [
       "state.json",
       "actual-progress.json",
@@ -428,7 +428,7 @@
   },
   "schema": "WORLD_ENGINE_CAPTURE_STALL_REVIEW_V1",
   "sourceRef": "2055712d7207e80b96a83231415457f411fcd951",
-  "status": "FRAME1_FIX_IMAGE_PUBLISHED_GCUBE_CONFIGURED_STOPPED_GPU_VALIDATION_PENDING",
+  "status": "NEW_PREFLIGHT_PIN_MISMATCH_REPRODUCED_SOURCE_CORRECTION_CPU_PENDING",
   "storageInvestigation": {
     "absenceScope": "Provider confirms deleted container private files and stdout/stderr cannot be recovered; original individual-file existence and capture cause remain unknown.",
     "directChildrenListed": 180,
@@ -462,5 +462,22 @@
     "title": "[워크로드 #5373] 1/300 프레임 진행 정체 — 종료 Pod 보존 기록 회수 요청",
     "url": "https://gcube.ai/demand/ns74a360e2/qna"
   },
-  "supportResponse": "SUPPORT_RESPONSE.json"
+  "supportResponse": "SUPPORT_RESPONSE.json",
+  "variantPreflightIncident20261106": {
+    "baseline": "executions/20261106-variant-preflight-a1/BASELINE_RESULT.json",
+    "gCubeState": "UNKNOWN_USER_MANUAL_SESSION_SCREENSHOT_NEW_PREFLIGHT_FAILURE",
+    "gpuRendersByAgent": 0,
+    "gpuStartsByAgent": 0,
+    "imageBuilds": 0,
+    "imagePublications": 0,
+    "invalidatedClaim": "Newest image can pass real NVIDIA source-preparation facade; previous installed file/hash check did not execute this facade",
+    "localResult": "executions/20261106-variant-preflight-a1/LOCAL_RESULT.json",
+    "minimumRevalidation": "One changed runtime pin,3 dependent startup/manifest files, actual prepare/verify facade with existing incident request, UID1000 CPU/no network/no GPU",
+    "preservedPass": "Frame1 pixel and terminal cleanup/storage CPU results remain valid and are not rerun",
+    "publicationApproval": "NEW_ONE_TIME_IMAGE_APPROVAL_REQUIRED_PREVIOUS_APPROVAL_CONSUMED",
+    "rootCause": "capture_nvidia.validateVariantManifest still pinned original presentation_runtime SHA8d46... after frame1 update changed original and generated source to new SHAe09b...",
+    "seal": "evidence/VARIANT_PREFLIGHT_SOURCE_SEAL.json",
+    "status": "SOURCE_CORRECTED_CPU_FACADE_VALIDATION_PENDING",
+    "userEvidence": "Screenshot HANDOFF_EXACT_VARIANT_SET_REQUIRED before rendering"
+  }
 }

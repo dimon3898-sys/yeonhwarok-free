@@ -1,0 +1,51 @@
+name: WORLD ENGINE source variant preflight CPU once
+on:
+  push:
+    branches: [recovery/capture-durable-20261105]
+    paths: ['.github/workflows/world-engine-variant-preflight-cpu-once.yml']
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: world-engine-variant-preflight-cpu-20261106
+  cancel-in-progress: false
+jobs:
+  source-preflight-cpu:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == '3c6e26d5e60608454caf66ab468ff3d59a3d775b' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_VARIANT_PREFLIGHT_CPU_ONCE_20261106'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/recovery/capture-stall-review-v1
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - name: Read existing image; no build or publication
+        run: |
+          sudo python3 - <<'PYCONFIG'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PYCONFIG
+          sudo systemctl restart docker
+          docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:dd79cad7aafcd2caefb1468c95f9fc28f8834c960135c6a038e208d04d221091
+      - name: Only source closure and actual prepare-verify facade
+        run: python3 -B world-simulation-shorts-engine/recovery/capture-stall-review-v1/tests/run_variant_preflight_cpu.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: variant-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/variant-preflight-evidence/*.json
+          retention-days: 14
+      - name: Remove disposable CPU container
+        if: always()
+        run: |
+          if docker container inspect "we-variant-cpu-${GITHUB_RUN_ID}" >/dev/null 2>&1; then docker rm -f "we-variant-cpu-${GITHUB_RUN_ID}"; fi
