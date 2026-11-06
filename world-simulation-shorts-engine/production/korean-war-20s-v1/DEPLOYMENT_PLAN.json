@@ -1,7 +1,7 @@
 {
   "schema": "WORLD_ENGINE_KW20_DEPLOYMENT_PREPARATION_V1",
   "status": "RECIPE_READY_NOT_BUILT_OR_PUBLISHED",
-  "candidateSourceCommit": "4cae4a278bd3edfc11e9cb5e2c7235e864113d4a",
+  "candidateSourceCommit": "fada9f7f63b3584762147cdebd410c8006cdc47e",
   "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a",
   "requiredOverlayFiles": [
     {
@@ -102,7 +102,7 @@
   "gpuRenders": 0,
   "gCubeChangePerformed": false,
   "requiredBeforePublication": [
-    "New 600-frame candidate technical result and actual visual review",
+    "Bounded actual-frame verification and seam visual review; full 600-frame MP4 and final quality reserved for separately approved rendering",
     "Image-publication authorization scope",
     "Fresh unique tag",
     "Installed file/startup/source verification as uid1000 without GPU"
@@ -125,5 +125,13 @@
     "retries": 0
   },
   "mountedStorageStatus": "Recorder and connector tests reused; live gCube mount-to-external readback unverified",
-  "qualityPass": false
+  "qualityPass": false,
+  "composition": {
+    "script": "compose_verified_clips.py",
+    "renderer": "Existing two 300-frame paths; no 20-second renderer",
+    "composer": "recovery/universal-auto-video-v2/compose.py",
+    "actualNew600FrameComposition": "NOT_EXECUTED_NO_COMPLETED_INPUT_MP4S",
+    "requires": "Two completed MP4s matched to actual capture job receipts; distinct new destination",
+    "oldComposerPassReused": true
+  }
 }

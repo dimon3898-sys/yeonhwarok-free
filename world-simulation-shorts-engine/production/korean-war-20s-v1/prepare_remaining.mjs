@@ -1,4 +1,4 @@
-/** Materialize the second clip from its already-passed A5 analysis; do not rerun the prior suites. */
+/** Materialize both clips from preserved A4 input analysis; do not rerun the prior suites. */
 import assert from 'node:assert/strict';
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
