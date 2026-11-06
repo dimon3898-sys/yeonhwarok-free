@@ -26,12 +26,16 @@ export function validatePresentation(input,{scene,region}={}){
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  if(input.mapStyle!==undefined){
-  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames'],'PRESENTATION_MAP_STYLE');
+  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames','nativeBoundaries'],'PRESENTATION_MAP_STYLE');
   ok(['COUNTRY_FOCUS_V1','REFERENCE_FOCUS_V2'].includes(input.mapStyle.preset),'PRESENTATION_MAP_STYLE_PRESET_UNSUPPORTED');
   const revealFrames=input.mapStyle.revealFrames??18,countryFill=input.mapStyle.countryFill??false;
   ok(Number.isSafeInteger(revealFrames)&&revealFrames>=1&&revealFrames<=n,'PRESENTATION_MAP_REVEAL_RANGE_INVALID');
   ok(typeof countryFill==='boolean','PRESENTATION_MAP_FILL_BOOLEAN_REQUIRED');
   result.mapStyle={preset:input.mapStyle.preset,revealFrames,countryFill};
+  if(input.mapStyle.nativeBoundaries!==undefined){
+   ok(input.mapStyle.preset==='REFERENCE_FOCUS_V2'&&typeof input.mapStyle.nativeBoundaries==='boolean','PRESENTATION_NATIVE_BOUNDARIES_BOOLEAN_REQUIRED');
+   result.mapStyle.nativeBoundaries=input.mapStyle.nativeBoundaries;
+  }
   if(input.mapStyle.lineAccentFrames!==undefined){
    const range=input.mapStyle.lineAccentFrames;
    ok(input.mapStyle.preset==='REFERENCE_FOCUS_V2'&&Array.isArray(range)&&range.length===2&&range.every(Number.isSafeInteger)&&range[0]>=0&&range[1]<=n&&range[1]>range[0],'PRESENTATION_LINE_ACCENT_RANGE_INVALID');
@@ -112,7 +116,7 @@ export function presentationAreaViewport({geometry,project,safeArea,presentation
 
 export function presentationNativeMapOptions(presentation,frame){
  const style=presentation?.mapStyle,primary=style?Math.min(1,(frame+1)/style.revealFrames):0;
- return{mode:style?.countryFill?0:1,graphics:false,boundaries:!!style,glow:!!style,dem:false,
+ return{mode:style?.countryFill?0:1,graphics:false,boundaries:!!style&&style.nativeBoundaries!==false,glow:!!style&&style.nativeBoundaries!==false,dem:false,
   primaryMaterial:style?.countryFill?primary:0,reveal:{primary,marker:0,location:0,country:0,title:0,disclosure:0}};
 }
 
@@ -142,7 +146,7 @@ export function resolvePresentationMarkerLayout(markerRows,prepare){
 /** Protect the SAME current-projection country ribbons from area overpainting.
  * Geographic rings are reused unchanged, including holes; no derived outlines. */
 export function presentationBoundarySegments({presentation,nativePlan,project}={}){
- if(!presentation?.mapStyle)return[];
+ if(!presentation?.mapStyle||presentation.mapStyle.nativeBoundaries===false)return[];
  const theme=nativePlan.theme,result=[];
  for(const record of nativePlan.geometries){
   const primary=record.id===nativePlan.primary,secondary=nativePlan.secondary.includes(record.id);

@@ -1,0 +1,82 @@
+name: WORLD ENGINE Korean War two-clip CPU candidate
+on:
+  push:
+    branches: [production/korean-war-20s-20261106]
+    paths: ['.github/workflows/world-engine-kw20-cpu-once.yml']
+permissions:
+  contents: write
+  packages: read
+concurrency:
+  group: world-engine-kw20-20261106
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == 'bbd2ff9b783d00da208a6296e91183b32905373c' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_CPU_20261106_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/production/korean-war-20s-v1
+            world-simulation-shorts-engine/recovery/universal-presentation-v2
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - name: Read preserved parent image without GPU
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+          docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a
+      - name: Prepare new inputs and capture two ten-second CPU clips
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-v1/run_cpu_once.py
+      - name: Preserve new evidence and any completed clip
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import hashlib,json,os,shutil,zipfile
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'kw20-evidence';p.mkdir(exist_ok=True)
+          dest=p/'delivery';dest.mkdir(exist_ok=True)
+          selection=[f for f in p.rglob('*') if f.is_file() and (f.suffix=='.png' or f.name in ['RUN_RESULT.json','INSTALLED_SOURCE.json','CHECK_RESULT.json','CHECK_FAILED.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','INPUT_RECEIPT_1.json','INPUT_RECEIPT_2.json','CPU_PREVIEW_RESULT.json','FRAME_EVIDENCE.json','COMPOSITION_RESULT.json','COMPOSE_COMPLETE.json','COMPOSE_FAILED.json','QUALITY_SUMMARY.json'])]
+          with zipfile.ZipFile(dest/'KW20_EVIDENCE.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for f in selection:z.write(f,f.relative_to(p))
+          for i in (1,2):
+              clip=p/f'clip-{i:02d}/CLIP_10S_CPU_PREVIEW.mp4'
+              if clip.exists():shutil.copy2(clip,dest/f'KOREAN_WAR_PART_{i:02d}_CPU.mp4')
+          completed=list((p/'composition/public-review').glob('*.mp4'))
+          if completed:shutil.copy2(completed[0],dest/'WORLD_ENGINE_KOREAN_WAR_20S_CPU.mp4')
+          a=Path('world-simulation-shorts-engine/production/korean-war-20s-v1')
+          for i in (1,2):shutil.copy2(a/f'KOREAN_WAR_20S_PART_{i:02d}.json',dest)
+          files=sorted(f for f in dest.iterdir() if f.is_file())
+          (dest/'SHA256SUMS').write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n' for f in files))
+          (dest/'NOTES.txt').write_text('New Korean War twenty-second CPU candidate: two existing ten-second captures and existing composition. Historical fronts/occupation polygons and exact sea routes are not supplied. Regional geographic context, verified city locations, official event dates and a labeled approximate campaign direction are used. New optional boundary visibility requires a new immutable image before gCube use. No GPU or final quality approval.\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kw20-${{ github.run_id }}
+          path: ${{ runner.temp }}/kw20-evidence/delivery/
+          retention-days: 14
+      - name: Preserve completed CPU candidate
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "kw20-cpu-${GITHUB_RUN_ID}" "${RUNNER_TEMP}/kw20-evidence/delivery/"* \
+            --target "$GITHUB_SHA" --title 'WORLD ENGINE Korean War 20s CPU candidate' \
+            --notes-file "${RUNNER_TEMP}/kw20-evidence/delivery/NOTES.txt"
+      - name: Remove only this disposable CPU container
+        if: always()
+        run: |
+          if docker container inspect "we-kw20-${GITHUB_RUN_ID}" >/dev/null 2>&1; then docker rm -f "we-kw20-${GITHUB_RUN_ID}"; fi
