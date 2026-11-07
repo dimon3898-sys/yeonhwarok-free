@@ -19,8 +19,8 @@ jobs:
       github.run_attempt == 1 &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
       github.event.repository.private == false &&
-      github.event.before == '7bdb7653b83a40fb1ae60aff31ed5be440cc8356' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_KW20_NATIVE_DEPLOYMENT_PREPARE_20261107_A1'
+      github.event.before == '77742bcc0abf972c83324c20e8923ebca45cedda' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_NATIVE_DEPLOYMENT_RESUME_RETENTION_20261107_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
@@ -37,6 +37,12 @@ jobs:
           run-id: 42339102934
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: ${{ runner.temp }}/kw20-validated-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          name: kw20-native-deployment-42344924914
+          run-id: 42344924914
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/kw20-a1-evidence
       - name: Select containerd store for preserved parent
         run: |
           sudo python3 - <<'PY'
@@ -48,11 +54,11 @@ jobs:
           p.write_text(json.dumps(d)+'\n')
           PY
           sudo systemctl restart docker
-      - name: Validate formal input connection then retain and publish additive image
+      - name: Reuse formal input PASS then retain and publish identical package
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          KW20_EXPECTED_PARENT: '7bdb7653b83a40fb1ae60aff31ed5be440cc8356'
-        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-deployment-v11/build_once.py
+          KW20_EXPECTED_PARENT: '77742bcc0abf972c83324c20e8923ebca45cedda'
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-deployment-v11/resume_after_reservation.py
       - name: Preserve stage evidence
         if: always()
         uses: actions/upload-artifact@v4
