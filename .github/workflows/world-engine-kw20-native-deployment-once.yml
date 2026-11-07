@@ -1,0 +1,65 @@
+name: WORLD ENGINE native Korean deployment preparation
+on:
+  push:
+    branches: [deployment/korean-war-20s-native-20261107]
+    paths: ['.github/workflows/world-engine-kw20-native-deployment-once.yml']
+permissions:
+  contents: write
+  packages: write
+  actions: read
+concurrency:
+  group: world-engine-kw20-native-deployment-20261107
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  prepare-native-image:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '7bdb7653b83a40fb1ae60aff31ed5be440cc8356' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_NATIVE_DEPLOYMENT_PREPARE_20261107_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout: |
+            world-simulation-shorts-engine/production/korean-war-20s-deployment-v11
+            world-simulation-shorts-engine/recovery/reference-label-quality-v1
+      - uses: actions/download-artifact@v4
+        with:
+          name: kw20-viewport-42339102934
+          run-id: 42339102934
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/kw20-validated-artifact
+      - name: Select containerd store for preserved parent
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Validate formal input connection then retain and publish additive image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          KW20_EXPECTED_PARENT: '7bdb7653b83a40fb1ae60aff31ed5be440cc8356'
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-deployment-v11/build_once.py
+      - name: Preserve stage evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kw20-native-deployment-${{ github.run_id }}
+          path: ${{ runner.temp }}/kw20-native-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+# No capture, frame driver, encoding, GPU allocation, deployment start or stop.
+# Old PASS suites are not rerun. User performs actual deployment and Studio rendering.
