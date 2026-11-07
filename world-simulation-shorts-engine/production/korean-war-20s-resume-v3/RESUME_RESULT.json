@@ -1,0 +1,66 @@
+{
+  "schema": "WORLD_ENGINE_KW20_TAKEOVER_RESULT_V1",
+  "inherited": {
+    "branch": "production/korean-war-20s-20261106",
+    "head": "ceee49fc512074e33179344663b02367c3e875d6",
+    "latestRun": 42328171547,
+    "conclusion": "failure",
+    "reason": "Host Python missing PIL; zero rendered frames"
+  },
+  "new": {
+    "branch": "recovery/korean-war-20s-resume-20261107",
+    "head": "66657645850eff36e6c6b5f90c78a74dc401256a",
+    "run": 42336067180,
+    "job": 128293162988,
+    "conclusion": "success",
+    "artifact": 13559194709,
+    "artifactSHA256": "d3cb8304c9df7e862cb93a0fb96b2391dd5565375286b8b065fcfbe8a0eca644",
+    "selectedFrames": 6,
+    "clip1": [
+      0,
+      149,
+      299
+    ],
+    "clip2": [
+      0,
+      105,
+      299
+    ],
+    "inputHashes": [
+      "3c4eb85a8f668bcdbae62da48666e7e2c555fc259afebf0c50f2103cbfe778a8",
+      "231f1534a6db616d72f786b39897a448d05b4aaf8d8da9105b4a7ad2653562b9"
+    ]
+  },
+  "review": {
+    "referenceSHA256": "853ce5be22dc95c95e0c4b3eddbd603930e499bc88ee40cb4e59b50aad1187bc",
+    "detail": "Actual NE10m coastline/islands and NASA500m ground texture visibly improve on V1.",
+    "seam": {
+      "cameraEqual": true,
+      "visibleLabelsGeometryEqual": true,
+      "meanAbsoluteChannelDifference": 0.06991914223251029,
+      "differentPixelFraction": 0.007322048611111111,
+      "differenceOver8Fraction": 0.00322241512345679,
+      "scope": "Two selected boundary stills only; no encoded motion approval"
+    },
+    "remainingGap": "Dark olive land, weak yellow emphasis, no reference-like bright coastal outline or local island-scale sea detail; motion not reviewed.",
+    "decision": "SOURCE_DETAIL_PROGRESS_CONFIRMED_COLOR_IMPROVEMENT_PENDING",
+    "fullVideoQualityPass": false
+  },
+  "protectedPass": {
+    "detailSourceChecks": 4,
+    "staticChecks": 4,
+    "v1SourceGuards": 7,
+    "v1InputChecks": 17,
+    "v1Frames": 19
+  },
+  "changes": {
+    "existingFilesOverwritten": 0,
+    "sourceDataModified": false,
+    "oldPassSuitesRerun": 0,
+    "gpuStarts": 0,
+    "imageBuilds": 0,
+    "imagePublications": 0,
+    "gCubeChanges": 0
+  },
+  "next": "Complete data-only color candidate at separate visual-v4 paths; preserve successful pixels; complete no-cost CPU movie where feasible."
+}
