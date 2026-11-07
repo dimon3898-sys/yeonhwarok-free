@@ -1,0 +1,107 @@
+name: WORLD ENGINE Korean exact coastline contour candidate
+on:
+  push:
+    branches: [recovery/korean-war-20s-resume-20261107]
+    paths: ['.github/workflows/world-engine-kw20-coast-cpu-once.yml']
+permissions:
+  contents: read
+  packages: read
+  actions: read
+concurrency:
+  group: world-engine-kw20-coast-20261107
+  cancel-in-progress: false
+jobs:
+  source-detail:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == '1b6e4c93b624b1a4cb54258b2d2bb13d89fc7196' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_COAST_CPU_20261107_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/production/korean-war-20s-detail-v2
+            world-simulation-shorts-engine/production/korean-war-20s-visual-v4
+            world-simulation-shorts-engine/production/korean-war-20s-coast-v6
+            world-simulation-shorts-engine/recovery/universal-presentation-v2
+            world-simulation-shorts-engine/recovery/universal-data-pipeline-v1
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - uses: actions/download-artifact@v4
+        with:
+          name: kw20-visual-42336598566
+          run-id: 42336598566
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ${{ runner.temp }}/kw20-previous
+      - name: Restore preserved source and successful new analysis
+        run: |
+          python3 - <<'PY'
+          import os,zipfile,shutil
+          from pathlib import Path
+          prior=Path(os.environ['RUNNER_TEMP'])/'kw20-previous'
+          with zipfile.ZipFile(prior/'KW20_DETAIL_EVIDENCE.zip') as z:z.extractall(prior/'pixels')
+          source=Path('world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources')
+          with zipfile.ZipFile(prior/'KW20_PINNED_SOURCE_CROP.zip') as z:
+              with z.open('korea_bmng_500m_native.png') as src,(source/'korea_bmng_500m_native.png').open('xb') as dst:shutil.copyfileobj(src,dst)
+          target=Path('world-simulation-shorts-engine/production/korean-war-20s-visual-v4')
+          for name in ['KOREAN_WAR_20S_PART_01.json','KOREAN_WAR_20S_PART_02.json','SOURCE_SEAL.json']:
+              with (prior/name).open('rb') as src,(target/name).open('xb') as dst:shutil.copyfileobj(src,dst)
+          PY
+      - name: Create new isolated contour overlay without changing source data
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-coast-v6/create_overlay.py
+      - name: Reuse immutable parent without GPU or image build
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+          docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a
+      - name: Draw three changed coastline frames with preserved input analyses
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-coast-v6/run_cpu_once.py
+      - name: Preserve actual pixels and failure evidence
+        if: always()
+        run: |
+          if [ -d "${RUNNER_TEMP}/kw20-evidence" ]; then sudo chmod -R a+rX "${RUNNER_TEMP}/kw20-evidence"; fi
+          python3 - <<'PY'
+          import os,zipfile,hashlib,json
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'kw20-evidence';p.mkdir(exist_ok=True)
+          out=p/'delivery';out.mkdir(exist_ok=True)
+          selected=[f for f in p.rglob('*') if f.is_file() and out not in f.parents and (f.suffix=='.png' or f.name.startswith('FRAME_') or f.name in ['VISUAL_CHANGE_RECEIPT.json','CHECK_RESULT.json','CHECK_FAILED.json','RUN_RESULT.json','INSTALLED_SOURCE.json','CPU_PREVIEW_RESULT.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','REUSED_PREPARATION_RECEIPT.json'])]
+          with zipfile.ZipFile(out/'KW20_DETAIL_EVIDENCE.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for f in selected:z.write(f,f.relative_to(p))
+          import shutil
+          overlay=Path('world-simulation-shorts-engine/production/korean-war-20s-coast-v6')
+          for name in ['SOURCE_SEAL.json','OVERLAY_RECEIPT.json']:
+              if (overlay/name).exists():shutil.copy2(overlay/name,out/('COAST_'+name))
+          with zipfile.ZipFile(out/'COAST_OVERLAY.zip','w',zipfile.ZIP_DEFLATED) as z:
+              if (overlay/'overlay').exists():
+                  for f in (overlay/'overlay').rglob('*'):
+                      if f.is_file():z.write(f,f.relative_to(overlay))
+          candidate=Path('world-simulation-shorts-engine/production/korean-war-20s-visual-v4')
+          for name in ['VISUAL_CHANGE_RECEIPT.json','SOURCE_SEAL.json','KOREAN_WAR_20S_PART_01.json','KOREAN_WAR_20S_PART_02.json']:
+              if (candidate/name).exists():shutil.copy2(candidate/name,out/name)
+          source=Path('world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources')
+          with zipfile.ZipFile(out/'KW20_PINNED_SOURCE_CROP.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in ['korea_bmng_500m_native.png','NATIVE_CROP_RECEIPT.json','SOURCE_USE.json']:
+                  if (source/name).exists():z.write(source/name,name)
+          (out/'SHA256SUMS').write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n' for f in sorted(out.glob('*.zip'))))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kw20-coast-${{ github.run_id }}
+          path: ${{ runner.temp }}/kw20-evidence/delivery/
+          retention-days: 14
+      - name: Remove only the disposable CPU container
+        if: always()
+        run: |
+          if docker container inspect "we-kw20-${GITHUB_RUN_ID}" >/dev/null 2>&1; then docker rm -f "we-kw20-${GITHUB_RUN_ID}"; fi
