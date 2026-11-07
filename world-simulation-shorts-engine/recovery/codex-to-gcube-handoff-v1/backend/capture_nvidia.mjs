@@ -31,7 +31,7 @@ export function validateVariantManifest(metadata){
  const expectedVariants=new Map([
   ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'f1e93ec306584f5d1e77a0f6cd612cf15ac51be1ab35257dd553723de937782f'}],
   ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'f39a24ced64da5aae5bb2520183a96713301a15e2f7f55515a2c84da288cae11'}],
-  ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'bf89be2fa74d3b55f6651106cb35171c10ceaffd802bb505dbd3d31cca2bd008'}],
+  ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'b039457bb61f7c1d38e3fc03b315240db8ea91a7ddeba184cd49ac76c5933599'}],
  ]),seen=new Set();
  for(const row of metadata.variants){
   check(typeof row.original==='string'&&row.original.startsWith('world-simulation-shorts-engine/recovery/universal-presentation-v2/')&&!row.original.split('/').includes('..')&&expectedVariants.has(row.variant),'HANDOFF_VARIANT_PATH_INVALID');

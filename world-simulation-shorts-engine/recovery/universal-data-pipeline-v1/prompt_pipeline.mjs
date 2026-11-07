@@ -199,12 +199,14 @@ function staticGeographicContext(record, facts, source, geometryId) {
   // An unchanged modern land background is not a historical control area.
   // Exact fact/geometry hashes are checked above; the distinct scope must never
   // admit ownership, expansion or a polygon morph, even in a bad registry row.
+  // Separate complete island groups may share this static scope; every geometry
+  // still requires its own exact reviewed hash above and identical stage refs.
   const stages = facts.stages ?? [], first = stages[0]?.area_refs;
   return record.scope === 'GEOGRAPHIC_CONTEXT' && record.historicalOwnershipAllowed === false
     && record.geometryMeaning === 'UNCHANGED_MODERN_LAND_CONTEXT'
     && source.source_type === 'GEOGRAPHIC_CONTEXT'
     && facts.semantic_mode === 'ILLUSTRATIVE_FACT_BASED_VISUAL'
-    && Array.isArray(first) && first.length === 1 && first[0] === geometryId
+    && Array.isArray(first) && first.length > 0 && new Set(first).size === first.length && first.includes(geometryId)
     && stages.length >= 2 && stages.every(s => JSON.stringify(s.area_refs) === JSON.stringify(first))
     && !facts.factions?.length && !facts.territories?.length;
 }

@@ -54,13 +54,27 @@ export async function loadRegionSourceCatalog(){
  const raw=await readFile(CATALOG),data=JSON.parse(raw);check(data.schema==='WORLD_ENGINE_REGION_SOURCE_CATALOG_V2','REGION_CATALOG_SCHEMA_REQUIRED');
  return{data,sha256:hash(raw)};
 }
-async function loadSeed(catalog){
+async function loadSeed(catalog,sourceId){
  const file=await safeFile(catalog.seed.file);check(hash(file.raw)===catalog.seed.sha256,'REGION_SEED_ARCHIVE_SHA_MISMATCH');
  const script="import zipfile,sys;sys.stdout.write(zipfile.ZipFile(sys.argv[1]).read(sys.argv[2]).decode())";
  const {stdout}=await run('python',['-B','-c',script,file.file,catalog.seed.member],{timeout:30000,maxBuffer:32*1024**2});
  const seed=JSON.parse(stdout);check(Array.isArray(seed.nativePlan?.geometries),'REGION_SEED_GIS_REQUIRED');
  const gis=await safeFile(catalog.gis.file);check(hash(gis.raw)===catalog.gis.sha256,'REGION_GIS_SHA_MISMATCH');
  const license=await safeFile(catalog.gis.licenseFile);check(hash(license.raw)===catalog.gis.licenseSHA256,'REGION_GIS_LICENSE_SHA_MISMATCH');
+ // Only an explicitly selected server-owned source may replace GIS records.
+ // AUTO/default sources keep the protected original geometry and behavior.
+ const override=sourceId&&sourceId!=='AUTO'?catalog.sources.find(s=>s.id===sourceId)?.geometrySource:null;
+ if(override){
+  const asset=await safeFile(override.file);check(hash(asset.raw)===override.sha256,'REGION_GEOMETRY_OVERRIDE_SHA_MISMATCH');
+  const license=await safeFile(override.licenseFile);check(hash(license.raw)===override.licenseSHA256,'REGION_GEOMETRY_OVERRIDE_LICENSE_MISMATCH');
+  const data=JSON.parse(asset.raw);check(data.schema==='WORLD_ENGINE_NATIVE_GEOMETRY_OVERRIDE_V1'&&data.sourceOriginalSHA256===override.sourceOriginalSHA256&&data.historicalOwnershipClaimed===false&&Array.isArray(data.records)&&data.records.length>0,'REGION_GEOMETRY_OVERRIDE_SCHEMA');
+  const ids=new Set();
+  for(const record of data.records){
+   check(!ids.has(record.id)&&record.crs==='EPSG:4326'&&record.geometry_role==='country'&&['Polygon','MultiPolygon'].includes(record.geometry_type)&&Array.isArray(record.coordinates)&&record.coordinates.length>0&&record.source_file_sha256===override.sourceOriginalSHA256,'REGION_GEOMETRY_OVERRIDE_RECORD');
+   const index=seed.nativePlan.geometries.findIndex(r=>r.id===record.id);check(index>=0,'REGION_GEOMETRY_OVERRIDE_UNKNOWN_ID');
+   ids.add(record.id);seed.nativePlan.geometries[index]=clone(record);
+  }
+ }
  return seed;
 }
 function boundaryDistance(point,a,b){
@@ -111,7 +125,7 @@ function sourceWindow(source,bounds,gutter=2){
 async function chooseSource(catalog,region,bounds){
  const wanted=region.sourceId??'AUTO',unavailable=catalog.unavailableOriginals.find(row=>row.id===wanted);
  if(unavailable)throw Object.assign(Error('REGION_SOURCE_NOT_MATERIALIZED'),{status:'UNSUPPORTED',detail:unavailable});
- const candidates=catalog.sources.filter(row=>(wanted==='AUTO'||row.id===wanted)&&contains(row.bounds,bounds)).sort((a,b)=>a.priority-b.priority||a.id.localeCompare(b.id));
+ const candidates=catalog.sources.filter(row=>(wanted==='AUTO'?!row.explicitOnly:row.id===wanted)&&contains(row.bounds,bounds)).sort((a,b)=>a.priority-b.priority||a.id.localeCompare(b.id));
  for(const source of candidates){
   const window=sourceWindow(source,bounds,catalog.minimumGutterPixels);
   if(window.minimumGutterPixels<1-1e-9||Math.max(...window.dimensions)>catalog.maxNativeTextureDimension)continue;
@@ -134,7 +148,7 @@ export async function qualifyRegion({region,facts,scene}={}){
   const preserveLegacyBounds=Boolean(given.legacyProfileId&&region.center===undefined&&region.bbox===undefined);
   const fitted=preserveLegacyBounds?clone(given.bbox):fitGeographicExtent(given.bbox,{center:given.center,output:[1080,1920],padding:1});
   if(fitted[0]<-180||fitted[2]>180||fitted[1]<-85||fitted[3]>85)throw Object.assign(Error('REGION_FITTED_PROJECTION_LIMIT'),{status:'UNSUPPORTED',detail:{fitted}});
-  const seed=await loadSeed(catalog),countries=seed.nativePlan.geometries,checks=[];
+  const seed=await loadSeed(catalog,given.sourceId),countries=seed.nativePlan.geometries,checks=[];
   let context;
   if(given.countryId!==undefined||given.countryName!==undefined){
    const byId=given.countryId?countryByRef(countries,given.countryId):null,byName=given.countryName?countryByRef(countries,given.countryName):null;
@@ -155,14 +169,14 @@ export async function qualifyRegion({region,facts,scene}={}){
    if(!inside&&!uncertain)throw Object.assign(Error('REGION_LOCATION_COUNTRY_CONFLICT'),{status:'CONFLICT',detail:checks.at(-1)});
   }
   const selected=await chooseSource(catalog,given,fitted);
-  const evidence={schema:'WORLD_ENGINE_REGION_ADMISSION_V2',catalogSHA256,request:clone(given),fittedBounds:fitted,preservedLegacyFraming:preserveLegacyBounds,contextCountryId:context.id,contextCountryName:context.name,contextSelection:pointInCountry(given.center,context)?'CENTER_IN_ACTUAL_SOURCE_GEOMETRY':'REAL_BBOX_INTERSECTING_CONTEXT_ONLY_NO_CENTER_MEMBERSHIP_OR_OWNERSHIP_CLAIM',gisSHA256:catalog.gis.sha256,locationCountryChecks:checks,sourceId:selected.source.id,sourceSHA256:selected.source.sha256,license:selected.source.license,sourceDimensions:selected.source.dimensions,sourceBounds:selected.source.bounds,nativePixelSpacing:selected.source.pixelSpacing,initialWindow:selected.window,terrainTreatment:selected.source.terrainTreatment,styleId:selected.source.styleId,originalNE1Materialized:false,sourceBytesActuallyVerified:true,trajectoryCoverageRequiredBeforeStart:true,noElevationCreated:true,noHistoricalOwnershipInferred:true};
+  const evidence={schema:'WORLD_ENGINE_REGION_ADMISSION_V2',catalogSHA256,request:clone(given),fittedBounds:fitted,preservedLegacyFraming:preserveLegacyBounds,contextCountryId:context.id,contextCountryName:context.name,contextSelection:pointInCountry(given.center,context)?'CENTER_IN_ACTUAL_SOURCE_GEOMETRY':'REAL_BBOX_INTERSECTING_CONTEXT_ONLY_NO_CENTER_MEMBERSHIP_OR_OWNERSHIP_CLAIM',gisSHA256:catalog.gis.sha256,...(selected.source.geometrySource?{geometryOverrideSHA256:selected.source.geometrySource.sha256,geometryOriginalSHA256:selected.source.geometrySource.sourceOriginalSHA256}:{}),locationCountryChecks:checks,sourceId:selected.source.id,sourceSHA256:selected.source.sha256,license:selected.source.license,sourceDimensions:selected.source.dimensions,sourceBounds:selected.source.bounds,nativePixelSpacing:selected.source.pixelSpacing,initialWindow:selected.window,terrainTreatment:selected.source.terrainTreatment,styleId:selected.source.styleId,originalNE1Materialized:false,sourceBytesActuallyVerified:true,trajectoryCoverageRequiredBeforeStart:true,noElevationCreated:true,noHistoricalOwnershipInferred:true};
   return{...result,status:'PASS',region:given,regionEvidence:evidence,regionGateSHA256:hash(canonicalJSON(evidence))};
  }catch(error){return{...result,status:error.status??'INVALID',issues:[issue(error.status??'INVALID',String(error.message),'$.region','Region/source qualification failed without a fabricated fallback.',{action:'Correct the region/source request or supply a separately admitted source.',detail:error.detail??null})]};}
 }
 
 export async function resolveRegionPlan({scene,region}={}){
  const qualified=await qualifyRegion({region,scene});check(qualified.status==='PASS',qualified.issues?.[0]?.code??'REGION_ADMISSION_FAILED');
- const {data:catalog}=await loadRegionSourceCatalog(),seed=await loadSeed(catalog),nativePlan=clone(seed.nativePlan);
+ const {data:catalog}=await loadRegionSourceCatalog(),seed=await loadSeed(catalog,qualified.region.sourceId),nativePlan=clone(seed.nativePlan);
  nativePlan.primary=qualified.regionEvidence.contextCountryId;nativePlan.secondary=[];
  nativePlan.anchor={geometry_type:'Point',crs:'EPSG:4326',coordinates:clone(qualified.region.center)};
  nativePlan.framing={projection:'REGIONAL_EQUIRECTANGULAR',bounds:clone(qualified.regionEvidence.fittedBounds)};
@@ -227,7 +241,8 @@ export async function verifyRegionQualification({prepared,qualification}={}){
   if(!prepared){check(qualification?.status==='PASS'&&qualification.regionEvidence?.phase!=='FULL_CAMERA_ENVELOPE','REGION_REQUEST_RECEIPT_REQUIRED');const locations=(qualification.regionEvidence.locationCountryChecks??[]).map(row=>({id:row.locationId,country_id:row.countryId,anchor:row.geographic}));const region=clone(qualification.region);if(qualification.regionEvidence.preservedLegacyFraming){delete region.center;delete region.bbox;}const actual=await qualifyRegion({region,facts:{locations}});check(actual.status==='PASS'&&actual.regionGateSHA256===qualification.regionGateSHA256,'REGION_REQUEST_RECEIPT_STALE_OR_INVALID');return{status:'PASS',phase:'REQUEST_COVERAGE_ONLY',regionGateSHA256:actual.regionGateSHA256,trajectoryCoverageRequiredBeforeStart:true};}
   const e=prepared.regionEvidence;check(e?.phase==='FULL_CAMERA_ENVELOPE'&&e.trajectoryCoverageRequiredBeforeStart===false,'REGION_FULL_CAMERA_RECEIPT_REQUIRED');check(prepared.fullCoverageSHA256===hash(canonicalJSON(e)),'REGION_FULL_CAMERA_RECEIPT_SHA_MISMATCH');
   const {data:catalog,sha256:catalogSHA256}=await loadRegionSourceCatalog();check(catalogSHA256===prepared.sourceCatalogSHA256&&catalogSHA256===e.catalogSHA256,'REGION_SOURCE_CATALOG_CHANGED');
-  await loadSeed(catalog); // Includes actual GIS, source archive and license bytes.
+  const qualifiedSeed=await loadSeed(catalog,prepared.region.sourceId); // Actual source archive, GIS/override and license bytes.
+  check(canonicalJSON(prepared.nativePlan.geometries)===canonicalJSON(qualifiedSeed.nativePlan.geometries),'REGION_NATIVE_GEOMETRY_BINDING_MISMATCH');
   check(canonicalJSON(e.initializationAndAnalysisBounds)===canonicalJSON(prepared.nativePlan?.framing?.bounds)&&canonicalJSON(e.initializationAndAnalysisBounds)===canonicalJSON(e.fittedBounds),'REGION_INITIALIZATION_FRAMING_CHANGED');
   const requiredBounds=unionBounds(e.cameraEnvelope,e.initializationAndAnalysisBounds);check(canonicalJSON(requiredBounds)===canonicalJSON(e.sourceRequiredBounds),'REGION_REQUIRED_COVERAGE_RECEIPT_MISMATCH');
   const selected=await chooseSource(catalog,prepared.region,requiredBounds);check(selected.source.id===e.sourceId&&selected.source.sha256===e.sourceSHA256,'REGION_SOURCE_RECEIPT_MISMATCH');
