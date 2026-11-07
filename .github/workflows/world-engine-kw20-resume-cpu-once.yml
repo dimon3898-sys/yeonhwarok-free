@@ -1,0 +1,82 @@
+name: WORLD ENGINE Korean detail resume six frames
+on:
+  push:
+    branches: [recovery/korean-war-20s-resume-20261107]
+    paths: ['.github/workflows/world-engine-kw20-resume-cpu-once.yml']
+permissions:
+  contents: read
+  packages: read
+  actions: read
+concurrency:
+  group: world-engine-kw20-resume-20261107
+  cancel-in-progress: false
+jobs:
+  source-detail:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == 'ceee49fc512074e33179344663b02367c3e875d6' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KW20_RESUME_CPU_20261107_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/production/korean-war-20s-detail-v2
+            world-simulation-shorts-engine/production/korean-war-20s-resume-v3
+            world-simulation-shorts-engine/recovery/universal-presentation-v2
+            world-simulation-shorts-engine/recovery/universal-data-pipeline-v1
+            world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1
+            world-simulation-shorts-engine/recovery/studio-cold-start-v2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install exact missing image dependency in a disposable environment
+        run: |
+          python3 -m venv "${RUNNER_TEMP}/kw20-python"
+          "${RUNNER_TEMP}/kw20-python/bin/python" -m pip install --disable-pip-version-check --only-binary=:all: Pillow==13.0.0
+      - name: Materialize hash-pinned NASA crop without recolor or resampling
+        run: '"${RUNNER_TEMP}/kw20-python/bin/python" -B world-simulation-shorts-engine/production/korean-war-20s-detail-v2/materialize_terrain.py "${RUNNER_TEMP}/nasa/D1.jpg"'
+      - name: Reuse immutable parent without GPU or image build
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+          docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a
+      - name: Draw six new detail frames including both sides of the seam
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-resume-v3/run_cpu_once.py
+      - name: Preserve actual pixels and failure evidence
+        if: always()
+        run: |
+          if [ -d "${RUNNER_TEMP}/kw20-evidence" ]; then sudo chmod -R a+rX "${RUNNER_TEMP}/kw20-evidence"; fi
+          python3 - <<'PY'
+          import os,zipfile,hashlib,json
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'kw20-evidence';p.mkdir(exist_ok=True)
+          out=p/'delivery';out.mkdir(exist_ok=True)
+          selected=[f for f in p.rglob('*') if f.is_file() and out not in f.parents and (f.suffix=='.png' or f.name.startswith('FRAME_') or f.name in ['CHECK_RESULT.json','CHECK_FAILED.json','RUN_RESULT.json','INSTALLED_SOURCE.json','CPU_PREVIEW_RESULT.json','ANALYSIS_1.json','ANALYSIS_2.json','COMPOSE_PLAN.json','REUSED_PREPARATION_RECEIPT.json'])]
+          with zipfile.ZipFile(out/'KW20_DETAIL_EVIDENCE.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for f in selected:z.write(f,f.relative_to(p))
+          source=Path('world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources')
+          with zipfile.ZipFile(out/'KW20_PINNED_SOURCE_CROP.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in ['korea_bmng_500m_native.png','NATIVE_CROP_RECEIPT.json','SOURCE_USE.json']:
+                  if (source/name).exists():z.write(source/name,name)
+          (out/'SHA256SUMS').write_text(''.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name+'\n' for f in sorted(out.glob('*.zip'))))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kw20-resume-${{ github.run_id }}
+          path: ${{ runner.temp }}/kw20-evidence/delivery/
+          retention-days: 14
+      - name: Remove only the disposable CPU container
+        if: always()
+        run: |
+          if docker container inspect "we-kw20-${GITHUB_RUN_ID}" >/dev/null 2>&1; then docker rm -f "we-kw20-${GITHUB_RUN_ID}"; fi

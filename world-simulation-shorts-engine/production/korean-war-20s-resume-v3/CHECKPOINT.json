@@ -1,0 +1,33 @@
+{
+  "schema": "WORLD_ENGINE_KW20_RESUME_CHECKPOINT_V3",
+  "status": "RESUME_PREPARED_NO_PIXELS_YET",
+  "sourceCommit": "ceee49fc512074e33179344663b02367c3e875d6",
+  "sourceBranch": "production/korean-war-20s-20261106",
+  "firstIncomplete": "Six detail-source CPU frames: clip1 0,149,299; clip2 0,105,299",
+  "failure": {
+    "runId": 42328171547,
+    "jobId": 128268254983,
+    "stage": "Materialize hash-pinned NASA crop",
+    "reason": "ModuleNotFoundError: No module named 'PIL'",
+    "framesRendered": 0
+  },
+  "minimumChange": {
+    "invalidated": "No prior PASS invalidated. Previous run never passed environment setup.",
+    "fix": "Install Pillow 13.0.0 in disposable runner venv. Exact crop output was materialized locally and matches the existing SHA256 and byte count.",
+    "scope": "Unstarted six selected frames only. Reuse prior compressed analysis and compose plan; no source-admission regression, tamper test or static suite rerun.",
+    "preserve": "All existing files unchanged; only new workflow/resume files on a new branch."
+  },
+  "protected": {
+    "detailSourceChecks": 4,
+    "staticChecks": 4,
+    "v1SourceGuards": 7,
+    "v1InputChecks": 17,
+    "v1Frames": 19
+  },
+  "qualityPass": false,
+  "paidGpuApproved": false,
+  "gpuExecutions": 0,
+  "imageBuilds": 0,
+  "imagePublications": 0,
+  "gCubeChanges": 0
+}
