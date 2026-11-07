@@ -1,0 +1,32 @@
+name: WORLD ENGINE stop bypass sample only
+on:
+  push:
+    branches: [recovery/korean-war-20s-resume-20261107]
+    paths: ['.github/workflows/world-engine-stop-bypass-once.yml']
+permissions:
+  contents: read
+  actions: write
+jobs:
+  stop-only:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == 'f24359a69e1a251c4b469caa33d563bf4fc477fd' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_STOP_BYPASS_20261107'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Cancel only the user-rejected bypass run; keep its always-upload evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import os,json,urllib.request,urllib.error
+          url='https://api.github.com/repos/dimon3898-sys/yeonhwarok-free/actions/runs/42339382973/cancel'
+          req=urllib.request.Request(url,data=b'',method='POST',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'})
+          try:
+              with urllib.request.urlopen(req,timeout=30) as r:print(json.dumps({'targetRun':42339382973,'cancelHTTPStatus':r.status,'gpuRuns':0,'renderCalls':0,'forceCancel':False}))
+          except urllib.error.HTTPError as e:
+              if e.code!=409:raise
+              print(json.dumps({'targetRun':42339382973,'cancelHTTPStatus':409,'detail':'Already finished or no longer cancellable; inspect run status.','gpuRuns':0,'renderCalls':0}))
+          PY
