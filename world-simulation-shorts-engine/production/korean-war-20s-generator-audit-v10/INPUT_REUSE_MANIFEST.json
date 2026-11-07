@@ -1,0 +1,103 @@
+{
+  "schema": "WORLD_ENGINE_EXISTING_INPUT_REUSE_DESCRIPTOR_V1",
+  "executableStudioRequest": false,
+  "purpose": "Data pointers and request contract only. Preserve exact existing input bytes; do not call build_inputs.py, recompile stored analysis as a test, or replace missing capabilities externally.",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "sourceCommit": "ceee49fc512074e33179344663b02367c3e875d6",
+  "storyboard": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/STORYBOARD.json",
+  "geojson": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources/LAND_CONTEXT.geojson",
+  "nativeCountryOverrides": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources/NATIVE_COUNTRY_OVERRIDES.json",
+  "terrain": {
+    "bytes": 11691382,
+    "materialization": "materialize_terrain.py with pinned NASA source; exact crop receipt",
+    "path": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources/korea_bmng_500m_native.png",
+    "sha256": "e47e355c85deaeac86650df3174e19769bdd40a7ee7046980f39c8acc605a219"
+  },
+  "sourceId": "NASA_BMNG_KOREA_500M_NE10M_V2",
+  "sourceSeal": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/SOURCE_SEAL.json",
+  "originalSourceManifestSHA256": "f236cd08d46e3defd090895f8e88992b0bff5c572d45180135a76bb2eb90790e",
+  "parentImageRecordedBySourceSeal": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:af3ad26a305c160a916ac231122a31824cbee4759338c044bab0d6c9dab1691a",
+  "deployedImageStatus": "UNVERIFIED; recorded parent is not evidence of production source integration",
+  "inputs": [
+    {
+      "bytes": 1189435,
+      "path": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/KOREAN_WAR_20S_PART_01.json",
+      "sha256": "3c4eb85a8f668bcdbae62da48666e7e2c555fc259afebf0c50f2103cbfe778a8",
+      "order": 1,
+      "durationSeconds": 10,
+      "totalFrames": 300,
+      "sceneIds": [
+        "naktong",
+        "incheon"
+      ],
+      "simulationType": "GENERAL",
+      "canonicalRequest": {
+        "schema": "WORLD_ENGINE_NVIDIA_PRESENTATION_REQUEST_V1",
+        "sceneId": "__timeline__",
+        "promptValue": "Entire parsed object of this existing input file, not a path/string and not a selected individual scene."
+      },
+      "apiSequence": [
+        "POST /api/preflight",
+        "POST /api/submissions",
+        "POST /api/start only after separate execution approval",
+        "GET /api/jobs/{jobId}/result"
+      ],
+      "expectedOutput": "WORLD_ENGINE_STUDIO_VIDEO.mp4"
+    },
+    {
+      "bytes": 1190402,
+      "path": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/KOREAN_WAR_20S_PART_02.json",
+      "sha256": "231f1534a6db616d72f786b39897a448d05b4aaf8d8da9105b4a7ad2653562b9",
+      "order": 2,
+      "durationSeconds": 10,
+      "totalFrames": 300,
+      "sceneIds": [
+        "advance",
+        "seoul"
+      ],
+      "simulationType": "GENERAL",
+      "canonicalRequest": {
+        "schema": "WORLD_ENGINE_NVIDIA_PRESENTATION_REQUEST_V1",
+        "sceneId": "__timeline__",
+        "promptValue": "Entire parsed object of this existing input file, not a path/string and not a selected individual scene."
+      },
+      "apiSequence": [
+        "POST /api/preflight",
+        "POST /api/submissions",
+        "POST /api/start only after separate execution approval",
+        "GET /api/jobs/{jobId}/result"
+      ],
+      "expectedOutput": "WORLD_ENGINE_STUDIO_VIDEO.mp4"
+    }
+  ],
+  "existingAnalysis": [
+    "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/evidence/local/ANALYSIS_1.json.gz.base64",
+    "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/evidence/local/ANALYSIS_2.json.gz.base64"
+  ],
+  "existingPassEvidence": [
+    "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/evidence/local/CHECK_RESULT.json",
+    "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/evidence/local/SOURCE_INTEGRATION_RECEIPT.json",
+    "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/evidence/local/STATIC_GROUP_CHECK.json"
+  ],
+  "composition": {
+    "module": "world-simulation-shorts-engine/recovery/universal-auto-video-v2/compose.py",
+    "plan": "world-simulation-shorts-engine/production/korean-war-20s-detail-v2/evidence/local/COMPOSE_PLAN.json",
+    "orderedInputs": "Only two genuinely exported native Studio MP4s with their real paths/hashes/receipts. Diagnostic5s chunks are excluded.",
+    "durationSeconds": 20,
+    "totalFrames": 600,
+    "executed": false,
+    "automaticStudioConnection": "NOT_ESTABLISHED",
+    "output": "WORLD_ENGINE_AUTO_VIDEO.mp4",
+    "newWrapperRequired": false
+  },
+  "preservedVariants": {
+    "v4": "Prior alpha-only visual input variants preserved but not silently substituted for V2 or declared production-ready.",
+    "v6v8": "Coast/glow/viewport overlays are diagnostic candidates only; no automatic promotion."
+  },
+  "limits": [
+    "Modern geographic context and supplied illustrative events; no accurate1950 daily front/ownership reconstruction",
+    "Native HISTORICAL admission remains blocked",
+    "Audited10s NVIDIA profile is silent; no external SFX/narration substitution",
+    "Reference-quality approval requires actual formal output, still absent"
+  ]
+}
