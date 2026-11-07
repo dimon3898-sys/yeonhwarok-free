@@ -1,0 +1,17 @@
+{
+  "schema": "WORLD_ENGINE_KW20_VIEWPORT_CHECKPOINT_V8",
+  "status": "BLOCKED_UNTIL_CORRECTED_FRAME_192_DRAW",
+  "failedRun": 42337386737,
+  "failedFrame": 192,
+  "failedCode": "UP2_AREA_SOURCE_OUTSIDE_VIEWPORT",
+  "rootCause": "One additional MultiPolygon component with 659 vertices temporarily leaves the camera while main 4096-vertex component remains visible. Existing guard incorrectly requires every component in view.",
+  "protectedRunAndArtifact": 13560162635,
+  "minimumRecheck": {
+    "invalidated": "Only viewport admission for offscreen components during moving camera; earlier static image passes do not prove all-frame coverage.",
+    "scope": "Pure geometry visibility edge cases and actual changed frames clip1 192,210 plus clip2 80. No old suites or source-geometry checks rerun."
+  },
+  "strictGuard": "Every active state must retain at least one visible filled component. Default non-reference behavior stays strict.",
+  "sourceGeometryCameraTimingChanged": false,
+  "qualityPass": false,
+  "gpuRuns": 0
+}
