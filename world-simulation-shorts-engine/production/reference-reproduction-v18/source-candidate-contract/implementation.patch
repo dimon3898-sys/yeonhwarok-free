@@ -1,0 +1,350 @@
+diff --git a/derived_source_manifest.mjs b/derived_source_manifest.mjs
+new file mode 100644
+--- /dev/null
++++ b/derived_source_manifest.mjs
+@@ -0,0 +1,167 @@
++/** Isolated candidate validator. Never authorizes production, rendering, or builds. */
++import {readFile, realpath, lstat} from 'node:fs/promises';
++import path from 'node:path';
++import {createHash} from 'node:crypto';
++
++export const SCHEMA='WORLD_ENGINE_DERIVED_SOURCE_CANDIDATE_V1';
++const encBytes={RGB8:3,MASK8:1,F32LE:4};
++const classes={OPTICAL_RGB:'OPTICAL_RGB_NOT_BAKED',BAKED_BASEMAP_RGB:'BAKED_BASEMAP_NOT_OPTICAL',DSM:'REAL_DSM_METRES',VALIDITY_MASK:'SOURCE_VALIDITY',KNOWN_LAND_MASK:'KNOWN_LAND',KNOWN_WATER_MASK:'KNOWN_WATER',UNKNOWN_MASK:'UNKNOWN_CLASSIFICATION',SELECTION_MASK:'SOURCE_SELECTION',DSM_USE_MASK:'COMPLETE_DSM_NEIGHBORHOOD'};
++const deny=code=>{throw Object.assign(new Error(code),{code});};
++const check=(value,code)=>{if(!value)deny(code);};
++const plain=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
++const keys=(v,allowed,code)=>{check(plain(v),code);check(Object.keys(v).every(k=>allowed.includes(k)),code+'_UNKNOWN_FIELD');};
++const hex=v=>typeof v==='string'&&/^[0-9a-f]{64}$/.test(v);
++const digest=b=>createHash('sha256').update(b).digest('hex');
++const ident=v=>typeof v==='string'&&/^[a-zA-Z][a-zA-Z0-9_.-]{0,79}$/.test(v);
++const eq=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
++const secureUrl=s=>{try{const u=new URL(s);return u.protocol==='https:'&&!u.username&&!u.password&&!u.hash;}catch{return false;}};
++const sameGrid=(a,b)=>a.crs===b.crs&&eq(a.dimensions,b.dimensions)&&eq(a.bounds,b.bounds);
++const lookup=(m,id,code)=>{check(m.has(id),code);return m.get(id);};
++const positive=v=>Number.isInteger(v)&&v>0;
++
++function validateProvenance(p){
++ keys(p,['acquisitionReceiptSha256','upstreamManifestSha256','resampling','colorMapping'],'PROVENANCE');
++ check(hex(p.acquisitionReceiptSha256)&&hex(p.upstreamManifestSha256),'BOUND_UPSTREAM_AND_DERIVATION_HASHES_REQUIRED');
++ check(['NONE','NEAREST','BILINEAR','AREA_MEAN_VALID_ONLY'].includes(p.resampling),'UNSUPPORTED_RESAMPLING');
++ check(typeof p.colorMapping==='string'&&p.colorMapping.length>0&&p.colorMapping.length<=500,'EXPLICIT_COLOR_MAPPING_REQUIRED');
++}
++function validateUpstreamManifest(m){
++ keys(m,['schema','completeness','sources'],'UPSTREAM_MANIFEST');
++ check(m.schema==='WORLD_ENGINE_DERIVED_SOURCE_INPUT_MANIFEST_V1'&&m.completeness==='ALL_DECLARED_UPSTREAM_INPUTS','COMPLETE_UPSTREAM_MANIFEST_REQUIRED');
++ check(Array.isArray(m.sources)&&m.sources.length>0&&m.sources.length<=512,'UPSTREAM_SOURCES_REQUIRED');
++ const ids=new Set();
++ for(const p of m.sources){
++  keys(p,['id','sourceUrl','license','attribution','sourceHashScope','sourceWholeFileSha256','rangeReceipts','grid','processingMethod'],'UPSTREAM_SOURCE');
++  check(ident(p.id)&&!ids.has(p.id),'UPSTREAM_SOURCE_ID_INVALID');ids.add(p.id);
++  check(secureUrl(p.sourceUrl),'SOURCE_HTTPS_URL_REQUIRED');
++  check(typeof p.license==='string'&&p.license.trim()&&typeof p.attribution==='string'&&p.attribution.trim(),'SOURCE_CREDIT_REQUIRED');
++  check(['WHOLE_FILE','BYTE_RANGES'].includes(p.sourceHashScope),'SOURCE_HASH_SCOPE_REQUIRED');
++  if(p.sourceHashScope==='WHOLE_FILE')check(hex(p.sourceWholeFileSha256),'WHOLE_SOURCE_HASH_REQUIRED');
++  else{
++   check(p.sourceWholeFileSha256===null,'PARTIAL_HASH_MUST_NOT_CLAIM_WHOLE_SOURCE');
++   check(Array.isArray(p.rangeReceipts)&&p.rangeReceipts.length>0&&p.rangeReceipts.length<=8192,'RANGE_RECEIPTS_REQUIRED');
++   for(const r of p.rangeReceipts){keys(r,['offset','bytes','sha256'],'RANGE_RECEIPT');check(Number.isSafeInteger(r.offset)&&r.offset>=0&&positive(r.bytes)&&hex(r.sha256),'INVALID_RANGE_RECEIPT');}
++  }
++  keys(p.grid,['kind','crs','bounds','dimensions','pixelInterpretation'],'UPSTREAM_GRID');
++  const g=p.grid;check(typeof g.crs==='string'&&g.crs.trim()&&Array.isArray(g.bounds)&&g.bounds.length===4&&g.bounds.every(Number.isFinite)&&g.bounds[0]<g.bounds[2]&&g.bounds[1]<g.bounds[3],'UPSTREAM_CRS_GRID_REQUIRED');
++  check(['RASTER','VECTOR'].includes(g.kind),'UPSTREAM_GRID_KIND_REQUIRED');
++  if(g.kind==='RASTER')check(Array.isArray(g.dimensions)&&g.dimensions.length===2&&g.dimensions.every(positive)&&['AREA','POINT'].includes(g.pixelInterpretation),'UPSTREAM_RASTER_GRID_REQUIRED');
++  else check(g.dimensions===null&&g.pixelInterpretation===null,'VECTOR_GRID_MUST_NOT_INVENT_PIXELS');
++  check(['EXACT_SOURCE_DECODE','COG_WINDOW_RESAMPLE','MASK_DERIVATION','GEOGRAPHIC_MASKED_COMPOSITION'].includes(p.processingMethod),'UPSTREAM_PROCESSING_METHOD_REQUIRED');
++ }
++ return m.sources.length;
++}
++
++/** Structural validation only. Returns a fresh index; never mutates the manifest. */
++export function validateCandidateManifest(manifest){
++ keys(manifest,['schema','purpose','assets','receipts','products','layers','qualification'],'MANIFEST');
++ check(manifest.schema===SCHEMA&&manifest.purpose==='QUALIFICATION_ONLY','CANDIDATE_ONLY_SCHEMA_REQUIRED');
++ keys(manifest.qualification,['state','missingChecks'],'QUALIFICATION');
++ check(manifest.qualification.state==='PENDING'&&Array.isArray(manifest.qualification.missingChecks)&&manifest.qualification.missingChecks.length>0,'QUALIFICATION_MUST_REMAIN_PENDING');
++ check(manifest.qualification.missingChecks.every(s=>typeof s==='string'&&s.trim()),'MISSING_CHECKS_INVALID');
++ check(Array.isArray(manifest.assets)&&manifest.assets.length>0&&manifest.assets.length<=64,'ASSETS_REQUIRED');
++ const assets=new Map();
++ for(const a of manifest.assets){
++  keys(a,['id','file','sha256','bytes','encoding','dimensions','bounds','crs'],'ASSET');
++  check(ident(a.id)&&!assets.has(a.id),'DUPLICATE_OR_INVALID_ASSET_ID');
++  check(typeof a.file==='string'&&a.file.length>0&&!path.isAbsolute(a.file)&&!a.file.split(/[\\/]/).some(x=>x==='..'||x==='.'||!x)&&!a.file.includes('\\'),'SAFE_RELATIVE_ASSET_PATH_REQUIRED');
++  check(hex(a.sha256)&&positive(a.bytes),'ASSET_HASH_AND_SIZE_REQUIRED');
++  check(Object.hasOwn(encBytes,a.encoding),'RAW_ASSET_ENCODING_REQUIRED');
++  check(Array.isArray(a.dimensions)&&a.dimensions.length===2&&a.dimensions.every(v=>positive(v)&&v<=4096),'ATLAS_MAX_4096');
++  check(a.bytes===a.dimensions[0]*a.dimensions[1]*encBytes[a.encoding],'ASSET_DECLARED_BYTE_SIZE_MISMATCH');
++  check(a.crs==='EPSG:4326'&&Array.isArray(a.bounds)&&a.bounds.length===4&&a.bounds.every(Number.isFinite)&&a.bounds[0]<a.bounds[2]&&a.bounds[1]<a.bounds[3]&&a.bounds[0]>=-180&&a.bounds[2]<=180&&a.bounds[1]>=-90&&a.bounds[3]<=90,'REGISTERED_PIXEL_EDGE_BOUNDS_REQUIRED');
++  assets.set(a.id,a);
++ }
++ check(Array.isArray(manifest.receipts)&&manifest.receipts.length>0&&manifest.receipts.length<=64,'RECEIPTS_REQUIRED');
++ const receipts=new Map();
++ for(const r of manifest.receipts){
++  keys(r,['file','sha256','bytes'],'RECEIPT');check(hex(r.sha256)&&!receipts.has(r.sha256)&&positive(r.bytes)&&r.bytes<=2*1024**2,'INVALID_RECEIPT_DESCRIPTOR');
++  check(typeof r.file==='string'&&r.file.length>0&&!path.isAbsolute(r.file)&&!r.file.split(/[\\/]/).some(x=>x==='..'||x==='.'||!x)&&!r.file.includes('\\'),'SAFE_RELATIVE_RECEIPT_PATH_REQUIRED');receipts.set(r.sha256,r);
++ }
++ check(Array.isArray(manifest.products)&&manifest.products.length>0&&manifest.products.length<=64,'PRODUCTS_REQUIRED');
++ const products=new Map();
++ for(const p of manifest.products){
++  keys(p,['id','kind','classification','assetId','provenance'],'PRODUCT');
++  check(ident(p.id)&&!products.has(p.id),'DUPLICATE_OR_INVALID_PRODUCT_ID');
++  check(Object.hasOwn(classes,p.kind)&&p.classification===classes[p.kind],'TRUTHFUL_SOURCE_CLASSIFICATION_REQUIRED');
++  const a=lookup(assets,p.assetId,'PRODUCT_ASSET_MISSING');
++  check(a.encoding===(p.kind==='DSM'?'F32LE':['OPTICAL_RGB','BAKED_BASEMAP_RGB'].includes(p.kind)?'RGB8':'MASK8'),'PRODUCT_ENCODING_MISMATCH');
++  validateProvenance(p.provenance);check(receipts.has(p.provenance.acquisitionReceiptSha256),'PROVENANCE_RECEIPT_NOT_BOUND');check(receipts.has(p.provenance.upstreamManifestSha256),'UPSTREAM_MANIFEST_NOT_BOUND');products.set(p.id,p);
++ }
++ check(Array.isArray(manifest.layers)&&manifest.layers.length>0&&manifest.layers.length<=2,'AT_MOST_TWO_LAYERS');
++ const roles=new Set();
++ for(const l of manifest.layers){
++  keys(l,['role','rgbAssetId','opticalProductId','baselineProductId','baselineValidityProductId','opticalValidityProductId','knownLandMaskProductId','knownWaterMaskProductId','unknownMaskProductId','selectionProductId','composition','waterPolicy','invalidOpticalLandPolicy','height'],'LAYER');
++  check(['overview','regional'].includes(l.role)&&!roles.has(l.role),'UNIQUE_LAYER_ROLE_REQUIRED');roles.add(l.role);
++  check(l.composition==='EXACT_MASK_SELECT_REAL_RGB'&&l.waterPolicy==='PRESERVE_REAL_BASEMAP'&&l.invalidOpticalLandPolicy==='PRESERVE_BASEMAP_AND_BLOCK_ADMISSION','EXPLICIT_NO_INPAINTING_COMPOSITION_REQUIRED');
++  const out=lookup(assets,l.rgbAssetId,'LAYER_RGB_MISSING');check(out.encoding==='RGB8','LAYER_RGB8_REQUIRED');
++  for(const [field,kind] of [['opticalProductId','OPTICAL_RGB'],['baselineProductId','BAKED_BASEMAP_RGB'],['baselineValidityProductId','VALIDITY_MASK'],['opticalValidityProductId','VALIDITY_MASK'],['knownLandMaskProductId','KNOWN_LAND_MASK'],['knownWaterMaskProductId','KNOWN_WATER_MASK'],['unknownMaskProductId','UNKNOWN_MASK'],['selectionProductId','SELECTION_MASK']]){
++   const p=lookup(products,l[field],'LAYER_PRODUCT_MISSING');check(p.kind===kind,'LAYER_PRODUCT_KIND_MISMATCH');check(sameGrid(out,assets.get(p.assetId)),'LAYER_GRIDS_MUST_MATCH');
++  }
++  if(l.height!==undefined){
++   const h=l.height;keys(h,['dsmProductId','validityProductId','useMaskProductId','invalidPayload','unit','scale','offset','neighborhoodRadiusSamples','neighborhoodContract','outsidePolicy'],'HEIGHT');
++   check(h.invalidPayload==='NAN'&&h.unit==='m'&&h.scale===1&&h.offset===0&&h.outsidePolicy==='NO_DEM_KEEP_BASELINE_LIGHTING','NO_FAKE_ZERO_HEIGHT_POLICY_REQUIRED');
++   check(h.neighborhoodContract==='DECLARED_SQUARE_PENDING_RUNTIME_BINDING','RUNTIME_NEIGHBORHOOD_NOT_CERTIFIED');
++   check(Number.isInteger(h.neighborhoodRadiusSamples)&&h.neighborhoodRadiusSamples>=1&&h.neighborhoodRadiusSamples<=64,'EXPLICIT_DERIVATIVE_NEIGHBORHOOD_REQUIRED');
++   for(const [field,kind] of [['dsmProductId','DSM'],['validityProductId','VALIDITY_MASK'],['useMaskProductId','DSM_USE_MASK']]){
++    const p=lookup(products,h[field],'HEIGHT_PRODUCT_MISSING');check(p.kind===kind,'HEIGHT_PRODUCT_KIND_MISMATCH');check(sameGrid(out,assets.get(p.assetId)),'HEIGHT_GRIDS_MUST_MATCH');
++   }
++  }
++ }
++ check(roles.has('overview'),'OVERVIEW_LAYER_REQUIRED');
++ return{assets,products,receipts};
++}
++
++async function readAsset(root,a){
++ const target=path.resolve(root,a.file);check(target.startsWith(root+path.sep),'ASSET_OUTSIDE_ROOT');
++ const components=a.file.split('/');let prefix=root;
++ for(const component of components){prefix=path.join(prefix,component);const stat=await lstat(prefix);check(!stat.isSymbolicLink(),'ASSET_SYMLINK_FORBIDDEN');}
++ check(await realpath(target)===target,'ASSET_REALPATH_MISMATCH');const stat=await lstat(target);check(stat.isFile()&&stat.size===a.bytes,'ASSET_ACTUAL_SIZE_MISMATCH');
++ const data=await readFile(target);check(data.length===a.bytes&&digest(data)===a.sha256,'ASSET_ACTUAL_HASH_MISMATCH');return data;
++}
++
++/** Check local derivative bytes. Authenticity/scientific qualification remains pending. */
++export async function verifyCandidateFiles(manifest,{root,maxTotalBytes=512*1024**2}={}){
++ const {assets,products,receipts}=validateCandidateManifest(manifest);
++ check(typeof root==='string'&&path.isAbsolute(root),'ABSOLUTE_CANDIDATE_ROOT_REQUIRED');
++ const requested=path.resolve(root),canonical=await realpath(root);check(requested===canonical&&!(await lstat(root)).isSymbolicLink(),'ROOT_SYMLINK_FORBIDDEN');
++ check(Number.isSafeInteger(maxTotalBytes)&&maxTotalBytes>0&&maxTotalBytes<=512*1024**2,'MAX_CANDIDATE_BYTES_INVALID');
++ check([...assets.values(),...receipts.values()].reduce((s,a)=>s+a.bytes,0)<=maxTotalBytes,'CANDIDATE_BYTE_BUDGET_EXCEEDED');
++ const receiptData=new Map();for(const r of receipts.values()){const raw=await readAsset(canonical,r);let parsed;try{parsed=JSON.parse(raw.toString('utf8'));}catch{deny('RECEIPT_JSON_INVALID');}receiptData.set(r.sha256,parsed);}
++ for(const p of products.values()){const r=receiptData.get(p.provenance.acquisitionReceiptSha256),v=p.provenance;
++  check(r.schema==='WORLD_ENGINE_LOCAL_DERIVATION_RECEIPT_V1'&&r.productKind===p.kind&&r.derivedArtifactSha256===assets.get(p.assetId).sha256,'DERIVATION_RECEIPT_PRODUCT_MISMATCH');
++  check(receiptData.has(v.upstreamManifestSha256),'UPSTREAM_MANIFEST_NOT_BOUND');validateUpstreamManifest(receiptData.get(v.upstreamManifestSha256));
++  for(const k of ['upstreamManifestSha256','resampling','colorMapping'])check(eq(r[k],v[k]),'DERIVATION_RECEIPT_PROVENANCE_MISMATCH');
++ }
++ const data=new Map();for(const a of assets.values())data.set(a.id,await readAsset(canonical,a));
++ for(const a of assets.values())if(a.encoding==='MASK8')check(data.get(a.id).every(v=>v===0||v===1),'MASK_MUST_BE_BINARY_0_1');
++ const bytesFor=id=>data.get(products.get(id).assetId),reports=[];
++ for(const l of manifest.layers){
++  const a=assets.get(l.rgbAssetId),out=data.get(l.rgbAssetId),optical=bytesFor(l.opticalProductId),base=bytesFor(l.baselineProductId),baseValid=bytesFor(l.baselineValidityProductId),valid=bytesFor(l.opticalValidityProductId),land=bytesFor(l.knownLandMaskProductId),water=bytesFor(l.knownWaterMaskProductId),unknown=bytesFor(l.unknownMaskProductId),select=bytesFor(l.selectionProductId);
++  let opticalPixels=0,invalidOpticalKnownLandPixels=0,knownLandPixels=0,knownWaterPixels=0,unknownPixels=0;
++  for(let i=0;i<select.length;i++){
++   check(land[i]+water[i]+unknown[i]===1,'CLASSIFICATION_MASKS_MUST_PARTITION');
++   check(baseValid[i]===1,'BASEMAP_MUST_HAVE_VALID_COMPLETE_COVERAGE');
++   check(select[i]===Number(valid[i]===1&&land[i]===1),'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');
++   if(select[i])opticalPixels++;if(land[i]&&!valid[i])invalidOpticalKnownLandPixels++;knownLandPixels+=land[i];knownWaterPixels+=water[i];unknownPixels+=unknown[i];
++   const source=select[i]?optical:base;for(let c=0;c<3;c++)check(out[i*3+c]===source[i*3+c],'COMPOSITE_IS_NOT_EXACT_REAL_SOURCE_SELECTION');
++  }
++  let height=null;
++  if(l.height){
++   const h=l.height,raw=bytesFor(h.dsmProductId),validH=bytesFor(h.validityProductId),use=bytesFor(h.useMaskProductId),[w,he]=a.dimensions,r=h.neighborhoodRadiusSamples;
++   let usable=0,measuredZero=0;
++   for(let i=0;i<validH.length;i++){const value=raw.readFloatLE(i*4);check(validH[i]?Number.isFinite(value):Number.isNaN(value),'DSM_INVALID_VALUES_MUST_REMAIN_NAN');if(validH[i]&&value===0)measuredZero++;}
++   const stride=w+1,invalidPrefix=new Uint32Array((w+1)*(he+1));
++   for(let y=0;y<he;y++){let row=0;for(let x=0;x<w;x++){row+=1-validH[y*w+x];invalidPrefix[(y+1)*stride+x+1]=invalidPrefix[y*stride+x+1]+row;}}
++   for(let y=0;y<he;y++)for(let x=0;x<w;x++){
++    const i=y*w+x;if(!use[i])continue;check(land[i]===1,'DSM_USE_REQUIRES_KNOWN_LAND_MASK');
++    check(x>=r&&y>=r&&x<w-r&&y<he-r,'DSM_USE_NEIGHBORHOOD_OUTSIDE_GRID');
++    const x0=x-r,y0=y-r,x1=x+r+1,y1=y+r+1;
++    check(invalidPrefix[y1*stride+x1]-invalidPrefix[y0*stride+x1]-invalidPrefix[y1*stride+x0]+invalidPrefix[y0*stride+x0]===0,'DSM_USE_HAS_INCOMPLETE_NEIGHBORHOOD');usable++;
++   }
++   height={usablePixels:usable,measuredZeroPixels:measuredZero,invalidPixels:validH.length-validH.reduce((s,v)=>s+v,0),outsidePolicy:h.outsidePolicy};
++  }
++  reports.push({role:l.role,dimensions:[...a.dimensions],opticalPixels,invalidOpticalKnownLandPixels,knownLandPixels,knownWaterPixels,unknownPixels,height});
++ }
++ return{schema:'WORLD_ENGINE_DERIVED_SOURCE_CANDIDATE_CHECK_V1',status:'QUALIFICATION_REQUIRED',structuralAndByteChecks:'PASSED',productionAdmitted:false,renderAllowed:false,imageBuildAllowed:false,checkedAssetCount:assets.size,layers:reports,remainingChecks:[...manifest.qualification.missingChecks],provenanceScope:'Hashes verify supplied derivative files; upstream-list completeness and acquisition receipt authenticity, resampling correctness, source validity semantics, shoreline accuracy, visual quality, and renderer integration are not certified by this validator.'};
++}
+diff --git a/derived_source_manifest.test.mjs b/derived_source_manifest.test.mjs
+new file mode 100644
+--- /dev/null
++++ b/derived_source_manifest.test.mjs
+@@ -0,0 +1,84 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {mkdtemp,writeFile,readFile,symlink} from 'node:fs/promises';
++import os from 'node:os';
++import path from 'node:path';
++import {createHash} from 'node:crypto';
++import {SCHEMA,validateCandidateManifest,verifyCandidateFiles} from './derived_source_manifest.mjs';
++const hash=b=>createHash('sha256').update(b).digest('hex'),clone=structuredClone;
++const classifications={OPTICAL_RGB:'OPTICAL_RGB_NOT_BAKED',BAKED_BASEMAP_RGB:'BAKED_BASEMAP_NOT_OPTICAL',VALIDITY_MASK:'SOURCE_VALIDITY',KNOWN_LAND_MASK:'KNOWN_LAND',KNOWN_WATER_MASK:'KNOWN_WATER',UNKNOWN_MASK:'UNKNOWN_CLASSIFICATION',SELECTION_MASK:'SOURCE_SELECTION',DSM:'REAL_DSM_METRES',DSM_USE_MASK:'COMPLETE_DSM_NEIGHBORHOOD'};
++async function fixture({height=false}={}){
++ const root=await mkdtemp(path.join(os.tmpdir(),'source-candidate-test-'));
++ const m={schema:SCHEMA,purpose:'QUALIFICATION_ONLY',assets:[],receipts:[],products:[],layers:[],qualification:{state:'PENDING',missingChecks:['Source qualification and cloud/shoreline review','LOD runtime integration and production verification']}};
++ async function asset(id,bytes,encoding){const data=Buffer.from(bytes);const a={id,file:id+'.raw',sha256:hash(data),bytes:data.length,encoding,dimensions:[3,3],bounds:[126,37,127,38],crs:'EPSG:4326'};m.assets.push(a);await writeFile(path.join(root,a.file),data);return a;}
++ async function product(id,kind,bytes,encoding){
++  const a=await asset(id,bytes,encoding);
++  const input={id:'source-'+id,sourceUrl:'https://example.org/verified-source/'+id,license:'CC-BY-4.0',attribution:'Synthetic focused-test source, not production data',sourceHashScope:'WHOLE_FILE',sourceWholeFileSha256:hash(Buffer.from('synthetic original '+id)),grid:{kind:'RASTER',crs:'EPSG:4326',bounds:[126,37,127,38],dimensions:[3,3],pixelInterpretation:'AREA'},processingMethod:'EXACT_SOURCE_DECODE'};
++  const upstream={schema:'WORLD_ENGINE_DERIVED_SOURCE_INPUT_MANIFEST_V1',completeness:'ALL_DECLARED_UPSTREAM_INPUTS',sources:[input]};
++  const inputRaw=Buffer.from(JSON.stringify(upstream)),u={file:id+'.inputs.json',sha256:hash(inputRaw),bytes:inputRaw.length};m.receipts.push(u);await writeFile(path.join(root,u.file),inputRaw);
++  const v={upstreamManifestSha256:u.sha256,resampling:'NONE',colorMapping:'No color change; synthetic source fixture only'};
++  const receipt={schema:'WORLD_ENGINE_LOCAL_DERIVATION_RECEIPT_V1',productKind:kind,derivedArtifactSha256:a.sha256,...v};const raw=Buffer.from(JSON.stringify(receipt));const r={file:id+'.receipt.json',sha256:hash(raw),bytes:raw.length};m.receipts.push(r);await writeFile(path.join(root,r.file),raw);m.products.push({id,kind,classification:classifications[kind],assetId:a.id,provenance:{...v,acquisitionReceiptSha256:r.sha256}});
++ }
++
++ const optical=Buffer.from(Array.from({length:27},(_,i)=>100+i)),base=Buffer.from(Array.from({length:27},(_,i)=>10+i)),valid=Buffer.from([1,1,1,1,0,1,1,1,1]),land=Buffer.from([0,0,1,1,1,1,1,1,1]),select=Buffer.from(valid.map((v,i)=>v&&land[i]?1:0));
++ const out=Buffer.from(base);for(let i=0;i<9;i++)if(select[i])optical.copy(out,i*3,i*3,i*3+3);
++ await product('optical','OPTICAL_RGB',optical,'RGB8');await product('baseline','BAKED_BASEMAP_RGB',base,'RGB8');await product('bvalid','VALIDITY_MASK',Buffer.alloc(9,1),'MASK8');await product('valid','VALIDITY_MASK',valid,'MASK8');await product('land','KNOWN_LAND_MASK',land,'MASK8');await product('water','KNOWN_WATER_MASK',Buffer.from([1,0,0,0,0,0,0,0,0]),'MASK8');await product('unknown','UNKNOWN_MASK',Buffer.from([0,1,0,0,0,0,0,0,0]),'MASK8');await product('select','SELECTION_MASK',select,'MASK8');await asset('output',out,'RGB8');
++ const l={role:'overview',rgbAssetId:'output',opticalProductId:'optical',baselineProductId:'baseline',baselineValidityProductId:'bvalid',opticalValidityProductId:'valid',knownLandMaskProductId:'land',knownWaterMaskProductId:'water',unknownMaskProductId:'unknown',selectionProductId:'select',composition:'EXACT_MASK_SELECT_REAL_RGB',waterPolicy:'PRESERVE_REAL_BASEMAP',invalidOpticalLandPolicy:'PRESERVE_BASEMAP_AND_BLOCK_ADMISSION'};m.layers.push(l);
++ if(height){const h=Buffer.alloc(36);for(let i=0;i<9;i++)h.writeFloatLE(i===4?0:10+i,i*4);await product('dsm','DSM',h,'F32LE');await product('hvalid','VALIDITY_MASK',Buffer.alloc(9,1),'MASK8');const use=Buffer.alloc(9);use[4]=1;await product('huse','DSM_USE_MASK',use,'MASK8');l.height={dsmProductId:'dsm',validityProductId:'hvalid',useMaskProductId:'huse',invalidPayload:'NAN',unit:'m',scale:1,offset:0,neighborhoodRadiusSamples:1,neighborhoodContract:'DECLARED_SQUARE_PENDING_RUNTIME_BINDING',outsidePolicy:'NO_DEM_KEEP_BASELINE_LIGHTING'};}
++ return{root,m};
++}
++async function replaceAsset(f,id,mutate){const a=f.m.assets.find(a=>a.id===id),b=await readFile(path.join(f.root,a.file));mutate(b);await writeFile(path.join(f.root,a.file),b);a.sha256=hash(b);const p=f.m.products.find(p=>p.assetId===id);if(p){const r=f.m.receipts.find(r=>r.sha256===p.provenance.acquisitionReceiptSha256);const v=JSON.parse(await readFile(path.join(f.root,r.file)));v.derivedArtifactSha256=a.sha256;const raw=Buffer.from(JSON.stringify(v));r.sha256=hash(raw);r.bytes=raw.length;p.provenance.acquisitionReceiptSha256=r.sha256;await writeFile(path.join(f.root,r.file),raw);}}
++const rejects=async(f,code)=>assert.rejects(()=>verifyCandidateFiles(f.m,{root:f.root}),e=>e.code===code);
++
++test('valid byte composition remains blocked and reports invalid optical land',async()=>{const f=await fixture(),before=JSON.stringify(f.m),r=await verifyCandidateFiles(f.m,{root:f.root});assert.equal(r.status,'QUALIFICATION_REQUIRED');assert.equal(r.productionAdmitted,false);assert.equal(r.renderAllowed,false);assert.equal(r.imageBuildAllowed,false);assert.equal(r.layers[0].opticalPixels,6);assert.equal(r.layers[0].invalidOpticalKnownLandPixels,1);assert.equal(r.layers[0].knownLandPixels,7);assert.equal(r.layers[0].knownWaterPixels,1);assert.equal(r.layers[0].unknownPixels,1);assert.equal(JSON.stringify(f.m),before);});
++test('two layers accepted only as candidate',async()=>{const f=await fixture();f.m.layers.push({...clone(f.m.layers[0]),role:'regional'});assert.equal((await verifyCandidateFiles(f.m,{root:f.root})).layers.length,2);});
++test('legacy and non-opt-in schemas rejected',async()=>{const f=await fixture();f.m.schema='WORLD_ENGINE_REGION_SOURCE_CATALOG_V2';assert.throws(()=>validateCandidateManifest(f.m),/CANDIDATE_ONLY_SCHEMA_REQUIRED/);});
++test('admission flag cannot be injected',async()=>{const f=await fixture();f.m.productionAdmitted=true;assert.throws(()=>validateCandidateManifest(f.m),/MANIFEST_UNKNOWN_FIELD/);});
++test('qualification cannot be promoted to PASS',async()=>{const f=await fixture();f.m.qualification.state='PASS';assert.throws(()=>validateCandidateManifest(f.m),/QUALIFICATION_MUST_REMAIN_PENDING/);});
++test('optical cannot be labeled baked relief',async()=>{const f=await fixture();f.m.products[0].classification='BAKED HILLSHADE';assert.throws(()=>validateCandidateManifest(f.m),/TRUTHFUL_SOURCE_CLASSIFICATION_REQUIRED/);});
++test('baseline cannot masquerade as optical product',async()=>{const f=await fixture();f.m.layers[0].baselineProductId='optical';assert.throws(()=>validateCandidateManifest(f.m),/LAYER_PRODUCT_KIND_MISMATCH/);});
++test('oversized atlas rejected',async()=>{const f=await fixture();f.m.assets[0].dimensions=[4097,3];assert.throws(()=>validateCandidateManifest(f.m),/ATLAS_MAX_4096/);});
++test('partial upstream hash cannot pretend to be whole file',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources[0].sourceHashScope='BYTE_RANGES');await rejects(f,'PARTIAL_HASH_MUST_NOT_CLAIM_WHOLE_SOURCE');});
++test('path traversal rejected before IO',async()=>{const f=await fixture();f.m.assets[0].file='../escape';assert.throws(()=>validateCandidateManifest(f.m),/SAFE_RELATIVE_ASSET_PATH_REQUIRED/);});
++test('asset symlink rejected',async()=>{const f=await fixture();await symlink('optical.raw',path.join(f.root,'link.raw'));f.m.assets[0].file='link.raw';await rejects(f,'ASSET_SYMLINK_FORBIDDEN');});
++test('actual byte hash mismatch rejected',async()=>{const f=await fixture();await writeFile(path.join(f.root,'optical.raw'),Buffer.alloc(27));await rejects(f,'ASSET_ACTUAL_HASH_MISMATCH');});
++test('actual byte length mismatch rejected',async()=>{const f=await fixture();await writeFile(path.join(f.root,'optical.raw'),Buffer.alloc(1));await rejects(f,'ASSET_ACTUAL_SIZE_MISMATCH');});
++test('unbound acquisition receipt rejected',async()=>{const f=await fixture();f.m.products[0].provenance.acquisitionReceiptSha256='f'.repeat(64);assert.throws(()=>validateCandidateManifest(f.m),/PROVENANCE_RECEIPT_NOT_BOUND/);});
++test('receipt must bind derivative product and provenance',async()=>{const f=await fixture();f.m.products[0].provenance.colorMapping='Changed without receipt';await rejects(f,'DERIVATION_RECEIPT_PROVENANCE_MISMATCH');});
++test('grid registration mismatch rejected',async()=>{const f=await fixture();f.m.assets[0].bounds=[125,37,126,38];assert.throws(()=>validateCandidateManifest(f.m),/LAYER_GRIDS_MUST_MATCH/);});
++test('selected optical NoData rejected',async()=>{const f=await fixture();await replaceAsset(f,'select',b=>b[4]=1);await rejects(f,'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');});
++test('selected optical water/unclassified pixel rejected',async()=>{const f=await fixture();await replaceAsset(f,'select',b=>b[0]=1);await rejects(f,'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');});
++test('inpainted or recolored output rejected',async()=>{const f=await fixture();await replaceAsset(f,'output',b=>b[12]=200);await rejects(f,'COMPOSITE_IS_NOT_EXACT_REAL_SOURCE_SELECTION');});
++test('nonbinary mask rejected',async()=>{const f=await fixture();await replaceAsset(f,'land',b=>b[0]=255);await rejects(f,'MASK_MUST_BE_BINARY_0_1');});
++test('byte budget enforced',async()=>{const f=await fixture();await assert.rejects(()=>verifyCandidateFiles(f.m,{root:f.root,maxTotalBytes:1}),/CANDIDATE_BYTE_BUDGET_EXCEEDED/);});
++test('valid measured zero DSM is distinguished from missing data',async()=>{const f=await fixture({height:true});const r=await verifyCandidateFiles(f.m,{root:f.root});assert.equal(r.layers[0].height.measuredZeroPixels,1);assert.equal(r.layers[0].height.usablePixels,1);assert.equal(r.productionAdmitted,false);});
++test('missing DSM encoded as zero rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'hvalid',b=>b[4]=0);await rejects(f,'DSM_INVALID_VALUES_MUST_REMAIN_NAN');});
++test('valid DSM NaN rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'dsm',b=>b.writeFloatLE(NaN,0));await rejects(f,'DSM_INVALID_VALUES_MUST_REMAIN_NAN');});
++test('incomplete derivative neighborhood rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'hvalid',b=>b[0]=0);await replaceAsset(f,'dsm',b=>b.writeFloatLE(NaN,0));await rejects(f,'DSM_USE_HAS_INCOMPLETE_NEIGHBORHOOD');});
++test('edge derivative neighborhood rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'huse',b=>{b.fill(0);b[2]=1;});await rejects(f,'DSM_USE_NEIGHBORHOOD_OUTSIDE_GRID');});
++test('masked NaN permitted only with no DEM use there',async()=>{const f=await fixture({height:true});await replaceAsset(f,'hvalid',b=>b[0]=0);await replaceAsset(f,'dsm',b=>b.writeFloatLE(NaN,0));await replaceAsset(f,'huse',b=>b.fill(0));const r=await verifyCandidateFiles(f.m,{root:f.root});assert.equal(r.layers[0].height.invalidPixels,1);assert.equal(r.layers[0].height.usablePixels,0);});
++
++test('invalid baseline cannot fill source gaps',async()=>{const f=await fixture();await replaceAsset(f,'bvalid',b=>b[0]=0);await rejects(f,'BASEMAP_MUST_HAVE_VALID_COMPLETE_COVERAGE');});
++test('runtime derivative certification cannot be fabricated',async()=>{const f=await fixture({height:true});f.m.layers[0].height.neighborhoodContract='CURRENT_RENDERER_CERTIFIED';assert.throws(()=>validateCandidateManifest(f.m),/RUNTIME_NEIGHBORHOOD_NOT_CERTIFIED/);});
++
++async function replaceUpstream(f,id,mutate,{rebindDerivation=true}={}){
++ const p=f.m.products.find(p=>p.id===id),u=f.m.receipts.find(r=>r.sha256===p.provenance.upstreamManifestSha256),input=JSON.parse(await readFile(path.join(f.root,u.file)));
++ mutate(input);const bytes=Buffer.from(JSON.stringify(input));u.sha256=hash(bytes);u.bytes=bytes.length;await writeFile(path.join(f.root,u.file),bytes);p.provenance.upstreamManifestSha256=u.sha256;
++ if(rebindDerivation){const d=f.m.receipts.find(r=>r.sha256===p.provenance.acquisitionReceiptSha256),r=JSON.parse(await readFile(path.join(f.root,d.file)));r.upstreamManifestSha256=u.sha256;const raw=Buffer.from(JSON.stringify(r));d.sha256=hash(raw);d.bytes=raw.length;p.provenance.acquisitionReceiptSha256=d.sha256;await writeFile(path.join(f.root,d.file),raw);}
++}
++test('overlapping known-water and unknown masks rejected',async()=>{const f=await fixture();await replaceAsset(f,'unknown',b=>b[0]=1);await rejects(f,'CLASSIFICATION_MASKS_MUST_PARTITION');});
++test('classification partition gaps rejected',async()=>{const f=await fixture();await replaceAsset(f,'unknown',b=>b[1]=0);await rejects(f,'CLASSIFICATION_MASKS_MUST_PARTITION');});
++test('unknown pixel preserves baseline and cannot select optical',async()=>{const f=await fixture();await replaceAsset(f,'select',b=>b[1]=1);await rejects(f,'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');});
++test('DSM use forbidden on unknown classification',async()=>{const f=await fixture({height:true});await replaceAsset(f,'land',b=>b[4]=0);await replaceAsset(f,'unknown',b=>b[4]=1);await rejects(f,'DSM_USE_REQUIRES_KNOWN_LAND_MASK');});
++test('missing upstream binding rejected',async()=>{const f=await fixture();delete f.m.products[0].provenance.upstreamManifestSha256;assert.throws(()=>validateCandidateManifest(f.m),/BOUND_UPSTREAM_AND_DERIVATION_HASHES_REQUIRED/);});
++test('unbound upstream manifest rejected',async()=>{const f=await fixture();f.m.products[0].provenance.upstreamManifestSha256='e'.repeat(64);assert.throws(()=>validateCandidateManifest(f.m),/UPSTREAM_MANIFEST_NOT_BOUND/);});
++test('multiple source URLs bound by hashed upstream manifest',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>{const extra=clone(r.sources[0]);extra.id='adjacent-tile';extra.sourceUrl='https://example.org/adjacent-cog';extra.sourceHashScope='BYTE_RANGES';extra.sourceWholeFileSha256=null;extra.rangeReceipts=[{offset:0,bytes:32,sha256:'a'.repeat(64)}];extra.grid.bounds=[127,37,128,38];extra.processingMethod='COG_WINDOW_RESAMPLE';r.sources.push(extra);});assert.equal((await verifyCandidateFiles(f.m,{root:f.root})).productionAdmitted,false);});
++test('upstream CRS/grid omission rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>delete r.sources[0].grid.crs);await rejects(f,'UPSTREAM_CRS_GRID_REQUIRED');});
++test('upstream license omission rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>delete r.sources[0].license);await rejects(f,'SOURCE_CREDIT_REQUIRED');});
++test('upstream processing omission rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>delete r.sources[0].processingMethod);await rejects(f,'UPSTREAM_PROCESSING_METHOD_REQUIRED');});
++test('new upstream manifest cannot evade derivation receipt binding',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources[0].sourceUrl='https://example.org/changed',{rebindDerivation:false});await rejects(f,'DERIVATION_RECEIPT_PROVENANCE_MISMATCH');});
++test('required unknown mask cannot be omitted',async()=>{const f=await fixture();delete f.m.layers[0].unknownMaskProductId;assert.throws(()=>validateCandidateManifest(f.m),/LAYER_PRODUCT_MISSING/);});
++test('DSM use forbidden on known water',async()=>{const f=await fixture({height:true});await replaceAsset(f,'huse',b=>{b.fill(0);b[0]=1;});await rejects(f,'DSM_USE_REQUIRES_KNOWN_LAND_MASK');});
++test('hashed upstream manifest tampering rejected',async()=>{const f=await fixture();const p=f.m.products[0],u=f.m.receipts.find(r=>r.sha256===p.provenance.upstreamManifestSha256);const b=await readFile(path.join(f.root,u.file));b[b.length-2]^=1;await writeFile(path.join(f.root,u.file),b);await rejects(f,'ASSET_ACTUAL_HASH_MISMATCH');});
++test('empty upstream source list rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources=[]);await rejects(f,'UPSTREAM_SOURCES_REQUIRED');});
++test('duplicate upstream source IDs rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources.push(clone(r.sources[0])));await rejects(f,'UPSTREAM_SOURCE_ID_INVALID');});
+diff --git a/README.md b/README.md
+new file mode 100644
+--- /dev/null
++++ b/README.md
+@@ -0,0 +1,84 @@
++# Isolated derived-source candidate validator
++
++This directory is an isolated candidate implementation. Its scope excludes production runtime files: existing source contracts, renderer, Studio, generated Vulkan variants and deployment image are unchanged. Publishing these candidate files does not enable runtime behavior. It performs no network access, rendering or production admission.
++
++## Files and checks
++
++- `derived_source_manifest.mjs`: structural and local-byte verification.
++- `derived_source_manifest.test.mjs`: 45 focused synthetic tests, separate from old project PASS suites. All 45 current tests passed with zero failures, skips or cancellations after the final partition/provenance changes because those changes affect shared fixtures and validation.
++- `focused-tests.tap`: historical pre-revision receipt, 29 passed. Intermediate changed-test receipts are `changed-focused-tests.tap`, `changed-focused-extra-tests.tap`, and `changed-report-field-test.tap`. The final current receipt is `final-candidate-tests.txt`: 45 total, 45 passed, 0 failed. Its module SHA-256 is `273223357ac39273419e67100b9072e7ae7bcbc835e42b9279bd136958547e5b`. No unrelated project suites ran.
++- `implementation.patch`: standalone new-file patch for review; not applied to repository.
++
++Run `node --test --test-reporter=tap derived_source_manifest.test.mjs`. Import `validateCandidateManifest` for structural checking, or await `verifyCandidateFiles(manifest, {root})` for file/hash/composition checks. The verifier never writes source assets. It limits candidate assets plus receipts to 512 MiB by default and supports a smaller `maxTotalBytes`.
++
++A successful result is always `QUALIFICATION_REQUIRED`. It reports structural/byte checks separately and sets `productionAdmitted`, `renderAllowed`, and `imageBuildAllowed` to false. No acceptance field can be supplied to change that. Existing schemas are rejected rather than reinterpreted.
++
++## Candidate contract
++
++Top-level fields are strictly: schema `WORLD_ENGINE_DERIVED_SOURCE_CANDIDATE_V1`, purpose `QUALIFICATION_ONLY`, assets, receipts, products, layers, qualification. Qualification must remain `PENDING` with nonempty missingChecks.
++
++Assets are raw, independently hashed rasters with id, relative file, sha256, bytes, encoding, dimensions `[width,height]`, pixel-edge bounds `[west,south,east,north]`, and crs `EPSG:4326`. Supported encodings are RGB8, MASK8 (binary 0/1), and F32LE. Dimensions must not exceed 4096. No PNG/NPZ decoding is hidden in this module; the acquisition/preparation worker must explicitly export raw bytes and preserve decoding/resampling receipts. Pixel edges, not sample-center bounds, are required. Parent derivative inputs and masks must have identical grids.
++
++Receipts are local JSON files referenced by file, sha256 and bytes. Each product now binds both an acquisition/derivation receipt hash and a separate upstreamManifestSha256. The derivation receipt binds schema `WORLD_ENGINE_LOCAL_DERIVATION_RECEIPT_V1`, productKind, derivedArtifactSha256, upstreamManifestSha256, resampling and colorMapping. Missing, unbound, tampered or mismatched upstream-manifest hashes are rejected.
++
++The upstream JSON schema is `WORLD_ENGINE_DERIVED_SOURCE_INPUT_MANIFEST_V1`, with completeness `ALL_DECLARED_UPSTREAM_INPUTS` and a nonempty sources array. List every actual input to the mosaic or mask, not a single representative tile. Each source records a unique id, HTTPS sourceUrl, license, attribution, sourceHashScope, sourceWholeFileSha256, CRS/grid, and processingMethod. Raster grids require dimensions and AREA/POINT pixel interpretation; vector sources have null dimensions/pixel interpretation rather than invented pixels. BYTE_RANGES inputs additionally require rangeReceipts `{offset,bytes,sha256}` and a null whole-file hash. Processing methods are EXACT_SOURCE_DECODE, COG_WINDOW_RESAMPLE, MASK_DERIVATION or GEOGRAPHIC_MASKED_COMPOSITION. The 82-tile case can therefore bind all tile URLs and their individual evidence.
++
++Products bind id, kind, classification, assetId and provenance. Provenance contains acquisitionReceiptSha256, upstreamManifestSha256, resampling and colorMapping. The verifier checks the actual local hashes and consistency of those bindings. It cannot prove an author did not omit an upstream source, verify remote acquisition authenticity, or reproduce upstream resampling; source-list completeness and authenticity explicitly remain qualification work. Never invent a whole-file digest from partial COG access.
++
++Supported product kinds/classifications:
++
++- OPTICAL_RGB / OPTICAL_RGB_NOT_BAKED
++- BAKED_BASEMAP_RGB / BAKED_BASEMAP_NOT_OPTICAL
++- DSM / REAL_DSM_METRES
++- VALIDITY_MASK / SOURCE_VALIDITY
++- KNOWN_LAND_MASK / KNOWN_LAND
++- KNOWN_WATER_MASK / KNOWN_WATER
++- UNKNOWN_MASK / UNKNOWN_CLASSIFICATION
++- SELECTION_MASK / SOURCE_SELECTION
++- DSM_USE_MASK / COMPLETE_DSM_NEIGHBORHOOD
++
++Resampling metadata is limited to NONE, NEAREST, BILINEAR or AREA_MEAN_VALID_ONLY. Color mapping must be explicitly described. These are recorded operations, not assertions that the verifier independently reproduced them. The final composite, however, is checked pixel-for-pixel against its supplied real-source derivatives.
++
++## RGB composition and water handling
++
++One overview layer is required; one regional layer may be added. Each identifies rgbAssetId, opticalProductId, baselineProductId, baselineValidityProductId, opticalValidityProductId, knownLandMaskProductId, knownWaterMaskProductId, unknownMaskProductId and selectionProductId.
++
++Policies must be:
++
++- composition: EXACT_MASK_SELECT_REAL_RGB
++- waterPolicy: PRESERVE_REAL_BASEMAP
++- invalidOpticalLandPolicy: PRESERVE_BASEMAP_AND_BLOCK_ADMISSION
++
++The three classification masks are required, binary, mutually exclusive and exhaustive: knownLand + knownWater + unknown must equal one at every pixel. A wetland or class0 pixel may remain unknown; it must not be inferred to be water. The selection mask must equal optical validity AND knownLand, for every pixel. The output must copy exactly the selected optical derivative pixel or the baseline derivative pixel. Every baseline pixel must be valid. No inpainting, silent recoloring, unknown alpha behavior or fabricated optical detail is accepted.
++
++The audit separately counts knownLandPixels, knownWaterPixels, unknownPixels, invalidOpticalKnownLandPixels and opticalPixels. Known water and unknown both preserve the real BMNG derivative, but unknown is never reported as verified water. Invalid optical known-land remains an explicit unresolved count, even when the candidate display preserves baseline RGB. No silent source admission is possible. Even zero gaps do not grant admission. A generalized shoreline mask, including Natural Earth 1:10-million geometry, does not establish subpixel shoreline accuracy. This validator verifies how a provided mask is used, not its geographical truth.
++
++## Height handling
++
++An optional layer.height binds dsmProductId, validityProductId and useMaskProductId. It requires metre Float32 samples with scale 1, offset 0, invalidPayload NAN and outsidePolicy NO_DEM_KEEP_BASELINE_LIGHTING.
++
++Missing samples must remain NaN under validity 0. Finite zero is accepted only under validity 1, as a declared measured zero. Validity1 with NaN or invalidity 0 with numeric zero is rejected.
++
++The use mask may enable height only on knownLand, never knownWater or unknown, and only where the entire declared square neighborhood is inside the grid and valid. An integral invalid-sample map makes neighborhood checking linear in raster size. The contract deliberately says DECLARED_SQUARE_PENDING_RUNTIME_BINDING: the validator does not claim the current renderer's derivative kernel has been bound. Actual integration must derive a conservative sample radius from the renderer's bilinear height sampling, 3×3 footprint taps, central derivatives, per-frame sampling step and grid spacing. It must reject any frame whose required radius exceeds the admitted neighborhood. An arbitrary small radius is not production certification.
++
++## Exact remaining integration changes
++
++Repository paths below begin `world-simulation-shorts-engine/`.
++
++1. Add a separate opt-in derived-source path beside `recovery/universal-presentation-v2/region_source.mjs`. Preserve the old exact-native-crop, single-source, no-resampling contract unchanged. New source qualification must verify actual imagery, mask semantics, full coverage, shoreline suitability, LOD sampling, color mapping and seams, not just this candidate schema.
++2. Extend `capture_presentation.mjs` sourceRowsFor, prepareRuntimeRequest, verifyPreparedRuntimeRequest and loopback aliases to bind/hash all qualified RGB/mask/height/receipt assets. Preserve private-root and safe-file restrictions.
++3. Extend `studio_adapter.py` source admission/material-file validation and cache identity for the new opt-in family. No client-provided PASS or arbitrary file URL may authorize it.
++4. In `presentation_runtime.mjs`, pass qualified contextTerrain/height inputs, replace fixed LOD 1 only for the new path, and check active source coverage/gutters. Update source evidence; do not keep hardcoded demEnabled:false or fabricated full-source claims. `presentation_plan.mjs` currently disables DEM.
++5. Current renderer RGB sampling ignores alpha. CPU-composed RGB products can use its existing regional+context sampler; raw masked RGBA cannot. A new accurate treatment/classification is needed; optical is not BAKED_RELIEF. CURRENT still uses existing relief proxy unless a real height path is enabled.
++6. Current height contract requires complete finite R32F and its demWeight tests only rectangular boundaries. Add a separately qualified validity-mask path and full-neighborhood rejection before enabling sparse/coastal DSM. Do not feed these NaN-bearing candidate grids to the current renderer.
++7. Reconcile pinned/generated Vulkan source derivation and manifests deliberately before packaging; do not overwrite historical generated variants or run the old builder blindly. No image build has been authorized by this validator.
++
++## Two-layer sizing evidence
++
++Using the preserved 600 viewport bounds and 1× output sampling plus two-pixel gutters, the first segment would need 2980×4229 as one atlas, above 4096. A 341-sample/degree overview plus 1389×1973 regional atlas for frames 55–149 avoids that limit. Other segment atlas minima are 2421×3116,1696×2336 and 1357×1924. These are numerical sizes, not a visual-quality pass or 2× sampling guarantee.
++
++Safe schedule: overview-only until the regional atlas fully covers the current viewport and gutter; blend only where both layers cover; regional-only afterward. Existing renderer setTerrainLod supports two geographic RGB sources and correctly rejects regional-only rendering outside the regional extent. It still needs formal source admission and runtime wiring.
++
++## Limits of this local deliverable
++
++Tests use synthetic fixtures solely to exercise rejection and mask behavior. No actual acquired WorldCover mosaics or DSM atlases were qualified by these tests. Acquisition receipt authenticity, original-source range hashes, upstream resampling, cloud detection, historical accuracy, complete shoreline/water semantics, optical visual quality, renderer compatibility and runtime derivative radii remain unfinished. This directory does not claim deployment readiness.

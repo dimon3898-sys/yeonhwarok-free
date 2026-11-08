@@ -1,0 +1,19 @@
+# Bounded source acquisition and validity audit
+
+The Python helpers read public COG headers and selected overview/window byte ranges with normal TLS certificate verification. They never ask for account credentials, disable TLS validation, download whole TIFFs, render video or start a GPU.
+
+`bounded_cog.py` rejects HTTP responses unless status 206, Content-Range, length and recorded ETag match. Range bytes are cached with individual SHA256 receipts. The byte limits are 80 MiB per source and 1 GiB per acquisition process, initialized from existing cache size. Concurrent-process aggregate cache size is separately monitored and recorded; a per-process counter is not an atomic cross-process quota. Successful tiles are reused; failed transient HTTP 503 inputs receive one bounded retry, with the original failure record retained.
+
+`acquire_land_overviews.py` uses official catalog URLs and the preserved-frame LOD plan. It reads four uint16 bands on target 256/512/1024 grids using documented GDAL average resampling over available COG overviews. It preserves masks and raw values; audit PNGs use one fixed raw/3000 display mapping and magenta for invalid pixels. This is source-data inspection, not engine rendering. Whole-file source hashes remain null because access is partial.
+
+`acquire_water_classification.py` uses the official 2021 categorical-map URL contract and the official grid catalog specified by the 2021 Product User Manual. It verifies 36000² EPSG:4326, native 1/12000-degree alignment, and uses nearest-neighbor categorical resampling. Class 80 means classified permanent water ( >9 months/year); class 0 is unknown/NoData, not ocean. Wetlands 90 remain separately uncertain for compositing. Labels are an audit aid, not proof of historical/tidal shorelines, all-native-subpixel water, or absence of shadow misclassification.
+
+`audit_classified_masks.py` preserves separate classified land, permanent water and unknown/wetland masks. Invalid optical pixels labeled land remain blockers to detailed-source admission. `inspect_mask_disagreements.py` examines only those new disagreement locations at native resolution; it does not recreate previous PASS suites. Early native inspection confirms substantial true source NoData in several coastal disagreement windows.
+
+`audit_overview_masks.py` is an independent coarse comparison against the previously hash-verified Natural Earth source. Its 0.02-degree buffered interior test cannot certify precise shorelines. Neither audit silently promotes unknown to ocean or invents missing elevation.
+
+Source acquisition progress is a partial checkpoint while remaining tiles run. Pixel validity at requested overview scale does not establish scientific cloud-free status. Complete visual mosaic/seam inspection, water policy, actual DSM qualification, registered atlases and production integration are still pending. All production/render/build admission flags remain false.
+
+The separate source-candidate-contract directory is new isolated validator code, not an enabled production path. Its final 45 focused synthetic tests passed. It checks derivative bytes, tri-state masks and bound multi-source provenance, but does not confer scientific source acceptance. Existing runtime, image, CHECKPOINT and prior PASS results remain unchanged.
+
+Official sources: https://esa-worldcover.org/en/data-access ; https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/docs/WorldCover_PUM_V2.0.pdf ; https://github.com/ESA-WorldCover/esa-worldcover-datasets/blob/main/scripts/download.py . Source license: CC-BY 4.0. Attribution: ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021) processed by ESA WorldCover consortium. Derived previews change display mapping only; classification labels are not recolored into geographic facts.

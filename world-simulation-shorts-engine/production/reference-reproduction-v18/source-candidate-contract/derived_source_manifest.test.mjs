@@ -1,0 +1,84 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,writeFile,readFile,symlink} from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {SCHEMA,validateCandidateManifest,verifyCandidateFiles} from './derived_source_manifest.mjs';
+const hash=b=>createHash('sha256').update(b).digest('hex'),clone=structuredClone;
+const classifications={OPTICAL_RGB:'OPTICAL_RGB_NOT_BAKED',BAKED_BASEMAP_RGB:'BAKED_BASEMAP_NOT_OPTICAL',VALIDITY_MASK:'SOURCE_VALIDITY',KNOWN_LAND_MASK:'KNOWN_LAND',KNOWN_WATER_MASK:'KNOWN_WATER',UNKNOWN_MASK:'UNKNOWN_CLASSIFICATION',SELECTION_MASK:'SOURCE_SELECTION',DSM:'REAL_DSM_METRES',DSM_USE_MASK:'COMPLETE_DSM_NEIGHBORHOOD'};
+async function fixture({height=false}={}){
+ const root=await mkdtemp(path.join(os.tmpdir(),'source-candidate-test-'));
+ const m={schema:SCHEMA,purpose:'QUALIFICATION_ONLY',assets:[],receipts:[],products:[],layers:[],qualification:{state:'PENDING',missingChecks:['Source qualification and cloud/shoreline review','LOD runtime integration and production verification']}};
+ async function asset(id,bytes,encoding){const data=Buffer.from(bytes);const a={id,file:id+'.raw',sha256:hash(data),bytes:data.length,encoding,dimensions:[3,3],bounds:[126,37,127,38],crs:'EPSG:4326'};m.assets.push(a);await writeFile(path.join(root,a.file),data);return a;}
+ async function product(id,kind,bytes,encoding){
+  const a=await asset(id,bytes,encoding);
+  const input={id:'source-'+id,sourceUrl:'https://example.org/verified-source/'+id,license:'CC-BY-4.0',attribution:'Synthetic focused-test source, not production data',sourceHashScope:'WHOLE_FILE',sourceWholeFileSha256:hash(Buffer.from('synthetic original '+id)),grid:{kind:'RASTER',crs:'EPSG:4326',bounds:[126,37,127,38],dimensions:[3,3],pixelInterpretation:'AREA'},processingMethod:'EXACT_SOURCE_DECODE'};
+  const upstream={schema:'WORLD_ENGINE_DERIVED_SOURCE_INPUT_MANIFEST_V1',completeness:'ALL_DECLARED_UPSTREAM_INPUTS',sources:[input]};
+  const inputRaw=Buffer.from(JSON.stringify(upstream)),u={file:id+'.inputs.json',sha256:hash(inputRaw),bytes:inputRaw.length};m.receipts.push(u);await writeFile(path.join(root,u.file),inputRaw);
+  const v={upstreamManifestSha256:u.sha256,resampling:'NONE',colorMapping:'No color change; synthetic source fixture only'};
+  const receipt={schema:'WORLD_ENGINE_LOCAL_DERIVATION_RECEIPT_V1',productKind:kind,derivedArtifactSha256:a.sha256,...v};const raw=Buffer.from(JSON.stringify(receipt));const r={file:id+'.receipt.json',sha256:hash(raw),bytes:raw.length};m.receipts.push(r);await writeFile(path.join(root,r.file),raw);m.products.push({id,kind,classification:classifications[kind],assetId:a.id,provenance:{...v,acquisitionReceiptSha256:r.sha256}});
+ }
+
+ const optical=Buffer.from(Array.from({length:27},(_,i)=>100+i)),base=Buffer.from(Array.from({length:27},(_,i)=>10+i)),valid=Buffer.from([1,1,1,1,0,1,1,1,1]),land=Buffer.from([0,0,1,1,1,1,1,1,1]),select=Buffer.from(valid.map((v,i)=>v&&land[i]?1:0));
+ const out=Buffer.from(base);for(let i=0;i<9;i++)if(select[i])optical.copy(out,i*3,i*3,i*3+3);
+ await product('optical','OPTICAL_RGB',optical,'RGB8');await product('baseline','BAKED_BASEMAP_RGB',base,'RGB8');await product('bvalid','VALIDITY_MASK',Buffer.alloc(9,1),'MASK8');await product('valid','VALIDITY_MASK',valid,'MASK8');await product('land','KNOWN_LAND_MASK',land,'MASK8');await product('water','KNOWN_WATER_MASK',Buffer.from([1,0,0,0,0,0,0,0,0]),'MASK8');await product('unknown','UNKNOWN_MASK',Buffer.from([0,1,0,0,0,0,0,0,0]),'MASK8');await product('select','SELECTION_MASK',select,'MASK8');await asset('output',out,'RGB8');
+ const l={role:'overview',rgbAssetId:'output',opticalProductId:'optical',baselineProductId:'baseline',baselineValidityProductId:'bvalid',opticalValidityProductId:'valid',knownLandMaskProductId:'land',knownWaterMaskProductId:'water',unknownMaskProductId:'unknown',selectionProductId:'select',composition:'EXACT_MASK_SELECT_REAL_RGB',waterPolicy:'PRESERVE_REAL_BASEMAP',invalidOpticalLandPolicy:'PRESERVE_BASEMAP_AND_BLOCK_ADMISSION'};m.layers.push(l);
+ if(height){const h=Buffer.alloc(36);for(let i=0;i<9;i++)h.writeFloatLE(i===4?0:10+i,i*4);await product('dsm','DSM',h,'F32LE');await product('hvalid','VALIDITY_MASK',Buffer.alloc(9,1),'MASK8');const use=Buffer.alloc(9);use[4]=1;await product('huse','DSM_USE_MASK',use,'MASK8');l.height={dsmProductId:'dsm',validityProductId:'hvalid',useMaskProductId:'huse',invalidPayload:'NAN',unit:'m',scale:1,offset:0,neighborhoodRadiusSamples:1,neighborhoodContract:'DECLARED_SQUARE_PENDING_RUNTIME_BINDING',outsidePolicy:'NO_DEM_KEEP_BASELINE_LIGHTING'};}
+ return{root,m};
+}
+async function replaceAsset(f,id,mutate){const a=f.m.assets.find(a=>a.id===id),b=await readFile(path.join(f.root,a.file));mutate(b);await writeFile(path.join(f.root,a.file),b);a.sha256=hash(b);const p=f.m.products.find(p=>p.assetId===id);if(p){const r=f.m.receipts.find(r=>r.sha256===p.provenance.acquisitionReceiptSha256);const v=JSON.parse(await readFile(path.join(f.root,r.file)));v.derivedArtifactSha256=a.sha256;const raw=Buffer.from(JSON.stringify(v));r.sha256=hash(raw);r.bytes=raw.length;p.provenance.acquisitionReceiptSha256=r.sha256;await writeFile(path.join(f.root,r.file),raw);}}
+const rejects=async(f,code)=>assert.rejects(()=>verifyCandidateFiles(f.m,{root:f.root}),e=>e.code===code);
+
+test('valid byte composition remains blocked and reports invalid optical land',async()=>{const f=await fixture(),before=JSON.stringify(f.m),r=await verifyCandidateFiles(f.m,{root:f.root});assert.equal(r.status,'QUALIFICATION_REQUIRED');assert.equal(r.productionAdmitted,false);assert.equal(r.renderAllowed,false);assert.equal(r.imageBuildAllowed,false);assert.equal(r.layers[0].opticalPixels,6);assert.equal(r.layers[0].invalidOpticalKnownLandPixels,1);assert.equal(r.layers[0].knownLandPixels,7);assert.equal(r.layers[0].knownWaterPixels,1);assert.equal(r.layers[0].unknownPixels,1);assert.equal(JSON.stringify(f.m),before);});
+test('two layers accepted only as candidate',async()=>{const f=await fixture();f.m.layers.push({...clone(f.m.layers[0]),role:'regional'});assert.equal((await verifyCandidateFiles(f.m,{root:f.root})).layers.length,2);});
+test('legacy and non-opt-in schemas rejected',async()=>{const f=await fixture();f.m.schema='WORLD_ENGINE_REGION_SOURCE_CATALOG_V2';assert.throws(()=>validateCandidateManifest(f.m),/CANDIDATE_ONLY_SCHEMA_REQUIRED/);});
+test('admission flag cannot be injected',async()=>{const f=await fixture();f.m.productionAdmitted=true;assert.throws(()=>validateCandidateManifest(f.m),/MANIFEST_UNKNOWN_FIELD/);});
+test('qualification cannot be promoted to PASS',async()=>{const f=await fixture();f.m.qualification.state='PASS';assert.throws(()=>validateCandidateManifest(f.m),/QUALIFICATION_MUST_REMAIN_PENDING/);});
+test('optical cannot be labeled baked relief',async()=>{const f=await fixture();f.m.products[0].classification='BAKED HILLSHADE';assert.throws(()=>validateCandidateManifest(f.m),/TRUTHFUL_SOURCE_CLASSIFICATION_REQUIRED/);});
+test('baseline cannot masquerade as optical product',async()=>{const f=await fixture();f.m.layers[0].baselineProductId='optical';assert.throws(()=>validateCandidateManifest(f.m),/LAYER_PRODUCT_KIND_MISMATCH/);});
+test('oversized atlas rejected',async()=>{const f=await fixture();f.m.assets[0].dimensions=[4097,3];assert.throws(()=>validateCandidateManifest(f.m),/ATLAS_MAX_4096/);});
+test('partial upstream hash cannot pretend to be whole file',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources[0].sourceHashScope='BYTE_RANGES');await rejects(f,'PARTIAL_HASH_MUST_NOT_CLAIM_WHOLE_SOURCE');});
+test('path traversal rejected before IO',async()=>{const f=await fixture();f.m.assets[0].file='../escape';assert.throws(()=>validateCandidateManifest(f.m),/SAFE_RELATIVE_ASSET_PATH_REQUIRED/);});
+test('asset symlink rejected',async()=>{const f=await fixture();await symlink('optical.raw',path.join(f.root,'link.raw'));f.m.assets[0].file='link.raw';await rejects(f,'ASSET_SYMLINK_FORBIDDEN');});
+test('actual byte hash mismatch rejected',async()=>{const f=await fixture();await writeFile(path.join(f.root,'optical.raw'),Buffer.alloc(27));await rejects(f,'ASSET_ACTUAL_HASH_MISMATCH');});
+test('actual byte length mismatch rejected',async()=>{const f=await fixture();await writeFile(path.join(f.root,'optical.raw'),Buffer.alloc(1));await rejects(f,'ASSET_ACTUAL_SIZE_MISMATCH');});
+test('unbound acquisition receipt rejected',async()=>{const f=await fixture();f.m.products[0].provenance.acquisitionReceiptSha256='f'.repeat(64);assert.throws(()=>validateCandidateManifest(f.m),/PROVENANCE_RECEIPT_NOT_BOUND/);});
+test('receipt must bind derivative product and provenance',async()=>{const f=await fixture();f.m.products[0].provenance.colorMapping='Changed without receipt';await rejects(f,'DERIVATION_RECEIPT_PROVENANCE_MISMATCH');});
+test('grid registration mismatch rejected',async()=>{const f=await fixture();f.m.assets[0].bounds=[125,37,126,38];assert.throws(()=>validateCandidateManifest(f.m),/LAYER_GRIDS_MUST_MATCH/);});
+test('selected optical NoData rejected',async()=>{const f=await fixture();await replaceAsset(f,'select',b=>b[4]=1);await rejects(f,'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');});
+test('selected optical water/unclassified pixel rejected',async()=>{const f=await fixture();await replaceAsset(f,'select',b=>b[0]=1);await rejects(f,'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');});
+test('inpainted or recolored output rejected',async()=>{const f=await fixture();await replaceAsset(f,'output',b=>b[12]=200);await rejects(f,'COMPOSITE_IS_NOT_EXACT_REAL_SOURCE_SELECTION');});
+test('nonbinary mask rejected',async()=>{const f=await fixture();await replaceAsset(f,'land',b=>b[0]=255);await rejects(f,'MASK_MUST_BE_BINARY_0_1');});
+test('byte budget enforced',async()=>{const f=await fixture();await assert.rejects(()=>verifyCandidateFiles(f.m,{root:f.root,maxTotalBytes:1}),/CANDIDATE_BYTE_BUDGET_EXCEEDED/);});
+test('valid measured zero DSM is distinguished from missing data',async()=>{const f=await fixture({height:true});const r=await verifyCandidateFiles(f.m,{root:f.root});assert.equal(r.layers[0].height.measuredZeroPixels,1);assert.equal(r.layers[0].height.usablePixels,1);assert.equal(r.productionAdmitted,false);});
+test('missing DSM encoded as zero rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'hvalid',b=>b[4]=0);await rejects(f,'DSM_INVALID_VALUES_MUST_REMAIN_NAN');});
+test('valid DSM NaN rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'dsm',b=>b.writeFloatLE(NaN,0));await rejects(f,'DSM_INVALID_VALUES_MUST_REMAIN_NAN');});
+test('incomplete derivative neighborhood rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'hvalid',b=>b[0]=0);await replaceAsset(f,'dsm',b=>b.writeFloatLE(NaN,0));await rejects(f,'DSM_USE_HAS_INCOMPLETE_NEIGHBORHOOD');});
+test('edge derivative neighborhood rejected',async()=>{const f=await fixture({height:true});await replaceAsset(f,'huse',b=>{b.fill(0);b[2]=1;});await rejects(f,'DSM_USE_NEIGHBORHOOD_OUTSIDE_GRID');});
+test('masked NaN permitted only with no DEM use there',async()=>{const f=await fixture({height:true});await replaceAsset(f,'hvalid',b=>b[0]=0);await replaceAsset(f,'dsm',b=>b.writeFloatLE(NaN,0));await replaceAsset(f,'huse',b=>b.fill(0));const r=await verifyCandidateFiles(f.m,{root:f.root});assert.equal(r.layers[0].height.invalidPixels,1);assert.equal(r.layers[0].height.usablePixels,0);});
+
+test('invalid baseline cannot fill source gaps',async()=>{const f=await fixture();await replaceAsset(f,'bvalid',b=>b[0]=0);await rejects(f,'BASEMAP_MUST_HAVE_VALID_COMPLETE_COVERAGE');});
+test('runtime derivative certification cannot be fabricated',async()=>{const f=await fixture({height:true});f.m.layers[0].height.neighborhoodContract='CURRENT_RENDERER_CERTIFIED';assert.throws(()=>validateCandidateManifest(f.m),/RUNTIME_NEIGHBORHOOD_NOT_CERTIFIED/);});
+
+async function replaceUpstream(f,id,mutate,{rebindDerivation=true}={}){
+ const p=f.m.products.find(p=>p.id===id),u=f.m.receipts.find(r=>r.sha256===p.provenance.upstreamManifestSha256),input=JSON.parse(await readFile(path.join(f.root,u.file)));
+ mutate(input);const bytes=Buffer.from(JSON.stringify(input));u.sha256=hash(bytes);u.bytes=bytes.length;await writeFile(path.join(f.root,u.file),bytes);p.provenance.upstreamManifestSha256=u.sha256;
+ if(rebindDerivation){const d=f.m.receipts.find(r=>r.sha256===p.provenance.acquisitionReceiptSha256),r=JSON.parse(await readFile(path.join(f.root,d.file)));r.upstreamManifestSha256=u.sha256;const raw=Buffer.from(JSON.stringify(r));d.sha256=hash(raw);d.bytes=raw.length;p.provenance.acquisitionReceiptSha256=d.sha256;await writeFile(path.join(f.root,d.file),raw);}
+}
+test('overlapping known-water and unknown masks rejected',async()=>{const f=await fixture();await replaceAsset(f,'unknown',b=>b[0]=1);await rejects(f,'CLASSIFICATION_MASKS_MUST_PARTITION');});
+test('classification partition gaps rejected',async()=>{const f=await fixture();await replaceAsset(f,'unknown',b=>b[1]=0);await rejects(f,'CLASSIFICATION_MASKS_MUST_PARTITION');});
+test('unknown pixel preserves baseline and cannot select optical',async()=>{const f=await fixture();await replaceAsset(f,'select',b=>b[1]=1);await rejects(f,'SELECTION_MUST_EQUAL_VALID_OPTICAL_AND_LAND');});
+test('DSM use forbidden on unknown classification',async()=>{const f=await fixture({height:true});await replaceAsset(f,'land',b=>b[4]=0);await replaceAsset(f,'unknown',b=>b[4]=1);await rejects(f,'DSM_USE_REQUIRES_KNOWN_LAND_MASK');});
+test('missing upstream binding rejected',async()=>{const f=await fixture();delete f.m.products[0].provenance.upstreamManifestSha256;assert.throws(()=>validateCandidateManifest(f.m),/BOUND_UPSTREAM_AND_DERIVATION_HASHES_REQUIRED/);});
+test('unbound upstream manifest rejected',async()=>{const f=await fixture();f.m.products[0].provenance.upstreamManifestSha256='e'.repeat(64);assert.throws(()=>validateCandidateManifest(f.m),/UPSTREAM_MANIFEST_NOT_BOUND/);});
+test('multiple source URLs bound by hashed upstream manifest',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>{const extra=clone(r.sources[0]);extra.id='adjacent-tile';extra.sourceUrl='https://example.org/adjacent-cog';extra.sourceHashScope='BYTE_RANGES';extra.sourceWholeFileSha256=null;extra.rangeReceipts=[{offset:0,bytes:32,sha256:'a'.repeat(64)}];extra.grid.bounds=[127,37,128,38];extra.processingMethod='COG_WINDOW_RESAMPLE';r.sources.push(extra);});assert.equal((await verifyCandidateFiles(f.m,{root:f.root})).productionAdmitted,false);});
+test('upstream CRS/grid omission rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>delete r.sources[0].grid.crs);await rejects(f,'UPSTREAM_CRS_GRID_REQUIRED');});
+test('upstream license omission rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>delete r.sources[0].license);await rejects(f,'SOURCE_CREDIT_REQUIRED');});
+test('upstream processing omission rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>delete r.sources[0].processingMethod);await rejects(f,'UPSTREAM_PROCESSING_METHOD_REQUIRED');});
+test('new upstream manifest cannot evade derivation receipt binding',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources[0].sourceUrl='https://example.org/changed',{rebindDerivation:false});await rejects(f,'DERIVATION_RECEIPT_PROVENANCE_MISMATCH');});
+test('required unknown mask cannot be omitted',async()=>{const f=await fixture();delete f.m.layers[0].unknownMaskProductId;assert.throws(()=>validateCandidateManifest(f.m),/LAYER_PRODUCT_MISSING/);});
+test('DSM use forbidden on known water',async()=>{const f=await fixture({height:true});await replaceAsset(f,'huse',b=>{b.fill(0);b[0]=1;});await rejects(f,'DSM_USE_REQUIRES_KNOWN_LAND_MASK');});
+test('hashed upstream manifest tampering rejected',async()=>{const f=await fixture();const p=f.m.products[0],u=f.m.receipts.find(r=>r.sha256===p.provenance.upstreamManifestSha256);const b=await readFile(path.join(f.root,u.file));b[b.length-2]^=1;await writeFile(path.join(f.root,u.file),b);await rejects(f,'ASSET_ACTUAL_HASH_MISMATCH');});
+test('empty upstream source list rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources=[]);await rejects(f,'UPSTREAM_SOURCES_REQUIRED');});
+test('duplicate upstream source IDs rejected',async()=>{const f=await fixture();await replaceUpstream(f,'optical',r=>r.sources.push(clone(r.sources[0])));await rejects(f,'UPSTREAM_SOURCE_ID_INVALID');});
