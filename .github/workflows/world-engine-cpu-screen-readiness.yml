@@ -12,7 +12,7 @@ jobs:
   readiness:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
-      github.event.head_commit.message == 'WORLD_ENGINE_CPU_PRIVATE_INPUT_A2'
+      github.event.head_commit.message == 'WORLD_ENGINE_CPU_PRIVATE_APP_FOLDER_A3'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -31,3 +31,6 @@ jobs:
           6d3b1367ff113baf6a6d90a601f1f7c245cd1a5c824ba344bade3b7b0c44083a
           "$RUNNER_TEMP/private-transfer-probe.json"
 # No artifacts, cache, movie, production render, build, deployment, or old tests.
+
+# A2 cause resolved: input is now inside the existing scoped backup app folder.
+# A1 normal socket/browser PASS is reused, not rerun.
