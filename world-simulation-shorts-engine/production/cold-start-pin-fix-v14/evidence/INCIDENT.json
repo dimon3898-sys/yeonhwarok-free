@@ -1,0 +1,32 @@
+{
+  "schema": "WORLD_ENGINE_V13_COLD_START_INCIDENT",
+  "observedDateKST": "2026-11-08",
+  "workload": 5373,
+  "image": "capture-json-v13-42442147946",
+  "userScreenshot": "1794108804633.jpeg",
+  "screenshotSHA256": "985059e994cb95e75002ce7437df69179d51acc8f96c8c4c24e6932b962508d1",
+  "screenshotPod": "dep5373-6bc78c47c8-pjxhr",
+  "observedCurrentPod": "dep5373-6bc78c47c8-d7dfj",
+  "node": "wn702d2c79",
+  "driver": "580.126.09",
+  "cuda": "13.0.0",
+  "visibleError": "CrashLoopBackOff",
+  "event": "Back-off restarting failed container dep5373-0 in pod dep5373-6bc78c47c8-pjxhr_ns74a360e2(5bc0b977-aec8-4dd4-985d-484997f31b7e)",
+  "eventTimesKST": [
+    "12:33:01",
+    "12:33:17"
+  ],
+  "imagePull": "SUCCEEDED",
+  "terminalAndSSH": "DISABLED",
+  "applicationStdout": "UNAVAILABLE_FROM_UI",
+  "cause": "v13 inherited bootstrap.SOURCE_SHA differs from new runtime manifest; exact startup contract rejects offline before Studio or GPU",
+  "liveApplicationErrorCode": "NOT_RETRIEVED; not fabricated from offline result",
+  "offlineExactError": "COLD_START_MANIFEST_CONTRACT_INVALID",
+  "responsibility": "Work v13 packaging missed the bootstrap source pin update",
+  "invalidated": "v13 deployment readiness, not the ten JSON boundary tests or prior native data PASS",
+  "revalidationScope": "New cold-start pin, startup parent/child boundary, actual image ENTRYPOINT with no GPU/network and intentionally absent owner; old suites not rerun",
+  "userStopRequested": true,
+  "gpuStartsByWork": 0,
+  "rendersByWork": 0,
+  "deployStopsByWork": 0
+}
