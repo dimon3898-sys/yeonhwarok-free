@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {BMNG_PROFILE,EVIDENCE,evaluateSourceTone,evaluateCandidate,CANDIDATE_GLSL} from './bmng_ocean_candidate.mjs';
+const base=[.01,.03,.06],source=[.02,.04,.08],footprint={samples:9,knownLand:0,knownWater:9,unknown:0,valid:9};
+test('default disabled is exact legacy sea and does not require candidate inputs',()=>assert.deepEqual(evaluateCandidate({baselineSea:base}),base));
+test('whole valid known-water footprint permits candidate only when explicitly enabled',()=>assert.deepEqual(evaluateCandidate({enabled:true,source,baselineSea:base,footprint,landCoverage:0}),evaluateSourceTone(source)));
+test('unknown and mixed coast retain baseline',()=>{for(const f of [{...footprint,knownWater:8,unknown:1},{...footprint,knownWater:8,knownLand:1},{...footprint,valid:8}])assert.deepEqual(evaluateCandidate({enabled:true,source,baselineSea:base,footprint:f,landCoverage:0}),base);});
+test('even tiny nonzero land coverage retains baseline',()=>assert.deepEqual(evaluateCandidate({enabled:true,source,baselineSea:base,footprint,landCoverage:1e-12}),base));
+test('tri-state malformed footprint rejected',()=>assert.throws(()=>evaluateCandidate({enabled:true,source,baselineSea:base,footprint:{...footprint,unknown:1},landCoverage:0}),/PARTITION/));
+test('actual BMNG tonal range does not collapse to one response',()=>{const rows=[.005,.017,.055,.14,.28].map(y=>evaluateSourceTone([y,y,y]));assert.equal(new Set(rows.map(JSON.stringify)).size,5);});
+test('no resurrected procedural wave/glint/drift or nearshore band',()=>{for(const k of ['microStrength','glintStrength','driftRadiansPerSecond','nearshoreMix'])assert.equal(BMNG_PROFILE[k],0);assert.ok(!/sin\(|fwidth\(/.test(CANDIDATE_GLSL));});
+test('strict no-admission and color-space evidence',()=>{assert.equal(EVIDENCE.productionAdmitted,false);assert.equal(EVIDENCE.geographicDepthData,false);assert.equal(EVIDENCE.inputColorSpace,'SRGB_ENCODED_0_1');});
+test('invalid colors rejected and inputs unchanged',()=>{assert.throws(()=>evaluateSourceTone([NaN,0,0]));assert.throws(()=>evaluateSourceTone([1.1,0,0]));const before=structuredClone(source);evaluateSourceTone(source);assert.deepEqual(source,before);});
+test('fixed deterministic finite bounded results',()=>{for(let i=0;i<300;i++){const c=[(i%13)/13,(i%17)/17,(i%19)/19],a=evaluateSourceTone(c);assert.deepEqual(a,evaluateSourceTone(c));assert.ok(a.every(v=>Number.isFinite(v)&&v>=0&&v<=1));}});
