@@ -1,0 +1,50 @@
+name: WORLD ENGINE reference v18 changed-input diagnostics
+on:
+  push:
+    branches: [feat/reference-reproduction-v18-20261108]
+    paths: ['.github/workflows/world-engine-reference-v18-free.yml']
+permissions:
+  contents: read
+  packages: read
+concurrency:
+  group: world-engine-reference-v18-free
+  cancel-in-progress: false
+jobs:
+  changed-input-diagnostics:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE_V18_NEW_INPUT_DIAGNOSTICS_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            world-simulation-shorts-engine/production/reference-reproduction-v18
+            world-simulation-shorts-engine/production/korean-war-20s-detail-v2/render_clip_cpu.mjs
+      - name: Reuse established containerd image-store configuration
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json')
+          d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Read pinned existing image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: New-input sparse CPU diagnostics, no MP4 or GPU
+        run: python3 -B world-simulation-shorts-engine/production/reference-reproduction-v18/run_diagnostic.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference-v18-${{ github.run_id }}
+          path: ${{ runner.temp }}/reference-v18-evidence/
+          if-no-files-found: warn
+          retention-days: 90
