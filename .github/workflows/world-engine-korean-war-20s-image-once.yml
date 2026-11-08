@@ -1,0 +1,68 @@
+name: WORLD ENGINE Korean war 20s final image once
+on:
+  push:
+    branches: [deploy/korean-war-20s-20261109]
+    paths: ['.github/workflows/world-engine-korean-war-20s-image-once.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-korean-war-20s-final-image
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  package-image:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '3af1262fb4fdbc74dae40416c71efd91c90f31cd' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_KOREAN_WAR_20S_IMAGE_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Select preserved containerd image store without retries
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json')
+          d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Qualify new private installer with production ownership on CPU
+        run: |
+          sudo install -d -m0755 /var/lib/world-engine-installer-qualification
+          sudo env WORLD_ENGINE_TEST_UID=1000 WORLD_ENGINE_TEST_GID=1000 \
+            WORLD_ENGINE_TEST_ROOT=/var/lib/world-engine-installer-qualification \
+            WORLD_ENGINE_TEST_RESULT="$RUNNER_TEMP/korean-war-20s-private-fixture-result.json" \
+            python3 -B world-simulation-shorts-engine/production/korean-war-20s-deploy-20261109/private-package/verify_private_bundle.py
+      - name: Qualify, build once, verify backup restore, publish once
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORLD_ENGINE_EXPECTED_PREPARATION_HEAD: '3af1262fb4fdbc74dae40416c71efd91c90f31cd'
+          WORLD_ENGINE_BUILD_GATE_SHA256: '5227ca90c155f8e04c489eff6de664cc7d4366c20975cc105cbf11e89c226364'
+        run: python3 -B world-simulation-shorts-engine/production/korean-war-20s-deploy-20261109/build_once.py
+      - name: Preserve public build and backup proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: korean-war-20s-image-evidence-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/korean-war-20s-build-evidence/
+            ${{ runner.temp }}/korean-war-20s-private-fixture-result.json
+          if-no-files-found: warn
+          retention-days: 90
+# One exact-parent activation commit. Later checkpoint commits and reruns skip.
+# Public code-only additive image; private assets excluded from Docker context.
+# CPU installed-source / actual ENTRYPOINT missing-owner check only.
+# No GPU, capture, rendering, video encoding, gCube start or stop.
