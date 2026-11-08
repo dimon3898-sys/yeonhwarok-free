@@ -3,13 +3,15 @@ import numpy as np,rasterio
 from rasterio.enums import Resampling
 from PIL import Image
 from bounded_cog import RangeFile
+from cache_integrity import reusable_receipt
 P=pathlib.Path(__file__).parent;OUT=P/'land_overviews';OUT.mkdir(exist_ok=True)
-plan=json.loads((P/'SOURCE_LOD_ACQUISITION_PLAN.json').read_text());urls=json.loads((P/'WORLDCOVER_GRID_INVENTORY.json').read_text())['sourceUrls']
-rows=[r for r in plan['cells'] if r['mappedLandPresent']];rows.sort(key=lambda x:(-x['powerOfTwoSamplesPerDegree'],x['tile']))
+plan=json.loads((P/('FINER_SOURCE_LOD_ACQUISITION_PLAN.json' if (P/'FINER_SOURCE_LOD_ACQUISITION_PLAN.json').exists() else 'SOURCE_LOD_ACQUISITION_PLAN.json')).read_text());urls=json.loads((P/'WORLDCOVER_GRID_INVENTORY.json').read_text())['sourceUrls']
+rows=[r for r in plan['cells'] if r['mappedLandPresent'] or r.get('finerClassifiedLandPresent')];rows.sort(key=lambda x:(-x['powerOfTwoSamplesPerDegree'],x['tile']))
 limit=int(sys.argv[1]) if len(sys.argv)>1 else len(rows);rows=rows[:limit]
 def acquire(r):
  tile=r['tile'];receipt=OUT/(tile+'.json')
- if receipt.exists() and json.loads(receipt.read_text()).get('status')=='DECODED_NOT_ADMITTED':return {'tile':tile,'status':'REUSED_SUCCESS'}
+ n=r['powerOfTwoSamplesPerDegree'];bucket,key=urls[tile][5:].split('/',1);url=f'https://{bucket}.s3.eu-central-1.amazonaws.com/{key}';lat=int(tile[1:3]);lon=int(tile[4:7])
+ if reusable_receipt(receipt,status='DECODED_NOT_ADMITTED',url=url,shape=[4,n,n],keys=[('data','arraySha256',[4,n,n]),('invalid','maskSha256',[n,n])],bounds=[lon,lat,lon+1,lat+1]):return {'tile':tile,'status':'REUSED_SUCCESS'}
  try:
   n=r['powerOfTwoSamplesPerDegree'];bucket,key=urls[tile][5:].split('/',1);url=f'https://{bucket}.s3.eu-central-1.amazonaws.com/{key}';target=tile+'.tif'
   def opener(path,mode='rb'):

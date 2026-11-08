@@ -3,16 +3,18 @@ import numpy as np,rasterio
 from rasterio.enums import Resampling
 from shapely.geometry import shape,box
 from bounded_cog import RangeFile
+from cache_integrity import reusable_receipt
 P=pathlib.Path(__file__).parent;O=P/'water_classification';O.mkdir(exist_ok=True)
-plan=json.loads((P/'SOURCE_LOD_ACQUISITION_PLAN.json').read_text());catalog=json.loads((P/'worldcover_classification_grid.geojson').read_text());groups={}
+plan=json.loads((P/('FINER_SOURCE_LOD_ACQUISITION_PLAN.json' if (P/'FINER_SOURCE_LOD_ACQUISITION_PLAN.json').exists() else 'SOURCE_LOD_ACQUISITION_PLAN.json')).read_text());catalog=json.loads((P/'worldcover_classification_grid.geojson').read_text());groups={}
 for row in plan['cells']:
- if not row['mappedLandPresent']:continue
+ if not (row['mappedLandPresent'] or row.get('finerClassifiedLandPresent')):continue
  lat=int(row['tile'][1:3]);lon=int(row['tile'][4:7]);tile=f'N{lat//3*3:02d}E{lon//3*3:03d}';groups[tile]=max(groups.get(tile,0),row['powerOfTwoSamplesPerDegree'])
 registered={f['properties']['ll_tile'] for f in catalog['features']}
 assert all(k in registered for k in groups),'CLASSIFICATION_TILE_NOT_IN_OFFICIAL_GRID'
 def acquire(item):
  tile,n=item;path=O/(tile+'.json')
- if path.exists() and json.loads(path.read_text()).get('status')=='DECODED_CLASSIFICATION_NOT_SHORELINE_ADMISSION':return {'tile':tile,'status':'REUSED_SUCCESS'}
+ url=f'https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_{tile}_Map.tif';lat=int(tile[1:3]);lon=int(tile[4:7])
+ if reusable_receipt(path,status='DECODED_CLASSIFICATION_NOT_SHORELINE_ADMISSION',url=url,shape=[3*n,3*n],keys=[('classes','arraySha256',[3*n,3*n])],bounds=[lon,lat,lon+3,lat+3]):return {'tile':tile,'status':'REUSED_SUCCESS'}
  try:
   url=f'https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_{tile}_Map.tif';target=tile+'_classification.tif'
   def opener(path,mode='rb'):
