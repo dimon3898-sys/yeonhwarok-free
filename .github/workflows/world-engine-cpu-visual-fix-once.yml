@@ -1,0 +1,53 @@
+name: WORLD ENGINE existing official CPU screen probe
+on:
+  push:
+    branches: [validation/dot-cpu-visual-20261109]
+    paths: ['.github/workflows/world-engine-cpu-visual-fix-once.yml']
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-official-cpu-screen-20261109
+  cancel-in-progress: false
+jobs:
+  official-screen:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.event.before == '556e24fd86edb739d7cb0c657ebbdd92ff4b2846' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_OFFICIAL_CPU_VISUAL_FIX_A10'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: world-simulation-shorts-engine/production/cpu-visual-20261109
+      - name: Prepare isolated data root and existing browser dependency
+        run: |
+          if [ ! -e /workspace ]; then
+            sudo install -d -m 755 -o root -g root /workspace
+          fi
+          python3 - <<'PYCODE'
+          import pathlib, os, stat
+          p=pathlib.Path('/workspace');s=p.lstat()
+          assert stat.S_ISDIR(s.st_mode) and not p.is_symlink() and not s.st_mode & 0o022, 'UNSAFE_EXISTING_WORKSPACE'
+          assert not (p/'shared').exists(), 'PRIVATE_STAGE_ALREADY_EXISTS'
+          print('ISOLATED_ROOT_PRECONDITIONS_PASS')
+          PYCODE
+          sudo install -d -m 700 -o "$(id -u)" -g "$(id -g)" /workspace/shared
+          test -x /usr/bin/google-chrome
+          mkdir -p "$RUNNER_TEMP/kw20-cpu-deps"
+          cd "$RUNNER_TEMP/kw20-cpu-deps"
+          npm install --ignore-scripts --no-audit --no-fund --save-exact playwright@1.62.1
+          echo "CPU_DEPS_ROOT=$RUNNER_TEMP/kw20-cpu-deps" >> "$GITHUB_ENV"
+      - name: Check changed material and date layout through official probe with private input and private results
+        env:
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY }}
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_SECRET: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_SECRET }}
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_REFRESH_TOKEN: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_REFRESH_TOKEN }}
+        run: >-
+          python3 world-simulation-shorts-engine/production/cpu-visual-20261109/run_visual_fix_probe.py
+          KW20_CPU_SCREEN_INPUT_20261109_A1.zip
+          b92abb04cabfc3186552f41ad4ea9d5874a83f9d9e3b215e0e9a78ef0ef8e30a
+# Changed scope only: candidate sea response boundary and reference numeric date slot.
+# Existing 21 tests, nine syntax checks, source rasters and old images are preserved.
+# No MP4, GPU, deployment, Actions artifact/cache storage or public private-data upload.

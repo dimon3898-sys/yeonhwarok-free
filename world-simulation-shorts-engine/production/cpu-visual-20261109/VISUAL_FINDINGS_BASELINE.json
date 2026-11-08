@@ -1,0 +1,65 @@
+{
+  "schema": "WORLD_ENGINE_NEW_VISUAL_FINDINGS_V1",
+  "baseCommit": "5d749200684406ad66a6a381e04d5a31a3ef7b05",
+  "evidenceRuns": [
+    42524272844,
+    42525089389
+  ],
+  "newFrameEvidence": [
+    {
+      "scene": "part1_scene2",
+      "frame": 0,
+      "sha256": "00a2d8ae565f0f54781f9ad6571469f64a6cc3fff1b4d44cb8eaf9bb16a3fd6a"
+    },
+    {
+      "scene": "part1_scene1",
+      "frame": 75,
+      "sha256": "1bb5e7b8ae195a03036770abbd1c466d2f0064119fae17690b30878cc8f4bafa"
+    },
+    {
+      "scene": "part1_scene1",
+      "frame": 0,
+      "sha256": "03a6479fb5325b7b29b85bb3feea7d4a8ea32857a046c6df559f2953328be389"
+    },
+    {
+      "scene": "part1_scene1",
+      "frame": 149,
+      "sha256": "874fe6907dea572cad61afad2a077a52bb373fa6fb3f5be1dc4e8c7ba2ae02d8"
+    }
+  ],
+  "findings": [
+    {
+      "id": "WATER_SUPPORT_TONE_SEAM",
+      "status": "CONFIRMED_VISUAL",
+      "scope": "Candidate water shader switches abruptly at four-tap valid-mask support edges",
+      "minimumFix": "Blend candidate response into unchanged legacy response inside admitted support; never expand mask or change source data"
+    },
+    {
+      "id": "DATE_SLOT_CHUNK_RESET",
+      "status": "CONFIRMED_VISUAL",
+      "frames": [
+        149,
+        150
+      ],
+      "beforeBox": [
+        161,
+        1004,
+        470,
+        1125
+      ],
+      "afterBox": [
+        385.5,
+        1004,
+        694.5,
+        1125
+      ],
+      "minimumFix": "Prefer the existing left-below slot for reference numeric labels without a pin; preserve collision rejection and prior valid slot"
+    }
+  ],
+  "previousPassesRerun": false,
+  "previousPassesInvalidated": false,
+  "newVariantRevalidationScope": "Only changed material/date behavior in four-scene representative PNGs. Old 21 tests and nine syntax checks remain preserved.",
+  "nativeGPUVerified": false,
+  "finalVideoRendered": false,
+  "deploymentReady": false
+}
