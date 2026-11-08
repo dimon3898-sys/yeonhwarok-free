@@ -1,0 +1,74 @@
+{
+  "schema": "WORLD_ENGINE_GCUBE_SETTINGS_RECEIPT_V12",
+  "recordedAtKST": "2026-11-08T11:39:42.217004+09:00",
+  "workload": 5373,
+  "name": "world-engine-test",
+  "url": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+  "saved": true,
+  "readBack": "Fresh modify form all15 environment values, port and mount; Step5 review; final detail after canceling read-only inspection",
+  "status": "종료",
+  "nodeId": null,
+  "graphicsDriver": null,
+  "cudaToolkit": null,
+  "lastDeploymentDisplayed": "2026-11-06 13:48:35",
+  "gpu": {
+    "tier": 2,
+    "model": "RTX 5090",
+    "count": 1,
+    "vramGB": 32,
+    "vCPU": 12,
+    "ramGB": 63,
+    "diskGB": 937,
+    "displayedHourlyPriceKRW": [
+      910,
+      1300
+    ],
+    "vat": "excluded in displayed price"
+  },
+  "image": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:kw20-native-v11-42345505600",
+    "digest": "sha256:bb97c55401f25abba360f648b7f240be900ab44cbed2d9926a4ccc5a3be68726",
+    "backup": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/kw20-native-image-backup-42345505600",
+    "archiveSHA256": "sha256:f287e3b71eb2403cda3a078f0467ffb70f4a939630d2934cc22ca48edf4c8375"
+  },
+  "imageField": "dimon3898-sys/world-simulation-shorts-engine:kw20-native-v11-42345505600",
+  "registry": "ghcr.io",
+  "containerPort": 8080,
+  "commandOverride": "",
+  "entrypoint": "unchanged; no override",
+  "storageMount": "/world-storage",
+  "storageProvider": "dropbox",
+  "replicas": 1,
+  "concurrency": 4,
+  "sharedMemoryGB": 3,
+  "istio": true,
+  "sessionAffinityL7": false,
+  "minimumCudaVersion": null,
+  "environment": {
+    "count": 15,
+    "all15SavedValuesMatchedExpected": true,
+    "other14ValuesPreserved": true,
+    "authenticationPreserved": true,
+    "secretValuesIncluded": false,
+    "onlyChangedField": "operator policy gpuHourlyRate",
+    "previousRate": 360,
+    "savedPolicy": {
+      "gpuHourlyRate": 1300,
+      "currency": "KRW",
+      "maxWallSeconds": 7200,
+      "maxCostAmount": 10000,
+      "maxRetries": 0,
+      "validUntil": "2026-11-27T23:59:00+09:00"
+    }
+  },
+  "changes": [
+    "GPU selection RTX4080SUPER x1 -> RTX5090 x1",
+    "operator policy gpuHourlyRate360 ->1300 to match new displayed upper hourly rate"
+  ],
+  "gpuStarts": 0,
+  "studioRenders": 0,
+  "deploymentStarts": 0,
+  "deploymentStops": 0,
+  "actualMountedStorageProbe": "NOT_RUN_USER_DEPLOYMENT_REQUIRED",
+  "screenshot": "UNAVAILABLE_BROWSER_CAPTURE_TIMEOUT; saved UI readback is recorded, no screenshot fabricated"
+}
