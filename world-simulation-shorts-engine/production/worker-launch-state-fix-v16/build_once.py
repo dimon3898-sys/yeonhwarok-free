@@ -13,7 +13,7 @@ import prepare as package
 REPO = 'dimon3898-sys/yeonhwarok-free'
 BRANCH = 'fix/worker-launch-state-20261108'
 WORKFLOW = '.github/workflows/world-engine-worker-launch-state-image-once.yml'
-OLD_TAG = 'worker-launch-v16-42443683657'
+OLD_TAG = 'cold-start-v14-42443683657'
 
 def module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
