@@ -1,6 +1,7 @@
 /** Candidate-only sea response continuity. All raster bytes and land/GIS stay pinned. */
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import path from 'node:path';
+import {restoreRuntime,restorePlan} from './restore_viewport_features.mjs';
 import {createHash} from 'node:crypto';
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const oldShader='a12cbde55d19c0624f71b71d5cb997323104d6daac381fde2f59f9d644a7f09f';
@@ -48,9 +49,17 @@ const labelAfter=labelBefore.replace(labelAnchor,`  // A stable left-below defau
   if(reference&&pinStyle==='NONE'&&item.role==='NUMERIC')indices.splice(indices.indexOf(5),1),indices.unshift(5);
 `+labelAnchor);
 const labelFile=path.join(root,'presentation_label_layer.mjs');await writeFile(labelFile,labelAfter,{flag:'wx',mode:0o600});
+const viewportResources=[];
+for(const [name,pin,restore] of [['presentation_runtime.mjs','4e5357dd9f493911e385608ff52841150ac8bad043002153f9ff02170a765f56',restoreRuntime],['presentation_plan.mjs','8807f12df91f22c26270b867b630398294b7021b82e7e2a9aff32b807177bb1b',restorePlan]]){
+ const url='/recovery/universal-presentation-v2/'+name,res=registry.registrations[0].record.resources.find(r=>r.url===url),before=await readFile(res.sourcePath,'utf8');
+ if(hash(before)!==pin||res.pin.sha256!==pin)throw Error('V8_PARENT_RESOURCE_PIN');
+ const after=restore(before),file=path.join(root,name);await writeFile(file,after,{flag:'wx',mode:0o600});
+ viewportResources.push({url,parentSHA256:pin,sourcePath:file,pin:{bytes:Buffer.byteLength(after),sha256:hash(after)}});
+}
 for(const {record:r} of registry.registrations){
  if(r.shaderSha256!==oldShader)throw Error('WATER_EDGE_RECORD_PIN');r.shaderSha256=newShader;
  for(const resource of r.resources){
+  const restored=viewportResources.find(x=>x.url===resource.url);if(restored){if(resource.pin.sha256!==restored.parentSHA256)throw Error('V8_RECORD_RESOURCE_PIN');resource.sourcePath=restored.sourcePath;resource.pin=restored.pin;continue;}
   if(resource.url==='/web/map_infographic_v1/official_material_shader.mjs'){
    resource.sourcePath=newShaderFile;resource.pin={bytes:Buffer.byteLength(newModule),sha256:hash(newModule)};
   }else if(resource.url===labelUrl){
@@ -75,4 +84,4 @@ const configFile=path.join(probe,'PROBE_CONFIG.json'),config=JSON.parse(await re
 const runnerFile=path.join(probe,'run_probe.mjs'),runner=await readFile(runnerFile,'utf8');
 if(!runner.includes(registryFile)||!runner.includes(expectedRegistry))throw Error('WATER_EDGE_RUNNER_ANCHOR');
 await writeFile(runnerFile,runner.replace(registryFile,newRegistryFile).replace(expectedRegistry,hash(registryBytes)));
-await writeFile(path.join(probe,'WATER_EDGE_CHANGE.json'),JSON.stringify({schema:'WORLD_ENGINE_WATER_EDGE_CHANGE_V1',parentShaderSHA256:oldShader,shaderSHA256:newShader,moduleSHA256:hash(newModule),sourceRasterBytesChanged:false,geometryChanged:false,heightPolicyChanged:false,labelsChanged:true,labelParentSHA256:hash(labelBefore),labelSHA256:hash(labelAfter),labelScope:'REFERENCE_NUMERIC_NO_PIN_DEFAULT_SLOT_ONLY',waterResponseMix:.20,scope:'RESTRAIN_AND_SOFTEN_KNOWN_WATER_RESPONSE_WITHIN_EXISTING_ADMITTED_FOOTPRINT',visualApproved:false}),{flag:'wx',mode:0o600});
+await writeFile(path.join(probe,'WATER_EDGE_CHANGE.json'),JSON.stringify({schema:'WORLD_ENGINE_WATER_EDGE_CHANGE_V1',parentShaderSHA256:oldShader,shaderSHA256:newShader,moduleSHA256:hash(newModule),sourceRasterBytesChanged:false,geometryChanged:false,heightPolicyChanged:false,labelsChanged:true,labelParentSHA256:hash(labelBefore),labelSHA256:hash(labelAfter),labelScope:'REFERENCE_NUMERIC_NO_PIN_DEFAULT_SLOT_ONLY',waterResponseMix:.20,scope:'RESTRAIN_AND_SOFTEN_KNOWN_WATER_RESPONSE_WITHIN_EXISTING_ADMITTED_FOOTPRINT',viewportRestoration:viewportResources.map(({url,parentSHA256,pin})=>({url,parentSHA256,pin})),visualApproved:false}),{flag:'wx',mode:0o600});
