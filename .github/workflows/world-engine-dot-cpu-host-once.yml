@@ -1,0 +1,51 @@
+name: WORLD ENGINE permitted CPU browser preflight
+on:
+  push:
+    branches: [validation/dot-cpu-visual-20261109]
+    paths: ['.github/workflows/world-engine-dot-cpu-host-once.yml']
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-dot-cpu-host-20261109
+  cancel-in-progress: false
+jobs:
+  host:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_DOT_CPU_HOST_20261109_A1'
+    runs-on: ubuntu-22.04
+    timeout-minutes: 8
+    steps:
+      - name: Check normal UNIX socket permission on the new host
+        run: |
+          python3 - <<'PY'
+          import socket,tempfile,os,json
+          with tempfile.TemporaryDirectory() as folder:
+              sock=socket.socket(socket.AF_UNIX,socket.SOCK_STREAM)
+              sock.bind(os.path.join(folder,'browser-probe.sock'))
+              sock.listen(1);sock.close()
+          print('WORLD_ENGINE_HOST_SOCKET='+json.dumps({'status':'PASS','AF_UNIX':'bind/listen allowed','old_tests_rerun':False}))
+          PY
+      - name: Prepare the same pinned browser automation version
+        run: |
+          mkdir -p "${RUNNER_TEMP}/we-browser"
+          cd "${RUNNER_TEMP}/we-browser"
+          npm install --ignore-scripts --no-audit --no-fund --save-exact playwright@1.62.1
+      - name: Launch normal sandboxed Chrome without a renderer or private data
+        run: |
+          cd "${RUNNER_TEMP}/we-browser"
+          node --input-type=module <<'JS'
+          import {chromium} from 'playwright';
+          import {createServer} from 'node:http';
+          const server=createServer((req,res)=>{res.setHeader('Content-Type','text/html');res.end('<!doctype html><title>WORLD ENGINE CPU host</title><body>CPU host only</body>');});
+          await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+          let browser;
+          try {
+            browser=await chromium.launch({channel:'chrome',headless:true,chromiumSandbox:true,args:[]});
+            const page=await browser.newPage({viewport:{width:1080,height:1920}});
+            await page.goto('http://127.0.0.1:'+server.address().port,{waitUntil:'load'});
+            if(await page.title()!=='WORLD ENGINE CPU host')throw Error('HOST_PAGE_TITLE');
+            console.log('WORLD_ENGINE_HOST_BROWSER='+JSON.stringify({status:'PASS',browser:browser.version(),sandboxEnabled:true,uid:process.getuid(),worldEngineFrames:0,mp4Created:false,gpuUsed:false,privateDataTransferred:false,artifactUploads:0}));
+          } finally {await browser?.close();await new Promise(resolve=>server.close(resolve));}
+          JS
