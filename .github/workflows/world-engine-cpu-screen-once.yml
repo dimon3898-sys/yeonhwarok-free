@@ -1,0 +1,46 @@
+name: WORLD ENGINE existing official CPU screen probe
+on:
+  push:
+    branches: [audit/kw20-cpu-screen-20261109]
+    paths: ['.github/workflows/world-engine-cpu-screen-once.yml']
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-official-cpu-screen-20261109
+  cancel-in-progress: false
+jobs:
+  official-screen:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.event.before == 'b8cc63bb5981ce1fb0669e2c7042304b0323a5f4' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_OFFICIAL_CPU_SCREEN_A4'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          sparse-checkout: world-simulation-shorts-engine/production/cpu-screen-20261109
+      - name: Prepare isolated data root and existing browser dependency
+        run: |
+          test ! -e /workspace
+          sudo install -d -m 700 -o "$(id -u)" -g "$(id -g)" /workspace
+          mkdir -m 700 /workspace/shared
+          test ! -e /usr/bin/chromium
+          sudo ln -s "$(command -v google-chrome)" /usr/bin/chromium
+          mkdir -p "$RUNNER_TEMP/kw20-cpu-deps"
+          cd "$RUNNER_TEMP/kw20-cpu-deps"
+          npm install --ignore-scripts --no-audit --no-fund --save-exact playwright@1.62.1
+          echo "CPU_DEPS_ROOT=$RUNNER_TEMP/kw20-cpu-deps" >> "$GITHUB_ENV"
+      - name: Continue unchanged official probe with private input and private results
+        env:
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY }}
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_SECRET: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_SECRET }}
+          WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_REFRESH_TOKEN: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_REFRESH_TOKEN }}
+        run: >-
+          python3 world-simulation-shorts-engine/production/cpu-screen-20261109/run_existing_probe.py
+          KW20_CPU_SCREEN_INPUT_20261109_A1.zip
+          b92abb04cabfc3186552f41ad4ea9d5874a83f9d9e3b215e0e9a78ef0ef8e30a
+# Reuses run 42522754078 browser PASS and run 42523065120 private channel PASS.
+# One existing blocked scene frame only. No old tests, MP4, GPU, or deployment.
+# No Actions artifact/cache storage; source and evidence remain private.

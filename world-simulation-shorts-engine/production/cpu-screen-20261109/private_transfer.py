@@ -28,7 +28,7 @@ def rpc(access, endpoint, payload):
         return json.load(response)
 
 
-def download_exact(access, basename, digest, destination):
+def download_exact(access, basename, digest, destination, selection_sink=None):
     result = rpc(access, "files/search_v2", {"query": basename, "options": {"filename_only": True, "max_results": 100}})
     matches = [m["metadata"]["metadata"] for m in result.get("matches", [])
                if m.get("metadata", {}).get("metadata", {}).get("name") == basename]
@@ -39,6 +39,8 @@ def download_exact(access, basename, digest, destination):
             "metadataTags": [m.get(".tag") for m in matches]}))
     request = urllib.request.Request("https://content.dropboxapi.com/2/files/download", data=b"",
         headers={"Authorization": "Bearer " + access, "Dropbox-API-Arg": json.dumps({"path": matches[0]["id"]})})
+    if selection_sink is not None:
+        selection_sink.update(matches[0])
     checksum = hashlib.sha256()
     destination = pathlib.Path(destination)
     with urllib.request.urlopen(request, timeout=180) as response, destination.open("xb") as target:
