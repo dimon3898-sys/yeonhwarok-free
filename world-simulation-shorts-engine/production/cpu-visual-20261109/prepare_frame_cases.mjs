@@ -9,7 +9,9 @@ const activations=JSON.parse(await readFile(path.join(staging,'DESTINATION_ACTIV
 const cases=[];
 for(let part=1;part<=2;part++){
  const submission=JSON.parse(await readFile(path.join(staging,'inputs',`ORIGIN_SUBMISSION_0${part}.json`)));
- const plan=sealSceneChunks(submission.sourcePipeline.runtimePayload);
+ const wire=submission.sourcePipeline.runtimeRequestWireJSON;
+ if(typeof wire!=='string'||createHash('sha256').update(wire).digest('hex')!==submission.sourcePipeline.runtimeWireSHA256)throw Error('EXISTING_RUNTIME_WIRE_PIN');
+ const plan=sealSceneChunks(JSON.parse(wire));
  const selected=activations.find(a=>a.originalSemanticSHA256===plan.originalSHA256);
  if(!selected)throw Error('EXISTING_ACTIVATION_MISSING');
  for(const [index,chunk] of plan.chunks.entries()){

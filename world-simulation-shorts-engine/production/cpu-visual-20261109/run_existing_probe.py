@@ -86,7 +86,7 @@ def main():
     supervisor_file.write_bytes(supervisor_after)
     host_adapter['supervisor'] = {'reason': 'Run 42523576309 owned RSS 2200928256 exceeded old 2147483648 byte CPU probe budget', 'beforeSHA256': hashlib.sha256(supervisor_before).hexdigest(), 'afterSHA256': hashlib.sha256(supervisor_after).hexdigest(), 'oldAggregateBytes': 2*1024**3, 'aggregateBytes': 4*1024**3, 'hostAvailableBytes': available, 'perProcessAndTimeLimitsUnchanged': True}
     child_env = {k: v for k, v in os.environ.items() if 'TOKEN' not in k and 'SECRET' not in k and 'APP_KEY' not in k and 'BACKUP_KEY' not in k}
-    setup = subprocess.run(['node', str(Path(__file__).with_name('prepare_frame_cases.mjs')), str(probe), str(probe.parent / 'world_engine_destination_rehearsal')], env=child_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60, check=False)
+    setup = subprocess.run(['node', str(Path(__file__).with_name('prepare_frame_cases.mjs')), str(probe), str(probe.parent / 'world_engine_destination_rehearsal')], env=child_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=240, check=False)
     if setup.returncode:
         (temp / 'private-case-preparation.log').write_bytes(setup.stdout + setup.stderr)
         raise RuntimeError('EXISTING_FRAME_CASE_PREPARATION_FAILED')
