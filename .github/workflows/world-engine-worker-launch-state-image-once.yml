@@ -18,8 +18,8 @@ jobs:
       github.run_attempt == 1 &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
       github.event.repository.private == false &&
-      github.event.before == '49067bc9d382c9337f9bcf608a8aee98bd7407e8' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_WORKER_LAUNCH_IMAGE_20261108_A1'
+      github.event.before == '4aca35283b9af51e0513a3e9a8aa3eb2504985bc' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_WORKER_LAUNCH_IMAGE_20261108_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -44,7 +44,7 @@ jobs:
       - name: Package one additive image and check actual CPU entrypoint
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          WORKER_LAUNCH_EXPECTED_PARENT: '49067bc9d382c9337f9bcf608a8aee98bd7407e8'
+          WORKER_LAUNCH_EXPECTED_PARENT: '4aca35283b9af51e0513a3e9a8aa3eb2504985bc'
         run: python3 -B world-simulation-shorts-engine/production/worker-launch-state-fix-v16/build_once.py
       - name: Preserve image preparation evidence
         if: always()
