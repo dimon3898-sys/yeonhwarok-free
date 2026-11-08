@@ -1,0 +1,34 @@
+{
+  "schema": "WORLD_ENGINE_READY_BUILD_REVIEW_V1",
+  "status": "BUILD_INPUT_PREPARED_EXECUTION_BLOCKED",
+  "context": "native-code-context",
+  "dockerfile": "native-code-context/Dockerfile",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:1ab43dd68e5ccdd364b6ec97d61d2f877070213cc42101412f45e17c54871e4b",
+  "publicPayload": "Reviewed code and hash manifests only;50overlay files; no scene input, private registry, imagery or elevation bytes",
+  "proposedTagPolicy": "A new unique run-specific tag; never overwrite an existing tag",
+  "executionLimits": {
+    "normalFreeCPUHostOnly": true,
+    "gpu": false,
+    "studioRender": false,
+    "movieGeneration": false,
+    "gCubeDeployment": false,
+    "publicRawData": false
+  },
+  "requiredChecksBeforePush": [
+    "Full installed runtime/bootstrap/source manifest verification in built image",
+    "Verify inherited ENTRYPOINT,UID,HTTP8080 and existing native dependencies",
+    "Confirm two new native variants and immutable parent digest",
+    "Content review of image layers for excluded raw/private payload"
+  ],
+  "afterPush": [
+    "Read back immutable GHCR digest and create image backup",
+    "Preserve oldv16 image and all old PASS",
+    "Continue qualified private runtime asset installation before saving inactive gCube settings"
+  ],
+  "currentPermissionBlock": {
+    "code": "PERMITTED_IMAGE_BUILD_HOST_UNAVAILABLE",
+    "cause": "Local Docker/buildctl/daemon and GHCR write credentials are unavailable. Current explicit Actions permission is free CPU screen verification only.",
+    "minimumResolution": "Authorize free Actions image build, GHCR publication and image backup, or supply a normal authenticated build host. No GPU execution permission is requested.",
+    "evidence": "BUILD_HOST_AVAILABILITY.json"
+  }
+}

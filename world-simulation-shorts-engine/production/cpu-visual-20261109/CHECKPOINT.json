@@ -1,52 +1,81 @@
 {
-  "schema": "WORLD_ENGINE_CPU_VISUAL_CONTINUATION_V1",
-  "baseCommit": "5d749200684406ad66a6a381e04d5a31a3ef7b05",
-  "reusedNewerWorkCommit": "581776cbe0fedc1e649bdd30ff5f98c8eaa123da",
-  "status": "PRESERVED_CONTOUR_VIEWPORT_REGRESSION_RESTORATION_PENDING",
-  "cpuHostRun": 42524060787,
-  "previousFailedRun": 42523576309,
-  "confirmedCause": {
-    "code": "OWNED_RSS_MONITOR_CANCELLED",
-    "peakBytes": 2200928256,
-    "oldBudgetBytes": 2147483648,
-    "unixSocketIssueResolvedOnNewHost": true
+  "schema": "WORLD_ENGINE_DEPLOYMENT_PREPARATION_CHECKPOINT_V2",
+  "status": "CPU_VISUAL_PASS_NATIVE_CODE_PREPARED_BUILD_HOST_BLOCKED",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "branch": "validation/dot-cpu-visual-20261109",
+  "observedAtUTC": "2026-11-08T22:27:00Z",
+  "preservedBaseCommit": "5d749200684406ad66a6a381e04d5a31a3ef7b05",
+  "sourceCommitForFinalVisualRun": "733008bbfcef0b2ba7475842e81de5d784a0d119",
+  "earliestIncomplete": "Build and qualify the additive code-only image on a permitted normal host, then publish a new immutable GHCR image and backup.",
+  "cpuVisual": {
+    "status": "CHANGED_SCOPE_PASS",
+    "runId": 42528875251,
+    "actualPNGs": 12,
+    "resolution": [
+      1080,
+      1920
+    ],
+    "scenes": 4,
+    "continuousLabelBoundaries": 3,
+    "evidence": "VIEWPORT_PNG_REVIEW.json",
+    "full600FrameOrGpuValidation": false
   },
-  "minimalChange": "Existing official CPU host: 4 GiB aggregate RSS, 300 second per-case bound, browser sandbox unchanged. Candidate sea-edge blending and numeric-label default slot only.",
-  "rerunScope": "Only4scenes affected by restoring omitted V8 viewport/contour code; 12sparse PNGs. Prior21tests/9syntax checks remain preserved.",
-  "rendererChanged": true,
-  "sourceDataPublished": false,
-  "gpuExecuted": false,
-  "deploymentReady": false,
-  "earliestIncomplete": "Verify restored existing V8 contour/glow and viewport behavior on4current scenes.",
-  "oneFrameRun": 42524272844,
-  "oneFrameSHA256": "68ca79d738a3201dbf3d993f9bcdb50aaf943fb7b16726ab1dd633e0f1ac7e4b",
-  "confirmedCauseResolved": true,
-  "remainingVisualConcerns": [
-    "Missing preserved contour/glow and offscreen-component handling in Dot runtime"
+  "resolved": [
+    "AF_UNIX restriction resolved by standard free Ubuntu Actions CPU host; original restriction not bypassed",
+    "Water block contrast reduced within original admitted footprint",
+    "Date label slot jump removed at three scene boundaries",
+    "Omitted existing V8 contour/glow and offscreen handling restored",
+    "Two changed native source variants and50overlay files pinned"
   ],
-  "latestPreparationFailure": {
-    "run": 42524772432,
-    "code": "PLANNER_SCENE_NON_CANONICAL_GEOMETRY",
-    "cause": "Sorted metadata object changed insertion order; preserve the original runtimeRequestWireJSON and its wire SHA256.",
-    "fix": "Restore original wire bytes; all four new capture envelopes prepared successfully.",
-    "oldPASSInvalidated": false
+  "newCodePackage": {
+    "context": "native-code-context",
+    "sourcePinCheck": "NEW_NATIVE_SOURCE_PIN_CHECK.json",
+    "runtimeManifestSHA256": "b7126af32ec9b8b753b247df80715172b5f7c57538b85bc9ae021666c9f1e013",
+    "startupManifestSHA256": "670f6a835d3ccac4fa7eb356879fd227514c1ff8611030482d29aff5c76674c7",
+    "rawAssetsIncluded": false,
+    "built": false,
+    "fullInstalledImageQualified": false
   },
-  "latestScreenRun": 42527984819,
-  "technicalFrameProgress": {
-    "baselinePNGs": 13,
-    "changedMaterialAndLabelPNGs": 12,
-    "allThreeLabelBoundaries": "SAME_BOX_AND_ALPHA"
+  "frozenInputs": "FROZEN_INPUTS.json",
+  "blocker": {
+    "code": "PERMITTED_IMAGE_BUILD_HOST_UNAVAILABLE",
+    "cause": "Local Docker/buildctl/daemon and GHCR write credentials are unavailable. Current explicit Actions permission is free CPU screen verification only.",
+    "minimumResolution": "Authorize free Actions image build, GHCR publication and image backup, or supply a normal authenticated build host. No GPU execution permission is requested.",
+    "evidence": "BUILD_HOST_AVAILABILITY.json"
   },
-  "confirmedNewCause": {
-    "run": 42525089389,
-    "code": "UP2_SOFTWARE_REVIEW_DEADLINE_EXCEEDED",
-    "aggregateRSSPeakBytes": 2854825984,
-    "memoryLimitExceeded": false,
-    "captureElapsedSeconds": 56.421597286,
-    "supervisorWallSeconds": 180,
-    "minimumFix": "300 second per-case bound, unchanged 4 GiB memory guard, skip every completed frame"
+  "remainingAfterBuild": [
+    "Qualified private runtime asset installation in production storage without public raw-data publication",
+    "Immutable image digest and backup verification",
+    "Save new image configuration while retaining RTX5090x1,HTTP8080,/world-storage and existing secret values",
+    "Confirm stopped/node-unallocated state and release ready-to-render guide"
+  ],
+  "gcube": {
+    "workload": 5373,
+    "status": "STOPPED_NODE_UNALLOCATED",
+    "gpu": "RTX5090",
+    "count": 1,
+    "configurationChanged": false,
+    "evidence": "GCUBE_PRESERVATION_OBSERVATION.json"
   },
-  "confirmedNewCauseResolved": true,
-  "candidateEvidence": "VISUAL_FINDINGS_BASELINE.json",
-  "candidateCPUCheck": "DATE_SLOT_CHANGED_SCOPE_CHECK.json"
+  "baselineImage": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:worker-launch-v16-42446481907",
+    "digest": "sha256:1ab43dd68e5ccdd364b6ec97d61d2f877070213cc42101412f45e17c54871e4b",
+    "role": "PRESERVED_NOT_NEW_CANDIDATE"
+  },
+  "newDeploymentImage": null,
+  "deploymentReady": false,
+  "preservation": {
+    "old21ChecksRerun": false,
+    "old9SyntaxChecksRerun": false,
+    "raw35ZipRecoveryRepeated": false,
+    "requested385ComparisonRepeated": false,
+    "rawSourceDataPublished": false,
+    "mainChanged": false,
+    "forcePushUsed": false,
+    "gpuStarts": 0,
+    "studioRenders": 0,
+    "deploymentStarts": 0,
+    "imageBuilds": 0
+  },
+  "nextUserAction": "Expand Actions permission only to free CPU image build/publication/backup; keep GPU, deployment start and Studio rendering user-controlled."
 }
