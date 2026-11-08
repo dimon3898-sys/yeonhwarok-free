@@ -1,0 +1,121 @@
+--- a/recovery/universal-presentation-v2/studio_adapter.py
++++ b/recovery/universal-presentation-v2/studio_adapter.py
+@@ -16,6 +16,7 @@
+ SCHEMA = 'WORLD_ENGINE_PRESENTATION_STUDIO_SUBMISSION_V2'
+ PROFILE = 'FREE_UNIVERSAL_PRESENTATION_REVIEW_V2'
+ TIMELINE_ID = '__timeline__'
++CANDIDATE_TIMELINE_SERVER_OPTION = True
+ 
+ 
+ def load(name, path):
+@@ -172,7 +173,8 @@
+ 
+ class StudioController(manager.StudioController):
+     def __init__(self, *, control_root, export_root, evidence_registry=None, expected_registry_sha256=None,
+-                 allow_free_data_review=False, allow_ten_second_sample=False, candidate_registry=None, candidate_binary_registry=None, **kwargs):
++                 allow_free_data_review=False, allow_ten_second_sample=False, candidate_registry=None, candidate_binary_registry=None,
++                 allow_candidate_timeline=True, **kwargs):
+         root, exports = Path(control_root), Path(export_root)
+         if (not root.is_absolute() or root.is_relative_to(REPO) or root.is_symlink()
+                 or root.resolve().is_relative_to(exports.resolve()) or exports.resolve().is_relative_to(root.resolve())):
+@@ -184,6 +186,8 @@
+         self._candidate_binary_registry = deepcopy(candidate_binary_registry) if candidate_binary_registry is not None else {}
+         self.allow_free_data_review = allow_free_data_review is True
+         self.allow_ten_second_sample = allow_ten_second_sample is True
++        # Server selection only: preserve native NVIDIA source preparation hooks.
++        self.allow_candidate_timeline = allow_candidate_timeline is True
+         super().__init__(control_root=root, export_root=exports, source_root=HERE,
+             expected_index_sha256=sha(canonical({'schema': PROFILE, 'registryPin': self.registry_pin})),
+             image_digest=legacy.BASELINE_IMAGE_PROVENANCE, allow_software_source_review=True)
+@@ -290,7 +294,8 @@
+                 '--plan-sha256', plan_sha, '--expires-at', receipt['expiresAt'], '--max-wall-seconds', '900']
+ 
+     def _admit_timeline_sources(self, request, bindings):
+-        if not self.allow_ten_second_sample or request.get('totalFrames') != 300 or request.get('durationSeconds') != 10:
++        if (not self.allow_candidate_timeline or not self.allow_ten_second_sample
++                or request.get('totalFrames') != 300 or request.get('durationSeconds') != 10):
+             raise StudioError('UP2_TIMELINE_SERVER_SCOPE_REQUIRED')
+         identity = sha(canonical({'schema': 'WORLD_ENGINE_PRESENTATION_TIMELINE_SOURCES_V1', 'request': request, 'code': bindings}))
+         with self._cache.PrivateTree(self.control_root) as private:
+@@ -326,7 +331,7 @@
+                 return admission
+ 
+     def _verify_qualification(self, admission, total_frames):
+-        if total_frames == 300:
++        if total_frames == 300 and self.allow_candidate_timeline:
+             if not isinstance(admission, dict):
+                 raise StudioError('UP2_TIMELINE_QUALIFICATION_SEAL_MISMATCH')
+             wire = admission.get('sourceQualificationWireJSON') if isinstance(admission, dict) else None
+@@ -432,9 +437,12 @@
+         # private JSON persistence. Semantic and wire hashes are independent.
+         wire = json.dumps(runtime, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+         wire_sha, semantic_sha = sha(wire.encode()), sha(canonical(runtime))
+-        bindings = source_bindings(timeline=True) if total == 300 else source_bindings()
++        candidate_timeline = total == 300 and self.allow_candidate_timeline
++        if not candidate_timeline and sealed_candidate_activation is not None:
++            raise StudioError('UP2_CANDIDATE_TIMELINE_SERVER_SCOPE_REQUIRED')
++        bindings = source_bindings(timeline=True) if candidate_timeline else source_bindings()
+         historical = simulation == 'HISTORICAL'
+-        admission = {'status': 'BLOCKED', 'reason': 'UP2_HISTORICAL_G3_REMAINS_BLOCKED'} if historical else (self._admit_timeline_sources(runtime, bindings) if total == 300 else self._admit_sources(runtime, bindings))
++        admission = {'status': 'BLOCKED', 'reason': 'UP2_HISTORICAL_G3_REMAINS_BLOCKED'} if historical else (self._admit_timeline_sources(runtime, bindings) if candidate_timeline else self._admit_sources(runtime, bindings))
+         request_sha = sha(canonical(value))
+         identity = {'requestSHA256': request_sha, 'runtimeSemanticSHA256': semantic_sha,
+             'runtimeWireSHA256': wire_sha, 'sourceAdmission': admission, 'sourceBindings': bindings,
+@@ -442,8 +450,8 @@
+         if preserve_candidate_activation:
+             activation = self._verify_candidate_activation(sealed_candidate_activation) if sealed_candidate_activation is not None else None
+         else:
+-            activation = self._seal_candidate_activation(admission, semantic_sha) if total == 300 and not historical else None
+-        if total == 300 and not historical:
++            activation = self._seal_candidate_activation(admission, semantic_sha) if candidate_timeline and not historical else None
++        if candidate_timeline and not historical:
+             # Native Node wire strings survive sorted Python persistence unchanged.
+             transport_input = {'runtimeRequestWireJSON': wire, 'plan': admission['chunkPlan']}
+             if activation is not None:
+--- a/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py
++++ b/recovery/codex-to-gcube-handoff-v1/controller/nvidia_controller.py
+@@ -5,6 +5,7 @@
+ import re
+ import subprocess
+ import json
++import os
+ 
+ HERE = Path(__file__).resolve().parent
+ if str(HERE) not in sys.path:
+@@ -223,6 +224,11 @@
+                 or value.get('schema') != REQUEST or not isinstance(value.get('prompt'), dict)
+                 or not isinstance(value.get('sceneId'), str)):
+             invalid('HANDOFF_EXPLICIT_NVIDIA_PRESENTATION_REQUEST_REQUIRED')
++        # This worker has no sealed candidate/chunk consumer yet. Do not silently
++        # render the baseline when the operator has configured a candidate.
++        if (os.environ.get('WORLD_ENGINE_OFFICIAL_CANDIDATE_REGISTRY_FILE')
++                or os.environ.get('WORLD_ENGINE_OFFICIAL_CANDIDATE_REGISTRY_SHA256')):
++            invalid('HANDOFF_CANDIDATE_NVIDIA_BRIDGE_REQUIRED')
+         verify_manifest(self.source_manifest, self.source_sha)
+         if self._source_normalizer is None:
+             module = load('_handoff_preserved_cpu_source_normalizer',
+@@ -294,14 +300,23 @@
+                                              fields=[{'code': result.get('code')}])
+                 return result
+             module.verify_prepared_sources = verify_profile_sources
++            # Older preserved adapters have no candidate timeline option.
++            source_options = ({'allow_candidate_timeline': False}
++                if getattr(module, 'CANDIDATE_TIMELINE_SERVER_OPTION', False) is True else {})
+             self._source_normalizer = module.StudioController(
+                 control_root=self.control_root / 'handoff-source-normalization',
+                 export_root=self.export_root, allow_free_data_review=True,
+-                allow_ten_second_sample=True)
++                allow_ten_second_sample=True, **source_options)
+         module = sys.modules['_handoff_preserved_cpu_source_normalizer']
+         cpu = _normal_with_up2_diagnostic(self._source_normalizer._normal,
+             {**deepcopy(value), 'schema': module.REQUEST_SCHEMA})
+         pipeline = cpu['sourcePipeline']
++        admission = pipeline.get('sourceAdmission', {})
++        if (any(key in pipeline for key in ('candidateActivation', 'candidateActivationSHA256'))
++                or any(key in admission for key in ('chunkPlan', 'chunkCaptureWires'))
++                or admission.get('sourceQualification', {}).get('schema')
++                    == 'WORLD_ENGINE_PRESENTATION_TIMELINE_SOURCES_V1'):
++            invalid('HANDOFF_CANDIDATE_NVIDIA_BRIDGE_REQUIRED')
+         if (pipeline.get('simulationType') not in {'GENERAL', 'FICTIONAL'}
+                 or pipeline.get('totalFrames') not in {180, 300} or pipeline.get('fps') != 30
+                 or (pipeline.get('totalFrames') == 300 and pipeline.get('durationSeconds') != 10)
