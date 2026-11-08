@@ -1,0 +1,21 @@
+{
+  "schema": "WORLD_ENGINE_NATIVE_PACKAGING_PIN_REVIEW_V1",
+  "method": "READ_ONLY_MANIFEST_COMPARISON",
+  "mismatches": [
+    {
+      "variant": "capture_vulkan.generated.mjs",
+      "recordedSHA256": "b226b668f63ab577312e994a70e783fd3098d4deed3247baff12ac07759d559e",
+      "candidateSHA256": "d2f000675bc75f4bfbf27df8c0c744e1fecd96440e8eb71ab31046e704db7f4c"
+    },
+    {
+      "variant": "presentation_runtime_vulkan.generated.mjs",
+      "recordedSHA256": "58bb1ef4524e4c4afd5555a36aa41c9560297614ea86e4c398ddbee5f085b9a4",
+      "candidateSHA256": "21ee8876db7b9c0d8bf187c604187700d78ab65192dc10c583bd112387c4a9ee"
+    }
+  ],
+  "cause": "Prior NVIDIA integration candidate changed two generated variants; deployment manifest was intentionally not finalized before CPU visual validation.",
+  "minimumFix": "After visual gate, create a new candidate manifest binding exact reviewed variant bytes; retain original hashes and untouched variant. Qualify new closure before any image build.",
+  "oldPASSInvalidated": false,
+  "existingTestsRerun": false,
+  "gpuExecuted": false
+}
