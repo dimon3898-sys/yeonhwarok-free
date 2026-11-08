@@ -12,8 +12,8 @@ jobs:
   official-screen:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
-      github.event.before == '20b3c91fcfcab19275fd88e6a64f9d07deab6cbc' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_OFFICIAL_CPU_SCREEN_MEMORY_A6'
+      github.event.before == 'dd100d6e653826d0c35493e76d86102503cedcc3' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_OFFICIAL_CPU_SCREEN_FOUR_SCENES_A7'
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     steps:
@@ -49,6 +49,6 @@ jobs:
           KW20_CPU_SCREEN_INPUT_20261109_A1.zip
           b92abb04cabfc3186552f41ad4ea9d5874a83f9d9e3b215e0e9a78ef0ef8e30a
 # Reuses host PASS 42524060787 and private transfer PASS 42523576309.
-# Only the failed one-frame probe is resumed; owned RSS budget becomes 4 GiB on a host with >=6 GiB available.
-# One existing blocked scene frame only. No old tests, MP4, GPU, or deployment.
+# Retains run 42524272844 PNG PASS; frame 100 is not repeated. Same 4 GiB CPU probe budget.
+# Twelve previously unrendered frames across four existing scenes. No old tests, MP4, GPU, or deployment.
 # No Actions artifact/cache storage; source and evidence remain private.

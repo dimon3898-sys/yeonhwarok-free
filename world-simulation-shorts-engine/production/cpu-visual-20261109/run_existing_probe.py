@@ -85,35 +85,45 @@ def main():
     supervisor_after = supervisor_before.replace(limit_old, b'memory_exceeded=total>4*1024**3').replace(receipt_old, b"'aggregateRSSMonitorBytes':4*1024**3")
     supervisor_file.write_bytes(supervisor_after)
     host_adapter['supervisor'] = {'reason': 'Run 42523576309 owned RSS 2200928256 exceeded old 2147483648 byte CPU probe budget', 'beforeSHA256': hashlib.sha256(supervisor_before).hexdigest(), 'afterSHA256': hashlib.sha256(supervisor_after).hexdigest(), 'oldAggregateBytes': 2*1024**3, 'aggregateBytes': 4*1024**3, 'hostAvailableBytes': available, 'perProcessAndTimeLimitsUnchanged': True}
-    config_file = probe / 'PROBE_CONFIG.json'
-    config = json.loads(config_file.read_text())
-    # Dependency location only. Scene, frame, original, source, and module pins stay fixed.
-    config['depsRoot'] = os.environ['CPU_DEPS_ROOT']
-    assert config['probeFrames'] == [100]
-    config_file.write_text(json.dumps(config, indent=2) + '\n')
     child_env = {k: v for k, v in os.environ.items() if 'TOKEN' not in k and 'SECRET' not in k and 'APP_KEY' not in k and 'BACKUP_KEY' not in k}
-    with (temp / 'private-supervision.log').open('wb') as log:
-        run = subprocess.run([sys.executable, str(probe / 'supervise_probe.py')], env=child_env,
-            stdout=log, stderr=subprocess.STDOUT, timeout=220, check=False)
-    out = probe / 'probe_output'
-    capture = json.loads((out / 'CAPTURE_RECEIPT.json').read_text()) if (out / 'CAPTURE_RECEIPT.json').exists() else {}
-    report = {'schema': 'WORLD_ENGINE_NORMAL_CPU_SCREEN_RESULT_V1', 'sourceCommit': '5d749200684406ad66a6a381e04d5a31a3ef7b05',
+    setup = subprocess.run(['node', str(Path(__file__).with_name('prepare_frame_cases.mjs')), str(probe), str(probe.parent / 'world_engine_destination_rehearsal')], env=child_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60, check=False)
+    if setup.returncode:
+        (temp / 'private-case-preparation.log').write_bytes(setup.stdout + setup.stderr)
+        raise RuntimeError('EXISTING_FRAME_CASE_PREPARATION_FAILED')
+    cases = json.loads((probe / 'FRAME_CASES.json').read_text())
+    assert len(cases) == 4
+    report = {'schema': 'WORLD_ENGINE_FOUR_SCENE_CPU_SCREEN_V1', 'sourceCommit': '5d749200684406ad66a6a381e04d5a31a3ef7b05',
         'inputTransfer': transfer, 'transferredEntries': entries, 'hostAdapter': host_adapter, 'runId': os.environ['GITHUB_RUN_ID'],
-        'renderedFrames': capture.get('renderedFrames', 0), 'captureStatus': capture.get('status', 'NO_CAPTURE_RECEIPT'),
-        'oldTestsRerun': False, 'gpuExecuted': False, 'movieCreated': bool(list(probe.rglob('*.mp4'))),
-        'visualQualityApproved': False, 'normalBrowserProofRun': 42522754078, 'privateChannelProofRun': 42523065120}
+        'renderedFrames': 0, 'cases': [], 'oldTestsRerun': False, 'gpuExecuted': False,
+        'visualQualityApproved': False, 'preservedOneFrameRun': 42524272844}
     archive_out = temp / ('KW20_CPU_SCREEN_RESULT_' + os.environ['GITHUB_RUN_ID'] + '.zip')
     with zipfile.ZipFile(archive_out, 'x', zipfile.ZIP_DEFLATED) as z:
+        for case in cases:
+            config = case['config']
+            assert config['probeFrames'] == [0, 75, 149]
+            (probe / 'PROBE_CONFIG.json').write_text(json.dumps(config, indent=2) + '\n')
+            with (temp / 'private-supervision.log').open('wb') as log:
+                run = subprocess.run([sys.executable, str(probe / 'supervise_probe.py')], env=child_env,
+                    stdout=log, stderr=subprocess.STDOUT, timeout=220, check=False)
+            out = Path(config['outputRoot'])
+            capture = json.loads((out / 'CAPTURE_RECEIPT.json').read_text()) if (out / 'CAPTURE_RECEIPT.json').exists() else {}
+            result = {'name': case['name'], 'globalOffset': case['globalOffset'], 'probeFrames': config['probeFrames'],
+                'renderedFrames': capture.get('renderedFrames', 0), 'captureStatus': capture.get('status', 'NO_CAPTURE_RECEIPT')}
+            report['cases'].append(result)
+            report['renderedFrames'] += result['renderedFrames']
+            for file in sorted(out.glob('*')):
+                if file.is_file() and file.name not in {'REQUEST.json', 'RUNTIME.json'}:
+                    z.write(file, case['name'] + '/' + file.name)
+            for name in ['SUPERVISION_RECEIPT.json', 'probe_stdout.log', 'probe_stderr.log']:
+                if (probe / name).is_file(): z.write(probe / name, case['name'] + '/' + name)
+            z.write(temp / 'private-supervision.log', case['name'] + '/private-supervision.log')
+            if result['captureStatus'] != 'ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO' or result['renderedFrames'] != 3:
+                break
+        report['movieCreated'] = bool(list(probe.rglob('*.mp4')))
         z.writestr('CPU_SCREEN_RESULT.json', json.dumps(report, indent=2))
-        for file in sorted(out.glob('*')):
-            if file.is_file() and file.name not in {'REQUEST.json', 'RUNTIME.json'}:
-                z.write(file, 'probe_output/' + file.name)
-        for name in ['SUPERVISION_RECEIPT.json', 'probe_stdout.log', 'probe_stderr.log']:
-            if (probe / name).is_file(): z.write(probe / name, name)
-        z.write(temp / 'private-supervision.log', 'private-supervision.log')
     report['privateResult'] = upload_result(access, archive_out, str(PurePosixPath(selected['path_lower']).parent))
     print(json.dumps(report), flush=True)
-    return 0 if capture.get('status') == 'ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO' and capture.get('renderedFrames') == 1 and not report['movieCreated'] else 1
+    return 0 if report['renderedFrames'] == 12 and len(report['cases']) == 4 and not report['movieCreated'] else 1
 
 
 if __name__ == '__main__':
