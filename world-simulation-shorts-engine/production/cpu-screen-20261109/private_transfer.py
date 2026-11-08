@@ -33,7 +33,10 @@ def download_exact(access, basename, digest, destination):
     matches = [m["metadata"]["metadata"] for m in result.get("matches", [])
                if m.get("metadata", {}).get("metadata", {}).get("name") == basename]
     if result.get("has_more") or len(matches) != 1 or matches[0].get(".tag") != "file":
-        raise RuntimeError("PRIVATE_INPUT_SELECTION_FAILED")
+        raise RuntimeError(json.dumps({"code": "PRIVATE_INPUT_SELECTION_FAILED",
+            "exactMatches": len(matches), "hasMore": bool(result.get("has_more")),
+            "returnedMatches": len(result.get("matches", [])),
+            "metadataTags": [m.get(".tag") for m in matches]}))
     request = urllib.request.Request("https://content.dropboxapi.com/2/files/download", data=b"",
         headers={"Authorization": "Bearer " + access, "Dropbox-API-Arg": json.dumps({"path": matches[0]["id"]})})
     checksum = hashlib.sha256()
@@ -51,5 +54,6 @@ if __name__ == "__main__":
     try:
         print(json.dumps(download_exact(token(), *sys.argv[1:])))
     except Exception as error:
-        print(json.dumps({"status": "PRIVATE_TRANSFER_BLOCKED", "errorType": type(error).__name__}), flush=True)
+        print(json.dumps({"status": "PRIVATE_TRANSFER_BLOCKED", "errorType": type(error).__name__,
+            "detail": str(error) if isinstance(error, RuntimeError) else "PROVIDER_ERROR_REDACTED"}), flush=True)
         sys.exit(1)

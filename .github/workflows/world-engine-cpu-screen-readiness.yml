@@ -1,4 +1,4 @@
-name: WORLD ENGINE normal CPU browser readiness
+name: WORLD ENGINE private CPU input selection
 on:
   push:
     branches: [audit/kw20-cpu-screen-20261109]
@@ -12,7 +12,7 @@ jobs:
   readiness:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
-      github.event.head_commit.message == 'WORLD_ENGINE_CPU_SCREEN_NORMAL_HOST_A1'
+      github.event.head_commit.message == 'WORLD_ENGINE_CPU_PRIVATE_INPUT_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     steps:
@@ -20,26 +20,6 @@ jobs:
         with:
           persist-credentials: false
           sparse-checkout: world-simulation-shorts-engine/production/cpu-screen-20261109
-      - name: Confirm ordinary socket and non-GPU host
-        run: |
-          python3 - <<'PY'
-          import socket, tempfile, pathlib, json, os
-          assert os.geteuid() != 0
-          assert not list(pathlib.Path('/dev').glob('nvidia[0-9]*'))
-          with tempfile.TemporaryDirectory() as d:
-              with socket.socket(socket.AF_UNIX) as s:
-                  s.bind(d+'/normal.sock')
-          print(json.dumps({'normalUnixSocket':'PASS','nonRoot':True,'gpuDevices':0}))
-          PY
-      - name: Install existing pinned browser dependency
-        run: |
-          mkdir -p "$RUNNER_TEMP/kw20-cpu-deps"
-          cd "$RUNNER_TEMP/kw20-cpu-deps"
-          npm install --ignore-scripts --no-audit --no-fund --save-exact playwright@1.62.1
-          echo "CPU_DEPS_ROOT=$RUNNER_TEMP/kw20-cpu-deps" >> "$GITHUB_ENV"
-          echo "CPU_CHROME=$(command -v google-chrome)" >> "$GITHUB_ENV"
-      - name: Normal sandboxed software WebGL screenshot
-        run: node world-simulation-shorts-engine/production/cpu-screen-20261109/runner_readiness.mjs
       - name: Confirm existing private input channel
         env:
           WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY: ${{ secrets.WORLD_ENGINE_STUDIO_BACKUP_DROPBOX_APP_KEY }}
