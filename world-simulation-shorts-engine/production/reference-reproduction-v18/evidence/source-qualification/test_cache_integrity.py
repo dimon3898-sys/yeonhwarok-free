@@ -32,6 +32,11 @@ class CacheChecks(unittest.TestCase):
    self.assertTrue(reusable_receipt(p,**kw))
    for key,value in [('url','https://example.invalid/new'),('shape',[4,4]),('bounds',[125,37,126,38])]:
     wrong=dict(kw);wrong[key]=value;self.assertFalse(reusable_receipt(p,**wrong))
+   for nonfinite in [float('nan'),float('inf'),float('-inf')]:
+    bad=dict(m);bad['decodedTransform']=m['decodedTransform'].copy();bad['decodedTransform'][0]=nonfinite;p.write_text(json.dumps(bad));self.assertFalse(reusable_receipt(p,**kw))
+   dsm=dict(m,status='DSM_DECODED_NOT_ADMITTED');p.write_text(json.dumps(dsm));dk=dict(kw,status='DSM_DECODED_NOT_ADMITTED');self.assertFalse(reusable_receipt(p,**dk))
+   dsm.update(validityScope='DECODED_SAMPLE_VALIDITY_ONLY',nativeContributorCompletenessVerified=False);p.write_text(json.dumps(dsm));self.assertTrue(reusable_receipt(p,**dk))
+   p.write_text(json.dumps(m))
    m['arraySha256']='0'*64;p.write_text(json.dumps(m));self.assertFalse(reusable_receipt(p,**kw))
    p.with_suffix('.npz').write_bytes(b'corrupt');self.assertFalse(reusable_receipt(p,**kw))
 if __name__=='__main__':unittest.main(verbosity=2)

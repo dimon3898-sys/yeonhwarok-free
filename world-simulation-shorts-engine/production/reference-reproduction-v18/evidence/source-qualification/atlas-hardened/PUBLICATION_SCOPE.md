@@ -1,0 +1,3 @@
+# Candidate publication scope
+
+This checkpoint publishes code, test receipts, integrity inventories and a generation index. The source rasters, large raw atlases and full generation evidence remain local qualification artifacts and are not uploaded by this commit. Therefore the index is not a deployable asset package and the verifier cannot run against Git alone. Preserve or materialize the source inventory, provide explicit input/output roots and keep all source-admission blockers. No runtime, GPU, rendering or production admission occurred. The original generation was produced by the pre-portability helper recorded in its index; changed portable helpers were separately tested without rerunning that generation.
