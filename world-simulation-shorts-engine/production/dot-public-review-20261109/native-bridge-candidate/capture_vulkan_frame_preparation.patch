@@ -1,0 +1,10 @@
+--- a/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
++++ b/recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs
+@@ -125,6 +125,7 @@
+    const diagnostics=window.__worldEngineDiagnostics;
+    const index=window.payload.segments.findIndex(s=>frame>=s.startFrame&&frame<s.endFrame),segment=window.payload.segments[index];let initialized=null;
+    if(window.currentSegment!==index)initialized=await diagnostics.run('RUNTIME_CREATE',async()=>{const nativeDiagnostics={...diagnostics,run:(operation,task,options={})=>diagnostics.run(operation,task,{...options,frame})};window.runtime?.dispose();const canvas=document.createElement('canvas');canvas.width=1080;canvas.height=1920;document.body.replaceChildren(canvas);window.runtime=await window.createRuntime({canvas,...segment,diagnostics:nativeDiagnostics});window.currentSegment=index;const{runThreeNativeDraws}=await import('/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs');const proof=await runThreeNativeDraws({runtime:window.runtime,canvas,diagnostics:nativeDiagnostics});return{...window.runtime.evidence,nativeStability:proof};},{frame});
++   if(typeof window.runtime.prepareFrame==='function')await diagnostics.run('MAP_TEXTURE_PREPARATION',()=>window.runtime.prepareFrame(frame-segment.startFrame),{frame});
+    const diagnostic=await diagnostics.run('DRAW',()=>window.runtime.drawFrame(frame-segment.startFrame),{frame});
+    const pixels=await diagnostics.run('READBACK',()=>window.runtime.readPixels(),{frame});
+    const proof=await diagnostics.run('PROOF_VALIDATION',async()=>{let nonBlackPixels=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]||pixels[i+1]||pixels[i+2])nonBlackPixels++;

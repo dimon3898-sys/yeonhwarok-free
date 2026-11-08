@@ -1,0 +1,96 @@
+{
+  "schema": "WORLD_ENGINE_DESTINATION_REUSE_REVIEW_V1",
+  "status": "FROZEN_DESTINATION_EVIDENCE_BOUND",
+  "scope": "Compare retained manifest metadata with already SHA-verified archive inventory; do not rerun historical CPU sessions.",
+  "manifestFiles": 527,
+  "matchingFiles": 527,
+  "logicalBytes": 856056347,
+  "missingCount": 0,
+  "mismatchCount": 0,
+  "missing": [],
+  "mismatches": [],
+  "deliveryProofs": [
+    {
+      "file": "FULL_STAGE_MANIFEST.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "REPIN_RECEIPT.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "DESTINATION_CPU_PROOF.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "STAGED_IMPORT_CONSTRUCTOR_RECEIPT.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "DESTINATION_SUBMISSION_REBIND.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "OPERATIONAL_PATH_AUDIT.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "ADDITIONAL_PREPARATION_INPUTS.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "CAPTURE_CODE_BINDING_AUDIT.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "PRIVATE_CONFIG_TEMPLATE.json",
+      "matchesTransferredBytes": true
+    },
+    {
+      "file": "README.md",
+      "matchesTransferredBytes": true
+    }
+  ],
+  "preservedCpuEvidence": {
+    "sessions": 4,
+    "typedWindows": 5,
+    "outsideDestinationReads": 0,
+    "constructor": "PASS_LIMITED_SCOPE_PRESERVED",
+    "rerun": false,
+    "productionAdmitted": false,
+    "externalDeploymentReadbackVerified": false
+  },
+  "currentHostMaterializationPerformed": false,
+  "gpuDeploymentMaterializationPerformed": false,
+  "limitations": [
+    "Existing destination proof applies only to its frozen staged code and paths.",
+    "New NVIDIA variant, source closure and GPU-specific browser resource pins require new qualification.",
+    "Historical prepared fixtures remain reference evidence, never production admission seeds."
+  ],
+  "namespacePlan": [
+    {
+      "role": "BASELINE_REPOSITORY",
+      "policy": "Preserve all previously qualified source and generated variants."
+    },
+    {
+      "role": "CANDIDATE_BROWSER_RESOURCES",
+      "policy": "Separate immutable pinned resource store; canonical browser URLs do not authorize disk overwrite."
+    },
+    {
+      "role": "DATA_PAYLOAD",
+      "policy": "Private source objects only; do not include in public Git or public image layers."
+    },
+    {
+      "role": "SERVER_REGISTRY",
+      "policy": "Private server-issued configuration; disabled until destination qualification."
+    },
+    {
+      "role": "CONTROL_AND_CACHE",
+      "policy": "Fresh private controller-owned namespace; separate from exports and source assets."
+    },
+    {
+      "role": "PUBLIC_EXPORT",
+      "policy": "Final authorized outputs only; never source, registry or controller files."
+    }
+  ]
+}

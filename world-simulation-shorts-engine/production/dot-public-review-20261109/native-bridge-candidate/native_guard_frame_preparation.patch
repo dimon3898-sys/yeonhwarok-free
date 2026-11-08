@@ -1,0 +1,10 @@
+--- a/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs
++++ b/recovery/codex-to-gcube-handoff-v1/backend/native_guard.mjs
+@@ -19,6 +19,7 @@
+  const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'NATIVE_GUARD',frame}):task();
+  check(frame===0&&canvas?.width===1080&&canvas?.height===1920,'GCUBE_STABILITY_INITIAL_FRAME_REQUIRED');
+  check(runtime&&typeof runtime.drawFrame==='function'&&typeof runtime.readPixels==='function'&&typeof runtime.recordNativeStability==='function','GCUBE_ACTUAL_NATIVE_RUNTIME_REQUIRED');
++ if(typeof runtime.prepareFrame==='function')await observe('MAP_TEXTURE_PREPARATION',()=>runtime.prepareFrame(frame));
+  const gl=await observe('WEBGL_CONTEXT',()=>canvas.getContext('webgl2'));
+  const{backend}=await observe('RENDERER_IDENTIFICATION',()=>assertNvidiaVulkanContext(gl)),draws=[];
+  for(let index=0;index<3;index++){
