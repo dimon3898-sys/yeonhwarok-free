@@ -130,6 +130,9 @@ export async function verifyCandidateFiles(manifest,{root,maxTotalBytes=512*1024
  const receiptData=new Map();for(const r of receipts.values()){const raw=await readAsset(canonical,r);let parsed;try{parsed=JSON.parse(raw.toString('utf8'));}catch{deny('RECEIPT_JSON_INVALID');}receiptData.set(r.sha256,parsed);}
  for(const p of products.values()){const r=receiptData.get(p.provenance.acquisitionReceiptSha256),v=p.provenance;
   check(r.schema==='WORLD_ENGINE_LOCAL_DERIVATION_RECEIPT_V1'&&r.productKind===p.kind&&r.derivedArtifactSha256===assets.get(p.assetId).sha256,'DERIVATION_RECEIPT_PRODUCT_MISMATCH');
+  check(hex(r.sourceEvidenceSha256)&&receiptData.has(r.sourceEvidenceSha256),'SOURCE_EVIDENCE_NOT_BOUND');
+  const evidence=receiptData.get(r.sourceEvidenceSha256);
+  check(evidence.schema==='WORLD_ENGINE_SOURCE_EVIDENCE_INDEX_V1'&&evidence.productionAdmitted===false&&evidence.authenticity==='PENDING'&&Array.isArray(evidence.sources)&&evidence.sources.length>0,'SOURCE_EVIDENCE_INVALID');
   check(receiptData.has(v.upstreamManifestSha256),'UPSTREAM_MANIFEST_NOT_BOUND');validateUpstreamManifest(receiptData.get(v.upstreamManifestSha256));
   for(const k of ['upstreamManifestSha256','resampling','colorMapping'])check(eq(r[k],v[k]),'DERIVATION_RECEIPT_PROVENANCE_MISMATCH');
  }

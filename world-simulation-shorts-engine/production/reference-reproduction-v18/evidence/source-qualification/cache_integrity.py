@@ -1,5 +1,5 @@
 """Fail-closed reusable decoded receipt checks; never modifies source artifacts."""
-import hashlib,json,pathlib
+import hashlib,json,pathlib,math
 
 def reusable_receipt(path, *, status, url, shape, keys, bounds):
  try:
@@ -8,9 +8,10 @@ def reusable_receipt(path, *, status, url, shape, keys, bounds):
   if m.get('status')!=status or m.get('url')!=url or m.get('decodedShape')!=shape:return False
   if hashlib.sha256(blob).hexdigest()!=m.get('npzSha256'):return False
   if m.get('sourceCRS')!='EPSG:4326':return False
+  if status=='DSM_DECODED_NOT_ADMITTED' and (m.get('validityScope')!='DECODED_SAMPLE_VALIDITY_ONLY' or m.get('nativeContributorCompletenessVerified') is not False):return False
   n=shape[-1];w,s,e,north=bounds;t=m['decodedTransform']
   expected=[(e-w)/n,0,w,0,-(north-s)/n,north,0,0,1]
-  if len(t)!=9 or any(abs(float(a)-b)>1e-10 for a,b in zip(t,expected)):return False
+  if len(t)!=9 or not all(math.isfinite(float(a)) for a in t) or any(abs(float(a)-b)>1e-10 for a,b in zip(t,expected)):return False
   with np.load(p.with_suffix('.npz'),allow_pickle=False) as z:
    for key,digest,expected_shape in keys:
     a=z[key]

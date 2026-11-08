@@ -1,10 +1,18 @@
 /** Isolated CPU proposal. No renderer import, texture edits or admission. */
 import {validateReferenceOceanProfileV4,buildReferenceOceanGlslV4} from './source/reference_ocean_material_v4.mjs';
-export const BMNG_PROFILE=Object.freeze({...validateReferenceOceanProfileV4({
+// Freeze the full validated profile, including every nested color/range array.
+function freezeProfile(value){
+ if(value!==null&&typeof value==='object'){
+  for(const child of Object.values(value))freezeProfile(child);
+  Object.freeze(value);
+ }
+ return value;
+}
+export const BMNG_PROFILE=freezeProfile(validateReferenceOceanProfileV4({
  profileName:'BMNG_SOURCE_TONE_CANDIDATE_QUALIFICATION_REQUIRED',
  sourceLumaRange:[.005,.30],sourceAnchor:.05,sourceContrast:.75,
  nearshoreMix:0,sourceChromaRetention:.35,
-}),sourceLumaRange:Object.freeze([.005,.30])});
+}));
 export const EVIDENCE=Object.freeze({status:'QUALIFICATION_REQUIRED',productionAdmitted:false,
  inputColorSpace:'SRGB_ENCODED_0_1',outputColorSpace:'SRGB_ENCODED_0_1',
  source:'PINNED_REAL_BMNG_BASELINE_ONLY',geographicDepthData:false,
