@@ -1,0 +1,58 @@
+name: WORLD ENGINE capture JSON reader image
+on:
+  push:
+    branches: [fix/capture-json-size-20261108]
+    paths: ['.github/workflows/world-engine-capture-json-size-image-once.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-capture-json-size-20261108
+  cancel-in-progress: false
+defaults:
+  run:
+    shell: bash --noprofile --norc -e -o pipefail {0}
+jobs:
+  package-image:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '9f20502b7725e11c06cd0dc01a4286aad4d930ea' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_CAPTURE_JSON_IMAGE_20261108_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 2
+          sparse-checkout: |
+            world-simulation-shorts-engine/production/capture-json-size-fix-v13
+            world-simulation-shorts-engine/recovery/reference-label-quality-v1
+      - name: Select containerd store for preserved image
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True
+          d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Reuse focused PASS and package one additive image
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JSON_SIZE_EXPECTED_PARENT: '9f20502b7725e11c06cd0dc01a4286aad4d930ea'
+        run: python3 -B world-simulation-shorts-engine/production/capture-json-size-fix-v13/build_once.py
+      - name: Preserve image preparation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: capture-json-image-${{ github.run_id }}
+          path: ${{ runner.temp }}/json-size-evidence/
+          if-no-files-found: warn
+          retention-days: 90
+# CPU packaging only. No capture, browser, encoding, GPU, deployment start or stop.
+# Old PASS and the focused CPU test PASS are reused without re-execution.
