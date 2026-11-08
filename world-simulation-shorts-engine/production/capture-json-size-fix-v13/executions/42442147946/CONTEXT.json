@@ -1,0 +1,49 @@
+{
+  "cpuResultSHA256": "fdd9fb38ea6f938cfcf1d1b05b8d4a0a95cc7a51b413b781c1e19919002e81ab",
+  "dockerfileSHA256": "56191c58575707543b8a4fdac95e95f8951a424af5a9ae2238d5ba1f7740a947",
+  "entrypoint": [
+    "/usr/bin/tini",
+    "-g",
+    "--",
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "--startup-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "--startup-manifest-sha256",
+    "f8ca6ffe790a2c5fdf71b9b0212e51947dad5326812ab6532aeb96fc6ce17ab8",
+    "--source-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "--source-manifest-sha256",
+    "c70ec44c260c73b1366c3a4e5b66285297d247f4d33739936d96887df141cdfd",
+    "--export-root",
+    "/world-storage"
+  ],
+  "gpuStarts": 0,
+  "inputsChanged": false,
+  "oldPASSReruns": 0,
+  "overlay": [
+    {
+      "bytes": 19864,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "sha256": "d5bf03d4b79d70411c02d542bbebd08d9df0463636f558f02ee271c259b6b3d9"
+    },
+    {
+      "bytes": 98645,
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "sha256": "c70ec44c260c73b1366c3a4e5b66285297d247f4d33739936d96887df141cdfd"
+    },
+    {
+      "bytes": 531,
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "sha256": "f8ca6ffe790a2c5fdf71b9b0212e51947dad5326812ab6532aeb96fc6ce17ab8"
+    }
+  ],
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:bb97c55401f25abba360f648b7f240be900ab44cbed2d9926a4ccc5a3be68726",
+  "renderersChanged": false,
+  "runtimeManifestSHA256": "c70ec44c260c73b1366c3a4e5b66285297d247f4d33739936d96887df141cdfd",
+  "schema": "WORLD_ENGINE_CAPTURE_JSON_PACKAGE_V13",
+  "scope": "Only post-capture frame-ledger reader and required source/startup hashes",
+  "startupManifestSHA256": "f8ca6ffe790a2c5fdf71b9b0212e51947dad5326812ab6532aeb96fc6ce17ab8"
+}
