@@ -1,0 +1,94 @@
+{
+  "schema": "WORLD_ENGINE_A11_CHANGED_SCOPE_VISUAL_REVIEW_V1",
+  "status": "PASS_CHANGED_SCOPE_CPU_VISUAL",
+  "reviewer": "actions_audit",
+  "sourceCommit": "5d749200684406ad66a6a381e04d5a31a3ef7b05",
+  "candidateHead": "22a93a6d952ab82ee8cd888efbcf054089c3c895",
+  "runId": 42527984819,
+  "comparisonRunId": 42526690755,
+  "scope": "One Incheon frame100. A11 changes only the candidate water-response mix to 0.20 under the existing admitted-support fade. A10 four-scene label and endpoint-boundary PASS is preserved.",
+  "visualFindings": {
+    "candidateWaterBlockContrast": "Materially reduced in the actual A11 PNG compared with A10, especially broad sea region west/southwest of Incheon.",
+    "newLandColorBleed": "No visible new land recoloring or coast displacement; conservative interior RGB mask has zero changed pixels.",
+    "labels": "Same content, positions, pins, style and alpha in actual frame diagnostics; readable and unclipped in viewed PNG.",
+    "coastGeometry": "Identical source binding and no visible new change. Existing coarse coastline is an inherited limitation outside this delta.",
+    "height": "Unchanged material policy and existing visible relief; no global DEM or GPU quality assertion."
+  },
+  "integrity": {
+    "dimensions": [
+      1080,
+      1920
+    ],
+    "pngA10SHA256": "2a72477c5f6c236d836b4b69ff7120cf1d011106a417d0d24a433edc31b95207",
+    "pngA11SHA256": "a1b04e1a416007c65a3750b11221b9e35b36cb2e9b217f95275575da1347a8bf",
+    "pngHashesMatchFrameEvidence": true,
+    "bottomUpRGBAA10SHA256": "af376f8142f24395f8339fca974be958a09442e2dc495ab7aeb6fcfe949ed11a",
+    "bottomUpRGBAA11SHA256": "116dac107f04a07c601a2068de5dc5b7cdd2913467b94dcb8a7835d41d3d5f87",
+    "rawHashesMatchFrameEvidence": true,
+    "allAlphaOpaque": true,
+    "glError": 0,
+    "fullViewportCovered": true
+  },
+  "preservedEvidence": {
+    "cameraExactEqual": true,
+    "presentationLabelsExactEqual": true,
+    "materialDiagnosticExactEqual": true,
+    "inputTraceExactEqual": true,
+    "sourceGeometryBindingExactEqual": true,
+    "featuresExactEqual": true,
+    "sourceOriginalSHA256": "e47e355c85deaeac86650df3174e19769bdd40a7ee7046980f39c8acc605a219",
+    "terrainSHA256": "73c4c7cf0d1238ccb9a26db6d3eb880c66bccf52f660d73c50d75ebde00d6116",
+    "sourceGeometryBindingSHA256": "ea6ff248c4785cd2a9a836f0c452f138629b6808eae4de559ccb4b920b95dc16",
+    "labelModuleSHA256": "6153c5a1e06f2c0e83ba4ef9e73ad623149a5e8b704ade03fb13996827fdcdf0",
+    "labelModuleSameAsA10": true,
+    "A11MaterialShaderSHA256": "1e256f15dfe0c7fefa100dbd151fcf73d00ecb30b812c6ab48c08d0dae585a03",
+    "A11MaterialModuleSHA256": "ee76669a2a1365f7e700d143f5b53b1d82cc9f0ffdcea7a6566b763e1b4c74ae",
+    "httpBindingChangedPaths": [
+      "/runtime.json",
+      "/web/map_infographic_v1/official_candidate_registration.mjs",
+      "/web/map_infographic_v1/official_material_shader.mjs"
+    ],
+    "sourceRasterBytesChanged": false,
+    "geometryChanged": false,
+    "heightPolicyChanged": false
+  },
+  "pixelComparison": {
+    "changedPixels": 559592,
+    "totalPixels": 2073600,
+    "meanAbsoluteRGBDelta": 1.6360940715020575,
+    "maxChannelDelta": 30,
+    "conservativeInteriorPredicate": "A10 R>B+10 and G>B+10, eroded by a 3x3 pixel square; this is a visual-analysis mask, not a geographic proof",
+    "conservativeInteriorPixels": 1368548,
+    "conservativeInteriorChangedPixels": 0,
+    "seaPatchROI": [
+      10,
+      1130,
+      300,
+      1450
+    ],
+    "seaPatchRGBStdA10": [
+      1.8331487644333233,
+      6.3983572561764674,
+      6.9478799306127685
+    ],
+    "seaPatchRGBStdA11": [
+      0.5634870447968177,
+      2.236925930166314,
+      2.283399801637889
+    ],
+    "seaPatchInterpretation": "Reduced local sea variation supports visual contrast improvement; not a universal metric or full-frame smoothness certification."
+  },
+  "scopeLimits": [
+    "Only changed water response is newly approved.",
+    "Existing A10 date/label/three-boundary checks are reused, not rerun.",
+    "No full 600-frame video continuity claim.",
+    "No native NVIDIA/GPU verification.",
+    "No complete DEM or reference parity claim.",
+    "No image-build, registry-publish or deployment readiness claim."
+  ],
+  "blockingFindingsInChangedScope": [],
+  "rendererRerunPerformed": false,
+  "sourceMutationPerformed": false,
+  "GPUExecuted": false,
+  "nextAuthorizedPreparation": "Prepare disabled gated build/publication/backup and RTX5090 configuration drafts tied to these exact hashes; do not trigger GPU or production deployment."
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "WORLD_ENGINE_STREAM_RECOVERY_BUILD_PREPARATION_V1",
+  "status": "DRAFT_BLOCKED_ON_NEW_NATIVE_IMAGE_CLOSURE",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "reviewedSourceBranch": "validation/dot-cpu-visual-20261109",
+  "reviewedSourceCommit": "22a93a6d952ab82ee8cd888efbcf054089c3c895",
+  "integrationBaseCommit": "5d749200684406ad66a6a381e04d5a31a3ef7b05",
+  "savePolicy": "New isolated recovery branch; preserve active source branch, main, prior PASS and existing images",
+  "visualPrerequisite": {
+    "status": "SCOPED_CPU_VISUAL_REVIEW_ACCEPTED_BY_RECOVERY_REVIEW",
+    "runs": [42525854674, 42526690755, 42527984819],
+    "scope": "Existing official sparse PNGs, stable date slot, and A11 water response contribution of 0.2 inside the already admitted footprint",
+    "a11ShaderSHA256": "1e256f15dfe0c7fefa100dbd151fcf73d00ecb30b812c6ab48c08d0dae585a03",
+    "a11ShaderModuleSHA256": "ee76669a2a1365f7e700d143f5b53b1d82cc9f0ffdcea7a6566b763e1b4c74ae",
+    "retainedLabelModuleSHA256": "6153c5a1e06f2c0e83ba4ef9e73ad623149a5e8b704ade03fb13996827fdcdf0",
+    "rawCaptureVisualQualityApproved": false,
+    "reviewInterpretation": "Acceptance is a separate limited recovery review; raw capture receipts remain unchanged. No general visual-quality, GIS redesign, 600-frame video, native GPU or deployment PASS is claimed."
+  },
+  "preservedParentImage": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:worker-launch-v16-42446481907",
+    "digest": "sha256:1ab43dd68e5ccdd364b6ec97d61d2f877070213cc42101412f45e17c54871e4b",
+    "imageReference": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:1ab43dd68e5ccdd364b6ec97d61d2f877070213cc42101412f45e17c54871e4b",
+    "checkpointPath": "world-simulation-shorts-engine/production/worker-launch-state-fix-v16/CHECKPOINT.json",
+    "buildRun": 42446481907,
+    "backupRelease": "https://github.com/dimon3898-sys/yeonhwarok-free/releases/tag/worker-launch-image-backup-42446481907",
+    "imageRepositoryRoot": "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo",
+    "installedRuntimeManifestPath": "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "installedRuntimeManifestSHA256": "659654d1cdb3b1a004e80b4fd67baa7d1b2a750abec4b66fce141dae0d2f7fa5",
+    "installedStartupManifestPath": "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "installedStartupManifestSHA256": "08f6bd6ac10d69d9f2ac31f8cacd87673f18319eba314e741195bb8878b217f6",
+    "manifestRecovery": "Use exact files from the pinned image or derive with the preserved v16 prepare.py inputs and require both published output hashes. Local V16_BASE_RUNTIME and V16_BASE_STARTUP snapshots are pre-v16 baseline inputs, not these final installed manifests."
+  },
+  "reusedBuildPath": {
+    "workflow": ".github/workflows/world-engine-worker-launch-state-image-once.yml",
+    "driver": "world-simulation-shorts-engine/production/worker-launch-state-fix-v16/build_once.py",
+    "preparer": "world-simulation-shorts-engine/production/worker-launch-state-fix-v16/prepare.py",
+    "helpers": "world-simulation-shorts-engine/recovery/reference-label-quality-v1/build_once.py",
+    "retention": "world-simulation-shorts-engine/recovery/reference-label-quality-v1/retain_quality_image.py",
+    "reuseBoundary": "Reuse proven Docker, registry, backup identity and CPU entrypoint routines in a new candidate driver. Do not invoke the old main(), reuse old one-shot activation guards, or claim its one-worker preparer packages this native candidate."
+  },
+  "buildEnvironment": {
+    "target": "Standard free GitHub-hosted Linux CPU runner in this public repository",
+    "referenceRunner": "ubuntu-24.04",
+    "localBuildHostAvailability": "Reuse BUILD_HOST_AVAILABILITY.json; no local Docker/buildctl/GHCR credential reprobe",
+    "proposedWorkflowPermissions": {"contents": "write", "packages": "write"},
+    "proposedRegistryAuthentication": "Existing per-run GITHUB_TOKEN; availability and successful scoped publication not yet demonstrated for a new run",
+    "gpuAllowed": false,
+    "newWorkflowDispatched": false
+  },
+  "blockingClosureItems": [
+    {
+      "id": "GENERATED_VARIANT_MANIFEST_PENDING",
+      "status": "BLOCKED",
+      "manifest": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/GENERATED_SOURCE_MANIFEST.json",
+      "variants": [
+        {"file": "capture_vulkan.generated.mjs", "oldRecordedSHA256": "b226b668f63ab577312e994a70e783fd3098d4deed3247baff12ac07759d559e", "candidateSHA256": "d2f000675bc75f4bfbf27df8c0c744e1fecd96440e8eb71ab31046e704db7f4c"},
+        {"file": "presentation_runtime_vulkan.generated.mjs", "oldRecordedSHA256": "58bb1ef4524e4c4afd5555a36aa41c9560297614ea86e4c398ddbee5f085b9a4", "candidateSHA256": "21ee8876db7b9c0d8bf187c604187700d78ab65192dc10c583bd112387c4a9ee"}
+      ],
+      "minimumAction": "Bind the exact reviewed candidate bytes in a new generated-source manifest, preserving unaffected variants and baseline evidence. Validate only the new generated binding."
+    },
+    {
+      "id": "NATIVE_IMAGE_RUNTIME_SOURCE_CLOSURE_PENDING",
+      "status": "BLOCKED",
+      "overlay": "world-simulation-shorts-engine/production/dot-native-integration-20261109/engine-overlay",
+      "minimumAction": "Apply reviewed native overlays to an isolated pinned-v16 source tree; qualify every changed or added executable/module dependency in the image runtime manifest. Update its exact bootstrap SOURCE_SHA pin, startup manifest and image ENTRYPOINT manifest arguments together. A controller-normalization manifest is not an image manifest.",
+      "preserve": ["v16 worker publication barrier", "existing source and image guards", "frozen universal-presentation family", "official-candidate-v1 namespace", "native NVIDIA/Vulkan draw assertion", "existing encoder and operator budget"]
+    },
+    {
+      "id": "DESTINATION_REGISTRY_AND_PRIVATE_ASSET_CLOSURE_PENDING",
+      "status": "BLOCKED",
+      "expectedScenes": 4,
+      "expectedAssetWindows": 5,
+      "minimumAction": "Derive a new native registry from the accepted A11 shader and retained date-label resources; connect the reviewed native generated runtime and native guard. Qualify exact destination resource paths, byte counts and hashes, including browser module closure and original runtimeRequestWireJSON bytes.",
+      "registryEnvironmentNames": ["WORLD_ENGINE_OFFICIAL_CANDIDATE_REGISTRY_FILE", "WORLD_ENGINE_OFFICIAL_CANDIDATE_REGISTRY_SHA256"],
+      "privateWorkspaceContract": "Canonical owned 0700 directory outside the repository and separate from public export; no symlink or writable ancestor substitution",
+      "storageDecision": "Private provenance paths and raw source bundles stay in the existing private channel. Do not include them in public GitHub files or publicly downloadable image layers without an explicit reviewed publication decision.",
+      "destinationRegistryPath": null,
+      "destinationRegistrySHA256": null
+    },
+    {
+      "id": "NEW_IMAGE_IDENTITY_AND_FINAL_INPUTS_PENDING",
+      "status": "BLOCKED",
+      "minimumAction": "After closure qualification, prepare unique-tag additive packaging, verify installed changed sources and actual ENTRYPOINT on CPU without service/GPU start, retain the exact image, then publish and compare immutable digest identity. Final PART_01/PART_02 inputs must bind that new image and the final native registry; current CPU inputs contain a nondeployable image placeholder."
+    }
+  ],
+  "orderedExecutionAfterClosure": [
+    "Record a new prebuild closure result for exact source, accepted visual variants and private destination; reuse all unaffected PASS evidence.",
+    "Prepare a new single-attempt workflow with repository/branch/exact-parent guards, an isolated concurrency group and standard CPU runner; preserve original active work.",
+    "Read back pinned v16 parent and require the proposed new tag to be absent; reserve a distinct backup target.",
+    "Build one additive linux/amd64 image using the approved context; do not start a GPU, Studio service, capture or encoding task.",
+    "Verify changed installed source closure and actual tini/bootstrap entrypoint to the intentional missing-owner boundary with no network and NVIDIA_VISIBLE_DEVICES=void.",
+    "Archive the exact candidate image, verify archive identity and save evidence before publication; use private retention for any private payload.",
+    "Publish a unique immutable GHCR candidate tag and verify the remote digest, config and layers match the retained image; preserve old tags.",
+    "Finalize both input JSONs and RTX5090 draft values from the proven image digest and registry; save and reread settings only after prerequisites pass.",
+    "User alone performs actual deployment, rendering, result download and stop."
+  ],
+  "newImage": null,
+  "newImageDigest": null,
+  "newBackup": null,
+  "finalInputFiles": [],
+  "deploymentReady": false,
+  "executionCounts": {"builds": 0, "publications": 0, "workflowDispatches": 0, "gpuStarts": 0, "renders": 0, "deploymentChanges": 0, "oldPASSReruns": 0},
+  "workflowDraftState": "Concrete preparation plan only; an executable image workflow must not be represented as finished until the candidate context, closure verifier and private destination inputs exist."
+}

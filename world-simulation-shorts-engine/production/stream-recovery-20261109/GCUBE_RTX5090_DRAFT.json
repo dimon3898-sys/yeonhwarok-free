@@ -1,0 +1,77 @@
+{
+  "schema": "WORLD_ENGINE_STREAM_RECOVERY_RTX5090_DRAFT_V1",
+  "status": "DRAFT_NOT_APPLIED_NOT_DEPLOYMENT_READY",
+  "workload": 5373,
+  "name": "world-engine-test",
+  "url": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+  "evidence": {
+    "latestSavedImageReceipt": "world-simulation-shorts-engine/production/worker-launch-state-fix-v16/GCUBE_SETTINGS_RECEIPT.json",
+    "hardwareAndHistoricalPolicyReceipt": "world-simulation-shorts-engine/production/korean-war-20s-rtx5090-v12/GCUBE_SETTINGS_RECEIPT.json",
+    "evidenceRef": "5cb69ad8c6d7deb4eab97e1be0d55616803d047e",
+    "currentLiveUIReadback": false,
+    "interpretation": "Preservation baseline from prior saved receipts; current live configuration, inventory, price, driver and persistent mount have not been rechecked."
+  },
+  "latestRecordedImage": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:worker-launch-v16-42446481907",
+    "digest": "sha256:1ab43dd68e5ccdd364b6ec97d61d2f877070213cc42101412f45e17c54871e4b",
+    "role": "PRESERVE_UNTIL_NEW_IMAGE_AND_BACKUP_IDENTITY_PASS"
+  },
+  "newImage": null,
+  "newImageDigest": null,
+  "newImageBackup": null,
+  "proposedHardwareAndSettings": {
+    "gpu": {"tier": 2, "model": "RTX 5090", "count": 1, "vramGB": 32},
+    "vCPU": 12,
+    "ramGB": 63,
+    "replicas": 1,
+    "containerPort": 8080,
+    "commandOverride": "",
+    "entrypointOverride": null,
+    "entrypointPolicy": "Use new image's verified tini/bootstrap entrypoint; no command or entrypoint bypass",
+    "storageMount": "/world-storage",
+    "storageProvider": "dropbox",
+    "storageName": "world-engine-test",
+    "sharedMemoryGB": 3,
+    "concurrency": 4,
+    "istio": true,
+    "sessionAffinityL7": false,
+    "minimumCudaVersion": null
+  },
+  "historicalPricingOnly": {
+    "recordedAtKST": "2026-11-08T11:39:42.217004+09:00",
+    "displayedHourlyPriceKRW": [910, 1300],
+    "vat": "Excluded in the historical displayed price",
+    "currentPriceVerified": false,
+    "policyAction": "Preserve current operator policy and owner authentication; do not enlarge budget, retry allowance or GPU authorization."
+  },
+  "environmentChangesPendingEvidence": [
+    {"name": "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST", "value": null, "requiredEvidence": "New published digest identical to verified retained candidate"},
+    {"name": "WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST", "value": null, "requiredEvidence": "Same exact new published digest"},
+    {"name": "WORLD_ENGINE_OFFICIAL_CANDIDATE_REGISTRY_FILE", "value": null, "requiredEvidence": "Qualified private runtime destination registry path"},
+    {"name": "WORLD_ENGINE_OFFICIAL_CANDIDATE_REGISTRY_SHA256", "value": null, "requiredEvidence": "Exact qualified registry bytes including accepted visual resources and native closure"}
+  ],
+  "preserveOtherEnvironment": true,
+  "secretValuesRecorded": false,
+  "requiredBeforeSaving": [
+    "New generated-source, full native runtime and startup closure PASS",
+    "Private destination registry/resource qualification PASS",
+    "Installed changed-source and actual CPU ENTRYPOINT boundary PASS for the new image",
+    "Exact image backup identity and immutable GHCR digest readback PASS",
+    "Final two 10-second input JSONs bound to that exact image and registry",
+    "Read current live form and preserve any newer user changes before saving"
+  ],
+  "saveReadbackChecks": [
+    "New image tag and both image-digest environment values agree",
+    "Candidate registry path and SHA256 agree with qualified private destination",
+    "GPU remains RTX5090 x1; old image tags remain untouched",
+    "Port remains 8080 after image validation; the earlier UI once reset it to 8000",
+    "Storage mount, command, authentication and other settings are preserved",
+    "Workload remains stopped with no new deployment start"
+  ],
+  "executionOwnership": {"deployment": "USER_ONLY", "rendering": "USER_ONLY", "download": "USER", "stop": "USER_ONLY"},
+  "paidGpuExecutionAuthorizedToWork": false,
+  "liveSettingsApplied": false,
+  "deploymentReady": false,
+  "finalInputFiles": [],
+  "executionCounts": {"gpuStarts": 0, "renders": 0, "deploymentStarts": 0, "deploymentStops": 0, "settingsChanges": 0}
+}

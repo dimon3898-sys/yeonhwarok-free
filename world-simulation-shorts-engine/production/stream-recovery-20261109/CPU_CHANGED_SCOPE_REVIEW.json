@@ -1,0 +1,59 @@
+{
+  "schema": "WORLD_ENGINE_RECOVERED_CHANGED_SCOPE_REVIEW_V1",
+  "status": "PASS_CPU_CHANGED_SCOPE_ONLY",
+  "sourceBranch": "validation/dot-cpu-visual-20261109",
+  "sourceCommit": "22a93a6d952ab82ee8cd888efbcf054089c3c895",
+  "scope": "A10 label/scene-boundary review plus A11 restricted water-material refinement. No all-frame, native-GPU, historical-data, or reference-parity certification.",
+  "evidenceRuns": [
+    42526690755,
+    42527984819
+  ],
+  "A10": {
+    "runStatus": "SUCCESS",
+    "actualPNGs": 12,
+    "labelsReadable": true,
+    "all3Boundaries": [
+      {
+        "boundary": "part1_scene1->part1_scene2",
+        "cameraBoundsEqual": true,
+        "labelsEqual": true
+      },
+      {
+        "boundary": "part1_scene2->part2_scene1",
+        "cameraBoundsEqual": true,
+        "labelsEqual": true
+      },
+      {
+        "boundary": "part2_scene1->part2_scene2",
+        "cameraBoundsEqual": true,
+        "labelsEqual": true
+      }
+    ],
+    "retainedWithoutRerender": true
+  },
+  "A11": {
+    "runStatus": "SUCCESS",
+    "actualPNGs": 1,
+    "frame": "part1_scene2 FRAME_100",
+    "pngSHA256": "a1b04e1a416007c65a3750b11221b9e35b36cb2e9b217f95275575da1347a8bf",
+    "archiveSHA256": "1d1428c008bccd1ff2d70f549ce6c4ec742b342281863e5fd2b047f13406c209",
+    "waterResponseMix": 0.2,
+    "shaderSHA256": "1e256f15dfe0c7fefa100dbd151fcf73d00ecb30b812c6ab48c08d0dae585a03",
+    "moduleSHA256": "ee76669a2a1365f7e700d143f5b53b1d82cc9f0ffdcea7a6566b763e1b4c74ae",
+    "labelSHA256": "6153c5a1e06f2c0e83ba4ef9e73ad623149a5e8b704ade03fb13996827fdcdf0",
+    "observed": "Large square water-tone contrast is reduced; no new visible land recoloring or coastal bleed in the sampled frame. Labels, camera and geometry are retained.",
+    "analysisLimitation": "Color-subset analysis is a conservative sanity check, not a complete GIS identity assertion."
+  },
+  "preservedLimitations": [
+    "Inherited coarse GIS coastline and faint context outline are outside this material/label delta; not redesigned or certified reference quality.",
+    "Height lighting uses existing source eligibility; initial 4 samples use guarded fallback, subsequent 8 enabled.",
+    "A11 checks one affected frame; A10 full set is preserved, not rerun."
+  ],
+  "noOldPASSInvalidated": true,
+  "oldPASSReruns": 0,
+  "newWorkflowExecutionsByRecovery": 0,
+  "gpuStarts": 0,
+  "imageBuilds": 0,
+  "deploymentReady": false,
+  "nextGate": "Qualify exact new native runtime/source/registry closure and candidate image manifests before build/publication."
+}
