@@ -7,6 +7,7 @@ const probe=process.argv[2], staging=process.argv[3];
 const {sealSceneChunks}=await import(pathToFileURL(path.join(probe,'closure/world-simulation-shorts-engine/recovery/universal-presentation-v2/sealed_scene_chunks.mjs')));
 const activations=JSON.parse(await readFile(path.join(staging,'DESTINATION_ACTIVATIONS.json')));
 const cases=[];
+const remainingFrames=new Map([['part1_scene2',[75,149]],['part2_scene1',[0,75,149]],['part2_scene2',[0,75,149]]]);
 for(let part=1;part<=2;part++){
  const submission=JSON.parse(await readFile(path.join(staging,'inputs',`ORIGIN_SUBMISSION_0${part}.json`)));
  const wire=submission.sourcePipeline.runtimeRequestWireJSON;
@@ -15,6 +16,7 @@ for(let part=1;part<=2;part++){
  const selected=activations.find(a=>a.originalSemanticSHA256===plan.originalSHA256);
  if(!selected)throw Error('EXISTING_ACTIVATION_MISSING');
  for(const [index,chunk] of plan.chunks.entries()){
+  const caseName=`part${part}_scene${index+1}`;if(!remainingFrames.has(caseName))continue;
   const activation=selected.activation, activationSHA256=selected.activationSHA256;
   if(typeof activationSHA256!=='string')throw Error('EXISTING_ACTIVATION_PIN_MISSING');
   const binding=activation.chunks.find(c=>c.chunkRequestSHA256===chunk.requestSHA256);
@@ -22,8 +24,8 @@ for(let part=1;part<=2;part++){
   const envelope={schema:'WORLD_ENGINE_OFFICIAL_SCENE_CHUNK_CAPTURE_V1',plan,chunk,candidateActivation:activation,candidateActivationSHA256:activationSHA256};
   const name=`part${part}_scene${index+1}`, file=path.join(probe,name+'.json'),raw=JSON.stringify(envelope);
   await writeFile(file,raw,{flag:'wx',mode:0o600});
-  cases.push({name,part,scene:index+1,globalOffset:(part-1)*300+chunk.globalRange[0],config:{packageFile:file,expectedSHA256:createHash('sha256').update(raw).digest('hex'),expectedOriginalSHA256:plan.originalSHA256,expectedSourceQualificationSHA256:binding.nativeSourceQualificationSHA256,outputRoot:path.join(probe,name+'_output'),depsRoot:process.env.CPU_DEPS_ROOT,probeFrames:[0,75,149]}});
+  cases.push({name,part,scene:index+1,globalOffset:(part-1)*300+chunk.globalRange[0],config:{packageFile:file,expectedSHA256:createHash('sha256').update(raw).digest('hex'),expectedOriginalSHA256:plan.originalSHA256,expectedSourceQualificationSHA256:binding.nativeSourceQualificationSHA256,outputRoot:path.join(probe,name+'_output'),depsRoot:process.env.CPU_DEPS_ROOT,probeFrames:remainingFrames.get(name)}});
  }
 }
-if(cases.length!==4)throw Error('EXACT_FOUR_SCENES_REQUIRED');
+if(cases.length!==3)throw Error('EXACT_REMAINING_THREE_SCENES_REQUIRED');
 await writeFile(path.join(probe,'FRAME_CASES.json'),JSON.stringify(cases),{flag:'wx',mode:0o600});

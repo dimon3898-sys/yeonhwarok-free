@@ -2,7 +2,7 @@
   "schema": "WORLD_ENGINE_CPU_VISUAL_CONTINUATION_V1",
   "baseCommit": "5d749200684406ad66a6a381e04d5a31a3ef7b05",
   "reusedNewerWorkCommit": "581776cbe0fedc1e649bdd30ff5f98c8eaa123da",
-  "status": "CPU_HOST_AND_OFFICIAL_PNG_PASS_FOUR_SCENE_REVIEW_PENDING",
+  "status": "FIVE_OFFICIAL_PNGS_PRESERVED_REMAINING_CAPTURE_PENDING",
   "cpuHostRun": 42524060787,
   "previousFailedRun": 42523576309,
   "confirmedCause": {
@@ -12,12 +12,12 @@
     "unixSocketIssueResolvedOnNewHost": true
   },
   "minimalChange": "Probe supervisor aggregate budget 2 GiB -> 4 GiB with 6 GiB available-memory prerequisite; existing process/time limits and browser sandbox preserved.",
-  "rerunScope": "12 previously unrendered frames: per scene 0,75,149; prior Incheon frame100 is preserved.",
+  "rerunScope": "Only not-yet-captured frames: Incheon 75/149, advance 0/75/149, Seoul 0/75/149",
   "rendererChanged": false,
   "sourceDataPublished": false,
   "gpuExecuted": false,
   "deploymentReady": false,
-  "earliestIncomplete": "Actual official scene PNG output and visual review",
+  "earliestIncomplete": "Read private failure receipt for Incheon frame75; preserve completed new frames.",
   "oneFrameRun": 42524272844,
   "oneFrameSHA256": "68ca79d738a3201dbf3d993f9bcdb50aaf943fb7b16726ab1dd633e0f1ac7e4b",
   "confirmedCauseResolved": true,
@@ -31,5 +31,29 @@
     "cause": "Sorted metadata object changed insertion order; preserve the original runtimeRequestWireJSON and its wire SHA256.",
     "fix": "Restore original wire bytes; all four new capture envelopes prepared successfully.",
     "oldPASSInvalidated": false
+  },
+  "latestScreenRun": 42525089389,
+  "technicalFrameProgress": {
+    "newFrames": 4,
+    "part1Scene1": [
+      0,
+      75,
+      149
+    ],
+    "part1Scene2": [
+      0
+    ],
+    "preservedPart1Scene2": [
+      100
+    ]
+  },
+  "confirmedNewCause": {
+    "run": 42525089389,
+    "code": "UP2_SOFTWARE_REVIEW_DEADLINE_EXCEEDED",
+    "aggregateRSSPeakBytes": 2854825984,
+    "memoryLimitExceeded": false,
+    "captureElapsedSeconds": 56.421597286,
+    "supervisorWallSeconds": 180,
+    "minimumFix": "300 second per-case bound, unchanged 4 GiB memory guard, skip every completed frame"
   }
 }

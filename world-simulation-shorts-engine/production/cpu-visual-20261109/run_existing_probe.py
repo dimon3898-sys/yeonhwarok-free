@@ -83,28 +83,31 @@ def main():
     receipt_old = b"'aggregateRSSMonitorBytes':2*1024**3"
     assert supervisor_before.count(limit_old) == 1 and supervisor_before.count(receipt_old) == 1
     supervisor_after = supervisor_before.replace(limit_old, b'memory_exceeded=total>4*1024**3').replace(receipt_old, b"'aggregateRSSMonitorBytes':4*1024**3")
+    for old, new in [(b'(175,180)', b'(295,300)'), (b'deadline=time.monotonic()+180', b'deadline=time.monotonic()+300'), (b"'wallSeconds':180", b"'wallSeconds':300")]:
+        assert supervisor_after.count(old) == 1
+        supervisor_after = supervisor_after.replace(old, new)
     supervisor_file.write_bytes(supervisor_after)
-    host_adapter['supervisor'] = {'reason': 'Run 42523576309 owned RSS 2200928256 exceeded old 2147483648 byte CPU probe budget', 'beforeSHA256': hashlib.sha256(supervisor_before).hexdigest(), 'afterSHA256': hashlib.sha256(supervisor_after).hexdigest(), 'oldAggregateBytes': 2*1024**3, 'aggregateBytes': 4*1024**3, 'hostAvailableBytes': available, 'perProcessAndTimeLimitsUnchanged': True}
+    host_adapter['supervisor'] = {'reason': 'Run 42523576309 owned RSS 2200928256 exceeded old 2147483648 byte CPU probe budget', 'beforeSHA256': hashlib.sha256(supervisor_before).hexdigest(), 'afterSHA256': hashlib.sha256(supervisor_after).hexdigest(), 'oldAggregateBytes': 2*1024**3, 'aggregateBytes': 4*1024**3, 'hostAvailableBytes': available, 'perProcessMemoryLimitUnchanged': True, 'wallSeconds': 300, 'perProcessCPUSeconds': [295,300], 'deadlineReason': 'Run 42525089389 includes source admission before draw; the 180 second supervisor expired after 56 seconds of capture.'}
     child_env = {k: v for k, v in os.environ.items() if 'TOKEN' not in k and 'SECRET' not in k and 'APP_KEY' not in k and 'BACKUP_KEY' not in k}
     setup = subprocess.run(['node', str(Path(__file__).with_name('prepare_frame_cases.mjs')), str(probe), str(probe.parent / 'world_engine_destination_rehearsal')], env=child_env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=240, check=False)
     if setup.returncode:
         (temp / 'private-case-preparation.log').write_bytes(setup.stdout + setup.stderr)
         raise RuntimeError('EXISTING_FRAME_CASE_PREPARATION_FAILED')
     cases = json.loads((probe / 'FRAME_CASES.json').read_text())
-    assert len(cases) == 4
+    assert len(cases) == 3
     report = {'schema': 'WORLD_ENGINE_FOUR_SCENE_CPU_SCREEN_V1', 'sourceCommit': '5d749200684406ad66a6a381e04d5a31a3ef7b05',
         'inputTransfer': transfer, 'transferredEntries': entries, 'hostAdapter': host_adapter, 'runId': os.environ['GITHUB_RUN_ID'],
         'renderedFrames': 0, 'cases': [], 'oldTestsRerun': False, 'gpuExecuted': False,
-        'visualQualityApproved': False, 'preservedOneFrameRun': 42524272844}
+        'visualQualityApproved': False, 'preservedOneFrameRun': 42524272844, 'preservedFourFrameRun': 42525089389}
     archive_out = temp / ('KW20_CPU_SCREEN_RESULT_' + os.environ['GITHUB_RUN_ID'] + '.zip')
     with zipfile.ZipFile(archive_out, 'x', zipfile.ZIP_DEFLATED) as z:
         for case in cases:
             config = case['config']
-            assert config['probeFrames'] == [0, 75, 149]
+            assert config['probeFrames'] == ([75,149] if case['name'] == 'part1_scene2' else [0,75,149])
             (probe / 'PROBE_CONFIG.json').write_text(json.dumps(config, indent=2) + '\n')
             with (temp / 'private-supervision.log').open('wb') as log:
                 run = subprocess.run([sys.executable, str(probe / 'supervise_probe.py')], env=child_env,
-                    stdout=log, stderr=subprocess.STDOUT, timeout=220, check=False)
+                    stdout=log, stderr=subprocess.STDOUT, timeout=340, check=False)
             out = Path(config['outputRoot'])
             capture = json.loads((out / 'CAPTURE_RECEIPT.json').read_text()) if (out / 'CAPTURE_RECEIPT.json').exists() else {}
             result = {'name': case['name'], 'globalOffset': case['globalOffset'], 'probeFrames': config['probeFrames'],
@@ -117,13 +120,13 @@ def main():
             for name in ['SUPERVISION_RECEIPT.json', 'probe_stdout.log', 'probe_stderr.log']:
                 if (probe / name).is_file(): z.write(probe / name, case['name'] + '/' + name)
             z.write(temp / 'private-supervision.log', case['name'] + '/private-supervision.log')
-            if result['captureStatus'] != 'ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO' or result['renderedFrames'] != 3:
+            if result['captureStatus'] != 'ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO' or result['renderedFrames'] != len(config['probeFrames']):
                 break
         report['movieCreated'] = bool(list(probe.rglob('*.mp4')))
         z.writestr('CPU_SCREEN_RESULT.json', json.dumps(report, indent=2))
     report['privateResult'] = upload_result(access, archive_out, str(PurePosixPath(selected['path_lower']).parent))
     print(json.dumps(report), flush=True)
-    return 0 if report['renderedFrames'] == 12 and len(report['cases']) == 4 and not report['movieCreated'] else 1
+    return 0 if report['renderedFrames'] == 8 and len(report['cases']) == 3 and not report['movieCreated'] else 1
 
 
 if __name__ == '__main__':
