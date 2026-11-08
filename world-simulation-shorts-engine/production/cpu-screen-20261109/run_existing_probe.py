@@ -63,6 +63,16 @@ def main():
     selected = {}
     transfer = download_exact(access, sys.argv[1], sys.argv[2], archive, selected)
     entries, probe = restore(archive)
+    capture_source = probe / 'closure/world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs'
+    before = capture_source.read_bytes()
+    assert hashlib.sha256(before).hexdigest() == '39e698d181346e57852640a7cf62282629af0500290f982cb3c59cb122b7624c'
+    old = b"executablePath:'/usr/bin/chromium'"
+    assert before.count(old) == 1
+    # Use the already verified normal Chrome installation; retain sandbox and all flags.
+    after = before.replace(old, b"executablePath:'/usr/bin/google-chrome'")
+    capture_source.write_bytes(after)
+    host_adapter = {'scope': 'BROWSER_EXECUTABLE_LOCATION_ONLY', 'beforeSHA256': hashlib.sha256(before).hexdigest(),
+                    'afterSHA256': hashlib.sha256(after).hexdigest(), 'sandboxAndFlagsUnchanged': True}
     config_file = probe / 'PROBE_CONFIG.json'
     config = json.loads(config_file.read_text())
     # Dependency location only. Scene, frame, original, source, and module pins stay fixed.
@@ -76,7 +86,7 @@ def main():
     out = probe / 'probe_output'
     capture = json.loads((out / 'CAPTURE_RECEIPT.json').read_text()) if (out / 'CAPTURE_RECEIPT.json').exists() else {}
     report = {'schema': 'WORLD_ENGINE_NORMAL_CPU_SCREEN_RESULT_V1', 'sourceCommit': '5d749200684406ad66a6a381e04d5a31a3ef7b05',
-        'inputTransfer': transfer, 'transferredEntries': entries, 'runId': os.environ['GITHUB_RUN_ID'],
+        'inputTransfer': transfer, 'transferredEntries': entries, 'hostAdapter': host_adapter, 'runId': os.environ['GITHUB_RUN_ID'],
         'renderedFrames': capture.get('renderedFrames', 0), 'captureStatus': capture.get('status', 'NO_CAPTURE_RECEIPT'),
         'oldTestsRerun': False, 'gpuExecuted': False, 'movieCreated': bool(list(probe.rglob('*.mp4'))),
         'visualQualityApproved': False, 'normalBrowserProofRun': 42522754078, 'privateChannelProofRun': 42523065120}
