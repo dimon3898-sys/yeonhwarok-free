@@ -1,0 +1,48 @@
+ok
+test_checksum_mismatch_rejected (__main__.FrameEvidenceBoundary.test_checksum_mismatch_rejected) ... ok
+test_duplicate_and_nonfinite_json_rejected (__main__.FrameEvidenceBoundary.test_duplicate_and_nonfinite_json_rejected) ... ok
+test_empty_and_over_cap_rejected_before_read (__main__.FrameEvidenceBoundary.test_empty_and_over_cap_rejected_before_read) ... ok
+test_existing_small_180_frame_document (__main__.FrameEvidenceBoundary.test_existing_small_180_frame_document) ... ok
+test_inode_replacement_during_read_rejected (__main__.FrameEvidenceBoundary.test_inode_replacement_during_read_rejected) ... FAIL
+test_other_documents_keep_original_limit (__main__.FrameEvidenceBoundary.test_other_documents_keep_original_limit) ... ok
+test_public_permissions_rejected (__main__.FrameEvidenceBoundary.test_public_permissions_rejected) ... ok
+test_reference_name_and_frame_scope_rejected (__main__.FrameEvidenceBoundary.test_reference_name_and_frame_scope_rejected) ... ok
+test_symlink_and_hardlink_rejected (__main__.FrameEvidenceBoundary.test_symlink_and_hardlink_rejected) ... ok
+
+======================================================================
+FAIL: test_inode_replacement_during_read_rejected (__main__.FrameEvidenceBoundary.test_inode_replacement_during_read_rejected)
+----------------------------------------------------------------------
+size_boundary_original_cache.CacheError: PRIVATE_PATH_REQUIRED
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/scratch/fa7212bcdde1/deployment-prep-repo/world-simulation-shorts-engine/production/capture-json-size-fix-v13/test_frame_evidence.py", line 131, in test_inode_replacement_during_read_rejected
+    with self.assertRaisesRegex(RuntimeError, 'CHANGED_DURING_READ'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "CHANGED_DURING_READ" does not match "PRIVATE_PATH_REQUIRED"
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.231s
+
+FAILED (failures=1)
+{
+  "status": "FAIL",
+  "testsRun": 10,
+  "failures": 1,
+  "errors": 0,
+  "scope": "NEW_FRAME_EVIDENCE_READER_BOUNDARY_ONLY",
+  "oldPASSReruns": 0,
+  "rendererExecutions": 0,
+  "gpuStarts": 0,
+  "mediaEncodes": 0,
+  "installedImageValidation": "NOT_RUN",
+  "fixtureBytes": 47057408,
+  "frozenLimitBytes": 33554432,
+  "sourceSHA256": "8942fe992a6ab841ef849ccc392ad13e4c3172d68c9e525c03b823a6df40bcc9",
+  "sourceFrame": 192,
+  "baselineError": "JSON_SIZE_INVALID",
+  "candidateRoundTrip": "IDENTICAL",
+  "actualIncidentFileSize": "UNKNOWN",
+  "syntheticFixtureNotRendered": true
+}
