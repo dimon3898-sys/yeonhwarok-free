@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
-const [root,preparedFile,output,depsRoot]=process.argv.slice(2);
+const [root,preparedFile,output,depsRoot,candidateFile]=process.argv.slice(2);
 assert([root,preparedFile,output,depsRoot].every(path.isAbsolute));
 await fs.mkdir(output,{recursive:false});
 const require=createRequire(path.join(depsRoot,'package.json'));
@@ -13,9 +13,18 @@ assert(GlobalFonts.registerFromPath(path.join(root,'world-simulation-shorts-engi
 const context=createCanvas(1080,1920).getContext('2d');
 const engine=path.join(root,'world-simulation-shorts-engine/recovery/universal-presentation-v2');
 const {layoutLabels}=await import(pathToFileURL(path.join(engine,'presentation_label_layer.mjs')));
-const {projectBounds,presentationReplacesHighlightMarker,resolvePresentationMarkerLayout}=await import(pathToFileURL(path.join(engine,'presentation_plan.mjs')));
+const {projectBounds,presentationReplacesHighlightMarker,resolvePresentationMarkerLayout,validatePresentation}=await import(pathToFileURL(path.join(engine,'presentation_plan.mjs')));
 const payload=JSON.parse(await fs.readFile(preparedFile,'utf8'));
 assert(payload.totalFrames===300&&payload.segments.length===2);
+if(candidateFile){
+ const candidate=JSON.parse(await fs.readFile(candidateFile,'utf8'));
+ const {sceneOverrides,...shared}=candidate.presentation;
+ for(const segment of payload.segments){
+  const p=validatePresentation({...shared,...sceneOverrides?.[segment.sceneId]},{scene:segment.scene,region:candidate.region});
+  assert.deepEqual(p.camera,segment.presentationPlan.presentation.camera,'LAYOUT_REUSE_REQUIRES_UNCHANGED_CAMERA');
+  segment.presentationPlan.presentation=p;
+ }
+}
 const frames=[],failures=[];
 for(const segment of payload.segments){
  let previous=null;
@@ -43,7 +52,8 @@ for(const segment of payload.segments){
 const summary={status:failures.length?'FAIL_CHANGED_INPUT_LAYOUT':'PASS_CHANGED_INPUT_LAYOUT_SKIA',frames:frames.length,
  noActiveLabelFrames:frames.filter(f=>!f.active.length).length,unexpectedSuppressionFrames:failures.length,
  heroVisibleFrames:frames.filter(f=>f.drawn.some(x=>x.pin==='HERO'&&x.pinDrawn)).length,
- measurement:'Existing layout with pinned font via @napi-rs/canvas; Chromium pixels still required',failures,
+ measurement:'Existing layout with pinned font via @napi-rs/canvas; Chromium pixels still required',
+ scope:candidateFile?'NEW_CANDIDATE_LABELS_OVER_IDENTICAL_PREPARED_CAMERAS_FORMAL_ADMISSION_PENDING':'FORMALLY_ADMITTED_NEW_INPUT_LAYOUT',failures,
  gpuStarts:0,renders:0,oldPASSReruns:0,referenceQualityApproved:false};
 await fs.writeFile(path.join(output,'LAYOUT_300.json'),JSON.stringify({summary,frames},null,2)+'\n',{flag:'wx'});
 await fs.writeFile(path.join(output,'LAYOUT_RESULT.json'),JSON.stringify(summary,null,2)+'\n',{flag:'wx'});

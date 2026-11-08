@@ -13,7 +13,7 @@ jobs:
   changed-input-diagnostics:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
-      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE_V18_NEW_INPUT_DIAGNOSTICS_A1'
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE_V18_CHANGED_SEAMS_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -40,6 +40,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
       - name: New-input sparse CPU diagnostics, no MP4 or GPU
+        env:
+          REFERENCE_MANIFEST: READY_A4_MANIFEST.json
         run: python3 -B world-simulation-shorts-engine/production/reference-reproduction-v18/run_diagnostic.py
       - uses: actions/upload-artifact@v4
         if: always()
