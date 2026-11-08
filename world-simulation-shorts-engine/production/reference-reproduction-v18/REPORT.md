@@ -39,7 +39,7 @@ https://github.com/dimon3898-sys/yeonhwarok-free/actions/runs/42451652447
 
 Artifact 13605413527 SHA256 0858bafed9f039cd883fef462510bf84d73cbccb2813d0fe0c20fa316bc447da.
 Artifact 13605708512 SHA256 2b4f8d2419e5998d72b922b05a4e617cd30788b00af0f85e981507cf043836c9.
-Summaries and a selected diagnostic PNG are retained in this repository as well.
+Summaries are retained in this repository. Diagnostic PNGs remain in the linked Actions artifacts.
 
 Sparse stills skip intermediate layout history. Their date positions can therefore
 differ from a continuous capture; they demonstrate pixel styling and source output,
@@ -70,3 +70,19 @@ quality or GPU readiness.
 
 Runtime source changes 0; image builds 0; deployment changes 0; GPU starts 0;
 Studio renders 0; MP4 encodes 0; old PASS suites rerun 0.
+
+## Resumed Work on 2026-11-08
+
+Recovered unpublished completed evidence at eaf477e without running old checks.
+The preserved A1 layout failure contains 3 frames (100–102), not the 32 frames
+reported in the handoff summary. The separate reported 113 PASS has no located
+original suite receipt and is not promoted to a newly verified result.
+
+One Copernicus GLO-30 Incheon tile was acquired and decoded (3600×3600 Float32,
+EPSG:4326, no missing or nonfinite samples). This is one modern DSM tile only.
+EOX2016 imagery was downloaded and rejected: conspicuous white gap, clouds,
+and visible coastal mosaic seams. It also does not cover the initial wide view.
+No candidate source was installed, no production runtime was changed, and no
+new image, diagnostic render, MP4, or GPU run was made by resumed Work.
+See SOURCE_QUALIFICATION.md and evidence/source-qualification for the exact
+URLs, hashes, source scope, and minimum remaining implementation boundaries.
