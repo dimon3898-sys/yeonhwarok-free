@@ -1,0 +1,143 @@
+{
+  "schema": "WORLD_ENGINE_SOURCE_INTERSECTION_RECOMPUTATION_REVIEW_V1",
+  "reviewedAtUTC": "2026-11-11T17:43:50.785529+00:00",
+  "decision": "ACCEPT_NAMED_SOURCE_PROVEN_RECOMPUTATIONS_ONLY_NOT_GENERAL_SNAP_OR_RUNTIME_ADMISSION",
+  "scope": "Read-only code and existing proof/result review for newly identified Boolean floating-point intersection artifacts; no geometry tests, source conversion or existing PASS rerun",
+  "sourceDataPubliclyIncluded": false,
+  "proofAndImplementationIdentities": [
+    {
+      "name": "FRAME0636_EXACT_SOURCE_INTERSECTION_PROOF.json",
+      "sha256": "59b9b75f0ad39e30417a5e023acf18b6b9caf573151f2c13ba5cb29f98d3ed69"
+    },
+    {
+      "name": "FRAME0842_EXACT_SOURCE_INTERSECTION_PROOF.json",
+      "sha256": "630ee5c1433584e809462fe5b61d39f662482698d27cdf584ef7f42b5fa1d273"
+    },
+    {
+      "name": "FRAME0842_0962_SHARED_BOUNDARY_PROOF_EXTENSION.json",
+      "sha256": "ffd0a579e5e90db30ee15b3403ebaaf82bb3eebb04b8b18e86416c88e274dbd2"
+    },
+    {
+      "name": "EXACT_SOURCE_INTERSECTION_CANONICALIZATION_MAP.json",
+      "sha256": "60af5261e14dfd8c9808904318302b15ebab061a1c752e370b5488b700275900"
+    },
+    {
+      "name": "EXACT_SOURCE_INTERSECTION_MAP_FRAME0842_0962_V2.json",
+      "sha256": "a9db9d3b1dbc64ac121b8db1b13bb25b4b2494313928ae1af95341bb8a56f518"
+    },
+    {
+      "name": "FRAME0636_SOURCE_INTERSECTION_CANONICALIZATION_RESULT.json",
+      "sha256": "8a094ae13f782a048ec26c1a0099819df7cfcdf3f5fdff67b5ccd37048d4b863"
+    },
+    {
+      "name": "FRAME0842_SOURCE_INTERSECTION_CANONICALIZATION_V2_RESULT.json",
+      "sha256": "1bffdc13d7cf373ee8b7ff9d36e07c1bd8e76bd733be2db6c1a602923fbdfc7b"
+    },
+    {
+      "name": "FRAME0962_SOURCE_INTERSECTION_CANONICALIZATION_V2_RESULT.json",
+      "sha256": "f4386c4c45e25ce35c0568cb83395ae6f903ccce112eda736d0d5162ea9831c8"
+    },
+    {
+      "name": "FRAME1035_PREPROJECTION_SOURCE_IDENTITY.json",
+      "sha256": "ba95da15d73e5b761cab4b9e2433a60258e504dba4359ebe5f6f4356360715fa"
+    },
+    {
+      "name": "prove_frame0636_source_intersection.py",
+      "sha256": "a52ccb048a29fca89d31755c2e3956f05a34a812aed47964cfdf287c476c28f2"
+    },
+    {
+      "name": "prove_frame0842_source_intersection.py",
+      "sha256": "597eaa78e6872edf41bfcbdc776b33e91c1184428b8ef585b2a0fb4a027d383d"
+    },
+    {
+      "name": "prepare_exact_intersection_canonicalization_map.py",
+      "sha256": "6ebb8121e8f00c13456cf0f9c621916853bc7c68979b4c2ed151a3a46a54c616"
+    },
+    {
+      "name": "prepare_frame0842_0962_actor_map.py",
+      "sha256": "43d871230c579b188f6c3758313638023d523ad11bfc547c620810cd3388ff82"
+    },
+    {
+      "name": "inspect_frame1035_exact_artifact_reuse.py",
+      "sha256": "7f0173e2755db853e56021ee736eb9db4f928b4476894c1b5b14beb4625c7c27"
+    },
+    {
+      "name": "apply_proven_source_intersections.py",
+      "sha256": "7fc1251fc22e55a935579e823c8135cf67742abf268aaa28b6769665bec7e846"
+    },
+    {
+      "name": "apply_shared_source_intersection_extension.py",
+      "sha256": "eb103d9f30a6dd63da2e687c8128345bae74a209b6891ce50532b8d5d42d0f0a"
+    }
+  ],
+  "observations": [
+    {
+      "frames": [
+        636,
+        842
+      ],
+      "result": "SOURCE_PROOF_CONSTRAINED",
+      "detail": "Proof programs parse original path and affine matrix decimal values as exact rational numbers. Original line intersections are asserted to be shared endpoints. Exact intersections of the separate binary64-transformed lines round to the already recorded Boolean artifacts bit for bit. This identifies the numerical cause independently of desired ownership, validator tolerance or proximity."
+    },
+    {
+      "frames": [
+        842,
+        962
+      ],
+      "result": "SHARED_BOUNDARY_REUSE_CONSTRAINED",
+      "detail": "Reuse verifies recipe and original proof identity, unchanged source definition, affine placement and ratio, plus exact artifact occurrences in each named owner/ring. The opposite-owner boundary cases are included explicitly rather than moving only one owner side."
+    },
+    {
+      "frames": [
+        636,
+        842,
+        962
+      ],
+      "result": "APPLICATION_CONSTRAINED",
+      "detail": "Private application adapters pin proof maps, proof files and input projections by SHA256. They replace only the exact listed occurrences in the named rings, then reverse those replacements and assert equality with the full original structure. No epsilon search or general nearby-coordinate merge is present."
+    },
+    {
+      "frames": [
+        1035
+      ],
+      "result": "NO_INTERSECTION_CORRECTION_AUTHORIZED_OR_APPLIED",
+      "detail": "The identity screen records the same original source lines but no exact prior artifact occurrence. It correctly adds no correction case. Source identity alone is insufficient to modify another frame."
+    },
+    {
+      "result": "COORDINATE_CHANGE_DISCLOSED",
+      "detail": "Recomputation changes a small number of derived coordinate values; maximum recorded movement is about 6.37e-9 metres. Do not describe the combined repair as zero coordinate movement. Original source assets, historical dates and independent anchors remain unchanged; the change is a source-proven recalculation of numerical intersection output."
+    },
+    {
+      "result": "POST_RECOMPUTATION_NORMALIZATION_SEPARATE",
+      "detail": "Subsequent exact adjacent zero-edge removal uses the previously reviewed helper and preserves the nonzero edges and exact area of its immediate input. That preservation claim must not be extended backwards across the preceding coordinate recomputation."
+    }
+  ],
+  "unchangedGenericHelperIdentities": [
+    {
+      "name": "bounded_projection.py",
+      "sha256": "70c35cca1d91a11de704f5e34e8378b82ddd2cfff3087cc76595dfc95b4f8a25",
+      "unchangedSinceGenericHelperReview": true
+    },
+    {
+      "name": "exact_contact_faces.py",
+      "sha256": "99c8b41cc1e4e74773ad3709c60848567476d2e3ba74f78e2f99e83c3701edd8",
+      "unchangedSinceGenericHelperReview": true
+    },
+    {
+      "name": "exact_zero_length_edges.py",
+      "sha256": "98f69118e76507fb71956745f41b666ad1de16bba9f92ccbb5260e941712e5d4",
+      "unchangedSinceGenericHelperReview": true
+    }
+  ],
+  "limits": [
+    "This review accepts only the named hash-bound cases; it does not authorize a tolerance-based or global coordinate repair.",
+    "Proof/result bodies and original coordinates remain private; this report includes only summaries and file hashes.",
+    "This principle review does not assert the final affected-frame batch status, renderer integration, CPU pixels, source historical correctness or deployment readiness.",
+    "Any additional artifact location requires its own source identity and numerical-cause proof before application."
+  ],
+  "runtimeAdmitted": false,
+  "historicalSourceAdmitted": false,
+  "newTestsRunByReviewer": 0,
+  "existingPassReruns": 0,
+  "GPUStarts": 0
+}
