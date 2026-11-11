@@ -1,0 +1,89 @@
+{
+  "schema": "WORLD_ENGINE_GEOMETRY_FIX_INDEPENDENT_REVIEW_V1",
+  "reviewedAtUTC": "2026-11-11T17:31:49.213333+00:00",
+  "reviewedRemoteHead": "bf23a16b2fc33eded764bc0837cb1dd8bb937d54",
+  "decision": "ACCEPT_SCOPED_OFFLINE_GENERIC_HELPERS_NOT_SOURCE_OR_RUNTIME_ADMISSION",
+  "scope": "Read-only review of new approximation, proven contact split and exact adjacent zero-edge normalization helpers; no existing checks rerun",
+  "reviewedFiles": [
+    {
+      "path": "public-generic/bounded_projection.py",
+      "bytes": 6392,
+      "sha256": "70c35cca1d91a11de704f5e34e8378b82ddd2cfff3087cc76595dfc95b4f8a25"
+    },
+    {
+      "path": "public-generic/exact_contact_faces.py",
+      "bytes": 3857,
+      "sha256": "99c8b41cc1e4e74773ad3709c60848567476d2e3ba74f78e2f99e83c3701edd8"
+    },
+    {
+      "path": "public-generic/README.md",
+      "bytes": 1968,
+      "sha256": "a30524393ebd464b7f4509ac4566325bd873dbebd57c68e1d2e3ec02844842df"
+    },
+    {
+      "path": "thin-rings/exact_zero_length_edges.py",
+      "bytes": 3092,
+      "sha256": "98f69118e76507fb71956745f41b666ad1de16bba9f92ccbb5260e941712e5d4"
+    }
+  ],
+  "findings": [
+    {
+      "id": "PROJECTION_CONTRACT",
+      "result": "RESOLVED_DURING_REVIEW",
+      "detail": "Derivative bounds assume the documented longitude/latitude graticule ratio formulas, monotone original curve domains and geographic-degree output. The author added this exact contract and finite positive input preconditions. The current private adapter follows this formula."
+    },
+    {
+      "id": "BOUND_SCOPE",
+      "result": "SUPPORTED_WITH_STATED_LIMITS",
+      "detail": "Piecewise-knot subdivision plus component Hessian bounds and chord error M/8 are conservative in real arithmetic for the documented ratio transform. The 14.534855m composite estimate covers source206 curve flattening plus subsequent chord projection only; it is not a geographic registration or historical-source accuracy claim. Floating-point execution retains the explicit numerical margin and sampled check; this is not formal interval arithmetic certification."
+    },
+    {
+      "id": "EXACT_CONTACT",
+      "result": "SUPPORTED",
+      "detail": "The generic split requires a separately proved exact repeated point, retains every directed edge, and asserts exact Fraction signed-area equality. Opposite winding, unproved self-contact and contact splitting involving holes fail closed. The source113/ocean27 rational endpoint identity is separately evidenced."
+    },
+    {
+      "id": "EXACT_ZERO_EDGE",
+      "result": "SUPPORTED",
+      "detail": "The new normalization removes only adjacent occurrences of exactly equal coordinate values. Nonzero directed-edge multisets, all distinct coordinate values and exact rational signed area are asserted unchanged. It does not snap, move coordinates, remove short nonzero edges, or repair arbitrary invalid geometry."
+    },
+    {
+      "id": "DOCUMENTATION_SCOPE",
+      "result": "RESOLVED_DURING_REVIEW",
+      "detail": "README wording was narrowed from a general holes fail-closed claim to contact splitting involving holes. Full geometric validity remains a separate OGR/AreaCore check."
+    },
+    {
+      "id": "SOURCE_PRIVACY",
+      "result": "SUPPORTED",
+      "detail": "Reviewed generic helpers contain no original map assets, historical control coordinates, city anchors, event dates, source-specific renderer, or deployment actions."
+    }
+  ],
+  "evidenceRead": [
+    "LOCAL_NATIVE_CURVE_FIX_RESULT.json",
+    "COMPOSITE_SOURCE_CURVE_PROJECTION_BOUND.json",
+    "thin-rings/EXACT_SOURCE_TOUCH_DIAGNOSIS.json",
+    "thin-rings/FRAME1237_ADAPTIVE_CONTACT_RESULT.json",
+    "thin-rings/FRAME1237_FACE_RECORD_CONTRACT_CHECK.json",
+    "thin-rings/FRAME0636_ZERO_EDGE_NORMALIZATION_REPORT.json",
+    "private-candidates/affected-frame-repair/source-frame-0395.bounded-contact-fixed.private.report.json"
+  ],
+  "preservedExistingResults": {
+    "frame1237SeparatePolygonRecords": 209,
+    "maximumFaceCoordinates": 6026,
+    "fullActorMultiPolygonRejectedByExistingAreaCore": true,
+    "existingValidatorNotRelaxed": true
+  },
+  "limits": [
+    "Approval applies only to the exact reviewed generic helper bytes. Later edits require a focused diff review.",
+    "This review does not assert completion of the remaining affected-frame conversion batch; it is still running in the author task.",
+    "Separate same-owner Polygon records are required where AreaCore rejects point-touching MultiPolygon parts. This review does not authorize suppressing that rejection.",
+    "Final runtime resource size, full timeline byte validation, all-frame geometry and CPU pixel verification remain separate gates.",
+    "Historical source admission and actual Incheon/Seoul control chronology remain separate from numerical geometry validity."
+  ],
+  "runtimeAdmitted": false,
+  "historicalSourceAdmitted": false,
+  "newTestsRunByReviewer": 0,
+  "existingPassReruns": 0,
+  "GPUStarts": 0,
+  "repositoryCommitSafeScope": "Reviewed source-independent helpers and this summary only; keep private source geometry and adapters out of public source publication."
+}

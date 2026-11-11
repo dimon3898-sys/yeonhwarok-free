@@ -1,0 +1,92 @@
+{
+  "schema": "WORLD_ENGINE_HISTORICAL_GATE_REVIEW_V1",
+  "reviewDateUTC": "2026-11-11",
+  "reviewScope": "New historical interpretation audit of existing source gate; no PASS rerun, source mutation, production changes, build or GPU",
+  "reviewedRemoteHead": "bf23a16b2fc33eded764bc0837cb1dd8bb937d54",
+  "reviewedCheckpoint": "../remote/CHECKPOINT.json",
+  "decision": "REVISE_OVERSTRICT_CITY_POINT_EXPECTATION_KEEP_RUNTIME_ADMISSION_PENDING",
+  "notClaimed": [
+    "DVA source confirmed historically correct at all locations or hours",
+    "Complete 15 September mainland bridgehead qualified",
+    "Strict known-CRS raster georeference PASS",
+    "New historical input or image ready"
+  ],
+  "newPrimaryTextEvidence": {
+    "source": "Montross and Canzona, U.S. Marine Operations in Korea 1950-1953, Vol II, HQ USMC, 1955",
+    "url": "https://www.gutenberg.org/files/65008/65008-h/65008-h.htm",
+    "provenance": "Accessible transcription of the USMC-authored official history. Existing image-map inspection is preserved; only text concerning the new control-gate question was read.",
+    "passages": [
+      {
+        "printedPages": "122-123",
+        "summary": "15일 밤 제1해병연대는 O-1의 중요 부분과 개별 목표를 확보했다. 전체 인천 도시와 동일한 확보 범위라는 근거는 아니다."
+      },
+      {
+        "printedPages": "133-134",
+        "summary": "16일 새벽 제5해병연대 진격 명령은 도심 소탕을 한국 해병대에 맡겼다. 같은 날 07시 관찰은 북한군의 야간 철수를 설명한다. 15일의 임의 시점에 도시 전체가 파란색이어야 한다고 단정할 수 없다."
+      },
+      {
+        "printedPages": "136-140",
+        "summary": "16일 O-3 진출과 FBHL 공격 명령은 구분된다. 2/5는 그날 밤 도로와 FBHL 교차점 약 3,000야드 전에서 멈췄다. FBHL 전체를 그날 확보 경계로 채색할 수 없다."
+      }
+    ],
+    "beachUnitCorrection": {
+      "BlueBeach": "1st Marines",
+      "RedBeach": "5th Marines",
+      "WolmiDoGreenBeach": "3rd Battalion, 5th Marines",
+      "basis": "Previously inspected official maps pages 89, 109, 119; no repeat image inspection."
+    }
+  },
+  "gateCorrections": [
+    {
+      "existingObservation": "15Sep exact native fill places source city dot and modern Incheon reference point in red",
+      "observationStatus": "PRESERVED_NOT_REMEASURED",
+      "invalidInference": "Any 15Sep Incheon city point must be blue, so the source is historically wrong",
+      "replacementInterpretation": "The date lacks intra-day time, city-point meaning and historic extent. A date-only landing frame cannot by itself prove whole-city ownership. Reclassify the expectation as historically under-specified, not source-history FAIL.",
+      "stillOpen": "Whether blue geometry represents the actual landing area at the source's strategic scale; existing 4.45km source-dot and 13.68km modern-reference distances remain evidence, not erased failures."
+    },
+    {
+      "existingObservation": "Modern Wolmi-do references are outside coarse source coast and far from native blue",
+      "observationStatus": "PRESERVED_NOT_REMEASURED",
+      "replacementInterpretation": "The island's omission or misplaced control needs a separate scale, shoreline-era and registration assessment. Modern reclaimed geography is not a measured 1950 Green Beach outline.",
+      "prohibitedRepair": "Move control to force modern anchors, invent a blue island outline, or infer a circular UNKNOWN ownership polygon."
+    },
+    {
+      "existingRequirement": "Complete dated 15Sep mainland bridgehead is mandatory before any 20-second timeline can be prepared",
+      "replacementInterpretation": "This is one possible implementation requirement, not an explicit user requirement. A truthful 15Sep landing event plus qualified partial control/unknown coverage, followed by separately qualified 16Sep-or-later territorial expansion, can satisfy the requested historical progression.",
+      "limits": "Must retain visible territorial change overall, use actual source-supported boundaries, never relabel a later state as 15Sep, and never infer red ownership from missing blue coverage."
+    }
+  ],
+  "sourceTypingPolicy": {
+    "DVA": "OFFICIAL_RETROSPECTIVE_STRATEGIC_VECTOR_RECONSTRUCTION",
+    "dateMeaning": "Source-labeled dated historical summary, not daily measured GIS",
+    "nativeMorphMeaning": "Source-authored visual transition, not independently observed intervening daily front",
+    "strictRasterKnownCRSRule": "NOT_APPLICABLE_BY_DEFAULT; maintain separate measured vector registration policy",
+    "acceptableConditionalPresentation": "Source-bound strategic approximate territories with explicit uncertainty and source dates, at a map scale supported by the registration evidence",
+    "notAnEscapeHatch": "An approximation label cannot excuse a known material location, chronology or ownership contradiction. No detailed beach/city polygon claim without matching evidence."
+  },
+  "minimalTruthfulTimelineOption": {
+    "PART01": "Source-supported North Korean southward expansion and Naktong defense; conclude with 15Sep landing event and only separately qualified control evidence.",
+    "PART02": "Continue from the identical landing/time boundary into qualified post-landing expansion, then source-supported Seoul recovery.",
+    "boundaryContinuity": "Reuse the same source state, camera and labels across the split; no undocumented geographic morph or time reversal.",
+    "15SepState": "May be event plus supported island/local front rather than mandatory complete mainland partition. Omitted control must be unclaimed, not automatically enemy-owned.",
+    "16SepState": "Use a dated qualified source state or actual achieved tactical segments; do not fill the complete planned FBHL from p137.",
+    "unknownHandling": "Retain documented evidence footprint or omit unsupported ownership claims. Do not draw invented unknown circles or close partial lines to fabricate a territorial mask.",
+    "Seoul": "Preserve 28Sep date semantics; correct approximation locality against exact native source; never borrow 30Sep shape under a 28Sep label."
+  },
+  "remainingAdmissionWork": [
+    "Determine whether strategic source-native 15/16Sep geometry can depict the actual landing and expansion without material misplacement at the intended camera scale",
+    "Resolve exact curve/registered topology defects independently of the historical city-point expectation",
+    "If tactical inset is used, independently register historic shore and actual unit-front evidence; planned objectives are not achieved control",
+    "Verify runtime makes no unobserved complement-owner inference and distinguishes source dates from visual morph time",
+    "Only after source qualification, run the new changed-scope CPU pixel validation and proceed to build preparation"
+  ],
+  "preserved": {
+    "oldPassReruns": 0,
+    "sourceFilesModified": 0,
+    "productionFilesModified": 0,
+    "newBuilds": 0,
+    "newGPURuns": 0,
+    "runtimeAdmissionPASS": false,
+    "existingTechnicalGPUAndMP4PASS": "UNCHANGED"
+  }
+}

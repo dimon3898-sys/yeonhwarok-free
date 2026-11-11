@@ -1,0 +1,82 @@
+{
+  "schema": "WORLD_ENGINE_PROJECTION_MODEL_HYPOTHESIS_REVIEW_V1",
+  "reviewedAtUTC": "2026-11-11T17:34:08.523584+00:00",
+  "status": "MODEL_ERROR_PLAUSIBLE_PROJECTION_NOT_IDENTIFIED",
+  "inputsRead": [
+    {
+      "path": "territory-resume-20261112/recovered-source/registration/derived_graticule.py",
+      "sha256": "1bf23ca918470a586f673b284a2cdb5e208eaf4442cdc7eee7ca24611540f18f"
+    },
+    {
+      "path": "territory-20261111/research/swf-frames/DefineSprite_372_korea_fla.KoreaMap_1/380.svg",
+      "sha256": "6fea23231b8d42377373301ffc5ae4b459ec4d17c41879adb9a62138f082ea1f"
+    },
+    {
+      "path": "territory-resume-20261112/recovered-source/registration/CURVED_GRATICULE_REVIEW.json",
+      "use": "Existing measurements read, not rerun"
+    }
+  ],
+  "codeFinding": "GraticuleField.transform calculates normalized horizontal and vertical positions between source curves, then interpolates longitude125..130 and latitude35..40 linearly. This is a boundary-constrained angular interpolation, not the inverse of a specified map projection.",
+  "sourceGridFindings": [
+    "35N and40N are exported as mixed L/Q polylines and quadratic Bezier pieces, not analytic projected parallels with declared projection parameters.",
+    "125E meridian is a straight L segment;130E meridian is a sequence of noncollinear Q segments. The inspected export wrapper and grid placements are translations only.",
+    "Normal Mercator would have straight parallels and meridians; the actual curved parallels do not support declaring that projection directly.",
+    "Lambert conformal conic uses straight converging meridians and common-center circular parallels. The source mixed approximating paths do not establish those constraints or uniquely identify parameters.",
+    "A standard projection family could only be selected through an explicitly justified model plus independently held-out grid evidence. Approximate source paths with unknown drafting transformations and datum do not provide that identification here."
+  ],
+  "hypotheticalSensitivityOnly": {
+    "model": "Spherical Mercator one-dimensional latitude interval example, not claimed as source projection",
+    "intervalDegrees": [
+      35,
+      40
+    ],
+    "linearAngularMidpointDegrees": 37.5,
+    "inverseMercatorOfMeanProjectedYDegrees": 37.54189617763601,
+    "differenceDegrees": 0.041896177636012055,
+    "differenceApproxKmUsing111KmPerDegree": 4.650475717597338,
+    "meaning": "Matching the two bounding latitude curves does not make angular-linear interior latitude exact. A nonlinear latitude law can differ by kilometres within this interval.",
+    "notMeaning": "No claim that this correction applies to Seoul, Incheon, any source vertex or a DVA production transform.",
+    "actualSourceCoordinatesTransformed": 0
+  },
+  "identifiability": {
+    "uniqueNewProjectionIdentified": false,
+    "reason": "Boundary latitude labels alone constrain their own values, not the interior latitude law. Without a justified projection family or further reliable grid evidence, multiple monotone interior laws remain possible. Source path approximation and undeclared datum further prevent a strict official-CRS inference.",
+    "cityFitsForbiddenAndNotPerformed": true,
+    "projectionTrialSelectionByMinimumCityResidualForbidden": true
+  },
+  "existingResidualInterpretation": {
+    "classification": "UNRESOLVED_SOURCE_CARTOGRAPHY_VS_INTERPOLATION_MODEL_VS_REFERENCE_POINT_AND_DATUM",
+    "existingNumbersPreserved": "Seoul about6.394km andIncheon about9.262km are comparison residuals under the recorded derived model, not isolated measurements of original source error.",
+    "notAllSouth": "The existing table has Pusan derivedlatitude35.13418 vs reference35.102, so the predominantly southerly residual pattern is not universal.",
+    "pointSemantics": "A modern city reference coordinate need not be the specific historic city center intended by an artistic source dot; that distinction remains unresolved.",
+    "sourceUncertaintyBound": null,
+    "modelUncertaintyBound": null,
+    "cannotClaim": "Projection uncertainty proves the source historically correct or removes the registration block."
+  },
+  "topologicalInvariant": {
+    "finding": "If the same one-to-one coordinate transform is applied to a native point and its source owner regions, the point-in-region ownership is preserved.",
+    "consequence": "Changing the geographic projection could improve modern-anchor alignment but cannot by itself turn the native Incheon city dot from red to blue. Native source ownership semantics require their own historical/time/scale review.",
+    "exceptionNotAllowed": "A non-injective transform, independent city warp, or different point/region transforms would not be a valid common registration."
+  },
+  "minimalNextEvidence": [
+    "Original cartographic projection/datum provenance or a reliable third labeled latitude curve/tick set that constrains interior latitude without city fitting",
+    "If none exists, preserve the vector source as unregistered/approximate with unresolved model uncertainty and do not silently replace the current transform",
+    "Keep geographic alignment review separate from source-native ownership and historical-time qualification"
+  ],
+  "primaryTechnicalSources": [
+    {
+      "url": "https://proj.org/en/stable/operations/projections/merc.html",
+      "support": "Spherical Mercator forward and inverse formulae, lines107-118"
+    },
+    {
+      "url": "https://www.pygmt.org/latest/projections/conic/conic_lambert.html",
+      "support": "Lambert conformal conic graticule geometry and parameters, lines9-14"
+    }
+  ],
+  "newSourceDownloads": 0,
+  "existingMeasurementsRerun": 0,
+  "candidateCoordinateEdits": 0,
+  "anchorFits": 0,
+  "runtimeChanges": 0,
+  "gpuRuns": 0
+}
