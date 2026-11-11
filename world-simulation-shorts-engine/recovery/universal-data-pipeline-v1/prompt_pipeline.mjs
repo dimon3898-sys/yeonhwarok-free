@@ -67,7 +67,7 @@ function coordinates(value, field, out) {
   } else for (const [i, child] of value.entries()) coordinates(child, `${field}[${i}]`, out);
 }
 const FACT_KEYS = ['version', 'data_mode', 'subject', 'locations', 'time_range', 'source_notes', 'geometries', 'stages', 'routes',
-  'geographic_lines', 'impacts', 'propagations', 'metrics', 'markers', 'text', 'camera', 'scale', 'native_context', 'semantic_mode', 'scene_timing', 'causal_tracks'];
+  'geographic_lines', 'impacts', 'propagations', 'metrics', 'markers', 'text', 'camera', 'scale', 'native_context', 'semantic_mode', 'scene_timing', 'causal_tracks', 'control_timeline_ref'];
 const RECORD_KEYS = {
   source_notes: ['id', 'source_type', 'source_reference', 'verification_status', 'note', 'verification_basis', 'live_access', 'retrieval_date', 'license', 'version', 'original_sha256', 'source_wrapper_sha256', 'sha256', 'crs', 'resolution'],
   geometries: ['id', 'geometry', 'source_id', 'note'], locations: ['id', 'label', 'anchor', 'country_id'],
@@ -158,6 +158,7 @@ function checkEvidence(scene, facts, field, registry, out) {
   const records = [...reviewedContextRecords(), ...(Array.isArray(supplied) ? supplied : []).filter(r => !String(r?.id ?? '').startsWith('KW20_CONTEXT_'))];
   if (![facts.source_notes, facts.geometries].every(rows => Array.isArray(rows) && rows.every(object)) || facts.stages !== undefined && (!Array.isArray(facts.stages) || facts.stages.some(row => !object(row)))) return;
   const boundGeometries = new Set(), boundStages = new Set(), boundSources = new Set();
+  let boundControlTimeline = false;
   for (const [i, binding] of rows.entries()) {
     const where = `${field}.historicalEvidence[${i}]`;
     unknowns(binding, ['recordId', 'sourceId', 'claimId', 'geometryIds', 'stageIds'], where, out);
@@ -175,6 +176,12 @@ function checkEvidence(scene, facts, field, registry, out) {
       out.push(issue('NEEDS_INPUT', 'EVIDENCE_DATASET_NOT_REVIEWED', where, 'This exact supplied fact dataset has no server-reviewed digest binding. Reusing a source identifier does not qualify new locations, dates or territory.', {action: 'Review exact dataset and bind its canonicalFactsSHA256 in the server-owned registry'})); continue;
     }
     boundSources.add(binding.sourceId);
+    if (facts.control_timeline_ref?.sourceId === binding.sourceId) {
+      const ref = facts.control_timeline_ref;
+      if (found.scope === 'SOURCE_NATIVE_DATED_CONTROL' && found.controlTimelineSHA256 === ref.sha256
+        && found.controlTimelineAdmissionSHA256 === ref.admissionSHA256 && found.sourceSHA256 === ref.sourceSHA256)
+        boundControlTimeline = true;
+    }
     for (const gid of binding.geometryIds ?? []) {
       const geometry = facts.geometries?.find(row => row.id === gid);
       if (!geometry || geometry.source_id !== binding.sourceId || found.geometrySHA256ById?.[gid] !== sha(geometry.geometry))
@@ -194,6 +201,9 @@ function checkEvidence(scene, facts, field, registry, out) {
     'No reviewed claim binds this exact geometry.', {geometryId: geometry.id, action: 'Provide reviewed geographic evidence, not a document hash alone'}));
   for (const stage of facts.stages ?? []) if (!boundStages.has(stage.id)) out.push(issue('NEEDS_INPUT', 'UNREVIEWED_STAGE_DATE', field + '.facts.stages.' + stage.id, 'No reviewed claim qualifies this stage date.', {stageId: stage.id}));
   for (const src of facts.source_notes ?? []) if (!boundSources.has(src.id)) out.push(issue('NEEDS_INPUT', 'UNREVIEWED_SOURCE_CLAIM', field + '.facts.source_notes.' + src.id, 'No admitted claim binds this source.', {sourceId: src.id}));
+  if (facts.control_timeline_ref !== undefined && !boundControlTimeline)
+    out.push(issue('NEEDS_INPUT', 'UNREVIEWED_CONTROL_TIMELINE', field + '.facts.control_timeline_ref',
+      'No server-reviewed control claim binds this exact external dataset and admission record.', {action: 'Qualify the source data and bind its immutable registry hashes'}));
 }
 function staticGeographicContext(record, facts, source, geometryId) {
   // An unchanged modern land background is not a historical control area.
@@ -295,9 +305,12 @@ export function parsePrompt(input) {
   if (!text.startsWith('{')) throw Error('FREE_NATURAL_LANGUAGE_NOT_SUPPORTED');
   const parsed = strictJSONParse(text); plainJSON(parsed); return parsed;
 }
-export function validateLegacyScene(scene) { validateScenePlan(scene); return {status: 'PASS', schema: 'PLANNER_SCENE_JSON_V1', scene: copy(scene), enginePlan: compileExistingEnginePlan(scene), reinterpretation: false}; }
+export function validateLegacyScene(scene) {
+  if (scene?.control_timeline_ref !== undefined) throw Error('SOURCE_CONTROL_PRESENTATION_CONSUMER_REQUIRED');
+  validateScenePlan(scene); return {status: 'PASS', schema: 'PLANNER_SCENE_JSON_V1', scene: copy(scene), enginePlan: compileExistingEnginePlan(scene), reinterpretation: false};
+}
 
-export function analyzePrompt(input, {evidenceRegistry = []} = {}) {
+export function analyzePrompt(input, {evidenceRegistry = [], allowSourceControlReference = false} = {}) {
   const result = {schema: 'WORLD_ENGINE_DATA_PIPELINE_RESULT_V1', compilerVersion: COMPILER_VERSION, engineHashes,
     status: 'INVALID', issues: [], sceneResults: [], renderableSceneIds: [], blockedSceneIds: [], renderRequests: [], capabilities: CAPABILITIES};
   let data;
@@ -342,6 +355,10 @@ export function analyzePrompt(input, {evidenceRegistry = []} = {}) {
     if (frames < 16 || frames > 240) problems.push(issue('UNSUPPORTED', 'BOUNDED_PREVIEW_FRAME_BUDGET', field, 'This free preview profile supports 16..240 frames per scene. Long production rendering remains on the preserved long-form pipeline.', {minimumFrames: 16, maximumFrames: 240}));
     const facts = row.facts === undefined ? undefined : copy(row.facts);
     inspectFacts(facts, field + '.facts', data.simulationType, problems);
+    if (facts?.control_timeline_ref !== undefined && allowSourceControlReference !== true)
+      problems.push(issue('UNSUPPORTED', 'SOURCE_CONTROL_PRESENTATION_CONSUMER_REQUIRED', field + '.facts.control_timeline_ref',
+        'This source-control reference requires the explicitly connected presentation consumer; the legacy static preview cannot render its timeline.',
+        {schema: 'WORLD_ENGINE_PRESENTATION_PROMPT_V2'}));
     if (object(facts) && (data.simulationType === 'HISTORICAL' || data.simulationType === 'GENERAL' && facts.data_mode === 'PRODUCTION')) checkEvidence(row, facts, field, evidenceRegistry, problems);
     let scene, enginePlan;
     if (!problems.length) try {
@@ -420,3 +437,4 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.stderr.write(JSON.stringify({status: result.status, renderableScenes: result.renderableSceneIds.length, blockedScenes: result.blockedSceneIds.length}) + '\n');
   } catch (error) { process.stderr.write(JSON.stringify({status: 'INVALID', error: String(error.message)}) + '\n'); process.exitCode = 2; }
 }
+

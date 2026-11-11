@@ -2,6 +2,7 @@
 import {compileEventIntent, freezeEventData, validateEventAnchor} from './event_contract_v1.mjs';
 import {validateAreaGeometry} from './area_core_v3.mjs';
 import {compileFlowIntent} from './flow_core_v2.mjs';
+import {validateControlTimelineReference} from './control_timeline_contract_v1.mjs';
 
 export const PLANNER_FACTS_VERSION = 'PLANNER_FACTS_V1';
 export const PLANNER_SCENE_VERSION = 'PLANNER_SCENE_JSON_V1';
@@ -73,6 +74,17 @@ function sourceRecord(value, mode) {
 }
 function contractSource(source) {
  return {source_type: source.source_type, source_reference: source.source_reference, verification_status: source.verification_status};
+}
+/** A supplied reference is not proof that its external data has been admitted. */
+function controlTimelineReference(value, {sourceMap, family, timing}) {
+ if (value === undefined) return undefined;
+ const ref = validateControlTimelineReference(value), source = sourceMap.get(ref.sourceId);
+ if (family !== 'WAR' || !source || source.original_sha256 !== ref.sourceSHA256)
+  throw Error('PLANNER_CONTROL_TIMELINE_SOURCE_BINDING_REQUIRED');
+ if (timing && (timing.fps !== 30 || timing.event_start_frame !== 0 || timing.camera_lock_frame !== 0
+  || ref.lastFrame - ref.firstFrame + 1 !== timing.total_frames))
+  throw Error('PLANNER_CONTROL_TIMELINE_SCENE_FRAME_BINDING_REQUIRED');
+ return ref;
 }
 function geometryRecord(value, sources, mode) {
  record(value, 'GEOMETRY_RECORD');
@@ -302,6 +314,9 @@ export function validateFactDataset(input) {
  const preferred = given.scale?.preferred ?? 'REGIONAL';
  if (!['CONTINENT', 'REGIONAL', 'LOCAL'].includes(preferred)) throw Error('PLANNER_SCALE_INTENT_REQUIRED');
  const sceneTiming = given.scene_timing === undefined ? undefined : suppliedTiming(given.scene_timing);
+ const controlTimeline = controlTimelineReference(given.control_timeline_ref,
+  {sourceMap, family: subjectRecord.event_family, timing: sceneTiming});
+ if (controlTimeline && given.causal_tracks !== undefined) throw Error('PLANNER_CONTROL_TIMELINE_CAUSAL_STATE_CONFLICT');
  const causalTracks = given.causal_tracks === undefined ? undefined
   : unique(list(given.causal_tracks, 'CAUSAL_TRACKS').map(causalTrackRecord), 'CAUSAL_TRACK');
  if (causalTracks) {
@@ -330,6 +345,7 @@ export function validateFactDataset(input) {
    minimum_context_geometry_refs: refs(camera.minimum_context_geometry_refs ?? [], geometryMap, 'MINIMUM_CONTEXT_GEOMETRY'),
    detail_policy: 'FACT_BASED_VISUAL_GRADE', ...(context === undefined ? {} : {native_context: context})},
   scale: {preferred}, ...(sceneTiming === undefined ? {} : {scene_timing: sceneTiming}),
+  ...(controlTimeline === undefined ? {} : {control_timeline_ref: controlTimeline}),
   ...(causalTracks === undefined ? {} : {causal_tracks: causalTracks})});
 }
 
@@ -433,6 +449,7 @@ export function compileScenePlan({topic, facts: factsInput, output = {}}) {
    camera: 'READ_ONLY_EXISTING_DIRECTOR', physics: 'NONE'}, timing, source_notes: copy(facts.source_notes)};
  if (facts.markers.length) scene.markers = copy(facts.markers);
  if (facts.text.length) scene.text = copy(facts.text);
+ if (facts.control_timeline_ref !== undefined) scene.control_timeline_ref = copy(facts.control_timeline_ref);
  if (intent.event_family === 'WAR') {
   scene.areas = []; scene.front_lines = []; scene.time_steps = [];
   for (const [index, stage] of facts.stages.entries()) {
@@ -478,7 +495,7 @@ export function validateScenePlan(scene) {
  const value = record(scene, 'SCENE');
  const allowed = ['metadata', 'subject', 'locations', 'time_range', 'topic_intent', 'event_type', 'selected_features',
   'camera_intent', 'scale_intent', 'beats', 'geometries', 'markers', 'routes', 'moving_objects', 'areas', 'front_lines',
-  'metrics', 'time_steps', 'text', 'visual_roles', 'timing', 'source_notes', 'propagations', 'impact_zones', 'geographic_lines', 'causal_tracks'];
+  'metrics', 'time_steps', 'text', 'visual_roles', 'timing', 'source_notes', 'propagations', 'impact_zones', 'geographic_lines', 'causal_tracks', 'control_timeline_ref'];
  if (Object.keys(value).some(key => !allowed.includes(key))) throw Error('PLANNER_SCENE_UNKNOWN_FIELD');
  const meta = record(value.metadata, 'METADATA');
  if (meta.schema !== PLANNER_SCENE_VERSION || meta.policy !== 'FACT_BASED_VISUAL_GRADE' || meta.deterministic !== true)
@@ -511,6 +528,9 @@ export function validateScenePlan(scene) {
   || timing.duration_seconds !== timing.total_frames / timing.fps || timing.blank_interstage_frames !== 0)
   throw Error('PLANNER_TIMELINE_LOCK_AND_DURATION_REQUIRED');
  if (timing.fps !== output.fps) throw Error('PLANNER_OUTPUT_TIMING_FPS_BINDING_REQUIRED');
+ controlTimelineReference(value.control_timeline_ref, {sourceMap, family: value.event_type, timing});
+ if (value.control_timeline_ref !== undefined && value.causal_tracks !== undefined)
+  throw Error('PLANNER_CONTROL_TIMELINE_CAUSAL_STATE_CONFLICT');
  const beats = unique(list(value.beats, 'BEATS'), 'BEAT');
  let end = 0;
  for (const beat of beats) {

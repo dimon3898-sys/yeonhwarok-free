@@ -82,7 +82,10 @@ function ringRecord(input) {
  return ring;
 }
 /** Preserve source order, part count, closure and holes; reject rather than silently repair topology. */
-export function validateAreaGeometry(input) {
+export function validateAreaGeometry(input, {maxCoordinates = 4096} = {}) {
+ // A separately admitted source-native timeline can retain detailed source rings.
+ // Every existing caller keeps the original 4096-coordinate capacity.
+ if (![4096, 8192].includes(maxCoordinates)) throw Error('AREA_GEOMETRY_CAPACITY_PROFILE_INVALID');
  const geometry = record(input, 'GEOMETRY');
  if (!['Polygon', 'MultiPolygon'].includes(geometry.type)) throw Error('AREA_POLYGON_OR_MULTIPOLYGON_REQUIRED');
  const sourcePolygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates;
@@ -97,7 +100,7 @@ export function validateAreaGeometry(input) {
   return rings;
  });
  if (!polygons.length) throw Error('AREA_POLYGON_PART_REQUIRED');
- if (polygons.reduce((sum, polygon) => sum + polygon.reduce((n, ring) => n + ring.length, 0), 0) > 4096)
+ if (polygons.reduce((sum, polygon) => sum + polygon.reduce((n, ring) => n + ring.length, 0), 0) > maxCoordinates)
   throw Error('AREA_GEOMETRY_CAPACITY_EXCEEDED');
  for (let i = 0; i < polygons.length; i++) for (let j = 0; j < i; j++) {
   const a = polygons[i][0], b = polygons[j][0];

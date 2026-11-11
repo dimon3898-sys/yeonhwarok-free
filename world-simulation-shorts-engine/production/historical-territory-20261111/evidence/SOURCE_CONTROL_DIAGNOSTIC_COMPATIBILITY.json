@@ -1,0 +1,189 @@
+{
+  "schema": "WORLD_ENGINE_SOURCE_CONTROL_DIAGNOSTIC_DOWNSTREAM_AUDIT_V1",
+  "auditedSourceCommit": "7fd60399b79af68ba40c55dd0986c41b51de4086",
+  "auditMode": "READ_ONLY_SOURCE_INSPECTION_NO_EXECUTION",
+  "result": "COMPACT_NEW_ENGINE_DIAGNOSTICS_TRANSPORT_COMPATIBLE_WITH_EXPLICIT_RUNTIME_BRANCH_AND_PIXEL_GUARD",
+  "scope": {
+    "paidGPUExecuted": false,
+    "newRenders": false,
+    "testsRerun": false,
+    "productionFilesEdited": false,
+    "existingPassInvalidated": false,
+    "fullRepositorySearchClaimed": false
+  },
+  "question": "May engine SOURCE_CONTROL_TIMELINE_V1 emit compact sourceAreas without full per-frame geometry?",
+  "answer": {
+    "transport": "YES within inspected formal capture/controller/worker/native-proof path; no diagnostic sourceAreas geometry requirement or feature.engine enum receiver found.",
+    "notProven": "This is source compatibility evidence, not source-data accuracy, historical geometry, render quality, draw correctness, GPU compatibility or implementation PASS.",
+    "oldModes": "Retain existing area/flow diagnostic shape and values. New mode must report its own true engine identity and contract version."
+  },
+  "requiredPreservedContracts": [
+    "FRAME_EVIDENCE.json frame order, 300 frames for 10 seconds, integer durationSeconds=10 and totalFrames=300",
+    "Per-frame diagnostic.glError=0 and native diagnostic.backend equal actual inspected GPU backend",
+    "Existing actual pixel readback hashes, nonblack threshold, three-repeat native stability and immutable sealed frame ledger SHA",
+    "Existing authorization, source qualification, native candidate/session pins, runtime/package hashes and full MP4 decode validation",
+    "Existing diagnostic sourceId/operationId vocabulary unless separately and deliberately extended"
+  ],
+  "receivers": [
+    {
+      "file": "official-candidate-v1/capture_presentation.mjs",
+      "local": "downstream-capture_presentation.mjs",
+      "lines": [
+        126,
+        145
+      ],
+      "behavior": "Forwards runtime drawFrame diagnostic opaquely to FRAME_EVIDENCE. Checks glError and nonblack readback; does not validate nested features or sourceAreas.geometry."
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/backend/capture_vulkan.generated.mjs",
+      "local": "downstream-capture_vulkan.generated.mjs",
+      "lines": [
+        138,
+        150,
+        160
+      ],
+      "behavior": "Forwards complete runtime diagnostic. Captures real pixel/base readbacks and SHA, checks glError/nonblack, seals frame ledger. No feature engine enum or full geometry receiver requirement."
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/backend/native_guard_candidate.mjs",
+      "local": "downstream-native_guard_candidate.mjs",
+      "lines": [
+        18,
+        33
+      ],
+      "behavior": "Requires prepareFrame if available, glError=0 and actual backend, readPixels Uint8Array length, stable real hashes over 3 initial draws. No feature mode enum."
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "local": "integration-nvidia_worker.py",
+      "lines": [
+        80,
+        108,
+        115,
+        176
+      ],
+      "behavior": "Sealed frame ledger ownership/no-follow/immutable read/SHA/size checks. Validates ordered frames and duration, per-frame diagnostic.glError. Does not require diagnostic features, feature engine enum or sourceAreas.geometry.",
+      "frameLedgerMaxBytesFor300": 536870912
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/controller/nvidia_controller.py",
+      "local": "integration-nvidia_controller.py",
+      "lines": [
+        16,
+        32,
+        122,
+        174
+      ],
+      "behavior": "EXISTING_AREA_V3/EXISTING_FLOW_V2 occur in _UP2_CODES, a whitelist for redacted input-error logging. It is not a runtime feature engine allowlist. Unknown error codes are emitted as UNLISTED_CODE, not accepted as arbitrary text."
+    },
+    {
+      "file": "official-candidate-v1/timeline_worker.py",
+      "local": "downstream-timeline_worker.py",
+      "lines": [
+        27,
+        41,
+        68,
+        74
+      ],
+      "behavior": "Validates prepared/chunk/request schemas and canonical pinned requests, not feature diagnostic fields."
+    },
+    {
+      "file": "official-candidate-v1/sealed_scene_chunks.mjs",
+      "local": "downstream-sealed_scene_chunks.mjs",
+      "lines": [
+        9,
+        35,
+        38,
+        48
+      ],
+      "behavior": "Seals request/chunk continuity schemas; no diagnostic feature enum."
+    },
+    {
+      "file": "official-candidate-v1/capture_scene_chunk.mjs",
+      "local": "downstream-capture_scene_chunk.mjs",
+      "lines": [
+        13
+      ],
+      "behavior": "Validates fixed worker transport envelope schema; no sourceAreas receiver."
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs",
+      "lines": [
+        106,
+        118
+      ],
+      "scope": "Base deployed diagnostics module, fetched separately at same commit",
+      "behavior": "Operation/source IDs use fixed whitelist; runtime's existing PRESENTATION_RUNTIME source ID can remain. This separate safe operation ledger is not FRAME_EVIDENCE feature diagnostics. No need to add SOURCE_CONTROL_TIMELINE_V1 as operation/source ID solely because it is a feature engine."
+    }
+  ],
+  "explicitOldEngineGates": [
+    {
+      "file": "official-candidate-v1/presentation_runtime.mjs",
+      "local": "presentation_runtime.mjs",
+      "lines": [
+        78,
+        79
+      ],
+      "condition": "Area bindings return; all others must be EXISTING_FLOW_V2.",
+      "action": "Add explicit SOURCE_CONTROL_TIMELINE_V1 initialization branch before existing flow assertion; reject unknown modes."
+    },
+    {
+      "file": "official-candidate-v1/presentation_runtime.mjs",
+      "local": "presentation_runtime.mjs",
+      "lines": [
+        111,
+        125
+      ],
+      "condition": "Area branch vs unconditional else flow evaluation.",
+      "action": "Add explicit source-control draw branch that uses actual selected frame geometry and AreaOverlayPass; retain existing area/flow semantics."
+    },
+    {
+      "file": "official-candidate-v1/presentation_runtime.mjs",
+      "local": "presentation_runtime.mjs",
+      "lines": [
+        136
+      ],
+      "condition": "Actual feature changed-pixel assertion currently applies only to named old area/flow modes.",
+      "action": "Include visible SOURCE_CONTROL_TIMELINE_V1 areas in actual-feature changed-pixel guard. Preserve per-area drawn and viewport checks. Do not let the new engine escape proof."
+    },
+    {
+      "file": "codex-to-gcube-handoff-v1/backend/presentation_runtime_nvidia.generated.mjs",
+      "local": "presentation_runtime_nvidia.generated.mjs",
+      "lines": [
+        86,
+        87,
+        120,
+        145
+      ],
+      "condition": "Generated counterpart of base runtime gates.",
+      "action": "Regenerate through existing build_variants.py path with updated pinned source/variant manifests; do not alter only generated code or spoof old mode."
+    }
+  ],
+  "recommendedNewFeatureDiagnostic": {
+    "engine": "SOURCE_CONTROL_TIMELINE_V1",
+    "schema": "EXPLICIT_NEW_FEATURE_DIAGNOSTIC_SCHEMA_VERSION",
+    "datasetSHA256": "sha256 of immutable raw verified source dataset bytes",
+    "sourceFrame": "exact native source sample frame selected for this output frame",
+    "date": "only verified source date or explicit null",
+    "timingTruth": "explicit exact dated sample versus source animation intermediate, not claimed daily historical measurement",
+    "sourceAreas": [
+      {
+        "id": "source identity",
+        "ownerId": "source-defined controller identity",
+        "geometrySHA256": "hash canonical geometry actually passed to draw",
+        "coordinateCount": "documented count including closures",
+        "alpha": "actual draw alpha",
+        "coverage": "1 for complete source polygon, never radial source-control fabrication"
+      }
+    ],
+    "draws": "existing actual AreaOverlayPass draw receipts for this same selected sample",
+    "note": "Field names are proposal only. Use one documented canonical geometry hashing recipe. Geometry remains in pinned private source resource; compact diagnostics point to it and identify evaluated draw. Hashes must derive from actual selected draw data, not untrusted caller strings."
+  },
+  "recommendations": [
+    "No broad change to capture/controller/worker is needed solely to transport compact diagnostics.",
+    "Keep full source dataset out of mobile request and per-frame diagnostic; load once via existing pinned private static resource.",
+    "Fail closed on dataset digest mismatch, absent source frame, invalid owner, malformed coordinates or missing exact evaluated geometry binding.",
+    "Focused new-mode verification must independently bind output frame -> source frame -> dataset SHA -> actual draw geometry SHA and actual draw/pixel evidence; current downstream worker does not validate territory correctness.",
+    "Do not claim existing GPU proof for new-mode behavior. Preserve old success and label new GPU correctness pending until user renders."
+  ]
+}

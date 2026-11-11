@@ -1,0 +1,40 @@
+{
+  "schema": "WORLD_ENGINE_TERRITORIAL_STORY_REQUIREMENTS_V1",
+  "status": "SOURCE_GATED_REAUTHORING_SPEC_NOT_A_RENDERABLE_INPUT",
+  "timing": {"width": 1080, "height": 1920, "fps": 30, "parts": 2, "framesPerPart": 300, "totalFrames": 600},
+  "parts": [
+    {
+      "id": "PART01",
+      "role": "North Korean advance from the opening of the war to the Naktong/Pusan defense perimeter",
+      "dateScope": "1950-06-25 through the pre-Incheon defensive situation; exact last observation date must come from an admitted source",
+      "requiredChanges": ["Red grows along the admitted observed control boundary", "Blue remains in the admitted southeastern defense area", "Keep enough of the peninsula visible to understand the territorial change"],
+      "candidateSourceDatesNotYetAdmitted": ["1950-06-25", "1950-06-28", "1950-07-06", "1950-07-20", "1950-08-20"],
+      "source": "DVA strategic map media if recovered and date/frame/geometry qualification succeeds; CMH maps cross-check dates and scope"
+    },
+    {
+      "id": "PART02",
+      "role": "Incheon landing, concurrent breakout from the southeast, then Seoul recapture",
+      "dateScope": "1950-09-15 through 1950-09-28",
+      "requiredChanges": ["A separately sourced blue Incheon bridgehead coexists with the southeastern blue region", "Blue expands and red retreats along source-bound boundaries", "Retain documented isolated opposing pockets rather than painting the whole country blue", "Show Seoul's change of control at its source-supported date"],
+      "sourceDateRules": ["Do not substitute a September 30 national line for September 28", "Do not treat a multi-day narrated advance as completed on September 16", "Do not manufacture control polygons from attack arrows or partial unit-position lines"]
+    }
+  ],
+  "continuity": {"part01LastAndPart02FirstControlState": "IDENTICAL_SOURCE_STATE_OR_EXPLICIT_DATED_TRANSITION", "cameraBoundary": "SAME_GEOGRAPHIC_FRAME", "factionColors": "PRESERVED_ACROSS_PARTS"},
+  "visualContract": {
+    "northKoreanControl": "RED",
+    "rokAndUNControl": "BLUE",
+    "unknownControl": "NO_OWNER_CLAIM_NO_AUTOMATIC_COMPLEMENT",
+    "terrain": "RETAIN_EXISTING_SOURCE_TERRAIN_VISIBLE_BENEATH_TRANSLUCENT_FILL",
+    "initialFillAlphaCandidate": 0.28,
+    "alphaQualification": "FREE_CHANGED_SCOPE_PIXEL_REVIEW_REQUIRED_BEFORE_ACCEPTANCE",
+    "frontGlow": "ON_SUPPLIED_CONTROL_BOUNDARY_NOT_NATIONAL_COASTLINE",
+    "prohibitedSubstitutions": ["rectangle", "circle", "whole-screen color shift", "radial reveal presented as historical advance", "static nationwide tint presented as territory change"]
+  },
+  "genericEngineContract": {
+    "countrySpecificRendererAllowed": false,
+    "reuse": ["formal Studio request and compiler", "existing AreaOverlayPass", "existing geographic triangulation and map projection", "existing geographic frontline drawing", "existing absolute frame timeline", "existing NVIDIA worker and MP4 encoder"],
+    "requiredAdditionalCapabilities": ["Source-bound dated owner Polygon/MultiPolygon timeline", "Simultaneous owner/area-specific palette", "Multiple disconnected fronts and documented pockets", "Declared visual interpolation only where correspondence is qualified"],
+    "noAutomaticGeometryFromProse": true
+  },
+  "releaseGate": {"historicalControlSourceAdmissionRequired": true, "genericIntegrationRequired": true, "changedScopeFreeValidationRequired": true, "oldInputsMustRemainPreserved": true, "gpuRunsByWork": 0}
+}

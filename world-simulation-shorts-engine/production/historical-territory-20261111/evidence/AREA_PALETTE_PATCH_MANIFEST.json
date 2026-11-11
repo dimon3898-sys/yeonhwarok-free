@@ -1,0 +1,96 @@
+{
+  "schema": "WORLD_ENGINE_GENERIC_AREA_PALETTE_PATCH_V1",
+  "status": "CANDIDATE_13_NEW_CPU_TESTS_PASS_PIXEL_VALIDATION_PENDING",
+  "baseHead": "7fd60399b79af68ba40c55dd0986c41b51de4086",
+  "baseImageDigest": "sha256:9190c88bcf5074f3fe1c064b18518b4ba7aa3a0707b255cbf078720e70e75100",
+  "scope": "ADDITIVE_PER_AREA_COLOR_CONTRACT_ONLY_NO_HISTORICAL_GEOMETRY_GENERATION",
+  "files": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/official-candidate-v1/presentation_prompt.mjs",
+      "bytes": 43904,
+      "sha256": "7d8fc77149ffd4a96e103ce5b8bb062f50027505e063f4db0d2de5944dc54757",
+      "operation": "modify",
+      "baseSHA256": "36060ee629af4105d50a9b09c84279f633b0e2d5d9705acdf181cd074fce080c"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/official-candidate-v1/presentation_plan.mjs",
+      "bytes": 23619,
+      "sha256": "0f20784d65f937650fa108a63394c223bd8f3138305d1636927a1592664306d8",
+      "operation": "modify",
+      "baseSHA256": "3f2442ea576b015679b57adbc42da4432c4afa423b4678ae067f76e85ad1adc7"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/official-candidate-v1/presentation_runtime.mjs",
+      "bytes": 22134,
+      "sha256": "ffb4ec56b1901a75299b3fe905f72da775410de60cfc8b824857fa015a4b884a",
+      "operation": "modify",
+      "baseSHA256": "c766de85267f7ae30e3b76af9fef4168a786baafa93c03bdbdc39da476e4cf49"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/official-candidate-v1/presentation_area_palette.mjs",
+      "bytes": 2942,
+      "sha256": "90aa0857002817dcd40dfe842002d339f9cb52f52d96ca078c70f336e23ca8d4",
+      "operation": "add",
+      "baseSHA256": null
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/official-candidate-v1/tests/presentation_area_palette.test.mjs",
+      "bytes": 5198,
+      "sha256": "d5342596debb44ac3250bc49938dcfc1d1f1e822c17036bcb1dd2b8fb76dd163",
+      "operation": "add",
+      "baseSHA256": null
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/official-candidate-v1/tests/presentation_area_palette_integration.test.mjs",
+      "bytes": 2750,
+      "sha256": "393fe9bde8a3a795550d47f5ac06972f2109fb85ec10fbab7d6a91d9fca284b9",
+      "operation": "add",
+      "baseSHA256": null
+    }
+  ],
+  "newTests": {
+    "purePalette": {
+      "status": "PASS_10_UNIQUE_CASES",
+      "passed": 10,
+      "failed": 0,
+      "command": "node --test world-simulation-shorts-engine/recovery/official-candidate-v1/tests/presentation_area_palette.test.mjs",
+      "modifiedGroupingRecheck": {
+        "existingAffectedCase": 1,
+        "newOmittedOptionCase": 1,
+        "otherEightUnchangedPassesPreserved": true
+      }
+    },
+    "changedJavaScriptSyntax": {
+      "status": "PASS",
+      "files": 4
+    },
+    "actualPresentationIntegration": {
+      "status": "PASS",
+      "tests": 3,
+      "command": "node --test world-simulation-shorts-engine/recovery/official-candidate-v1/tests/presentation_area_palette_integration.test.mjs",
+      "passed": 3,
+      "failed": 0,
+      "evidence": "PALETTE_FOCUSED_RESULT.json"
+    },
+    "changedPixelValidation": "PENDING_FREE_ACTIONS"
+  },
+  "invalidationScope": "Only newly introduced area palette admission, effective-color grouping, and palette-aware PART boundary continuity; old input/state palette behavior has no new claimed pixel PASS.",
+  "oldPASSReruns": 0,
+  "oldInputsModified": false,
+  "sourceAuditFilesModified": false,
+  "timelineMorphChanges": false,
+  "rendererShadersModified": false,
+  "imageBuilds": 0,
+  "gpuStarts": 0,
+  "deployments": 0,
+  "nextGate": [
+    "Root integration review",
+    "Admit dated source geometry",
+    "Prepare a new palette-only sparse actual-pixel case or admitted historical input on free Actions without replaying old cases",
+    "Regenerate official NVIDIA variants and all changed source manifest pins before any image build"
+  ],
+  "newRuntimeDependency": "recovery/official-candidate-v1/presentation_area_palette.mjs must be included in official entry dependency/runtime source closure; current image unchanged.",
+  "legacyOptionalFieldPolicy": "When areaColors is omitted, exact legacy global state grouping and state-based pass cache key are preserved. New consecutive color grouping/front-last ordering is enabled only by the explicit new field.",
+  "importClosure": "PALETTE_IMPORT_CLOSURE.json; 14 exact unmodified base dependencies copied only for local complete import context; NOT part of this patch.",
+  "freeActionsHarnessReview": "PALETTE_FREE_ACTIONS_HARNESS_REVIEW.json"
+}

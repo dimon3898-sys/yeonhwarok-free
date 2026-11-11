@@ -178,6 +178,9 @@ export function createAreaOverlayPass({canvas,width=1080,height=1920,style=null}
  }
  function vertices(data){gl.bindVertexArray(positionVao);gl.bindBuffer(gl.ARRAY_BUFFER,positionBuffer);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STREAM_DRAW);}
  function contour(paths,roleStyle,alpha,coverage,reservations,safeArea){
+  // Source-control masks use fill only; the shared historical front is drawn
+  // separately. Transparent contours must not scan thousands of coast edges.
+  if(alpha<=0||(roleStyle.coreColor[3]===0&&(roleStyle.glowGain===0||roleStyle.glowColor[3]===0)))return[];
   const segments=[];for(const path of paths)for(let index=1;index<path.length;index++)segments.push([...path[index-1],...path[index]]);
   if(!segments.length||alpha<=0)return[];
   // Chunking changes only GPU capacity, not source contours or reveal progress.

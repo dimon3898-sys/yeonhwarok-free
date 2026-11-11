@@ -1,0 +1,195 @@
+{
+  "schema": "WORLD_ENGINE_GENERIC_CONTROL_TIMELINE_INTEGRATION_LIMITS_V1",
+  "status": "FEASIBLE_WITH_EXPLICIT_ADDITIVE_CONTRACT_AND_SOURCE_BINDING",
+  "scope": "READ_ONLY_SOURCE_AND_PAYLOAD_SIZE_AUDIT_NO_IMPLEMENTATION_OR_TEST_RUN",
+  "sourceHead": "7fd60399b79af68ba40c55dd0986c41b51de4086",
+  "sourceIndex": "INTEGRATION_SOURCE_INDEX.json",
+  "existingInputBytes": {
+    "PART01": {
+      "file": 237843,
+      "compactPrompt": 237842,
+      "compactHttpRequest": 237933,
+      "mobileFileHeadroom": 3956461,
+      "sceneCount": 2
+    },
+    "PART02": {
+      "file": 237405,
+      "compactPrompt": 237404,
+      "compactHttpRequest": 237495,
+      "mobileFileHeadroom": 3956899,
+      "sceneCount": 2
+    },
+    "measurement": "UTF-8 bytes of existing supplied file and JSON serialization only; no compiler or renderer invoked"
+  },
+  "hardLimits": [
+    {
+      "stage": "Mobile input file and textarea",
+      "maximumBytes": 4194304,
+      "source": "mobile/app.js:41,51",
+      "behavior": "Rejects file or UTF-8 prompt larger than 4 MiB"
+    },
+    {
+      "stage": "HTTP JSON POST body",
+      "maximumBytes": 8388608,
+      "source": "production-studio-mvp-v1/server.py:39,202",
+      "behavior": "Existing handler content_length maximum; not a new limit"
+    },
+    {
+      "stage": "Node compiler/preparer stdin payload",
+      "maximumBytes": 8388608,
+      "source": "official-candidate-v1/studio_adapter.py:71; controller/nvidia_controller.py:249",
+      "behavior": "Canonical wrapper payload counts, not only mobile prompt; runtimeRequestWireJSON and other serialized structures can duplicate/escape geometry"
+    },
+    {
+      "stage": "Node result stdout",
+      "maximumBytes": 25165824,
+      "source": "official-candidate-v1/studio_adapter.py:78; controller/nvidia_controller.py:256"
+    },
+    {
+      "stage": "Prepared timeline private disk record",
+      "maximumBytes": 25165824,
+      "source": "official-candidate-v1/presentation_timeline.mjs:63,70",
+      "behavior": "Existing pinned disk summary avoids sending prepared plans again over stdin"
+    },
+    {
+      "stage": "Official private registry JSON",
+      "maximumBytes": 25165824,
+      "source": "official_candidate_registry.mjs:10; backend/candidate_native_session.mjs:23"
+    },
+    {
+      "stage": "One pinned private server file",
+      "maximumBytes": 67108864,
+      "source": "candidate_asset_snapshot.mjs:13"
+    },
+    {
+      "stage": "One official candidate session static resource total",
+      "maximumBytes": 33554432,
+      "source": "official_candidate_session.mjs:11,38-42",
+      "behavior": "Includes existing native static terrain/mask assets plus any new timeline JSON; available headroom requires measuring the actual registry resource set"
+    },
+    {
+      "stage": "One official candidate session module total",
+      "maximumBytes": 16777216,
+      "source": "official_candidate_session.mjs:11,38-42"
+    },
+    {
+      "stage": "One area geometry triangulation",
+      "maximumTriangles": 16384,
+      "source": "area_overlay_pass_v3.mjs:12,116",
+      "behavior": "Per supplied Polygon/MultiPolygon draw; holes and separate parts supported"
+    },
+    {
+      "stage": "Contour GPU uniform batch",
+      "maximumSegmentsPerBatch": 128,
+      "source": "area_overlay_pass_v3.mjs:12,180-195",
+      "behavior": "Existing code chunks all contour segments; this is not a 128-segment total geometry cap"
+    },
+    {
+      "stage": "Native boundary protection mask",
+      "maximumSegments": 8192,
+      "source": "area_overlay_pass_v3.mjs:95"
+    },
+    {
+      "stage": "Protected label/graphic reservations",
+      "maximumRecords": 64,
+      "source": "area_overlay_pass_v3.mjs:12,88"
+    },
+    {
+      "stage": "Current two-part NVIDIA route",
+      "framesPerRequest": [
+        180,
+        300
+      ],
+      "requiredForCandidate": 300,
+      "source": "controller/nvidia_controller.py:334-339; backend/candidate_native_session.mjs:29",
+      "behavior": "Keep two independent 10-second/300-frame user requests; do not send one 600-frame request through this route"
+    },
+    {
+      "stage": "FRAME_EVIDENCE.json special read cap",
+      "maximumBytes": 536870912,
+      "source": "controller/nvidia_worker.py:80-99",
+      "behavior": "min(512 MiB,totalFrames*2 MiB); all other frozen cache JSON retains 32 MiB. This cap is not a reason to repeat the complete timeline in every frame."
+    },
+    {
+      "stage": "Existing validateAreaGeometry polygon coordinate count",
+      "maximumCoordinates": 4096,
+      "source": "area_core_v3.mjs:100-101",
+      "behavior": "Total across all rings and parts of one geometry, including closure; rejects rather than simplifying"
+    },
+    {
+      "stage": "Existing compileAreaIntent front lineRecord",
+      "maximumCoordinates": 129,
+      "source": "area_core_v3.mjs:128",
+      "behavior": "Per front record. If using this path, preserve all source vertices with explicit adjacent source-order line chunks; do not silently simplify a historic front to fit."
+    }
+  ],
+  "existingSceneAndPresentationGates": {
+    "currentPromptTopLevel": [
+      "schema",
+      "prompt",
+      "data",
+      "region",
+      "presentation"
+    ],
+    "presentationAllowlist": [
+      "camera",
+      "territoryColors",
+      "highlights",
+      "initialStateVisibility",
+      "sceneOverrides",
+      "transitions",
+      "labels",
+      "mapStyle"
+    ],
+    "source": "presentation_prompt.mjs:263,282; presentation_plan.mjs:25; planner_scene_v1.mjs:479-482",
+    "supportedToday": "Static supplied geometry records, per-stage area/front references, existing temporal states; one presentation territory color per state",
+    "unsupportedToday": "No admitted source-bound dense polygon timeline reference or faction-per-area palette in current formal contract. Adding arbitrary fields to mobile JSON does not connect a consumer and may be rejected or normalized away.",
+    "paletteConstraint": "Existing territoryColors has at most 8 state IDs and RGBA alpha in [0.08,0.6]; it does not distinguish two owners in the same state."
+  },
+  "minimalExistingPrivateDataTransport": {
+    "finding": "Existing official session already supports arbitrary registered static resources, including application/json. No new HTTP server, GPU renderer or texture-lease extension is needed for a bounded control dataset.",
+    "registryEntry": "record.resources[] = {kind:'static',url:'/qualified-control/<digest>.json',mime:'application/json',sourcePath:<server-owned absolute private file>,pin:{bytes,sha256}}",
+    "source": "official_candidate_session.mjs:34-45,95-103",
+    "validation": "readPinnedServerFile enforces registry-owned file path, byte count/hash, no-follow/ownership and immutable read checks; exact registered URL bytes are served on existing loopback session GET",
+    "publicBoundary": "Request data may select only an explicitly admitted registration/data ID and hash. It must not authorize arbitrary local paths, remote URLs, registry entries or new data through a Boolean.",
+    "browserPayload": "Use a small compiled ref containing registered relative URL, bytes, SHA256, source interval/frame mapping and domain/source IDs. Browser loader must verify fetched bytes and source contract before evaluation. Never expose private sourcePath in mobile JSON or public runtime diagnostics.",
+    "leaseAlternativeNotNeeded": "candidate_asset_lease.mjs currently has strict png,textureDescriptor,window entries; preserve that texture path and use existing record.resources static service instead.",
+    "registrationRebindRequired": "New input semantic/chunk hashes and changed module hashes require newly qualified registry registrations, payload/proof/activation pins and private-package receipt; preserve old registrations/package/image. Existing old-input registrations cannot be reused merely by swapping dataset bytes."
+  },
+  "minimalRuntimeRoute": {
+    "historicalFacts": "Add an explicit optional versioned control_timeline_ref to the facts/compiled Scene contract and preserve/validate it through normalization. Keep palette/opacity as presentation fields. Do not disguise changed territorial facts as styling only.",
+    "compiler": "Resolve source-bound dataset identity and frame mapping at admission; produce a small existing-engine-plan binding that identifies this qualified timeline. Do not expand all 600 source samples into every Scene, runtime request or proof.",
+    "evaluator": "A generic bounded helper reads the admitted dataset, performs deterministic random-access local-frame to source-frame mapping, returns current owner Polygon/MultiPolygon geometries and the same-frame front/provenance. Native source morph segment data may be retained compactly if its evaluator and source correspondence are independently qualified.",
+    "drawOwner": "Call existing createAreaOverlayPass with controls.areas containing current-frame geometry, alpha=1 and coverage=1, selecting a separate existing pass/style per owner color. coverage<1 creates radial reveal and is not historical advance.",
+    "frontOwner": "Existing drawLine requires a fresh linePrimitive whose projected coordinates match the current geographic front; build it with the existing line owner for the current camera. Do not reuse stale projections. Polygon contour already derives from the drawn geometry, with existing protected boundary/label masks.",
+    "diagnostics": "For the new mode, record dataset SHA256, evaluated global/local/source frame, owner IDs, geometry hashes, bounds/counts and source truth kind. Do not put the entire timeline in each FRAME_EVIDENCE row. Preserve legacy evidence behavior unless a specific changed-mode proof schema is added.",
+    "preservedOwners": [
+      "AreaOverlayPass fill/contour/glow shaders",
+      "native triangulateRegion and polygon hole support",
+      "camera/projection owners",
+      "existing scalar territory mode",
+      "existing source texture lease",
+      "existing Studio authentication/cost/GPU execution gates"
+    ]
+  },
+  "sizeDecision": {
+    "doNotInline600FramesByDefault": true,
+    "part01RemainingBytesPer300FramesBeforeNewObjectOverhead": 13188.203333333333,
+    "meaning": "With present input bytes, a 300-frame inline timeline averaging more than about 13.2 KB/frame already exceeds mobile 4 MiB, before new structure/provenance/pretty printing. Actual DVA packet size was not available to this audit; no dataset-size PASS is claimed.",
+    "preferred": "Store dense frame geometry once as a bounded registered static dataset, or keep compact source-native morph endpoints/ratio mappings. Mobile files carry only explicit source-bound references and presentation. Select only needed part/chunk slice in a candidate session if actual static totals require it.",
+    "requiredBeforeBuild": [
+      "Measure each final mobile file and actual POST/Node wrapper bytes",
+      "Measure registry, prepared timeline record and each candidate session static/module totals",
+      "Measure max evaluated polygon triangles and protection geometry counts",
+      "Verify no complete timeline repetition in frame diagnostics",
+      "Hash and qualify frame mapping, cross-PART boundary and random access without a new GPU run",
+      "Count all source-derived evaluated polygon coordinates (4096 per geometry) and any legacy front-line records (129 per record); retain exact admitted boundaries without silent geometric simplification"
+    ]
+  },
+  "limitsNotWeakened": true,
+  "codeChanges": 0,
+  "testsRun": 0,
+  "oldPASSReruns": 0,
+  "gpuStarts": 0,
+  "implementationOrDeploymentPASSClaimed": false
+}

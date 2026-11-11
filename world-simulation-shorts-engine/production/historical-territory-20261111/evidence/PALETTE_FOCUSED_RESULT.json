@@ -1,0 +1,46 @@
+{
+  "schema": "WORLD_ENGINE_NEW_PALETTE_FOCUSED_TEST_RESULT_V1",
+  "status": "PASS",
+  "runs": [
+    {
+      "name": "PALETTE_INTEGRATION_RESULT",
+      "command": [
+        "node",
+        "--test",
+        "world-simulation-shorts-engine/recovery/official-candidate-v1/tests/presentation_area_palette_integration.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": "PALETTE_INTEGRATION_RESULT.log",
+      "sha256": "9e2f5c71110dcd9b7dd233cc6ca73c82b5ee9ac21ca84ce83abeb257bdace713"
+    },
+    {
+      "name": "PALETTE_GROUPING_CHANGE_RESULT",
+      "command": [
+        "node",
+        "--test",
+        "--test-name-pattern=omitted areaColors|adjacent equal colors",
+        "world-simulation-shorts-engine/recovery/official-candidate-v1/tests/presentation_area_palette.test.mjs"
+      ],
+      "exitCode": 0,
+      "log": "PALETTE_GROUPING_CHANGE_RESULT.log",
+      "sha256": "d13823acf76c327e4e9575fdca209492d7451db6e22062db0dca2b9a0533f6d4"
+    }
+  ],
+  "changedSyntax": [
+    {
+      "file": "presentation_area_palette.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    },
+    {
+      "file": "presentation_runtime.mjs",
+      "exitCode": 0,
+      "stderr": ""
+    }
+  ],
+  "scope": "FIRST_NEW_INTEGRATION_RUN_PLUS_ONLY_MODIFIED_GROUPING_CASES",
+  "unmodifiedPaletteTestsRerun": 0,
+  "oldProjectPASSReruns": 0,
+  "browserRuns": 0,
+  "gpuStarts": 0
+}
