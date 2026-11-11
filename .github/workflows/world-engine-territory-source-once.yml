@@ -1,0 +1,35 @@
+name: WORLD ENGINE official territory source acquisition once
+on:
+  push:
+    branches: [fix/historical-territory-20261111]
+    paths: ['.github/workflows/world-engine-territory-source-once.yml']
+permissions:
+  contents: read
+concurrency:
+  group: world-engine-territory-source-20261111
+  cancel-in-progress: false
+jobs:
+  acquire-source:
+    if: >-
+      github.run_attempt == 1 &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.repository.private == false &&
+      github.event.before == '7fd60399b79af68ba40c55dd0986c41b51de4086' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_TERRITORY_SOURCE_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Acquire official public page and linked source media once
+        run: python3 -B world-simulation-shorts-engine/production/historical-territory-20261111/acquire_official_control_media.py
+      - name: Preserve source bytes and truthful acquisition status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: territory-official-source-${{ github.run_id }}
+          path: territory-source-evidence/
+          if-no-files-found: error
+          retention-days: 30
+# Read-only source acquisition. No GPU, renderer, MP4 production, image build or deployment.

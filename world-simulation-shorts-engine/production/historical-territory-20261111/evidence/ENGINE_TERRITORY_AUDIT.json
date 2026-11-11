@@ -1,0 +1,94 @@
+{
+  "schema": "WORLD_ENGINE_DATED_TERRITORY_ENGINE_AUDIT_V1",
+  "status": "CONFIRMED_DATA_AND_FORMAL_INTEGRATION_GAPS",
+  "repository": "dimon3898-sys/yeonhwarok-free",
+  "branch": "deploy/korean-war-20s-20261109",
+  "head": "7fd60399b79af68ba40c55dd0986c41b51de4086",
+  "checkpointReviewed": "world-simulation-shorts-engine/production/korean-war-20s-deploy-20261109/CHECKPOINT.json",
+  "checkpointStatusBeforeNewRequirement": "DEPLOYMENT_READY",
+  "scope": "READ_ONLY_CURRENT_INPUTS_AND_PUBLISHED_SOURCE; NO_TEST_RERUN_OR_RENDER",
+  "sourceIndex": "SOURCE_INDEX.json",
+  "currentInputFacts": {
+    "PART01": {
+      "sha256": "ffcbf85fa99a82a903f49e3cedbdecf69c5cac90b968e8780560637f20623792",
+      "scenes": [
+        {"id": "naktong", "frames": [0,150], "dates": ["1950-09-01","1950-09-14"]},
+        {"id": "incheon", "frames": [150,300], "dates": ["1950-09-15","1950-09-16"]}
+      ]
+    },
+    "PART02": {
+      "sha256": "3f569901e1ff0ed45f7dd3cabe17d89ad0666179981ef98e59051d1a3dde6611",
+      "scenes": [
+        {"id": "advance", "frames": [0,150], "dates": ["1950-09-16","1950-09-27"]},
+        {"id": "seoul", "frames": [150,300], "dates": ["1950-09-28","1950-09-29"]}
+      ]
+    },
+    "allStatesReuseSameTwoLandGeometries": true,
+    "landGeometryIds": ["KOREAN_LAND_CONTEXT_1","KOREAN_LAND_CONTEXT_2"],
+    "allStateColorsRGBA": [1,0.8,0.1,0.14],
+    "historicalFactionOwnerMasks": 0,
+    "historicalDatedControlStates": 0,
+    "northKoreanJuneToAugustAdvanceIncluded": false,
+    "firstTwoSceneFrontGeometry": "LAND_OUTLINE",
+    "lastTwoSceneFrontGeometry": "INCHEON_SEOUL_DIRECTION (two city coordinates; explicitly schematic)",
+    "sourceRecordPath": "$.data.scenes[*].facts.source_notes[id=PINNED_GEOGRAPHIC_CONTEXT]",
+    "explicitSourceScope": "Modern generalized geographic land and city context only; not historic military front, faction ownership or land gain. Stage dates are authored emphasis intervals, not occupied-area observations.",
+    "geometryClaim": "Existing file is truthful about geographic-only scope but does not satisfy the user's newly explicit territorial-change requirement."
+  },
+  "capabilities": [
+    {
+      "name": "Existing dated area/front display",
+      "status": "SUPPORTED_CONNECTED",
+      "evidence": ["planner_engine_adapter_v1.mjs:29-70", "presentation_runtime.mjs:112-124"],
+      "behavior": "WAR stages become source-bound Area V3 states; date labels, polygon/multipolygon fill, line reveal and state switching are connected."
+    },
+    {
+      "name": "Historical moving border in current official route",
+      "status": "NOT_IMPLEMENTED_BY_CURRENT_STATE_TRANSITION",
+      "evidence": ["area_core_v3.mjs:314-324", "area_core_v3.mjs:333-344"],
+      "behavior": "STATE_TRANSITION alpha-crossfades unchanged geometries. AREA_GROW/CONTRACT uses radial coverage. Neither is a moving shared historical control boundary."
+    },
+    {
+      "name": "Two factions with distinct color at the same date",
+      "status": "FORMAL_PRESENTATION_CONTRACT_GAP",
+      "evidence": ["presentation_plan.mjs:67-70", "presentation_runtime.mjs:66-78", "presentation_runtime.mjs:112-117"],
+      "behavior": "territoryColors is keyed by temporal state_id; the runtime groups every area of one state into a single color. No faction_id or area owner palette reaches the formal painter."
+    },
+    {
+      "name": "Existing complementary moving control field",
+      "status": "IMPLEMENTED_BUT_NOT_CONNECTED_TO_FORMAL_STUDIO_PATH",
+      "evidence": ["territory_control_adapter_v1.mjs:69-121", "territory_control_adapter_v1.mjs:161-186", "territory_control_gpu_adapter_v1.mjs:184-229", "planner_engine_adapter_v1.mjs:95", "presentation_runtime.mjs:80-85"],
+      "behavior": "Generic Territory V1 owns two complementary factions over unchanged polygon land with a piecewise longitude/latitude boundary. Formal WAR still compiles only EXISTING_AREA_V3.",
+      "limits": ["One boundary latitude per longitude", "Two factions", "One monotonic northward or southward advance direction per plan", "No separate Incheon bridgehead plus Naktong perimeter or multi-front ownership topology"]
+    },
+    {
+      "name": "Qualified control bridge",
+      "status": "INTENTIONALLY_SOURCE_BLOCKED",
+      "evidence": ["control_bridge.mjs:15-66", "control_contract.py:62-124"],
+      "behavior": "Only QUALIFIED_SOURCE_REVIEW is accepted; productionReady=false, no fullControlStates/transitions, ownerMasks empty, renderAllowed=false. Partial observed fronts explicitly must not imply complete owner masks."
+    },
+    {
+      "name": "Supplied moving front/glow adapter",
+      "status": "DISPLAY_REUSE_AVAILABLE_BUT_NO_OWNER_OR_MORPH_GENERATION",
+      "evidence": ["frontier_extension.mjs:30-57", "frontier_extension.mjs:81-116", "gain_territory.mjs:20-40"],
+      "behavior": "Frontier extension accepts exact dense supplied per-frame front geometry and scales the existing Area line alpha; gain decorator changes existing Territory pass materials. Neither creates historical territory data or solves the formal integration gap."
+    }
+  ],
+  "minimalChangeSequence": [
+    "First qualify dated actual control geometry; retain observed front segments as partial where the source does not close an owner area. Never turn the rest of the peninsula into the opposing owner merely by complementing an incomplete front.",
+    "Re-author the two 10s inputs to span North Korean advance, Naktong defense, Incheon landing and September advance/Seoul capture using only admitted dates. Preserve old input files and actual GPU MP4 evidence.",
+    "Add a generic source-bound faction/area-owner palette to the formal Scene/presentation contract and pass it to unchanged Area/Territory draw owners; do not recolor an entire temporal state as a substitute for simultaneous owners.",
+    "For geometry that meets Territory V1's explicit scalar limitations, connect its existing compiler/evaluator/GPU pass through the formal planner/runtime. For disjoint fronts and topology changes, require a generic richer owner-field contract or exact supplied geometry timeline; do not force the scalar model onto Korea.",
+    "Declare any temporal interpolation as a visual estimate between cited observations, preserve exact endpoint geometries, and reject gaps/extrapolation that have no source qualification.",
+    "Only after data and integration admission, regenerate affected derived manifests and perform focused free CPU checks for affected territorial fills/fronts/timing/projection, then prepare a unique additive image. No GPU execution."
+  ],
+  "minimalRevalidationScope": {
+    "newRequirementUnsupportedByOldVisualEvidence": "Actual historical red/blue ownership movement was absent from the old input and therefore never covered by the old geography/pin visual PASS.",
+    "invalidatedOnlyIfChanged": ["territory input/source admission", "owner color routing", "changed territorial transition/front rendering", "cross-part endpoint continuity", "affected runtime/source hash manifests and image closure"],
+    "preserveWithoutRerun": ["old GPU MP4 success", "old image/backups", "old unmodified renderer tests", "NVIDIA startup/authentication checks not changed", "geographic/context source bytes not changed", "existing CPU screenshots for their original limited scope"]
+  },
+  "mutations": {"productionCode":0,"inputs":0,"branches":0,"images":0,"gCube":0},
+  "testsRun":0,
+  "oldPASSReruns":0,
+  "gpuStarts":0
+}

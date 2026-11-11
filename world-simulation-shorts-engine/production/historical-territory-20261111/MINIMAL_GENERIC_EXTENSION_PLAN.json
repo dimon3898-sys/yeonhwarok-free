@@ -1,0 +1,73 @@
+{
+  "schema": "WORLD_ENGINE_GENERIC_TERRITORY_EXTENSION_PREPARATION_V1",
+  "status": "DESIGN_ONLY_DATA_ADMISSION_REQUIRED",
+  "sourceHead": "7fd60399b79af68ba40c55dd0986c41b51de4086",
+  "implementationAuthorizedByThisArtifact": false,
+  "reason": "Read-only preparation requested by root; dated ownership data is the next gate.",
+  "finding": "Extending the existing scalar shader into an unrestricted signed-distance ownership renderer is not the smallest defensible fix. Existing AreaOverlayPass already consumes Polygon/MultiPolygon geometry per draw using the shared native triangulation/protection/glow owners.",
+  "reuseEvidence": [
+    {"file":"area_overlay_pass_v3.mjs","lines":[108,124,197,225],"behavior":"projectedPolygon triangulates each supplied geometry on draw; supports parts/holes, native project callback, shared GL state preservation and boundary/label masks"},
+    {"file":"territory_control_gpu_adapter_v1.mjs","lines":[28,53,104,184,188],"behavior":"Current fill shader classifies one latitude boundary over unchanged landDomain; sourceDomain owns static triangulated land, draw only uploads scalar knots"},
+    {"file":"area_core_v3.mjs","lines":[85,90,103,314,343],"behavior":"Existing source geometry validation rejects invalid parts/holes and preserves order; existing state transition crossfades and radial growth cannot be relabeled as historical morph"}
+  ],
+  "smallestIndependentColorExtension": {
+    "field": "presentation.areaColors: { [compiledSceneAreaId]: [r,g,b,a] }",
+    "semanticScope": "Presentation color only; does not assert military ownership without an admitted source-bound owner contract",
+    "precedence": "areaColors[area.id] if explicitly present; otherwise existing territoryColors[area.state_id]; otherwise existing default material",
+    "files": [
+      {"file":"recovery/official-candidate-v1/presentation_prompt.mjs","functions":["localPresentation","compilePresentationPrompt envelope presentation allowlist"],"change":"Allow and copy areaColors in shared/scene override presentation, without changing existing facts/geometry."},
+      {"file":"recovery/official-candidate-v1/presentation_plan.mjs","functions":["validatePresentation","boundarySignature"],"change":"Bind palette keys to scene.areas ids; validate RGBA and existing opacity range. Boundary continuity must compare each area's effective color rather than one temporal-state color."},
+      {"file":"recovery/official-candidate-v1/presentation_runtime.mjs","functions":["areaPass","drawFrame EXISTING_AREA_V3 branch"],"change":"Group visible supplied areas by resolved color; cache distinct color passes; draw each frame's fronts only once. Existing AreaOverlayPass remains the fill/contour owner."},
+      {"file":"recovery/codex-to-gcube-handoff-v1/backend/build_variants.py and generated variants/manifests","change":"Use the existing generation process; update the required source closure/startup/image pins after qualification. Do not manually edit only a generated NVIDIA file."}
+    ],
+    "unchangedOwners":["area_core_v3.mjs","area_overlay_pass_v3.mjs","renderer.mjs","camera adapters","terrain source","existing scalar Territory V1"],
+    "adequacy":"Enables simultaneous red/blue supplied polygons; does not implement moving historical boundaries or fix absent data alone."
+  },
+  "minimalDatedPolygonModeAfterDataAdmission": {
+    "newMode": "Add an explicit versioned POLYGON_SNAPSHOTS mode beside existing Territory V1 scalar mode; do not reinterpret its old schema.",
+    "dataContract": {
+      "required":["explicit admitted geographic domain", "faction IDs", "dated source-bound Polygon/MultiPolygon owner masks", "snapshot source IDs, original map hash, trace/registration provenance, observation date and uncertainty", "explicit unknown/contested geometry or incomplete-coverage status", "time mapping and declared interval policy"],
+      "noImplicitComplement": "A missing or partial opponent polygon remains unknown. Complement is allowed only for a source-qualified complete two-owner partition inside the explicitly admitted domain, never the whole peninsula by default.",
+      "topology":"Disjoint bridgehead and mainland components are explicit source parts. No inferred closure of partial frontline segments and no synthetic circles/rectangles.",
+      "dateScope":"Exact source dates at observation endpoints; intermediate movement must be labeled visual interpolation between those dates, not a newly observed historical daily front."
+    },
+    "compilerAndEvaluator": {
+      "target":"web/map_infographic_v1/territory_control_adapter_v1.mjs (or a narrowly imported polygon-mode helper beside it)",
+      "functions":["compileDatedTerritoryIntent", "compileDatedTerritoryPlan", "evaluateDatedTerritoryFrame"],
+      "reuse":"validateAreaGeometry and existing source contracts; preserve old scalar compile/evaluate behavior and schemas",
+      "outputs":"Exact frame identity, source date or source interval, effective owner polygons, explicit shared front/unknown scope, truth kind and provenance hashes",
+      "interpolationPolicy":["EXACT_SNAPSHOT / source-qualified hold", "EXACT_SUPPLIED_FRAME_GEOMETRY if a separately qualified dense timeline exists", "VISUAL_TOPOLOGY_COMPATIBLE_VERTEX_INTERPOLATION only with explicit component/ring/vertex correspondence and per-frame non-overlap/domain validation"],
+      "reject":["automatic nearest-ring matching", "silent resampling or topology repair", "unqualified endpoint extrapolation", "simple radial AREA_GROW as territory advance", "alpha crossfade presented as moving border", "arbitrary SDF transition where a bridgehead or hole has no admitted birth/topology event"]
+    },
+    "rendererIntegration": {
+      "preferred":"Consume evaluated owner polygons with the existing AreaOverlayPass and native triangulateRegion; do not copy GPU fill/contour shaders.",
+      "optionalPublicFacade":"A polygon-mode branch in createTerritoryControlPass can delegate to existing AreaOverlayPass instances per faction. If avoiding facade coupling is smaller, planner/runtime can route a new EXISTING_TERRITORY_POLYGON binding directly to the same Area draw owner.",
+      "formalFiles":["planner_scene_v1.mjs facts/scene optional control contract and validation", "planner_engine_adapter_v1.mjs explicit polygon-control binding", "presentation_prompt.mjs source admission and trace", "presentation_plan.mjs palette/continuity binding", "presentation_runtime.mjs new binding consumer", "generated variants and manifests"],
+      "frontRequirement":"Fill boundary and displayed front must derive from the same admitted/evaluated field. Existing supplied-front/glow pass is reusable. Never draw an unrelated schematic line as that boundary."
+    },
+    "notMinimalAlternatives":["Replacing the scalar fragment shader with a new full raster/SDF renderer", "Adding a Korea-only renderer", "Editing historical input into geometry without source admission", "Two independent alpha-crossfading owners over an assumed complementary full-domain fill"]
+  },
+  "meaningfulNewVerificationScope": {
+    "pureCPU_NoSockets":[
+      "Actual source packet hash/date/geometry-reference admission and rejection of missing or geographic-context-only records",
+      "Two simultaneous faction polygons, disjoint bridgehead, preserved holes and explicit unknown area; no inferred opponent complement",
+      "Different owner colors in one temporal state; unknown palette ID rejected; legacy state palette unchanged when areaColors absent",
+      "Exact source endpoint equality and byte-preserved original geometry; deterministic random-access and cross-part boundary identity",
+      "Explicit interpolation source interval, topology correspondence, per-frame simple rings/non-overlap/domain containment; unsupported topology changes fail instead of inventing motion",
+      "Boundary-continuity rejection when identical geometry has different effective faction color"
+    ],
+    "freeActionsChangedPixelScope":[
+      "Existing real CPU WebGL renderer on free Linux runner only; sample relevant observed endpoints and admitted interval midpoints, including first bridgehead date and PART boundary",
+      "Actual red/blue simultaneous pixels, terrain still visible under opacity, no owner fill outside admitted land/inside unknown sea or holes",
+      "Pixel sample ownership agrees with independent CPU point-in-polygon oracle away from antialias boundaries",
+      "Displayed front aligns with evaluated fill boundary under wide and close camera projections; label/native coastline protection and GL state remain intact",
+      "New mode synthetic non-Korea fixture demonstrates generic topology support without implying synthetic fixture is historical data"
+    ],
+    "doNotRerun":"Old valid GPU successes and unrelated CPU suites. Only changed input, source admission, color routing, moving boundary, PART continuity and affected manifests need new evidence."
+  },
+  "openDecision":"Actual approved source geometry determines whether topology-compatible intervals suffice or a more general owner-field transition is necessary. Do not implement the latter speculatively.",
+  "codeChanges":0,
+  "renders":0,
+  "gpuStarts":0,
+  "testsRun":0
+}

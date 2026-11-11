@@ -1,0 +1,152 @@
+{
+  "schema": "WORLD_ENGINE_USER_GPU_SAMPLE_VISUAL_AUDIT_V1",
+  "status": "VISUAL_REQUIREMENT_GAP_CONFIRMED",
+  "scope": "READ_ONLY_EXISTING_MP4_DECODE_AND_VISUAL_INSPECTION_NO_RENDER",
+  "input": {
+    "uploadedName": "70102.mp4",
+    "bytes": 13335674,
+    "sha256": "f981335157c428c0ccf0721c328a0bff00882800e7170c1ec368897d258d223f",
+    "container": "MP4",
+    "codec": "H.264",
+    "width": 1080,
+    "height": 1920,
+    "fps": "30/1",
+    "durationSeconds": 10.0,
+    "frames": 300,
+    "audioStreams": 0,
+    "userIdentifiedPart": "PART01",
+    "modified": false
+  },
+  "baselineCheckpoint": "world-simulation-shorts-engine/production/korean-war-20s-deploy-20261109/CHECKPOINT.json at 7fd60399b79af68ba40c55dd0986c41b51de4086",
+  "preservedTechnicalEvidence": [
+    "Existing user-supplied playable MP4",
+    "Expected 10-second portrait resolution/frame-rate/frame-count metadata",
+    "Existing build and preparation PASS are not invalidated by this visual requirement gap"
+  ],
+  "sampling": {
+    "decodedFrames": [
+      0,
+      30,
+      60,
+      90,
+      120,
+      149,
+      150,
+      180,
+      210,
+      240,
+      270,
+      299
+    ],
+    "timestampsSeconds": [
+      0.0,
+      1.0,
+      2.0,
+      3.0,
+      4.0,
+      4.966667,
+      5.0,
+      6.0,
+      7.0,
+      8.0,
+      9.0,
+      9.966667
+    ],
+    "contactSheet": "contact-sheet.png",
+    "fullResolutionInspected": [
+      {
+        "frame": 90,
+        "timeSeconds": 3.0,
+        "file": "frame-01.png"
+      },
+      {
+        "frame": 270,
+        "timeSeconds": 9.0,
+        "file": "frame-02.png"
+      }
+    ]
+  },
+  "observations": [
+    {
+      "sampleTimesSeconds": [
+        0,
+        1
+      ],
+      "visible": "Korean peninsula terrain/satellite texture, dark-blue sea, pale-yellow coast/outer border glow, Korean War title and Busan pin.",
+      "territorialMeaning": "No actor legend, red North Korean control fill, blue ROK/UN control fill or dated front visible."
+    },
+    {
+      "sampleTimesSeconds": [
+        2,
+        3,
+        4,
+        4.966667,
+        5
+      ],
+      "visible": "Camera near southeast Korea; yellow Naktong defense hero pin, Busan pin, white/blue-glow labels. Date reads 1950.09 early in samples from 3s.",
+      "territorialMeaning": "Naktong defense is represented by a location pin, not an observable enclosing perimeter or blue controlled region. Yellow coastal outline does not depict the requested battle front."
+    },
+    {
+      "sampleTimesSeconds": [
+        6
+      ],
+      "visible": "Camera transition northwards with Seoul label.",
+      "territorialMeaning": "Camera movement conveys location change, not territorial transfer."
+    },
+    {
+      "sampleTimesSeconds": [
+        7,
+        8,
+        9,
+        9.966667
+      ],
+      "visible": "Incheon landing hero pin and Seoul pin with 1950.09.15 visible from 8s. Terrain remains naturally colored with yellow coast outline.",
+      "territorialMeaning": "No observable blue landing bridgehead or expanding blue control, and no retreating red control."
+    }
+  ],
+  "confirmedGaps": [
+    {
+      "code": "NO_DISTINGUISHABLE_ACTOR_CONTROL_AREAS",
+      "scope": "Inspected sample frames",
+      "detail": "No red/blue land control fills distinguish North Korean and ROK/UN controlled regions."
+    },
+    {
+      "code": "NO_OBSERVABLE_HISTORICAL_FRONT_MOVEMENT",
+      "scope": "Inspected sample sequence",
+      "detail": "Visible animation is camera travel/zoom and labels/pins; actual changing control boundary is not communicated."
+    },
+    {
+      "code": "NORTH_ADVANCE_NOT_TOLD_IN_PART01",
+      "scope": "Inspected PART01 timeline",
+      "detail": "Labels proceed from early September Naktong defense to September 15 Incheon landing; an initial north-to-south advance sequence is not visible."
+    },
+    {
+      "code": "NO_CONTROL_SEMANTICS_LEGEND",
+      "scope": "Inspected sample frames",
+      "detail": "Blue label glow and dark-blue sea cannot establish blue territorial control; yellow coast/border glow cannot establish a battlefield front."
+    }
+  ],
+  "preserveVisualStrengths": [
+    "Terrain and coast are legible",
+    "Korean hero labels and dates are readable",
+    "Expected MP4 technical format and camera/label functioning are retained"
+  ],
+  "minimalRevalidationScope": [
+    "Dated control-area input binding",
+    "Generic time-varying region/front rendering",
+    "Actor colors and alpha over terrain",
+    "Date/scene boundary continuity across revised PART01 and PART02"
+  ],
+  "limitations": [
+    "This MP4 alone does not authenticate image digest, job ID, GPU hardware, source polygon provenance or diagnostic receipts.",
+    "Sparse visual inspection covers 12 frames, not a new full-render PASS.",
+    "The required historical front shapes must come from independently verified sources; none were inferred or generated in this audit."
+  ],
+  "derivedArtifactsPublicUploadAuthorized": false,
+  "gpuExecutions": 0,
+  "newRenders": 0,
+  "oldPASSReruns": 0,
+  "additionalRemoteEvidence": "EXISTING_OUTPUT_RETENTION_AUDIT.json",
+  "matchingRemoteStudioHashReceiptFound": true,
+  "technicalQAReceiptPreserved": "PASS"
+}
