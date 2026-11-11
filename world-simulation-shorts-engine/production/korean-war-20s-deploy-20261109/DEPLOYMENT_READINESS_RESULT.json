@@ -1,0 +1,58 @@
+{
+  "schema": "WORLD_ENGINE_DEPLOYMENT_READINESS_RESULT_V1",
+  "status": "DEPLOYMENT_READY",
+  "scope": "ALL_FREE_PREDEPLOYMENT_PREPARATION_COMPLETE; USER_OPERATED_GPU_NOT_RUN",
+  "checkedAtUTC": "2026-11-11T13:31:31.918Z",
+  "branch": "deploy/korean-war-20s-20261109",
+  "buildCommit": "252fc8492e6060744967d33c93442f2bcd05591f",
+  "sourceCommit": "733008bbfcef0b2ba7475842e81de5d784a0d119",
+  "criteria": {
+    "imageFilesRuntimeDependenciesAndPrivateManifest": "PASS",
+    "changedScopeCPUVisualEvidence": "PASS_PRESERVED_A10_A11_A12",
+    "newImageBuild": "PASS_ACTION_42530874057",
+    "ghcrPublicationAndDigest": "PASS",
+    "oldAndNewImageBackupDownloadRestore": "PASS",
+    "privateAssetBackupDownload": "PASS",
+    "part01AndPart02JSON": "PASS_FROZEN_BYTES",
+    "officialStudioCompilerNvidiaWorkerRendererMP4Route": "PASS_SOURCE_BINDING_GPU_EXECUTION_PENDING",
+    "gcubeRTX5090SettingsSavedAndReadBack": "PASS",
+    "workloadStoppedNodeUnassigned": "PASS",
+    "mobileInstructionsAndExistingCPUComposerPath": "PREPARED"
+  },
+  "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:korean-war-20s-v17-42530874057",
+  "digest": "sha256:9190c88bcf5074f3fe1c064b18518b4ba7aa3a0707b255cbf078720e70e75100",
+  "runtimeManifestSHA256": "13bdcdc11d063ac9a81ee59d38edb8f052f80daf07cdb1b06ebcc1e5b0e6a5ea",
+  "startupManifestSHA256": "035a555871b4ba4938949eb6d00a2bc573d381be0477a54bbc72d9c8b801e08d",
+  "privateRegistrySHA256": "3f87141fcdf3fce92034ed674cebaf153912b8dbc707f0319fd898c89e8a68bf",
+  "backupEvidence": [
+    "evidence/BACKUP_DOWNLOAD_RESTORE.json",
+    "evidence/PARENT_BACKUP_VERIFICATION.json",
+    "PRIVATE_BACKUP_VERIFICATION.json",
+    "evidence/PRIVATE_BACKUP_READBACK_20261111.json"
+  ],
+  "buildEvidence": "evidence/RESULT.json",
+  "savedSettingsEvidence": "GCUBE_SETTINGS_RECEIPT.json",
+  "inputEvidence": "INPUT_DELIVERY_MANIFEST.json",
+  "mobileRunbook": "MOBILE_RUNBOOK.md",
+  "historicalEvidenceScope": "evidence/RESULT.json.gCubeConfigurationSaved=false describes build completion before the later settings save; that original receipt remains unchanged. GCUBE_SETTINGS_RECEIPT.json records the subsequent actual save and fresh readback.",
+  "remainingGPUStatus": "GPU_PENDING",
+  "remainingRuntimeAndOutputChecks": [
+    "Actual RTX 5090 driver and NVIDIA WebGL compatibility",
+    "Actual mounted private archive installation and persistent diagnostic writes on user deployment",
+    "Two official 300-frame renders and MP4 downloads",
+    "Actual reference-video visual quality and all frame continuity",
+    "Existing CPU composition of the two downloaded MP4s into verified 600-frame output"
+  ],
+  "userOnlyOperations": [
+    "deployment start",
+    "Studio rendering",
+    "MP4 and diagnostic download",
+    "deployment stop"
+  ],
+  "gpuStarts": 0,
+  "validPASSReruns": 0,
+  "newBuildsThisResume": 0,
+  "newPublicationsThisResume": 0,
+  "cpuCompositionNeedsUserOutputFiles": true,
+  "noMobileTwoJobJoinButton": true
+}
