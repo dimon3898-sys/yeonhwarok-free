@@ -1,0 +1,44 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_6S_RESUME_GATE_V1",
+  "date": "2026-11-13",
+  "baseBranch": "feat/reference-6s-ready-20261112",
+  "baseCommit": "e10f801978bc4e77256da1fd21f3bb18bd1fd724",
+  "status": "BLOCKED_FORMAL_ADMISSION",
+  "firstIncomplete": "Compile existing 6s/180-frame reference input through preserved formal compiler",
+  "oldPassReruns": 0,
+  "gpuStarts": 0,
+  "existingCheckpoint": "world-simulation-shorts-engine/production/reference-6s-20261112/CHECKPOINT.json",
+  "verifiedContracts": {
+    "nvidiaFrames": [
+      180,
+      300
+    ],
+    "schema": "WORLD_ENGINE_PRESENTATION_PROMPT_V2",
+    "registeredGlobalSource": "GLOBAL_EARTH_DAY_RGB_V1",
+    "sourceRegistrationNotEqualToAdmission": true
+  },
+  "inputCandidate": {
+    "sha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
+    "origin": "Conversation attachment; NOT yet committed to this repository",
+    "knownDefects": [
+      "territoryColors alpha 0.85 exceeds supported 0.6",
+      "subject.event_family GEOGRAPHIC unsupported",
+      "scene_timing frame allocation needs exact 180 frame contract",
+      "stage colors represent sequential states, not simultaneous independent colors"
+    ],
+    "formalCompilerPass": false
+  },
+  "nextActions": [
+    "Preserve candidate bytes with matching SHA256 in this branch before edits",
+    "Use existing compiler and source registry; no renderer rewrite",
+    "Correct only rejected input fields and compile new input",
+    "Do not advance to CPU visual gate without formal compiler PASS"
+  ],
+  "prohibited": [
+    "reset",
+    "force push",
+    "main edits",
+    "existing PASS reruns",
+    "paid GPU"
+  ]
+}
