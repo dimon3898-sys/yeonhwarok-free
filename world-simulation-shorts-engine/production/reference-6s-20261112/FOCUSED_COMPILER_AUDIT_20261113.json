@@ -1,0 +1,46 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_6S_FOCUSED_COMPILER_AUDIT_V1",
+  "status": "BLOCKED",
+  "branch": "fix/reference-6s-formal-admission-20261113",
+  "sourcePaths": [
+    "world-simulation-shorts-engine/web/map_infographic_v1/planner_scene_v1.mjs",
+    "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs",
+    "world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs"
+  ],
+  "verifiedFacts": [
+    {
+      "code": "UNSUPPORTED_GEOGRAPHIC_FAMILY",
+      "evidence": "PLANNER_FAMILIES = ['TRANSPORT','LINE_METRIC','DISASTER','WAR']; candidate uses GEOGRAPHIC",
+      "scope": "scene planner fact validation"
+    },
+    {
+      "code": "UNQUALIFIED_GEOMETRY_SOURCE",
+      "evidence": "candidate source_notes verification_status=UNVERIFIED; registered global raster is separate from country geometry qualification",
+      "scope": "source evidence"
+    },
+    {
+      "code": "ALPHA_OUT_OF_RANGE",
+      "evidence": "candidate territoryColors alpha=0.85; earlier checkpoint records max 0.6",
+      "scope": "presentation input"
+    },
+    {
+      "code": "TIMING_MISMATCH",
+      "evidence": "candidate action_frames=150 and final_hold_frames=30 sum to 180 under non-WAR; WAR path instead uses initial_reveal_frames=1 plus state_transition_frames=90 plus hold=30 =121",
+      "scope": "planner timing"
+    },
+    {
+      "code": "COUNTRY_AND_PIN_BINDING_REQUIRES_ADMISSION",
+      "evidence": "candidate native_context includes Spain and Morocco; source admission must establish location-country correspondence",
+      "scope": "native context"
+    }
+  ],
+  "doNotDo": [
+    "Do not relabel geographic visualization as WAR merely to pass parser",
+    "Do not claim compiler PASS from static checks",
+    "Do not rerun old PASS",
+    "Do not start GPU"
+  ],
+  "nextMinimalImplementation": "Implement supported geographic visual-only contract in additive, isolated compiler adapter or choose an existing truly compatible presentation pathway; bind reviewed source geometry and independent simultaneous color layers; then compile the new 180-frame input and validate focused changes only.",
+  "gpuStarts": 0,
+  "oldPassReruns": 0
+}
