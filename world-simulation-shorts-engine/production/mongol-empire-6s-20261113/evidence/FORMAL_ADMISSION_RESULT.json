@@ -1,0 +1,313 @@
+{
+  "schema": "WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2",
+  "compilerVersion": "universal-presentation-v2.0.0",
+  "status": "INVALID",
+  "issues": [
+    {
+      "status": "CONFLICT",
+      "code": "NATURAL_DATE_OUTSIDE_ATTACHED_DATA",
+      "field": "$.prompt",
+      "reason": "The requested date interval does not intersect the matching attached scene validity range; attached dates were not overwritten.",
+      "example": {
+        "requested": "1259",
+        "precision": "YEAR",
+        "allowedIntervals": [
+          {
+            "start": "1206",
+            "end": "1259"
+          }
+        ],
+        "action": "Attach matching dated facts or correct the prompt"
+      }
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.time_range.start",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.time_range.end",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[0].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[1].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[2].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[3].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[4].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[5].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[6].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "INVALID",
+      "code": "ISO_DATE_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages[7].date",
+      "reason": "The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.",
+      "example": {
+        "supportedExample": "1950-06-25",
+        "unsupported": "27 BCE"
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages",
+      "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon.",
+      "example": {
+        "minimumStates": 2,
+        "eachStateRequires": [
+          "date",
+          "area_refs",
+          "front_refs"
+        ]
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REVIEWED_EVIDENCE_REQUIRED",
+      "field": "$.data.scenes[0].historicalEvidence",
+      "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact.",
+      "example": {
+        "historicalEvidence": [
+          {
+            "recordId": "approved_record",
+            "sourceId": "source_1",
+            "claimId": "approved_claim",
+            "geometryIds": [],
+            "stageIds": []
+          }
+        ]
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    }
+  ],
+  "clarifications": [
+    {
+      "status": "CONFLICT",
+      "code": "NATURAL_DATE_OUTSIDE_ATTACHED_DATA",
+      "field": "$.prompt",
+      "reason": "The requested date interval does not intersect the matching attached scene validity range; attached dates were not overwritten.",
+      "example": {
+        "requested": "1259",
+        "precision": "YEAR",
+        "allowedIntervals": [
+          {
+            "start": "1206",
+            "end": "1259"
+          }
+        ],
+        "action": "Attach matching dated facts or correct the prompt"
+      }
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "TERRITORY_AND_FRONT_STATES_REQUIRED",
+      "field": "$.data.scenes[0].facts.stages",
+      "reason": "Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon.",
+      "example": {
+        "minimumStates": 2,
+        "eachStateRequires": [
+          "date",
+          "area_refs",
+          "front_refs"
+        ]
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    },
+    {
+      "status": "NEEDS_INPUT",
+      "code": "REVIEWED_EVIDENCE_REQUIRED",
+      "field": "$.data.scenes[0].historicalEvidence",
+      "reason": "Historical or observed claims need server-reviewed source/claim bindings. A SHA or VERIFIED label alone proves no historical fact.",
+      "example": {
+        "historicalEvidence": [
+          {
+            "recordId": "approved_record",
+            "sourceId": "source_1",
+            "claimId": "approved_claim",
+            "geometryIds": [],
+            "stageIds": []
+          }
+        ]
+      },
+      "validationOwner": "UNCHANGED_DATA_PIPELINE_V1"
+    }
+  ],
+  "sceneResults": [],
+  "renderRequests": [],
+  "renderableSceneIds": [],
+  "blockedSceneIds": [],
+  "transitionPlan": [],
+  "unrestrictedLanguageUnderstanding": false,
+  "externalLLMUsed": false,
+  "paidExecutionAllowed": false,
+  "historicalRenderAllowed": false,
+  "inputSHA256": "755c82e590720918e72c3a10290584e66297bd4f636f86f1df794fca79e21489",
+  "naturalLanguage": {
+    "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+    "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+    "unrestrictedLanguageUnderstanding": false,
+    "externalLLMUsed": false,
+    "rawPrompt": "몽골제국의 영토 확장. 제공한 1206년부터 1259년까지의 역사 자료로 1080x1920, 30fps, 6초 영상을 만들어줘.",
+    "topic": {
+      "text": "몽골제국의 영토 확장",
+      "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+      "factsInferred": false
+    },
+    "intents": [
+      {
+        "type": "TERRITORY_CHANGE",
+        "value": "TERRITORY_CHANGE",
+        "start": 6,
+        "end": 11,
+        "text": "영토 확장",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      }
+    ],
+    "durations": [
+      {
+        "type": "DURATION",
+        "value": 6,
+        "start": 59,
+        "end": 61,
+        "text": "6초",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+      }
+    ],
+    "fps": [
+      {
+        "type": "FPS",
+        "value": 30,
+        "start": 52,
+        "end": 57,
+        "text": "30fps",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+      }
+    ],
+    "dates": [
+      {
+        "type": "DATE",
+        "value": "1206",
+        "start": 17,
+        "end": 22,
+        "text": "1206년",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+        "precision": "YEAR",
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      },
+      {
+        "type": "DATE",
+        "value": "1259",
+        "start": 25,
+        "end": 30,
+        "text": "1259년",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+        "precision": "YEAR",
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      }
+    ],
+    "locations": [],
+    "routes": [],
+    "connections": [],
+    "coordinates": [],
+    "unsupported": [],
+    "uninterpretedText": "몽골제국의 영토 확장. 제공한 1206년부터 1259년까지의 역사 자료로 1080x1920, 30fps, 6초 영상을 만들어줘."
+  },
+  "inputDerivations": [],
+  "simulationType": "HISTORICAL",
+  "normalizedDataSHA256": "605aed412effe7ecda7f37d43dd88b9bb881ed64e8567b58bcf8ab7ebd991bf7",
+  "totalFrames": 180
+}
