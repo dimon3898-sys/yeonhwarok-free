@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "BLOCKED_COMMON_RELEASE_GUARD_IMPLEMENTATION",
-  "firstIncomplete": "COMMON_IMAGE_GATE_CURRENT_D1_MISSING_V16_LAUNCH_FIX",
+  "status": "READY_FOR_USER_GPU_RETRY",
+  "firstIncomplete": "USER_ONLY_SEPARATE_APPROVAL_DEPLOY_AND_STUDIO_RENDER",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
     "width": 1080,
@@ -62,6 +62,11 @@
       "step": "gCube config",
       "class": "신규 작업",
       "state": "PASS_SAVED_WITHOUT_DEPLOYMENT"
+    },
+    {
+      "step": "Common recurrence gate + actual immutable image + saved stopped workload readback",
+      "class": "신규 / 기존 PASS 재사용",
+      "state": "PASS_NO_GPU_EXECUTION"
     }
   ],
   "actions": {
@@ -84,7 +89,7 @@
   ],
   "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Implement scene-independent gate, verify existing d1 image, restore only missing proven v16 worker if rejected; preserve all prior PASS.",
+  "nextAction": "User separately authorizes retry, then personally starts gCube deployment, runs existing registered6s input once, downloads MP4, and stops workload. Agent GPU authorization remains false.",
   "lastError": "JSON_SIZE_INVALID",
   "formalCompile": {
     "status": "PASS",
@@ -121,13 +126,14 @@
   },
   "imageBuild": {
     "status": "PASS",
-    "evidence": "incident-7001b1f3/execution-a2/IMAGE_BUILD.json",
-    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-jsonfix-df10b435ec73-43359755603",
-    "digest": "sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1",
-    "buildCommit": "df10b435ec73cfa38b0251abb54e486b8e9cf8d7",
-    "runId": "43359755603"
+    "evidence": "../../release-guard/recovery-20261113/execution-a1/RELEASE_APPROVAL.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:required-fixes-f0f44d269b9a-43362382877",
+    "digest": "sha256:8f7a91201840b84769523ec4cd2430df54470403883d57c40e26d3d1e36ce329",
+    "buildCommit": "f0f44d269b9ab5189019c696e9e5024e0e719215",
+    "runId": "43362382877",
+    "rebuildReason": "Actual existing d1 image rejected by common required-fix gate: WORKER_PUBLICATION_FIX_MISSING; four-file delta restored exact previously verified v16 worker and matching startup/source pins."
   },
-  "deploymentReady": false,
+  "deploymentReady": true,
   "sourcePinVerification": {
     "status": "PASS",
     "scope": "Changed NVIDIA variants and mandatory atomic 3-variant source check only; no GPU, no image build",
@@ -140,7 +146,7 @@
     "admission": "FULL_CAMERA_SOURCE_ADMISSION.json",
     "oldApproximateFitPreservedInGit": true
   },
-  "lastRemoteSavedBeforeThisUnit": "d4567ee2b88c06d069eeb650513dd0389f19fa8c",
+  "lastRemoteSavedBeforeThisUnit": "f0e560b4b38f64d2b7cc4950e02cd817544ab59c",
   "registeredCompile": {
     "status": "PASS",
     "compilerInputSHA256": "4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45",
@@ -153,7 +159,8 @@
   },
   "firstFrameFitReused": "Existing V10 relative transforms; new Mercator registration and final two-pin correction only",
   "invalidatedScope": [
-    "Old image post-capture admission defect repaired and new image integration PASS; real GPU MP4 verification/export remains unverified. Existing compile/geography/PNG/180continuity unchanged."
+    "Old image post-capture admission defect repaired and new image integration PASS; real GPU MP4 verification/export remains unverified. Existing compile/geography/PNG/180continuity unchanged.",
+    "Only old image common mandatory-fix admission invalidated: missing proven v16 launch publication barrier. Exact prior fix restored, actual image import/source closure and new negative gate cases PASS. No compile/geography/PNG/180continuity rerun."
   ],
   "registeredSourcePins": {
     "evidence": "REGISTERED_SOURCE_PIN_DELTA.json",
@@ -163,10 +170,15 @@
     "adapterVerification": "image-a1/IMAGE_ADAPTER_VERIFICATION.json"
   },
   "gcubePredeployment": {
-    "status": "PREVIOUS_SETTINGS_PRESERVED_REPAIR_IMAGE_NOT_YET_SELECTED",
+    "status": "PASS_SAVED_REOPENED_STOPPED",
     "evidence": "GCUBE_PREDEPLOY_CONFIG.json",
+    "receipt": "../../release-guard/recovery-20261113/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
     "workloadId": 5373,
-    "GPUExecutions": 0
+    "imageDigest": "sha256:8f7a91201840b84769523ec4cd2430df54470403883d57c40e26d3d1e36ce329",
+    "bothDigestEnvironmentValuesMatch": true,
+    "lastDeploymentUnchanged": "2026-11-13 12:15:42 KST",
+    "GPUExecutions": 0,
+    "saveTriggeredDeployment": false
   },
   "unverifiedAfterUserDeployment": [
     "Exact failed GPU FRAME_EVIDENCE/CAPTURE_RECEIPT bytes and traceback not recovered",
@@ -204,7 +216,7 @@
     "archivedCPUFrameLedgerBytes": 116332024,
     "actualFailedGPUFilename": null,
     "MP4Recovery": "NO_ACCESSIBLE_COPY_FOUND_STOPPED_PRIVATE_FILESYSTEM_UNAVAILABLE",
-    "gcubeSettingsUpdated": false
+    "gcubeSettingsUpdated": true
   },
   "priorImageBuild": {
     "status": "PASS",
@@ -215,11 +227,59 @@
     "runId": "43355738683"
   },
   "releaseGuard": {
-    "status": "IMPLEMENTING",
+    "status": "PASS",
     "existingImageWorkerSHA256": "d5bf03d4b79d70411c02d542bbebd08d9df0463636f558f02ee271c259b6b3d9",
     "requiredWorkerSHA256": "f96763045ae38f24b0dba6f609e049454464f8d8489e2762987155c1e1cf0171",
     "newFinding": "Known v16 publication barrier absent from d1 source closure; not attributed to JSON incident",
     "oldPassReruns": 0,
-    "GPUExecutions": 0
+    "GPUExecutions": 0,
+    "scope": "CURRENT_BRANCH_ALL_FORMAL_PUBLISHER_JOBS_ANY_SCENE",
+    "policySHA256": "225bbb5d6f15d23b2b311002cc3f583361aea0e4e7c0fddbe7388998eff2b744",
+    "publisherJobs": 60,
+    "implementationCommit": "f0f44d269b9ab5189019c696e9e5024e0e719215",
+    "executionEvidenceCommit": "f0e560b4b38f64d2b7cc4950e02cd817544ab59c",
+    "imageGateEvidence": "../../release-guard/recovery-20261113/execution-a1",
+    "deploymentGateEvidence": "../../release-guard/recovery-20261113/gcube-readback/DEPLOYMENT_GATE.json",
+    "newRuntimeFiles": [
+      "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json"
+    ],
+    "newCases": [
+      "normal actual image PASS",
+      "missing worker blocked",
+      "old reader blocked",
+      "wrong manifest blocked",
+      "either digest mismatch blocked",
+      "rejected image publication blocked",
+      "direct OCI/buildx push blocked"
+    ],
+    "preservedPass": [
+      "GEOGRAPHIC compile",
+      "registered6s180 compile",
+      "geographic admission",
+      "CPU7PNG",
+      "180frame continuity",
+      "last30framehold",
+      "NVIDIA binding",
+      "prior JSON reader security10",
+      "prior worker publication6"
+    ],
+    "limits": [
+      "Known-fix registry and current branch formal workflows; no organization registry ACL or immutable repository rules added",
+      "main and other branch workflows unchanged per user instruction; old branches do not inherit these gates",
+      "No actual NVIDIA render or MP4 export claimed"
+    ]
+  },
+  "GPUStartAuthorized": false,
+  "actualNvidiaRenderVerified": false,
+  "priorJSONRepairImageBuild": {
+    "status": "PASS",
+    "evidence": "incident-7001b1f3/execution-a2/IMAGE_BUILD.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-jsonfix-df10b435ec73-43359755603",
+    "digest": "sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1",
+    "buildCommit": "df10b435ec73cfa38b0251abb54e486b8e9cf8d7",
+    "runId": "43359755603"
   }
 }
