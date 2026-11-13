@@ -1,0 +1,182 @@
+name: WORLD ENGINE complete boundary and C2 camera image
+'on':
+  push:
+    branches:
+    - fix/reference-6s-formal-admission-20261113
+    paths:
+    - .github/workflows/world-engine-quality-v2-image.yml
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-quality-v2-image
+  cancel-in-progress: false
+jobs:
+  quality-image:
+    if: github.run_attempt == 1 && github.event.repository.private == false && github.repository == 'dimon3898-sys/yeonhwarok-free'
+      && github.event.before == '80eb38ad16829e76e0450ad3cc706aa36d37a3b6' && github.event.head_commit.message == 'WORLD_ENGINE_QUALITY_V2_IMAGE_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      NVIDIA_VISIBLE_DEVICES: void
+      GUARD: world-simulation-shorts-engine/release-guard
+      QUALITY: world-simulation-shorts-engine/production/reference-6s-20261112/quality-v2
+    steps:
+    - name: Fetch common release policy from this exact commit
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        path: .world-engine-guard-control
+        persist-credentials: false
+        sparse-checkout: '.github/actions/world-engine-release-guard
+
+          world-simulation-shorts-engine/release-guard
+
+          '
+    - name: Install mandatory common image publication gate
+      uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
+    - uses: actions/checkout@v4
+      with:
+        sparse-checkout-cone-mode: false
+        sparse-checkout: '/.github/workflows/
+
+          /world-simulation-shorts-engine/release-guard/
+
+          /world-simulation-shorts-engine/web/
+
+          /world-simulation-shorts-engine/recovery/universal-presentation-v2/
+
+          /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/
+
+          /world-simulation-shorts-engine/recovery/studio-cold-start-v2/
+
+          /world-simulation-shorts-engine/production/reference-6s-20261112/quality-v2/
+
+          '
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Require reviewed actual CPU delta and common publisher wiring
+      run: 'python -m pip install --disable-pip-version-check PyYAML==6.0.3
+
+        python -B "${GUARD}/audit_workflows.py" --repo . --output "${WORLD_ENGINE_GUARD_EVIDENCE}/WORKFLOW_COVERAGE.json"
+
+        python - <<''PYCODE''
+
+        import json,os
+
+        from pathlib import Path
+
+        p=Path(os.environ[''QUALITY''])
+
+        assert json.loads((p/''CPU_VISUAL_REVIEW.json'').read_text())[''status'']==''PASS_CHANGED_SCOPE''
+
+        assert json.loads((p/''FOCUSED_TESTS.json'').read_text())[''status'']==''PASS''
+
+        assert json.loads((p/''cpu-a4/CHANGED_FEATURES_RESULT.json'').read_text())[''holdPixelsIdentical149_150_179''] is
+        True
+
+        print(''New CPU evidence admitted; old visual/security suites reused without rerun'')
+
+        PYCODE'
+    - name: Preserve selected PNGs from the already reviewed official CPU video; no render
+      run: 'sudo apt-get update -qq
+
+        sudo apt-get install -y --no-install-recommends ffmpeg
+
+        mkdir -p "${QUALITY}/cpu-a4/decoded"
+
+        ffmpeg -hide_banner -loglevel error -i "${QUALITY}/cpu-a4/VIDEO.mp4" -vf ''select=eq(n\,12)+eq(n\,24)+eq(n\,42)+eq(n\,54)+eq(n\,120)+eq(n\,149)''
+        -vsync 0 "${QUALITY}/cpu-a4/decoded/FRAME_%02d.png"
+
+        printf ''%s\n'' ''PNG decoded from reviewed official CPU preview; frames12,24,42,54,120,149 in order. No rerender.''
+        > "${QUALITY}/cpu-a4/decoded/README.txt"'
+    - name: Enable disposable builder compatibility
+      run: 'sudo python3 - <<''PY''
+
+        import json
+
+        from pathlib import Path
+
+        p=Path(''/etc/docker/daemon.json'');d=json.loads(p.read_text()) if p.exists() else {}
+
+        d.setdefault(''features'',{})[''containerd-snapshotter'']=True;d[''max-download-attempts'']=1
+
+        p.write_text(json.dumps(d)+''\n'')
+
+        PY
+
+        sudo systemctl restart docker
+
+        '
+    - name: Build sealed quality delta on immutable previously approved image
+      run: 'set -euo pipefail
+
+        python -B "${GUARD}/package_delta.py" "${QUALITY}/PACKAGE.json" "${RUNNER_TEMP}/quality-image-context"
+
+        IMAGE="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-v2-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
+
+        if docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then echo IMMUTABLE_TAG_EXISTS; exit 1; fi
+
+        docker build --platform linux/amd64 --label "org.opencontainers.image.revision=${GITHUB_SHA}" --label ''org.opencontainers.image.source=https://github.com/dimon3898-sys/yeonhwarok-free''
+        -t "${IMAGE}" "${RUNNER_TEMP}/quality-image-context"
+
+        printf ''%s\n'' "${IMAGE}" > "${RUNNER_TEMP}/quality-image-tag"'
+    - name: Verify changed code inside actual image without GPU
+      run: 'set -euo pipefail
+
+        IMAGE="$(cat "${RUNNER_TEMP}/quality-image-tag")"
+
+        docker run --rm -i --network none --read-only --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges -e
+        NVIDIA_VISIBLE_DEVICES=void --mount "type=bind,src=${GITHUB_WORKSPACE}/${QUALITY}/probe_image.mjs,dst=/quality-probe.mjs,readonly"
+        --entrypoint node "${IMAGE}" /quality-probe.mjs < "${QUALITY}/PACKAGE.json" > "${WORLD_ENGINE_GUARD_EVIDENCE}/QUALITY_IMAGE_BINDINGS.json"
+
+        python -B "${GUARD}/control.py" verify --image "${IMAGE}" --evidence "${WORLD_ENGINE_GUARD_EVIDENCE}"'
+    - name: Publish only after new-image quality and mandatory common gates PASS
+      env:
+        GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: 'set -euo pipefail
+
+        printf ''%s'' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+
+        docker push "$(cat "${RUNNER_TEMP}/quality-image-tag")"
+
+        docker logout ghcr.io'
+    - name: Preserve image validation and failure receipts
+      if: always()
+      run: 'python - <<''PYCODE''
+
+        import os,json,shutil
+
+        from pathlib import Path
+
+        src=Path(os.environ[''WORLD_ENGINE_GUARD_EVIDENCE'']);out=Path(os.environ[''QUALITY''])/''image-a1'';out.mkdir(exist_ok=False)
+
+        if src.exists():shutil.copytree(src,out,dirs_exist_ok=True)
+
+        (out/''RUN.json'').write_text(json.dumps({''runId'':os.environ[''GITHUB_RUN_ID''],''buildCommit'':os.environ[''GITHUB_SHA''],''releaseApproved'':(out/''RELEASE_APPROVAL.json'').exists(),''GPUExecutions'':0,''oldPassReruns'':0},indent=2)+''\n'')
+
+        PYCODE'
+    - name: Commit immutable image evidence with a fresh branch lease
+      if: always()
+      run: 'set -euo pipefail
+
+        BRANCH=fix/reference-6s-formal-admission-20261113
+
+        test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
+
+        git config user.name ''WORLD ENGINE quality image evidence''
+
+        git config user.email ''41898282+github-actions[bot]@users.noreply.github.com''
+
+        git add --sparse "${QUALITY}/image-a1" "${QUALITY}/cpu-a4/decoded"
+
+        git commit -m ''Preserve quality image source bindings and common release approval [skip ci]''
+
+        git push origin "HEAD:refs/heads/${BRANCH}"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: quality-image-${{ github.run_id }}
+        path: ${{ runner.temp }}/world-engine-release-evidence/
+        retention-days: 90
