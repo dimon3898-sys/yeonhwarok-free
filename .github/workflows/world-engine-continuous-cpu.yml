@@ -13,8 +13,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '2836408ae2a8cb7cd4734e5d51da224f44f9c2cb' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_CONTINUOUS_PROBE_RECOVERY_A1'
+      github.event.before == 'd0915722716b89d98cbd9203a1a20dd2ef0424bd' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_CONTINUOUS_FINAL_A1'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -33,7 +33,7 @@ jobs:
             /cinematic-world-map/assets/
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22.23.4'
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -49,14 +49,15 @@ jobs:
           CHROMIUM_PATH=$(node -e "process.stdout.write(require('${RUNNER_TEMP}/continuous-deps/node_modules/playwright').chromium.executablePath())")
           sudo ln -sfn "${CHROMIUM_PATH}" /usr/bin/chromium
           sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /workspace
-      - name: Capture new consecutive thirty-frame boundary probe
+      - name: Capture new continuous-territory six-second MP4
         env:
           WORLD_ENGINE_NODE_DEPS: ${{ runner.temp }}/continuous-deps
           NVIDIA_VISIBLE_DEVICES: void
         run: |
           set -o pipefail
           mkdir -p "${RUNNER_TEMP}/continuous-logs"
-          node world-simulation-shorts-engine/production/continuous-territory-20261114/run_cpu.mjs probe a1 > >(tee "${RUNNER_TEMP}/continuous-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/continuous-logs/stderr.log" >&2)
+          test ! -e world-simulation-shorts-engine/production/continuous-territory-20261114/final-a1/VIDEO.mp4
+          node world-simulation-shorts-engine/production/continuous-territory-20261114/run_cpu.mjs final a1 > >(tee "${RUNNER_TEMP}/continuous-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/continuous-logs/stderr.log" >&2)
       - name: Preserve actual output and exact failure checkpoint
         if: always()
         env:
@@ -67,8 +68,8 @@ jobs:
           import os,json,shutil,hashlib,gzip
           from pathlib import Path
           base=Path('world-simulation-shorts-engine/production/continuous-territory-20261114')
-          out=base/'probe-a1';out.mkdir(exist_ok=False)
-          src=Path('/workspace/continuous-probe-a1')
+          out=base/'final-a1';out.mkdir(exist_ok=False)
+          src=Path('/workspace/continuous-final-a1')
           for f in src.glob('*'):
               if f.is_file() and (f.suffix in ['.png','.mp4'] or f.name in ['CAPTURE_RECEIPT.json','TASK_FAILURE.json','HTTP_ASSET_BINDINGS.json','REQUEST.json','NEW_INPUT_RESULT.json','FRAME_SUMMARY.json']):shutil.copy2(f,out/f.name)
           for f in Path(os.environ['RUNNER_TEMP'],'continuous-logs').glob('*.log'):shutil.copy2(f,out/f.name)
@@ -76,9 +77,16 @@ jobs:
               ledger=src/name
               if ledger.exists():(out/(name+'.gz')).write_bytes(gzip.compress(ledger.read_bytes(),compresslevel=6,mtime=0))
           if (src/'SHA256SUMS').exists():shutil.copy2(src/'SHA256SUMS',out/'CAPTURE_SHA256SUMS.original')
-          (out/'RUN.json').write_text(json.dumps({'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'gpuStarts':0,'oldPassReruns':0,'visualApproval':'PENDING_30_FRAME_BOUNDARY_REVIEW','captureReceiptPresent':(out/'CAPTURE_RECEIPT.json').exists()},indent=2)+'\n')
+          (out/'RUN.json').write_text(json.dumps({'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'gpuStarts':0,'oldPassReruns':0,'visualApproval':'PENDING_FULL_180_FRAME_REVIEW','captureReceiptPresent':(out/'CAPTURE_RECEIPT.json').exists()},indent=2)+'\n')
           manifest=lambda folder:'\n'.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+str(f.relative_to(folder)) for f in sorted(folder.rglob('*')) if f.is_file() and f.name!='SHA256SUMS')+'\n'
           (out/'SHA256SUMS').write_text(manifest(out))
+          cp=json.loads((base/'CHECKPOINT.json').read_text())
+          receiptFile=out/'CAPTURE_RECEIPT.json'
+          receipt=json.loads(receiptFile.read_text()) if receiptFile.exists() else {}
+          captured=receipt.get('status')=='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED' and (out/'VIDEO.mp4').exists()
+          cp.update(status='NEW_FULL_CPU_CAPTURE_COMPLETE_AWAITING_FULL_REVIEW' if captured else 'NEW_FULL_CPU_CAPTURE_BLOCKED',firstIncomplete='FULL_180_FRAME_AND_REFERENCE_REVIEW' if captured else 'NEW_FULL_CPU_CAPTURE_BLOCKED',newMP4Created=captured,fullMP4Allowed=False)
+          cp['fullCapture']={'attempt':'a1','runId':os.environ['RUN_ID'],'sourceCommit':os.environ['SOURCE_SHA'],'receipt':'final-a1/CAPTURE_RECEIPT.json','video':receipt.get('video'),'status':receipt.get('status','NO_RECEIPT')}
+          (base/'CHECKPOINT.json').write_text(json.dumps(cp,indent=2)+'\n')
           (base/'SHA256SUMS').write_text(manifest(base))
           PY
       - uses: actions/upload-artifact@v4
@@ -99,5 +107,5 @@ jobs:
           git config user.name 'WORLD ENGINE CPU evidence'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --sparse world-simulation-shorts-engine/production/continuous-territory-20261114 world-simulation-shorts-engine/recovery/universal-presentation-v2/sources/eurasia
-          git commit -m 'Preserve continuous thirty-frame CPU probe and evidence [skip ci]'
+          git commit -m 'Preserve new continuous-territory six-second CPU MP4 and evidence [skip ci]'
           git push origin "HEAD:refs/heads/${BRANCH}"
