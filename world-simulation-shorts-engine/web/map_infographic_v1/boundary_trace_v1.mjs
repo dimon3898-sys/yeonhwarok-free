@@ -3,10 +3,11 @@ import {compileEventIntent} from './event_contract_v1.mjs';
 import {compileGeographicLinePrimitive,evaluateGeographicLineReveal} from './event_line_v1.mjs';
 const check=(v,c)=>{if(!v)throw Error(c);};
 export function validateBoundaryTrace(spec,{totalFrames,holdFrames=0}={}){
- check(spec&&typeof spec==='object'&&!Array.isArray(spec)&&Object.keys(spec).every(k=>['preset','countryIds','startFrame','endFrame','startVertex','direction'].includes(k)),'BOUNDARY_TRACE_FIELDS');
+ check(spec&&typeof spec==='object'&&!Array.isArray(spec)&&Object.keys(spec).every(k=>['preset','countryIds','startFrame','endFrame','startVertex','direction','pathTiming'].includes(k)),'BOUNDARY_TRACE_FIELDS');
  check(spec.preset==='BOUNDARY_TRACE'&&spec.startVertex==='NORTHMOST'&&['FORWARD','REVERSE'].includes(spec.direction),'BOUNDARY_TRACE_PRESET');
  check(Array.isArray(spec.countryIds)&&spec.countryIds.length>0&&spec.countryIds.length<=256&&new Set(spec.countryIds).size===spec.countryIds.length&&spec.countryIds.every(x=>typeof x==='string'&&/^COUNTRY_[A-Z0-9_]+$/.test(x)),'BOUNDARY_TRACE_COUNTRIES');
  check(Number.isSafeInteger(spec.startFrame)&&Number.isSafeInteger(spec.endFrame)&&spec.startFrame>=0&&spec.endFrame>spec.startFrame&&spec.endFrame<totalFrames-holdFrames,'BOUNDARY_TRACE_TIMING');
+ check(spec.pathTiming===undefined||['PARALLEL','LENGTH_WEIGHTED'].includes(spec.pathTiming),'BOUNDARY_TRACE_PATH_TIMING');
  return structuredClone(spec);
 }
 export function boundaryTraceFraction(spec,frame){
@@ -25,6 +26,14 @@ export function compileBoundaryTrace(record,project,spec){
   return compileGeographicLinePrimitive(intent,{project});
  }));
 }
-export function evaluateBoundaryTrace(primitives,fraction){
- return primitives.map(p=>{const ring=evaluateGeographicLineReveal(p,fraction).path.map(q=>[...q]);ring.closed=fraction===1;return ring;}).filter(r=>r.length>=2);
+export function boundaryTraceProgress(primitives,fraction,spec={}){
+ check(Number.isFinite(fraction)&&fraction>=0&&fraction<=1,'BOUNDARY_TRACE_PROGRESS');
+ const ordered=primitives.map((p,index)=>({p,index}));
+ if(spec.pathTiming==='LENGTH_WEIGHTED')ordered.sort((a,b)=>b.p.totalLengthPixels-a.p.totalLengthPixels||a.index-b.index);
+ const totalLength=ordered.reduce((s,{p})=>s+p.totalLengthPixels,0);let consumed=0;
+ const paths=ordered.map(({p,index})=>{const progress=spec.pathTiming==='LENGTH_WEIGHTED'?Math.max(0,Math.min(1,(fraction*totalLength-consumed)/p.totalLengthPixels)):fraction;consumed+=p.totalLengthPixels;return{primitive:p,index,progress:fraction===1?1:progress};});
+ return{paths,totalLength,visibleLength:paths.reduce((s,r)=>s+r.progress*r.primitive.totalLengthPixels,0),totalPaths:paths.length,completedPaths:paths.filter(r=>r.progress===1).length};
+}
+export function evaluateBoundaryTrace(primitives,fraction,spec={}){
+ return boundaryTraceProgress(primitives,fraction,spec).paths.map(({primitive,progress})=>{const ring=evaluateGeographicLineReveal(primitive,progress).path.map(q=>[...q]);ring.closed=progress===1;return ring;}).filter(r=>r.length>=2);
 }

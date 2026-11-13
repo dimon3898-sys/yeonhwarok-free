@@ -1,4 +1,4 @@
-import {compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from './boundary_trace_v1.mjs';
+import {compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction,boundaryTraceProgress} from './boundary_trace_v1.mjs';
 import {GEOGRAPHIC_CAMERA_VERSION,geographicQ,inverseMercatorY,geographicCameraFrame,selectGeographicTerrain} from './geographic_camera_v1.mjs';
 /** MAP_INFOGRAPHIC_RENDERER_V1 — Gate 1 only.
  * Independent WebGL2 frame graph. No parent Earth renderer, DOM overlay,
@@ -453,7 +453,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   idScene.add(new THREE.Mesh(g.mesh,mat(geoVertex,flatFragment,{value:{value:idColor}})));
   const coverageMaterial=mat(geoVertex,flatFragment,{value:{value:new THREE.Vector3(1,role===1?1:0,role===2?1:0)}});
   covScene.add(new THREE.Mesh(g.mesh,coverageMaterial));if(role===2)primaryCoverage.push(coverageMaterial);
-  if(boundaryTrace?.countryIds.includes(record.id)&&role>0)traceRecords.push({role,original:g.rings,primitives:compileBoundaryTrace(record,project,boundaryTrace)});
+  if(boundaryTrace?.countryIds.includes(record.id)&&role>0)traceRecords.push({id:record.id,role,original:g.rings,primitives:compileBoundaryTrace(record,project,boundaryTrace)});
   else{if(role===2)primaryRings.push(...g.rings);if(role===1)secondaryRings.push(...g.rings);}
   geometryEvidence.push({id:record.id,gpuID:gid,role,triangles:g.mesh.index.count/3,parts:polygons(record).length,holes:polygons(record).reduce((s,p)=>s+p.length-1,0)});
  }
@@ -531,8 +531,10 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  for(const row of traceRecords){const geometry=ribbon(row.original),isPrimary=row.role===2,styles=isPrimary?[['primaryEdgeWidth','primaryEdgeColor',boundaryScene],['primaryWidth','primaryCoreColor',boundaryScene],['glowWidth','glowColor',glowScene]]:[['secondaryEdgeWidth','secondaryEdgeColor',boundaryScene],['secondaryWidth','secondaryCoreColor',boundaryScene]];
   const layers=styles.map(([width,color,scene])=>({mesh:line(scene,geometry,boundaryStyle[width],boundaryStyle[color]),width,role:isPrimary?'PRIMARY':'SECONDARY',alpha:boundaryStyle[color][3]}));boundaryLayers.push(...layers);traceLayers.push({...row,layers,geometry});}
  function updateBoundaryTrace(frame){if(!boundaryTrace)return;const fraction=boundaryTraceFraction(boundaryTrace,frame);if(fraction===previousTraceFraction)return;
-  for(const row of traceLayers){const paths=fraction===1?row.original:evaluateBoundaryTrace(row.primitives,fraction),geometry=ribbon(paths);for(const layer of row.layers)layer.mesh.geometry=geometry;row.geometry.dispose();row.geometry=geometry;}
-  previousTraceFraction=fraction;evidence.boundaryTrace={preset:'BOUNDARY_TRACE',frame,fraction,complete:fraction===1,owner:'GEOGRAPHIC_LINE_REVEAL_V1',countryIds:[...boundaryTrace.countryIds],worldLocked:true};
+  for(const row of traceLayers){const paths=fraction===1?row.original:evaluateBoundaryTrace(row.primitives,fraction,boundaryTrace),geometry=ribbon(paths);for(const layer of row.layers)layer.mesh.geometry=geometry;row.geometry.dispose();row.geometry=geometry;}
+  previousTraceFraction=fraction;
+  const coverage=traceLayers.map(row=>{const {paths,...progress}=boundaryTraceProgress(row.primitives,fraction,boundaryTrace);return{id:row.id,...progress};});
+  evidence.boundaryTrace={preset:'BOUNDARY_TRACE',frame,fraction,complete:coverage.length===boundaryTrace.countryIds.length&&coverage.every(r=>r.completedPaths===r.totalPaths),owner:'GEOGRAPHIC_LINE_REVEAL_V1',countryIds:[...boundaryTrace.countryIds],pathTiming:boundaryTrace.pathTiming??'PARALLEL',coverage,worldLocked:true};
  }
  let activeGlowRadius=theme.glowRadius,activeGlowGain=theme.glowGain,primaryReveal=1;
  const blur=mat(fullscreenVertex,blurFragment,{inputTexture:{value:glowTarget.texture},direction:{value:new THREE.Vector2()}}),blurScene=fullScene(blur);

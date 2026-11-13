@@ -48,13 +48,13 @@ export function validatePresentation(input,{scene,region}={}){
  result.initialStateVisibility=input.initialStateVisibility??'REVEAL';
  ok(['REVEAL','PRESERVE_PROVIDED','PRESERVE_AREA_REVEAL_LINE'].includes(result.initialStateVisibility),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
  if(result.initialStateVisibility!=='REVEAL')ok(scene.event_type==='WAR'&&scene.timing.event_start_frame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
- keys(input.camera,['mode','keyframes','routeId','zoom','followStrength','projection','frames'],'PRESENTATION_CAMERA');
+ keys(input.camera,['mode','keyframes','routeId','zoom','followStrength','projection','frames','interpolation'],'PRESENTATION_CAMERA');
  ok(['KEYFRAMES','ROUTE_FOLLOW','GEOGRAPHIC_TRACK'].includes(input.camera.mode),'PRESENTATION_CAMERA_MODE_UNSUPPORTED');
  if(input.camera.mode==='GEOGRAPHIC_TRACK'){
   ok(scene.event_type==='GEOGRAPHIC','PRESENTATION_GEOGRAPHIC_CAMERA_FAMILY');
   compileGeographicCamera(input.camera,{totalFrames:n,holdFrames:scene.timing.final_hold_frames});
  }else if(input.camera.mode==='KEYFRAMES'){
-  ok(input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.routeId===undefined&&input.camera.zoom===undefined&&input.camera.followStrength===undefined,'PRESENTATION_KEYFRAME_FIELD_CONFLICT');
+  ok(input.camera.interpolation===undefined&&input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.routeId===undefined&&input.camera.zoom===undefined&&input.camera.followStrength===undefined,'PRESENTATION_KEYFRAME_FIELD_CONFLICT');
   const rows=input.camera.keyframes;ok(Array.isArray(rows)&&rows.length>=2&&rows.length<=32,'PRESENTATION_KEYFRAMES_REQUIRED');
   for(const [i,k]of rows.entries()){
    keys(k,['frame','center','zoom'],'PRESENTATION_KEYFRAME');
@@ -64,7 +64,7 @@ export function validatePresentation(input,{scene,region}={}){
   ok(rows[0].frame===0&&rows.at(-1).frame===n-1,'PRESENTATION_COMPLETE_KEYFRAME_RANGE_REQUIRED');
   ok(rows.every(k=>k.zoom<=rows.at(-1).zoom),'PRESENTATION_FINAL_ENDPOINT_CLOSEST_REQUIRED');
  }else{
-  ok(input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.keyframes===undefined,'PRESENTATION_FOLLOW_KEYFRAME_CONFLICT');
+  ok(input.camera.interpolation===undefined&&input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.keyframes===undefined,'PRESENTATION_FOLLOW_KEYFRAME_CONFLICT');
   ok(typeof input.camera.routeId==='string'&&scene.routes?.some(r=>r.id===input.camera.routeId),'PRESENTATION_FOLLOW_SUPPLIED_ROUTE_REQUIRED');
   const zoom=input.camera.zoom??.75,strength=input.camera.followStrength??.2;
   ok(Number.isFinite(zoom)&&zoom>0&&zoom<=1&&Number.isFinite(strength)&&strength>0&&strength<=1,'PRESENTATION_FOLLOW_RANGE_INVALID');
@@ -167,7 +167,7 @@ export function presentationBoundarySegments({presentation,nativePlan,project,fr
    radius=Math.max(width/2,glowSupport);
   ok(Number.isFinite(radius)&&radius>=0&&radius<=64,'PRESENTATION_NATIVE_BOUNDARY_SUPPORT_INVALID');
   const trace=presentation.mapStyle.boundaryTrace,traced=trace?.countryIds.includes(record.id),fraction=traced?boundaryTraceFraction(trace,frame):1;
-  const rings=traced&&fraction<1?evaluateBoundaryTrace(compileBoundaryTrace(record,project,trace),fraction):parts.flatMap(p=>p.map(r=>r.map(project)));
+  const rings=traced&&fraction<1?evaluateBoundaryTrace(compileBoundaryTrace(record,project,trace),fraction,trace):parts.flatMap(p=>p.map(r=>r.map(project)));
   for(const ring of rings)for(let i=1;i<ring.length;i++){
    const a=ring[i-1],b=ring[i];
    ok(a.every(Number.isFinite)&&b.every(Number.isFinite),'PRESENTATION_NATIVE_BOUNDARY_PROJECTION_INVALID');
