@@ -119,7 +119,7 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    if(!hiddenNative)assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(displayFrame),preparedLabel=null;
    if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
-   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:visualPlan,project});
+   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:geographic?{...visualPlan,secondary:scene.camera_intent.native_context.country_ids.filter(id=>id!==visualPlan.primary)}:visualPlan,project});
    const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=displayFrame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
