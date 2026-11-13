@@ -13,8 +13,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '15d0fddd9ea018f417e2610c771819110acd3daa' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY6S_PROBE_A2'
+      github.event.before == '7780b687949f5196775bfa5af8ad2160345b48dd' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY6S_PROBE_A5'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -67,8 +67,8 @@ jobs:
           import os,json,shutil,hashlib,gzip
           from pathlib import Path
           base=Path('world-simulation-shorts-engine/production/generic-history-v1-20261113')
-          out=base/'probe-a2';out.mkdir(exist_ok=False)
-          src=Path('/workspace/history6s-probe-a2')
+          out=base/'probe-a5';out.mkdir(exist_ok=False)
+          src=Path('/workspace/history6s-probe-a5')
           for f in src.glob('*'):
               if f.is_file() and (f.suffix in ['.png','.mp4'] or f.name in ['CAPTURE_RECEIPT.json','TASK_FAILURE.json','HTTP_ASSET_BINDINGS.json','REQUEST.json','NEW_INPUT_RESULT.json','FRAME_SUMMARY.json']):shutil.copy2(f,out/f.name)
           for f in Path(os.environ['RUNNER_TEMP'],'history6s-logs').glob('*.log'):shutil.copy2(f,out/f.name)
