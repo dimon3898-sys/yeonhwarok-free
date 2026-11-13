@@ -1,0 +1,42 @@
+{
+  "baseHEAD": "16d8160beb8b8213f39b79fa7684ab43d54deede",
+  "priorPassReruns": 0,
+  "preservedArtifacts": {
+    "world-simulation-shorts-engine/production/generic-history-v1-20261113/CHECKPOINT.json": "98a0285250d0945e2942f088d261a2901e99d3f4fd39064e759631d151f82f84",
+    "world-simulation-shorts-engine/production/generic-history-v1-20261113/final-a1/VIDEO.mp4": "260b675b8a2d569c8f8dbc1f683188f648ff2d069a00ebee5321de11fcea605c",
+    "world-simulation-shorts-engine/production/generic-history-v1-20261113/final-review/TECHNICAL_REVIEW.json": "39b0f1cce5a5332f69d048ad3c58ae0af5dd7e715e661415fc0a516be5dc9af9",
+    "world-simulation-shorts-engine/production/generic-history-v1-20261113/final-review/VISUAL_REVIEW.json": "d8f8c73c676e9dc2bdbb245e483edbc701953f249582e1d878efa8dfaebb9fb0"
+  },
+  "invalidatedPriorPASS": [],
+  "newValidationReason": "New opt-in HISTORICAL_STATES_V2 decisions; source/history/V1/Japan results remain valid. V1 review documents empty ocean framing and equal 16-frame transitions.",
+  "scope": [
+    "new polygon-difference analyzer",
+    "V2-only variable Scene time_steps and beats using unchanged Area V3",
+    "V2 camera/effect policy",
+    "optional presentation difference overlay using existing Area pass",
+    "new 180/600 frame policy checks and V2 CPU images"
+  ],
+  "reuse": {
+    "HISTORICAL_STATES_V1": "preserve unchanged; add V2 opt-in",
+    "Area V3": "reuse unchanged state transitions and GPU pass",
+    "camera": "reuse Mercator projection, density gates, quintic easing",
+    "wide map": "reuse verified terrain pyramid bytes",
+    "glow": "reuse Area pass with derived difference overlay",
+    "labels": "reuse safe layout; extend timing admission for V2 600 frames",
+    "timing": "new weighted allocator using existing variable time-step contract"
+  },
+  "renderOrder": [
+    "delta tests",
+    "V2 representative CPU frames",
+    "visual gate",
+    "V2 180-frame MP4",
+    "all-frame audit",
+    "comparison"
+  ],
+  "prohibitedRuns": {
+    "GPU": 0,
+    "gCube": 0,
+    "StudioGPU": 0,
+    "V1Rerender": 0
+  }
+}

@@ -1,3 +1,4 @@
+import {validateTerritoryEffects} from './territory_effects_v2.mjs';
 import {compareHistoricalTime} from '../../web/map_infographic_v1/historical_time_v1.mjs';
 import {validatePresentationFlows,validateHighlightRing,bindPresentationFlows} from './presentation_flow.mjs';
 import {validateBoundaryTrace,compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from '../../web/map_infographic_v1/boundary_trace_v1.mjs';
@@ -26,7 +27,7 @@ export function unprojectBounds(bounds,pixel){return[bounds[0]+pixel[0]/1080*(bo
 
 /** Unknown/unconsumed controls fail rather than being accepted as metadata. */
 export function validatePresentation(input,{scene,region}={}){
- keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels','mapStyle','flow'],'PRESENTATION');
+ keys(input,['camera','territoryColors','territoryChanges','highlights','transitions','initialStateVisibility','labels','mapStyle','flow'],'PRESENTATION');
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  if(input.mapStyle!==undefined){
@@ -72,6 +73,7 @@ export function validatePresentation(input,{scene,region}={}){
   ok(Number.isFinite(zoom)&&zoom>0&&zoom<=1&&Number.isFinite(strength)&&strength>0&&strength<=1,'PRESENTATION_FOLLOW_RANGE_INVALID');
   result.camera.zoom=zoom;result.camera.followStrength=strength;
  }
+ if(input.territoryChanges!==undefined)result.territoryChanges=validateTerritoryEffects(input.territoryChanges,scene);
  if(input.territoryColors!==undefined){
   ok(object(input.territoryColors)&&Object.keys(input.territoryColors).length<=8,'PRESENTATION_TERRITORY_PALETTE_INVALID');
   const states=new Set(scene.event_type==='GEOGRAPHIC'?scene.region_layers.map(x=>x.id):(scene.time_steps?.map(x=>x.id)??[]));

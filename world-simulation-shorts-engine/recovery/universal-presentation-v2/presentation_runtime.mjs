@@ -1,3 +1,4 @@
+import {territoryEffectsAt} from './territory_effects_v2.mjs';
 import {composePresentationFlowControls,highlightRingAt} from './presentation_flow.mjs';
 /** Explicit moving-projection composition; unchanged engines own every pixel. */
 import {compileGeographicCamera,geographicCameraFrame,GEOGRAPHIC_CAMERA_VERSION,geographicTrackTransportDelta} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
@@ -27,7 +28,7 @@ const flatPoints=g=>g.type==='Polygon'?g.coordinates.flat():g.type==='MultiPolyg
  * Actual current-projection admission is nevertheless repeated at every draw. */
 export async function createPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null}={}){
  validateScenePlan(scene);
- assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&scene.timing.total_frames<=240,'UP2_FREE_FRAME_SCOPE');
+ assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&(scene.timing.total_frames<=240||scene.timing.total_frames<=600&&presentationPlan.presentation?.territoryChanges?.profile==='HISTORICAL_STATES_V2'),'UP2_FREE_FRAME_SCOPE');
  assert(canvas?.width===1080&&canvas?.height===1920,'UP2_CANONICAL_CANVAS_REQUIRED');
  assert(['NE1_SOURCE_NATIVE_COVERAGE','GLOBAL_RGB_SOURCE_NATIVE_COVERAGE','GEOGRAPHIC_TERRAIN_PYRAMID_V1'].includes(sourceStyle?.styleId),'UP2_ACTUAL_NATIVE_SOURCE_REQUIRED');
  assert(sourceStyle.terrainAsset.sha256===nativePlan.assets.terrain.sha256&&terrainTreatment===sourceStyle.terrainTreatment,'UP2_SOURCE_BINDING_REQUIRED');
@@ -96,6 +97,8 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    const style=binding.presentationFlow?.style??selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style,trail:binding.presentationFlow?.trail,previewStyle:binding.presentationFlow?.previewStyle});passes.push(pass);
    return{...binding,pass,style,analysisPrimitive:compileFlowRoute(binding.plan.intent,{project:analysisProject})};
   });
+  const deltaPasses=new Map();
+  function deltaPass(kind){if(!deltaPasses.has(kind)){const style=copy(defaultAreaStyle);style.AREA={...style.AREA,fillColor:kind==='added'?[1,.85,.25,.24]:[.9,.4,.18,.16],coreColor:kind==='added'?[1,.94,.5,.95]:[1,.5,.25,.65],glowColor:[1,.8,.22,1],glowGain:.18,glowRadius:2.4,width:3.2};const pass=createAreaOverlayPass({canvas,style});passes.push(pass);deltaPasses.set(kind,pass);}return deltaPasses.get(kind);}
   const ringBindings=p.highlights.filter(h=>h.ring).map(h=>{const pass=createFlowGraphicPass({canvas,style:{width:2,glowRadius:1,glowGain:0,coreColor:h.ring.color,glowColor:h.ring.color},pulseStyle:{width:h.ring.widthPx??1.6,glowRadius:h.ring.glowRadiusPx??0,glowGain:h.ring.glowGain??0}});passes.push(pass);return{highlight:h,pass};});
   const project=point=>factory.screen(point);let source=sourceStyle.terrainAsset;
   function markersAt(frame){
@@ -129,7 +132,8 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
     if(binding.engine==='EXISTING_AREA_V3'){
      const controls=evaluateAreaFrame(binding.plan,binding.plan.startFrame+localFrame,{project}),groups=[...new Set(controls.areas.map(a=>a.state_id??binding.colorId??'__DEFAULT__'))];if(!groups.length)groups.push('__DEFAULT__');
      const areaViewport=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?[0,0,1080,1920]:safe;
-     for(const area of controls.areas)if(area.alpha>0)presentationAreaViewport({geometry:area.geometry,project,safeArea:safe,presentation:p});
+     const offscreen=new Set();
+     for(const area of controls.areas)if(area.alpha>0){try{presentationAreaViewport({geometry:area.geometry,project,safeArea:safe,presentation:p});}catch(error){if(p.territoryChanges&&error.message==='UP2_AREA_SOURCE_OUTSIDE_VIEWPORT')offscreen.add(area.id);else throw error;}}
      const accentRange=p.mapStyle?.lineAccentFrames,accent=!!accentRange&&displayFrame>=accentRange[0]&&displayFrame<accentRange[1];
      const draws=groups.map((id,index)=>{const subset={...controls,areas:controls.areas.filter(a=>(a.state_id??binding.colorId??'__DEFAULT__')===id),fronts:index===0&&!accent?controls.fronts:[],impacts:index===0?controls.impacts:[],propagations:index===0?controls.propagations:[]};
       return{stateId:id,color:p.territoryColors?.[id]??defaultAreaStyle.AREA.fillColor,draw:areaPass(id,accent).draw({controls:subset,project,safeArea:areaViewport,protectedGraphics:markerRows,primaryMaterialColor:nativePlan.theme.primary,boundarySegments})};});
@@ -138,7 +142,7 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
      // line-only draw omits it, preserving exact line coordinates and label boxes.
      const lineAccent=accent?areaPass('__LINE_ACCENT__',true).draw({controls:{...controls,areas:[],impacts:[],propagations:[]},
       project,safeArea:areaViewport,protectedGraphics:markerRows,primaryMaterialColor:visualPlan.theme.primary,boundarySegments:[]}):null;
-     for(const item of controls.areas)if(item.alpha>0&&item.coverage>0)assert(draws.some(d=>d.draw.areas.some(a=>a.id===item.id&&a.drawn)),'UP2_AREA_NOT_DRAWN');
+     for(const item of controls.areas)if(item.alpha>0&&item.coverage>0&&!offscreen.has(item.id))assert(draws.some(d=>d.draw.areas.some(a=>a.id===item.id&&a.drawn)),'UP2_AREA_NOT_DRAWN');
      features.push({id:binding.id,engine:binding.engine,state:controls.state,stateId:controls.stateId,lineAccent,activeFeatures:controls.activeFeatures,presentationOperationBinding:copy(binding.presentationOperationBinding??null),sourceAreas:controls.areas.map(a=>({id:a.id,stateId:a.state_id,geometry:copy(a.geometry),coverage:a.coverage,alpha:a.alpha})),sourceFronts:controls.fronts.map(f=>({id:f.id,geometry:copy(f.geometry),alpha:f.alpha,revealFraction:f.revealFraction})),draws});
     }else{
      const model=evaluateFlowFrame(binding.plan,binding.plan.startFrame+localFrame,{primitive:binding.analysisPrimitive,eventContext:{cameraState:presentationPlan.analysisCamera,project:analysisProject,safeArea:safe,scalePlan:nativePlan,heightSource:null,protectedBoxes:[]}}),primitive=compileFlowRoute(binding.plan.intent,{project}),controls=composePresentationFlowControls(reprojectFlowPresentation({modelControls:model,primitive,flowIntent:binding.plan.intent}),primitive,binding.presentationFlow);
@@ -148,6 +152,8 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
      features.push({id:binding.id,engine:binding.engine,state:controls.state,routeFraction:controls.routeFraction,objectFraction:controls.objectFraction,objectPosition:copy(controls.objectPosition),heading:controls.heading,departurePulse:controls.departurePulse,arrivalPulse:controls.arrivalPulse,routeReveal:controls.routeReveal,geometry:copy(binding.plan.intent.route_geometry),projectedRoute:copy(primitive.screenCoordinates),admission,modelEventReadinessScope:controls.eventControls.readinessScope,draw});
     }
    }
+   const territoryDifferenceDraws=territoryEffectsAt(p.territoryChanges,displayFrame).map(e=>({id:e.id,kind:e.kind,alpha:e.alpha,stateId:e.stateId,source:'DERIVED_SOURCE_STATE_DIFFERENCE_NOT_EVENT',draw:deltaPass(e.kind).draw({controls:{areas:[e],fronts:[],propagations:[],impacts:[]},project,safeArea:[0,0,1080,1920],protectedGraphics:[...markerRows,...(preparedLabel?.drawn??[]).map(x=>({box:x.box}))].filter(x=>x.box),primaryMaterialColor:nativePlan.theme.primary,boundarySegments})}));
+   if(territoryDifferenceDraws.length)features.push({id:'TERRITORY_DIFFERENCES_V2',engine:'EXISTING_AREA_V3_DIFFERENCE_OVERLAY',draws:territoryDifferenceDraws});
    const locationRings=[];for(const {highlight,pass} of ringBindings){const location=scene.locations.find(l=>l.id===highlight.locationId),pulse=highlightRingAt(highlight,displayFrame,project(location.anchor));if(pulse)locationRings.push({id:highlight.id,locationId:highlight.locationId,draw:pass.drawPulse({pulse,safeArea:safe,protectedGraphics:markerRows})});}
    const featurePixels=factory.readPixels();let featureChangedPixels=0;for(let i=0;i<featurePixels.length;i+=4)if(featurePixels[i]!==basePixels[i]||featurePixels[i+1]!==basePixels[i+1]||featurePixels[i+2]!==basePixels[i+2]||featurePixels[i+3]!==basePixels[i+3])featureChangedPixels++;
    // RGBA8 rounds contributions below half a channel step to zero.

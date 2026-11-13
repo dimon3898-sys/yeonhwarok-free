@@ -30,7 +30,7 @@ export function validateLabelText(value){
 export function validateLabelSpec(spec,{scene,highlights=[]}={}){
  keys(spec,['enabled','items'],'PRESENTATION_LABELS');
  check(spec.enabled===true,'PRESENTATION_LABELS_EXPLICIT_OPT_IN_REQUIRED');
- check(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames)&&scene.timing.total_frames>=2&&scene.timing.total_frames<=300,'PRESENTATION_LABEL_SCENE_TIMING_REQUIRED');
+ check(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames)&&scene.timing.total_frames>=2&&scene.timing.total_frames<=600,'PRESENTATION_LABEL_SCENE_TIMING_REQUIRED');
  check(Array.isArray(scene.locations)&&Array.isArray(highlights),'PRESENTATION_LABEL_BINDING_COLLECTION_REQUIRED');
  check(Array.isArray(spec.items)&&spec.items.length>=1&&spec.items.length<=MAX_LABELS,'PRESENTATION_LABEL_CAPACITY');
  const frames=scene.timing.total_frames,seen=new Set();
