@@ -6,7 +6,7 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {analyzePresentationPrompt} from '../../recovery/universal-presentation-v2/presentation_prompt.mjs';
 import {validateRuntimeRequest,capturePresentation} from '../../recovery/universal-presentation-v2/capture_presentation.mjs';
-const p=path.dirname(fileURLToPath(import.meta.url)),out='/workspace/japan6s-v2-cpu-a2',attempt=path.join(p,'attempt-a2');
+const p=path.dirname(fileURLToPath(import.meta.url)),out='/workspace/japan6s-v2-cpu-a3',attempt=path.join(p,'attempt-a3');
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const write=(dir,name,value)=>fs.writeFile(path.join(dir,name),JSON.stringify(value,null,2)+'\n',{flag:'wx'});
 const raw=await fs.readFile(path.join(p,'JAPAN_V2_SCENE_INPUT.json')),input=JSON.parse(raw);
@@ -48,14 +48,18 @@ try {
    if(feature.draw.object)assert.deepEqual(feature.draw.object.graphicDimensions,[64,64]);
   }
   return {frame:f,rawSHA256:row.rawSHA256,nonBlackPixels:row.nonBlackPixels,cameraBounds:d.camera.bounds,
-   locations:d.suppliedLocations,labels:labels.map(l=>({id:l.id,projected:l.projected,pinDrawn:l.pinDrawn})),
+   locations:d.suppliedLocations,labels:labels.map(l=>({id:l.id,projected:l.projected,pinDrawn:l.pinDrawn,slot:l.slot,box:l.box})),
    route:feature?{state:feature.state,routeFraction:feature.routeFraction,objectFraction:feature.objectFraction,projectedRoute:feature.projectedRoute,draw:feature.draw}:null,
    source:{id:receipt.sourceCredits[0].sourceId,originalSHA256:d.material.sourceOriginalSHA256,terrainSHA256:d.material.terrainSHA256,fullViewportCovered:true},glError:0};
  });
  assert.equal(summary[60].route.routeFraction,0);assert.ok(summary[75].route.routeFraction>0&&summary[75].route.routeFraction<1);
  for(let f=150;f<180;f++){assert.equal(rows[f].rawSHA256,rows[150].rawSHA256);assert.deepEqual(summary[f].cameraBounds,summary[149].cameraBounds);}
  assert.notDeepEqual(summary[0].cameraBounds,summary[59].cameraBounds);
- const span=x=>x.cameraBounds[2]-x.cameraBounds[0];assert.ok(span(summary[149])<span(summary[119]));assert.ok(span(summary[0])<9);
+ const span=x=>x.cameraBounds[2]-x.cameraBounds[0];assert.ok(span(summary[149])<span(summary[119]));assert.ok(span(summary[0])<7.1);
+ for(const [id,start] of [['tokyo-label',16],['nagoya-label',88],['kyoto-label',130]]){
+  const first=summary[start].labels.find(l=>l.id===id);
+  for(let f=start+1;f<180;f++){const label=summary[f].labels.find(l=>l.id===id),prev=summary[f-1].labels.find(l=>l.id===id);assert.equal(label.slot,first.slot,'V2_LABEL_SLOT_JUMP '+id+' '+f);assert.ok(Math.hypot(label.box[0]-prev.box[0],label.box[1]-prev.box[1])<5,'V2_LABEL_BOX_JUMP '+id+' '+f);}
+ }
  await write(out,'FRAME_SUMMARY.json',summary);
  await write(out,'NEW_INPUT_RESULT.json',{status:'V2_ACTUAL_CPU_TECHNICAL_PASS_PENDING_VISUAL_COMPARISON',inputSHA256:hash(raw),runtimeSHA256:runtimeSHA,video:receipt.video,frames:180,final30RawFramesIdentical:true,sequentialLabels:['tokyo-label','nagoya-label','kyoto-label'],movingObjectDimensions:[64,64],sourceGeometryAndOriginalRouteUnchanged:true,productCodeChanges:0,oldPassReruns:0,GPUExecutions:0,costKRW:0});
  cp.status='V2_CPU_TECHNICAL_PASS_PENDING_VISUAL_COMPARISON';cp.firstIncomplete='V1_V2_INDEPENDENT_VISUAL_COMPARISON';cp.activeBlocker=null;
