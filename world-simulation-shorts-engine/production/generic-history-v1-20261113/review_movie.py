@@ -5,11 +5,21 @@ import numpy as np
 from PIL import Image,ImageDraw
 base=Path(__file__).parent;cap=base/sys.argv[1];out=base/'final-review';out.mkdir(exist_ok=False)
 video=cap/'VIDEO.mp4';sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
-info=json.loads(subprocess.check_output(['ffprobe','-v','error','-count_frames','-show_streams','-show_format','-of','json',str(video)]));stream=next(s for s in info['streams'] if s['codec_type']=='video')
-assert (stream['width'],stream['height'],stream['r_frame_rate'],stream['nb_read_frames'])==(1080,1920,'30/1','180');assert abs(float(info['format']['duration'])-6)<.00001
-subprocess.run(['ffmpeg','-v','error','-i',str(video),'-f','null','-'],check=True,capture_output=True)
-credit=info['format']['tags']['copyright'];assert 'Cliopatria' in credit and 'CC BY 4.0' in credit and 'v0.2.1' in credit and 'NASA' in credit
-ledger=json.loads(gzip.decompress((cap/'FRAME_EVIDENCE.json.gz').read_bytes()));frames=ledger['frames'];assert [f['frame'] for f in frames]==list(range(180))
+receipt=json.loads((cap/'CAPTURE_RECEIPT.json').read_text())
+preserve_capture_pass='--preserve-capture-pass' in sys.argv[2:]
+if preserve_capture_pass:
+ # Resume the first unfinished pixel review. Never rerun the successful capture gates.
+ assert sha(video)==receipt['video']['sha256'] and video.stat().st_size==receipt['video']['bytes']
+ assert receipt['status']=='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED' and receipt['video']['fullDecode']=='PASS'
+ info={'status':'PRESERVED_CAPTURE_PASS_NOT_RERUN','receipt':'../'+sys.argv[1]+'/CAPTURE_RECEIPT.json','video':receipt['video'],'embeddedSourceCredits':receipt['embeddedSourceCredits']}
+else:
+ info=json.loads(subprocess.check_output(['ffprobe','-v','error','-count_frames','-show_streams','-show_format','-of','json',str(video)]));stream=next(s for s in info['streams'] if s['codec_type']=='video')
+ assert (stream['width'],stream['height'],stream['r_frame_rate'],stream['nb_read_frames'])==(1080,1920,'30/1','180');assert abs(float(info['format']['duration'])-6)<.00001
+ subprocess.run(['ffmpeg','-v','error','-i',str(video),'-f','null','-'],check=True,capture_output=True)
+ credit=info['format']['tags']['copyright'];assert 'Cliopatria' in credit and 'CC BY 4.0' in credit and 'v0.2.1' in credit and 'NASA' in credit
+ledger_bytes=gzip.decompress((cap/'FRAME_EVIDENCE.json.gz').read_bytes())
+assert hashlib.sha256(ledger_bytes).hexdigest()==receipt['frameEvidence']['sha256']
+ledger=json.loads(ledger_bytes);frames=ledger['frames'];assert [f['frame'] for f in frames]==list(range(180))
 r=json.loads((base/'RUNTIME_REQUEST.json').read_text());scene=r['segments'][0]['scene'];geometries={a['id']:next(g['geometry'] for g in scene['geometries'] if g['id']==a['geometry_ref']) for a in scene['areas']}
 summary=[]
 for f in frames:
@@ -37,4 +47,5 @@ canvas.save(out/'MONGOL_EMPIRE_REPRESENTATIVE_FRAMES.jpg',quality=94)
 for n in [0,54,102,179]:
  subprocess.run(['ffmpeg','-v','error','-i',str(video),'-vf',f'select=eq(n\\,{n})','-frames:v','1',str(out/f'ENCODED_FRAME_{n:03d}.png')],check=True)
 receipt=json.loads((cap/'CAPTURE_RECEIPT.json').read_text());report={'status':'PASS_TECHNICAL_NOT_USER_VISUAL_APPROVAL','video':{'sha256':sha(video),'bytes':video.stat().st_size,'frames':180,'width':1080,'height':1920,'fps':30,'seconds':6,'fullDecode':'PASS'},'sourceGeometryPreservedFrames':180,'frameLabelAndCoordinateRuntimeChecks':180,'stableFinalHoldFrames':45,'paidGPUExecutions':0,'oldPASSReruns':0,'actualPixelStatistics':pixel,'runtimeReceipt':receipt['status'],'visualReview':'PENDING_ENCODED_CONTACT_AND_FULL_FRAME_REVIEW','summary':summary}
-(out/'TECHNICAL_REVIEW.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');(out/'FFPROBE.json').write_text(json.dumps(info,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k!='summary'},ensure_ascii=False))
+report['captureTechnicalPassPreservedNotRerun']=preserve_capture_pass
+(out/'TECHNICAL_REVIEW.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');(out/('PRESERVED_CAPTURE_PASS.json' if preserve_capture_pass else 'FFPROBE.json')).write_text(json.dumps(info,indent=2)+'\n');print(json.dumps({k:v for k,v in report.items() if k!='summary'},ensure_ascii=False))
