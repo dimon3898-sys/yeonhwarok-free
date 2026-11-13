@@ -21,6 +21,17 @@ jobs:
       PARENT_DIGEST: sha256:bedf23b0315666ea702f719a509147d6c97dc27f7b529de918e2708f8928997f
       NEW_ROOT: /opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - uses: actions/checkout@v4
       - name: Cost and Docker capacity preflight before pull
         timeout-minutes: 2
@@ -123,3 +134,11 @@ jobs:
           python3 "$G2/build_g2_image.py" collect --validation-outcome success
           python3 "$G2/build_g2_image.py" backup --phase published
           echo G2_CPU_IMAGE_PUBLISHED_GPU_NOT_EXECUTED
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

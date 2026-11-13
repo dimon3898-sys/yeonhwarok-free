@@ -39,6 +39,17 @@ jobs:
       IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine
       RELEASE_TAG: gcube-v009
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - name: Checkout approved sources
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -390,3 +401,11 @@ jobs:
           trap 'rm -f "$anonymous_directory/config.json"; rmdir "$anonymous_directory"' EXIT
           printf '{"auths":{}}\n' > "$anonymous_directory/config.json"
           docker --config "$anonymous_directory" pull "${IMAGE}:${RELEASE_TAG}"
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

@@ -23,6 +23,17 @@ jobs:
       BASE_IMAGE: ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:abbdab6844bb27bd0d7ea0339a6242dd15805b0cd6446c9fd76d9ba6d86f3eb6
       PIPELINE: world-simulation-shorts-engine/recovery/capture-diagnostics-image-v1/image_pipeline.py
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - name: Fetch only pinned runtime delta and existing startup tests
         timeout-minutes: 3
         shell: bash
@@ -114,3 +125,11 @@ jobs:
         run: |
           ids=$(docker ps -aq --filter label=world-engine.validation=studio-cold-start-v2)
           if [ -n "$ids" ]; then docker rm -f $ids; fi
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

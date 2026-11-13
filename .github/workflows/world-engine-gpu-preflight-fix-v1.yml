@@ -30,6 +30,17 @@ jobs:
       FIX_DIR: world-simulation-shorts-engine/recovery/gpu-preflight-fix-v1
       WORLD_ENGINE_PUBLIC_CPU_RUNNER: ubuntu-24.04
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - name: Read only focused fix and preserved registry helper
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -75,3 +86,11 @@ jobs:
           if [ -n "$containers" ]; then
             docker rm -f $containers
           fi
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "newCases": [
+    {
+      "case": "docker push ghcr.io/dimon3898-sys/world-simulation-shorts-engine:test-only",
+      "code": "REQUIRED_WORKER_MISSING",
+      "result": "EXPECTED_FAIL"
+    },
+    {
+      "case": "docker buildx build",
+      "code": "DIRECT_BUILD_PUBLISH_BLOCKED_LOAD_THEN_GATED_PUSH",
+      "result": "EXPECTED_FAIL"
+    },
+    {
+      "case": "skopeo copy dir:fixture",
+      "code": "OCI_DIRECT_PUBLISH_BLOCKED_USE_COMMON_DOCKER_GATE",
+      "result": "EXPECTED_FAIL"
+    }
+  ],
+  "actualRegistryWrites": 0,
+  "actualImageTests": false,
+  "GPUExecutions": 0,
+  "oldPassReruns": 0
+}

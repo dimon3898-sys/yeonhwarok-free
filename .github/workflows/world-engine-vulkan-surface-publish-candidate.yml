@@ -40,6 +40,17 @@ jobs:
       APPROVED_HEAD_SHA: ${{ inputs.approved_head_sha }}
       ZERO_COST_CONFIRMED: ${{ inputs.zero_cost_confirmed }}
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -79,3 +90,11 @@ jobs:
         if: always() && !cancelled()
         timeout-minutes: 1
         run: python3 -I -B "$PUBLISH_TOOL/publish_candidate.py" collect --work "$PUBLISH_WORK"
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

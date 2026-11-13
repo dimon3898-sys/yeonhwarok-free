@@ -1,0 +1,7 @@
+name: WORLD ENGINE common release interlock
+description: Refuse publication without actual-image required-fix admission
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: python3 -B "${GITHUB_ACTION_PATH}/../../../world-simulation-shorts-engine/release-guard/install.py"

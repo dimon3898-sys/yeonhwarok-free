@@ -1,0 +1,24 @@
+name: WORLD ENGINE mandatory publisher wiring
+on:
+  push:
+    paths: ['.github/workflows/**', '.github/actions/world-engine-release-guard/**', 'world-simulation-shorts-engine/release-guard/**']
+  pull_request:
+    paths: ['.github/workflows/**', '.github/actions/world-engine-release-guard/**', 'world-simulation-shorts-engine/release-guard/**']
+permissions:
+  contents: read
+jobs:
+  coverage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows
+            world-simulation-shorts-engine/release-guard
+      - run: python3 -m pip install --disable-pip-version-check PyYAML==6.0.3
+      - run: python3 -B world-simulation-shorts-engine/release-guard/audit_workflows.py --repo . --output release-wiring-evidence/WORKFLOW_COVERAGE.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mandatory-publisher-wiring-${{ github.run_id }}
+          path: release-wiring-evidence/

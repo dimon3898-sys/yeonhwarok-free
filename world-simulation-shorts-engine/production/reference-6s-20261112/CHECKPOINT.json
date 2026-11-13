@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "PENDING_GPU_VALIDATION_NO_RETRY_AUTHORIZED",
-  "firstIncomplete": "USER_DECISION_ON_NEW_IMAGE_AND_SEPARATE_GPU_RETRY_AUTHORIZATION",
+  "status": "BLOCKED_COMMON_RELEASE_GUARD_IMPLEMENTATION",
+  "firstIncomplete": "COMMON_IMAGE_GATE_CURRENT_D1_MISSING_V16_LAUNCH_FIX",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
     "width": 1080,
@@ -84,7 +84,7 @@
   ],
   "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Keep workload stopped. Repair image is published. Update image plus both digest variables before any separately user-authorized retry; do not rerun compiler/PNG/continuity. Failed private MP4/raw JSON are not recovered.",
+  "nextAction": "Implement scene-independent gate, verify existing d1 image, restore only missing proven v16 worker if rejected; preserve all prior PASS.",
   "lastError": "JSON_SIZE_INVALID",
   "formalCompile": {
     "status": "PASS",
@@ -213,5 +213,13 @@
     "digest": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
     "buildCommit": "4102d55447e3ea36cb3e42601fd44d3e758a036c",
     "runId": "43355738683"
+  },
+  "releaseGuard": {
+    "status": "IMPLEMENTING",
+    "existingImageWorkerSHA256": "d5bf03d4b79d70411c02d542bbebd08d9df0463636f558f02ee271c259b6b3d9",
+    "requiredWorkerSHA256": "f96763045ae38f24b0dba6f609e049454464f8d8489e2762987155c1e1cf0171",
+    "newFinding": "Known v16 publication barrier absent from d1 source closure; not attributed to JSON incident",
+    "oldPassReruns": 0,
+    "GPUExecutions": 0
   }
 }

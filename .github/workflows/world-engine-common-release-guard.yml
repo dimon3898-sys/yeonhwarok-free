@@ -1,0 +1,136 @@
+name: WORLD ENGINE common release guard and required-fix recovery
+on:
+  push:
+    branches: [fix/reference-6s-formal-admission-20261113]
+    paths: ['.github/workflows/world-engine-common-release-guard.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-common-release-guard
+  cancel-in-progress: false
+jobs:
+  admission:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == '039b702a04318225109af5db07e9c35d8b07668b' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_COMMON_RELEASE_GUARD_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      NVIDIA_VISIBLE_DEVICES: void
+      GUARD: world-simulation-shorts-engine/release-guard
+    steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /world-simulation-shorts-engine/release-guard/
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/studio-cold-start-v2/
+            /world-simulation-shorts-engine/production/capture-json-size-fix-v13/evidence/CPU_RESULT.json
+            /world-simulation-shorts-engine/production/worker-launch-state-fix-v16/evidence/CPU_RESULT.json
+            /world-simulation-shorts-engine/production/cold-start-pin-fix-v14/evidence/CPU_RESULT.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check common publisher coverage and reuse prior fix evidence
+        run: |
+          python -m pip install --disable-pip-version-check PyYAML==6.0.3
+          python -B "${GUARD}/audit_workflows.py" --repo . --output "${WORLD_ENGINE_GUARD_EVIDENCE}/WORKFLOW_COVERAGE.json"
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          p=json.loads(Path(os.environ['GUARD']+'/REQUIRED_FIXES.json').read_text())
+          for row in p['records']:
+              assert hashlib.sha256(Path(row['existingEvidence']).read_bytes()).hexdigest()==row['evidenceSHA256']
+          print('Prior security10, launch6, startup evidence reused; zero old test reruns')
+          PY
+      - name: Enable disposable builder compatibility
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Inspect existing JSON repair image before deciding to rebuild
+        run: |
+          docker pull ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1
+          python - <<'PY'
+          import os,sys
+          from pathlib import Path
+          sys.path.insert(0,os.environ['GUARD']);import control
+          parent='ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1'
+          try:control.verify(parent,Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE'])/'existing-d1',reuse=False)
+          except RuntimeError as error:
+              assert str(error)=='WORKER_PUBLICATION_FIX_MISSING',str(error)
+          else:raise RuntimeError('EXISTING_IMAGE_PASSED_REBUILD_NOT_ALLOWED')
+          control.write(Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE'])/'REBUILD_REQUIRED.json',{'status':'CONFIRMED_MISSING_V16_FIX','existingImage':parent,'expectedGateFailure':'WORKER_PUBLICATION_FIX_MISSING','newRuntimeRequired':True,'oldPassReruns':0,'GPUExecutions':0})
+          PY
+      - name: Build only the proven missing worker and required source pins
+        run: |
+          set -euo pipefail
+          python -B "${GUARD}/package_delta.py" "${GUARD}/recovery-20261113/PACKAGE.json" "${RUNNER_TEMP}/guard-image-context"
+          IMAGE="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:required-fixes-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
+          if docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then echo IMMUTABLE_TAG_EXISTS; exit 1; fi
+          docker build --platform linux/amd64 --label "org.opencontainers.image.revision=${GITHUB_SHA}" --label 'org.opencontainers.image.source=https://github.com/dimon3898-sys/yeonhwarok-free' -t "${IMAGE}" "${RUNNER_TEMP}/guard-image-context"
+          printf '%s\n' "${IMAGE}" > "${RUNNER_TEMP}/guard-image-tag"
+      - name: Test only new actual-image gate and controlled missing-fix variants
+        run: |
+          python -B "${GUARD}/test_image_gate.py" --image "$(cat "${RUNNER_TEMP}/guard-image-tag")" --evidence "${WORLD_ENGINE_GUARD_EVIDENCE}" --repo .
+      - name: Publish through mandatory common interlock
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker push "$(cat "${RUNNER_TEMP}/guard-image-tag")"
+          docker logout ghcr.io
+      - name: Test published digest and deployment mismatch rejection
+        run: python -B "${GUARD}/test_deployment_gate.py" "${WORLD_ENGINE_GUARD_EVIDENCE}"
+      - name: Preserve all gate receipts and immutable publication identity
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os,shutil
+          from pathlib import Path
+          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['GUARD'])/'recovery-20261113/execution-a1';out.mkdir(exist_ok=False)
+          if src.exists():shutil.copytree(src,out,dirs_exist_ok=True)
+          (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'buildCommit':os.environ['GITHUB_SHA'],'releaseApproved':(out/'RELEASE_APPROVAL.json').exists(),'GPUExecutions':0})+'\n')
+          PY
+      - name: Commit new evidence on the task branch with a fresh lease
+        if: always()
+        run: |
+          set -euo pipefail
+          BRANCH=fix/reference-6s-formal-admission-20261113
+          test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
+          git config user.name 'WORLD ENGINE common release evidence'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "${GUARD}/recovery-20261113/execution-a1"
+          git commit -m 'Preserve actual common release gate and fault-injection evidence'
+          git push origin "HEAD:refs/heads/${BRANCH}"
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

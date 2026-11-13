@@ -34,6 +34,17 @@ jobs:
       STORAGE_PHASE: build
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - name: Fetch new storage code and unchanged verification helpers only
         id: checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -76,6 +87,14 @@ jobs:
             {"preflight":"${{ steps.preflight.outcome }}","guard":"${{ steps.guard.outcome }}","test":"${{ steps.test.outcome }}","stage":"${{ steps.stage.outcome }}","build":"${{ steps.build.outcome }}","verify":"${{ steps.verify.outcome }}","publish":"${{ steps.publish.outcome }}"}
         run: python3 -B world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/ci.py persist
 
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90
   verify-pull:
     needs: build
     if: needs.build.result == 'success' && needs.build.outputs.digest != ''
@@ -92,6 +111,17 @@ jobs:
       STORAGE_PUBLISHED_DIGEST: ${{ needs.build.outputs.digest }}
       PYTHONDONTWRITEBYTECODE: '1'
     steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
       - name: Fresh independent checkout of new and unchanged verification helpers
         id: checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -116,3 +146,11 @@ jobs:
           STORAGE_STEP_OUTCOMES: >-
             {"preflight":"${{ steps.preflight.outcome }}","pull":"${{ steps.pull.outcome }}"}
         run: python3 -B world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/ci.py persist
+      - name: Preserve common release gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-guard-${{ github.job }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90

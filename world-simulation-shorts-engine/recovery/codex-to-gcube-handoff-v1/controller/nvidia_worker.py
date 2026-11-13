@@ -219,6 +219,16 @@ def _run(args):
         time.sleep(.05)
     else:
         raise RuntimeError('HANDOFF_LAUNCH_RECEIPT_MISSING')
+    # The worker can read initial state before the parent publishes its PID.
+    # launch.json is the parent's publication barrier; reload only after it.
+    with cache().PrivateTree(job) as directory:
+        launch, published = directory.json('launch.json'), directory.json('state.json')
+    identity = parent_identity(os.getpid())
+    expected = {'pid': identity['pid'], 'processStart': identity['startTicks']}
+    if (launch != expected or published != {**state, **expected}
+            or published.get('jobId') != job.name or identity['uid'] != os.getuid()):
+        raise RuntimeError('HANDOFF_LAUNCH_IDENTITY_MISMATCH')
+    state = published
     original = lease_helper()
     supervisor, cleanup_verified, holder = None, False, [None]
     started = time.monotonic()
