@@ -1,0 +1,81 @@
+{
+  "status": "INVESTIGATION_COMPLETE",
+  "baseHEAD": "6c51c7f165ca016650f191b4c04346514bee7761",
+  "scope": "Read-only code/source inspection, no old tests",
+  "features": [
+    {
+      "feature": "camera_center_zoom",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_plan.mjs validatePresentation; region_source.mjs qualifyRegion",
+      "detail": "Region bbox + KEYFRAMES center and zoom in (0,1]. Closer framing via smaller bbox."
+    },
+    {
+      "feature": "camera_keyframe_speed",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_plan.mjs compilePresentationPlan",
+      "detail": "Frame placement + existing smooth interpolation; no separate speed property."
+    },
+    {
+      "feature": "map_resolution",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "REGION_SOURCE_CATALOG.json NE1_EAST_ASIA_NATIVE_V1",
+      "detail": "2880x3360; 1/60 degree native spacing; exact crop only, no new detail invented. 7 degree view roughly420 native pixels wide; expect softness."
+    },
+    {
+      "feature": "city_labels",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_labels.mjs validatePresentationLabels",
+      "detail": "Supplied locations + EVENT labels/highlights; no new CITY role needed."
+    },
+    {
+      "feature": "label_size_color_position",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_label_layer.mjs metrics/layout",
+      "detail": "REFERENCE_V1 EVENT56px, fixed color/glow, source-bound anchor and collision placement."
+    },
+    {
+      "feature": "arbitrary_label_style_properties",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": "presentation_labels.mjs allowed fields",
+      "detail": "No arbitrary fontSize/color/offset JSON. Do not add unsupported fields."
+    },
+    {
+      "feature": "label_timing",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_labels.mjs timing/reveal",
+      "detail": "start/end/reveal/exitFrames and GRAPHEME_POP."
+    },
+    {
+      "feature": "pin_size_emphasis",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_label_layer.mjs pin dimensions",
+      "detail": "CONTEXT49x64 vs HERO116x151; use smaller CONTEXT."
+    },
+    {
+      "feature": "route_style_override",
+      "status": "EXISTING_UNCONNECTED",
+      "evidence": "flow_graphic_pass_v2.mjs createFlowGraphicPass style; presentation_runtime.mjs auto select",
+      "detail": "Low-level configurable style exists, formal presentation JSON has no route override. Keep existing auto contrast/core width; enlarge projected route instead."
+    },
+    {
+      "feature": "route_draw_timing",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "flow_core_v2.mjs and facts.scene_timing",
+      "detail": "Existing event start60, progressive route61..89; action ends149; fixed30 hold."
+    },
+    {
+      "feature": "moving_object_size_color",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "prompt_pipeline.mjs object_graphic; flow_graphic_pass_v2.mjs",
+      "detail": "width24..80 height12..80, supplied polygon RGBA. Increase32 to64 and cyan/white layers."
+    },
+    {
+      "feature": "final30_hold",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "scene_timing.final_hold_frames; KEYFRAMES",
+      "detail": "Identical149/179 pose, complete route/object/labels by149; verify raw150..179."
+    }
+  ],
+  "decision": "JSON_ONLY",
+  "productCodeChangesRequired": 0
+}

@@ -1,0 +1,102 @@
+name: WORLD ENGINE Japan6s V2 free CPU
+on:
+  push:
+    branches: [fix/reference-6s-formal-admission-20261113]
+    paths: ['.github/workflows/world-engine-japan6s-v2-cpu.yml']
+permissions:
+  contents: write
+concurrency:
+  group: world-engine-japan6s-v2-cpu
+  cancel-in-progress: false
+jobs:
+  japan6s:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == '6c51c7f165ca016650f191b4c04346514bee7761' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_JAPAN6S_V2_CPU_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/web/
+            /world-simulation-shorts-engine/recovery/universal-presentation-v2/
+            /world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/
+            /world-simulation-shorts-engine/recovery/reference-director-v1/director_events.mjs
+            /world-simulation-shorts-engine/recovery/g2-final-recovery-v1/layout_extension.mjs
+            /world-simulation-shorts-engine/recovery/g2-final-recovery-v1/fixtures/GENERIC_REGION_INPUTS.zip
+            /world-simulation-shorts-engine/production/japan-6s-v2-20261113/
+            /cinematic-world-map/assets/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned free CPU dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -1
+          ffprobe -version | head -1
+          python -m pip install --disable-pip-version-check --only-binary=:all: Pillow==13.0.0
+          npm install --prefix "${RUNNER_TEMP}/japan6s-v2-deps" --ignore-scripts --no-audit --no-fund playwright@1.62.1
+          "${RUNNER_TEMP}/japan6s-v2-deps/node_modules/.bin/playwright" install --with-deps chromium
+          CHROMIUM_PATH=$(node -e "process.stdout.write(require('${RUNNER_TEMP}/japan6s-v2-deps/node_modules/playwright').chromium.executablePath())")
+          sudo ln -sfn "${CHROMIUM_PATH}" /usr/bin/chromium
+          sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /workspace
+      - name: Compile new V2 input then official CPU render only after PASS
+        env:
+          WORLD_ENGINE_NODE_DEPS: ${{ runner.temp }}/japan6s-v2-deps
+          NVIDIA_VISIBLE_DEVICES: void
+        run: |
+          set -o pipefail
+          mkdir -p "${RUNNER_TEMP}/japan-v2-logs"
+          node world-simulation-shorts-engine/production/japan-6s-v2-20261113/run_v2.mjs > >(tee "${RUNNER_TEMP}/japan-v2-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/japan-v2-logs/stderr.log" >&2)
+      - name: Preserve actual output and exact failure checkpoint
+        if: always()
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import os,json,shutil,hashlib,gzip
+          from pathlib import Path
+          base=Path('world-simulation-shorts-engine/production/japan-6s-v2-20261113')
+          out=base/'cpu-a1';out.mkdir(exist_ok=False)
+          src=Path('/workspace/japan6s-v2-cpu-a1')
+          for f in src.glob('*'):
+              if f.is_file() and (f.suffix in ['.png','.mp4'] or f.name in ['CAPTURE_RECEIPT.json','TASK_FAILURE.json','HTTP_ASSET_BINDINGS.json','REQUEST.json','NEW_INPUT_RESULT.json','FRAME_SUMMARY.json']):shutil.copy2(f,out/f.name)
+          for f in Path(os.environ['RUNNER_TEMP'],'japan-v2-logs').glob('*.log'):shutil.copy2(f,out/f.name)
+          for name in ['FRAME_EVIDENCE.json','RUNTIME.json']:
+              ledger=src/name
+              if ledger.exists():(out/(name+'.gz')).write_bytes(gzip.compress(ledger.read_bytes(),compresslevel=6,mtime=0))
+          if (src/'SHA256SUMS').exists():shutil.copy2(src/'SHA256SUMS',out/'CAPTURE_SHA256SUMS.original')
+          (out/'RUN.json').write_text(json.dumps({'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'gpuStarts':0,'oldPassReruns':0,'visualApproval':'PENDING_V1_V2_COMPARISON','captureReceiptPresent':(out/'CAPTURE_RECEIPT.json').exists()},indent=2)+'\n')
+          manifest=lambda folder:'\n'.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+str(f.relative_to(folder)) for f in sorted(folder.rglob('*')) if f.is_file() and f.name!='SHA256SUMS')+'\n'
+          (out/'SHA256SUMS').write_text(manifest(out))
+          (base/'SHA256SUMS').write_text(manifest(base))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: japan6s-v2-${{ github.run_id }}
+          path: world-simulation-shorts-engine/production/japan-6s-v2-20261113/
+          retention-days: 90
+      - name: Save evidence on the authorized branch only
+        if: always()
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          BRANCH=fix/reference-6s-formal-admission-20261113
+          REMOTE_SHA=$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)
+          test "${REMOTE_SHA}" = "${SOURCE_SHA}"
+          git config user.name 'WORLD ENGINE CPU evidence'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse world-simulation-shorts-engine/production/japan-6s-v2-20261113
+          git commit -m 'Preserve Japan6s V2 actual CPU evidence without renderer changes [skip ci]'
+          git push origin "HEAD:refs/heads/${BRANCH}"
