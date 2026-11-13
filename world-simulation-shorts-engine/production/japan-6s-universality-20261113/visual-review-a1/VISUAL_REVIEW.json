@@ -1,0 +1,185 @@
+{
+  "schema": "WORLD_ENGINE_INDEPENDENT_VISUAL_REVIEW_V1",
+  "reviewDateClient": "2026-11-13",
+  "reviewer": "Codex primary agent; actual image inspection",
+  "status": "PASS_WITH_NOTES_INDEPENDENT_FRAME_REVIEW",
+  "userFinalQualityApproval": "PENDING_NOT_GRANTED",
+  "sourceVideo": "../cpu-a1/VIDEO.mp4",
+  "sourceVideoSHA256": "a767fa9b3d83d931422593f0d7315d71ae9036e42ab403001e7804cd41af8c78",
+  "frameIndexBase": 0,
+  "method": {
+    "originalPNGViewed": [
+      0,
+      90,
+      179
+    ],
+    "decodedMP4FramesViewed": {
+      "first": 0,
+      "last": 179,
+      "count": 180,
+      "contactSheetFrameSize": [
+        270,
+        480
+      ]
+    },
+    "nativeResolutionCropFrames": [
+      59,
+      62,
+      65,
+      70,
+      75,
+      80,
+      85,
+      89,
+      90,
+      105,
+      119,
+      120,
+      130,
+      139,
+      149,
+      150,
+      179
+    ],
+    "notPerformed": [
+      "new rendering",
+      "new encoding",
+      "compiler execution",
+      "realtime playback on user device"
+    ]
+  },
+  "checks": [
+    {
+      "id": "map_and_coastline",
+      "status": "PASS",
+      "observation": "Japan relief and coastline remain visible and coherent in all 180 frame thumbnails and original 1080x1920 PNGs; no missing map tiles/source rectangles seen."
+    },
+    {
+      "id": "city_locations",
+      "status": "PASS_WITHIN_SUPPLIED_COORDINATE_SCOPE",
+      "observation": "Tokyo pin tip lies in Kanto/Tokyo Bay area and Kyoto pin tip in central Kansai; input [lon,lat] anchors remain attached while the camera moves. Large Kyoto pin body lies above the anchor, not a second location. No street-level/survey accuracy claim.",
+      "inputAnchors": [
+        {
+          "id": "TOKYO",
+          "label": "TOKYO",
+          "anchor": [
+            139.749462,
+            35.686963
+          ],
+          "country_id": "COUNTRY_JPN"
+        },
+        {
+          "id": "KYOTO",
+          "label": "KYOTO",
+          "anchor": [
+            135.748052,
+            35.031938
+          ],
+          "country_id": "COUNTRY_JPN"
+        }
+      ]
+    },
+    {
+      "id": "progressive_route",
+      "status": "PASS",
+      "observation": "No line through frame60/61; visible line emerges near Tokyo at62, extends westward through65/70/75/80/85, reaches Kyoto by89; movement toward Kyoto is visible at90/105/119/130.",
+      "evidence": [
+        "ALL_FRAMES_060_089.jpg",
+        "ROUTE_DETAIL_1.jpg",
+        "ROUTE_DETAIL_2.jpg",
+        "ROUTE_DETAIL_3.jpg"
+      ]
+    },
+    {
+      "id": "camera",
+      "status": "PASS_FRAME_SEQUENCE_REVIEW",
+      "observation": "Map progressively moves/zooms toward Tokyo during0..59, holds at59..119, then moves/zooms toward Kyoto during119..149 and holds. No discontinuous teleport seen in consecutive frame sequence. Second travel is faster than first; perceptual preference and device realtime playback remain unapproved.",
+      "existingTelemetrySupport": {
+        "TOKYO": {
+          "maxAdjacentDisplacementPixels": 13.834564410527326,
+          "keyBoundaryDisplacementPixels": {
+            "59": 0.08308010439650321,
+            "60": 0.0,
+            "89": 0.0,
+            "90": 0.0,
+            "119": 0.0,
+            "120": 0.8090290632039927,
+            "149": 0.9929660462841247,
+            "150": 0.0
+          },
+          "finalHoldDisplacementPixels": 0.0
+        },
+        "KYOTO": {
+          "maxAdjacentDisplacementPixels": 12.460166590444775,
+          "keyBoundaryDisplacementPixels": {
+            "59": 0.09366939634323324,
+            "60": 0.0,
+            "89": 0.0,
+            "90": 0.0,
+            "119": 0.0,
+            "120": 0.723803977789968,
+            "149": 0.8983040191953513,
+            "150": 0.0
+          },
+          "finalHoldDisplacementPixels": 0.0
+        }
+      }
+    },
+    {
+      "id": "scene_transitions",
+      "status": "NOT_APPLICABLE_SINGLE_SCENE",
+      "observation": "One segment and transitions=[]; multi-scene CUT continuity is NOT_VERIFIED by this sample. Within-scene timing boundaries59/60,89/90,119/120,149/150 were visually inspected without a visible cut."
+    },
+    {
+      "id": "black_or_broken_frames",
+      "status": "PASS_VISUAL_REVIEW",
+      "observation": "All180 decoded frame thumbnails viewed; no black frame, gross corruption, missing source or blank patch seen. Detailed texture examined in original PNGs and native crops.",
+      "decodedMaximumBlackPixelFraction": 0.0
+    },
+    {
+      "id": "last30_hold",
+      "status": "PASS_VISUAL_HOLD",
+      "observation": "Frames150..179 show same map/city/path composition, with no visible camera/graphic movement. Reused original raw-render ledger has one hash for all30. Decoded lossy MP4 has30 distinct RGB hashes; do not claim decoded pixel-bit identity.",
+      "sourceRawUniqueHashes": 1,
+      "decodedRGBUniqueHashes": 30,
+      "maxMeanAbsoluteRGBDifferenceFrom150": 0.12668965406378602,
+      "maxIndividualChannelDifference": 26,
+      "differenceInterpretation": "Small pixel differences are consistent with original libx264 CRF18 lossy encoding, not observed scene motion."
+    },
+    {
+      "id": "json_direction_match",
+      "status": "PASS",
+      "observation": "Actual order matches supplied camera keys, labels on both cities for entire clip, Tokyo CONTEXT pin and Kyoto HERO pin, illustrative Tokyo-to-Kyoto route and final hold. No real airline service or physical travel speed is claimed."
+    }
+  ],
+  "qualityNotes": [
+    {
+      "id": "Q1",
+      "severity": "NON_BLOCKING_DESIGN_NOTE",
+      "observation": "Kyoto HERO pin is much larger than Tokyo CONTEXT pin and obscures nearby terrain; this matches the explicit JSON style."
+    },
+    {
+      "id": "Q2",
+      "severity": "NON_BLOCKING_READABILITY_NOTE",
+      "observation": "Small moving aircraft/arrow and same yellow route are difficult to distinguish at phone width; motion is identifiable in native-resolution crops."
+    },
+    {
+      "id": "Q3",
+      "severity": "NON_BLOCKING_COMPOSITION_NOTE",
+      "observation": "Wide region framing gives large ocean area and a relatively short city connection; detailed route focus could be stronger."
+    }
+  ],
+  "notVerified": [
+    "user final visual acceptance",
+    "user-device realtime playback",
+    "multi-scene transitions",
+    "Japan NVIDIA rendering",
+    "history/war/disaster/long-form generalization"
+  ],
+  "engineCodeChanges": 0,
+  "rendererExecutions": 0,
+  "encoderExecutions": 0,
+  "compilerExecutions": 0,
+  "GPUExecutions": 0,
+  "costKRW": 0
+}

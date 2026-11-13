@@ -1,0 +1,152 @@
+{
+  "schema": "WORLD_ENGINE_READ_ONLY_DIAGNOSTICS_AUDIT_V1",
+  "status": "READ_ONLY_AUDIT_COMPLETE_WITH_LIMITS",
+  "inspectedHEAD": "949f1857c419d5dc2c71c2abb604845a625c5112",
+  "methods": [
+    "read current implementation",
+    "read preserved actual incident records",
+    "read historical CPU contract results; no tests rerun"
+  ],
+  "sources": {
+    "cpuHarness": {
+      "path": "world-simulation-shorts-engine/production/japan-6s-universality-20261113/run_cpu.mjs",
+      "sha256": "6ddffe42d0a974c8173f9c22620b75637d47fde19d36e26476b3e5f8fa87ee16"
+    },
+    "localPreparationFailure": {
+      "path": "world-simulation-shorts-engine/production/japan-6s-universality-20261113/COMPILE_FAILURE.json",
+      "sha256": "1c7902572fcc18b025332d2eaeb69229b8f9857873c509355f9d8c5626f0b7a0"
+    },
+    "capture": {
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs",
+      "sha256": "6cdce0dff2c30f605e5a637021cf9ea5f7a2a44816edd895477e7fbf8c145d61"
+    },
+    "cpuWorker": {
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/software_worker.py",
+      "sha256": "1b6cb29c9893044552ac1a6bbbea8f7e2b01eb632050747418fbd2078ca50d3c"
+    },
+    "presentationCompiler": {
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs",
+      "sha256": "36060ee629af4105d50a9b09c84279f633b0e2d5d9705acdf181cd074fce080c"
+    },
+    "dataParser": {
+      "path": "world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/prompt_pipeline.mjs",
+      "sha256": "2acb6e864ced5a39689c55e04a2a2c9275ad22e694a9062558220f2cb28c5841"
+    },
+    "regionSource": {
+      "path": "world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs",
+      "sha256": "a6a2c8e651eede505f4106dc6dc11c870319788d7efd1e165665e348906e3fc3"
+    },
+    "gpuRecorder": {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs",
+      "sha256": "ef22250ddb12092a681474ddbf9f9f89350e64e748c669d793ab125ebb681b31"
+    },
+    "gpuWorker": {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "sha256": "f96763045ae38f24b0dba6f609e049454464f8d8489e2762987155c1e1cf0171"
+    },
+    "gpuSafeExporter": {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/safe_capture_export.py",
+      "sha256": "7a8be601501531ea593eacf7712980eea3573a99f0206cc5202288a887c2ff88"
+    },
+    "gpuActiveMirror": {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/capture_diagnostics_safe.py",
+      "sha256": "36c9ac6f227aceab1bc042585a50edaaa1a7cd1afe5366fdf5cf245f17b75b2f"
+    },
+    "generalFailureRecord": {
+      "path": "world-simulation-shorts-engine/engine/failures.py",
+      "sha256": "de8db9cc2f5d029a513825da6a3614c3d15110091fa2b18eb463e860a071da5e"
+    },
+    "cpuDiagnosticHistoricalEvidence": {
+      "path": "world-simulation-shorts-engine/recovery/capture-diagnostics-g1-v1/evidence/ci-40674899782/TEST_RESULTS.json",
+      "sha256": "7c26bc1652c4bd4dd04a9a71f770d707b6151c707ada1614f6a40178fa44b977"
+    },
+    "actualHistoricalGPUIncident": {
+      "path": "world-simulation-shorts-engine/production/reference-6s-20261112/incident-7001b1f3/evidence/CAPTURE_DIAGNOSTIC.json",
+      "sha256": "d8a955375649fc544c78eb2d03681f39593ce67625de133a48fd860b2cf388e4"
+    },
+    "actualHistoricalGPUCheckpoint": {
+      "path": "world-simulation-shorts-engine/production/reference-6s-20261112/incident-7001b1f3/evidence/CAPTURE_CHECKPOINT.json",
+      "sha256": "d4700d836b621539d8e03ed2161aa15f15d5a78514b037a17698af9c5e7b10a4"
+    },
+    "workflow": {
+      "path": ".github/workflows/world-engine-japan6s-cpu.yml",
+      "sha256": "fe828d74aff43ed8c413241d6adf83f4350c4b769b0154c54cdde568885fa87f"
+    }
+  },
+  "capabilities": [
+    {
+      "area": "failure stage",
+      "implemented": "Japan harness stores stage, originalMessage and stack in TASK_FAILURE.json; compile harness stores preparation stage in COMPILE_FAILURE.json. CPU worker stores phase/stage. GPU recorder stores current/last operation, frameIndex, firstFailure and separate cleanupFailure.",
+      "evidence": "Existing local COMPILE_FAILURE.json has CAMERA_AND_FULL_SOURCE_PREPARATION and UP2_PRIVATE_ROOT_ANCESTOR_UNSAFE.",
+      "limit": "Japan capture harness groups source preparation and capture into one coarse stage; GPU worker state alone can collapse to FAILED, requiring operation checkpoint."
+    },
+    {
+      "area": "error codes and original text",
+      "implemented": "Local Japan failure preserves original message and stack; capture receipt stores a bounded error message. General failure formatter redacts log tails. GPU public export intentionally emits allowlisted codes/types/operation fields and safe runtime metadata.",
+      "limit": "Raw error text/stack is not guaranteed in public GPU exports; unknown errors remain UNCLASSIFIED_EXCEPTION. No claim of universal original-text retention."
+    },
+    {
+      "area": "JSON input classification",
+      "implemented": "parsePrompt and presentation compiler classify INVALID, CONFLICT, UNSUPPORTED, NEEDS_INPUT with code/field/reason/example. Runtime guards reject schema, frame gaps/overlap, seals and unsupported family/scale.",
+      "limit": "Bounded grammar and attached facts only; not arbitrary natural language understanding or automatic fact retrieval. Japan script parses its input before its own try block, so malformed JSON at this entrypoint can bypass COMPILE_FAILURE.json."
+    },
+    {
+      "area": "map/data integrity",
+      "implemented": "Source/catalog/asset SHA, native geometry binding, source/crop dimensions, CRS/coordinates, camera coverage and cache identities checked; missing/changed sources block with REGION_* or UP2_* codes.",
+      "evidence": "Japan source qualification hashes, HTTP_ASSET_BINDINGS, CAPTURE_RECEIPT and actual map images preserved.",
+      "limit": "These are integrity/admission checks, not historical truth certification."
+    },
+    {
+      "area": "CPU execution errors",
+      "implemented": "Capture emits per-frame progress, browser error list, error code, frame evidence, receipt, HTTP bindings and sums; worker records timeout, package/source, cleanup/progress and media-contract errors. Original Japan workflow preserves stdout/stderr and failure records.",
+      "limit": "Direct capture preflight/source preparation occurs before receipt try/finally; outer harness is necessary. Cleanup before receipt writes may prevent remaining writes if it throws; no new fault injection performed."
+    },
+    {
+      "area": "GPU execution recording",
+      "implemented": "Operation recorder covers WebGL/runtime/import/source preparation/draw/readback/PNG/encoder/progress/export/cleanup. Worker has atomic state, active checkpoint mirror, cleanup status and safe export. Runtime evidence includes safe browser diagnostics, native error codes, allocation and expected image identity.",
+      "evidence": "Historical actual incident7001b1f3 has frame179/renderedFrames180 checkpoint and safe diagnostic, with missingEvidence flags and UNKNOWN/UNCLASSIFIED values retained. Historical G1 record reports14 CPU-only cases, not GPU RCA validation.",
+      "limit": "Japan GPU run NOT_RUN; current production image not launched or tested. Storage mirror is best-effort, not proof of remote backup or recoverability after deletion."
+    },
+    {
+      "area": "automatic root cause",
+      "status": "NOT_VERIFIED_FOR_GENERAL_GPU_ROOT_CAUSE",
+      "implemented": "Exact known-code and bounded category mapping; unknown/error-evidence gaps remain explicit.",
+      "evidence": "Historical G1 has gpuRootCause=UNKNOWN, gpuExecuted=false, productionImageTested=false; actual historical GPU incident has missingEvidence and UNCLASSIFIED_EXCEPTION.",
+      "limit": "No validated automatic determination of every GPU driver/device/OOM/context crash root cause."
+    }
+  ],
+  "boundedFindings": [
+    {
+      "id": "D1",
+      "kind": "OBSERVED_STALE_CHECKPOINT",
+      "observation": "Japan CHECKPOINT still requested actual CPU run although Actions and archived CPU result already succeeded.",
+      "resolution": "Reconciled in this review; original checkpoint retained byte-for-byte."
+    },
+    {
+      "id": "D2",
+      "kind": "OBSERVED_ARCHIVAL_GAP",
+      "observation": "Original SHA256SUMS lists REQUEST.json and RUNTIME.json, but workflow copy allowlist did not archive them. REQUEST is byte-identical to committed RUNTIME_REQUEST.json; RUNTIME prepared snapshot is NOT_VERIFIED/not archived.",
+      "minimumFutureImprovement": "Add only prepared snapshot/receipt retention to a separately scoped future workflow change; preserve existing failure receipts. Do not rerun this successful render solely to fill the archive.",
+      "blocksCurrentVisualReview": false
+    },
+    {
+      "id": "D3",
+      "kind": "STATIC_CODE_COVERAGE_GAP",
+      "observation": "Japan compile input JSON.parse and CHECKPOINT read precede try; direct capture source preparation precedes capture receipt try. Malformed input or early setup may lack a structured receipt at these layers. Existing outer harness and logs cover some cases.",
+      "minimumFutureImprovement": "Wrap early input/preparation in existing structured failure path, preserving original error; add focused new failing-input case only if repair is separately undertaken.",
+      "faultInjectedThisTurn": false,
+      "blocksCurrentVisualReview": false
+    },
+    {
+      "id": "D4",
+      "kind": "STATIC_CPU_FAILURE_DETAIL_LIMIT",
+      "observation": "software_worker.py maps child nonzero return to UP2_NATIVE_CAPTURE_FAILED and writes only stage/code/type; child original detail remains in separate logs/receipt if available.",
+      "minimumFutureImprovement": "Link existing bounded capture receipt error into worker failure record; retain redaction and no broad diagnosis rewrite.",
+      "blocksCurrentVisualReview": false
+    }
+  ],
+  "newProductCodeChanges": 0,
+  "testExecutions": 0,
+  "GPUExecutions": 0,
+  "costKRW": 0
+}
