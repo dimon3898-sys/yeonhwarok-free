@@ -1,0 +1,58 @@
+name: WORLD ENGINE preserve original local Git history
+on:
+  push:
+    branches: [recovery/local-commits-20261114-preserve]
+    paths: [.github/workflows/world-engine-preserve-original.yml]
+permissions:
+  contents: write
+concurrency:
+  group: world-engine-original-history-preservation
+  cancel-in-progress: false
+jobs:
+  preserve:
+    if: github.run_attempt == 1 && github.event.repository.private == false && github.repository == 'dimon3898-sys/yeonhwarok-free' && github.event.head_commit.message == 'WORLD_ENGINE_PRESERVE_ORIGINAL_COMMITS_20261114_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          sparse-checkout: world-engine-recovery/local-commits-20261114
+      - name: Restore exact Git objects from preserved bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path('world-engine-recovery/local-commits-20261114')
+          m=json.loads((p/'MANIFEST.json').read_text())
+          data=[]
+          for part in m['parts']:
+              b=(p/part['file']).read_bytes()
+              assert len(b)==part['size'] and hashlib.sha256(b).hexdigest()==part['sha256']
+              data.append(b)
+          b=b''.join(data)
+          assert hashlib.sha256(b).hexdigest()==m['bundleSHA256']
+          Path('/tmp/original-local-commits.bundle').write_bytes(b)
+          print('REMOTE_ARCHIVE_SHA256_VERIFIED',m['bundleSHA256'])
+          PY
+          git bundle verify /tmp/original-local-commits.bundle
+          git fetch /tmp/original-local-commits.bundle HEAD:refs/heads/recovered-original-local-commits
+          for COMMIT in 8a67855dde383db0b474467775814df1f0fc919a 704ffdf61373f83177aca27b2ad81cf247c9ca2e 2836408ae2a8cb7cd4734e5d51da224f44f9c2cb; do
+            test "$(git cat-file -t "${COMMIT}")" = commit
+            git show -s --format='%H %T %P' "${COMMIT}"
+          done
+          test "$(git rev-parse recovered-original-local-commits^{tree})" = 44c01917f8a1e4b4af99ddcfeb714ebe86d0869b
+          git merge-base --is-ancestor 4f1ccf960bd3ca102f7de543c229299744673839 recovered-original-local-commits
+      - name: Preserve original commits with a non-force fast-forward
+        shell: bash
+        run: |
+          set -euo pipefail
+          TARGET=fix/reference-6s-formal-admission-20261113
+          EXPECTED=4f1ccf960bd3ca102f7de543c229299744673839
+          ACTUAL=$(git ls-remote origin "refs/heads/${TARGET}" | cut -f1)
+          test "${ACTUAL}" = "${EXPECTED}"
+          git push origin "2836408ae2a8cb7cd4734e5d51da224f44f9c2cb:refs/heads/${TARGET}"
+          test "$(git ls-remote origin "refs/heads/${TARGET}" | cut -f1)" = 2836408ae2a8cb7cd4734e5d51da224f44f9c2cb
+          echo ORIGINAL_COMMIT_SHA_HISTORY_PRESERVED
