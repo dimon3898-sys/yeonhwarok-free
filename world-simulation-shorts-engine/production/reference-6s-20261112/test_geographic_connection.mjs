@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+import {createHash} from 'node:crypto';
+import {validateFactDataset,validateScenePlan} from '../../web/map_infographic_v1/planner_scene_v1.mjs';
+import {evaluateAreaFrame} from '../../web/map_infographic_v1/area_core_v3.mjs';
+import {validatePresentation} from '../../recovery/universal-presentation-v2/presentation_plan.mjs';
+import {analyzePresentationPrompt} from '../../recovery/universal-presentation-v2/presentation_prompt.mjs';
+const here=path.dirname(fileURLToPath(import.meta.url)),load=n=>JSON.parse(fs.readFileSync(path.join(here,n))),copy=structuredClone;
+const input=load('REFERENCE_6S_GEOGRAPHIC_INPUT.json'),compiled=load('COMPILE_RESULT.json');
+const passed=[];function check(name,fn){fn();passed.push(name);}
+assert.equal(compiled.status,'PASS');
+const segment=compiled.renderRequests[0],scene=segment.scene,plans=segment.enginePlan.plans;
+check('actual_compiler_180_geographic',()=>{assert.equal(scene.event_type,'GEOGRAPHIC');assert.equal(scene.timing.total_frames,180);assert.equal(scene.timing.final_hold_frames,30);assert.equal(scene.time_steps,undefined);});
+check('no_war_or_state_transition_relabel',()=>{assert.equal(plans.length,2);for(const p of plans){assert.equal(p.engine,'EXISTING_AREA_V3');assert.equal(p.plan.intent.states.length,0);assert.ok(p.plan.operations.every(o=>['AREA_REVEAL','AREA_HOLD'].includes(o.type)));}});
+const controls=(i,f)=>evaluateAreaFrame(plans[i].plan,f);
+check('spain_visible_from_frame_zero',()=>assert.equal(controls(0,0).areas[0].alpha,1));
+check('cyan_appears_independently_at90',()=>{assert.equal(controls(1,60).areas[0].alpha,0);assert.ok(controls(1,90).areas[0].alpha>0);assert.equal(controls(0,90).areas[0].alpha,1);});
+check('both_colors_keep_final_state',()=>{for(const f of [120,149,179])assert.deepEqual(plans.map((_,i)=>controls(i,f).areas[0].alpha),[1,1]);});
+check('area_final_hold_matches149',()=>{for(let i=0;i<2;i++)assert.deepEqual(controls(i,149).areas,controls(i,179).areas);});
+check('source_vertices_preserved',()=>{for(const p of plans){const layer=scene.region_layers.find(l=>l.id===p.id);assert.deepEqual(p.plan.intent.areas[0].geometry,scene.geometries.find(g=>g.id===layer.geometry_ref).geometry);}});
+const facts=input.data.scenes[0].facts;
+check('duplicate_layer_rejected',()=>{const f=copy(facts);f.region_layers.push(f.region_layers[0]);assert.throws(()=>validateFactDataset(f),/DUPLICATE/);});
+check('missing_geometry_rejected',()=>{const f=copy(facts);f.region_layers[1].geometry_ref='MISSING';assert.throws(()=>validateFactDataset(f),/GEOMETRY_REFERENCE/);});
+check('hold_intrusion_rejected',()=>{const f=copy(facts);f.region_layers[1].start_frame=140;assert.throws(()=>validateFactDataset(f),/BEFORE_HOLD/);});
+check('one_frame_delayed_reveal_rejected',()=>{const f=copy(facts);f.region_layers[1].reveal_frames=1;assert.throws(()=>validateFactDataset(f),/BEFORE_HOLD/);});
+check('unconsumed_field_rejected',()=>{const f=copy(facts);f.region_layers[0].invented=true;assert.throws(()=>validateFactDataset(f),/UNKNOWN_FIELD/);});
+check('state_in_geographic_rejected',()=>{const f=copy(scene);f.time_steps=[];assert.throws(()=>validateScenePlan(f),/UNUSED_CATEGORY|VISUAL_ONLY/);});
+check('extra_palette_binding_rejected',()=>{const p=copy(segment.presentation);p.territoryColors.UNKNOWN=[1,0,0,.6];assert.throws(()=>validatePresentation(p,{scene,region:segment.region}),/COLOR_BINDING/);});
+check('alpha_above_contract_rejected',()=>{const p=copy(segment.presentation);p.territoryColors.IBERIA_YELLOW[3]=.85;assert.throws(()=>validatePresentation(p,{scene,region:segment.region}),/COLOR_BINDING/);});
+const tampered=copy(input);tampered.data.scenes[0].facts.geometries[0].geometry.coordinates[0][0][0][0]+=.01;
+const rejected=await analyzePresentationPrompt(tampered);assert.notEqual(rejected.status,'PASS');assert.ok(rejected.issues.some(i=>i.code==='EVIDENCE_DATASET_NOT_REVIEWED'));passed.push('changed_geometry_cannot_reuse_admission');
+const result={status:'PASS',scope:'NEW_GEOGRAPHIC_COMPILER_CONNECTION_ONLY_NOT_SCREEN_OR_CONTINUITY',checks:passed.length,passed,
+ inputSHA256:createHash('sha256').update(fs.readFileSync(path.join(here,'REFERENCE_6S_GEOGRAPHIC_INPUT.json'))).digest('hex'),oldPassReruns:0,gpuStarts:0};
+fs.writeFileSync(path.join(here,'FOCUSED_TEST_RESULT.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify(result));

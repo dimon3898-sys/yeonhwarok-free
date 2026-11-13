@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "IN_PROGRESS_FORMAL_INPUT_ADMISSION",
-  "firstIncomplete": "Formal 6s input compiler admission",
+  "status": "BLOCKED_FULL_CAMERA_ADMISSION",
+  "firstIncomplete": "STEP 1 full camera geography admission; formal compiler and schemas passed",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
     "width": 1080,
@@ -68,6 +68,157 @@
   ],
   "activeInput": "inputs/REFERENCE_6S_HOLD_BOUNDARY_CORRECTED.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Connect GEOGRAPHIC to existing Area V3 with independent region layers; qualify source bytes before production compile",
-  "lastError": "UNSUPPORTED_GEOGRAPHIC_FAMILY"
+  "nextAction": "Resolve invalid camera candidate using recovered V10/V11 and real reference geography; retain compiler PASS unless input/code changes invalidate it.",
+  "lastError": "REFERENCE_CAMERA_KEY_0_GEOGRAPHIC_BOUNDS_REQUIRED",
+  "formalCompile": {
+    "status": "PASS",
+    "eventType": "GEOGRAPHIC",
+    "frames": 180,
+    "evidence": "COMPILE_RESULT.json",
+    "inputSHA256": "f0a30fd58fcf29f8cb7429c81550b7bc8acdeb12a86442660bcfd5144c597996"
+  },
+  "newFocusedChecks": {
+    "status": "PASS",
+    "checks": 16,
+    "evidence": "FOCUSED_TEST_RESULT.json"
+  },
+  "schemas": {
+    "status": "PASS",
+    "count": 2,
+    "evidence": "SCHEMA_RESULT.json"
+  },
+  "sourceAdmission": {
+    "status": "PARTIAL",
+    "requestScope": {
+      "schema": "WORLD_ENGINE_REGION_ADMISSION_V2",
+      "catalogSHA256": "6935bc7389248702dad12084ef85f47a1ff69baa80e9901b5b593ce3b3fe4716",
+      "request": {
+        "sourceId": "GLOBAL_EARTH_DAY_RGB_V1",
+        "crs": "EPSG:4326",
+        "center": [
+          -3.7,
+          37
+        ],
+        "bbox": [
+          -18,
+          17,
+          15,
+          61
+        ],
+        "countryId": "COUNTRY_ESP"
+      },
+      "fittedBounds": [
+        -22.4,
+        10.44980615487222,
+        15,
+        63.55019384512778
+      ],
+      "preservedLegacyFraming": false,
+      "contextCountryId": "COUNTRY_ESP",
+      "contextCountryName": "Spain",
+      "contextSelection": "CENTER_IN_ACTUAL_SOURCE_GEOMETRY",
+      "gisSHA256": "3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb",
+      "locationCountryChecks": [
+        {
+          "locationId": "SPAIN",
+          "countryId": "COUNTRY_ESP",
+          "status": "INSIDE_OR_BOUNDARY",
+          "geographic": [
+            -3.7,
+            40.4
+          ],
+          "boundaryDistanceDegrees": 0,
+          "boundaryUncertaintyDegrees": 0.1
+        },
+        {
+          "locationId": "MOROCCO",
+          "countryId": "COUNTRY_MAR",
+          "status": "INSIDE_OR_BOUNDARY",
+          "geographic": [
+            -6,
+            31.8
+          ],
+          "boundaryDistanceDegrees": 0,
+          "boundaryUncertaintyDegrees": 0.1
+        },
+        {
+          "locationId": "COAST_PIN_A",
+          "countryId": "COUNTRY_MAR",
+          "status": "WITHIN_GENERALIZED_BORDER_UNCERTAINTY",
+          "geographic": [
+            -6,
+            35.8
+          ],
+          "boundaryDistanceDegrees": 0.07600541313572427,
+          "boundaryUncertaintyDegrees": 0.1
+        },
+        {
+          "locationId": "COAST_PIN_B",
+          "countryId": "COUNTRY_MAR",
+          "status": "INSIDE_OR_BOUNDARY",
+          "geographic": [
+            -5.3,
+            35.2
+          ],
+          "boundaryDistanceDegrees": 0,
+          "boundaryUncertaintyDegrees": 0.1
+        }
+      ],
+      "sourceId": "GLOBAL_EARTH_DAY_RGB_V1",
+      "sourceSHA256": "88ab060b6e7d241cfc590c69f528fab2b3247b738d40124cb590999a6fe44abc",
+      "license": "CC-BY-4.0",
+      "sourceDimensions": [
+        8192,
+        4096
+      ],
+      "sourceBounds": [
+        -180,
+        -90,
+        180,
+        90
+      ],
+      "nativePixelSpacing": [
+        0.0439453125,
+        0.0439453125
+      ],
+      "initialWindow": {
+        "pixelBox": [
+          3584,
+          599,
+          4440,
+          1813
+        ],
+        "dimensions": [
+          856,
+          1214
+        ],
+        "bounds": [
+          -22.5,
+          10.3271484375,
+          15.1171875,
+          63.6767578125
+        ],
+        "minimumGutterPixels": 2.275555555555588
+      },
+      "terrainTreatment": "CURRENT",
+      "styleId": "GLOBAL_RGB_SOURCE_NATIVE_COVERAGE",
+      "originalNE1Materialized": false,
+      "sourceBytesActuallyVerified": true,
+      "trajectoryCoverageRequiredBeforeStart": true,
+      "noElevationCreated": true,
+      "noHistoricalOwnershipInferred": true
+    },
+    "fullCameraEnvelope": "BLOCKED_INVALID_CANDIDATE_CAMERA"
+  },
+  "cpuScreen": {
+    "status": "NOT_RUN",
+    "reason": "Full camera admission must pass first; local workspace ancestor /workspace mode0777 additionally violates existing private-root contract."
+  },
+  "continuity180": {
+    "status": "NOT_RUN"
+  },
+  "imageBuild": {
+    "status": "NOT_RUN"
+  },
+  "deploymentReady": false
 }

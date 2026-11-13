@@ -6,13 +6,14 @@ import {fileURLToPath} from 'node:url';
 import {compileScenePlan, validateFactDataset, validateScenePlan} from '../../web/map_infographic_v1/planner_scene_v1.mjs';
 import {compileExistingEnginePlan} from '../../web/map_infographic_v1/planner_engine_adapter_v1.mjs';
 import {reviewedContextRecords} from './reviewed_context_registry.mjs';
+import {reviewedGeographicRecords} from './reviewed_geographic_registry.mjs';
 
 export const SCHEMA = 'WORLD_ENGINE_DATA_PROMPT_V1';
 export const COMPILER_VERSION = 'universal-data-pipeline-v1.0.0';
 export const REGIONS = Object.freeze(['namibia_desert_coast', 'europe_germany', 'south_america_chile', 'korean_peninsula', 'nepal_himalaya']);
 export const CAPABILITIES = Object.freeze({
   prompt: 'STRUCTURED_JSON_OR_SINGLE_JSON_FENCE; NO_EXTERNAL_AI',
-  families: ['WAR', 'TRANSPORT'],
+  families: ['WAR', 'TRANSPORT', 'GEOGRAPHIC'],
   plannerOnlyFamilies: ['LINE_METRIC', 'DISASTER'],
   camera: 'EXISTING_SERVER_OWNED_REGION_PROFILE_LOCKED; supplied targets must fit its coverage',
   dates: 'GREGORIAN_ISO_DATE_0001_TO_9999; BCE and precision-only dates are unsupported',
@@ -67,8 +68,9 @@ function coordinates(value, field, out) {
   } else for (const [i, child] of value.entries()) coordinates(child, `${field}[${i}]`, out);
 }
 const FACT_KEYS = ['version', 'data_mode', 'subject', 'locations', 'time_range', 'source_notes', 'geometries', 'stages', 'routes',
-  'geographic_lines', 'impacts', 'propagations', 'metrics', 'markers', 'text', 'camera', 'scale', 'native_context', 'semantic_mode', 'scene_timing', 'causal_tracks'];
+  'geographic_lines', 'impacts', 'propagations', 'metrics', 'markers', 'text', 'camera', 'scale', 'native_context', 'semantic_mode', 'scene_timing', 'causal_tracks', 'region_layers'];
 const RECORD_KEYS = {
+  region_layers: ['id', 'geometry_ref', 'start_frame', 'reveal_frames'],
   source_notes: ['id', 'source_type', 'source_reference', 'verification_status', 'note', 'verification_basis', 'live_access', 'retrieval_date', 'license', 'version', 'original_sha256', 'source_wrapper_sha256', 'sha256', 'crs', 'resolution'],
   geometries: ['id', 'geometry', 'source_id', 'note'], locations: ['id', 'label', 'anchor', 'country_id'],
   stages: ['id', 'date', 'label', 'area_refs', 'front_refs'],
@@ -134,13 +136,14 @@ function inspectFacts(facts, field, mode, out) {
   if (isoDate(facts.time_range?.start) && isoDate(facts.time_range?.end) && facts.time_range.end < facts.time_range.start)
     out.push(issue('CONFLICT', 'REVERSED_TIME_RANGE', field + '.time_range', 'End date precedes start date.', {start: facts.time_range.end, end: facts.time_range.start}));
   const family = facts.subject?.event_family;
-  if (!CAPABILITIES.families.includes(family)) out.push(issue('UNSUPPORTED', 'FAMILY_NOT_CONNECTED', field + '.subject.event_family', 'This preview pixel profile connects WAR and TRANSPORT. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer.', {supported: CAPABILITIES.families}));
+  if (!CAPABILITIES.families.includes(family)) out.push(issue('UNSUPPORTED', 'FAMILY_NOT_CONNECTED', field + '.subject.event_family', 'This preview pixel profile connects WAR, TRANSPORT and GEOGRAPHIC. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer.', {supported: CAPABILITIES.families}));
   if (family === 'TRANSPORT' && !(facts.routes?.length)) out.push(issue('NEEDS_INPUT', 'ROUTE_DATA_REQUIRED', field + '.routes', 'Transport requires supplied geographic routes and supplied object graphics, not military territories.', {routes: [{id: 'route_1', geometry_ref: 'supplied_line', object_role: 'AIRCRAFT', object_graphic: 'See contract'}]}));
   if (family === 'LINE_METRIC' && (!facts.geographic_lines?.length || !facts.metrics?.length)) out.push(issue('NEEDS_INPUT', 'LINE_METRIC_DATA_REQUIRED', field, 'Supply the line and its source-bound metric; neither is inferred.', {geographic_lines: [{id: 'line_1', geometry_ref: 'supplied_line'}], metrics: 'Supply explicit metric'}));
   if (family === 'WAR' && (!Array.isArray(facts.stages) || facts.stages.length < 2 || facts.stages.some(x => !x.area_refs?.length || !x.front_refs?.length)))
     out.push(issue('NEEDS_INPUT', 'TERRITORY_AND_FRONT_STATES_REQUIRED', field + '.stages', 'Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon.', {minimumStates: 2, eachStateRequires: ['date', 'area_refs', 'front_refs']}));
   const unconsumed = family === 'WAR' ? ['metrics', 'geographic_lines', 'impacts', 'propagations', 'text', 'causal_tracks', 'routes']
-    : family === 'TRANSPORT' ? ['stages', 'geographic_lines', 'metrics', 'impacts', 'propagations', 'text', 'causal_tracks'] : [];
+    : family === 'TRANSPORT' ? ['stages', 'geographic_lines', 'metrics', 'impacts', 'propagations', 'text', 'causal_tracks']
+    : family === 'GEOGRAPHIC' ? ['stages','routes','geographic_lines','metrics','impacts','propagations','text','causal_tracks'] : [];
   for (const key of unconsumed) if (facts[key]?.length) out.push(issue('UNSUPPORTED', 'FEATURE_HAS_NO_PIXEL_CONSUMER', field + '.' + key,
     'This category has no connected pixel consumer in the selected family; supplied content will not be silently discarded.', {field: key, connectedFamilies: CAPABILITIES.families}));
   if (mode === 'HISTORICAL' && facts.data_mode !== 'PRODUCTION') out.push(issue('INVALID', 'HISTORY_MODE_BINDING', field + '.data_mode', 'Historical input cannot masquerade as SYNTHETIC_TEST.', {data_mode: 'PRODUCTION'}));
@@ -155,7 +158,7 @@ function checkEvidence(scene, facts, field, registry, out) {
   // Built-in records are server-owned and digest-pinned; caller flags cannot
   // create or replace them. Existing explicitly supplied server records remain.
   const supplied = Array.isArray(registry) ? registry : registry?.records ?? [];
-  const records = [...reviewedContextRecords(), ...(Array.isArray(supplied) ? supplied : []).filter(r => !String(r?.id ?? '').startsWith('KW20_CONTEXT_'))];
+  const records = [...reviewedContextRecords(), ...reviewedGeographicRecords(), ...(Array.isArray(supplied) ? supplied : []).filter(r => !/^(KW20_CONTEXT_|REF6_GEOGRAPHIC_)/.test(String(r?.id ?? '')))];
   if (![facts.source_notes, facts.geometries].every(rows => Array.isArray(rows) && rows.every(object)) || facts.stages !== undefined && (!Array.isArray(facts.stages) || facts.stages.some(row => !object(row)))) return;
   const boundGeometries = new Set(), boundStages = new Set(), boundSources = new Set();
   for (const [i, binding] of rows.entries()) {
@@ -206,8 +209,10 @@ function staticGeographicContext(record, facts, source, geometryId) {
     && record.geometryMeaning === 'UNCHANGED_MODERN_LAND_CONTEXT'
     && source.source_type === 'GEOGRAPHIC_CONTEXT'
     && facts.semantic_mode === 'ILLUSTRATIVE_FACT_BASED_VISUAL'
-    && Array.isArray(first) && first.length > 0 && new Set(first).size === first.length && first.includes(geometryId)
-    && stages.length >= 2 && stages.every(s => JSON.stringify(s.area_refs) === JSON.stringify(first))
+    && (facts.subject.event_family === 'GEOGRAPHIC'
+      ? stages.length === 0 && facts.region_layers?.length > 0 && !facts.routes?.length && !facts.causal_tracks?.length
+      : Array.isArray(first) && first.length > 0 && new Set(first).size === first.length && first.includes(geometryId)
+    && stages.length >= 2 && stages.every(s => JSON.stringify(s.area_refs) === JSON.stringify(first)))
     && !facts.factions?.length && !facts.territories?.length;
 }
 function timingFor(facts, frames, fps) {

@@ -5,8 +5,8 @@
   "description": "Structural validation only. Actual source bytes/coverage, data evidence, native Scene compiler, presentation references, full camera coverage and Studio safety gates also run. This does not certify facts or video quality.",
   "x-reusedFactsSchema": {
     "file": "../universal-data-pipeline-v1/PROMPT_INPUT.schema.json",
-    "sha256": "c29eba0a4bed7a84f5feb95f5feba6ec2ff737e318887cdbfda6ad07297e04b4",
-    "semantics": "Unchanged facts definitions; only optional display scalar resolution belongs to new version."
+    "sha256": "86e86a4c9570bf10c72e9f6add478c9eb8132cb082d2594b29317ee256b17163",
+    "semantics": "Additive GEOGRAPHIC independent region layers; existing families unchanged."
   },
   "type": "object",
   "additionalProperties": false,
@@ -438,7 +438,7 @@
           "enum": [
             "REVEAL",
             "PRESERVE_PROVIDED",
-                  "PRESERVE_AREA_REVEAL_LINE"
+            "PRESERVE_AREA_REVEAL_LINE"
           ]
         },
         "labels": {
@@ -666,7 +666,8 @@
                     "WAR",
                     "TRANSPORT",
                     "LINE_METRIC",
-                    "DISASTER"
+                    "DISASTER",
+                    "GEOGRAPHIC"
                   ]
                 }
               },
@@ -1423,6 +1424,39 @@
               "items": {
                 "type": "object",
                 "description": "Preserved native causal contract; current pixel profile rejects until admitted, never silently consumes."
+              }
+            },
+            "region_layers": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 8,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]+$"
+                  },
+                  "geometry_ref": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_.:-]+$"
+                  },
+                  "start_frame": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "reveal_frames": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "required": [
+                  "id",
+                  "geometry_ref",
+                  "start_frame",
+                  "reveal_frames"
+                ]
               }
             }
           },

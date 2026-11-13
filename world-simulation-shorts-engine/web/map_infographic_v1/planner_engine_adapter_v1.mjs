@@ -92,6 +92,17 @@ export function compileExistingEnginePlan(scene){
    arrival_pulse_frames:arrivalPulse,hold_frames:holdFrames};
   plans.push({id:route.id,engine:'EXISTING_FLOW_V2',plan:compileFlowPlan(flow,timing),objectProfile:object.profile});
  }
+ if(scene.event_type==='GEOGRAPHIC'){
+  for(const layer of scene.region_layers){
+   const geometry=scene.geometries.find(g=>g.id===layer.geometry_ref),source=sourceFor(scene,geometry.source_id);
+   const intent=compileAreaIntent({data_mode:mode,origin:scene.camera_intent.anchor,source,semantic_mode:scene.metadata.semantic_mode,
+    areas:[{id:layer.id,geometry:copy(geometry.geometry),source,role:'GEOGRAPHIC_REGION',style_role:'PRIMARY'}]});
+   const operations=[{type:'AREA_REVEAL',target_id:layer.id,start_frame:layer.start_frame-scene.timing.event_start_frame,
+    duration_frames:Math.max(2,layer.reveal_frames),from:layer.start_frame===0&&layer.reveal_frames===1?1:0,to:1},
+    {type:'AREA_HOLD',start_frame:eventFrames-holdFrames,duration_frames:holdFrames}];
+   plans.push({id:layer.id,colorId:layer.id,engine:'EXISTING_AREA_V3',plan:compileAreaPlan(intent,{fps:scene.timing.fps,total_frames:eventFrames,operations})});
+  }
+ }
  if(scene.event_type==='WAR')plans.push({id:'AREA_STATE_TIMELINE',engine:'EXISTING_AREA_V3',plan:compileSceneEngineRequest(scene).areaPlan});
  if(scene.event_type==='LINE_METRIC'){
   const lines=scene.geographic_lines,metrics=scene.metrics;

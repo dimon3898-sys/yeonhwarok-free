@@ -66,7 +66,7 @@ export function validatePresentation(input,{scene,region}={}){
  }
  if(input.territoryColors!==undefined){
   ok(object(input.territoryColors)&&Object.keys(input.territoryColors).length<=8,'PRESENTATION_TERRITORY_PALETTE_INVALID');
-  const states=new Set(scene.time_steps?.map(x=>x.id)??[]);
+  const states=new Set(scene.event_type==='GEOGRAPHIC'?scene.region_layers.map(x=>x.id):(scene.time_steps?.map(x=>x.id)??[]));
   for(const [id,rgba]of Object.entries(input.territoryColors))ok(states.has(id)&&Array.isArray(rgba)&&rgba.length===4&&rgba.every(unit)&&rgba[3]>=.08&&rgba[3]<=.6,'PRESENTATION_STATE_COLOR_BINDING_INVALID');
  }
  const highlights=input.highlights??[];ok(Array.isArray(highlights)&&highlights.length<=16,'PRESENTATION_HIGHLIGHT_CAPACITY');
@@ -203,6 +203,9 @@ export function compilePresentationCameraPlan({scene,region,nativePlan,baseCamer
   ok(sample.cameraLocked===false&&sample.settle.locked===false,'PRESENTATION_FAKE_LOCK_REJECTED');
   ok(Math.abs(span(sample.flatBounds)[0]/span(sample.flatBounds)[1]-aspect)<1e-10,'PRESENTATION_NONUNIFORM_PROJECTION_UNSUPPORTED');
   ok(sample.camera.noCloserThanApprovedStop===true,'PRESENTATION_DETAIL_ADMISSION_EXCEEDED');
+ }
+ if(scene.event_type==='GEOGRAPHIC'){const lastMotion=n-scene.timing.final_hold_frames-1;
+  for(let f=lastMotion+1;f<n;f++)ok(same(samples[lastMotion].flatBounds,samples[f].flatBounds),'PRESENTATION_GEOGRAPHIC_FINAL_HOLD_REQUIRED');
  }
  ok(same(scene,canonical),'PRESENTATION_SCENE_MUTATION');
  return{schema:PRESENTATION_VERSION,mode:p.camera.mode,track,cpuFrameBounds:samples.map(s=>copy(s.flatBounds)),analysisCamera,analysisSourceFrame,analysisBounds,

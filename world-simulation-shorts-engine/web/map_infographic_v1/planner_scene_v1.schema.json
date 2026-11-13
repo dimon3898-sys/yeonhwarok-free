@@ -237,7 +237,8 @@
           "AREA_HOLD",
           "FRONT_LINE",
           "STATE_TRANSITION",
-          "TIME_STEP"
+          "TIME_STEP",
+          "REGION_REVEAL"
         ]
       }
     },
@@ -769,6 +770,39 @@
           }
         }
       }
+    },
+    "region_layers": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]+$"
+          },
+          "geometry_ref": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.:-]+$"
+          },
+          "start_frame": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reveal_frames": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "id",
+          "geometry_ref",
+          "start_frame",
+          "reveal_frames"
+        ]
+      }
     }
   },
   "allOf": [
@@ -850,7 +884,8 @@
         "TRANSPORT",
         "LINE_METRIC",
         "DISASTER",
-        "WAR"
+        "WAR",
+        "GEOGRAPHIC"
       ]
     },
     "frame": {

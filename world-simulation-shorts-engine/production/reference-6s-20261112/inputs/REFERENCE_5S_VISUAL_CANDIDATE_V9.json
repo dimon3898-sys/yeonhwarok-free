@@ -1,0 +1,91 @@
+{
+  "schema": "WORLD_ENGINE_REFERENCE_5S_VISUAL_CANDIDATE_V9",
+  "status": "VISUAL_CONTRACT_READY_FORMAL_SCENE_BLOCKED",
+  "reference": {
+    "sha256": "18d3cdb10fb398dfc53f850fd7a6132b3002c3a2dd1fd60254d2619e872c0193",
+    "frames": 150,
+    "fps": 30,
+    "size": [
+      822,
+      1920
+    ]
+  },
+  "acceptance": {
+    "pixelPerfectRequired": false,
+    "minorPixelColorCoastlinePinOffsetsAllowed": true,
+    "mustMatch": [
+      "major camera motion",
+      "dominant land and sea appearance",
+      "yellow Spain and cyan North Africa geography",
+      "pin timing",
+      "region transition timing"
+    ],
+    "noFalsePass": true
+  },
+  "keyframes": [
+    {
+      "frame": 0,
+      "observed": "Spain yellow; North African yellow boundaries; Europe white borders",
+      "cameraGeoBounds": null,
+      "cameraRollDegrees": null,
+      "sourceGeometryRefs": null,
+      "admission": "VISUAL_ONLY_NOT_GEOREGISTERED"
+    },
+    {
+      "frame": 30,
+      "observed": "Spain yellow; North African yellow boundaries",
+      "cameraGeoBounds": null,
+      "cameraRollDegrees": null,
+      "sourceGeometryRefs": null,
+      "admission": "VISUAL_ONLY_NOT_GEOREGISTERED"
+    },
+    {
+      "frame": 60,
+      "observed": "Two yellow coastal pins near Morocco; Spain yellow",
+      "cameraGeoBounds": null,
+      "cameraRollDegrees": null,
+      "sourceGeometryRefs": null,
+      "admission": "VISUAL_ONLY_NOT_GEOREGISTERED"
+    },
+    {
+      "frame": 90,
+      "observed": "Spain yellow; Morocco cyan begins visible; yellow coastal pins",
+      "cameraGeoBounds": null,
+      "cameraRollDegrees": null,
+      "sourceGeometryRefs": null,
+      "admission": "VISUAL_ONLY_NOT_GEOREGISTERED"
+    },
+    {
+      "frame": 120,
+      "observed": "Spain partially cropped yellow; cyan North African region dominates; yellow pins",
+      "cameraGeoBounds": null,
+      "cameraRollDegrees": null,
+      "sourceGeometryRefs": null,
+      "admission": "VISUAL_ONLY_NOT_GEOREGISTERED"
+    },
+    {
+      "frame": 149,
+      "observed": "Cyan North African region dominates; yellow pins",
+      "cameraGeoBounds": null,
+      "cameraRollDegrees": null,
+      "sourceGeometryRefs": null,
+      "admission": "VISUAL_ONLY_NOT_GEOREGISTERED"
+    }
+  ],
+  "cameraGap90to120": {
+    "status": "SCREEN_MOTION_PASS_NOT_GEO",
+    "edgeCount": 10,
+    "minimumInliers": 150,
+    "maximumMedianErrorPixels": 0.59
+  },
+  "existingAdapters": [
+    "reference_camera_adapter_v1.mjs",
+    "reference_presentation_adapter_v2.mjs"
+  ],
+  "formalSceneAdmission": {
+    "status": "BLOCKED",
+    "reason": "Verified geographic bounds and source polygons not supplied; formal compiler contract must not be fabricated"
+  },
+  "gpuExecuted": false,
+  "rendererModified": false
+}

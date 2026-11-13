@@ -5,10 +5,10 @@ import {compileFlowIntent} from './flow_core_v2.mjs';
 
 export const PLANNER_FACTS_VERSION = 'PLANNER_FACTS_V1';
 export const PLANNER_SCENE_VERSION = 'PLANNER_SCENE_JSON_V1';
-export const PLANNER_FAMILIES = Object.freeze(['TRANSPORT', 'LINE_METRIC', 'DISASTER', 'WAR']);
+export const PLANNER_FAMILIES = Object.freeze(['TRANSPORT', 'LINE_METRIC', 'DISASTER', 'WAR', 'GEOGRAPHIC']);
 export const PLANNER_FEATURES = Object.freeze(['ROUTE_REVEAL', 'DIRECTIONAL_FLOW', 'MOVING_OBJECT',
  'ENDPOINT_PULSE', 'ROUTE_HOLD', 'GEOGRAPHIC_LINE_REVEAL', 'METRIC_ANNOTATION', 'INFORMATION_HOLD',
- 'PROPAGATION_WAVE', 'IMPACT_ZONE', 'AREA_HOLD', 'FRONT_LINE', 'STATE_TRANSITION', 'TIME_STEP']);
+ 'REGION_REVEAL', 'PROPAGATION_WAVE', 'IMPACT_ZONE', 'AREA_HOLD', 'FRONT_LINE', 'STATE_TRANSITION', 'TIME_STEP']);
 const copy = value => structuredClone(value);
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const normalize = value => value.normalize('NFKC').toLocaleLowerCase('en-US').replace(/\s+/gu, ' ').trim();
@@ -190,6 +190,24 @@ function validateCausalTracks(tracks, {sourceMap, geometryMap, routes, objects, 
   })) throw Error('PLANNER_CAUSAL_SUPPLIED_FRONT_CONTACT_REQUIRED');
  }
 }
+/** Independent immutable geographic layers; display frames are not historical dates. */
+function regionLayers(input, geometries, timing) {
+ const layers = unique(list(input, 'REGION_LAYERS').map(value => {
+  record(value, 'REGION_LAYER');
+  if (Object.keys(value).some(k => !['id', 'geometry_ref', 'start_frame', 'reveal_frames'].includes(k)))
+   throw Error('PLANNER_REGION_LAYER_UNKNOWN_FIELD');
+  const geometry = expectGeometry(value.geometry_ref, geometries, ['Polygon', 'MultiPolygon'], 'REGION_LAYER');
+  const layer = {id: id(value.id, 'REGION_LAYER_ID'), geometry_ref: geometry.id,
+   start_frame: integer(value.start_frame, 'REGION_START'), reveal_frames: integer(value.reveal_frames, 'REGION_REVEAL', 1)};
+  if (!timing || layer.start_frame < timing.event_start_frame
+   || layer.reveal_frames === 1 && layer.start_frame !== 0
+   || layer.start_frame + Math.max(2, layer.reveal_frames) > timing.total_frames - timing.final_hold_frames)
+   throw Error('PLANNER_REGION_REVEAL_MUST_END_BEFORE_HOLD');
+  return layer;
+ }), 'REGION_LAYER');
+ if (!layers.length || layers.length > 8) throw Error('PLANNER_REGION_LAYER_COUNT_REQUIRED');
+ return layers;
+}
 /** Sources and geographical validation reuse Final contracts; no geometry is invented or repaired. */
 export function validateFactDataset(input) {
  const given = record(input, 'FACTS');
@@ -302,6 +320,11 @@ export function validateFactDataset(input) {
  const preferred = given.scale?.preferred ?? 'REGIONAL';
  if (!['CONTINENT', 'REGIONAL', 'LOCAL'].includes(preferred)) throw Error('PLANNER_SCALE_INTENT_REQUIRED');
  const sceneTiming = given.scene_timing === undefined ? undefined : suppliedTiming(given.scene_timing);
+ const layers = given.region_layers === undefined ? undefined : regionLayers(given.region_layers, geometryMap, sceneTiming);
+ if (subject.event_family === 'GEOGRAPHIC') {
+  if (!layers || stages.length || routes.length || geographicLines.length || impacts.length || propagations.length || metrics.length || texts.length || given.causal_tracks !== undefined
+   || given.semantic_mode !== 'ILLUSTRATIVE_FACT_BASED_VISUAL') throw Error('PLANNER_GEOGRAPHIC_VISUAL_ONLY_REQUIRED');
+ } else if (layers) throw Error('PLANNER_REGION_LAYERS_REQUIRE_GEOGRAPHIC');
  const causalTracks = given.causal_tracks === undefined ? undefined
   : unique(list(given.causal_tracks, 'CAUSAL_TRACKS').map(causalTrackRecord), 'CAUSAL_TRACK');
  if (causalTracks) {
@@ -318,7 +341,7 @@ export function validateFactDataset(input) {
    steps, fronts, timing: sceneTiming, mode});
  }
  const allIds = [...geometries, ...locations, ...stages, ...routes, ...geographicLines, ...impacts, ...propagations,
-  ...metrics, ...markers, ...texts, ...(causalTracks ?? [])].map(value => value.id);
+  ...metrics, ...markers, ...texts, ...(layers ?? []), ...(causalTracks ?? [])].map(value => value.id);
  if (new Set(allIds).size !== allIds.length) throw Error('PLANNER_DUPLICATE_DATA_ID');
  if (!['ILLUSTRATIVE_FACT_BASED_VISUAL', 'SUPPLIED_OBSERVED_STATES'].includes(given.semantic_mode ?? 'ILLUSTRATIVE_FACT_BASED_VISUAL'))
   throw Error('PLANNER_SEMANTIC_MODE_REQUIRED');
@@ -330,10 +353,12 @@ export function validateFactDataset(input) {
    minimum_context_geometry_refs: refs(camera.minimum_context_geometry_refs ?? [], geometryMap, 'MINIMUM_CONTEXT_GEOMETRY'),
    detail_policy: 'FACT_BASED_VISUAL_GRADE', ...(context === undefined ? {} : {native_context: context})},
   scale: {preferred}, ...(sceneTiming === undefined ? {} : {scene_timing: sceneTiming}),
+  ...(layers === undefined ? {} : {region_layers: layers}),
   ...(causalTracks === undefined ? {} : {causal_tracks: causalTracks})});
 }
 
 const familyPatterns = Object.freeze({
+ GEOGRAPHIC: /(?:지도|지리|geograph|map)/iu,
  TRANSPORT: /(?:운송|물류|이동|항로|노선|배송|교역|항공|여객|선박|transport|logistics|movement|shipping|route|journey|travel)/iu,
  LINE_METRIC: /(?:운하|국경|길이|거리|철도|도로|canal|border|length|distance|geographic line)/iu,
  DISASTER: /(?:쓰나미|지진|재난|홍수|산불|태풍|확산|파동|tsunami|earthquake|disaster|flood|wildfire|typhoon|propagat|wave)/iu,
@@ -366,6 +391,9 @@ export function selectFeatures(intent, factsInput) {
  } else if (intent.event_family === 'DISASTER') {
   if (!facts.propagations.length || !facts.impacts.length) throw new PlannerDataRequiredError('supplied propagation and impact geography');
   selected = ['PROPAGATION_WAVE', 'IMPACT_ZONE', 'AREA_HOLD'];
+ } else if (intent.event_family === 'GEOGRAPHIC') {
+  if (!facts.region_layers?.length) throw new PlannerDataRequiredError('independent geographic regions');
+  selected = ['REGION_REVEAL', 'AREA_HOLD'];
  } else {
   if (facts.stages.length < 2 || facts.stages.some(stage => !stage.area_refs.length || !stage.front_refs.length))
    throw new PlannerDataRequiredError('chronological front and area states');
@@ -431,6 +459,7 @@ export function compileScenePlan({topic, facts: factsInput, output = {}}) {
   visual_roles: {base_map: 'EXISTING_TERRAIN_AND_REGION_MATERIAL', event: 'EXISTING_AUTO_CONTRAST',
    geographic_markers: 'PROTECTED_NATIVE_MARKERS', text: 'EXISTING_GLYPH_AND_LAYOUT',
    camera: 'READ_ONLY_EXISTING_DIRECTOR', physics: 'NONE'}, timing, source_notes: copy(facts.source_notes)};
+ if (intent.event_family === 'GEOGRAPHIC') scene.region_layers = copy(facts.region_layers);
  if (facts.markers.length) scene.markers = copy(facts.markers);
  if (facts.text.length) scene.text = copy(facts.text);
  if (intent.event_family === 'WAR') {
@@ -478,7 +507,7 @@ export function validateScenePlan(scene) {
  const value = record(scene, 'SCENE');
  const allowed = ['metadata', 'subject', 'locations', 'time_range', 'topic_intent', 'event_type', 'selected_features',
   'camera_intent', 'scale_intent', 'beats', 'geometries', 'markers', 'routes', 'moving_objects', 'areas', 'front_lines',
-  'metrics', 'time_steps', 'text', 'visual_roles', 'timing', 'source_notes', 'propagations', 'impact_zones', 'geographic_lines', 'causal_tracks'];
+  'metrics', 'time_steps', 'text', 'visual_roles', 'timing', 'source_notes', 'propagations', 'impact_zones', 'geographic_lines', 'causal_tracks', 'region_layers'];
  if (Object.keys(value).some(key => !allowed.includes(key))) throw Error('PLANNER_SCENE_UNKNOWN_FIELD');
  const meta = record(value.metadata, 'METADATA');
  if (meta.schema !== PLANNER_SCENE_VERSION || meta.policy !== 'FACT_BASED_VISUAL_GRADE' || meta.deterministic !== true)
@@ -536,6 +565,12 @@ export function validateScenePlan(scene) {
    : value.event_type === 'TRANSPORT' ? ['propagations', 'impact_zones', 'front_lines', 'areas', 'time_steps', 'geographic_lines', 'metrics']
     : ['routes', 'moving_objects', 'propagations', 'impact_zones', 'front_lines', 'areas', 'time_steps'];
  if (excludedCategories.some(category => value[category] !== undefined)) throw Error('PLANNER_UNUSED_CATEGORY_MUST_BE_OMITTED');
+ if (value.event_type === 'GEOGRAPHIC') {
+  const layers = regionLayers(value.region_layers, geometryMap, timing);
+  if (!equal(layers, value.region_layers) || meta.semantic_mode !== 'ILLUSTRATIVE_FACT_BASED_VISUAL'
+   || !equal(features, ['REGION_REVEAL', 'AREA_HOLD']) || ['routes','moving_objects','areas','front_lines','time_steps','propagations','impact_zones','geographic_lines','metrics','text','causal_tracks'].some(k => value[k] !== undefined))
+   throw Error('PLANNER_GEOGRAPHIC_VISUAL_ONLY_REQUIRED');
+ } else if (value.region_layers !== undefined || features.includes('REGION_REVEAL')) throw Error('PLANNER_REGION_LAYERS_REQUIRE_GEOGRAPHIC');
  const ranges = record(value.time_range, 'TIME_RANGE');
  date(ranges.start, 'TIME_RANGE_START'); date(ranges.end, 'TIME_RANGE_END');
  if (ranges.start > ranges.end) throw Error('PLANNER_TIME_RANGE_ORDER');
