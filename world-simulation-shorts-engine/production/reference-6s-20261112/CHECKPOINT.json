@@ -3,7 +3,7 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "IN_PROGRESS_TWO_QUALITY_DELTAS",
+  "status": "PENDING_QUALITY_IMAGE_ADMISSION",
   "firstIncomplete": "CHANGED_BOUNDARY_AND_CAMERA_CPU_SCREEN_GATE",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
@@ -42,30 +42,30 @@
   "classification": [
     {
       "step": "Recover original candidate + V9-V11",
-      "class": "기존 PASS 재사용"
+      "class": "\uae30\uc874 PASS \uc7ac\uc0ac\uc6a9"
     },
     {
       "step": "Formal compile of recovered new6s candidate",
-      "class": "신규 작업"
+      "class": "\uc2e0\uaddc \uc791\uc5c5"
     },
     {
       "step": "CPU7PNG/180continuity",
-      "class": "신규 작업",
+      "class": "\uc2e0\uaddc \uc791\uc5c5",
       "state": "PASS_7_PNG_AND_180_CONTINUITY"
     },
     {
       "step": "Image build",
-      "class": "신규 작업",
+      "class": "\uc2e0\uaddc \uc791\uc5c5",
       "state": "PASS_NEW_IMMUTABLE_IMAGE"
     },
     {
       "step": "gCube config",
-      "class": "신규 작업",
+      "class": "\uc2e0\uaddc \uc791\uc5c5",
       "state": "PASS_SAVED_WITHOUT_DEPLOYMENT"
     },
     {
       "step": "Common recurrence gate + actual immutable image + saved stopped workload readback",
-      "class": "신규 / 기존 PASS 재사용",
+      "class": "\uc2e0\uaddc / \uae30\uc874 PASS \uc7ac\uc0ac\uc6a9",
       "state": "PASS_NO_GPU_EXECUTION"
     }
   ],
@@ -89,7 +89,7 @@
   ],
   "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Compile new presentation input and draw changed boundary/camera samples through existing free CPU capture. Preserve all prior images and evidence.",
+  "nextAction": "Run new-image-only installed source/worker/reader/startup/policy gates, publish immutable tag, then configure stopped gCube",
   "lastError": "JSON_SIZE_INVALID",
   "formalCompile": {
     "status": "PASS",
@@ -289,7 +289,7 @@
     "newQualityRevisionGPUVerified": false
   },
   "qualityDelta": {
-    "status": "IMPLEMENTED_NEW_CPU_GATE_PENDING",
+    "status": "PASS_CHANGED_FEATURES_CPU_IMAGE_PENDING",
     "scope": [
       "BOUNDARY_TRACE presentation",
       "C1 camera temporal interpolation"
@@ -303,6 +303,12 @@
     "minimumValidation": "New boundary reveal samples and consecutive frames around camera knots, exact old source/data/palette/pin/label preservation checks, modified track coverage only, source seals and new-image common gate",
     "oldPassReruns": 0,
     "additionalGPUExecutions": 0,
-    "referenceCaveat": "Target4..9s borders already complete; trace adapted from preceding source buildup into output0..54; no claimed observed original onset at4s"
-  }
+    "referenceCaveat": "Target4..9s borders already complete; trace adapted from preceding source buildup into output0..54; no claimed observed original onset at4s",
+    "cpuEvidence": "quality-v1/cpu-a1",
+    "cpuRunId": 43368062163,
+    "visualReview": "quality-v1/CPU_VISUAL_REVIEW.json",
+    "runtimeSealed": true,
+    "NVIDIARuntimeThreeConnectionsMirrored": true
+  },
+  "firstIncompleteStep": "NEW_IMAGE_SOURCE_AND_COMMON_RELEASE_GATE"
 }

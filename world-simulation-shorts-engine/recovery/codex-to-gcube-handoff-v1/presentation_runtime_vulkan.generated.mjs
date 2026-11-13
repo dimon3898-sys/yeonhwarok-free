@@ -47,7 +47,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   // title slot in the new close view; visible presentation labels keep their checks.
   const layoutPlan=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?{...visualPlan,scale:{...visualPlan.scale,
    information:{...visualPlan.scale.information,title:false}}}:nativePlan;
-  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment,...(geographic?{projectionMode:GEOGRAPHIC_CAMERA_VERSION,terrainSources:sourceStyle.terrainLevels}:{})}));
+  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment,boundaryTrace:p.mapStyle?.boundaryTrace,...(geographic?{projectionMode:GEOGRAPHIC_CAMERA_VERSION,terrainSources:sourceStyle.terrainLevels}:{})}));
   graphics=await observe('GRAPHICS_PREPARATION',()=>createMovingGraphicPass({renderer,factory,width:1080,height:1920}));
   if(p.labels?.enabled===true&&p.labels.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
   // Derived plans are created in their consuming JS realm. The frozen owner's
@@ -120,7 +120,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    if(!hiddenNative)assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(displayFrame),preparedLabel=null;
    if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
-   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:geographic?{...visualPlan,secondary:scene.camera_intent.native_context.country_ids.filter(id=>id!==visualPlan.primary)}:visualPlan,project});
+   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:geographic?{...visualPlan,secondary:scene.camera_intent.native_context.country_ids.filter(id=>id!==visualPlan.primary)}:visualPlan,project,frame:displayFrame});
    const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=displayFrame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
@@ -159,7 +159,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
     material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
     featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
-   if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false,areaViewportPolicy:p.mapStyle.preset==='REFERENCE_FOCUS_V2'?'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY':'WHOLE_SOURCE_SAFE',effectiveTheme:copy(visualPlan.theme)};
+   if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,boundaryTrace:copy(factory.evidence.boundaryTrace??null),geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false,areaViewportPolicy:p.mapStyle.preset==='REFERENCE_FOCUS_V2'?'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY':'WHOLE_SOURCE_SAFE',effectiveTheme:copy(visualPlan.theme)};
    if(labelDraw){last.layout.visiblePresentationLabels=labelDraw.visibleCount>0;last.presentationLabels=copy(labelDraw);}
    return last;
   }

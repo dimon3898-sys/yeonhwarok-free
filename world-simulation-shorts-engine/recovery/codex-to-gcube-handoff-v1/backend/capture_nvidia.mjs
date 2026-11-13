@@ -30,7 +30,7 @@ export function validateVariantManifest(metadata){
  check(metadata.schema==='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1'&&metadata.variants.length===3,'HANDOFF_VARIANT_MANIFEST_REQUIRED');
  const expectedVariants=new Map([
   ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'6cdce0dff2c30f605e5a637021cf9ea5f7a2a44816edd895477e7fbf8c145d61'}],
-  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'d03d48a66c43c7288455ce708fc6f18f8d20a625fb4a77861e201d1f8d067e6c'}],
+  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'26dbcbc905c19c9a881499625d954ccafd053c138730a7a0354e9f054141908d'}],
   ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'a6a2c8e651eede505f4106dc6dc11c870319788d7efd1e165665e348906e3fc3'}],
  ]),seen=new Set();
  for(const row of metadata.variants){
