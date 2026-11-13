@@ -1,0 +1,92 @@
+{
+  "status": "INVESTIGATION_COMPLETE",
+  "features": [
+    {
+      "feature": "camera zoom/keyframes/easing",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_plan.mjs: boundsFromKeyframe / compilePresentationCameraPlan; reference_camera_adapter_v1.mjs",
+      "decision": "Use opening focus then route-safe overview; existing closest endpoint/source and full-route safety remain."
+    },
+    {
+      "feature": "terrain texture/relief/resolution",
+      "status": "ALREADY_PASS",
+      "evidence": "REGION_SOURCE_CATALOG.json: NE1_EAST_ASIA_NATIVE_V1; V2 cpu-a3",
+      "decision": "Reuse native baked relief 2880x3360, 1/60 degree; no DEM/extrusion/new high-frequency detail."
+    },
+    {
+      "feature": "label enter/exit/emphasis",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_labels.mjs / presentation_label_layer.mjs",
+      "decision": "Use timed fade, reference typography and source-bound locations; avoid long grapheme animation."
+    },
+    {
+      "feature": "country/city/event/information labels",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "LABEL_ROLES COUNTRY/EVENT/NUMERIC",
+      "decision": "Three cities use EVENT; no new factual labels."
+    },
+    {
+      "feature": "endpoint rings",
+      "status": "IMPLEMENTED_UNCONNECTED",
+      "evidence": "flow_core_v2.mjs pulseAt / flow_graphic_pass_v2.mjs drawOverlay mode2",
+      "decision": "Existing rings work on Flow endpoints only; expose same primitive for supplied waypoint highlight rings."
+    },
+    {
+      "feature": "location pulse",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "presentation_runtime.mjs markersAt",
+      "decision": "Existing pulse is a scaled pin, not circular scan."
+    },
+    {
+      "feature": "progressive route",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "flow_core_v2.mjs",
+      "decision": "Default reveals whole line early; add opt-in front following object with bounded lead."
+    },
+    {
+      "feature": "route width/color/glow",
+      "status": "IMPLEMENTED_UNCONNECTED",
+      "evidence": "createFlowGraphicPass style / selectEventLineStyle",
+      "decision": "Expose bounded explicit flow style via presentation JSON; keep default style when absent."
+    },
+    {
+      "feature": "short moving trail",
+      "status": "NOT_IMPLEMENTED",
+      "evidence": "flow_graphic_pass_v2.mjs draws object once",
+      "decision": "Reuse existing vector primitive for two translucent route-sampled echoes; no new renderer."
+    },
+    {
+      "feature": "moving object size/color/shape",
+      "status": "EXISTING_SUPPORTED",
+      "evidence": "object_graphic 24..80 px and supplied polygons",
+      "decision": "Use 80px marker with visible white center."
+    },
+    {
+      "feature": "moving speed/route tracking",
+      "status": "IMPLEMENTED_UNCONNECTED",
+      "evidence": "compileFlowPlan public timing; planner_engine_adapter fixed ratios",
+      "decision": "Expose exact existing compileFlowPlan timing; total/event/hold clocks must match unchanged contract."
+    },
+    {
+      "feature": "last frame hold",
+      "status": "ALREADY_PASS",
+      "evidence": "V2 final30RawFramesIdentical",
+      "decision": "Camera and all authored effects settle by149; 150..179 identical."
+    },
+    {
+      "feature": "355 label assets",
+      "status": "DATA_ONLY",
+      "evidence": "label-packaging-v1/README.txt; package_labels.py",
+      "decision": "355 means 353 runtime files +2 label modules, not 355 label presets. Reuse already-connected modules."
+    },
+    {
+      "feature": "new V3 actual visual quality",
+      "status": "NOT_VERIFIED",
+      "evidence": "no V3 output yet",
+      "decision": "Pending actual frame review; final user quality approval remains pending."
+    }
+  ],
+  "labelManifestCurrentRows": 380,
+  "labelManifestHistoricalRows": 355,
+  "labelModules": 2
+}
