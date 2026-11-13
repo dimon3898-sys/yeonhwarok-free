@@ -13,8 +13,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '5f22fd89347f5a9400524a4f5ce6debdce41ef60' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_DIRECTOR_V2_PROBE_A1'
+      github.event.before == 'a0e348b958e5884b49571a603ba738b5d139055c' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_DIRECTOR_V2_FINAL_A1'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -49,14 +49,14 @@ jobs:
           CHROMIUM_PATH=$(node -e "process.stdout.write(require('${RUNNER_TEMP}/director-v2-deps/node_modules/playwright').chromium.executablePath())")
           sudo ln -sfn "${CHROMIUM_PATH}" /usr/bin/chromium
           sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /workspace
-      - name: Capture V2 representative frames only
+      - name: Capture new V2 6-second final video
         env:
           WORLD_ENGINE_NODE_DEPS: ${{ runner.temp }}/director-v2-deps
           NVIDIA_VISIBLE_DEVICES: void
         run: |
           set -o pipefail
           mkdir -p "${RUNNER_TEMP}/director-v2-logs"
-          node world-simulation-shorts-engine/production/auto-director-v2-20261114/run_cpu.mjs probe a1 > >(tee "${RUNNER_TEMP}/director-v2-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/director-v2-logs/stderr.log" >&2)
+          node world-simulation-shorts-engine/production/auto-director-v2-20261114/run_cpu.mjs final a1 > >(tee "${RUNNER_TEMP}/director-v2-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/director-v2-logs/stderr.log" >&2)
       - name: Preserve actual output and exact failure checkpoint
         if: always()
         env:
@@ -67,8 +67,8 @@ jobs:
           import os,json,shutil,hashlib,gzip
           from pathlib import Path
           base=Path('world-simulation-shorts-engine/production/auto-director-v2-20261114')
-          out=base/'probe-a1';out.mkdir(exist_ok=False)
-          src=Path('/workspace/director-v2-probe-a1')
+          out=base/'final-a1';out.mkdir(exist_ok=False)
+          src=Path('/workspace/director-v2-final-a1')
           for f in src.glob('*'):
               if f.is_file() and (f.suffix in ['.png','.mp4'] or f.name in ['CAPTURE_RECEIPT.json','TASK_FAILURE.json','HTTP_ASSET_BINDINGS.json','REQUEST.json','NEW_INPUT_RESULT.json','FRAME_SUMMARY.json']):shutil.copy2(f,out/f.name)
           for f in Path(os.environ['RUNNER_TEMP'],'director-v2-logs').glob('*.log'):shutil.copy2(f,out/f.name)
@@ -76,7 +76,7 @@ jobs:
               ledger=src/name
               if ledger.exists():(out/(name+'.gz')).write_bytes(gzip.compress(ledger.read_bytes(),compresslevel=6,mtime=0))
           if (src/'SHA256SUMS').exists():shutil.copy2(src/'SHA256SUMS',out/'CAPTURE_SHA256SUMS.original')
-          (out/'RUN.json').write_text(json.dumps({'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'gpuStarts':0,'oldPassReruns':0,'visualApproval':'PENDING_REPRESENTATIVE_FRAME_REVIEW','captureReceiptPresent':(out/'CAPTURE_RECEIPT.json').exists()},indent=2)+'\n')
+          (out/'RUN.json').write_text(json.dumps({'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'gpuStarts':0,'oldPassReruns':0,'visualApproval':'PENDING_180_FRAME_REVIEW','captureReceiptPresent':(out/'CAPTURE_RECEIPT.json').exists()},indent=2)+'\n')
           manifest=lambda folder:'\n'.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+str(f.relative_to(folder)) for f in sorted(folder.rglob('*')) if f.is_file() and f.name!='SHA256SUMS')+'\n'
           (out/'SHA256SUMS').write_text(manifest(out))
           (base/'SHA256SUMS').write_text(manifest(base))
@@ -99,5 +99,5 @@ jobs:
           git config user.name 'WORLD ENGINE CPU evidence'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --sparse world-simulation-shorts-engine/production/auto-director-v2-20261114 world-simulation-shorts-engine/recovery/universal-presentation-v2/sources/eurasia
-          git commit -m 'Preserve V2 representative CPU frames and evidence [skip ci]'
+          git commit -m 'Preserve V2 final CPU video and evidence [skip ci]'
           git push origin "HEAD:refs/heads/${BRANCH}"
