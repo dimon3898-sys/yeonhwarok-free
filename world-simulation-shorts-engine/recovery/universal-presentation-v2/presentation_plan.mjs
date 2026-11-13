@@ -245,7 +245,7 @@ export function compilePresentationEnginePlan({scene,presentation}={}){
  // new line reveals. It makes no claim that a previous timeline scene exists.
  const preserved=mode==='PRESERVE_AREA_REVEAL_LINE'?['AREA_REVEAL']:['AREA_REVEAL','FRONT_LINE'];
  return{...engines,plans:engines.plans.map(binding=>{if(binding.engine!=='EXISTING_AREA_V3')return binding;const plan=binding.plan,operations=plan.operations.map(op=>{
-   if(presentation?.territoryChanges?.profile==='HISTORICAL_STATES_V3'&&op.type==='STATE_TRANSITION'){
+   if(['HISTORICAL_STATES_V3','HISTORICAL_CONTINUOUS_V1'].includes(presentation?.territoryChanges?.profile)&&op.type==='STATE_TRANSITION'){
     const effects=validateTerritoryEffects(presentation.territoryChanges,scene),e=effects.items.find(x=>x.toStateId===op.state_ids[1]);
     ok(e&&e.startFrame===op.start_frame,'PRESENTATION_V3_BLEND_BINDING');return{...copy(op),duration_frames:e.endFrame-e.startFrame};
    }

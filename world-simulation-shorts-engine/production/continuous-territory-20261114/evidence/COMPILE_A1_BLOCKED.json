@@ -1,0 +1,152 @@
+{
+  "schema": "WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2",
+  "compilerVersion": "universal-presentation-v2.0.0",
+  "status": "INVALID",
+  "issues": [
+    {
+      "status": "INVALID",
+      "code": "AREA_RING_SELF_INTERSECTION",
+      "field": "$.data.scenes[0]",
+      "reason": "The connected existing contract rejected this input; no fallback was rendered.",
+      "example": {
+        "action": "Correct the referenced field using PRESENTATION_INPUT_CONTRACT.md"
+      }
+    }
+  ],
+  "clarifications": [],
+  "sceneResults": [
+    {
+      "sceneId": "mongol-empire-source-snapshots",
+      "startFrame": 0,
+      "endFrame": 180,
+      "status": "INVALID",
+      "issues": [
+        {
+          "status": "INVALID",
+          "code": "AREA_RING_SELF_INTERSECTION",
+          "field": "$.data.scenes[0]",
+          "reason": "The connected existing contract rejected this input; no fallback was rendered.",
+          "example": {
+            "action": "Correct the referenced field using PRESENTATION_INPUT_CONTRACT.md"
+          }
+        }
+      ],
+      "dependsOn": []
+    }
+  ],
+  "renderRequests": [],
+  "renderableSceneIds": [],
+  "blockedSceneIds": [
+    "mongol-empire-source-snapshots"
+  ],
+  "transitionPlan": [],
+  "unrestrictedLanguageUnderstanding": false,
+  "externalLLMUsed": false,
+  "paidExecutionAllowed": false,
+  "historicalRenderAllowed": false,
+  "inputSHA256": "55f7e1ae47259e1a154591e5ec1d77554ab5878b25b9b17e2f64314e22be53ad",
+  "naturalLanguage": {
+    "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+    "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+    "unrestrictedLanguageUnderstanding": false,
+    "externalLLMUsed": false,
+    "rawPrompt": "몽골제국의 영토 확장. 제공한 역사 자료에서 영상 길이에 맞는 일부 시기를 자동 선택해 1080x1920, 30fps, 6초 영상을 만들어줘.",
+    "topic": {
+      "text": "몽골제국의 영토 확장",
+      "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+      "factsInferred": false
+    },
+    "intents": [
+      {
+        "type": "TERRITORY_CHANGE",
+        "value": "TERRITORY_CHANGE",
+        "start": 6,
+        "end": 11,
+        "text": "영토 확장",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      }
+    ],
+    "durations": [
+      {
+        "type": "DURATION",
+        "value": 6,
+        "start": 67,
+        "end": 69,
+        "text": "6초",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+      }
+    ],
+    "fps": [
+      {
+        "type": "FPS",
+        "value": 30,
+        "start": 60,
+        "end": 65,
+        "text": "30fps",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+      }
+    ],
+    "dates": [],
+    "locations": [],
+    "routes": [],
+    "connections": [],
+    "coordinates": [],
+    "unsupported": [],
+    "uninterpretedText": "몽골제국의 영토 확장. 제공한 역사 자료에서 영상 길이에 맞는 일부 시기를 자동 선택해 1080x1920, 30fps, 6초 영상을 만들어줘."
+  },
+  "inputDerivations": [
+    {
+      "field": "$.region",
+      "origin": "SUPPLIED_GEOMETRY_BOUNDS_COMMON_HISTORY_POLICY",
+      "value": {
+        "sourceId": "AUTO",
+        "crs": "EPSG:4326",
+        "projection": "GEOGRAPHIC_MERCATOR_V1",
+        "center": [
+          79.45810985565186,
+          43.1659460067749
+        ],
+        "bbox": [
+          17.359594345092773,
+          24.07203483581543,
+          141.55662536621094,
+          62.259857177734375
+        ]
+      },
+      "worldFactCreated": false
+    }
+  ],
+  "simulationType": "HISTORICAL",
+  "normalizedDataSHA256": "ec93acafc4abb38022381f9e1e57cada5e06a79656fea9c850affebf86f92809",
+  "totalFrames": 180,
+  "legacyValidationAudit": {
+    "status": "UNSUPPORTED",
+    "profile": "UNCHANGED_WORLD_ENGINE_DATA_PROMPT_V1",
+    "deferredIssues": [
+      {
+        "status": "UNSUPPORTED",
+        "code": "SOURCE_REGION_NOT_AVAILABLE",
+        "field": "$.scenes[0].renderSettings.sourceRegionId",
+        "reason": "Only already-preserved, source-qualified regional texture profiles are available; arbitrary uncovered texture data is not invented.",
+        "example": {
+          "sourceRegionId": "namibia_desert_coast",
+          "available": [
+            "namibia_desert_coast",
+            "europe_germany",
+            "south_america_chile",
+            "korean_peninsula",
+            "nepal_himalaya"
+          ]
+        }
+      }
+    ],
+    "replacementGate": "ACTUAL_NEW_REGION_SOURCE_QUALIFICATION_REQUIRED",
+    "legacyProfileReportedAsPassed": false
+  },
+  "timelinePreserved": true,
+  "partialRenderRequiresExplicitSceneSelection": true
+}
