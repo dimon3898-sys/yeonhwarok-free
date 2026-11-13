@@ -1,3 +1,4 @@
+import {compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from './boundary_trace_v1.mjs';
 import {GEOGRAPHIC_CAMERA_VERSION,geographicQ,inverseMercatorY,geographicCameraFrame,selectGeographicTerrain} from './geographic_camera_v1.mjs';
 /** MAP_INFOGRAPHIC_RENDERER_V1 — Gate 1 only.
  * Independent WebGL2 frame graph. No parent Earth renderer, DOM overlay,
@@ -392,7 +393,7 @@ function ribbon(rings){
  g.setAttribute('tangent',new THREE.Float32BufferAttribute(tan,2));g.setAttribute('side',new THREE.Float32BufferAttribute(side,1));
  g.setIndex(idx);return g;
 }
-export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null,outputRenderer=null,outputTarget=null,layoutPlan=null,contextTerrain=null,contextGeometries=[],projectionMode=null,terrainSources=null}){
+export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null,outputRenderer=null,outputTarget=null,layoutPlan=null,contextTerrain=null,contextGeometries=[],projectionMode=null,terrainSources=null,boundaryTrace=null}){
  const geographicOptIn=projectionMode===GEOGRAPHIC_CAMERA_VERSION;
  const similarityOptIn=projectionMode===REFERENCE_SIMILARITY_SCHEMA;
  if(projectionMode!==null&&!similarityOptIn&&!geographicOptIn)throw Error('SIMILARITY_PROJECTION_MODE_UNSUPPORTED');
@@ -440,7 +441,9 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
  if(isGlobe){lineCamera.position.z=5;lineCamera.updateMatrixWorld();}
  const fsCamera=new THREE.Camera(),idScene=new THREE.Scene(),covScene=new THREE.Scene();
  const roleLUT=new Uint8Array(256*4),primaryRings=[],secondaryRings=[],primaryCoverage=[];let gid=0;
- const geometryEvidence=[];
+ const geometryEvidence=[],traceRecords=[];
+ if(boundaryTrace&&isGlobe)throw Error('BOUNDARY_TRACE_FLAT_PROJECTION_REQUIRED');
+ if(boundaryTrace&&boundaryTrace.countryIds.some(id=>!plan.geometries.some(g=>g.id===id)))throw Error('BOUNDARY_TRACE_COUNTRY_NOT_IN_NATIVE_PLAN');
  for(const record of [...plan.geometries,...extraContext]){
   gid++;if(gid>=256)throw Error('Gate1 region LUT capacity exceeded');
   const role=record.id===plan.primary?2:plan.secondary.includes(record.id)?1:0;
@@ -450,7 +453,8 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   idScene.add(new THREE.Mesh(g.mesh,mat(geoVertex,flatFragment,{value:{value:idColor}})));
   const coverageMaterial=mat(geoVertex,flatFragment,{value:{value:new THREE.Vector3(1,role===1?1:0,role===2?1:0)}});
   covScene.add(new THREE.Mesh(g.mesh,coverageMaterial));if(role===2)primaryCoverage.push(coverageMaterial);
-  if(role===2)primaryRings.push(...g.rings);if(role===1)secondaryRings.push(...g.rings);
+  if(boundaryTrace?.countryIds.includes(record.id)&&role>0)traceRecords.push({role,original:g.rings,primitives:compileBoundaryTrace(record,project,boundaryTrace)});
+  else{if(role===2)primaryRings.push(...g.rings);if(role===1)secondaryRings.push(...g.rings);}
   geometryEvidence.push({id:record.id,gpuID:gid,role,triangles:g.mesh.index.count/3,parts:polygons(record).length,holes:polygons(record).reduce((s,p)=>s+p.length-1,0)});
  }
  if(isGlobe){
@@ -523,6 +527,13 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   {mesh:line(boundaryScene,primaryGeometry,boundaryStyle.primaryWidth,boundaryStyle.primaryCoreColor),width:'primaryWidth',role:'PRIMARY',alpha:boundaryStyle.primaryCoreColor[3]},
   {mesh:line(glowScene,primaryGeometry,boundaryStyle.glowWidth,boundaryStyle.glowColor),width:'glowWidth',role:'PRIMARY',alpha:boundaryStyle.glowColor[3]}
  ];
+ const traceLayers=[];let previousTraceFraction=-1;
+ for(const row of traceRecords){const geometry=ribbon(row.original),isPrimary=row.role===2,styles=isPrimary?[['primaryEdgeWidth','primaryEdgeColor',boundaryScene],['primaryWidth','primaryCoreColor',boundaryScene],['glowWidth','glowColor',glowScene]]:[['secondaryEdgeWidth','secondaryEdgeColor',boundaryScene],['secondaryWidth','secondaryCoreColor',boundaryScene]];
+  const layers=styles.map(([width,color,scene])=>({mesh:line(scene,geometry,boundaryStyle[width],boundaryStyle[color]),width,role:isPrimary?'PRIMARY':'SECONDARY',alpha:boundaryStyle[color][3]}));boundaryLayers.push(...layers);traceLayers.push({...row,layers,geometry});}
+ function updateBoundaryTrace(frame){if(!boundaryTrace)return;const fraction=boundaryTraceFraction(boundaryTrace,frame);if(fraction===previousTraceFraction)return;
+  for(const row of traceLayers){const paths=fraction===1?row.original:evaluateBoundaryTrace(row.primitives,fraction),geometry=ribbon(paths);for(const layer of row.layers)layer.mesh.geometry=geometry;row.geometry.dispose();row.geometry=geometry;}
+  previousTraceFraction=fraction;evidence.boundaryTrace={preset:'BOUNDARY_TRACE',frame,fraction,complete:fraction===1,owner:'GEOGRAPHIC_LINE_REVEAL_V1',countryIds:[...boundaryTrace.countryIds],worldLocked:true};
+ }
  let activeGlowRadius=theme.glowRadius,activeGlowGain=theme.glowGain,primaryReveal=1;
  const blur=mat(fullscreenVertex,blurFragment,{inputTexture:{value:glowTarget.texture},direction:{value:new THREE.Vector2()}}),blurScene=fullScene(blur);
  const composite=mat(fullscreenVertex,compositeFragment,{baseTexture:{value:baseTarget.texture},glowTexture:{value:glowFinal.texture},gain:{value:theme.glowGain}}),compositeScene=fullScene(composite);
@@ -725,7 +736,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   uniforms.terrainLodWeight.value=weight;
   if(evidence.terrainLod)evidence.terrainLod.weight=weight;
  }
- function renderFrame({mode=0,graphics=true,boundaries=true,glow=true,dem=!!heightSource,correctedLight=false,verticalExaggeration=1,bakedSuppression=0,shadingCorrection='BASELINE',reveal=null,primaryMaterial=null,finish=false,log=false}={}){
+ function renderFrame({mode=0,graphics=true,boundaries=true,glow=true,dem=!!heightSource,correctedLight=false,verticalExaggeration=1,bakedSuppression=0,shadingCorrection='BASELINE',reveal=null,primaryMaterial=null,finish=false,log=false,boundaryTraceFrame=null}={}){
   if(similarityOptIn&&!similarityReady)throw similarityError('SIMILARITY_PREVIOUS_UPDATE_FAILED_NO_DRAW_ALLOWED');
   if(similarityState&&graphics)throw similarityError('SIMILARITY_CURRENT_PROJECTED_GRAPHIC_CONSUMER_REQUIRED');
   if(geographicOptIn&&(!geographicState||graphics||dem||uniforms.terrainLodWeight.value!==1))throw Error('GEOGRAPHIC_DRAW_BINDING_REQUIRED');
@@ -747,6 +758,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
    ambient:stage>=4?.30:.42,diffuse:stage>=4?.70:.58,
    lighting:'Normalized ambient/diffuse with frozen light direction, flat irradiance and DEM normals; no positive slope cap for corrected stages',lightingProbeEncoding:stage>0?'light / 2':'light'};
   evidence.demParameters={enabled:dem,verticalExaggeration,correctedLight,bakedSuppression};
+  updateBoundaryTrace(boundaryTraceFrame);
   setReveal(reveal,primaryMaterial);
   if(log)console.info(`GATE1: frame start mode=${mode} graphics=${graphics}`);
   const start=performance.now();uniforms.mode.value=mode;draw(terrainScene,fsCamera,baseTarget);

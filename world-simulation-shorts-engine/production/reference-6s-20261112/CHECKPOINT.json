@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "READY_FOR_USER_GPU_RETRY",
-  "firstIncomplete": "USER_ONLY_SEPARATE_APPROVAL_DEPLOY_AND_STUDIO_RENDER",
+  "status": "IN_PROGRESS_TWO_QUALITY_DELTAS",
+  "firstIncomplete": "CHANGED_BOUNDARY_AND_CAMERA_CPU_SCREEN_GATE",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
     "width": 1080,
@@ -89,7 +89,7 @@
   ],
   "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "User separately authorizes retry, then personally starts gCube deployment, runs existing registered6s input once, downloads MP4, and stops workload. Agent GPU authorization remains false.",
+  "nextAction": "Compile new presentation input and draw changed boundary/camera samples through existing free CPU capture. Preserve all prior images and evidence.",
   "lastError": "JSON_SIZE_INVALID",
   "formalCompile": {
     "status": "PASS",
@@ -133,7 +133,7 @@
     "runId": "43362382877",
     "rebuildReason": "Actual existing d1 image rejected by common required-fix gate: WORKER_PUBLICATION_FIX_MISSING; four-file delta restored exact previously verified v16 worker and matching startup/source pins."
   },
-  "deploymentReady": true,
+  "deploymentReady": false,
   "sourcePinVerification": {
     "status": "PASS",
     "scope": "Changed NVIDIA variants and mandatory atomic 3-variant source check only; no GPU, no image build",
@@ -273,7 +273,7 @@
     ]
   },
   "GPUStartAuthorized": false,
-  "actualNvidiaRenderVerified": false,
+  "actualNvidiaRenderVerified": true,
   "priorJSONRepairImageBuild": {
     "status": "PASS",
     "evidence": "incident-7001b1f3/execution-a2/IMAGE_BUILD.json",
@@ -281,5 +281,28 @@
     "digest": "sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1",
     "buildCommit": "df10b435ec73cfa38b0251abb54e486b8e9cf8d7",
     "runId": "43359755603"
+  },
+  "GPUQualitySuccess": {
+    "evidence": "quality-v1/GPU_SUCCESS_RECEIPT.json",
+    "originalMP4Preserved": true,
+    "visualQuality": "TWO_USER_REPORTED_GAPS",
+    "newQualityRevisionGPUVerified": false
+  },
+  "qualityDelta": {
+    "status": "IMPLEMENTED_NEW_CPU_GATE_PENDING",
+    "scope": [
+      "BOUNDARY_TRACE presentation",
+      "C1 camera temporal interpolation"
+    ],
+    "invalidatedItems": [
+      "Candidate boundary display timing/progression",
+      "Candidate camera between-key trajectory and derived coverage bounds",
+      "Candidate runtime image source seals"
+    ],
+    "reason": "User supplied successful GPU MP4 exposes static full boundary and motion unevenness; measured input has velocity breaks at V10 anchor boundaries",
+    "minimumValidation": "New boundary reveal samples and consecutive frames around camera knots, exact old source/data/palette/pin/label preservation checks, modified track coverage only, source seals and new-image common gate",
+    "oldPassReruns": 0,
+    "additionalGPUExecutions": 0,
+    "referenceCaveat": "Target4..9s borders already complete; trace adapted from preceding source buildup into output0..54; no claimed observed original onset at4s"
   }
 }

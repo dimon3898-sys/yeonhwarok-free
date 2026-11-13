@@ -1,3 +1,4 @@
+import {validateBoundaryTrace,compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from '../../web/map_infographic_v1/boundary_trace_v1.mjs';
 import {GEOGRAPHIC_CAMERA_VERSION,compileGeographicCamera,geographicCameraFrame} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
 /** Data-only presentation composition over unchanged V5/Flow/Area owners. */
 import {compileReferenceCameraTrack,evaluateReferenceCameraTrackFrame} from '../../web/map_infographic_v1/reference_camera_adapter_v1.mjs';
@@ -27,12 +28,13 @@ export function validatePresentation(input,{scene,region}={}){
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  if(input.mapStyle!==undefined){
-  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames','nativeBoundaries'],'PRESENTATION_MAP_STYLE');
+  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames','nativeBoundaries','boundaryTrace'],'PRESENTATION_MAP_STYLE');
   ok(['COUNTRY_FOCUS_V1','REFERENCE_FOCUS_V2'].includes(input.mapStyle.preset),'PRESENTATION_MAP_STYLE_PRESET_UNSUPPORTED');
   const revealFrames=input.mapStyle.revealFrames??18,countryFill=input.mapStyle.countryFill??false;
   ok(Number.isSafeInteger(revealFrames)&&revealFrames>=1&&revealFrames<=n,'PRESENTATION_MAP_REVEAL_RANGE_INVALID');
   ok(typeof countryFill==='boolean','PRESENTATION_MAP_FILL_BOOLEAN_REQUIRED');
   result.mapStyle={preset:input.mapStyle.preset,revealFrames,countryFill};
+  if(input.mapStyle.boundaryTrace!==undefined)result.mapStyle.boundaryTrace=validateBoundaryTrace(input.mapStyle.boundaryTrace,{totalFrames:n,holdFrames:scene.timing.final_hold_frames});
   if(input.mapStyle.nativeBoundaries!==undefined){
    ok(input.mapStyle.preset==='REFERENCE_FOCUS_V2'&&typeof input.mapStyle.nativeBoundaries==='boolean','PRESENTATION_NATIVE_BOUNDARIES_BOOLEAN_REQUIRED');
    result.mapStyle.nativeBoundaries=input.mapStyle.nativeBoundaries;
@@ -122,7 +124,7 @@ export function presentationAreaViewport({geometry,project,safeArea,presentation
 export function presentationNativeMapOptions(presentation,frame){
  const style=presentation?.mapStyle,primary=style?Math.min(1,(frame+1)/style.revealFrames):0;
  return{mode:style?.countryFill?0:1,graphics:false,boundaries:!!style&&style.nativeBoundaries!==false,glow:!!style&&style.nativeBoundaries!==false,dem:false,
-  primaryMaterial:style?.countryFill?primary:0,reveal:{primary,marker:0,location:0,country:0,title:0,disclosure:0}};
+  ...(style?.boundaryTrace?{boundaryTraceFrame:frame}:{}),primaryMaterial:style?.countryFill?primary:0,reveal:{primary,marker:0,location:0,country:0,title:0,disclosure:0}};
 }
 
 /** The opt-in pin consumer owns a matching active highlight; avoid two markers.
@@ -150,7 +152,7 @@ export function resolvePresentationMarkerLayout(markerRows,prepare){
 
 /** Protect the SAME current-projection country ribbons from area overpainting.
  * Geographic rings are reused unchanged, including holes; no derived outlines. */
-export function presentationBoundarySegments({presentation,nativePlan,project}={}){
+export function presentationBoundarySegments({presentation,nativePlan,project,frame=0}={}){
  if(!presentation?.mapStyle||presentation.mapStyle.nativeBoundaries===false)return[];
  const theme=nativePlan.theme,result=[];
  for(const record of nativePlan.geometries){
@@ -164,13 +166,15 @@ export function presentationBoundarySegments({presentation,nativePlan,project}={
    glowSupport=primary?(theme.glowWidth??theme.primaryWidth+3)/2+Math.SQRT2*3.230769*theme.glowRadius+2:0,
    radius=Math.max(width/2,glowSupport);
   ok(Number.isFinite(radius)&&radius>=0&&radius<=64,'PRESENTATION_NATIVE_BOUNDARY_SUPPORT_INVALID');
-  for(const polygon of parts)for(const ring of polygon)for(let i=1;i<ring.length;i++){
-   const a=project(ring[i-1]),b=project(ring[i]);
+  const trace=presentation.mapStyle.boundaryTrace,traced=trace?.countryIds.includes(record.id),fraction=traced?boundaryTraceFraction(trace,frame):1;
+  const rings=traced&&fraction<1?evaluateBoundaryTrace(compileBoundaryTrace(record,project,trace),fraction):parts.flatMap(p=>p.map(r=>r.map(project)));
+  for(const ring of rings)for(let i=1;i<ring.length;i++){
+   const a=ring[i-1],b=ring[i];
    ok(a.every(Number.isFinite)&&b.every(Number.isFinite),'PRESENTATION_NATIVE_BOUNDARY_PROJECTION_INVALID');
    result.push({a,b,radiusPx:radius});
   }
  }
- ok(result.length>0&&result.length<=8192,'PRESENTATION_NATIVE_BOUNDARY_CAPACITY');
+ ok((result.length>0||presentation.mapStyle.boundaryTrace)&&result.length<=8192,'PRESENTATION_NATIVE_BOUNDARY_CAPACITY');
  return result;
 }
 
