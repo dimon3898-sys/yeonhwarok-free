@@ -3,9 +3,9 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "PENDING_QUALITY_IMAGE_ADMISSION",
-  "firstIncomplete": "CHANGED_BOUNDARY_AND_CAMERA_CPU_SCREEN_GATE",
-  "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
+  "status": "READY_FOR_USER_GPU_QUALITY_RETRY",
+  "firstIncomplete": "USER_GPU_QUALITY_RENDER_AND_REVIEW_NO_RETRY_AUTHORIZED",
+  "inputCandidateSha256": "b54522ab3616a3cab9737749f38b13918676b5ed9ea94abae0b3b094441ce72e",
   "format": {
     "width": 1080,
     "height": 1920,
@@ -67,6 +67,11 @@
       "step": "Common recurrence gate + actual immutable image + saved stopped workload readback",
       "class": "\uc2e0\uaddc / \uae30\uc874 PASS \uc7ac\uc0ac\uc6a9",
       "state": "PASS_NO_GPU_EXECUTION"
+    },
+    {
+      "step": "Boundary drawing and camera timing quality delta + sealed image + stopped gCube settings",
+      "class": "NEW_CHANGE_SCOPE_ONLY / EXISTING_PASS_REUSED",
+      "state": "READY_FOR_USER_GPU_QUALITY_RETRY"
     }
   ],
   "actions": {
@@ -87,10 +92,10 @@
       "sha256": "d88c180c6b11ee87ac033c9e0667c6461fe8eb57da8bfd8fb4f40596b3f3e0eb"
     }
   ],
-  "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
+  "activeInput": "quality-v1/REFERENCE_6S_QUALITY_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Run new-image-only installed source/worker/reader/startup/policy gates, publish immutable tag, then configure stopped gCube",
-  "lastError": "JSON_SIZE_INVALID",
+  "nextAction": "User only: deploy#5373, choose NEW quality-v1/REFERENCE_6S_QUALITY_INPUT.json, render6s once, downloadMP4 and stop workload; compare both requested quality changes. No automatic retry authorized.",
+  "lastError": null,
   "formalCompile": {
     "status": "PASS",
     "eventType": "GEOGRAPHIC",
@@ -126,14 +131,16 @@
   },
   "imageBuild": {
     "status": "PASS",
-    "evidence": "../../release-guard/recovery-20261113/execution-a1/RELEASE_APPROVAL.json",
-    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:required-fixes-f0f44d269b9a-43362382877",
-    "digest": "sha256:8f7a91201840b84769523ec4cd2430df54470403883d57c40e26d3d1e36ce329",
-    "buildCommit": "f0f44d269b9ab5189019c696e9e5024e0e719215",
-    "runId": "43362382877",
-    "rebuildReason": "Actual existing d1 image rejected by common required-fix gate: WORKER_PUBLICATION_FIX_MISSING; four-file delta restored exact previously verified v16 worker and matching startup/source pins."
+    "evidence": "quality-v1/image-a1/RELEASE_APPROVAL.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-boundary-camera-044bde9e8bc3-43368976255",
+    "digest": "sha256:cf52ba25cb46b16b6bee0ba3149d1e8048a3d6a5abf05f1cfda932f7094665a8",
+    "buildCommit": "044bde9e8bc342b09d91ea71d62325f9f6f28226",
+    "runId": "43368976255",
+    "newRuntimeFiles": 12,
+    "newImageOnlyCommonGate": "PASS",
+    "GPUExecutions": 0
   },
-  "deploymentReady": false,
+  "deploymentReady": true,
   "sourcePinVerification": {
     "status": "PASS",
     "scope": "Changed NVIDIA variants and mandatory atomic 3-variant source check only; no GPU, no image build",
@@ -146,7 +153,7 @@
     "admission": "FULL_CAMERA_SOURCE_ADMISSION.json",
     "oldApproximateFitPreservedInGit": true
   },
-  "lastRemoteSavedBeforeThisUnit": "f0e560b4b38f64d2b7cc4950e02cd817544ab59c",
+  "lastRemoteSavedBeforeThisUnit": "f934c115125e297e3b4c6c5142b4cf3ca7117d5a",
   "registeredCompile": {
     "status": "PASS",
     "compilerInputSHA256": "4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45",
@@ -170,20 +177,16 @@
     "adapterVerification": "image-a1/IMAGE_ADAPTER_VERIFICATION.json"
   },
   "gcubePredeployment": {
-    "status": "PASS_SAVED_REOPENED_STOPPED",
-    "evidence": "GCUBE_PREDEPLOY_CONFIG.json",
-    "receipt": "../../release-guard/recovery-20261113/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
-    "workloadId": 5373,
-    "imageDigest": "sha256:8f7a91201840b84769523ec4cd2430df54470403883d57c40e26d3d1e36ce329",
-    "bothDigestEnvironmentValuesMatch": true,
-    "lastDeploymentUnchanged": "2026-11-13 12:15:42 KST",
-    "GPUExecutions": 0,
-    "saveTriggeredDeployment": false
+    "status": "PASS_SAVED_AND_REOPENED_STOPPED",
+    "config": "GCUBE_PREDEPLOY_CONFIG.json",
+    "evidence": "quality-v1/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
+    "deployStarts": 0,
+    "studioRenders": 0,
+    "additionalGPUExecutions": 0
   },
   "unverifiedAfterUserDeployment": [
-    "Exact failed GPU FRAME_EVIDENCE/CAPTURE_RECEIPT bytes and traceback not recovered",
-    "Failed private VIDEO.mp4 not recovered; public exports contain no MP4",
-    "New image actual NVIDIA MP4 verification/export not run; requires separate user decision"
+    "Actual NVIDIA quality of this new boundary/camera revision",
+    "Final user reference-quality acceptance"
   ],
   "existingAnalysisRerun": false,
   "incident7001b1f3": {
@@ -273,7 +276,7 @@
     ]
   },
   "GPUStartAuthorized": false,
-  "actualNvidiaRenderVerified": true,
+  "actualNvidiaRenderVerified": false,
   "priorJSONRepairImageBuild": {
     "status": "PASS",
     "evidence": "incident-7001b1f3/execution-a2/IMAGE_BUILD.json",
@@ -289,7 +292,7 @@
     "newQualityRevisionGPUVerified": false
   },
   "qualityDelta": {
-    "status": "PASS_CHANGED_FEATURES_CPU_IMAGE_PENDING",
+    "status": "READY_FOR_USER_GPU_QUALITY_RETRY",
     "scope": [
       "BOUNDARY_TRACE presentation",
       "C1 camera temporal interpolation"
@@ -308,7 +311,35 @@
     "cpuRunId": 43368062163,
     "visualReview": "quality-v1/CPU_VISUAL_REVIEW.json",
     "runtimeSealed": true,
-    "NVIDIARuntimeThreeConnectionsMirrored": true
+    "NVIDIARuntimeThreeConnectionsMirrored": true,
+    "implementationCommit": "a23603980fee6c1837e9ce81e9ca074048b18b99",
+    "CPUCommit": "f86315e252fbe1b50a8fe325555c340e3a12d6ee",
+    "imageBuildCommit": "044bde9e8bc342b09d91ea71d62325f9f6f28226",
+    "imageEvidenceCommit": "f934c115125e297e3b4c6c5142b4cf3ca7117d5a",
+    "newFocusedChecks": 9,
+    "actualCPUFrames": 25,
+    "holdPixels149_150_179Identical": true,
+    "sourceBindings": "quality-v1/SOURCE_BINDINGS.json",
+    "newImageBindings": "quality-v1/image-a1/QUALITY_IMAGE_BINDINGS.json",
+    "newImageReleaseGate": "quality-v1/image-a1/RELEASE_APPROVAL.json",
+    "savedStoppedGcubeReadback": "quality-v1/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
+    "newGPUQualityVerified": false,
+    "boundaryTraceFrames": [
+      0,
+      54
+    ],
+    "zoomJunctionJumpRmsReductionPercent": 63.082742099863886
   },
-  "firstIncompleteStep": "NEW_IMAGE_SOURCE_AND_COMMON_RELEASE_GATE"
+  "firstIncompleteStep": "USER_GPU_QUALITY_RENDER_AND_REVIEW_NO_RETRY_AUTHORIZED",
+  "priorSuccessfulNvidiaRenderVerified": true,
+  "priorIncidentLastError": "JSON_SIZE_INVALID",
+  "previousSuccessfulRelease": {
+    "status": "PASS",
+    "evidence": "../../release-guard/recovery-20261113/execution-a1/RELEASE_APPROVAL.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:required-fixes-f0f44d269b9a-43362382877",
+    "digest": "sha256:8f7a91201840b84769523ec4cd2430df54470403883d57c40e26d3d1e36ce329",
+    "buildCommit": "f0f44d269b9ab5189019c696e9e5024e0e719215",
+    "runId": "43362382877",
+    "rebuildReason": "Actual existing d1 image rejected by common required-fix gate: WORKER_PUBLICATION_FIX_MISSING; four-file delta restored exact previously verified v16 worker and matching startup/source pins."
+  }
 }
