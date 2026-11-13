@@ -1,7 +1,7 @@
 {
-  "status": "REMOTE_ORIGINAL_HISTORY_PRESERVED_READY_FOR_FIRST_30_CPU_FRAMES",
+  "status": "ORIGINAL_HISTORY_PRESERVED_30_FRAME_CPU_VISUAL_GATE_PASS",
   "baseHEAD": "4f1ccf960bd3ca102f7de543c229299744673839",
-  "firstIncomplete": "CONTINUOUS_30_ACTUAL_CPU_FRAMES",
+  "firstIncomplete": "NEW_FULL_CPU_CAPTURE_AND_FULL_RHYTHM_REVIEW",
   "oldPassReruns": 0,
   "gpuStarts": 0,
   "technicalPass": false,
@@ -17,10 +17,12 @@
     "180 formal model frames/source-aware camera/labels",
     "20s timing with three adjacent changes",
     "new module syntax",
-    "original local commit SHAs and all 43 changed file blobs preserved and verified on GitHub"
+    "original local commit SHAs and all 43 changed file blobs preserved and verified on GitHub",
+    "first actual 30 consecutive CPU frames plus four context frames captured and saved",
+    "saved PNG hashes and camera-compensated boundary pixels verified; sample visual gate passed"
   ],
-  "probeAllowed": true,
-  "fullMP4Allowed": false,
+  "probeAllowed": false,
+  "fullMP4Allowed": true,
   "recoveredCommit": "704ffdf61373f83177aca27b2ad81cf247c9ca2e",
   "recoveryEvidence": "evidence/RECOVERY_INVENTORY.json",
   "recoveryReport": "RECOVERY_REPORT.md",
@@ -37,9 +39,19 @@
     "evidence": "evidence/REMOTE_PRESERVATION.json"
   },
   "nextProbe": {
-    "attempt": "a1",
-    "newExecution": true,
-    "oldPassInvalidated": [],
-    "scope": "first actual 30 consecutive frames plus existing endpoint samples; no existing PASS reruns; no MP4"
-  }
+    "status": "COMPLETE_DO_NOT_RERUN",
+    "attempt": "a1"
+  },
+  "actual30FrameProbePass": true,
+  "probeEvidence": {
+    "runId": 43526265587,
+    "captureCommit": "b54f6114d6c943b1208f2e3e4f5a49e4291ec3b3",
+    "evidenceCommit": "6604a86c3281a3a84ce96886267757a7ad5e0856",
+    "frames": 34,
+    "consecutiveFrames": 30,
+    "review": "PROBE_VISUAL_REVIEW.json"
+  },
+  "nextAction": "Use this valid probe gate for a new full CPU capture and full-duration rhythm review; no existing probe/model/video PASS rerun.",
+  "scopeCompleted": "Emergency original-commit remote preservation and first 30-frame CPU screen validation",
+  "newMP4Created": false
 }
