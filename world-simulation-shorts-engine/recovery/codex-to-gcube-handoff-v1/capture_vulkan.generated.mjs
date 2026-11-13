@@ -36,7 +36,7 @@ export function validateRuntimeRequest(request){
  check(cursor===request.totalFrames,'UP2_TOTAL_FRAME_SUM');
  const expected=request.segments.slice(1).map(s=>({type:'CUT',frame:s.startFrame}));check(canonicalJSON(request.transitions??[])===canonicalJSON(expected),'UP2_EXACT_SCENE_CUTS_REQUIRED');return true;
 }
-function sourceRowsFor(segments){return segments.map((s,index)=>{const source=s.sourceStyle.terrainAsset;return{segmentIndex:index,startFrame:s.startFrame,endFrame:s.endFrame,sourceId:s.regionEvidence.sourceId,sourceOriginalSHA256:source.sourceOriginalSHA256,styleId:s.sourceStyle.styleId,terrainSHA256:source.sha256,bounds:copy(source.bounds),cameraEnvelope:copy(s.presentationPlan.coverageBounds),terrainTreatment:s.terrainTreatment,nativeResolution:copy(s.regionEvidence.sourceDimensions),outputResolution:copy(source.dimensions),sourceGeometryBinding:compileExistingEnginePlan(s.scene).sourceGeometryBinding,sceneSHA256:hash(canonicalJSON(s.scene)),presentationSHA256:hash(canonicalJSON(s.presentation))};});}
+function sourceRowsFor(segments){return segments.map((s,index)=>{const source=s.sourceStyle.terrainAsset;return{segmentIndex:index,startFrame:s.startFrame,endFrame:s.endFrame,sourceId:s.regionEvidence.sourceId,sourceOriginalSHA256:source.sourceOriginalSHA256,styleId:s.sourceStyle.styleId,terrainSHA256:source.sha256,...(s.sourceStyle.terrainLevels?{terrainLevels:s.sourceStyle.terrainLevels.map(a=>({sha256:a.sha256,bounds:a.bounds,dimensions:a.dimensions}))}:{}),bounds:copy(source.bounds),cameraEnvelope:copy(s.presentationPlan.coverageBounds),terrainTreatment:s.terrainTreatment,nativeResolution:copy(s.regionEvidence.sourceDimensions),outputResolution:copy(source.dimensions),sourceGeometryBinding:compileExistingEnginePlan(s.scene).sourceGeometryBinding,sceneSHA256:hash(canonicalJSON(s.scene)),presentationSHA256:hash(canonicalJSON(s.presentation))};});}
 export async function verifyPreparedRuntimeRequest(prepared,{privateWorkspaceRoot,publicExportRoot}={}){
  try{
   check(prepared?.schema==='WORLD_ENGINE_PREPARED_PRESENTATION_V2','UP2_PREPARED_SCHEMA_REQUIRED');validateRuntimeRequest({...prepared,schema:'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2'});
@@ -55,7 +55,7 @@ export async function prepareRuntimeRequest({request,cacheRoot,privateWorkspaceR
   const regionPlan=await resolveRegionPlan({scene:item.scene,region:item.region});
   check(regionPlan.baseCameraPlan,'UP2_REGION_BASE_CAMERA_REQUIRED');
   const presentationPlan=compilePresentationCameraPlan({scene:item.scene,region:item.region,nativePlan:regionPlan.nativePlan,baseCameraPlan:regionPlan.baseCameraPlan,presentation:item.presentation});
-  const prepared=await prepareRegionTerrain({regionPlan,bounds:presentationPlan.coverageBounds,outputRoot:path.join(cacheRoot,'segment-'+String(index).padStart(3,'0')),privateWorkspaceRoot,publicExportRoot});
+  const prepared=await prepareRegionTerrain({regionPlan,presentationPlan,bounds:presentationPlan.coverageBounds,outputRoot:path.join(cacheRoot,'segment-'+String(index).padStart(3,'0')),privateWorkspaceRoot,publicExportRoot});
   const qualification=await verifyRegionQualification({prepared,privateWorkspaceRoot,publicExportRoot});check(qualification.status==='PASS','UP2_PREPARED_REGION_VERIFICATION_FAILED');
   check(canonicalJSON(prepared.nativePlan.framing.bounds)===canonicalJSON(presentationPlan.closestBounds),'UP2_CLOSEST_APPROVED_EXTENT_CHANGED');
   const source=prepared.sourceStyle.terrainAsset;
@@ -72,7 +72,7 @@ export async function prepareRuntimeRequest({request,cacheRoot,privateWorkspaceR
 }
 async function makeLoopback(payload,cacheRoot){
  const trace=[],aliases=new Map([['/recovery/reference-director-v1/director_events.mjs',path.join(ENGINE,'recovery/reference-director-v1/director_events.mjs')],['/three.js',path.join(ENGINE,'web/vendor/three/0.170.0/three.module.js')],['/web/map_infographic_v1/graphic_layout.mjs',path.join(ENGINE,'recovery/g2-final-recovery-v1/layout_extension.mjs')],['/web/map_infographic_v1/graphic_layout_legacy.mjs',path.join(ENGINE,'web/map_infographic_v1/graphic_layout.mjs')]]);
- for(const segment of payload.segments)aliases.set(segment.sourceStyle.terrainAsset.url,segment.sourceStyle.terrainAsset.file);
+ for(const segment of payload.segments)for(const a of segment.sourceStyle.terrainLevels??[segment.sourceStyle.terrainAsset])aliases.set(a.url,a.file);
  const server=createServer(async(req,res)=>{let target='';try{
   const url=new URL(req.url,'http://localhost');target=decodeURIComponent(url.pathname);check(['GET','HEAD'].includes(req.method)&&!url.search&&!target.includes('..')&&!target.includes('\\'),'UP2_HTTP_READ_ONLY');let raw,type='application/octet-stream';
   if(target==='/'){raw=Buffer.from('<!doctype html><meta charset="utf-8"><body style="margin:0"><canvas id="map" width="1080" height="1920"></canvas>');type='text/html';}

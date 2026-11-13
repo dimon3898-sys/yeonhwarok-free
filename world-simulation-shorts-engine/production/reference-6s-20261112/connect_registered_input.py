@@ -23,6 +23,7 @@ for i,name in enumerate(['COAST_PIN_A','COAST_PIN_B']):
 x['region']={'sourceId':'NASA_BMNG_EU_AFRICA_PYRAMID_V1','crs':'EPSG:4326','center':[-3.7,38],'bbox':[-5.5,35.5,-1.9,40.5],'countryId':'COUNTRY_ESP'}
 # Keep on-screen place labels neutral; the coordinate-source identity is explicit in evidence.
 x['presentation']['labels']['items'][0]['text']='해안 A'
+x['presentation']['labels']['items'][0]['pin']='CONTEXT'
 x['presentation']['labels']['items'].append({**x['presentation']['labels']['items'][0],'id':'pin-b','text':'해안 B','locationId':'COAST_PIN_B','eventId':'coast-pin-b','priority':59})
 merc=lambda t:math.degrees(math.log(math.tan(math.pi/4+math.radians(t)/2)))
 inv=lambda y:math.degrees(2*math.atan(math.exp(math.radians(y)))-math.pi/2)

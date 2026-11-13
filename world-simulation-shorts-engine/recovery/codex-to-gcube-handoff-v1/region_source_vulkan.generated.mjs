@@ -1,4 +1,5 @@
 /** Data-driven region/source admission. No renderer, shader, invented elevation or country exception. */
+import{loadGeographicTerrain,prepareGeographicTerrain,verifyGeographicTerrain}from'../universal-presentation-v2/geographic_terrain_source.mjs';
 import {readFile,mkdir,lstat,realpath,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -128,6 +129,7 @@ async function chooseSource(catalog,region,bounds){
  if(unavailable)throw Object.assign(Error('REGION_SOURCE_NOT_MATERIALIZED'),{status:'UNSUPPORTED',detail:unavailable});
  const candidates=catalog.sources.filter(row=>(wanted==='AUTO'?!row.explicitOnly:row.id===wanted)&&contains(row.bounds,bounds)).sort((a,b)=>a.priority-b.priority||a.id.localeCompare(b.id));
  for(const source of candidates){
+  if(source.pyramid){const {levels}=await loadGeographicTerrain({source,safeFile});const a=levels[0];return{source:clone(source),window:{pixelBox:[0,0,...a.dimensions],dimensions:a.dimensions,bounds:a.bounds,minimumGutterPixels:Math.min(...[bounds[0]-a.bounds[0],bounds[1]-a.bounds[1],a.bounds[2]-bounds[2],a.bounds[3]-bounds[3]].map((x,i)=>x/a.pixelSpacing[i%2]))}};}
   const window=sourceWindow(source,bounds,catalog.minimumGutterPixels);
   if(window.minimumGutterPixels<1-1e-9||Math.max(...window.dimensions)>catalog.maxNativeTextureDimension)continue;
   const asset=await safeFile(source.file);check(hash(asset.raw)===source.sha256&&asset.raw.length===source.bytes,'REGION_ASSET_SHA_MISMATCH');
@@ -197,13 +199,16 @@ export async function resolveRegionPlan({scene,region}={}){
 async function safeCacheRoot(value,options){return ensureQualifiedPrivateDirectory(value,options);}
 
 /** One chosen, actual source covers the whole camera envelope; no per-frame style mixture. */
-export async function prepareRegionTerrain({regionPlan,bounds,outputRoot,privateWorkspaceRoot,publicExportRoot}={}){
+export async function prepareRegionTerrain({regionPlan,presentationPlan,bounds,outputRoot,privateWorkspaceRoot,publicExportRoot}={}){
  check(regionPlan?.schema==='WORLD_ENGINE_REGION_PLAN_V2','REGION_RESOLVED_PLAN_REQUIRED');
  const valid=validateRegionRequest({center:[(bounds?.[0]+bounds?.[2])/2,(bounds?.[1]+bounds?.[3])/2],bbox:bounds});check(valid.status==='PASS',valid.issues?.[0]?.code??'REGION_CAMERA_BOUNDS_INVALID');
  const {data:catalog,sha256:catalogSHA256}=await loadRegionSourceCatalog();check(catalogSHA256===regionPlan.sourceCatalogSHA256,'REGION_SOURCE_CATALOG_CHANGED');
  // The factory also initializes against the immutable approved model framing.
  // A panned movie may never visit one edge of that framing, so camera-only
  // crops cannot satisfy the existing native scale/source admission contract.
+ const explicitSource=catalog.sources.find(s=>s.id===regionPlan.region.sourceId);
+ if(explicitSource?.pyramid)await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
+ if(explicitSource?.pyramid)return prepareGeographicTerrain({source:explicitSource,regionPlan,presentationPlan,catalogSHA256,catalogPath:CATALOG,safeFile,canonicalJSON,compileScalePlan});
  const sourceRequiredBounds=unionBounds(bounds,regionPlan.nativePlan.framing.bounds);
  const {source,window}=await chooseSource(catalog,regionPlan.region,sourceRequiredBounds),cache=await safeCacheRoot(outputRoot,{privateWorkspaceRoot,publicExportRoot});
  const identity={schema:'WORLD_ENGINE_NATIVE_SOURCE_WINDOW_V2',catalogSHA256,requestRegionGateSHA256:regionPlan.regionGateSHA256,sourceSHA256:source.sha256,cameraEnvelope:clone(bounds),initializationAndAnalysisBounds:clone(regionPlan.nativePlan.framing.bounds),sourceRequiredBounds:clone(sourceRequiredBounds),pixelBox:window.pixelBox,dimensions:window.dimensions,bounds:window.bounds,method:'EXACT_SOURCE_PIXEL_WINDOW_NO_RESAMPLE_NO_RECOLOR'},key=hash(canonicalJSON(identity)),directory=path.join(cache,'region-'+key),png=path.join(directory,'terrain.png'),record=path.join(directory,'CACHE.json');
@@ -235,7 +240,9 @@ export async function verifyRegionQualification({prepared,qualification,privateW
  try{
   if(!prepared){check(qualification?.status==='PASS'&&qualification.regionEvidence?.phase!=='FULL_CAMERA_ENVELOPE','REGION_REQUEST_RECEIPT_REQUIRED');const locations=(qualification.regionEvidence.locationCountryChecks??[]).map(row=>({id:row.locationId,country_id:row.countryId,anchor:row.geographic}));const region=clone(qualification.region);if(qualification.regionEvidence.preservedLegacyFraming){delete region.center;delete region.bbox;}const actual=await qualifyRegion({region,facts:{locations}});check(actual.status==='PASS'&&actual.regionGateSHA256===qualification.regionGateSHA256,'REGION_REQUEST_RECEIPT_STALE_OR_INVALID');return{status:'PASS',phase:'REQUEST_COVERAGE_ONLY',regionGateSHA256:actual.regionGateSHA256,trajectoryCoverageRequiredBeforeStart:true};}
   await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
-  const e=prepared.regionEvidence;check(e?.phase==='FULL_CAMERA_ENVELOPE'&&e.trajectoryCoverageRequiredBeforeStart===false,'REGION_FULL_CAMERA_RECEIPT_REQUIRED');check(prepared.fullCoverageSHA256===hash(canonicalJSON(e)),'REGION_FULL_CAMERA_RECEIPT_SHA_MISMATCH');
+  const e=prepared.regionEvidence;
+  if(e?.phase==='FULL_CAMERA_PYRAMID'){const {data:catalog,sha256:catalogSHA256}=await loadRegionSourceCatalog();check(catalogSHA256===prepared.sourceCatalogSHA256,'REGION_SOURCE_CATALOG_CHANGED');const seed=await loadSeed(catalog,prepared.region.sourceId);check(canonicalJSON(seed.nativePlan.geometries)===canonicalJSON(prepared.nativePlan.geometries),'REGION_NATIVE_GEOMETRY_BINDING_MISMATCH');const source=catalog.sources.find(s=>s.id===prepared.region.sourceId);check(source?.pyramid,'GEOGRAPHIC_SOURCE_CATALOG_BINDING');return await verifyGeographicTerrain({prepared,source,safeFile,canonicalJSON,compileScalePlan,catalogSHA256,catalogPath:CATALOG});}
+  check(e?.phase==='FULL_CAMERA_ENVELOPE'&&e.trajectoryCoverageRequiredBeforeStart===false,'REGION_FULL_CAMERA_RECEIPT_REQUIRED');check(prepared.fullCoverageSHA256===hash(canonicalJSON(e)),'REGION_FULL_CAMERA_RECEIPT_SHA_MISMATCH');
   const {data:catalog,sha256:catalogSHA256}=await loadRegionSourceCatalog();check(catalogSHA256===prepared.sourceCatalogSHA256&&catalogSHA256===e.catalogSHA256,'REGION_SOURCE_CATALOG_CHANGED');
   const qualifiedSeed=await loadSeed(catalog,prepared.region.sourceId); // Actual source archive, GIS/override and license bytes.
   check(canonicalJSON(prepared.nativePlan.geometries)===canonicalJSON(qualifiedSeed.nativePlan.geometries),'REGION_NATIVE_GEOMETRY_BINDING_MISMATCH');

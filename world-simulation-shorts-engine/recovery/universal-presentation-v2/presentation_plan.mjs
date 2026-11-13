@@ -93,6 +93,7 @@ export function validatePresentation(input,{scene,region}={}){
 /** Explicit close framing reuses native polygon clipping; source geometry is never trimmed. */
 export function presentationMapTheme(presentation,theme){
  if(presentation?.mapStyle?.preset!=='REFERENCE_FOCUS_V2')return theme;
+ if(presentation.camera?.mode==='GEOGRAPHIC_TRACK')return{...theme,exposure:2.2,primaryWidth:2.4,primaryEdgeWidth:3.4,primaryCoreColor:[1,1,.94,1],primaryEdgeColor:[.12,.10,.02,.65],secondaryWidth:2.4,secondaryEdgeWidth:3.4,secondaryCoreColor:[.96,.98,.92,.96],secondaryEdgeColor:[.08,.10,.07,.55],glowWidth:3.4,glowRadius:.5,glowGain:.22,glowColor:[1,.92,.5,1]};
  return{...theme,primaryWidth:4,primaryEdgeWidth:7,primaryCoreColor:[1,1,.9,1],
   primaryEdgeColor:[.12,.10,.02,.8],glowWidth:9,glowRadius:3,glowGain:.22,glowColor:[1,.85,.03,1]};
 }
