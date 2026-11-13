@@ -82,8 +82,9 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
   function areaPass(stateId,accent=false){const key=(stateId??'__DEFAULT__')+(accent?'_ACCENT':'');if(!colorPasses.has(key)){
    const style=copy(defaultAreaStyle),color=p.territoryColors?.[stateId];if(color)style.AREA.fillColor=copy(color);
    if(p.mapStyle?.preset==='REFERENCE_FOCUS_V2'){
-    // Native country border owns the outline; existing source line owns the coast accent.
-    style.AREA.coreColor[3]=0;style.AREA.glowGain=0;
+    // Where native borders are enabled they own the outline. Territory-only
+    // historical maps hide modern borders and retain the existing Area contour.
+    if(p.mapStyle.nativeBoundaries!==false){style.AREA.coreColor[3]=0;style.AREA.glowGain=0;}
     style.FRONT={...style.FRONT,coreColor:accent?[.08,.95,1,1]:[1,.87,.1,.2],
      width:accent?7:2,glowColor:[.05,.8,1,1],glowRadius:accent?9:1,glowGain:accent ? .28 : 0};
    }

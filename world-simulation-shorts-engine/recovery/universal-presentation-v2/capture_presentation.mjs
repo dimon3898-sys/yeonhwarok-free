@@ -27,7 +27,7 @@ export function validateRuntimeRequest(request){
   validateScenePlan(segment.scene);check(segment.scene.timing.total_frames===segment.endFrame-segment.startFrame&&segment.scene.timing.fps===30&&segment.scene.metadata.output.width===1080&&segment.scene.metadata.output.height===1920,'UP2_SEGMENT_SCENE_TIMING');
   check(['WAR','TRANSPORT','GEOGRAPHIC'].includes(segment.scene.event_type)&&segment.scene.scale_intent.preferred==='REGIONAL','UP2_RENDER_FAMILY_OR_SCALE_UNSUPPORTED');
   check(!segment.scene.text?.length&&!segment.scene.causal_tracks?.length,'UP2_UNCONNECTED_VISIBLE_TEXT_OR_CAUSAL_TRACK_UNSUPPORTED');compileExistingEnginePlan(segment.scene);cursor=segment.endFrame;
-  if(segment.presentation?.initialStateVisibility==='PRESERVE_PROVIDED')assertPresentationBoundaryContinuity(request.segments[index-1],segment);
+  if(index>0&&segment.presentation?.initialStateVisibility==='PRESERVE_PROVIDED')assertPresentationBoundaryContinuity(request.segments[index-1],segment);
  }
  check(cursor===request.totalFrames,'UP2_TOTAL_FRAME_SUM');
  const expected=request.segments.slice(1).map(s=>({type:'CUT',frame:s.startFrame}));check(canonicalJSON(request.transitions??[])===canonicalJSON(expected),'UP2_EXACT_SCENE_CUTS_REQUIRED');return true;

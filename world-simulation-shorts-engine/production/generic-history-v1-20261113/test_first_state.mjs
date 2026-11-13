@@ -1,0 +1,10 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+import {validateRuntimeRequest} from '../../recovery/universal-presentation-v2/capture_presentation.mjs';
+import {assertPresentationBoundaryContinuity} from '../../recovery/universal-presentation-v2/presentation_plan.mjs';
+const r=JSON.parse(fs.readFileSync(new URL('RUNTIME_REQUEST.json',import.meta.url))),checks=[];
+assert.equal(validateRuntimeRequest(r),true);checks.push('actual first scene preserves supplied state without a nonexistent predecessor');
+const a=r.segments[0],b=structuredClone(a);b.scene.time_steps[0]=structuredClone(a.scene.time_steps.at(-1));
+assert.equal(assertPresentationBoundaryContinuity(a,b).status,'SOURCE_STATE_CONTINUITY_CONFIRMED');checks.push('later scenes still require exact supplied state continuity');
+b.scene.time_steps[0].area_ids=a.scene.time_steps[0].area_ids;assert.throws(()=>assertPresentationBoundaryContinuity(a,b),/PROVIDED_STATE_DISCONTINUITY/);checks.push('later discontinuous territory remains blocked');
+b.scene.time_steps[0]=structuredClone(a.scene.time_steps.at(-1));b.scene.time_steps[0].date={year:44,era:'BCE'};assert.throws(()=>assertPresentationBoundaryContinuity(a,b),/TIME_REVERSED/);checks.push('precision-aware reversed historical cut remains blocked');
+console.log(JSON.stringify({status:'PASS',scope:'new first-scene admission failure and historical cut comparison only',checks},null,2));

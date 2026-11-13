@@ -1,3 +1,4 @@
+import {compareHistoricalTime} from '../../web/map_infographic_v1/historical_time_v1.mjs';
 import {validatePresentationFlows,validateHighlightRing,bindPresentationFlows} from './presentation_flow.mjs';
 import {validateBoundaryTrace,compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from '../../web/map_infographic_v1/boundary_trace_v1.mjs';
 import {GEOGRAPHIC_CAMERA_VERSION,compileGeographicCamera,geographicCameraFrame} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
@@ -259,7 +260,7 @@ export function assertPresentationBoundaryContinuity(previous,next){
  ok(previous?.scene?.event_type==='WAR'&&next.scene.event_type==='WAR','PRESENTATION_CONTINUITY_PREVIOUS_AREA_REQUIRED');
  const before=boundarySignature(previous,true),after=boundarySignature(next,false);
  ok(same(before,after),'PRESENTATION_CUT_PROVIDED_STATE_DISCONTINUITY');
- ok(previous.scene.time_steps.at(-1).date<=next.scene.time_steps[0].date,'PRESENTATION_CUT_STATE_TIME_REVERSED');
+ ok(compareHistoricalTime(previous.scene.time_steps.at(-1).date,next.scene.time_steps[0].date)<=0,'PRESENTATION_CUT_STATE_TIME_REVERSED');
  return{status:'SOURCE_STATE_CONTINUITY_CONFIRMED',geometryMatched:true,frontMatched:true,colorMatched:true,sourceMatched:true,eventClockOffsetFrames:0};
 }
 
