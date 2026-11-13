@@ -54,3 +54,14 @@ export function selectGeographicTerrain(sources,pose,{maximumTextureSize=16384}=
  // Coarsest adequate level limits memory bandwidth; every selected level has genuine native density.
  selected.sort((a,b)=>b.spacing[0]-a.spacing[0]);return selected[0];
 }
+
+/** Derived coefficients may differ by realm rounding, never by visible geometry. */
+export function geographicTrackTransportDelta(actual,expected){
+ check(actual?.frames?.length===expected?.frames?.length&&actual.totalFrames===expected.totalFrames,'GEOGRAPHIC_TRANSPORT_LENGTH');
+ let delta=0;
+ for(let f=0;f<actual.frames.length;f++){
+  const a=actual.frames[f],b=expected.frames[f];geographicCameraFrame(b);
+  for(const [x,y]of [[a.center[0],b.center[0]],[a.center[1],b.center[1]],[a.scale,b.scale],[a.rollDegrees,b.rollDegrees]])delta=Math.max(delta,Math.abs(x-y));
+ }
+ return delta;
+}

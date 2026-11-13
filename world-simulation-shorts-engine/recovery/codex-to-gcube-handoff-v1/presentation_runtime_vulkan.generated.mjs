@@ -1,5 +1,5 @@
 /** Explicit moving-projection composition; unchanged engines own every pixel. */
-import {compileGeographicCamera,geographicCameraFrame,GEOGRAPHIC_CAMERA_VERSION} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
+import {compileGeographicCamera,geographicCameraFrame,GEOGRAPHIC_CAMERA_VERSION,geographicTrackTransportDelta} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
 import * as THREE from '/three.js';
 import {createMapInfographicRenderer} from '../../web/map_infographic_v1/renderer.mjs';
 import {compileExistingEnginePlan} from '../../web/map_infographic_v1/planner_engine_adapter_v1.mjs';
@@ -57,10 +57,11 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   const analysisProject=point=>projectBounds(presentationPlan.analysisBounds,point);
   if(geographic){
    const browserTrack=compileGeographicCamera(p.camera,{totalFrames:scene.timing.total_frames,holdFrames:scene.timing.final_hold_frames,closestBounds:presentationPlan.closestBounds});
-   assert(JSON.stringify(browserTrack.frames)===JSON.stringify(presentationPlan.geographicTrack.frames),'UP2_CAMERA_KEYFRAME_TRANSPORT_CHANGED');
+   const poseTransportDelta=p.camera.interpolation?geographicTrackTransportDelta(browserTrack,presentationPlan.geographicTrack):0;
+   assert(p.camera.interpolation?poseTransportDelta<=1e-9:JSON.stringify(browserTrack.frames)===JSON.stringify(presentationPlan.geographicTrack.frames),'UP2_CAMERA_KEYFRAME_TRANSPORT_CHANGED');
    let delta=0;for(let f=0;f<browserTrack.totalFrames;f++)for(let i=0;i<4;i++)delta=Math.max(delta,Math.abs(browserTrack.cpuFrameBounds[f][i]-presentationPlan.cpuFrameBounds[f][i]));
    assert(delta<=1e-9,'UP2_BROWSER_CAMERA_TRANSPORT_DRIFT');
-   trackHydration={owner:GEOGRAPHIC_CAMERA_VERSION,authoredKeyframesPreserved:true,comparedFrameCount:browserTrack.totalFrames,maximumBrowserCPUFrameBoundDeltaDegrees:delta};
+   trackHydration={owner:GEOGRAPHIC_CAMERA_VERSION,authoredKeyframesPreserved:true,maximumDerivedPoseTransportDelta:poseTransportDelta,comparedFrameCount:browserTrack.totalFrames,maximumBrowserCPUFrameBoundDeltaDegrees:delta};
    activePresentationPlan={...presentationPlan,geographicTrack:browserTrack};factory.updateGeographicCamera(browserTrack.frames[0]);factory.setTerrainLod(1);
    assert(engines.plans.every(b=>b.engine==='EXISTING_AREA_V3'),'UP2_GEOGRAPHIC_AREA_OWNERS_REQUIRED');
   }else{
