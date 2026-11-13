@@ -1,0 +1,127 @@
+name: WORLD ENGINE reference6s post-capture reader repair
+on:
+  push:
+    branches: [fix/reference-6s-formal-admission-20261113]
+    paths: ['.github/workflows/world-engine-reference6s-json-repair.yml']
+permissions:
+  contents: write
+  packages: write
+  actions: read
+concurrency:
+  group: world-engine-reference6s-json-repair
+  cancel-in-progress: false
+jobs:
+  repair:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == '676c559942043b63b0d9120c4e06c940cb7d4130' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE6S_JSON_REPAIR_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      INCIDENT: world-simulation-shorts-engine/production/reference-6s-20261112/incident-7001b1f3
+      NVIDIA_VISIBLE_DEVICES: void
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/production/reference-6s-20261112/incident-7001b1f3/
+            /world-simulation-shorts-engine/production/capture-json-size-fix-v13/evidence/CPU_RESULT.json
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/studio-cold-start-v2/
+            /world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py
+            /world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reuse the existing 180-frame artifact without rendering
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: dimon3898-sys/yeonhwarok-free
+          run-id: 43354123053
+          name: reference6s-registered-43354123053
+          path: ${{ runner.temp }}/existing-reference180
+      - name: Test only new post-capture admission using archived bytes
+        run: |
+          python -B "${INCIDENT}/check_archived_ledger.py" "${RUNNER_TEMP}/existing-reference180" "${RUNNER_TEMP}/repair-evidence/CPU_ADMISSION.json"
+      - name: Prepare four changed runtime files after admission PASS
+        run: |
+          python -B "${INCIDENT}/prepare_image.py" "${RUNNER_TEMP}/repair-context" "${RUNNER_TEMP}/repair-evidence/CPU_ADMISSION.json"
+      - name: Enable disposable builder compatibility
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Build one additive immutable image
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-jsonfix-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
+          if docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then echo IMMUTABLE_TAG_ALREADY_EXISTS; exit 1; fi
+          docker build --platform linux/amd64 --label "org.opencontainers.image.revision=${GITHUB_SHA}" --label 'org.opencontainers.image.source=https://github.com/dimon3898-sys/yeonhwarok-free' -t "${IMAGE}" "${RUNNER_TEMP}/repair-context"
+          printf '%s\n' "${IMAGE}" > "${RUNNER_TEMP}/repair-image-tag"
+      - name: Verify installed reader and new pins without GPU or network
+        run: |
+          set -euo pipefail
+          IMAGE=$(cat "${RUNNER_TEMP}/repair-image-tag")
+          docker run --rm -i --network none --read-only --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges -e NVIDIA_VISIBLE_DEVICES=void --mount "type=bind,src=${RUNNER_TEMP}/repair-context/verify_installed.py,dst=/verify_installed.py,readonly" --entrypoint /usr/bin/python3 "${IMAGE}" -I -B /verify_installed.py < "${RUNNER_TEMP}/repair-context/CONTEXT.json" > "${RUNNER_TEMP}/repair-evidence/INSTALLED_READER.json"
+          docker image inspect "${IMAGE}" --format '{{json .Config}}' > "${RUNNER_TEMP}/repair-image-config.json"
+      - name: Publish the verified new tag
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          IMAGE=$(cat "${RUNNER_TEMP}/repair-image-tag")
+          printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker push "${IMAGE}" | tee "${RUNNER_TEMP}/repair-evidence/PUSH.log"
+          docker image inspect "${IMAGE}" --format '{{json .RepoDigests}}' > "${RUNNER_TEMP}/repair-evidence/REGISTRY_DIGESTS.json"
+          docker logout ghcr.io
+      - name: Record actual published digest
+        run: |
+          python - <<'PY'
+          import json,os,re
+          from pathlib import Path
+          t=Path(os.environ['RUNNER_TEMP']);out=t/'repair-evidence';ctx=json.loads((t/'repair-context/CONTEXT.json').read_text());cfg=json.loads((t/'repair-image-config.json').read_text())
+          ds=json.loads((out/'REGISTRY_DIGESTS.json').read_text());assert len(ds)==1 and re.fullmatch(r'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:[0-9a-f]{64}',ds[0])
+          assert cfg.get('User','') in ['', '0', 'root', '0:0'] and cfg['Entrypoint']==ctx['entrypoint']
+          value={'status':'PASS_BUILT_VERIFIED_PUBLISHED','imageTag':(t/'repair-image-tag').read_text().strip(),'digest':ds[0].split('@')[1],'imageByDigest':ds[0],'buildCommit':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],'parentImage':ctx['parentImage'],'runtimeManifestSHA256':ctx['runtimeManifestSHA256'],'startupManifestSHA256':ctx['startupManifestSHA256'],'overlayFiles':ctx['files'],'workerUID':1000,'entrypoint':ctx['entrypoint'],'GPUExecutions':0,'rendererExecutions':0,'oldPassReruns':0,'existingImageOverwritten':False,'actualFailedMP4Recovered':False}
+          (out/'IMAGE_BUILD.json').write_text(json.dumps(value,indent=2)+'\n')
+          PY
+      - name: Preserve the execution outcome
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os,shutil
+          from pathlib import Path
+          t=Path(os.environ['RUNNER_TEMP']);out=Path(os.environ['INCIDENT'])/'execution-a1';out.mkdir(exist_ok=False)
+          src=t/'repair-evidence'
+          if src.exists():
+              for p in src.iterdir():
+                  if p.is_file():shutil.copy2(p,out/p.name)
+          (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'sourceCommit':os.environ['GITHUB_SHA'],'imagePass':(out/'IMAGE_BUILD.json').exists(),'GPUExecutions':0})+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference6s-json-repair-${{ github.run_id }}
+          path: ${{ env.INCIDENT }}/execution-a1/
+          retention-days: 90
+      - name: Commit evidence with a fresh branch lease
+        if: always()
+        run: |
+          set -euo pipefail
+          BRANCH=fix/reference-6s-formal-admission-20261113
+          test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
+          git config user.name 'WORLD ENGINE incident evidence'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "${INCIDENT}/execution-a1"
+          git commit -m 'Preserve post-capture admission and immutable image evidence'
+          git push origin "HEAD:refs/heads/${BRANCH}"
