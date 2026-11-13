@@ -148,7 +148,7 @@ uniform float screenHeight;uniform vec4 safeArea;
 uniform vec4 reservations[64];uniform int reservationCount;
 uniform int mode;uniform vec2 center;uniform float heading;uniform vec2 graphicSize;
 uniform vec2 points[96];uniform int pointCounts[8];uniform vec4 polygonColors[8];uniform int polygonCount;
-uniform vec4 accent;uniform float pulseRadius,pulseAlpha;
+uniform vec4 accent;uniform float pulseRadius,pulseAlpha,pulseWidth,pulseGlowRadius,pulseGlowGain;
 float segmentDistance(vec2 p,vec2 a,vec2 b){vec2 ab=b-a;return length(p-a-ab*clamp(dot(p-a,ab)/max(dot(ab,ab),1.e-8),0.,1.));}
 float polygonDistance(vec2 p,int polygon){
  int n=pointCounts[polygon],offset=polygon*12;bool inside=false;float distance=1.e20;
@@ -178,7 +178,9 @@ void main(){
   color=vec4(accent.rgb,(1.-smoothstep(1.,2.,d))*accent.a);
  }else{
   float d=abs(length(delta)-pulseRadius);
-  color=vec4(accent.rgb,(1.-smoothstep(.8,1.8,d))*pulseAlpha);
+  float core=1.-smoothstep(pulseWidth*.5,pulseWidth*.5+1.,d);
+  float glow=pulseGlowRadius>0.?(1.-smoothstep(pulseWidth*.5,pulseWidth*.5+pulseGlowRadius,d))*pulseGlowGain:0.;
+  color=vec4(accent.rgb,(core+glow*(1.-core))*pulseAlpha);
  }
  if(color.a<=0.)discard;frag=color;
 }`;
@@ -231,7 +233,10 @@ function reservationsRecord(graphics){
  * Marker occlusion is allowed for a route. Objects, chevrons and pulse rings
  * rasterize below all native reservations without moving those reservations.
  */
-export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail=null,previewStyle=null}={}){
+export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail=null,previewStyle=null,pulseStyle=null}={}){
+ const pulseAppearance=pulseStyle??{width:1.6,glowRadius:0,glowGain:0};
+ if(!Number.isFinite(pulseAppearance.width)||pulseAppearance.width<1||pulseAppearance.width>10||!Number.isFinite(pulseAppearance.glowRadius)||pulseAppearance.glowRadius<0||pulseAppearance.glowRadius>16||!Number.isFinite(pulseAppearance.glowGain)||pulseAppearance.glowGain<0||pulseAppearance.glowGain>1)throw Error('FLOW_PULSE_STYLE_RANGE');
+ const pulseSupport=radius=>radius+Math.max(2,pulseAppearance.width/2+Math.max(1,pulseAppearance.glowRadius));
  if(!canvas||width!==1080||height!==1920||canvas.width!==width||canvas.height!==height)
   throw Error('FLOW_CANONICAL_NATIVE_CANVAS_REQUIRED');
  const gl=canvas.getContext('webgl2');if(!gl)throw Error('FLOW_NATIVE_WEBGL2_REQUIRED');
@@ -249,7 +254,7 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail
  }catch(error){previewPass?.dispose();linePass?.dispose();renderer?.dispose();if(program)gl.deleteProgram(program);if(vao)gl.deleteVertexArray(vao);throw error;}
  finally{restoreFlowNativeGlState(gl,originalState);}
  const uniformNames=['screenHeight','safeArea','reservations[0]','reservationCount','mode','center','heading','graphicSize',
-  'points[0]','pointCounts[0]','polygonColors[0]','polygonCount','accent','pulseRadius','pulseAlpha'];
+  'points[0]','pointCounts[0]','polygonColors[0]','polygonCount','accent','pulseRadius','pulseAlpha','pulseWidth','pulseGlowRadius','pulseGlowGain'];
  const uniforms=Object.fromEntries(uniformNames.map(name=>[name,gl.getUniformLocation(program,name)]));
  const evidence={version:FLOW_GRAPHIC_PASS_V2_VERSION,composition:'Fresh native canvas -> unchanged V1 route -> finite-support Flow vector GPU',
   routeEngine:'EVENT_LINE_GPU_PASS_V1',geometryEngine:'GEOGRAPHIC_LINE_REVEAL_V1',nativeRendererSourceUnchanged:true,
@@ -271,6 +276,7 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail
   gl.uniform4fv(uniforms['reservations[0]'],boxes);gl.uniform1i(uniforms.reservationCount,reservations.length);
   gl.uniform1i(uniforms.mode,mode);gl.uniform2fv(uniforms.center,position);gl.uniform1f(uniforms.heading,heading);
   gl.uniform4fv(uniforms.accent,style.coreColor);gl.uniform1f(uniforms.pulseRadius,radius);gl.uniform1f(uniforms.pulseAlpha,alpha);
+  gl.uniform1f(uniforms.pulseWidth,pulseAppearance.width);gl.uniform1f(uniforms.pulseGlowRadius,pulseAppearance.glowRadius);gl.uniform1f(uniforms.pulseGlowGain,pulseAppearance.glowGain);
   if(graphic){
    const points=new Float32Array(MAX_POLYGONS*MAX_POINTS*2),counts=new Int32Array(MAX_POLYGONS),colors=new Float32Array(MAX_POLYGONS*4);
    graphic.polygons.forEach((polygon,index)=>{
@@ -290,9 +296,9 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail
   drawPulse({pulse,safeArea,protectedGraphics=[]}){
    if(disposed)throw Error('FLOW_GPU_DISPOSED');
    const position=pulse?.anchor??pulse?.position,radius=pulse?.radius,alpha=pulse?.alpha;
-   if(!finitePoint(position)||!Number.isFinite(radius)||radius<0||radius>64||!Number.isFinite(alpha)||alpha<0||alpha>1)throw Error('FLOW_ENDPOINT_PULSE_CONTRACT_REQUIRED');
-   const reservations=reservationsRecord(protectedGraphics),state=captureFlowNativeGlState(gl),support=radius+2;
-   try{return {...drawOverlay({mode:2,position,heading:0,roi:[position[0]-support,position[1]-support,position[0]+support,position[1]+support],safeArea,reservations,radius,alpha}),radius,alpha,progress:pulse.progress,repetition:'ONCE_PER_SUPPLIED_HIGHLIGHT'};}
+   if(!finitePoint(position)||!Number.isFinite(radius)||radius<0||radius>96||!Number.isFinite(alpha)||alpha<0||alpha>1)throw Error('FLOW_ENDPOINT_PULSE_CONTRACT_REQUIRED');
+   const reservations=reservationsRecord(protectedGraphics),state=captureFlowNativeGlState(gl),support=pulseSupport(radius);
+   try{return {...drawOverlay({mode:2,position,heading:0,roi:[position[0]-support,position[1]-support,position[0]+support,position[1]+support],safeArea,reservations,radius,alpha}),radius,alpha,pulseStyle:clone(pulseAppearance),progress:pulse.progress,repetition:'ONCE_PER_SUPPLIED_HIGHLIGHT'};}
    finally{restoreFlowNativeGlState(gl,state);}
   },
   draw({primitive,controls,safeArea,protectedGraphics=[],flowIntent}={}){
@@ -313,8 +319,11 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail
      for(let i=trail.echoes;i>=1;i--){
       const fraction=controls.objectFraction-i*trail.spacingPixels/primitive.totalLengthPixels;if(fraction<=0)continue;
       const sample=sampleFlowRoute(primitive,fraction,{lookAheadPixels:controls.headingLookAheadPixels});
-      const ghost=clone(graphic);for(const polygon of ghost.polygons)polygon.color[3]*=trail.alpha*(trail.echoes-i+1)/trail.echoes;
-      echoes.push({...drawOverlay({mode:0,position:sample.position,heading:sample.heading,roi:objectRoi(sample.position,sample.heading,ghost),safeArea,reservations,graphic:ghost}),fraction,alpha:trail.alpha*(trail.echoes-i+1)/trail.echoes});
+      const fade=trail.fadeEndFraction===undefined?1:Math.min(1,(1-controls.objectFraction)/(1-trail.fadeEndFraction));
+      const opacity=trail.alpha*(trail.echoes-i+1)/trail.echoes*fade;
+      const ghost=clone(graphic);ghost.width_px*=trail.scale??1;ghost.height_px*=trail.scale??1;
+      for(const polygon of ghost.polygons)polygon.color[3]*=opacity;
+      echoes.push({...drawOverlay({mode:0,position:sample.position,heading:sample.heading,roi:objectRoi(sample.position,sample.heading,ghost),safeArea,reservations,graphic:ghost}),fraction,alpha:opacity,graphicDimensions:[ghost.width_px,ghost.height_px]});
      }
     }
     if(controls.directionalActive){

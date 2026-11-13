@@ -15,9 +15,10 @@ export function validateFlowStyle(style){
  return copy(style);
 }
 export function validateHighlightRing(ring,{startFrame,endFrame,totalFrames,holdFrames}){
- keys(ring,['frames','radiusPx','color'],'PRESENTATION_RING_FIELDS');
+ keys(ring,['frames','radiusPx','color','widthPx','glowRadiusPx','glowGain','holdAlpha'],'PRESENTATION_RING_FIELDS');
  check(integer(ring.frames,2,60)&&startFrame+ring.frames<=endFrame&&startFrame+ring.frames<=totalFrames-holdFrames,'PRESENTATION_RING_MUST_FINISH_BEFORE_HOLD');
- check(Number.isFinite(ring.radiusPx)&&ring.radiusPx>=12&&ring.radiusPx<=64,'PRESENTATION_RING_RADIUS');
+ check(Number.isFinite(ring.radiusPx)&&ring.radiusPx>=12&&ring.radiusPx<=96,'PRESENTATION_RING_RADIUS');
+ for(const [key,min,max] of [['widthPx',1,10],['glowRadiusPx',0,16],['glowGain',0,1],['holdAlpha',0,.7]])if(ring[key]!==undefined)check(Number.isFinite(ring[key])&&ring[key]>=min&&ring[key]<=max,'PRESENTATION_RING_STYLE_RANGE');
  check(Array.isArray(ring.color)&&ring.color.length===4&&ring.color.every(unit)&&ring.color[3]>0,'PRESENTATION_RING_COLOR');
  return copy(ring);
 }
@@ -34,8 +35,10 @@ export function validatePresentationFlows(items,{scene,engines}){
    check(plan.fps===scene.timing.fps&&plan.startFrame===0&&plan.totalFrames===binding.plan.totalFrames&&plan.timing.hold_frames===scene.timing.final_hold_frames,'PRESENTATION_FLOW_ORIGINAL_CLOCK_REQUIRED');
   }
   for(const k of ['style','previewStyle'])if(item[k]!==undefined)out[k]=validateFlowStyle(item[k]);
-  if(item.trail!==undefined){keys(item.trail,['echoes','spacingPixels','alpha'],'PRESENTATION_TRAIL_FIELDS');
-   check(integer(item.trail.echoes,1,3)&&Number.isFinite(item.trail.spacingPixels)&&item.trail.spacingPixels>=8&&item.trail.spacingPixels<=32&&Number.isFinite(item.trail.alpha)&&item.trail.alpha>0&&item.trail.alpha<=.4,'PRESENTATION_TRAIL_RANGE');}
+  if(item.trail!==undefined){keys(item.trail,['echoes','spacingPixels','alpha','scale','fadeEndFraction'],'PRESENTATION_TRAIL_FIELDS');
+   check(integer(item.trail.echoes,1,3)&&Number.isFinite(item.trail.spacingPixels)&&item.trail.spacingPixels>=8&&item.trail.spacingPixels<=64&&Number.isFinite(item.trail.alpha)&&item.trail.alpha>0&&item.trail.alpha<=.6,'PRESENTATION_TRAIL_RANGE');
+   if(item.trail.scale!==undefined)check(Number.isFinite(item.trail.scale)&&item.trail.scale>=.3&&item.trail.scale<=1,'PRESENTATION_TRAIL_SCALE');
+   if(item.trail.fadeEndFraction!==undefined)check(Number.isFinite(item.trail.fadeEndFraction)&&item.trail.fadeEndFraction>=.7&&item.trail.fadeEndFraction<1,'PRESENTATION_TRAIL_FADE');}
   if(item.reveal!==undefined){keys(item.reveal,['mode','leadPixels'],'PRESENTATION_FLOW_REVEAL_FIELDS');
    check(item.reveal.mode==='FOLLOW_OBJECT'&&Number.isFinite(item.reveal.leadPixels)&&item.reveal.leadPixels>=0&&item.reveal.leadPixels<=48,'PRESENTATION_FLOW_REVEAL_RANGE');}
   return out;
@@ -58,7 +61,8 @@ export function composePresentationFlowControls(controls,primitive,options){
   presentationReveal:{mode:options.reveal.mode,leadPixels:options.reveal.leadPixels,clockOwner:'UNCHANGED_FLOW_V2_OBJECT_CLOCK'}};
 }
 export function highlightRingAt(highlight,frame,position){
- const ring=highlight.ring;if(!ring||frame<highlight.startFrame||frame>=highlight.startFrame+ring.frames)return null;
- const progress=(frame-highlight.startFrame)/(ring.frames-1);
- return {active:true,anchor:[...position],position:[...position],radius:ring.radiusPx*(.3+.7*progress),alpha:progress===0||progress===1?0:Math.sin(Math.PI*progress),progress};
+ const ring=highlight.ring;if(!ring||frame<highlight.startFrame||frame>=highlight.endFrame||(!ring.holdAlpha&&frame>=highlight.startFrame+ring.frames))return null;
+ const progress=Math.min(1,(frame-highlight.startFrame)/(ring.frames-1));
+ const oscillation=progress===0||progress===1?0:Math.sin(Math.PI*progress),settled=(ring.holdAlpha??0)*progress;
+ return {active:true,anchor:[...position],position:[...position],radius:ring.radiusPx*(.3+.7*progress),alpha:Math.max(oscillation,settled),progress};
 }

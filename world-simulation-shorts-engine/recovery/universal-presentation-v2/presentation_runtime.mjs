@@ -95,7 +95,7 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    const style=binding.presentationFlow?.style??selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style,trail:binding.presentationFlow?.trail,previewStyle:binding.presentationFlow?.previewStyle});passes.push(pass);
    return{...binding,pass,style,analysisPrimitive:compileFlowRoute(binding.plan.intent,{project:analysisProject})};
   });
-  const ringBindings=p.highlights.filter(h=>h.ring).map(h=>{const pass=createFlowGraphicPass({canvas,style:{width:2,glowRadius:1,glowGain:0,coreColor:h.ring.color,glowColor:h.ring.color}});passes.push(pass);return{highlight:h,pass};});
+  const ringBindings=p.highlights.filter(h=>h.ring).map(h=>{const pass=createFlowGraphicPass({canvas,style:{width:2,glowRadius:1,glowGain:0,coreColor:h.ring.color,glowColor:h.ring.color},pulseStyle:{width:h.ring.widthPx??1.6,glowRadius:h.ring.glowRadiusPx??0,glowGain:h.ring.glowGain??0}});passes.push(pass);return{highlight:h,pass};});
   const project=point=>factory.screen(point);let source=sourceStyle.terrainAsset;
   function markersAt(frame){
    const rows=(scene.markers??[]).map(item=>({id:item.id,anchor:copy(item.anchor),kind:'MARKER',scale:1,source:'SUPPLIED_SCENE_MARKER'}));
