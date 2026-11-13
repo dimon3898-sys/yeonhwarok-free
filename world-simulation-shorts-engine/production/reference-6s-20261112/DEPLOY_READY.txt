@@ -1,0 +1,44 @@
+READY_FOR_USER_DEPLOYMENT
+2026-11-13 / WORLD ENGINE 64306 reference6s
+
+완료: 전체 카메라·지리 소스 승인, IGN 좌표/핀 연결, 실제7PNG, 연속180PNG, 마지막30프레임 유지, 새 이미지 게시, gCube 설정 저장.
+GPU0회, Studio렌더0회, 기존유효PASS재실행0회. V10/V11재사용, 원본광학흐름재분석없음.
+
+사용자 실행 순서
+1. https://gcube.ai/demand/ns74a360e2/workload/5373 에서 배포.
+2. Studio에서 입력 JSON 선택 → REFERENCE_6S_REGISTERED_INPUT.json → 사전검사 → 6초 렌더링.
+   내장된 예전 예제 대신 이번 파일을 선택.1080x1920,30fps,180프레임.
+3. 완성 MP4를 휴대폰에 다운로드.
+4. gCube 배포 중지 후 종료 상태 확인.
+
+저장된 설정
+GPU TIER2 RTX5090x1(32GB),vCPU12,RAM63GB,포트8080,공유메모리3GB,레플리카1,동시요청4.
+컨테이너 명령은 빈칸.이미지 기본TINI/bootstrap사용.기존소유자인증값보존.
+Dropbox world-engine-test → /world-storage.개인인증영역은 /var/lib/world-engine-studio-v2/auth.
+앱 실행상한1800초(30분),재시도0,예산2000원,시간당 표시요금910~1300원(VAT별도).
+30분예상455~650원(VAT별도).앱시간제한은 gCube과금을 중단하지 않으므로 사용자가 반드시배포중지.
+정책만료2026-11-27 23:59+09:00.재고/요금은2026-11-13확인값.
+
+이미지
+ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-20261113-4102d55447e3-43355738683
+
+Digest
+sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4
+
+Build commit
+4102d55447e3ea36cb3e42601fd44d3e758a036c
+
+증거
+- FULL_CAMERA_SOURCE_ADMISSION.json
+- CPU_SCREEN_REVIEW.json / cpu-a4 실제7PNG
+- CPU_CONTINUITY_REVIEW.json / cpu-continuity-a1
+- Actions43354123053: 전체180PNG아티팩트(90일보관); 중요PNG/해시영구Git보존
+- image-a1/IMAGE_BUILD.json / Actions43355738683
+- GCUBE_PREDEPLOY_CONFIG.json: 비밀값제외정확한환경변수와설정저장확인
+
+로그/오류 보존경로
+/world-storage/capture-checkpoint-studio-<jobid>/
+/world-storage/capture-diagnostic-studio-<jobid>/
+종료상태에서는 실제마운트쓰기/외부백업회수 및NVIDIA실행을 검증하지 않았음.
+CPU승인은 실제MP4완성이나GPU실행PASS를 뜻하지 않음.
+NASA2004배경색·일반화경계·중립라벨서체는 레퍼런스와차이가 있으며 픽셀완전일치주장없음.

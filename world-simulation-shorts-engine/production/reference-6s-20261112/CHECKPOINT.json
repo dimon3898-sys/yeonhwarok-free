@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "PENDING_IMAGE_BUILD",
-  "firstIncomplete": "STEP 4 immutable image build and publication",
+  "status": "READY_FOR_USER_DEPLOYMENT",
+  "firstIncomplete": "USER_STEP_1_GCUBE_DEPLOYMENT_NOT_EXECUTED_BY_WORK",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
     "width": 1080,
@@ -56,12 +56,12 @@
     {
       "step": "Image build",
       "class": "신규 작업",
-      "state": "ONLY_IF_RUNTIME_CHANGE_AND_CPU_PASS"
+      "state": "PASS_NEW_IMMUTABLE_IMAGE"
     },
     {
       "step": "gCube config",
       "class": "신규 작업",
-      "state": "WAIT_FOR_REQUIRED_GATES"
+      "state": "PASS_SAVED_WITHOUT_DEPLOYMENT"
     }
   ],
   "actions": {
@@ -84,7 +84,7 @@
   ],
   "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Build current verified runtime closure once on free public Ubuntu Actions, preserve new digest; then update stopped gCube settings without deployment.",
+  "nextAction": "User only: deploy workload5373, upload REFERENCE_6S_REGISTERED_INPUT.json and render6s, download MP4, stop workload.",
   "lastError": null,
   "formalCompile": {
     "status": "PASS",
@@ -120,10 +120,14 @@
     "actualFrames": 180
   },
   "imageBuild": {
-    "status": "PENDING",
-    "reason": "Existing image lacks newly verified geographic camera and source connection"
+    "status": "PASS",
+    "evidence": "image-a1/IMAGE_BUILD.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-20261113-4102d55447e3-43355738683",
+    "digest": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+    "buildCommit": "4102d55447e3ea36cb3e42601fd44d3e758a036c",
+    "runId": "43355738683"
   },
-  "deploymentReady": false,
+  "deploymentReady": true,
   "sourcePinVerification": {
     "status": "PASS",
     "scope": "Changed NVIDIA variants and mandatory atomic 3-variant source check only; no GPU, no image build",
@@ -136,7 +140,7 @@
     "admission": "FULL_CAMERA_SOURCE_ADMISSION.json",
     "oldApproximateFitPreservedInGit": true
   },
-  "lastRemoteSavedBeforeThisUnit": "a49c36fa1e5264c5413b28b324d1a4c6a72038f1",
+  "lastRemoteSavedBeforeThisUnit": "23756e9d6c11a18f311c98475dbbad17f1c03ca7",
   "registeredCompile": {
     "status": "PASS",
     "compilerInputSHA256": "4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45",
@@ -149,12 +153,24 @@
   },
   "firstFrameFitReused": "Existing V10 relative transforms; new Mercator registration and final two-pin correction only",
   "invalidatedScope": [
-    "New source/catalog/camera input: compile and two schemas refreshed only for changed input",
-    "Native renderer opt-in and runtime connection require new geographic PNG evidence",
-    "NVIDIA source pins pending final code changes"
+    "Previously declared changes verified by current registered compile/schema, fullsource admission, cpu-a4 seven PNG, sequential180PNG, and actualimage source verification; no outstanding invalidation"
   ],
   "registeredSourcePins": {
     "evidence": "REGISTERED_SOURCE_PIN_DELTA.json",
+    "GPUExecutions": 0,
+    "status": "PASS_ACTUAL_IMAGE_SOURCE_CLOSURE",
+    "imageVerification": "image-a1/IMAGE_SOURCE_VERIFICATION.json",
+    "adapterVerification": "image-a1/IMAGE_ADAPTER_VERIFICATION.json"
+  },
+  "gcubePredeployment": {
+    "status": "PASS_SAVED_STOPPED",
+    "evidence": "GCUBE_PREDEPLOY_CONFIG.json",
+    "workloadId": 5373,
     "GPUExecutions": 0
-  }
+  },
+  "unverifiedAfterUserDeployment": [
+    "Real NVIDIA driver rendering and encodedMP4",
+    "Actual mounted read/write and external backupreadback"
+  ],
+  "existingAnalysisRerun": false
 }

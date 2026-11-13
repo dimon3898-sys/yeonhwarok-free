@@ -1,0 +1,130 @@
+{
+  "status": "READY_FOR_USER_DEPLOYMENT",
+  "workloadId": 5373,
+  "workloadName": "world-engine-test",
+  "workloadURL": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+  "observedBeforeChange": {
+    "status": "Stopped",
+    "allocatedNode": null,
+    "image": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:korean-war-20s-v17-42530874057",
+    "digest": "sha256:9190c88bcf5074f3fe1c064b18518b4ba7aa3a0707b255cbf078720e70e75100"
+  },
+  "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-20261113-4102d55447e3-43355738683",
+  "digest": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+  "GPU": {
+    "model": "TIER2 RTX 5090",
+    "count": 1,
+    "VRAMGiB": 32,
+    "availableAtInspection": true,
+    "observedDateUTC": "2026-11-13"
+  },
+  "vCPU": 12,
+  "RAMGiB": 63,
+  "localDiskGB": 937,
+  "replicas": 1,
+  "port": 8080,
+  "registry": "GitHub",
+  "registryCredentialRequired": false,
+  "containerCommand": "",
+  "concurrency": 4,
+  "sharedMemoryGiB": 3,
+  "istio": true,
+  "l7ConsistentHash": false,
+  "minimumCUDAVersion": null,
+  "environment": {
+    "NVIDIA_DRIVER_CAPABILITIES": "all",
+    "WORLD_ENGINE_RENDER_MODE": "gpu-required",
+    "WORLD_ENGINE_STORAGE_MODE": "ephemeral",
+    "WORLD_ENGINE_STORAGE_PATH": "/data",
+    "WORLD_ENGINE_STARTUP_MODE": "normal",
+    "WORLD_ENGINE_DIAGNOSTIC_PORT": "8000",
+    "WORLD_ENGINE_DIAGNOSTIC_TTL_SECONDS": "900",
+    "WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+    "WORLD_ENGINE_STUDIO_OPERATOR_POLICY_JSON": {
+      "validUntil": "2026-11-27T23:59:00+09:00",
+      "maxWallSeconds": 1800,
+      "maxRetries": 0,
+      "maxCostAmount": 2000,
+      "currency": "KRW",
+      "gpuHourlyRate": 1300
+    },
+    "WORLD_ENGINE_STUDIO_STATE_ROOT": "/var/lib/world-engine-studio-v2/auth",
+    "WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+    "GPU_BACKEND": "vulkan",
+    "WORLD_ENGINE_NODE_DEPS": "/opt/rtx-package/repo/cinematic-world-map"
+  },
+  "secretEnvironmentPolicy": {
+    "names": [
+      "WORLD_ENGINE_OWNER_CODE",
+      "WORLD_ENGINE_STUDIO_OWNER_CODE"
+    ],
+    "action": "PRESERVE_EXISTING_VALUES_NEVER_PUBLISH"
+  },
+  "storage": {
+    "registeredConnection": "world-engine-test",
+    "mountPath": "/world-storage",
+    "imageExportRoot": "/world-storage",
+    "privateAuthRoot": "/var/lib/world-engine-studio-v2/auth",
+    "privateAuthMustRemainOutsideExport": true,
+    "legacyStorageEnvironment": "ephemeral /data is preserved legacy configuration; the new image entrypoint explicitly exports to /world-storage",
+    "mountedReadWrite": "NOT_RUN_WITH_STOPPED_WORKLOAD",
+    "externalBackupReadback": "NOT_CLAIMED"
+  },
+  "studioInput": {
+    "filename": "REFERENCE_6S_REGISTERED_INPUT.json",
+    "fileSHA256": "f2822ac6c2a156504e48538cad631442f14fe60b538e0dbe65fc0c5c275b6282",
+    "compilerInputSHA256": "4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45",
+    "uploadControl": "입력 JSON 선택",
+    "useBuiltInOldExample": false,
+    "format": {
+      "width": 1080,
+      "height": 1920,
+      "fps": 30,
+      "frames": 180
+    }
+  },
+  "diagnosticExportPaths": [
+    "/world-storage/capture-checkpoint-studio-<jobid>/",
+    "/world-storage/capture-diagnostic-studio-<jobid>/"
+  ],
+  "runtimeLimitSeconds": 1800,
+  "retries": 0,
+  "price": {
+    "currency": "KRW",
+    "hourlyBeforeVAT": [
+      910,
+      1300
+    ],
+    "estimated30MinutesBeforeVAT": [
+      455,
+      650
+    ],
+    "budget": 2000,
+    "source": "Actual gCube selected available GPU row,2026-11-13",
+    "applicationExpiryStopsProviderBilling": false
+  },
+  "settingsSaved": true,
+  "GPUExecutions": 0,
+  "deployStarts": 0,
+  "studioRenders": 0,
+  "deployStops": 0,
+  "imageByDigest": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+  "buildCommit": "4102d55447e3ea36cb3e42601fd44d3e758a036c",
+  "settingsReadback": {
+    "status": "PASS",
+    "observedDateUTC": "2026-11-13",
+    "workloadStatus": "Stopped",
+    "nodeAllocated": false,
+    "lastDeploymentUnchanged": "2026-11-11 22:45:24",
+    "imageValidation": "gCube 검증완료",
+    "port": 8080,
+    "bothDigestEnvironmentValuesMatchPublishedImage": true,
+    "policyMaxWallSeconds": 1800,
+    "policyMaxRetries": 0,
+    "policyMaxCostKRW": 2000,
+    "storageConnection": "Dropbox world-engine-test",
+    "storageMount": "/world-storage",
+    "saveTriggeredDeployment": false,
+    "note": "Image validation selected8000 automatically; correctedto8080before save and reopened edit form confirmed8080. Existing auth values unchanged and excluded from this file."
+  }
+}
