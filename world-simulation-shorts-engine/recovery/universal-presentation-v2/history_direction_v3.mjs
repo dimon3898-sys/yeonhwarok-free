@@ -37,8 +37,18 @@ export function deriveHistoryPresentationV3({scene,admission,timingAudit}){
  const reused=deriveHistoryPresentationV2({scene,admission,analysis,timingAudit});
  const p=copy(reused.presentation),n=scene.timing.total_frames,frames=Array(n),keys=[];let current=copy(reused.audit.cameraKeys[0].pose);
  // Start in geographic context then gently approach. Source qualification bounds zoom, never raster enlargement.
- const context=copy(current);context.scale*=.78;
- try{selectGeographicTerrain(levels,context,{maximumTextureSize:8192});current=context;}catch{/* exact qualified V2 pose remains authoritative */}
+ // Reference [175,283) changes image scale by about13x. A conservative2x context cap
+ // is a design adaptation to this native source, never an invented measured value.
+ const firstTarget=reused.audit.cameraKeys[2].pose;let chosen=null;
+ for(const ratio of [.5,.55,.6,.65,.7,.75,.8,.9,1]){
+  for(let shift=0;shift<=30;shift+=2){
+   const context=copy(current),cy=mercatorY(current.center[1]);context.scale=Math.min(current.scale,firstTarget.scale)*ratio;
+   context.center[1]=inverseMercatorY(cy-Math.sign(cy)*Math.min(Math.abs(cy),shift));
+   try{selectGeographicTerrain(levels,context,{maximumTextureSize:8192});if(screenFraction(analysis.states[0],context)<.05)continue;chosen=context;break;}catch{}
+  }
+  if(chosen)break;
+ }
+ if(chosen)current=chosen;
  for(const [i,c]of timingAudit.choreography.entries()){
   // Last key is a full result overview; intermediate keys follow the actual difference region.
   const target=copy(reused.audit.cameraKeys[i+2].pose),movement=cameraPath(current,target,c.moveEnd-c.moveStart);
