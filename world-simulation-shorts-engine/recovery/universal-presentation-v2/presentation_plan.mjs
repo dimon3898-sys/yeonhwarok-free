@@ -90,7 +90,7 @@ export function validatePresentation(input,{scene,region}={}){
  result.highlights=copy(highlights);
  for(const h of result.highlights)if(h.ring!==undefined)h.ring=validateHighlightRing(h.ring,{...h,totalFrames:n,holdFrames:scene.timing.final_hold_frames});
  if(input.flow!==undefined)result.flow=validatePresentationFlows(input.flow,{scene,engines:compileExistingEnginePlan(scene)});
- if(input.labels!==undefined)result.labels=validateLabelSpec(input.labels,{scene,highlights});
+ if(input.labels!==undefined)result.labels=validateLabelSpec(input.labels,{scene,highlights,territoryChanges:result.territoryChanges});
  const cuts=input.transitions??[];ok(Array.isArray(cuts),'PRESENTATION_TRANSITION_ARRAY_REQUIRED');
  for(const t of cuts){keys(t,['type','frame'],'PRESENTATION_TRANSITION');ok(t.type==='CUT'&&Number.isSafeInteger(t.frame)&&t.frame>=0,'PRESENTATION_CUT_REQUIRED');}
  result.transitions=copy(cuts);return result;
@@ -244,7 +244,13 @@ export function compilePresentationEnginePlan({scene,presentation}={}){
  // An independent clip can start with its supplied land area visible while a
  // new line reveals. It makes no claim that a previous timeline scene exists.
  const preserved=mode==='PRESERVE_AREA_REVEAL_LINE'?['AREA_REVEAL']:['AREA_REVEAL','FRONT_LINE'];
- return{...engines,plans:engines.plans.map(binding=>{if(binding.engine!=='EXISTING_AREA_V3')return binding;const plan=binding.plan,operations=plan.operations.map(op=>preserved.includes(op.type)?{...copy(op),from:1,to:1}:copy(op));
+ return{...engines,plans:engines.plans.map(binding=>{if(binding.engine!=='EXISTING_AREA_V3')return binding;const plan=binding.plan,operations=plan.operations.map(op=>{
+   if(presentation?.territoryChanges?.profile==='HISTORICAL_STATES_V3'&&op.type==='STATE_TRANSITION'){
+    const effects=validateTerritoryEffects(presentation.territoryChanges,scene),e=effects.items.find(x=>x.toStateId===op.state_ids[1]);
+    ok(e&&e.startFrame===op.start_frame,'PRESENTATION_V3_BLEND_BINDING');return{...copy(op),duration_frames:e.endFrame-e.startFrame};
+   }
+   return preserved.includes(op.type)?{...copy(op),from:1,to:1}:copy(op);
+  });
   return{...binding,plan:compileAreaPlan(plan.intent,{fps:plan.fps,start_frame:plan.startFrame,total_frames:plan.totalFrames,operations}),presentationOperationBinding:{owner:'UNCHANGED_COMPILE_AREA_PLAN_PUBLIC_OPERATIONS',initialStateVisibility:mode,revealEndpoints:[1,1],originalGlobalClockPreserved:true,sourceGeometryChanged:false}};})};
 }
 

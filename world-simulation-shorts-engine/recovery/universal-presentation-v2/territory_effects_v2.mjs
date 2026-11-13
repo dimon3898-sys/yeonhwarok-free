@@ -3,7 +3,7 @@ import {analyzeTerritoryChanges,multi} from './territory_delta_v2.mjs';
 const check=(v,c)=>{if(!v)throw Error('TERRITORY_EFFECT_'+c);};
 const cache=new Map(),same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
 export function validateTerritoryEffects(spec,scene){
- check(spec?.profile==='HISTORICAL_STATES_V2'&&Object.keys(spec).every(k=>['profile','config','items'].includes(k)),'PROFILE');
+ check(['HISTORICAL_STATES_V2','HISTORICAL_STATES_V3'].includes(spec?.profile)&&Object.keys(spec).every(k=>['profile','config','items'].includes(k)),'PROFILE');
  check(scene.event_type==='WAR'&&!scene.routes?.length&&!scene.front_lines?.length&&Array.isArray(spec.items)&&spec.items.length===scene.time_steps.length-1,'TERRITORY_ONLY');
  const signature=JSON.stringify([scene.geometries,scene.areas,scene.time_steps.map(s=>({area_ids:s.area_ids,id:s.id}))]);
  let analysis=cache.get(signature);if(!analysis){analysis=analyzeTerritoryChanges(scene);if(cache.size>=4)cache.delete(cache.keys().next().value);cache.set(signature,analysis);}

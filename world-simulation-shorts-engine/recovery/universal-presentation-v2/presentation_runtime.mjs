@@ -28,7 +28,7 @@ const flatPoints=g=>g.type==='Polygon'?g.coordinates.flat():g.type==='MultiPolyg
  * Actual current-projection admission is nevertheless repeated at every draw. */
 export async function createPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null}={}){
  validateScenePlan(scene);
- assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&(scene.timing.total_frames<=240||scene.timing.total_frames<=600&&presentationPlan.presentation?.territoryChanges?.profile==='HISTORICAL_STATES_V2'),'UP2_FREE_FRAME_SCOPE');
+ assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&(scene.timing.total_frames<=240||scene.timing.total_frames<=600&&['HISTORICAL_STATES_V2','HISTORICAL_STATES_V3'].includes(presentationPlan.presentation?.territoryChanges?.profile)),'UP2_FREE_FRAME_SCOPE');
  assert(canvas?.width===1080&&canvas?.height===1920,'UP2_CANONICAL_CANVAS_REQUIRED');
  assert(['NE1_SOURCE_NATIVE_COVERAGE','GLOBAL_RGB_SOURCE_NATIVE_COVERAGE','GEOGRAPHIC_TERRAIN_PYRAMID_V1'].includes(sourceStyle?.styleId),'UP2_ACTUAL_NATIVE_SOURCE_REQUIRED');
  assert(sourceStyle.terrainAsset.sha256===nativePlan.assets.terrain.sha256&&terrainTreatment===sourceStyle.terrainTreatment,'UP2_SOURCE_BINDING_REQUIRED');

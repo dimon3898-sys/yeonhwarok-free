@@ -23,7 +23,7 @@ function alphaAt(item,frame){
 function validateItem(item){
  check(item&&typeof item==='object'&&Object.hasOwn(roles,item.role)&&typeof item.id==='string'&&typeof item.text==='string'
   &&(item.screenPlacement===item.role&&['TITLE','TIMELINE','DISCLOSURE'].includes(item.role)||typeof item.locationId==='string'&&point(item.anchor)&&Math.abs(item.anchor[0])<=180&&Math.abs(item.anchor[1])<=90)
-  &&Number.isSafeInteger(item.startFrame)&&item.startFrame>=0&&Number.isSafeInteger(item.endFrame)&&item.endFrame>item.startFrame&&item.endFrame<=300
+  &&Number.isSafeInteger(item.startFrame)&&item.startFrame>=0&&Number.isSafeInteger(item.endFrame)&&item.endFrame>item.startFrame&&item.endFrame<=600
   &&Number.isSafeInteger(item.revealFrames)&&item.revealFrames>=1&&item.revealFrames<=30
   &&Number.isSafeInteger(item.exitFrames)&&item.exitFrames>=1&&item.exitFrames<=30
   &&item.revealFrames+item.exitFrames<item.endFrame-item.startFrame
@@ -86,7 +86,7 @@ function connectorFor(rect,anchor,protectedBoxes,placed,clearance){
  */
 export function layoutLabels({items,frame,project,width=1080,height=1920,safeArea,protectedBoxes=[],measureText,previousLayout=null}={}){
  check(Array.isArray(items)&&items.length<=16&&new Set(items.map(x=>x?.id)).size===items.length,'UP2_LABEL_ITEM_CAPACITY');
- check(Number.isSafeInteger(frame)&&frame>=0&&frame<300&&typeof project==='function'&&typeof measureText==='function','UP2_LABEL_FRAME_PROJECTION_REQUIRED');
+ check(Number.isSafeInteger(frame)&&frame>=0&&frame<600&&typeof project==='function'&&typeof measureText==='function','UP2_LABEL_FRAME_PROJECTION_REQUIRED');
  check(Number.isSafeInteger(width)&&Number.isSafeInteger(height)&&width>=240&&height>=240&&width<=4096&&height<=4096,'UP2_LABEL_CANVAS_REQUIRED');
  const scale=Math.min(width/1080,height/1920),margin=32*scale,requested=safeArea??[0,0,width,height];
  check(box(requested)&&requested[0]>=0&&requested[1]>=0&&requested[2]<=width&&requested[3]<=height,'UP2_LABEL_SAFE_VIEWPORT_REQUIRED');

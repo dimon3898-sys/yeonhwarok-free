@@ -27,7 +27,7 @@ export function validateLabelText(value){
  * Optional anchor input is accepted only as an exact repeated compiled binding.
  * With no explicit label spec, callers must leave their legacy output unchanged.
  */
-export function validateLabelSpec(spec,{scene,highlights=[]}={}){
+export function validateLabelSpec(spec,{scene,highlights=[],territoryChanges}={}){
  keys(spec,['enabled','items'],'PRESENTATION_LABELS');
  check(spec.enabled===true,'PRESENTATION_LABELS_EXPLICIT_OPT_IN_REQUIRED');
  check(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames)&&scene.timing.total_frames>=2&&scene.timing.total_frames<=600,'PRESENTATION_LABEL_SCENE_TIMING_REQUIRED');
@@ -48,12 +48,13 @@ export function validateLabelSpec(spec,{scene,highlights=[]}={}){
     const index=scene.time_steps.findIndex(s=>s.id===item.stateId);check(index>=0,'PRESENTATION_TIMELINE_STATE_REQUIRED');
     const step=scene.time_steps[index],next=scene.time_steps[index+1];
     check(text===historicalTimeLabel(step.date),'PRESENTATION_TIMELINE_SOURCE_TEXT_MISMATCH');
-    start=index===0?0:step.start_frame+Math.ceil((step.transition_frames-1)/2);
-    end=next?next.start_frame+Math.ceil((next.transition_frames-1)/2):frames;
+    const midpoint=x=>{const effect=territoryChanges?.profile==='HISTORICAL_STATES_V3'?territoryChanges.items.find(e=>e.toStateId===x.id):null;return x.start_frame+Math.ceil(((effect?effect.endFrame-effect.startFrame:x.transition_frames)-1)/2);};
+    start=index===0?0:midpoint(step);
+    end=next?midpoint(next):frames;
    }else{
     check(!own(item,'stateId'),'PRESENTATION_SCREEN_STATE_UNEXPECTED');
     if(item.role==='TITLE')check(text===scene.subject.label,'PRESENTATION_TITLE_SOURCE_TEXT_MISMATCH');
-    else check(text==='역사 경계 재구성'&&scene.source_notes.some(s=>s.uncertainty),'PRESENTATION_DISCLOSURE_SOURCE_REQUIRED');
+    else check((text==='역사 경계 재구성'||territoryChanges?.profile==='HISTORICAL_STATES_V3'&&text==='역사 경계 재구성 / 일부 시기')&&scene.source_notes.some(s=>s.uncertainty),'PRESENTATION_DISCLOSURE_SOURCE_REQUIRED');
    }
    check(item.startFrame===start&&item.endFrame===end,'PRESENTATION_SCREEN_LABEL_SOURCE_TIMING_MISMATCH');
    const reveal=item.revealFrames??1,exit=item.exitFrames??1,priority=item.priority??100;
