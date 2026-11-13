@@ -77,6 +77,40 @@ def _write_runtime(job, wire):
         os.close(descriptor)
 
 
+def _read_frame_evidence(directory, reference, total_frames):
+    """Read only the sealed capture frame ledger with a frame-scaled byte cap.
+
+    Full projected geometry is repeated in per-frame diagnostics. Keep the
+    frozen cache's 32MiB limit for every other document and preserve all frame
+    evidence, ownership, no-follow, immutable-read and JSON checks here.
+    """
+    frozen = cache()
+    if (total_frames not in {180, 300} or type(total_frames) is not int
+            or not isinstance(reference, dict) or reference.get('file') != 'FRAME_EVIDENCE.json'
+            or not re.fullmatch(r'[a-f0-9]{64}', str(reference.get('sha256')))):
+        raise RuntimeError('HANDOFF_FRAME_EVIDENCE_REFERENCE_INVALID')
+    maximum = min(512 * 1024**2, total_frames * 2 * 1024**2)
+    name = 'FRAME_EVIDENCE.json'
+    descriptor = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory.fd)
+    try:
+        before = frozen._owned(os.fstat(descriptor))
+        if not 1 <= before.st_size <= maximum:
+            raise RuntimeError('HANDOFF_FRAME_EVIDENCE_SIZE_INVALID')
+        raw = frozen.storage._read_fd(descriptor, limit=maximum)
+        after = frozen._owned(os.fstat(descriptor))
+        current = os.stat(name, dir_fd=directory.fd, follow_symlinks=False)
+        if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns)
+                != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns)
+                or (current.st_dev, current.st_ino) != (after.st_dev, after.st_ino)):
+            raise RuntimeError('HANDOFF_FRAME_EVIDENCE_CHANGED_DURING_READ')
+        if sha(raw) != reference['sha256']:
+            raise RuntimeError('HANDOFF_FRAME_EVIDENCE_SHA256_MISMATCH')
+        return json.loads(raw, object_pairs_hook=frozen._pairs,
+                          parse_constant=lambda _: (_ for _ in ()).throw(frozen.CacheError('NONFINITE_JSON')))
+    finally:
+        os.close(descriptor)
+
+
 def _validate_capture(output, plan):
     timing = duration_contract(plan)
     total_frames, duration = timing['totalFrames'], timing['durationSeconds']
@@ -84,7 +118,7 @@ def _validate_capture(output, plan):
     video = output / 'VIDEO.mp4'
     with cache().PrivateTree(output) as directory:
         receipt = directory.json('CAPTURE_RECEIPT.json')
-        frames = directory.json('FRAME_EVIDENCE.json')
+        frames = _read_frame_evidence(directory, receipt.get('frameEvidence'), total_frames)
     if (receipt.get('schema') != f'WORLD_ENGINE_NVIDIA_{label}_SECOND_CAPTURE_V1'
             or receipt.get('status') != 'TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'
             or receipt.get('packageSHA256') != plan['runtimeWireSHA256']
