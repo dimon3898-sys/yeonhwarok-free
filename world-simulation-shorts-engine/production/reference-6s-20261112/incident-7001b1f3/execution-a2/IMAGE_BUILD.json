@@ -1,0 +1,58 @@
+{
+  "status": "PASS_BUILT_VERIFIED_PUBLISHED",
+  "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-jsonfix-df10b435ec73-43359755603",
+  "digest": "sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1",
+  "imageByDigest": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1",
+  "buildCommit": "df10b435ec73cfa38b0251abb54e486b8e9cf8d7",
+  "runId": "43359755603",
+  "parentImage": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+  "runtimeManifestSHA256": "e8c837e0c8ea18d435901eb8cd798e723e2f8df69d560378c39861fafdc1edb0",
+  "startupManifestSHA256": "0a884e87877cf33248f26f39dec17d1267b068ec27a5715d29afa02529152f7c",
+  "overlayFiles": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "bytes": 19864,
+      "sha256": "d5bf03d4b79d70411c02d542bbebd08d9df0463636f558f02ee271c259b6b3d9"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+      "bytes": 101618,
+      "sha256": "e8c837e0c8ea18d435901eb8cd798e723e2f8df69d560378c39861fafdc1edb0"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "bytes": 14285,
+      "sha256": "bee611e40b7f87a35e464e515a2ff631da4ab2933917ad74cd781190cc2b868e"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+      "bytes": 531,
+      "sha256": "0a884e87877cf33248f26f39dec17d1267b068ec27a5715d29afa02529152f7c"
+    }
+  ],
+  "workerUID": 1000,
+  "entrypoint": [
+    "/usr/bin/tini",
+    "-g",
+    "--",
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+    "--startup-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/studio-cold-start-v2/STARTUP_MANIFEST.json",
+    "--startup-manifest-sha256",
+    "0a884e87877cf33248f26f39dec17d1267b068ec27a5715d29afa02529152f7c",
+    "--source-manifest",
+    "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json",
+    "--source-manifest-sha256",
+    "e8c837e0c8ea18d435901eb8cd798e723e2f8df69d560378c39861fafdc1edb0",
+    "--export-root",
+    "/world-storage"
+  ],
+  "GPUExecutions": 0,
+  "rendererExecutions": 0,
+  "oldPassReruns": 0,
+  "existingImageOverwritten": false,
+  "actualFailedMP4Recovered": false
+}
