@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "READY_FOR_USER_GPU_QUALITY_RETRY",
-  "firstIncomplete": "USER_GPU_QUALITY_RENDER_AND_REVIEW_NO_RETRY_AUTHORIZED",
+  "status": "USER_VISUAL_QUALITY_PASS_REPORTED",
+  "firstIncomplete": null,
   "inputCandidateSha256": "c1fb0b8dba90a15b7b90ead6c57ba4ec56ca749a20dccaf2057a15be9be4531f",
   "format": {
     "width": 1080,
@@ -99,7 +99,7 @@
   ],
   "activeInput": "quality-v2/REFERENCE_6S_QUALITY_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "User only: start gCube5373 with saved quality-v2 image, upload NEW quality-v2/REFERENCE_6S_QUALITY_INPUT.json, render once, download MP4 and stop deployment. No GPU retry is authorized to Work. Final NVIDIA visual quality remains unverified.",
+  "nextAction": "No further 6s reference quality rerender authorized. Next separate task: inspect existing Japan/Australia actual CPU draw evidence, then only missing new-input scope; no GPU without explicit approval.",
   "lastError": null,
   "formalCompile": {
     "status": "PASS",
@@ -389,5 +389,14 @@
     "newRuntimeFiles": 12,
     "newImageOnlyCommonGate": "PASS",
     "GPUExecutions": 0
-  }
+  },
+  "userQualityApproval": {
+    "status": "PASS_REPORTED_BY_USER",
+    "date": "2026-11-13",
+    "artifact": "WORLD_ENGINE_STUDIO_VIDEO.mp4",
+    "reportedSha256": "43f38261bbe7883ea85b65ce60696aa64ca3936af0291f082afd9922ddb149ed",
+    "verificationScope": "User visual acceptance reported in conversation; artifact SHA not independently recomputed in this GitHub checkpoint update.",
+    "gpuRerenderAuthorized": false
+  },
+  "checkpointUpdateReason": "Reconcile stale pre-render status with subsequent user visual PASS; retain all earlier evidence, do not rerun PASS."
 }
