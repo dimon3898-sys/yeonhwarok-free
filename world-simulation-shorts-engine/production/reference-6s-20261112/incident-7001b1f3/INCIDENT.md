@@ -57,7 +57,26 @@ provide those bytes. No automatic rerender/retry is authorized or performed.
 
 ## Continuation
 
-Run only the archived-ledger admission test, then build an additive four-file image
-over digest8f8. Verify the installed new reader and required source/startup pins.
-Preserve the immutable old image and failure records. Do not rerun old visual or
-compiler checks, start a GPU, or claim the failed job's MP4 has been recovered.
+Completed in free Actions run43359755603: the existing180frame CPU ledger is
+116332024 bytes (SHA8750c66d...), exceeding the generic33554432-byte cap. The old
+reader raises JSON_SIZE_INVALID; the restored reader returns the exact parsed
+document and leaves the source bytes unchanged. This is direct evidence of the
+current input's admission defect, not a measurement of the unavailable GPU file.
+The new180frame ledger cap is377487360 bytes; all other JSON retains32MiB.
+
+Only four runtime files were overlaid on digest8f8. Installed UID1000/no-network/
+read-only verification confirms the actual worker import, call binding and new
+source/startup seals. No renderer, encoder or GPU was invoked. The existing ten
+reader security PASS tests and all reference compilation/visual PASS were reused.
+An initial test setup failure (receipt and ledger in different artifact folders)
+is retained in execution-a1; only that new setup path was corrected for a2.
+
+New image: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-jsonfix-df10b435ec73-43359755603`
+
+Digest: `sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1`
+
+State: PENDING_GPU_VALIDATION_NO_RETRY_AUTHORIZED. gCube remains stopped with its
+previous image selected; NEXT_IMAGE_SETTINGS.json contains the exact three
+configuration changes. Applying those values is not permission to deploy or
+render. Keep all old failure records and images. The old private MP4/raw exception
+cannot currently be recovered, and the new image's actual GPU export is untested.

@@ -3,8 +3,8 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "BLOCKED_POST_CAPTURE_JSON_SIZE",
-  "firstIncomplete": "INCIDENT_POST_CAPTURE_READER_INTEGRATION_AND_NEW_IMAGE",
+  "status": "PENDING_GPU_VALIDATION_NO_RETRY_AUTHORIZED",
+  "firstIncomplete": "USER_DECISION_ON_NEW_IMAGE_AND_SEPARATE_GPU_RETRY_AUTHORIZATION",
   "inputCandidateSha256": "b3f86cb5a19f686bb3d7fd025c5f17afbf347095d61aceffc05582670171793f",
   "format": {
     "width": 1080,
@@ -84,7 +84,7 @@
   ],
   "activeInput": "REFERENCE_6S_REGISTERED_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Reuse existing v13 reader; test only archived180frame ledger admission; build immutable four-file overlay without rendering; preserve incident limitations.",
+  "nextAction": "Keep workload stopped. Repair image is published. Update image plus both digest variables before any separately user-authorized retry; do not rerun compiler/PNG/continuity. Failed private MP4/raw JSON are not recovered.",
   "lastError": "JSON_SIZE_INVALID",
   "formalCompile": {
     "status": "PASS",
@@ -121,11 +121,11 @@
   },
   "imageBuild": {
     "status": "PASS",
-    "evidence": "image-a1/IMAGE_BUILD.json",
-    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-20261113-4102d55447e3-43355738683",
-    "digest": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
-    "buildCommit": "4102d55447e3ea36cb3e42601fd44d3e758a036c",
-    "runId": "43355738683"
+    "evidence": "incident-7001b1f3/execution-a2/IMAGE_BUILD.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-jsonfix-df10b435ec73-43359755603",
+    "digest": "sha256:d1bf9b54ba361c46e42c7e231485b63b58ad54a4d3b3431f4fc34983a5c3a0c1",
+    "buildCommit": "df10b435ec73cfa38b0251abb54e486b8e9cf8d7",
+    "runId": "43359755603"
   },
   "deploymentReady": false,
   "sourcePinVerification": {
@@ -140,7 +140,7 @@
     "admission": "FULL_CAMERA_SOURCE_ADMISSION.json",
     "oldApproximateFitPreservedInGit": true
   },
-  "lastRemoteSavedBeforeThisUnit": "23756e9d6c11a18f311c98475dbbad17f1c03ca7",
+  "lastRemoteSavedBeforeThisUnit": "d4567ee2b88c06d069eeb650513dd0389f19fa8c",
   "registeredCompile": {
     "status": "PASS",
     "compilerInputSHA256": "4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45",
@@ -153,7 +153,7 @@
   },
   "firstFrameFitReused": "Existing V10 relative transforms; new Mercator registration and final two-pin correction only",
   "invalidatedScope": [
-    "Post-capture reader integration in image8f8 and MP4 verification/export readiness only; original compile/geography/PNG/180continuity evidence unchanged"
+    "Old image post-capture admission defect repaired and new image integration PASS; real GPU MP4 verification/export remains unverified. Existing compile/geography/PNG/180continuity unchanged."
   ],
   "registeredSourcePins": {
     "evidence": "REGISTERED_SOURCE_PIN_DELTA.json",
@@ -163,14 +163,15 @@
     "adapterVerification": "image-a1/IMAGE_ADAPTER_VERIFICATION.json"
   },
   "gcubePredeployment": {
-    "status": "PASS_SAVED_STOPPED",
+    "status": "PREVIOUS_SETTINGS_PRESERVED_REPAIR_IMAGE_NOT_YET_SELECTED",
     "evidence": "GCUBE_PREDEPLOY_CONFIG.json",
     "workloadId": 5373,
     "GPUExecutions": 0
   },
   "unverifiedAfterUserDeployment": [
-    "Real NVIDIA driver rendering and encodedMP4",
-    "Actual mounted read/write and external backupreadback"
+    "Exact failed GPU FRAME_EVIDENCE/CAPTURE_RECEIPT bytes and traceback not recovered",
+    "Failed private VIDEO.mp4 not recovered; public exports contain no MP4",
+    "New image actual NVIDIA MP4 verification/export not run; requires separate user decision"
   ],
   "existingAnalysisRerun": false,
   "incident7001b1f3": {
@@ -192,6 +193,25 @@
     "externalMP4Found": false,
     "extraGPUStarts": 0,
     "oldPassReruns": 0,
-    "existingAnalysisRerun": false
+    "existingAnalysisRerun": false,
+    "status": "FREE_REPAIR_COMPLETE_ACTUAL_GPU_MP4_UNVERIFIED",
+    "repairCommit": "676c559942043b63b0d9120c4e06c940cb7d4130",
+    "buildCommit": "df10b435ec73cfa38b0251abb54e486b8e9cf8d7",
+    "evidenceCommit": "d4567ee2b88c06d069eeb650513dd0389f19fa8c",
+    "cpuAdmission": "incident-7001b1f3/execution-a2/CPU_ADMISSION.json",
+    "installedImageVerification": "incident-7001b1f3/execution-a2/INSTALLED_READER.json",
+    "imageBuild": "incident-7001b1f3/execution-a2/IMAGE_BUILD.json",
+    "archivedCPUFrameLedgerBytes": 116332024,
+    "actualFailedGPUFilename": null,
+    "MP4Recovery": "NO_ACCESSIBLE_COPY_FOUND_STOPPED_PRIVATE_FILESYSTEM_UNAVAILABLE",
+    "gcubeSettingsUpdated": false
+  },
+  "priorImageBuild": {
+    "status": "PASS",
+    "evidence": "image-a1/IMAGE_BUILD.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-20261113-4102d55447e3-43355738683",
+    "digest": "sha256:8f8b3a2bfe859dc78715b9e8955fc4a74ef74229b44b86ac4417915b166ea8a4",
+    "buildCommit": "4102d55447e3ea36cb3e42601fd44d3e758a036c",
+    "runId": "43355738683"
   }
 }
