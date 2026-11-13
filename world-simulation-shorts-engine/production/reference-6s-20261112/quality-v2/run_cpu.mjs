@@ -1,5 +1,5 @@
 import fs from'node:fs/promises';import path from'node:path';import{fileURLToPath}from'node:url';import{createHash}from'node:crypto';import assert from'node:assert/strict';import{capturePresentation}from'../../../recovery/universal-presentation-v2/capture_presentation.mjs';
-const p=path.dirname(fileURLToPath(import.meta.url)),packageFile=path.join(p,'RUNTIME_REQUEST.json'),bytes=await fs.readFile(packageFile),out='/workspace/reference6s-quality-v2-a2';
+const p=path.dirname(fileURLToPath(import.meta.url)),packageFile=path.join(p,'RUNTIME_REQUEST.json'),bytes=await fs.readFile(packageFile),out='/workspace/reference6s-quality-v2-a3';
 // New changed camera/trace revision only. Official capture also encodes the CPU preview.
 try{await capturePresentation({packageFile,outputRoot:out,expectedSHA256:createHash('sha256').update(bytes).digest('hex'),depsRoot:process.env.WORLD_ENGINE_NODE_DEPS});}catch(error){await fs.writeFile(path.join(out,'PREPARATION_FAILURE.json'),JSON.stringify({status:'FAIL',error:String(error.message),GPUExecutions:0})+'\n');throw error;}
 const data=JSON.parse(await fs.readFile(path.join(out,'FRAME_EVIDENCE.json'))),rows=data.frames,track=JSON.parse(await fs.readFile(path.join(p,'CAMERA_TRACK.json'))),summary=[];
