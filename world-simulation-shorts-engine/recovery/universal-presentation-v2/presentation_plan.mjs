@@ -1,3 +1,4 @@
+import {GEOGRAPHIC_CAMERA_VERSION,compileGeographicCamera,geographicCameraFrame} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
 /** Data-only presentation composition over unchanged V5/Flow/Area owners. */
 import {compileReferenceCameraTrack,evaluateReferenceCameraTrackFrame} from '../../web/map_infographic_v1/reference_camera_adapter_v1.mjs';
 import {evaluateMinimumContextCameraFrame} from '../../web/map_infographic_v1/camera_director_v5.mjs';
@@ -45,10 +46,13 @@ export function validatePresentation(input,{scene,region}={}){
  result.initialStateVisibility=input.initialStateVisibility??'REVEAL';
  ok(['REVEAL','PRESERVE_PROVIDED','PRESERVE_AREA_REVEAL_LINE'].includes(result.initialStateVisibility),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
  if(result.initialStateVisibility!=='REVEAL')ok(scene.event_type==='WAR'&&scene.timing.event_start_frame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
- keys(input.camera,['mode','keyframes','routeId','zoom','followStrength'],'PRESENTATION_CAMERA');
- ok(['KEYFRAMES','ROUTE_FOLLOW'].includes(input.camera.mode),'PRESENTATION_CAMERA_MODE_UNSUPPORTED');
- if(input.camera.mode==='KEYFRAMES'){
-  ok(input.camera.routeId===undefined&&input.camera.zoom===undefined&&input.camera.followStrength===undefined,'PRESENTATION_KEYFRAME_FIELD_CONFLICT');
+ keys(input.camera,['mode','keyframes','routeId','zoom','followStrength','projection','frames'],'PRESENTATION_CAMERA');
+ ok(['KEYFRAMES','ROUTE_FOLLOW','GEOGRAPHIC_TRACK'].includes(input.camera.mode),'PRESENTATION_CAMERA_MODE_UNSUPPORTED');
+ if(input.camera.mode==='GEOGRAPHIC_TRACK'){
+  ok(scene.event_type==='GEOGRAPHIC','PRESENTATION_GEOGRAPHIC_CAMERA_FAMILY');
+  compileGeographicCamera(input.camera,{totalFrames:n,holdFrames:scene.timing.final_hold_frames});
+ }else if(input.camera.mode==='KEYFRAMES'){
+  ok(input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.routeId===undefined&&input.camera.zoom===undefined&&input.camera.followStrength===undefined,'PRESENTATION_KEYFRAME_FIELD_CONFLICT');
   const rows=input.camera.keyframes;ok(Array.isArray(rows)&&rows.length>=2&&rows.length<=32,'PRESENTATION_KEYFRAMES_REQUIRED');
   for(const [i,k]of rows.entries()){
    keys(k,['frame','center','zoom'],'PRESENTATION_KEYFRAME');
@@ -58,7 +62,7 @@ export function validatePresentation(input,{scene,region}={}){
   ok(rows[0].frame===0&&rows.at(-1).frame===n-1,'PRESENTATION_COMPLETE_KEYFRAME_RANGE_REQUIRED');
   ok(rows.every(k=>k.zoom<=rows.at(-1).zoom),'PRESENTATION_FINAL_ENDPOINT_CLOSEST_REQUIRED');
  }else{
-  ok(input.camera.keyframes===undefined,'PRESENTATION_FOLLOW_KEYFRAME_CONFLICT');
+  ok(input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.keyframes===undefined,'PRESENTATION_FOLLOW_KEYFRAME_CONFLICT');
   ok(typeof input.camera.routeId==='string'&&scene.routes?.some(r=>r.id===input.camera.routeId),'PRESENTATION_FOLLOW_SUPPLIED_ROUTE_REQUIRED');
   const zoom=input.camera.zoom??.75,strength=input.camera.followStrength??.2;
   ok(Number.isFinite(zoom)&&zoom>0&&zoom<=1&&Number.isFinite(strength)&&strength>0&&strength<=1,'PRESENTATION_FOLLOW_RANGE_INVALID');
@@ -181,6 +185,10 @@ export function compilePresentationCameraPlan({scene,region,nativePlan,baseCamer
  ok(analysisCamera.cameraLocked&&analysisCamera.settle.locked,'PRESENTATION_GENUINE_MODEL_CAMERA_REQUIRED');
  const canonical=copy(scene),engine=compileExistingEnginePlan(scene),analysisBounds=analysisCamera.camera.flatBounds,
   analysisProject=point=>projectBounds(analysisBounds,point),safe=nativePlan.layout.safe;
+ if(p.camera.mode==='GEOGRAPHIC_TRACK'){
+  const track=compileGeographicCamera(p.camera,{totalFrames:n,holdFrames:scene.timing.final_hold_frames,closestBounds:closest});
+  return{schema:PRESENTATION_VERSION,mode:p.camera.mode,geographicTrack:track,cpuFrameBounds:track.cpuFrameBounds,analysisCamera,analysisSourceFrame,analysisBounds,coverageBounds:track.coverageBounds,closestBounds:copy(closest),sameAspect:true,modelTimingOwner:'UNCHANGED_AREA_V3_GLOBAL_CLOCK',movingCameraOwner:GEOGRAPHIC_CAMERA_VERSION,actualMovingCameraLockForged:false,sourceGeometryMutated:false,presentation:p};
+ }
  let keyframes=p.camera.keyframes;
  if(p.camera.mode==='ROUTE_FOLLOW'){
   const binding=engine.plans.find(x=>x.id===p.camera.routeId&&x.engine==='EXISTING_FLOW_V2');
@@ -213,7 +221,7 @@ export function compilePresentationCameraPlan({scene,region,nativePlan,baseCamer
   modelTimingOwner:'UNCHANGED_FLOW_V2_AT_GENUINE_FIXED_V5_FRAME',movingCameraOwner:'UNCHANGED_REFERENCE_CAMERA_ADAPTER_V1',
   actualMovingCameraLockForged:false,sourceGeometryMutated:false,presentation:p};
 }
-export function evaluatePresentationCameraFrame(plan,frame){return evaluateReferenceCameraTrackFrame(plan.track,frame);}
+export function evaluatePresentationCameraFrame(plan,frame){return plan.mode==='GEOGRAPHIC_TRACK'?geographicCameraFrame(plan.geographicTrack.frames[frame]):evaluateReferenceCameraTrackFrame(plan.track,frame);}
 
 /** The old public Area operations support already visible supplied states.
  * This changes opacity endpoints only, never event time or geographic input. */

@@ -163,6 +163,57 @@
                 "mode",
                 "routeId"
               ]
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "mode",
+                "projection",
+                "frames"
+              ],
+              "properties": {
+                "mode": {
+                  "const": "GEOGRAPHIC_TRACK"
+                },
+                "projection": {
+                  "const": "GEOGRAPHIC_MERCATOR_V1"
+                },
+                "frames": {
+                  "type": "array",
+                  "minItems": 2,
+                  "maxItems": 240,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "center",
+                      "scale",
+                      "rollDegrees"
+                    ],
+                    "properties": {
+                      "center": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      "scale": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "maximum": 10000
+                      },
+                      "rollDegrees": {
+                        "type": "number",
+                        "minimum": -45,
+                        "maximum": 45
+                      }
+                    }
+                  }
+                }
+              }
             }
           ]
         },
@@ -326,6 +377,57 @@
                       "mode",
                       "routeId"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "mode",
+                      "projection",
+                      "frames"
+                    ],
+                    "properties": {
+                      "mode": {
+                        "const": "GEOGRAPHIC_TRACK"
+                      },
+                      "projection": {
+                        "const": "GEOGRAPHIC_MERCATOR_V1"
+                      },
+                      "frames": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 240,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "center",
+                            "scale",
+                            "rollDegrees"
+                          ],
+                          "properties": {
+                            "center": {
+                              "type": "array",
+                              "minItems": 2,
+                              "maxItems": 2,
+                              "items": {
+                                "type": "number"
+                              }
+                            },
+                            "scale": {
+                              "type": "number",
+                              "exclusiveMinimum": 0,
+                              "maximum": 10000
+                            },
+                            "rollDegrees": {
+                              "type": "number",
+                              "minimum": -45,
+                              "maximum": 45
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 ]
               },
