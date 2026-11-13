@@ -29,7 +29,7 @@ export function validateRuntimeRequest(request){
  check(hex(request.sourceInputSHA256),'UP2_SOURCE_INPUT_HASH_REQUIRED');check(Array.isArray(request.segments)&&request.segments.length>=1&&request.segments.length<=16,'UP2_RUNTIME_SEGMENTS');
  let cursor=0;for(const[index,segment]of request.segments.entries()){check(segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor,'UP2_SEGMENT_FRAME_GAP_OR_OVERLAP');
   validateScenePlan(segment.scene);check(segment.scene.timing.total_frames===segment.endFrame-segment.startFrame&&segment.scene.timing.fps===30&&segment.scene.metadata.output.width===1080&&segment.scene.metadata.output.height===1920,'UP2_SEGMENT_SCENE_TIMING');
-  check(['WAR','TRANSPORT'].includes(segment.scene.event_type)&&segment.scene.scale_intent.preferred==='REGIONAL','UP2_RENDER_FAMILY_OR_SCALE_UNSUPPORTED');
+  check(['WAR','TRANSPORT','GEOGRAPHIC'].includes(segment.scene.event_type)&&segment.scene.scale_intent.preferred==='REGIONAL','UP2_RENDER_FAMILY_OR_SCALE_UNSUPPORTED');
   check(!segment.scene.text?.length&&!segment.scene.causal_tracks?.length,'UP2_UNCONNECTED_VISIBLE_TEXT_OR_CAUSAL_TRACK_UNSUPPORTED');compileExistingEnginePlan(segment.scene);cursor=segment.endFrame;
   if(segment.presentation?.initialStateVisibility==='PRESERVE_PROVIDED')assertPresentationBoundaryContinuity(request.segments[index-1],segment);
  }

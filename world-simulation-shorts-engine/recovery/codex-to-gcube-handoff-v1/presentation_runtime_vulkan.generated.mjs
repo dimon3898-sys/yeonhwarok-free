@@ -92,29 +92,30 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   }
   function drawFrame(frame){
    assert(!disposed&&Number.isSafeInteger(frame)&&frame>=0&&frame<scene.timing.total_frames,'UP2_FRAME_RANGE');
-   const camera=evaluatePresentationCameraFrame(activePresentationPlan,frame),bounds=camera.flatBounds;
+   const displayFrame=scene.event_type==='GEOGRAPHIC'?Math.min(frame,scene.timing.total_frames-scene.timing.final_hold_frames-1):frame;
+   const camera=evaluatePresentationCameraFrame(activePresentationPlan,displayFrame),bounds=camera.flatBounds;
    renderer.resetState();factory.updateCamera(bounds);
    const gutter=Math.min((bounds[0]-source.bounds[0])/source.pixelSpacing[0],(bounds[1]-source.bounds[1])/source.pixelSpacing[1],(source.bounds[2]-bounds[2])/source.pixelSpacing[0],(source.bounds[3]-bounds[3])/source.pixelSpacing[1]);
    assert(gutter>=1-1e-8,'UP2_CURRENT_SOURCE_COVERAGE_FAILED');
    for(const location of scene.locations){const expected=projectBounds(bounds,location.anchor),actual=project(location.anchor);assert(Math.hypot(actual[0]-expected[0],actual[1]-expected[1])<1e-6,'UP2_CURRENT_COORDINATE_MISMATCH');}
-   const mapOptions=presentationNativeMapOptions(p,frame);
+   const mapOptions=presentationNativeMapOptions(p,displayFrame);
    // Reference presentation draws its own source-bound pins and labels below.
    // Hidden native graphics have no current-screen layout obligation. Keep
    // their absence explicit rather than marking an unperformed audit PASS.
    const hiddenNative=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'&&mapOptions.graphics===false;
    const layoutAudit=hiddenNative?{validation:{valid:null},scope:'NATIVE_GRAPHICS_NOT_DRAWN'}:auditRuntimeLayout({plan:layoutPlan,screen:project});
    if(!hiddenNative)assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
-   let markerRows=markersAt(frame),preparedLabel=null;
-   if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:rows})));
+   let markerRows=markersAt(displayFrame),preparedLabel=null;
+   if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
    const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:visualPlan,project});
-   const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=frame-engines.globalEventStartFrame;
+   const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=displayFrame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
-     const controls=evaluateAreaFrame(binding.plan,binding.plan.startFrame+localFrame,{project}),groups=[...new Set(controls.areas.map(a=>a.state_id??'__DEFAULT__'))];if(!groups.length)groups.push('__DEFAULT__');
+     const controls=evaluateAreaFrame(binding.plan,binding.plan.startFrame+localFrame,{project}),groups=[...new Set(controls.areas.map(a=>a.state_id??binding.colorId??'__DEFAULT__'))];if(!groups.length)groups.push('__DEFAULT__');
      const areaViewport=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?[0,0,1080,1920]:safe;
      for(const area of controls.areas)if(area.alpha>0)presentationAreaViewport({geometry:area.geometry,project,safeArea:safe,presentation:p});
-     const accentRange=p.mapStyle?.lineAccentFrames,accent=!!accentRange&&frame>=accentRange[0]&&frame<accentRange[1];
-     const draws=groups.map((id,index)=>{const subset={...controls,areas:controls.areas.filter(a=>(a.state_id??'__DEFAULT__')===id),fronts:index===0&&!accent?controls.fronts:[],impacts:index===0?controls.impacts:[],propagations:index===0?controls.propagations:[]};
+     const accentRange=p.mapStyle?.lineAccentFrames,accent=!!accentRange&&displayFrame>=accentRange[0]&&displayFrame<accentRange[1];
+     const draws=groups.map((id,index)=>{const subset={...controls,areas:controls.areas.filter(a=>(a.state_id??binding.colorId??'__DEFAULT__')===id),fronts:index===0&&!accent?controls.fronts:[],impacts:index===0?controls.impacts:[],propagations:index===0?controls.propagations:[]};
       return{stateId:id,color:p.territoryColors?.[id]??defaultAreaStyle.AREA.fillColor,draw:areaPass(id,accent).draw({controls:subset,project,safeArea:areaViewport,protectedGraphics:markerRows,primaryMaterialColor:nativePlan.theme.primary,boundarySegments})};});
      // Intentional source-line emphasis is drawn over the existing country edge.
      // The area fill still keeps the native boundary mask; only this separate
@@ -136,7 +137,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    // The draw/geometry guards still apply; do not require a changed byte before visibility.
    if(features.some(f=>f.engine==='EXISTING_FLOW_V2'&&f.routeFraction>0)||features.some(f=>f.engine==='EXISTING_AREA_V3'&&f.sourceAreas.some(a=>a.alpha>0.5/255&&a.coverage>0)))assert(featureChangedPixels>0,'UP2_ACTUAL_FEATURE_PIXELS_MISSING');
    renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
-   const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:p.labels,scene,frame,project,safeArea:safe,protectedBoxes:markerRows})):null;
+   const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
    gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');
    last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
     camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},

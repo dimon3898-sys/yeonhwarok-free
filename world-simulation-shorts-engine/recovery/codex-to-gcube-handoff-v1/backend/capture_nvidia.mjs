@@ -29,8 +29,8 @@ export async function privateDocument(file,{maximum=24*1024**2}={}){
 export function validateVariantManifest(metadata){
  check(metadata.schema==='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1'&&metadata.variants.length===3,'HANDOFF_VARIANT_MANIFEST_REQUIRED');
  const expectedVariants=new Map([
-  ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'f1e93ec306584f5d1e77a0f6cd612cf15ac51be1ab35257dd553723de937782f'}],
-  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'f39a24ced64da5aae5bb2520183a96713301a15e2f7f55515a2c84da288cae11'}],
+  ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'9f04e52a45a604c1b105012d024c2cf1d5a310037616f4c3b59b017b3a1e1ae7'}],
+  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'3b9b413481dafac6c0f55dd4ecd68d482b9b0f3c7ec8f12697349e9807033bc3'}],
   ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'b039457bb61f7c1d38e3fc03b315240db8ea91a7ddeba184cd49ac76c5933599'}],
  ]),seen=new Set();
  for(const row of metadata.variants){
