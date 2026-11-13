@@ -13,8 +13,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '7780b687949f5196775bfa5af8ad2160345b48dd' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY6S_PROBE_A5'
+      github.event.before == '9219aa4285ddf647e47ba93cf6c2262739decc0e' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY6S_FINAL_A1'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -49,14 +49,14 @@ jobs:
           CHROMIUM_PATH=$(node -e "process.stdout.write(require('${RUNNER_TEMP}/history6s-deps/node_modules/playwright').chromium.executablePath())")
           sudo ln -sfn "${CHROMIUM_PATH}" /usr/bin/chromium
           sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /workspace
-      - name: Capture new common history representative frames on free CPU
+      - name: Capture final180 frames after actual representative-frame review
         env:
           WORLD_ENGINE_NODE_DEPS: ${{ runner.temp }}/history6s-deps
           NVIDIA_VISIBLE_DEVICES: void
         run: |
           set -o pipefail
           mkdir -p "${RUNNER_TEMP}/history6s-logs"
-          node world-simulation-shorts-engine/production/generic-history-v1-20261113/run_cpu.mjs probe > >(tee "${RUNNER_TEMP}/history6s-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/history6s-logs/stderr.log" >&2)
+          node world-simulation-shorts-engine/production/generic-history-v1-20261113/run_cpu.mjs final > >(tee "${RUNNER_TEMP}/history6s-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/history6s-logs/stderr.log" >&2)
       - name: Preserve actual output and exact failure checkpoint
         if: always()
         env:
@@ -67,8 +67,8 @@ jobs:
           import os,json,shutil,hashlib,gzip
           from pathlib import Path
           base=Path('world-simulation-shorts-engine/production/generic-history-v1-20261113')
-          out=base/'probe-a5';out.mkdir(exist_ok=False)
-          src=Path('/workspace/history6s-probe-a5')
+          out=base/'final-a1';out.mkdir(exist_ok=False)
+          src=Path('/workspace/history6s-final-a5')
           for f in src.glob('*'):
               if f.is_file() and (f.suffix in ['.png','.mp4'] or f.name in ['CAPTURE_RECEIPT.json','TASK_FAILURE.json','HTTP_ASSET_BINDINGS.json','REQUEST.json','NEW_INPUT_RESULT.json','FRAME_SUMMARY.json']):shutil.copy2(f,out/f.name)
           for f in Path(os.environ['RUNNER_TEMP'],'history6s-logs').glob('*.log'):shutil.copy2(f,out/f.name)
@@ -99,5 +99,5 @@ jobs:
           git config user.name 'WORLD ENGINE CPU evidence'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --sparse world-simulation-shorts-engine/production/generic-history-v1-20261113 world-simulation-shorts-engine/recovery/universal-presentation-v2/sources/eurasia
-          git commit -m 'Preserve common history CPU representative frames and terrain [skip ci]'
+          git commit -m 'Preserve final180-frame historical CPU video and evidence [skip ci]'
           git push origin "HEAD:refs/heads/${BRANCH}"
