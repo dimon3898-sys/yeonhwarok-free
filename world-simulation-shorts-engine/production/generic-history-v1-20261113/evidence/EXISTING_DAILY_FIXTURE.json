@@ -1,0 +1,28 @@
+{
+  "name": "C_WAR",
+  "topic": "합성 전쟁의 전선은 어떻게 변했을까?",
+  "expected_features": ["FRONT_LINE", "STATE_TRANSITION", "TIME_STEP", "AREA_HOLD"],
+  "excluded_features": ["ROUTE_REVEAL", "MOVING_OBJECT", "PROPAGATION_WAVE", "IMPACT_ZONE", "METRIC_ANNOTATION"],
+  "facts": {
+    "version": "PLANNER_FACTS_V1", "data_mode": "SYNTHETIC_TEST",
+    "subject": {"id": "WAR_SUBJECT", "label": "합성 전쟁", "aliases": ["합성 전쟁", "Synthetic Conflict"], "event_family": "WAR"},
+    "locations": [{"id": "CONTEXT_LOCATION", "label": "중심", "anchor": [2, 40]}],
+    "time_range": {"start": "2000-03-01", "end": "2000-05-01"},
+    "source_notes": [{"id": "SYNTH_SOURCE", "source_type": "SYNTHETIC_TEST", "source_reference": "EXPLICIT_SYNTHETIC_STATE_CHANGE_NOT_PRODUCTION", "verification_status": "SYNTHETIC_TEST"}],
+    "geometries": [
+      {"id": "AREA_GEOM_1", "source_id": "SYNTH_SOURCE", "geometry": {"type": "Polygon", "coordinates": [[[0, 38], [4, 38], [4, 40], [0, 40], [0, 38]]]}},
+      {"id": "FRONT_GEOM_1", "source_id": "SYNTH_SOURCE", "geometry": {"type": "LineString", "coordinates": [[0, 40], [2, 40.1], [4, 40]]}},
+      {"id": "AREA_GEOM_2", "source_id": "SYNTH_SOURCE", "geometry": {"type": "Polygon", "coordinates": [[[0, 38], [4, 38], [4, 39.2], [2, 39.7], [0, 39.5], [0, 38]]]}},
+      {"id": "FRONT_GEOM_2", "source_id": "SYNTH_SOURCE", "geometry": {"type": "LineString", "coordinates": [[0, 39.5], [2, 39.7], [4, 39.2]]}},
+      {"id": "AREA_GEOM_3", "source_id": "SYNTH_SOURCE", "geometry": {"type": "Polygon", "coordinates": [[[0, 38], [4, 38], [4, 41], [2, 41.3], [0, 40.8], [0, 38]]]}},
+      {"id": "FRONT_GEOM_3", "source_id": "SYNTH_SOURCE", "geometry": {"type": "LineString", "coordinates": [[0, 40.8], [2, 41.3], [4, 41]]}}
+    ],
+    "stages": [
+      {"id": "STATE_1", "date": "2000-03-01", "label": "2000.03.01", "area_refs": ["AREA_GEOM_1"], "front_refs": ["FRONT_GEOM_1"]},
+      {"id": "STATE_2", "date": "2000-04-01", "label": "2000.04.01", "area_refs": ["AREA_GEOM_2"], "front_refs": ["FRONT_GEOM_2"]},
+      {"id": "STATE_3", "date": "2000-05-01", "label": "2000.05.01", "area_refs": ["AREA_GEOM_3"], "front_refs": ["FRONT_GEOM_3"]}
+    ],
+    "camera": {"anchor": [2, 40], "target_geometry_refs": ["AREA_GEOM_1", "FRONT_GEOM_1", "AREA_GEOM_2", "FRONT_GEOM_2", "AREA_GEOM_3", "FRONT_GEOM_3"], "detail_policy": "FACT_BASED_VISUAL_GRADE"},
+    "scale": {"preferred": "REGIONAL"}
+  }
+}

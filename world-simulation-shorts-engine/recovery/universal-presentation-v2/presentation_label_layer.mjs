@@ -5,7 +5,7 @@ import {validateLabelText,REFERENCE_LABEL_STYLE} from './presentation_labels.mjs
 import {authoredPinSvg,popScale,graphemes} from '../reference-director-v1/director_events.mjs';
 export const LABEL_LAYER_SCHEMA='WORLD_ENGINE_PRESENTATION_LABEL_LAYER_V1';
 export const LABEL_FONT_FAMILY='Gate1Bold';
-const roles=Object.freeze({EVENT:3,NUMERIC:2,COUNTRY:1});
+const roles=Object.freeze({TITLE:6,TIMELINE:5,DISCLOSURE:4,EVENT:3,NUMERIC:2,COUNTRY:1});
 const check=(value,code)=>{if(!value)throw Error(code);};
 const copy=value=>structuredClone(value);
 const point=value=>Array.isArray(value)&&value.length===2&&value.every(Number.isFinite);
@@ -22,7 +22,7 @@ function alphaAt(item,frame){
 }
 function validateItem(item){
  check(item&&typeof item==='object'&&Object.hasOwn(roles,item.role)&&typeof item.id==='string'&&typeof item.text==='string'
-  &&typeof item.locationId==='string'&&point(item.anchor)&&Math.abs(item.anchor[0])<=180&&Math.abs(item.anchor[1])<=90
+  &&(item.screenPlacement===item.role&&['TITLE','TIMELINE','DISCLOSURE'].includes(item.role)||typeof item.locationId==='string'&&point(item.anchor)&&Math.abs(item.anchor[0])<=180&&Math.abs(item.anchor[1])<=90)
   &&Number.isSafeInteger(item.startFrame)&&item.startFrame>=0&&Number.isSafeInteger(item.endFrame)&&item.endFrame>item.startFrame&&item.endFrame<=300
   &&Number.isSafeInteger(item.revealFrames)&&item.revealFrames>=1&&item.revealFrames<=30
   &&Number.isSafeInteger(item.exitFrames)&&item.exitFrames>=1&&item.exitFrames<=30
@@ -36,8 +36,8 @@ function validateItem(item){
 }
 function measuredSize(item,width,height,measure){
  const scale=Math.min(width/1080,height/1920),reference=item.style===REFERENCE_LABEL_STYLE,
-  preferred=(reference?{COUNTRY:48,EVENT:56,NUMERIC:52}:{COUNTRY:36,EVENT:44,NUMERIC:52})[item.role]*scale;
- const min=Math.max(10,18*scale),paddingX=(reference?24:16)*scale,paddingY=(reference?24:10)*scale,maxWidth=Math.min(width*.48,width-64*scale);
+  preferred=(reference?{COUNTRY:48,EVENT:56,NUMERIC:52}:{COUNTRY:36,EVENT:44,NUMERIC:52,TITLE:68,TIMELINE:86,DISCLOSURE:30})[item.role]*scale;
+ const min=Math.max(10,18*scale),paddingX=(reference?24:16)*scale,paddingY=(reference?24:10)*scale,maxWidth=Math.min(width*(item.screenPlacement?.length? .86:.48),width-64*scale);
  let size=Math.max(min,preferred),advance;
  for(let i=0;i<4;i++){
   const result=measure(item.text,font(size),item.role);advance=typeof result==='number'?result:result?.width;
@@ -100,6 +100,12 @@ export function layoutLabels({items,frame,project,width=1080,height=1920,safeAre
  for(const item of [...items].sort(order)){
   const alpha=alphaAt(item,frame);
   if(alpha<=0){suppressed.push({id:item.id,reason:'OUTSIDE_EVENT_TIMING'});continue;}
+  if(item.screenPlacement){
+   const size=measuredSize(item,width,height,measureText),cx=width/2,cy=height*({TITLE:.10,TIMELINE:.75,DISCLOSURE:.81}[item.role]);
+   const rect=[cx-size.width/2,cy-size.height/2,cx+size.width/2,cy+size.height/2];
+   if(!within(rect.slice(0,2),safe)||!within(rect.slice(2),safe)||protectedRects.some(b=>overlap(rect,b,10*scale))||drawn.some(r=>overlap(rect,r.box,10*scale))){suppressed.push({id:item.id,reason:'SCREEN_LABEL_OBSTRUCTED'});continue;}
+   drawn.push({id:item.id,role:item.role,text:item.text,stateId:item.stateId??null,screenPlacement:item.screenPlacement,box:rect,connector:null,pinDrawn:false,pinBox:null,alpha,fontSize:size.fontSize,font:size.font,slot:0,priority:item.priority});slots[item.id]=0;continue;
+  }
   let projected;try{projected=project(item.anchor);}catch{throw Error('UP2_LABEL_PROJECTION_UNSUPPORTED');}
   check(point(projected),'UP2_LABEL_PROJECTION_UNSUPPORTED');
   if(!within(projected,safe)){suppressed.push({id:item.id,reason:'ANCHOR_OUTSIDE_SAFE_VIEWPORT'});continue;}
@@ -176,6 +182,7 @@ export function paintLabels(context,layout){
  const[x0,y0,x1,y1]=layout.safeArea;context.beginPath();context.rect(x0,y0,x1-x0,y1-y0);context.clip();
  context.lineCap='round';context.lineJoin='round';
  for(const row of layout.drawn){
+  if(!row.connector)continue;
   context.globalAlpha=row.alpha;context.strokeStyle='#22252b';context.lineWidth=Math.max(1,2*s);
   context.beginPath();context.moveTo(...row.connector[0]);context.lineTo(...row.connector[1]);context.stroke();
  }
@@ -225,7 +232,7 @@ export function createPresentationLabelPass({renderer,THREE,width=1080,height=19
    check(!disposed&&labels?.enabled===true&&Array.isArray(labels.items),'UP2_LABEL_ENABLED_CONTRACT_REQUIRED');
    check(renderer.autoClear===false,'UP2_LABEL_ADDITIVE_RENDERER_REQUIRED');
    check(Array.isArray(sourceScene?.locations),'UP2_LABEL_LOCATION_BINDING_REQUIRED');
-   for(const item of labels.items){const location=sourceScene.locations.find(row=>row.id===item.locationId);check(location&&point(location.anchor)&&point(item.anchor)&&location.anchor.every((v,i)=>v===item.anchor[i]),'UP2_LABEL_LOCATION_BINDING_REQUIRED');}
+   for(const item of labels.items){if(item.screenPlacement)continue;const location=sourceScene.locations.find(row=>row.id===item.locationId);check(location&&point(location.anchor)&&point(item.anchor)&&location.anchor.every((v,i)=>v===item.anchor[i]),'UP2_LABEL_LOCATION_BINDING_REQUIRED');}
    prepared=layoutLabels({items:labels.items,frame,project,width,height,safeArea,protectedBoxes,previousLayout:previous,
     measureText:(text,fontValue)=>{context.font=fontValue;return context.measureText(text);}});
    return prepared;

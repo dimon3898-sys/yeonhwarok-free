@@ -1,3 +1,5 @@
+import {reviewedHistoricalRecords} from './reviewed_historical_registry.mjs';
+import {validHistoricalTime,historicalRange,timeWithin,compareHistoricalTime} from '../../web/map_infographic_v1/historical_time_v1.mjs';
 /** Additive structured-prompt adapter. It does not modify, simulate or replace any engine. */
 import {createHash} from 'node:crypto';
 import fs from 'node:fs';
@@ -16,7 +18,7 @@ export const CAPABILITIES = Object.freeze({
   families: ['WAR', 'TRANSPORT', 'GEOGRAPHIC'],
   plannerOnlyFamilies: ['LINE_METRIC', 'DISASTER'],
   camera: 'EXISTING_SERVER_OWNED_REGION_PROFILE_LOCKED; supplied targets must fit its coverage',
-  dates: 'GREGORIAN_ISO_DATE_0001_TO_9999; BCE and precision-only dates are unsupported',
+  dates: 'HISTORICAL_TIME_V1; YEAR/MONTH/DAY, explicit BCE, closed ranges and bounded uncertainty; input precision preserved',
   routeMotion: 'PROJECTED_ARC_LENGTH_PLAYBACK; not physical velocity or inferred navigation',
   bounds: 'EPSG:4326 [longitude,latitude]; antimeridian-spanning segments unsupported',
   historical: 'SERVER_REVIEWED_CLAIM_AND_GEOMETRY_BINDINGS; SHA and VERIFIED labels alone are insufficient',
@@ -38,7 +40,7 @@ const issue = (status, code, field, reason, example) => ({status, code, field, r
 const statusOf = issues => ['INVALID', 'CONFLICT', 'UNSUPPORTED', 'NEEDS_INPUT'].find(status => issues.some(x => x.status === status)) ?? 'PASS';
 const txt = x => typeof x === 'string' && x.trim().length > 0;
 const safeID = x => txt(x) && /^[A-Za-z0-9_.:-]+$/u.test(x);
-const isoDate = x => typeof x === 'string' && /^\d{4}-\d{2}-\d{2}$/u.test(x) && !x.startsWith('0000') && Number.isFinite(Date.parse(x + 'T00:00:00Z')) && new Date(x + 'T00:00:00Z').toISOString().slice(0, 10) === x;
+const isoDate = validHistoricalTime;
 function unknowns(value, allowed, field, out) {
   if (value !== undefined && !object(value)) {
     out.push(issue('INVALID', 'OBJECT_REQUIRED', field, 'This field must be an object.', {objectFields: allowed})); return;
@@ -71,8 +73,8 @@ const FACT_KEYS = ['version', 'data_mode', 'subject', 'locations', 'time_range',
   'geographic_lines', 'impacts', 'propagations', 'metrics', 'markers', 'text', 'camera', 'scale', 'native_context', 'semantic_mode', 'scene_timing', 'causal_tracks', 'region_layers'];
 const RECORD_KEYS = {
   region_layers: ['id', 'geometry_ref', 'start_frame', 'reveal_frames'],
-  source_notes: ['id', 'source_type', 'source_reference', 'verification_status', 'note', 'verification_basis', 'live_access', 'retrieval_date', 'license', 'version', 'original_sha256', 'source_wrapper_sha256', 'sha256', 'crs', 'resolution'],
-  geometries: ['id', 'geometry', 'source_id', 'note'], locations: ['id', 'label', 'anchor', 'country_id'],
+  source_notes: ['id', 'source_type', 'source_reference', 'verification_status', 'note', 'verification_basis', 'live_access', 'retrieval_date', 'license', 'version', 'original_sha256', 'source_wrapper_sha256', 'sha256', 'crs', 'resolution', 'attribution', 'uncertainty', 'historical_validity'],
+  geometries: ['id', 'geometry', 'source_id', 'note', 'validity'], locations: ['id', 'label', 'anchor', 'country_id'],
   stages: ['id', 'date', 'label', 'area_refs', 'front_refs'],
   routes: ['id', 'geometry_ref', 'direction', 'object_role', 'object_profile', 'required_for_story', 'object_graphic'],
   geographic_lines: ['id', 'geometry_ref', 'direction', 'style_role'], impacts: ['id', 'geometry_ref'],
@@ -131,17 +133,17 @@ function inspectFacts(facts, field, mode, out) {
   }
   const dates = [...Object.entries(facts.time_range ?? {}).map(([key, date]) => ({date, path: `${field}.time_range.${key}`})),
     ...(Array.isArray(facts.stages) ? facts.stages : []).map((row, i) => ({date: row.date, path: `${field}.stages[${i}].date`}))];
-  for (const item of dates) if (!isoDate(item.date)) out.push(issue(/BCE|BC|era|^-|^\d{1,3}-/iu.test(String(item.date)) ? 'UNSUPPORTED' : 'INVALID', 'ISO_DATE_REQUIRED', item.path,
-    'The preserved Planner supports complete Gregorian YYYY-MM-DD only. Do not replace ancient or approximate dates with invented precise dates.', {supportedExample: '1950-06-25', unsupported: '27 BCE'}));
-  if (isoDate(facts.time_range?.start) && isoDate(facts.time_range?.end) && facts.time_range.end < facts.time_range.start)
-    out.push(issue('CONFLICT', 'REVERSED_TIME_RANGE', field + '.time_range', 'End date precedes start date.', {start: facts.time_range.end, end: facts.time_range.start}));
+  for (const item of dates) if (!isoDate(item.date)) out.push(issue('INVALID','HISTORICAL_TIME_REQUIRED',item.path,'Preserve supplied YEAR/MONTH/DAY, explicit BCE or bounded range; no missing precision is invented.',{year:'1206'}));
+  if (isoDate(facts.time_range?.start) && isoDate(facts.time_range?.end)) {
+    try { historicalRange(facts.time_range); } catch { out.push(issue('CONFLICT','REVERSED_TIME_RANGE',field+'.time_range','Historical range is reversed.',facts.time_range)); }
+  }
   const family = facts.subject?.event_family;
   if (!CAPABILITIES.families.includes(family)) out.push(issue('UNSUPPORTED', 'FAMILY_NOT_CONNECTED', field + '.subject.event_family', 'This preview pixel profile connects WAR, TRANSPORT and GEOGRAPHIC. LINE_METRIC and DISASTER retain existing Planner contracts but are not connected to this new capture consumer.', {supported: CAPABILITIES.families}));
   if (family === 'TRANSPORT' && !(facts.routes?.length)) out.push(issue('NEEDS_INPUT', 'ROUTE_DATA_REQUIRED', field + '.routes', 'Transport requires supplied geographic routes and supplied object graphics, not military territories.', {routes: [{id: 'route_1', geometry_ref: 'supplied_line', object_role: 'AIRCRAFT', object_graphic: 'See contract'}]}));
   if (family === 'LINE_METRIC' && (!facts.geographic_lines?.length || !facts.metrics?.length)) out.push(issue('NEEDS_INPUT', 'LINE_METRIC_DATA_REQUIRED', field, 'Supply the line and its source-bound metric; neither is inferred.', {geographic_lines: [{id: 'line_1', geometry_ref: 'supplied_line'}], metrics: 'Supply explicit metric'}));
-  if (family === 'WAR' && (!Array.isArray(facts.stages) || facts.stages.length < 2 || facts.stages.some(x => !x.area_refs?.length || !x.front_refs?.length)))
-    out.push(issue('NEEDS_INPUT', 'TERRITORY_AND_FRONT_STATES_REQUIRED', field + '.stages', 'Area animation requires at least two supplied dated territory and front states. A partial front line is not a complete occupation polygon.', {minimumStates: 2, eachStateRequires: ['date', 'area_refs', 'front_refs']}));
-  const unconsumed = family === 'WAR' ? ['metrics', 'geographic_lines', 'impacts', 'propagations', 'text', 'causal_tracks', 'routes']
+  if (family === 'WAR' && (!Array.isArray(facts.stages) || facts.stages.length < 2 || facts.stages.some(x => !x.area_refs?.length && !x.front_refs?.length)))
+    out.push(issue('NEEDS_INPUT', 'SUPPLIED_AREA_OR_FRONT_STATES_REQUIRED', field + '.stages', 'State changes require at least two dated states with supplied areas or fronts. Neither is invented from the other.', {minimumStates:2, eachStateRequires:['date','area_refs OR front_refs']}));
+  const unconsumed = family === 'WAR' ? ['metrics', 'geographic_lines', 'impacts', 'propagations', 'text', 'causal_tracks']
     : family === 'TRANSPORT' ? ['stages', 'geographic_lines', 'metrics', 'impacts', 'propagations', 'text', 'causal_tracks']
     : family === 'GEOGRAPHIC' ? ['stages','routes','geographic_lines','metrics','impacts','propagations','text','causal_tracks'] : [];
   for (const key of unconsumed) if (facts[key]?.length) out.push(issue('UNSUPPORTED', 'FEATURE_HAS_NO_PIXEL_CONSUMER', field + '.' + key,
@@ -158,7 +160,7 @@ function checkEvidence(scene, facts, field, registry, out) {
   // Built-in records are server-owned and digest-pinned; caller flags cannot
   // create or replace them. Existing explicitly supplied server records remain.
   const supplied = Array.isArray(registry) ? registry : registry?.records ?? [];
-  const records = [...reviewedContextRecords(), ...reviewedGeographicRecords(), ...(Array.isArray(supplied) ? supplied : []).filter(r => !/^(KW20_CONTEXT_|REF6_GEOGRAPHIC_)/.test(String(r?.id ?? '')))];
+  const records = [...reviewedContextRecords(), ...reviewedGeographicRecords(), ...reviewedHistoricalRecords(), ...(Array.isArray(supplied) ? supplied : []).filter(r => !/^(KW20_CONTEXT_|REF6_GEOGRAPHIC_|HISTORICAL_RECONSTRUCTION_)/.test(String(r?.id ?? '')))];
   if (![facts.source_notes, facts.geometries].every(rows => Array.isArray(rows) && rows.every(object)) || facts.stages !== undefined && (!Array.isArray(facts.stages) || facts.stages.some(row => !object(row)))) return;
   const boundGeometries = new Set(), boundStages = new Set(), boundSources = new Set();
   for (const [i, binding] of rows.entries()) {
@@ -177,18 +179,34 @@ function checkEvidence(scene, facts, field, registry, out) {
     if (found.canonicalFactsSHA256 !== sha(facts)) {
       out.push(issue('NEEDS_INPUT', 'EVIDENCE_DATASET_NOT_REVIEWED', where, 'This exact supplied fact dataset has no server-reviewed digest binding. Reusing a source identifier does not qualify new locations, dates or territory.', {action: 'Review exact dataset and bind its canonicalFactsSHA256 in the server-owned registry'})); continue;
     }
+    if (found.scope==='RECONSTRUCTED_TERRITORY') {
+      let valid=true;
+      try {
+        historicalRange(src.historical_validity);
+        valid=txt(src.uncertainty)&&txt(src.license)&&txt(src.attribution)&&txt(src.version)
+          && canonicalJSON(src.historical_validity)===canonicalJSON(found.applicableDates)
+          && src.uncertainty===found.uncertainty && src.license===found.license;
+        for(const gid of binding.geometryIds??[]){const g=facts.geometries.find(g=>g.id===gid);
+          historicalRange(g?.validity);valid&&=canonicalJSON(g.validity)===canonicalJSON(found.geometryValidityById?.[gid]);
+        }
+        for(const sid of binding.stageIds??[]){const stage=facts.stages?.find(s=>s.id===sid);
+          valid&&=Boolean(stage)&&[...(stage.area_refs??[]),...(stage.front_refs??[])].every(gid=>timeWithin(stage.date,facts.geometries.find(g=>g.id===gid)?.validity));
+        }
+      } catch { valid=false; }
+      if(!valid){out.push(issue('CONFLICT','RECONSTRUCTION_VALIDITY_OR_DISCLOSURE_MISMATCH',where,'Reconstructed extents require exact source-bound validity, uncertainty, version, credit and license; a polygon cannot be assigned to another period.',{action:'Preserve the reviewed source periods and uncertainty'}));continue;}
+    }
     boundSources.add(binding.sourceId);
     for (const gid of binding.geometryIds ?? []) {
       const geometry = facts.geometries?.find(row => row.id === gid);
       if (!geometry || geometry.source_id !== binding.sourceId || found.geometrySHA256ById?.[gid] !== sha(geometry.geometry))
         out.push(issue('CONFLICT', 'EVIDENCE_GEOMETRY_MISMATCH', where + '.geometryIds', 'Supplied geometry is not the reviewed geometry for this claim.', {geometryId: gid, action: 'Supply matching reviewed geometry; partial lines cannot qualify full territories'}));
-      else if (['Polygon', 'MultiPolygon'].includes(geometry.geometry.type) && found.scope !== 'FULL_TERRITORY' && !staticGeographicContext(found, facts, src, gid))
+      else if (['Polygon', 'MultiPolygon'].includes(geometry.geometry.type) && !['FULL_TERRITORY','RECONSTRUCTED_TERRITORY'].includes(found.scope) && !staticGeographicContext(found, facts, src, gid))
         out.push(issue('NEEDS_INPUT', 'EVIDENCE_SCOPE_INSUFFICIENT', where + '.geometryIds', 'A partial-front/event-date review does not establish complete occupation polygons.', {requiredScope: 'FULL_TERRITORY'}));
       else boundGeometries.add(gid);
     }
     for (const sid of binding.stageIds ?? []) {
       const stage = facts.stages?.find(row => row.id === sid), dates = found.applicableDates;
-      if (!stage || !dates || stage.date < dates.start || stage.date > dates.end)
+      if (!stage || !dates || !isoDate(stage.date) || !isoDate(dates.start) || !isoDate(dates.end) || !timeWithin(stage.date,dates))
         out.push(issue('CONFLICT', 'EVIDENCE_DATE_MISMATCH', where + '.stageIds', 'Event/map validity dates do not qualify this stage date.', {stageId: sid, action: 'Keep event date, map date and geometry date separate'}));
       else boundStages.add(sid);
     }
@@ -351,7 +369,7 @@ export function analyzePrompt(input, {evidenceRegistry = []} = {}) {
     let scene, enginePlan;
     if (!problems.length) try {
       // Sorting only supplied dated states; neither positions nor historical dates are invented.
-      if (Array.isArray(facts.stages)) facts.stages.sort((a, b) => a.date.localeCompare(b.date));
+      if (Array.isArray(facts.stages)) facts.stages.sort((a, b) => compareHistoricalTime(a.date,b.date));
       facts.scene_timing ??= timingFor(facts, frames, data.fps);
       validateFactDataset(facts);
       scene = compileScenePlan({topic: data.topic, facts, output: {fps: data.fps, width: data.resolution.width, height: data.resolution.height}});

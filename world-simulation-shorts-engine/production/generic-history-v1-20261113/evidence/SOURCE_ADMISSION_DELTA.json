@@ -1,0 +1,86 @@
+{
+  "schema": "WORLD_ENGINE_DATA_PIPELINE_RESULT_V1",
+  "compilerVersion": "universal-data-pipeline-v1.0.0",
+  "engineHashes": {
+    "planner_scene_v1.mjs": "d46eb7569c46ca0eb90c1219ba0ea39d8e145e43f2be8665d1938755d36a7b16",
+    "planner_engine_adapter_v1.mjs": "1447c4dee5252f293bb170b1727833d81b2e6cfda42cfe5e17c37f434de3aec0",
+    "area_core_v3.mjs": "10c55061c2a38ab527411fcd58cb6c4248d4a4fc21c0c59ae31271e755500d3f",
+    "flow_core_v2.mjs": "5666f77c2dd254458f7e937d0dbec5d6a2725f06705e168ecf982623da5045be",
+    "event_contract_v1.mjs": "38a1b423b8dc741ab0c5f78b42a68bcc3cd22ba79272d20a3e019045fe10bd07"
+  },
+  "status": "UNSUPPORTED",
+  "issues": [
+    {
+      "status": "UNSUPPORTED",
+      "code": "SOURCE_REGION_NOT_AVAILABLE",
+      "field": "$.scenes[0].renderSettings.sourceRegionId",
+      "reason": "Only already-preserved, source-qualified regional texture profiles are available; arbitrary uncovered texture data is not invented.",
+      "example": {
+        "sourceRegionId": "namibia_desert_coast",
+        "available": [
+          "namibia_desert_coast",
+          "europe_germany",
+          "south_america_chile",
+          "korean_peninsula",
+          "nepal_himalaya"
+        ]
+      }
+    }
+  ],
+  "sceneResults": [
+    {
+      "sceneId": "mongol-empire-source-snapshots",
+      "startFrame": 0,
+      "endFrame": 180,
+      "status": "UNSUPPORTED",
+      "issues": [
+        {
+          "status": "UNSUPPORTED",
+          "code": "SOURCE_REGION_NOT_AVAILABLE",
+          "field": "$.scenes[0].renderSettings.sourceRegionId",
+          "reason": "Only already-preserved, source-qualified regional texture profiles are available; arbitrary uncovered texture data is not invented.",
+          "example": {
+            "sourceRegionId": "namibia_desert_coast",
+            "available": [
+              "namibia_desert_coast",
+              "europe_germany",
+              "south_america_chile",
+              "korean_peninsula",
+              "nepal_himalaya"
+            ]
+          }
+        }
+      ],
+      "dependsOn": []
+    }
+  ],
+  "renderableSceneIds": [],
+  "blockedSceneIds": [
+    "mongol-empire-source-snapshots"
+  ],
+  "renderRequests": [],
+  "capabilities": {
+    "prompt": "STRUCTURED_JSON_OR_SINGLE_JSON_FENCE; NO_EXTERNAL_AI",
+    "families": [
+      "WAR",
+      "TRANSPORT",
+      "GEOGRAPHIC"
+    ],
+    "plannerOnlyFamilies": [
+      "LINE_METRIC",
+      "DISASTER"
+    ],
+    "camera": "EXISTING_SERVER_OWNED_REGION_PROFILE_LOCKED; supplied targets must fit its coverage",
+    "dates": "HISTORICAL_TIME_V1; YEAR/MONTH/DAY, explicit BCE, closed ranges and bounded uncertainty; input precision preserved",
+    "routeMotion": "PROJECTED_ARC_LENGTH_PLAYBACK; not physical velocity or inferred navigation",
+    "bounds": "EPSG:4326 [longitude,latitude]; antimeridian-spanning segments unsupported",
+    "historical": "SERVER_REVIEWED_CLAIM_AND_GEOMETRY_BINDINGS; SHA and VERIFIED labels alone are insufficient",
+    "rendering": "FREE_SOFTWARE_PREVIEW_ONLY; 30fps,16..240 frames per scene; no NVIDIA quality claim",
+    "legacy": "Existing PLANNER_SCENE_JSON_V1 validated without reinterpretation by validateLegacyScene"
+  },
+  "inputSHA256": "ec93acafc4abb38022381f9e1e57cada5e06a79656fea9c850affebf86f92809",
+  "simulationType": "HISTORICAL",
+  "totalFrames": 180,
+  "timelinePreserved": true,
+  "partialRenderRequiresExplicitSceneSelection": true
+}

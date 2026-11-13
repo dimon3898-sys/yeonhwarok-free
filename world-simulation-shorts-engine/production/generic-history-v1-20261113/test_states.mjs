@@ -1,0 +1,24 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {compileScenePlan,validateScenePlan} from '../../web/map_infographic_v1/planner_scene_v1.mjs';
+import {compileSceneEngineRequest} from '../../web/map_infographic_v1/planner_engine_adapter_v1.mjs';
+import {evaluateAreaFrame} from '../../web/map_infographic_v1/area_core_v3.mjs';
+const base=new URL('./',import.meta.url),input=JSON.parse(fs.readFileSync(new URL('evidence/EXISTING_DAILY_FIXTURE.json',base))),checks=[];
+function check(name,fn){fn();checks.push(name);}
+check('daily dates/front bindings retained in changed common planner',()=>{const s=compileScenePlan(input);assert.deepEqual(s.selected_features,input.expected_features);assert.deepEqual(s.time_steps.map(x=>x.date),input.facts.stages.map(x=>x.date));assert.deepEqual(s.geometries,input.facts.geometries);validateScenePlan(s);});
+const source=structuredClone(input);source.facts.time_range={start:'1206',end:'1220'};
+source.facts.stages.forEach((s,i)=>{s.date=String(1206+i*7);s.front_refs=[];});
+source.facts.geometries=source.facts.geometries.filter(g=>g.geometry.type!=='LineString');
+source.facts.camera.target_geometry_refs=source.facts.geometries.map(x=>x.id);
+const box=(w,s,e,n)=>({type:'Polygon',coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]]});
+source.facts.geometries[0].geometry=box(0,38,4,41);
+source.facts.geometries[1].geometry=box(0,38,5,42);
+source.facts.geometries[2].geometry={type:'MultiPolygon',coordinates:[box(0,38,1,39).coordinates,box(3,40,4,41).coordinates]};
+const scene=compileScenePlan(source),plan=compileSceneEngineRequest(scene).areaPlan;
+check('year-only territory states admit without fronts/routes',()=>{assert.deepEqual(scene.time_steps.map(x=>x.date),['1206','1213','1220']);assert.equal(scene.front_lines.length,0);assert.ok(!scene.selected_features.includes('FRONT_LINE'));assert.ok(!scene.routes);});
+check('expansion contraction and split use exact supplied polygons',()=>{for(let f=0;f<plan.totalFrames;f++){const c=evaluateAreaFrame(plan,f);assert.ok(c.areas.length<=2);assert.equal(c.fronts.length,0);for(const a of c.areas){const original=plan.intent.states.find(s=>s.state_id===a.state_id).areas.find(s=>s.id===a.id);assert.deepEqual(a.geometry,original.geometry);}}});
+check('final state removes previous larger territory, no cumulative union',()=>{const c=evaluateAreaFrame(plan,plan.totalFrames-1);assert.equal(c.areas.length,1);assert.equal(c.areas[0].geometry.type,'MultiPolygon');assert.equal(c.stateId,scene.time_steps.at(-1).id);assert.equal(c.areas[0].alpha,1);});
+check('front-only change does not fabricate territory',()=>{const x=structuredClone(input);x.facts.stages.forEach(s=>s.area_refs=[]);const s=compileScenePlan(x),p=compileSceneEngineRequest(s).areaPlan;assert.equal(s.areas.length,0);assert.equal(evaluateAreaFrame(p,p.totalFrames-1).areas.length,0);assert.ok(s.front_lines.length);});
+check('empty states and overlapping historical precision rejected',()=>{const x=structuredClone(source);x.facts.stages[0].area_refs=[];assert.throws(()=>compileScenePlan(x));const y=structuredClone(source);y.facts.stages[1].date='1206-06';assert.throws(()=>compileScenePlan(y));});
+check('BCE and uncertainty reach unchanged Area timeline as labels',()=>{const x=structuredClone(source);x.facts.time_range={start:{year:100,era:'BCE'},end:'0005'};x.facts.stages[0].date={year:44,era:'BCE'};x.facts.stages[1].date={earliest:{year:3,era:'BCE'},latest:{year:1,era:'BCE'},uncertain:true,label:'기원전 말기'};x.facts.stages[2].date='0005';const p=compileSceneEngineRequest(compileScenePlan(x)).areaPlan;assert.equal(p.intent.states[0].time_label,'0044 BCE');assert.equal(p.intent.states[1].time_label,'기원전 말기');});
+console.log(JSON.stringify({status:'PASS',scope:'new common state admission; old rendering suites not rerun',checks},null,2));

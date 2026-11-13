@@ -1,0 +1,11 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+import {analyzePresentationPrompt} from '../../recovery/universal-presentation-v2/presentation_prompt.mjs';
+const base=new URL('./',import.meta.url),path=n=>new URL(n,base),input=JSON.parse(fs.readFileSync(path('MONGOL_EMPIRE_SCENE_INPUT.json')));
+const result=await analyzePresentationPrompt(input);
+fs.writeFileSync(path('evidence/AUTOMATIC_COMPILE_RESULT.json'),JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({status:result.status,issues:result.issues,requests:result.renderRequests.length}));
+assert.equal(result.status,'PASS');assert.equal(result.renderRequests.length,1);
+const request=result.renderRequests[0];fs.writeFileSync(path('FORMAL_SCENE.json'),JSON.stringify(request.scene,null,2)+'\n');
+fs.writeFileSync(path('RUNTIME_REQUEST.json'),JSON.stringify({schema:'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2',totalFrames:result.totalFrames,sourceInputSHA256:result.inputSHA256,segments:result.renderRequests,transitions:result.transitionPlan},null,2)+'\n');
+fs.writeFileSync(path('AUTOMATIC_DIRECTION_ANALYSIS.json'),JSON.stringify(request.automaticDirection,null,2)+'\n');

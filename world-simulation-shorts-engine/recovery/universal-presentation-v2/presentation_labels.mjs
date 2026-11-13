@@ -1,5 +1,6 @@
+import {historicalTimeLabel} from '../../web/map_infographic_v1/historical_time_v1.mjs';
 /** Explicit geographic label contract. No font, renderer, GPU or network work. */
-export const LABEL_ROLES=Object.freeze(['COUNTRY','EVENT','NUMERIC']);
+export const LABEL_ROLES=Object.freeze(['COUNTRY','EVENT','NUMERIC','TITLE','TIMELINE','DISCLOSURE']);
 export const MAX_LABELS=16;
 export const MAX_LABEL_GRAPHEMES=24;
 export const REFERENCE_LABEL_STYLE='REFERENCE_V1';
@@ -34,11 +35,33 @@ export function validateLabelSpec(spec,{scene,highlights=[]}={}){
  check(Array.isArray(spec.items)&&spec.items.length>=1&&spec.items.length<=MAX_LABELS,'PRESENTATION_LABEL_CAPACITY');
  const frames=scene.timing.total_frames,seen=new Set();
  const items=spec.items.map(item=>{
-  keys(item,['id','role','text','locationId','anchor','eventId','startFrame','endFrame','revealFrames','exitFrames','priority','style','pin','reveal'],'PRESENTATION_LABEL');
+  keys(item,['id','role','text','stateId','screenPlacement','locationId','anchor','eventId','startFrame','endFrame','revealFrames','exitFrames','priority','style','pin','reveal'],'PRESENTATION_LABEL');
   check(id(item.id)&&!seen.has(item.id),'PRESENTATION_LABEL_ID_INVALID');seen.add(item.id);
   check(LABEL_ROLES.includes(item.role),'PRESENTATION_LABEL_ROLE_INVALID');
+  check(!own(item,'screenPlacement')||item.screenPlacement===item.role&&['TITLE','TIMELINE','DISCLOSURE'].includes(item.role),'PRESENTATION_SCREEN_PLACEMENT_INVALID');
   const text=validateLabelText(item.text);
   check(item.role!=='NUMERIC'||/\p{N}/u.test(text),'PRESENTATION_NUMERIC_LABEL_VALUE_REQUIRED');
+  if(['TITLE','TIMELINE','DISCLOSURE'].includes(item.role)){
+   check(!['anchor','locationId','eventId','pin','reveal','style'].some(k=>own(item,k)),'PRESENTATION_SCREEN_LABEL_GEOGRAPHIC_BINDING_FORBIDDEN');
+   let start=0,end=frames;
+   if(item.role==='TIMELINE'){
+    const index=scene.time_steps.findIndex(s=>s.id===item.stateId);check(index>=0,'PRESENTATION_TIMELINE_STATE_REQUIRED');
+    const step=scene.time_steps[index],next=scene.time_steps[index+1];
+    check(text===historicalTimeLabel(step.date),'PRESENTATION_TIMELINE_SOURCE_TEXT_MISMATCH');
+    start=index===0?0:step.start_frame+Math.ceil((step.transition_frames-1)/2);
+    end=next?next.start_frame+Math.ceil((next.transition_frames-1)/2):frames;
+   }else{
+    check(!own(item,'stateId'),'PRESENTATION_SCREEN_STATE_UNEXPECTED');
+    if(item.role==='TITLE')check(text===scene.subject.label,'PRESENTATION_TITLE_SOURCE_TEXT_MISMATCH');
+    else check(text==='역사 경계 재구성'&&scene.source_notes.some(s=>s.uncertainty),'PRESENTATION_DISCLOSURE_SOURCE_REQUIRED');
+   }
+   check(item.startFrame===start&&item.endFrame===end,'PRESENTATION_SCREEN_LABEL_SOURCE_TIMING_MISMATCH');
+   const reveal=item.revealFrames??1,exit=item.exitFrames??1,priority=item.priority??100;
+   check(Number.isSafeInteger(reveal)&&reveal>=1&&reveal<=30&&Number.isSafeInteger(exit)&&exit>=1&&exit<=30&&reveal+exit<end-start,'PRESENTATION_LABEL_REVEAL_HOLD_EXIT_INVALID');
+   check(Number.isSafeInteger(priority)&&priority>=0&&priority<=100,'PRESENTATION_LABEL_PRIORITY_INVALID');
+   return{id:item.id,role:item.role,text,screenPlacement:item.role,...(item.role==='TIMELINE'?{stateId:item.stateId}:{}),startFrame:start,endFrame:end,revealFrames:reveal,exitFrames:exit,priority};
+  }
+  check(!own(item,'stateId'),'PRESENTATION_GEOGRAPHIC_LABEL_STATE_UNEXPECTED');
   check(id(item.locationId),'PRESENTATION_LABEL_LOCATION_REQUIRED');
   const locations=scene.locations.filter(location=>location.id===item.locationId);
   check(locations.length===1&&point(locations[0].anchor),'PRESENTATION_LABEL_LOCATION_BINDING_REQUIRED');

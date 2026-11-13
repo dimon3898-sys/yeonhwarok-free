@@ -1,3 +1,5 @@
+import {HISTORY_DIRECTION_PROFILE,historyRegion,deriveHistoryPresentation} from './history_direction.mjs';
+import {validHistoricalTime,timeIntersectsRange,compareHistoricalTime} from '../../web/map_infographic_v1/historical_time_v1.mjs';
 /** Bounded bilingual intent extraction plus supplied-data native Scene compilation.
  * This is not an LLM, historical researcher, geocoder, or unrestricted NLU service. */
 import fs from 'node:fs';
@@ -128,8 +130,8 @@ function validateExplicitSpans(nl,data,region,issues){
  for(const date of nl.dates){
   const interval=calendarInterval(date);
   if(!interval){issues.push(issue('INVALID','NATURAL_DATE_INVALID','$.prompt','Explicit dates must be valid Gregorian dates at the stated precision.',{span:date.text,value:date.value,precision:date.precision}));continue;}
-  const matching=rows.filter((_,i)=>!date.scope.sceneIndices||date.scope.sceneIndices.includes(i)),ranges=matching.map(row=>row?.facts?.time_range).filter(r=>text(r?.start)&&text(r?.end));
-  if(ranges.length&&ranges.every(r=>interval[1]<r.start||interval[0]>r.end))issues.push(issue('CONFLICT','NATURAL_DATE_OUTSIDE_ATTACHED_DATA','$.prompt','The requested date interval does not intersect the matching attached scene validity range; attached dates were not overwritten.',{requested:date.value,precision:date.precision,allowedIntervals:ranges,action:'Attach matching dated facts or correct the prompt'}));
+  const matching=rows.filter((_,i)=>!date.scope.sceneIndices||date.scope.sceneIndices.includes(i)),ranges=matching.map(row=>row?.facts?.time_range).filter(r=>validHistoricalTime(r?.start)&&validHistoricalTime(r?.end));
+  if(ranges.length&&ranges.every(r=>!timeIntersectsRange(date.value,r)))issues.push(issue('CONFLICT','NATURAL_DATE_OUTSIDE_ATTACHED_DATA','$.prompt','The requested date interval does not intersect the matching attached scene validity range; attached dates were not overwritten.',{requested:date.value,precision:date.precision,allowedIntervals:ranges,action:'Attach matching dated facts or correct the prompt'}));
  }
  for(const coordinate of nl.coordinates){
   if(!point(coordinate.value)){issues.push(issue('INVALID','NATURAL_COORDINATE_INVALID','$.prompt','Explicit coordinate text must use finite longitude/latitude within ±180/±90.',{span:coordinate.text,order:'[longitude,latitude]'}));continue;}
@@ -183,7 +185,7 @@ function completeData(data,nl,trace,issues){
  return out;
 }
 function has(nl,name){return nl.intents.some(x=>x.type===name);}
-function displayTiming(facts,frames,fps){
+export function displayTiming(facts,frames,fps){
  const hold=Math.max(2,Math.floor(frames*.25)),action=frames-hold,count=facts.subject.event_family==='WAR'?facts.stages.length:1;
  return{fps,total_frames:frames,duration_seconds:frames/fps,camera_lock_frame:0,event_start_frame:0,
   initial_reveal_frames:count>1?action-Math.floor(action/count)*(count-1):0,state_transition_frames:count>1?Math.floor(action/count):0,
@@ -270,16 +272,22 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
  for(const unsupported of nl.unsupported){
   const selected=unsupported.type==='UNSUPPORTED_VISIBLE_LABELS'?sceneScope(envelope.prompt,unsupported,labelScenes):null;
   const indices=selected?.sceneIndices??labelScenes.map((_,index)=>index);
-  const explicitLabels=indices.length>0&&indices.every(index=>{const row=labelScenes[index];if(!row)return false;const spec=envelope.presentation?.sceneOverrides?.[row.sceneId]?.labels??envelope.presentation?.labels;return spec?.enabled===true&&Array.isArray(spec.items)&&spec.items.length>0;});
+  const explicitLabels=envelope.presentation?.automatic===HISTORY_DIRECTION_PROFILE||indices.length>0&&indices.every(index=>{const row=labelScenes[index];if(!row)return false;const spec=envelope.presentation?.sceneOverrides?.[row.sceneId]?.labels??envelope.presentation?.labels;return spec?.enabled===true&&Array.isArray(spec.items)&&spec.items.length>0;});
   if(unsupported.type==='UNSUPPORTED_VISIBLE_LABELS'&&explicitLabels){result.inputDerivations.push({field:'$.presentation.labels',origin:'EXPLICIT_LABEL_CONSUMER_WITH_SUPPLIED_LOCATION_EVENT_AND_FRAME_BINDINGS',sceneIndices:indices,worldFactCreated:false});continue;}
   result.issues.push(issue('UNSUPPORTED',unsupported.type,'$.prompt','This requested effect has no connected consumer in the new profile.',{unsupportedSpan:unsupported.text,action:'Remove the effect or provide a supported presentation intent'}));
  }
  const data=completeData(envelope.data,nl,result.inputDerivations,result.issues);
  if(!data){result.status=statusOf(result.issues);result.clarifications=result.issues.filter(x=>x.status==='NEEDS_INPUT');return finalize(result);}
+ const automatic=envelope.presentation?.automatic;
+ if(automatic!==undefined){
+  if(automatic!==HISTORY_DIRECTION_PROFILE)result.issues.push(issue('UNSUPPORTED','AUTOMATIC_PROFILE_UNSUPPORTED','$.presentation.automatic','Unknown common direction profile.',{supported:HISTORY_DIRECTION_PROFILE}));
+  else if(envelope.region!==undefined||Object.keys(envelope.presentation).some(k=>k!=='automatic'))result.issues.push(issue('CONFLICT','AUTOMATIC_AUTHORED_PRESENTATION_CONFLICT','$.presentation','Automatic selection cannot conceal authored camera, region or effects.',{allowed:{automatic:HISTORY_DIRECTION_PROFILE}}));
+  else try{envelope.region=historyRegion(data);result.inputDerivations.push({field:'$.region',origin:'SUPPLIED_GEOMETRY_BOUNDS_COMMON_HISTORY_POLICY',value:copy(envelope.region),worldFactCreated:false});}catch(error){result.issues.push(errorIssue(error,'$.data'));}
+ }
  result.simulationType=data.simulationType;result.normalizedDataSHA256=hash(data);result.totalFrames=data.durationSeconds*data.fps;
- unknown(envelope.region,['center','bbox','countryId','countryName','sourceId','crs','legacyProfileId'],'$.region',result.issues);
+ unknown(envelope.region,['center','bbox','countryId','countryName','sourceId','crs','legacyProfileId','projection'],'$.region',result.issues);
  if(!object(envelope.region)||!point(envelope.region.center)||!Array.isArray(envelope.region.bbox)||envelope.region.bbox.length!==4||!envelope.region.bbox.every(Number.isFinite))result.issues.push(issue('NEEDS_INPUT','EXPLICIT_REGION_REQUIRED','$.region','Supply the source-covered center and [west,south,east,north] map range; places are not geocoded or guessed.',{center:[0,0],bbox:[-5,-8,5,8],crs:'EPSG:4326',sourceId:'AUTO'}));
- unknown(envelope.presentation,['camera','territoryColors','highlights','initialStateVisibility','sceneOverrides','transitions','labels','mapStyle','flow'],'$.presentation',result.issues);
+ unknown(envelope.presentation,['automatic','camera','territoryColors','highlights','initialStateVisibility','sceneOverrides','transitions','labels','mapStyle','flow'],'$.presentation',result.issues);
  const shared=envelope.presentation??{},ids=new Set(Array.isArray(data.scenes)?data.scenes.map(x=>x?.sceneId).filter(text):[]);
  unknown(shared.sceneOverrides,[...ids],'$.presentation.sceneOverrides',result.issues);
  validateExplicitSpans(nl,data,envelope.region,result.issues);
@@ -318,7 +326,7 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
   const requestedLegacySource={...data.renderSettings,...row.renderSettings}.sourceRegionId;
   if(requestedLegacySource!==undefined&&envelope.region.legacyProfileId!==requestedLegacySource)problems.push(issue('CONFLICT','LEGACY_SOURCE_SELECTION_CONFLICT',row.renderSettings?.sourceRegionId!==undefined?field+'.renderSettings.sourceRegionId':'$.data.renderSettings.sourceRegionId','The old source selection is not silently ignored by the new regional profile. Explicitly bind its matching legacyProfileId or remove the old rendering selection from the new envelope.',{legacySourceRegionId:requestedLegacySource,regionLegacyProfileId:envelope.region.legacyProfileId??null,action:'Use the explicit new region or a matching preserved legacy profile'}));
   else if(requestedLegacySource!==undefined)trace.push({field:'$.region.legacyProfileId',origin:'EXPLICIT_MATCHED_LEGACY_SOURCE_SELECTION',value:requestedLegacySource,requiresActualSourceQualification:true});
-  let scene,enginePlan,admission,presentation;
+  let scene,enginePlan,admission,presentation,automaticDirection;
   if(!problems.length){
    try{
     admission=await qualifyRegion({region:copy(envelope.region),facts:copy(row.facts)});
@@ -331,11 +339,13 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
   if(!problems.length)problems.push(...validateNativeContextBindings(row.facts,envelope.region,admission,field+'.facts'));
   if(!problems.length)try{
    const facts=copy(row.facts),frames=row.endFrame-row.startFrame;
-   if(Array.isArray(facts.stages))facts.stages.sort((a,b)=>a.date.localeCompare(b.date));
+   if(Array.isArray(facts.stages))facts.stages.sort((a,b)=>compareHistoricalTime(a.date,b.date));
    if(facts.scene_timing===undefined){facts.scene_timing=displayTiming(facts,frames,data.fps);trace.push({field:field+'.facts.scene_timing',origin:'EXACT_FRAME_BUDGET_DISPLAY_ALLOCATION',worldFactCreated:false,value:copy(facts.scene_timing)});}
    validateFactDataset(facts);scene=compileScenePlan({topic:data.topic,facts,output:{fps:data.fps,width:data.resolution.width,height:data.resolution.height}});validateScenePlan(scene);enginePlan=compileExistingEnginePlan(scene);
    if(scene.timing.total_frames!==frames)problems.push(issue('CONFLICT','SCENE_FRAME_BUDGET_MISMATCH',field,'Native Scene timing differs from its exact original frame interval.',{expectedFrames:frames,actualFrames:scene.timing.total_frames}));
-   const local=localPresentation(shared,shared.sceneOverrides?.[row.sceneId],sceneNL,scene,envelope.region,trace,problems,'$.presentation.sceneOverrides.'+row.sceneId);
+   let local;
+   if(automatic===HISTORY_DIRECTION_PROFILE){const derived=deriveHistoryPresentation({scene,admission});local=derived.presentation;automaticDirection=derived.audit;trace.push({field:'$.presentation',origin:'COMMON_HISTORY_POLICY',audit:copy(automaticDirection),worldFactCreated:false});}
+   else local=localPresentation(shared,shared.sceneOverrides?.[row.sceneId],sceneNL,scene,envelope.region,trace,problems,'$.presentation.sceneOverrides.'+row.sceneId);
    if(!problems.length){presentation=validatePresentation(local,{scene,region:envelope.region});trace.push({field:'$.presentation.sceneOverrides.'+row.sceneId+'.initialStateVisibility',origin:local.initialStateVisibility===undefined?'PRESERVED_REVEAL_DEFAULT':'EXPLICIT_PUBLIC_AREA_OPERATION_MODE',value:presentation.initialStateVisibility,worldGeometryChanged:false,worldClockChanged:false});}
   }catch(error){problems.push(errorIssue(error,field));}
   const state={sceneId:row.sceneId,startFrame:row.startFrame,endFrame:row.endFrame,status:statusOf(problems),issues:problems,dependsOn:row.dependsOn??[]};
@@ -346,7 +356,7 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
     {inputPath:'$.region',scenePath:'$.runtime.region',regionSHA256:hash(envelope.region),actualSourceQualification:copy(admission.regionEvidence??admission.evidence??admission)},
     {inputPath:'$.presentation',scenePath:'$.runtime.presentation',presentationSHA256:hash(presentation)},
     ...scene.geometries.map(g=>({inputPath:field+'.facts.geometries['+row.facts.geometries.findIndex(x=>x.id===g.id)+']',scenePath:'$.geometries['+scene.geometries.findIndex(x=>x.id===g.id)+']',geometryId:g.id,geometrySHA256:hash(g.geometry),sourceId:g.source_id})),...trace];
-   result.renderRequests.push({sceneId:row.sceneId,startFrame:row.startFrame,endFrame:row.endFrame,scene,enginePlan,sceneSHA256:hash(scene),region:copy(envelope.region),presentation,
+   result.renderRequests.push({sceneId:row.sceneId,startFrame:row.startFrame,endFrame:row.endFrame,scene,enginePlan,sceneSHA256:hash(scene),region:copy(envelope.region),presentation,...(automaticDirection?{automaticDirection}:{}),
     regionEvidence:copy(admission.regionEvidence??admission.evidence??admission),regionGateSHA256:admission.regionGateSHA256??hash(admission),sourceGate:'ACTUAL_PROVIDER_QUALIFICATION_PASS_CAMERA_ENVELOPE_GATE_STILL_REQUIRED',inputTrace,
     sourceManifest:scene.source_notes.map(s=>({sourceId:s.id,sourceReference:s.source_reference,canonicalMetadataSHA256:hash(s),originalSHA256:s.original_sha256??s.sha256??null,originalBytesVerified:false})),
     presentationDerivations:trace,displayMetadataOnly:['subject.label','locations[].label','markers[].label','moving_objects[].profile']});
@@ -357,6 +367,7 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
  result.renderableSceneIds=result.sceneResults.filter(x=>x.status==='PASS').map(x=>x.sceneId);result.blockedSceneIds=result.sceneResults.filter(x=>x.status!=='PASS').map(x=>x.sceneId);
  result.renderRequests=result.renderRequests.filter(x=>result.renderableSceneIds.includes(x.sceneId));
  result.issues=result.sceneResults.flatMap(x=>x.issues);result.status=statusOf(result.issues);result.clarifications=result.issues.filter(x=>['NEEDS_INPUT','CONFLICT'].includes(x.status));
+ result.historicalRenderAllowed=data.simulationType==='HISTORICAL'&&result.status==='PASS'&&result.renderRequests.length===data.scenes.length;
  result.timelinePreserved=true;result.partialRenderRequiresExplicitSceneSelection=result.blockedSceneIds.length>0;
  return finalize(result);
 }

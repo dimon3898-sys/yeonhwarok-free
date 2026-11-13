@@ -5,6 +5,25 @@ const check=(x,c)=>{if(!x)throw Error(c);},rad=x=>x*Math.PI/180,deg=x=>x*180/Mat
 export const mercatorY=latitude=>deg(Math.log(Math.tan(Math.PI/4+rad(latitude)/2)));
 export const inverseMercatorY=y=>deg(2*Math.atan(Math.exp(rad(y)))-Math.PI/2);
 export const geographicQ=point=>[point[0],-mercatorY(Math.max(-85,Math.min(85,point[1])))];
+/** Fit supplied content using the existing Mercator projection, preserving x/y scale.
+ * Native raster density constrains the polar background, not historical coordinates. */
+export function fitGeographicPose(bounds,{margin=72,pixelSpacing=1/60}={}){
+ check(Array.isArray(bounds)&&bounds.length===4&&bounds.every(Number.isFinite)&&bounds[0]<bounds[2]&&bounds[1]<bounds[3]&&bounds[0]>-180&&bounds[2]<180&&bounds[1]>-85&&bounds[3]<85,'GEOGRAPHIC_FIT_BOUNDS');
+ const y0=mercatorY(bounds[1]),y1=mercatorY(bounds[3]);
+ const maximumScale=Math.min((1080-2*margin)/(bounds[2]-bounds[0]),(1920-2*margin)/(y1-y0));
+ for(let attempt=0;attempt<80;attempt++){
+  const scale=maximumScale*Math.pow(.97,attempt);
+  if(scale*pixelSpacing>=1)continue;
+  const latitudeLimit=Math.min(84,deg(Math.acos(scale*pixelSpacing))-.75),limit=mercatorY(latitudeLimit),half=960/scale;
+  if(limit<=half)continue;
+  const cy=Math.max(-limit+half,Math.min(limit-half,(y0+y1)/2)),center=[(bounds[0]+bounds[2])/2,inverseMercatorY(cy)];
+  const pose={center,scale,rollDegrees:0},frame=geographicCameraFrame(pose);
+  if([[bounds[0],bounds[1]],[bounds[0],bounds[3]],[bounds[2],bounds[1]],[bounds[2],bounds[3]]].every(p=>{
+   const q=frame.project(p);return q[0]>=margin-1e-8&&q[0]<=1080-margin+1e-8&&q[1]>=margin-1e-8&&q[1]<=1920-margin+1e-8;
+  }))return pose;
+ }
+ throw Error('GEOGRAPHIC_CONTENT_FIT_FAILED');
+}
 const keys=(x,allowed,code)=>{check(x&&typeof x==='object'&&!Array.isArray(x)&&Object.keys(x).every(k=>allowed.includes(k)),code);};
 export function geographicCameraFrame(pose){
  keys(pose,['center','scale','rollDegrees'],'GEOGRAPHIC_CAMERA_POSE_FIELDS');

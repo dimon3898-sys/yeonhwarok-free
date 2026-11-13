@@ -1,3 +1,4 @@
+import {historicalTime,historicalRange,timeWithin,timeBefore} from './historical_time_v1.mjs';
 /** Deterministic scene planning from a topic and supplied facts. No renderer or camera solver. */
 import {compileEventIntent, freezeEventData, validateEventAnchor} from './event_contract_v1.mjs';
 import {validateAreaGeometry} from './area_core_v3.mjs';
@@ -48,11 +49,10 @@ function refs(values, existing, label) {
  return [...result];
 }
 function date(value, label) {
- text(value, label);
- if (!/^\d{4}-\d{2}-\d{2}$/u.test(value) || !Number.isFinite(Date.parse(value + 'T00:00:00Z'))
-  || new Date(value + 'T00:00:00Z').toISOString().slice(0, 10) !== value) throw Error('PLANNER_' + label + '_ISO_DATE_REQUIRED');
- return value;
+ try { historicalTime(value); } catch { throw Error('PLANNER_' + label + '_HISTORICAL_TIME_REQUIRED'); }
+ return copy(value);
 }
+
 function sourceRecord(value, mode) {
  record(value, 'SOURCE');
  const result = {id: id(value.id, 'SOURCE_ID'), source_type: text(value.source_type, 'SOURCE_TYPE'),
@@ -62,12 +62,13 @@ function sourceRecord(value, mode) {
  if (mode === 'SYNTHETIC_TEST' && (result.verification_status !== 'SYNTHETIC_TEST' || result.source_type !== 'SYNTHETIC_TEST'))
   throw Error('PLANNER_EXPLICIT_SYNTHETIC_SOURCE_REQUIRED');
  if (value.note !== undefined) result.note = text(value.note, 'SOURCE_NOTE');
- for (const key of ['verification_basis', 'live_access', 'retrieval_date', 'license', 'version'])
+ for (const key of ['verification_basis', 'live_access', 'retrieval_date', 'license', 'version', 'attribution', 'uncertainty'])
   if (value[key] !== undefined) result[key] = text(value[key], 'SOURCE_' + key.toUpperCase());
  for (const key of ['original_sha256', 'source_wrapper_sha256', 'sha256']) if (value[key] !== undefined) {
   if (typeof value[key] !== 'string' || !/^[a-f0-9]{64}$/u.test(value[key])) throw Error('PLANNER_SOURCE_SHA256_REQUIRED');
   result[key] = value[key];
  }
+ if (value.historical_validity!==undefined) { historicalRange(value.historical_validity); result.historical_validity=copy(value.historical_validity); }
  for (const key of ['crs', 'resolution']) if (value[key] !== undefined) result[key] = text(value[key], 'SOURCE_' + key.toUpperCase());
  return result;
 }
@@ -85,6 +86,7 @@ function geometryRecord(value, sources, mode) {
   line: {geometry: value.geometry, source: contractSource(source), direction: 'FORWARD', style_role: 'PRIMARY'}}).line.geometry;
  else geometry = validateAreaGeometry(value.geometry);
  return {id: id(value.id, 'GEOMETRY_ID'), geometry: copy(geometry), source_id: source.id,
+  ...(value.validity===undefined?{}:{validity:(historicalRange(value.validity),copy(value.validity))}),
   ...(value.note === undefined ? {} : {note: text(value.note, 'GEOMETRY_NOTE')})};
 }
 function expectGeometry(ref, geometries, types, label) {
@@ -232,7 +234,7 @@ export function validateFactDataset(input) {
  if (!locations.length) throw new PlannerDataRequiredError('geographical context');
  const range = record(given.time_range, 'TIME_RANGE');
  const timeRange = {start: date(range.start, 'TIME_RANGE_START'), end: date(range.end, 'TIME_RANGE_END')};
- if (timeRange.end < timeRange.start) throw Error('PLANNER_TIME_RANGE_ORDER');
+ historicalRange(timeRange);
  const stages = unique(list(given.stages ?? [], 'STAGES').map(value => {
   record(value, 'STAGE');
   const areas = refs(value.area_refs ?? [], geometryMap, 'STAGE_AREA');
@@ -243,8 +245,8 @@ export function validateFactDataset(input) {
    area_refs: areas, front_refs: fronts};
  }), 'STAGE');
  for (let index = 0; index < stages.length; index++) {
-  if (stages[index].date < timeRange.start || stages[index].date > timeRange.end
-   || index > 0 && stages[index].date <= stages[index - 1].date) throw Error('PLANNER_CHRONOLOGICAL_STAGES_REQUIRED');
+  if (!timeWithin(stages[index].date,timeRange)
+   || index > 0 && !timeBefore(stages[index - 1].date,stages[index].date)) throw Error('PLANNER_CHRONOLOGICAL_STAGES_REQUIRED');
  }
  const routes = unique(list(given.routes ?? [], 'ROUTES').map(value => {
   record(value, 'ROUTE'); expectGeometry(value.geometry_ref, geometryMap, ['LineString'], 'ROUTE');
@@ -395,9 +397,9 @@ export function selectFeatures(intent, factsInput) {
   if (!facts.region_layers?.length) throw new PlannerDataRequiredError('independent geographic regions');
   selected = ['REGION_REVEAL', 'AREA_HOLD'];
  } else {
-  if (facts.stages.length < 2 || facts.stages.some(stage => !stage.area_refs.length || !stage.front_refs.length))
-   throw new PlannerDataRequiredError('chronological front and area states');
-  selected = ['FRONT_LINE', 'STATE_TRANSITION', 'TIME_STEP', 'AREA_HOLD'];
+  if (facts.stages.length < 2 || facts.stages.some(stage => !stage.area_refs.length && !stage.front_refs.length))
+   throw new PlannerDataRequiredError('chronological supplied area or front states');
+  selected = [...(facts.stages.some(s=>s.front_refs.length)?['FRONT_LINE']:[]), 'STATE_TRANSITION', 'TIME_STEP', 'AREA_HOLD'];
   if (facts.routes.some(route => route.required_for_story)) selected.push('ROUTE_REVEAL', 'DIRECTIONAL_FLOW', 'MOVING_OBJECT', 'ENDPOINT_PULSE');
  }
  return freezeEventData(selected);
@@ -573,7 +575,7 @@ export function validateScenePlan(scene) {
  } else if (value.region_layers !== undefined || features.includes('REGION_REVEAL')) throw Error('PLANNER_REGION_LAYERS_REQUIRE_GEOGRAPHIC');
  const ranges = record(value.time_range, 'TIME_RANGE');
  date(ranges.start, 'TIME_RANGE_START'); date(ranges.end, 'TIME_RANGE_END');
- if (ranges.start > ranges.end) throw Error('PLANNER_TIME_RANGE_ORDER');
+ historicalRange(ranges);
  const locations = unique(list(value.locations, 'LOCATIONS'), 'LOCATION');
  if (!locations.length) throw Error('PLANNER_LOCATION_CONTEXT_REQUIRED');
  for (const location of locations) { id(location.id); text(location.label, 'LOCATION_LABEL'); validateEventAnchor(location.anchor); }
@@ -588,17 +590,18 @@ export function validateScenePlan(scene) {
   && (!categoryMap.routes.size || !value.moving_objects?.length)) throw Error('PLANNER_MOVING_OBJECT_ROUTE_DATA_REQUIRED');
  if (value.event_type === 'WAR') {
   const steps = unique(list(value.time_steps, 'TIME_STEPS'), 'TIME_STEP');
-  if (steps.length < 2 || !categoryMap.areas.size || !categoryMap.front_lines.size
-   || !['FRONT_LINE', 'STATE_TRANSITION', 'TIME_STEP'].every(feature => features.includes(feature)))
+  if (steps.length < 2 || (!categoryMap.areas.size && !categoryMap.front_lines.size)
+   || features.includes('FRONT_LINE') !== Boolean(categoryMap.front_lines.size)
+   || !['STATE_TRANSITION', 'TIME_STEP'].every(feature => features.includes(feature)))
    throw Error('PLANNER_WAR_STATE_FEATURES_REQUIRED');
-  let priorDate = '', priorEnd = timing.event_start_frame;
+  let priorDate = null, priorEnd = timing.event_start_frame;
   for (const step of steps) {
    date(step.date, 'STATE_DATE'); text(step.label, 'STATE_LABEL');
    integer(step.start_frame, 'STATE_START'); integer(step.transition_frames, 'STATE_DURATION', 2);
-   if (step.date <= priorDate || step.date < ranges.start || step.date > ranges.end || step.start_frame !== priorEnd)
+   if (priorDate!==null && !timeBefore(priorDate,step.date) || !timeWithin(step.date,ranges) || step.start_frame !== priorEnd)
     throw Error('PLANNER_CHRONOLOGICAL_STATE_TIMELINE_REQUIRED');
    const areaIds = refs(step.area_ids, categoryMap.areas, 'STATE_AREA'), frontIds = refs(step.front_line_ids, categoryMap.front_lines, 'STATE_FRONT');
-   if (!areaIds.length || !frontIds.length || areaIds.some(ref => categoryMap.areas.get(ref).stage_id !== step.id)
+   if ((!areaIds.length && !frontIds.length) || areaIds.some(ref => categoryMap.areas.get(ref).stage_id !== step.id)
     || frontIds.some(ref => categoryMap.front_lines.get(ref).stage_id !== step.id)) throw Error('PLANNER_STATE_GEOMETRY_BINDING_REQUIRED');
    priorDate = step.date; priorEnd = step.start_frame + step.transition_frames;
   }

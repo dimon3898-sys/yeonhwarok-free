@@ -52,7 +52,7 @@ export function validatePresentation(input,{scene,region}={}){
  keys(input.camera,['mode','keyframes','routeId','zoom','followStrength','projection','frames','interpolation'],'PRESENTATION_CAMERA');
  ok(['KEYFRAMES','ROUTE_FOLLOW','GEOGRAPHIC_TRACK'].includes(input.camera.mode),'PRESENTATION_CAMERA_MODE_UNSUPPORTED');
  if(input.camera.mode==='GEOGRAPHIC_TRACK'){
-  ok(scene.event_type==='GEOGRAPHIC','PRESENTATION_GEOGRAPHIC_CAMERA_FAMILY');
+  ok(scene.event_type==='GEOGRAPHIC'||scene.event_type==='WAR'&&!scene.routes?.length,'PRESENTATION_GEOGRAPHIC_CAMERA_FAMILY');
   compileGeographicCamera(input.camera,{totalFrames:n,holdFrames:scene.timing.final_hold_frames});
  }else if(input.camera.mode==='KEYFRAMES'){
   ok(input.camera.interpolation===undefined&&input.camera.projection===undefined&&input.camera.frames===undefined&&input.camera.routeId===undefined&&input.camera.zoom===undefined&&input.camera.followStrength===undefined,'PRESENTATION_KEYFRAME_FIELD_CONFLICT');

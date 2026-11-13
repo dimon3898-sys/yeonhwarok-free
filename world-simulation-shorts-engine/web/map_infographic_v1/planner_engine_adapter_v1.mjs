@@ -1,3 +1,4 @@
+import {historicalTimeLabel} from './historical_time_v1.mjs';
 /** Scene data selects existing engines. No story interpretation, camera math or new renderer. */
 import {compileAreaIntent,compileAreaPlan} from './area_core_v3.mjs';
 import {compileFlowIntent,compileFlowPlan} from './flow_core_v2.mjs';
@@ -37,7 +38,7 @@ export function compileSceneEngineRequest(scene){
  if(!Number.isSafeInteger(eventStart)||!Number.isSafeInteger(totalFrames)||totalFrames<=0)
   throw Error('PLANNER_ENGINE_EXPLICIT_EVENT_TIMING_REQUIRED');
  const areas=scene.areas??[],fronts=scene.front_lines??[];
- const states=scene.time_steps.map(step=>({state_id:step.id,time_label:step.date,
+ const states=scene.time_steps.map(step=>({state_id:step.id,time_label:historicalTimeLabel(step.date),
   areas:step.area_ids.map(id=>{const row=areas.find(value=>value.id===id);if(!row)throw Error('PLANNER_AREA_ID_REQUIRED');return recordFor(scene,row);}),
   fronts:step.front_line_ids.map(id=>{const row=fronts.find(value=>value.id===id);if(!row)throw Error('PLANNER_FRONT_ID_REQUIRED');return recordFor(scene,row);})}));
  const sourceId=areas[0]?.source_id??fronts[0]?.source_id;
@@ -55,7 +56,7 @@ export function compileSceneEngineRequest(scene){
  const holdFrames=scene.timing.final_hold_frames??36;
  operations.push({type:'AREA_HOLD',start_frame:totalFrames-holdFrames,duration_frames:holdFrames});
  const areaPlan=compileAreaPlan(intent,{fps:scene.timing.fps,total_frames:totalFrames,operations});
- const annotations=scene.time_steps.map(step=>({id:step.id,display_value:step.date.replaceAll('-','.'),
+ const annotations=scene.time_steps.map(step=>({id:step.id,display_value:historicalTimeLabel(step.date).replaceAll('-','.'),
   unit:step.label,source:sourceFor(scene,sourceId),anchor:copy(origin)}));
  return {version:PLANNER_ENGINE_ADAPTER_V1_VERSION,areaPlan,annotations,
   timing:{fps:scene.timing.fps,totalFrames:scene.timing.total_frames,eventStartFrame:eventStart},

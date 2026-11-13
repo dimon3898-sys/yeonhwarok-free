@@ -64,6 +64,28 @@ function insideRing(point, ring) {
 function ringsIntersect(first, second) {
  return first.slice(1).some((b, i) => second.slice(1).some((d, j) => intersects(first[i], b, second[j], d)));
 }
+// Disconnected polygon parts may touch at isolated points (OGC MultiPolygon).
+// Shared edges or positive-area overlap remain invalid; never repair source rings.
+function multipartBoundaryConflict(a,b,c,d){
+ const ca=cross(a,b,c),cb=cross(a,b,d),cc=cross(c,d,a),cd=cross(c,d,b);
+ const opposite=(x,y)=>x>EPS&&y< -EPS||x< -EPS&&y>EPS;
+ if(opposite(ca,cb)&&opposite(cc,cd))return true;
+ if([ca,cb,cc,cd].every(x=>Math.abs(x)<=EPS)){
+  const axis=Math.abs(b[0]-a[0])>=Math.abs(b[1]-a[1])?0:1;
+  return Math.min(Math.max(a[axis],b[axis]),Math.max(c[axis],d[axis]))-
+   Math.max(Math.min(a[axis],b[axis]),Math.min(c[axis],d[axis]))>EPS;
+ }
+ return false;
+}
+function filledInterior(point,polygon){
+ return insideRing(point,polygon[0])&&!polygon.slice(1).some(r=>insideRing(point,r)||r.slice(1).some((b,i)=>on(r[i],b,point)));
+}
+function polygonPartsOverlap(first,second){
+ for(const a of first)for(const b of second)
+  if(a.slice(1).some((p,i)=>b.slice(1).some((q,j)=>multipartBoundaryConflict(a[i],p,b[j],q))))return true;
+ const samples=ring=>ring.slice(1).flatMap((b,i)=>[b,[(b[0]+ring[i][0])/2,(b[1]+ring[i][1])/2]]);
+ return samples(first[0]).some(p=>filledInterior(p,second))||samples(second[0]).some(p=>filledInterior(p,first));
+}
 function ringRecord(input) {
  const ring = list(input, 'RING').map(point => validateEventAnchor(point, 'AREA_RING_VERTEX'));
  if (ring.length < 4 || !same(ring[0], ring.at(-1))) throw Error('AREA_CLOSED_RING_REQUIRED');
@@ -100,8 +122,7 @@ export function validateAreaGeometry(input) {
  if (polygons.reduce((sum, polygon) => sum + polygon.reduce((n, ring) => n + ring.length, 0), 0) > 4096)
   throw Error('AREA_GEOMETRY_CAPACITY_EXCEEDED');
  for (let i = 0; i < polygons.length; i++) for (let j = 0; j < i; j++) {
-  const a = polygons[i][0], b = polygons[j][0];
-  if (ringsIntersect(a, b) || insideRing(a[0], b) || insideRing(b[0], a)) throw Error('AREA_MULTIPOLYGON_PARTS_OVERLAP');
+  if (polygonPartsOverlap(polygons[i],polygons[j])) throw Error('AREA_MULTIPOLYGON_PARTS_OVERLAP');
  }
  return freezeEventData({type: geometry.type, coordinates: geometry.type === 'Polygon' ? polygons[0] : polygons});
 }
