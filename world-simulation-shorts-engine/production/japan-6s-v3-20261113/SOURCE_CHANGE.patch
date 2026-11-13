@@ -1,0 +1,209 @@
+diff --git a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs
+index 7cb7107..9390a22 100644
+--- a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs
++++ b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_plan.mjs
+@@ -1,3 +1,4 @@
++import {validatePresentationFlows,validateHighlightRing,bindPresentationFlows} from './presentation_flow.mjs';
+ import {validateBoundaryTrace,compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from '../../web/map_infographic_v1/boundary_trace_v1.mjs';
+ import {GEOGRAPHIC_CAMERA_VERSION,compileGeographicCamera,geographicCameraFrame} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
+ /** Data-only presentation composition over unchanged V5/Flow/Area owners. */
+@@ -24,7 +25,7 @@ export function unprojectBounds(bounds,pixel){return[bounds[0]+pixel[0]/1080*(bo
+ 
+ /** Unknown/unconsumed controls fail rather than being accepted as metadata. */
+ export function validatePresentation(input,{scene,region}={}){
+- keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels','mapStyle'],'PRESENTATION');
++ keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels','mapStyle','flow'],'PRESENTATION');
+  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
+  const n=scene.timing.total_frames,result=copy(input);
+  if(input.mapStyle!==undefined){
+@@ -78,12 +79,14 @@ export function validatePresentation(input,{scene,region}={}){
+  const highlights=input.highlights??[];ok(Array.isArray(highlights)&&highlights.length<=16,'PRESENTATION_HIGHLIGHT_CAPACITY');
+  const seen=new Set();
+  for(const h of highlights){
+-  keys(h,['id','locationId','startFrame','endFrame'],'PRESENTATION_HIGHLIGHT');
++  keys(h,['id','locationId','startFrame','endFrame','ring'],'PRESENTATION_HIGHLIGHT');
+   ok(typeof h.id==='string'&&/^[A-Za-z0-9_.:-]+$/.test(h.id)&&!seen.has(h.id),'PRESENTATION_HIGHLIGHT_ID_INVALID');seen.add(h.id);
+   ok(scene.locations?.some(l=>l.id===h.locationId),'PRESENTATION_HIGHLIGHT_LOCATION_REQUIRED');
+   ok(frame(h.startFrame,n)&&frame(h.endFrame,n,true)&&h.endFrame-h.startFrame>=2,'PRESENTATION_HIGHLIGHT_TIMING_INVALID');
+  }
+  result.highlights=copy(highlights);
++ for(const h of result.highlights)if(h.ring!==undefined)h.ring=validateHighlightRing(h.ring,{...h,totalFrames:n,holdFrames:scene.timing.final_hold_frames});
++ if(input.flow!==undefined)result.flow=validatePresentationFlows(input.flow,{scene,engines:compileExistingEnginePlan(scene)});
+  if(input.labels!==undefined)result.labels=validateLabelSpec(input.labels,{scene,highlights});
+  const cuts=input.transitions??[];ok(Array.isArray(cuts),'PRESENTATION_TRANSITION_ARRAY_REQUIRED');
+  for(const t of cuts){keys(t,['type','frame'],'PRESENTATION_TRANSITION');ok(t.type==='CUT'&&Number.isSafeInteger(t.frame)&&t.frame>=0,'PRESENTATION_CUT_REQUIRED');}
+@@ -231,7 +234,7 @@ export function evaluatePresentationCameraFrame(plan,frame){return plan.mode==='
+ /** The old public Area operations support already visible supplied states.
+  * This changes opacity endpoints only, never event time or geographic input. */
+ export function compilePresentationEnginePlan({scene,presentation}={}){
+- const engines=compileExistingEnginePlan(scene),mode=presentation?.initialStateVisibility??'REVEAL';
++ const engines=bindPresentationFlows(compileExistingEnginePlan(scene),presentation?.flow),mode=presentation?.initialStateVisibility??'REVEAL';
+  ok(['REVEAL','PRESERVE_PROVIDED','PRESERVE_AREA_REVEAL_LINE'].includes(mode),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
+  if(mode==='REVEAL')return engines;
+  ok(scene.event_type==='WAR'&&engines.globalEventStartFrame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');
+diff --git a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs
+index 0df1332..7541f71 100644
+--- a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs
++++ b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_prompt.mjs
+@@ -210,8 +210,8 @@ function deriveCamera(nl,scene,region,trace,issues,field){
+  trace.push({field:field+'.camera',origin:'NL_DISPLAY_INTENT_FRAMED_FROM_SUPPLIED_GEOMETRY',value:copy(result),worldFactCreated:false});return result;
+ }
+ function localPresentation(shared,override,nl,scene,region,trace,issues,field){
+- unknown(override,['camera','territoryColors','highlights','initialStateVisibility','labels','mapStyle'],field,issues);
+- const value={};for(const key of ['camera','territoryColors','highlights','initialStateVisibility','labels','mapStyle'])if(override?.[key]!==undefined)value[key]=copy(override[key]);else if(shared[key]!==undefined)value[key]=copy(shared[key]);
++ unknown(override,['camera','territoryColors','highlights','initialStateVisibility','labels','mapStyle','flow'],field,issues);
++ const value={};for(const key of ['camera','territoryColors','highlights','initialStateVisibility','labels','mapStyle','flow'])if(override?.[key]!==undefined)value[key]=copy(override[key]);else if(shared[key]!==undefined)value[key]=copy(shared[key]);
+  if(value.camera===undefined)value.camera=deriveCamera(nl,scene,region,trace,issues,field);
+  else if(has(nl,'ROUTE_FOLLOW')&&value.camera?.mode!=='ROUTE_FOLLOW')issues.push(issue('CONFLICT','NATURAL_CAMERA_MODE_CONFLICT',field+'.camera','Natural-language route following conflicts with the attached keyframe camera. Neither is silently ignored.',{requestedMode:'ROUTE_FOLLOW',attachedMode:value.camera?.mode}));
+  if(value.camera?.mode==='KEYFRAMES'&&Array.isArray(value.camera.keyframes)){
+@@ -279,7 +279,7 @@ export async function analyzePresentationPrompt(input,{evidenceRegistry=[],quali
+  result.simulationType=data.simulationType;result.normalizedDataSHA256=hash(data);result.totalFrames=data.durationSeconds*data.fps;
+  unknown(envelope.region,['center','bbox','countryId','countryName','sourceId','crs','legacyProfileId'],'$.region',result.issues);
+  if(!object(envelope.region)||!point(envelope.region.center)||!Array.isArray(envelope.region.bbox)||envelope.region.bbox.length!==4||!envelope.region.bbox.every(Number.isFinite))result.issues.push(issue('NEEDS_INPUT','EXPLICIT_REGION_REQUIRED','$.region','Supply the source-covered center and [west,south,east,north] map range; places are not geocoded or guessed.',{center:[0,0],bbox:[-5,-8,5,8],crs:'EPSG:4326',sourceId:'AUTO'}));
+- unknown(envelope.presentation,['camera','territoryColors','highlights','initialStateVisibility','sceneOverrides','transitions','labels','mapStyle'],'$.presentation',result.issues);
++ unknown(envelope.presentation,['camera','territoryColors','highlights','initialStateVisibility','sceneOverrides','transitions','labels','mapStyle','flow'],'$.presentation',result.issues);
+  const shared=envelope.presentation??{},ids=new Set(Array.isArray(data.scenes)?data.scenes.map(x=>x?.sceneId).filter(text):[]);
+  unknown(shared.sceneOverrides,[...ids],'$.presentation.sceneOverrides',result.issues);
+  validateExplicitSpans(nl,data,envelope.region,result.issues);
+diff --git a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs
+index ee64ca7..2a3614f 100644
+--- a/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs
++++ b/world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs
+@@ -1,3 +1,4 @@
++import {composePresentationFlowControls,highlightRingAt} from './presentation_flow.mjs';
+ /** Explicit moving-projection composition; unchanged engines own every pixel. */
+ import {compileGeographicCamera,geographicCameraFrame,GEOGRAPHIC_CAMERA_VERSION,geographicTrackTransportDelta} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
+ import * as THREE from '/three.js';
+@@ -91,13 +92,14 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
+   const bindings=engines.plans.map(binding=>{
+    if(binding.engine==='EXISTING_AREA_V3')return binding;
+    assert(binding.engine==='EXISTING_FLOW_V2','UP2_ENGINE_UNSUPPORTED');
+-   const style=selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style});passes.push(pass);
++   const style=binding.presentationFlow?.style??selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style,trail:binding.presentationFlow?.trail,previewStyle:binding.presentationFlow?.previewStyle});passes.push(pass);
+    return{...binding,pass,style,analysisPrimitive:compileFlowRoute(binding.plan.intent,{project:analysisProject})};
+   });
++  const ringBindings=p.highlights.filter(h=>h.ring).map(h=>{const pass=createFlowGraphicPass({canvas,style:{width:2,glowRadius:1,glowGain:0,coreColor:h.ring.color,glowColor:h.ring.color}});passes.push(pass);return{highlight:h,pass};});
+   const project=point=>factory.screen(point);let source=sourceStyle.terrainAsset;
+   function markersAt(frame){
+    const rows=(scene.markers??[]).map(item=>({id:item.id,anchor:copy(item.anchor),kind:'MARKER',scale:1,source:'SUPPLIED_SCENE_MARKER'}));
+-   for(const h of p.highlights)if(frame>=h.startFrame&&frame<h.endFrame){const location=scene.locations.find(l=>l.id===h.locationId),progress=(frame-h.startFrame)/(h.endFrame-h.startFrame-1);
++   for(const h of p.highlights)if(!h.ring&&frame>=h.startFrame&&frame<h.endFrame){const location=scene.locations.find(l=>l.id===h.locationId),progress=(frame-h.startFrame)/(h.endFrame-h.startFrame-1);
+     rows.push({id:h.id,anchor:copy(location.anchor),kind:'MARKER',scale:1+.4*Math.sin(Math.PI*progress),source:'SUPPLIED_LOCATION_EVENT_NATIVE_MARKER_PULSE',locationId:h.locationId,progress,...(presentationReplacesHighlightMarker(p,h,frame)?{qualityPinCandidate:true}:{})});}
+    for(const row of rows){row.position=project(row.anchor);row.size=nativeMarker.box[2]*row.scale;const r=row.size/2+2;row.box=[row.position[0]-r,row.position[1]-r,row.position[0]+r,row.position[1]+r];
+     assert(finiteBox(row.box)&&inside(row.box.slice(0,2),safe)&&inside(row.box.slice(2),safe),'UP2_SUPPLIED_MARKER_FULL_ROI_OUTSIDE_SAFE');}
+@@ -138,13 +140,14 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
+      for(const item of controls.areas)if(item.alpha>0&&item.coverage>0)assert(draws.some(d=>d.draw.areas.some(a=>a.id===item.id&&a.drawn)),'UP2_AREA_NOT_DRAWN');
+      features.push({id:binding.id,engine:binding.engine,state:controls.state,stateId:controls.stateId,lineAccent,activeFeatures:controls.activeFeatures,presentationOperationBinding:copy(binding.presentationOperationBinding??null),sourceAreas:controls.areas.map(a=>({id:a.id,stateId:a.state_id,geometry:copy(a.geometry),coverage:a.coverage,alpha:a.alpha})),sourceFronts:controls.fronts.map(f=>({id:f.id,geometry:copy(f.geometry),alpha:f.alpha,revealFraction:f.revealFraction})),draws});
+     }else{
+-     const model=evaluateFlowFrame(binding.plan,binding.plan.startFrame+localFrame,{primitive:binding.analysisPrimitive,eventContext:{cameraState:presentationPlan.analysisCamera,project:analysisProject,safeArea:safe,scalePlan:nativePlan,heightSource:null,protectedBoxes:[]}}),primitive=compileFlowRoute(binding.plan.intent,{project}),controls=reprojectFlowPresentation({modelControls:model,primitive,flowIntent:binding.plan.intent});
++     const model=evaluateFlowFrame(binding.plan,binding.plan.startFrame+localFrame,{primitive:binding.analysisPrimitive,eventContext:{cameraState:presentationPlan.analysisCamera,project:analysisProject,safeArea:safe,scalePlan:nativePlan,heightSource:null,protectedBoxes:[]}}),primitive=compileFlowRoute(binding.plan.intent,{project}),controls=composePresentationFlowControls(reprojectFlowPresentation({modelControls:model,primitive,flowIntent:binding.plan.intent}),primitive,binding.presentationFlow);
+      const admission=assertMovingProjectionAdmission({primitive,controls,camera,modelCamera:presentationPlan.analysisCamera,safeArea:safe,sourceBounds:source.bounds,project,sourceGeometry:binding.plan.intent.route_geometry,currentBounds:bounds,protectedGraphics:markerRows,flowIntent:binding.plan.intent});
+      const draw=binding.pass.draw({primitive,controls,safeArea:safe,protectedGraphics:markerRows,flowIntent:binding.plan.intent});
+      assert(!controls.objectVisible||draw.object?.drawn===true,'UP2_FLOW_OBJECT_NOT_DRAWN');assert(controls.routeFraction===0||draw.route?.drawn===true,'UP2_FLOW_ROUTE_NOT_DRAWN');
+      features.push({id:binding.id,engine:binding.engine,state:controls.state,routeFraction:controls.routeFraction,objectFraction:controls.objectFraction,objectPosition:copy(controls.objectPosition),heading:controls.heading,departurePulse:controls.departurePulse,arrivalPulse:controls.arrivalPulse,routeReveal:controls.routeReveal,geometry:copy(binding.plan.intent.route_geometry),projectedRoute:copy(primitive.screenCoordinates),admission,modelEventReadinessScope:controls.eventControls.readinessScope,draw});
+     }
+    }
++   const locationRings=[];for(const {highlight,pass} of ringBindings){const location=scene.locations.find(l=>l.id===highlight.locationId),pulse=highlightRingAt(highlight,displayFrame,project(location.anchor));if(pulse)locationRings.push({id:highlight.id,locationId:highlight.locationId,draw:pass.drawPulse({pulse,safeArea:safe,protectedGraphics:markerRows})});}
+    const featurePixels=factory.readPixels();let featureChangedPixels=0;for(let i=0;i<featurePixels.length;i+=4)if(featurePixels[i]!==basePixels[i]||featurePixels[i+1]!==basePixels[i+1]||featurePixels[i+2]!==basePixels[i+2]||featurePixels[i+3]!==basePixels[i+3])featureChangedPixels++;
+    // RGBA8 rounds contributions below half a channel step to zero.
+    // The draw/geometry guards still apply; do not require a changed byte before visibility.
+@@ -160,6 +163,7 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
+     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
+     featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
+    if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,boundaryTrace:copy(factory.evidence.boundaryTrace??null),geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false,areaViewportPolicy:p.mapStyle.preset==='REFERENCE_FOCUS_V2'?'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY':'WHOLE_SOURCE_SAFE',effectiveTheme:copy(visualPlan.theme)};
++   if(ringBindings.length)last.locationRings=locationRings;
+    if(labelDraw){last.layout.visiblePresentationLabels=labelDraw.visibleCount>0;last.presentationLabels=copy(labelDraw);}
+    return last;
+   }
+diff --git a/world-simulation-shorts-engine/web/map_infographic_v1/flow_graphic_pass_v2.mjs b/world-simulation-shorts-engine/web/map_infographic_v1/flow_graphic_pass_v2.mjs
+index 64d92c6..8e54d3b 100644
+--- a/world-simulation-shorts-engine/web/map_infographic_v1/flow_graphic_pass_v2.mjs
++++ b/world-simulation-shorts-engine/web/map_infographic_v1/flow_graphic_pass_v2.mjs
+@@ -4,6 +4,7 @@
+  * clears, resizes, samples, or copies the finished native frame.
+  */
+ import * as THREE from '/three.js';
++import {sampleFlowRoute} from './flow_core_v2.mjs';
+ import {createEventLinePass,validateEventLineFootprint} from './event_line_pass_v1.mjs';
+ 
+ export const FLOW_GRAPHIC_PASS_V2_VERSION='FLOW_GRAPHIC_GPU_PASS_V2';
+@@ -230,12 +231,12 @@ function reservationsRecord(graphics){
+  * Marker occlusion is allowed for a route. Objects, chevrons and pulse rings
+  * rasterize below all native reservations without moving those reservations.
+  */
+-export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
++export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail=null,previewStyle=null}={}){
+  if(!canvas||width!==1080||height!==1920||canvas.width!==width||canvas.height!==height)
+   throw Error('FLOW_CANONICAL_NATIVE_CANVAS_REQUIRED');
+  const gl=canvas.getContext('webgl2');if(!gl)throw Error('FLOW_NATIVE_WEBGL2_REQUIRED');
+  const originalState=captureFlowNativeGlState(gl);
+- let renderer=null,linePass=null,program=null,vao=null,disposed=false;
++ let renderer=null,linePass=null,previewPass=null,program=null,vao=null,disposed=false;
+  try{
+   // Calling setSize/setPixelRatio would reset the approved native framebuffer.
+   // The new renderer takes the existing canvas dimensions and owns only its
+@@ -243,8 +244,9 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
+   renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:false});
+   renderer.autoClear=false;renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
+   linePass=createEventLinePass({renderer,width,height,style});
++  if(previewStyle)previewPass=createEventLinePass({renderer,width,height,style:previewStyle});
+   program=createOverlayProgram(gl);vao=gl.createVertexArray();
+- }catch(error){linePass?.dispose();renderer?.dispose();if(program)gl.deleteProgram(program);if(vao)gl.deleteVertexArray(vao);throw error;}
++ }catch(error){previewPass?.dispose();linePass?.dispose();renderer?.dispose();if(program)gl.deleteProgram(program);if(vao)gl.deleteVertexArray(vao);throw error;}
+  finally{restoreFlowNativeGlState(gl,originalState);}
+  const uniformNames=['screenHeight','safeArea','reservations[0]','reservationCount','mode','center','heading','graphicSize',
+   'points[0]','pointCounts[0]','polygonColors[0]','polygonCount','accent','pulseRadius','pulseAlpha'];
+@@ -285,6 +287,14 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
+    protectedOverlaps:covering.map(item=>({kind:item.kind,box:clone(item.box)})),nativeProtection:'RASTER_ONLY_UNINTERRUPTED_MOTION'};
+  }
+  return{evidence,
++  drawPulse({pulse,safeArea,protectedGraphics=[]}){
++   if(disposed)throw Error('FLOW_GPU_DISPOSED');
++   const position=pulse?.anchor??pulse?.position,radius=pulse?.radius,alpha=pulse?.alpha;
++   if(!finitePoint(position)||!Number.isFinite(radius)||radius<0||radius>64||!Number.isFinite(alpha)||alpha<0||alpha>1)throw Error('FLOW_ENDPOINT_PULSE_CONTRACT_REQUIRED');
++   const reservations=reservationsRecord(protectedGraphics),state=captureFlowNativeGlState(gl),support=radius+2;
++   try{return {...drawOverlay({mode:2,position,heading:0,roi:[position[0]-support,position[1]-support,position[0]+support,position[1]+support],safeArea,reservations,radius,alpha}),radius,alpha,progress:pulse.progress,repetition:'ONCE_PER_SUPPLIED_HIGHLIGHT'};}
++   finally{restoreFlowNativeGlState(gl,state);}
++  },
+   draw({primitive,controls,safeArea,protectedGraphics=[],flowIntent}={}){
+    if(disposed)throw Error('FLOW_GPU_DISPOSED');
+    if(!validBox(safeArea)||!controls||!Number.isFinite(controls.routeFraction)||controls.routeFraction<0||controls.routeFraction>1)
+@@ -296,8 +306,17 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
+    let result;
+    try{
+     renderer.resetState();
++    const preview=previewPass?previewPass.draw({primitive,visibleFraction:1,safeArea,protectedGraphics:reservations}):null;
+     const route=linePass.draw({primitive,visibleFraction:controls.routeFraction,safeArea,protectedGraphics:reservations});
+-    let directional=null,object=null;const pulses=[];
++    let directional=null,object=null;const pulses=[],echoes=[];
++    if(trail&&controls.objectVisible&&controls.objectFraction>0&&controls.objectFraction<1){
++     for(let i=trail.echoes;i>=1;i--){
++      const fraction=controls.objectFraction-i*trail.spacingPixels/primitive.totalLengthPixels;if(fraction<=0)continue;
++      const sample=sampleFlowRoute(primitive,fraction,{lookAheadPixels:controls.headingLookAheadPixels});
++      const ghost=clone(graphic);for(const polygon of ghost.polygons)polygon.color[3]*=trail.alpha*(trail.echoes-i+1)/trail.echoes;
++      echoes.push({...drawOverlay({mode:0,position:sample.position,heading:sample.heading,roi:objectRoi(sample.position,sample.heading,ghost),safeArea,reservations,graphic:ghost}),fraction,alpha:trail.alpha*(trail.echoes-i+1)/trail.echoes});
++     }
++    }
+     if(controls.directionalActive){
+      const position=controls.directionalPosition,heading=controls.directionalHeading;
+      if(!finitePoint(position)||!Number.isFinite(heading))throw Error('FLOW_DIRECTIONAL_POSITION_REQUIRED');
+@@ -318,8 +337,8 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
+      pulses.push({...drawOverlay({mode:2,position,heading:0,roi,safeArea,reservations,radius,alpha}),endpoint,radius,alpha,
+       repetition:'ONCE_PER_ENDPOINT',progress:pulse.progress});
+     }
+-    result={version:FLOW_GRAPHIC_PASS_V2_VERSION,route,directional,object,pulses,
+-     rois:[route.drawn?route.roi:null,directional?.roi,object?.roi,...pulses.map(p=>p.roi)].filter(Boolean).map(clone),
++    result={version:FLOW_GRAPHIC_PASS_V2_VERSION,route,directional,object,pulses,...(trail?{echoes}:{}),...(previewPass?{preview}:{}),
++     rois:[route.drawn?route.roi:null,directional?.roi,object?.roi,...pulses.map(p=>p.roi),...echoes.map(p=>p.roi)].filter(Boolean).map(clone),
+      routeFraction:controls.routeFraction,objectFraction:controls.objectFraction,heading:controls.heading??controls.objectHeading,
+      routeFullRoi:clone(footprint.fullRoi),renderedCenterWidthPixels:style.width,
+      protectedReservations:reservations.map(item=>clone(item)),arcLengthOwnership:'UNCHANGED_V1_CORE',nativeStateRestored:true};
+@@ -329,7 +348,7 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
+   },
+   dispose(){
+    if(disposed)return;const state=captureFlowNativeGlState(gl);
+-   try{linePass.dispose();renderer.dispose();gl.deleteProgram(program);gl.deleteVertexArray(vao);disposed=true;}
++   try{previewPass?.dispose();linePass.dispose();renderer.dispose();gl.deleteProgram(program);gl.deleteVertexArray(vao);disposed=true;}
+    finally{restoreFlowNativeGlState(gl,state);}
+   },
+  };

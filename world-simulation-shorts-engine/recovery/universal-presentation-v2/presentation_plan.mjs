@@ -1,3 +1,4 @@
+import {validatePresentationFlows,validateHighlightRing,bindPresentationFlows} from './presentation_flow.mjs';
 import {validateBoundaryTrace,compileBoundaryTrace,evaluateBoundaryTrace,boundaryTraceFraction} from '../../web/map_infographic_v1/boundary_trace_v1.mjs';
 import {GEOGRAPHIC_CAMERA_VERSION,compileGeographicCamera,geographicCameraFrame} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
 /** Data-only presentation composition over unchanged V5/Flow/Area owners. */
@@ -24,7 +25,7 @@ export function unprojectBounds(bounds,pixel){return[bounds[0]+pixel[0]/1080*(bo
 
 /** Unknown/unconsumed controls fail rather than being accepted as metadata. */
 export function validatePresentation(input,{scene,region}={}){
- keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels','mapStyle'],'PRESENTATION');
+ keys(input,['camera','territoryColors','highlights','transitions','initialStateVisibility','labels','mapStyle','flow'],'PRESENTATION');
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  if(input.mapStyle!==undefined){
@@ -78,12 +79,14 @@ export function validatePresentation(input,{scene,region}={}){
  const highlights=input.highlights??[];ok(Array.isArray(highlights)&&highlights.length<=16,'PRESENTATION_HIGHLIGHT_CAPACITY');
  const seen=new Set();
  for(const h of highlights){
-  keys(h,['id','locationId','startFrame','endFrame'],'PRESENTATION_HIGHLIGHT');
+  keys(h,['id','locationId','startFrame','endFrame','ring'],'PRESENTATION_HIGHLIGHT');
   ok(typeof h.id==='string'&&/^[A-Za-z0-9_.:-]+$/.test(h.id)&&!seen.has(h.id),'PRESENTATION_HIGHLIGHT_ID_INVALID');seen.add(h.id);
   ok(scene.locations?.some(l=>l.id===h.locationId),'PRESENTATION_HIGHLIGHT_LOCATION_REQUIRED');
   ok(frame(h.startFrame,n)&&frame(h.endFrame,n,true)&&h.endFrame-h.startFrame>=2,'PRESENTATION_HIGHLIGHT_TIMING_INVALID');
  }
  result.highlights=copy(highlights);
+ for(const h of result.highlights)if(h.ring!==undefined)h.ring=validateHighlightRing(h.ring,{...h,totalFrames:n,holdFrames:scene.timing.final_hold_frames});
+ if(input.flow!==undefined)result.flow=validatePresentationFlows(input.flow,{scene,engines:compileExistingEnginePlan(scene)});
  if(input.labels!==undefined)result.labels=validateLabelSpec(input.labels,{scene,highlights});
  const cuts=input.transitions??[];ok(Array.isArray(cuts),'PRESENTATION_TRANSITION_ARRAY_REQUIRED');
  for(const t of cuts){keys(t,['type','frame'],'PRESENTATION_TRANSITION');ok(t.type==='CUT'&&Number.isSafeInteger(t.frame)&&t.frame>=0,'PRESENTATION_CUT_REQUIRED');}
@@ -231,7 +234,7 @@ export function evaluatePresentationCameraFrame(plan,frame){return plan.mode==='
 /** The old public Area operations support already visible supplied states.
  * This changes opacity endpoints only, never event time or geographic input. */
 export function compilePresentationEnginePlan({scene,presentation}={}){
- const engines=compileExistingEnginePlan(scene),mode=presentation?.initialStateVisibility??'REVEAL';
+ const engines=bindPresentationFlows(compileExistingEnginePlan(scene),presentation?.flow),mode=presentation?.initialStateVisibility??'REVEAL';
  ok(['REVEAL','PRESERVE_PROVIDED','PRESERVE_AREA_REVEAL_LINE'].includes(mode),'PRESENTATION_INITIAL_VISIBILITY_UNSUPPORTED');
  if(mode==='REVEAL')return engines;
  ok(scene.event_type==='WAR'&&engines.globalEventStartFrame===0,'PRESENTATION_ALREADY_VISIBLE_AREA_WITHOUT_EVENT_PREFIX_REQUIRED');

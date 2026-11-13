@@ -4,6 +4,7 @@
  * clears, resizes, samples, or copies the finished native frame.
  */
 import * as THREE from '/three.js';
+import {sampleFlowRoute} from './flow_core_v2.mjs';
 import {createEventLinePass,validateEventLineFootprint} from './event_line_pass_v1.mjs';
 
 export const FLOW_GRAPHIC_PASS_V2_VERSION='FLOW_GRAPHIC_GPU_PASS_V2';
@@ -230,12 +231,12 @@ function reservationsRecord(graphics){
  * Marker occlusion is allowed for a route. Objects, chevrons and pulse rings
  * rasterize below all native reservations without moving those reservations.
  */
-export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
+export function createFlowGraphicPass({canvas,style,width=1080,height=1920,trail=null,previewStyle=null}={}){
  if(!canvas||width!==1080||height!==1920||canvas.width!==width||canvas.height!==height)
   throw Error('FLOW_CANONICAL_NATIVE_CANVAS_REQUIRED');
  const gl=canvas.getContext('webgl2');if(!gl)throw Error('FLOW_NATIVE_WEBGL2_REQUIRED');
  const originalState=captureFlowNativeGlState(gl);
- let renderer=null,linePass=null,program=null,vao=null,disposed=false;
+ let renderer=null,linePass=null,previewPass=null,program=null,vao=null,disposed=false;
  try{
   // Calling setSize/setPixelRatio would reset the approved native framebuffer.
   // The new renderer takes the existing canvas dimensions and owns only its
@@ -243,8 +244,9 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
   renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:false});
   renderer.autoClear=false;renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
   linePass=createEventLinePass({renderer,width,height,style});
+  if(previewStyle)previewPass=createEventLinePass({renderer,width,height,style:previewStyle});
   program=createOverlayProgram(gl);vao=gl.createVertexArray();
- }catch(error){linePass?.dispose();renderer?.dispose();if(program)gl.deleteProgram(program);if(vao)gl.deleteVertexArray(vao);throw error;}
+ }catch(error){previewPass?.dispose();linePass?.dispose();renderer?.dispose();if(program)gl.deleteProgram(program);if(vao)gl.deleteVertexArray(vao);throw error;}
  finally{restoreFlowNativeGlState(gl,originalState);}
  const uniformNames=['screenHeight','safeArea','reservations[0]','reservationCount','mode','center','heading','graphicSize',
   'points[0]','pointCounts[0]','polygonColors[0]','polygonCount','accent','pulseRadius','pulseAlpha'];
@@ -285,6 +287,14 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
    protectedOverlaps:covering.map(item=>({kind:item.kind,box:clone(item.box)})),nativeProtection:'RASTER_ONLY_UNINTERRUPTED_MOTION'};
  }
  return{evidence,
+  drawPulse({pulse,safeArea,protectedGraphics=[]}){
+   if(disposed)throw Error('FLOW_GPU_DISPOSED');
+   const position=pulse?.anchor??pulse?.position,radius=pulse?.radius,alpha=pulse?.alpha;
+   if(!finitePoint(position)||!Number.isFinite(radius)||radius<0||radius>64||!Number.isFinite(alpha)||alpha<0||alpha>1)throw Error('FLOW_ENDPOINT_PULSE_CONTRACT_REQUIRED');
+   const reservations=reservationsRecord(protectedGraphics),state=captureFlowNativeGlState(gl),support=radius+2;
+   try{return {...drawOverlay({mode:2,position,heading:0,roi:[position[0]-support,position[1]-support,position[0]+support,position[1]+support],safeArea,reservations,radius,alpha}),radius,alpha,progress:pulse.progress,repetition:'ONCE_PER_SUPPLIED_HIGHLIGHT'};}
+   finally{restoreFlowNativeGlState(gl,state);}
+  },
   draw({primitive,controls,safeArea,protectedGraphics=[],flowIntent}={}){
    if(disposed)throw Error('FLOW_GPU_DISPOSED');
    if(!validBox(safeArea)||!controls||!Number.isFinite(controls.routeFraction)||controls.routeFraction<0||controls.routeFraction>1)
@@ -296,8 +306,17 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
    let result;
    try{
     renderer.resetState();
+    const preview=previewPass?previewPass.draw({primitive,visibleFraction:1,safeArea,protectedGraphics:reservations}):null;
     const route=linePass.draw({primitive,visibleFraction:controls.routeFraction,safeArea,protectedGraphics:reservations});
-    let directional=null,object=null;const pulses=[];
+    let directional=null,object=null;const pulses=[],echoes=[];
+    if(trail&&controls.objectVisible&&controls.objectFraction>0&&controls.objectFraction<1){
+     for(let i=trail.echoes;i>=1;i--){
+      const fraction=controls.objectFraction-i*trail.spacingPixels/primitive.totalLengthPixels;if(fraction<=0)continue;
+      const sample=sampleFlowRoute(primitive,fraction,{lookAheadPixels:controls.headingLookAheadPixels});
+      const ghost=clone(graphic);for(const polygon of ghost.polygons)polygon.color[3]*=trail.alpha*(trail.echoes-i+1)/trail.echoes;
+      echoes.push({...drawOverlay({mode:0,position:sample.position,heading:sample.heading,roi:objectRoi(sample.position,sample.heading,ghost),safeArea,reservations,graphic:ghost}),fraction,alpha:trail.alpha*(trail.echoes-i+1)/trail.echoes});
+     }
+    }
     if(controls.directionalActive){
      const position=controls.directionalPosition,heading=controls.directionalHeading;
      if(!finitePoint(position)||!Number.isFinite(heading))throw Error('FLOW_DIRECTIONAL_POSITION_REQUIRED');
@@ -318,8 +337,8 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
      pulses.push({...drawOverlay({mode:2,position,heading:0,roi,safeArea,reservations,radius,alpha}),endpoint,radius,alpha,
       repetition:'ONCE_PER_ENDPOINT',progress:pulse.progress});
     }
-    result={version:FLOW_GRAPHIC_PASS_V2_VERSION,route,directional,object,pulses,
-     rois:[route.drawn?route.roi:null,directional?.roi,object?.roi,...pulses.map(p=>p.roi)].filter(Boolean).map(clone),
+    result={version:FLOW_GRAPHIC_PASS_V2_VERSION,route,directional,object,pulses,...(trail?{echoes}:{}),...(previewPass?{preview}:{}),
+     rois:[route.drawn?route.roi:null,directional?.roi,object?.roi,...pulses.map(p=>p.roi),...echoes.map(p=>p.roi)].filter(Boolean).map(clone),
      routeFraction:controls.routeFraction,objectFraction:controls.objectFraction,heading:controls.heading??controls.objectHeading,
      routeFullRoi:clone(footprint.fullRoi),renderedCenterWidthPixels:style.width,
      protectedReservations:reservations.map(item=>clone(item)),arcLengthOwnership:'UNCHANGED_V1_CORE',nativeStateRestored:true};
@@ -329,7 +348,7 @@ export function createFlowGraphicPass({canvas,style,width=1080,height=1920}={}){
   },
   dispose(){
    if(disposed)return;const state=captureFlowNativeGlState(gl);
-   try{linePass.dispose();renderer.dispose();gl.deleteProgram(program);gl.deleteVertexArray(vao);disposed=true;}
+   try{previewPass?.dispose();linePass.dispose();renderer.dispose();gl.deleteProgram(program);gl.deleteVertexArray(vao);disposed=true;}
    finally{restoreFlowNativeGlState(gl,state);}
   },
  };

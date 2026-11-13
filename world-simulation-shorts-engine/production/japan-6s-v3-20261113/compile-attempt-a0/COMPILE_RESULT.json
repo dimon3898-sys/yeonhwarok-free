@@ -1,0 +1,157 @@
+{
+  "schema": "WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2",
+  "compilerVersion": "universal-presentation-v2.0.0",
+  "status": "NEEDS_INPUT",
+  "issues": [
+    {
+      "status": "NEEDS_INPUT",
+      "code": "NATURAL_LOCATION_DATA_REQUIRED",
+      "field": "$.prompt",
+      "reason": "A requested connection endpoint has no matching supplied location. Coordinates are not inferred from a name.",
+      "example": {
+        "requested": {
+          "from": "도쿄",
+          "to": "교토"
+        },
+        "missingEndpoints": [
+          "도쿄",
+          "교토"
+        ],
+        "action": "Attach the named location and route facts or correct the endpoint"
+      }
+    }
+  ],
+  "clarifications": [
+    {
+      "status": "NEEDS_INPUT",
+      "code": "NATURAL_LOCATION_DATA_REQUIRED",
+      "field": "$.prompt",
+      "reason": "A requested connection endpoint has no matching supplied location. Coordinates are not inferred from a name.",
+      "example": {
+        "requested": {
+          "from": "도쿄",
+          "to": "교토"
+        },
+        "missingEndpoints": [
+          "도쿄",
+          "교토"
+        ],
+        "action": "Attach the named location and route facts or correct the endpoint"
+      }
+    }
+  ],
+  "sceneResults": [],
+  "renderRequests": [],
+  "renderableSceneIds": [],
+  "blockedSceneIds": [],
+  "transitionPlan": [],
+  "unrestrictedLanguageUnderstanding": false,
+  "externalLLMUsed": false,
+  "paidExecutionAllowed": false,
+  "historicalRenderAllowed": false,
+  "inputSHA256": "3dc772ff47e3cf5ec8c2c5b4fb2a507e92a77b99b92d2892be83ba5ccfbcca55",
+  "naturalLanguage": {
+    "schema": "WORLD_ENGINE_BOUNDED_NL_INTENT_V2",
+    "method": "BOUNDED_KOREAN_ENGLISH_GRAMMAR_AND_SUPPLIED_ENTITY_LINKING",
+    "unrestrictedLanguageUnderstanding": false,
+    "externalLLMUsed": false,
+    "rawPrompt": "도쿄에서 교토까지 - 6초 지도 이동. Supplied illustrative Tokyo, Nagoya, Kyoto connection. No actual transport service is claimed.",
+    "topic": {
+      "text": "도쿄에서 교토까지 - 6초 지도 이동",
+      "origin": "NATURAL_LANGUAGE_FIRST_CLAUSE_DISPLAY_ONLY",
+      "factsInferred": false
+    },
+    "intents": [],
+    "durations": [
+      {
+        "type": "DURATION",
+        "value": 6,
+        "start": 12,
+        "end": 14,
+        "text": "6초",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN"
+      }
+    ],
+    "fps": [],
+    "dates": [],
+    "locations": [
+      {
+        "start": 44,
+        "end": 49,
+        "text": "Tokyo",
+        "id": "TOKYO",
+        "alias": "TOKYO",
+        "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+        "suppliedAnchor": [
+          139.749462,
+          35.686963
+        ],
+        "ambiguousAnchor": false,
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      },
+      {
+        "start": 59,
+        "end": 64,
+        "text": "Kyoto",
+        "id": "KYOTO",
+        "alias": "KYOTO",
+        "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+        "suppliedAnchor": [
+          135.748052,
+          35.031938
+        ],
+        "ambiguousAnchor": false,
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      },
+      {
+        "start": 51,
+        "end": 57,
+        "text": "Nagoya",
+        "id": "NAGOYA",
+        "alias": "NAGOYA",
+        "origin": "NATURAL_LANGUAGE_REFERENCE_TO_SUPPLIED_LOCATION",
+        "suppliedAnchor": [
+          136.913046,
+          35.156943
+        ],
+        "ambiguousAnchor": false,
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      }
+    ],
+    "routes": [],
+    "connections": [
+      {
+        "type": "SUPPLIED_LOCATION_CONNECTION",
+        "value": {
+          "from": "도쿄",
+          "to": "교토"
+        },
+        "start": 0,
+        "end": 9,
+        "text": "도쿄에서 교토까지",
+        "origin": "NATURAL_LANGUAGE_EXPLICIT_SPAN",
+        "direction": "AS_WRITTEN",
+        "scope": {
+          "sceneIndices": null,
+          "method": "UNSCOPED_SHARED_INTENT"
+        }
+      }
+    ],
+    "coordinates": [],
+    "unsupported": [],
+    "uninterpretedText": "도쿄에서 교토까지 - 6초 지도 이동. Supplied illustrative Tokyo, Nagoya, Kyoto connection. No actual transport service is claimed."
+  },
+  "inputDerivations": [],
+  "simulationType": "GENERAL",
+  "normalizedDataSHA256": "bf8ffd84ca5346ab1db450fdbdd6b4b2ac02d89d4cb8393414c171d29db278af",
+  "totalFrames": 180
+}
