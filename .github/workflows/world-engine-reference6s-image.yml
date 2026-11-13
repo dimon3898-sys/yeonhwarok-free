@@ -1,0 +1,132 @@
+name: WORLD ENGINE registered reference immutable image
+on:
+  push:
+    branches: [fix/reference-6s-formal-admission-20261113]
+    paths: ['.github/workflows/world-engine-reference6s-image.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-reference6s-image
+  cancel-in-progress: false
+jobs:
+  image:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == 'a49c36fa1e5264c5413b28b324d1a4c6a72038f1' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE6S_IMAGE_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/production/reference-6s-20261112/
+            /world-simulation-shorts-engine/production/korean-war-20s-detail-v2/materialize_terrain.py
+            /world-simulation-shorts-engine/production/korean-war-20s-detail-v2/sources/
+            /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
+            /world-simulation-shorts-engine/recovery/studio-cold-start-v2/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch only the exact declared runtime closure
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          prefix='world-simulation-shorts-engine/'
+          m=json.loads(Path(prefix+'recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json').read_text())
+          paths=['/'+r['path'] for r in m['files']]
+          paths+=['/'+prefix+'production/reference-6s-20261112/','/'+prefix+'production/korean-war-20s-detail-v2/','/'+prefix+'recovery/studio-cold-start-v2/','/'+prefix+'recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json']
+          Path('/tmp/reference6s-sparse').write_text('\n'.join(paths)+'\n')
+          PY
+          git sparse-checkout set --no-cone --stdin < /tmp/reference6s-sparse
+      - name: Materialize existing pinned assets without analysis or rendering
+        run: |
+          python -m pip install --disable-pip-version-check --only-binary=:all: Pillow==13.0.0
+          python -B world-simulation-shorts-engine/production/reference-6s-20261112/materialize_geographic_sources.py "${RUNNER_TEMP}/nasa-reference6s"
+          python -B world-simulation-shorts-engine/production/korean-war-20s-detail-v2/materialize_terrain.py "${RUNNER_TEMP}/nasa-existing/D1.jpg"
+      - name: Package verified CPU gates and exact source files
+        run: python -B world-simulation-shorts-engine/production/reference-6s-20261112/prepare_image_context.py "${RUNNER_TEMP}/reference6s-image-context"
+      - name: Enable disposable builder compatibility
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Build one new tag without overwriting an existing image
+        env:
+          NVIDIA_VISIBLE_DEVICES: void
+        run: |
+          set -euo pipefail
+          IMAGE="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:reference6s-20261113-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
+          if docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then echo 'IMMUTABLE_TAG_ALREADY_EXISTS'; exit 1; fi
+          docker build --platform linux/amd64 --label "org.opencontainers.image.revision=${GITHUB_SHA}" --label 'org.opencontainers.image.source=https://github.com/dimon3898-sys/yeonhwarok-free' -t "${IMAGE}" "${RUNNER_TEMP}/reference6s-image-context"
+          printf '%s\n' "${IMAGE}" > "${RUNNER_TEMP}/reference6s-image-tag"
+      - name: Verify actual image sources as UID1000 with no network or GPU
+        env:
+          NVIDIA_VISIBLE_DEVICES: void
+        run: |
+          set -euo pipefail
+          IMAGE=$(cat "${RUNNER_TEMP}/reference6s-image-tag")
+          mkdir "${RUNNER_TEMP}/reference6s-image-evidence"
+          docker run --rm --network none --read-only --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges -e NVIDIA_VISIBLE_DEVICES=void --mount "type=bind,src=${RUNNER_TEMP}/reference6s-image-context/verify_image.py,dst=/verify_image.py,readonly" --entrypoint /usr/bin/python3 "${IMAGE}" -I -B /verify_image.py > "${RUNNER_TEMP}/reference6s-image-evidence/IMAGE_SOURCE_VERIFICATION.json"
+          docker run --rm --network none --read-only --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges -e NVIDIA_VISIBLE_DEVICES=void --entrypoint node "${IMAGE}" --input-type=module -e "import{verifyGeneratedSources}from'/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo/world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs';console.log(JSON.stringify({status:'PASS_ACTUAL_IMAGE_ADAPTER_BINDINGS',variants:await verifyGeneratedSources(),GPUExecutions:0}));" > "${RUNNER_TEMP}/reference6s-image-evidence/IMAGE_ADAPTER_VERIFICATION.json"
+          docker image inspect "${IMAGE}" --format '{{json .Config}}' > "${RUNNER_TEMP}/reference6s-image-config-private.json"
+      - name: Publish the verified new immutable tag
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          IMAGE=$(cat "${RUNNER_TEMP}/reference6s-image-tag")
+          printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker push "${IMAGE}" | tee "${RUNNER_TEMP}/reference6s-image-evidence/PUSH.log"
+          docker image inspect "${IMAGE}" --format '{{json .RepoDigests}}' > "${RUNNER_TEMP}/reference6s-image-evidence/REGISTRY_DIGESTS.json"
+          docker logout ghcr.io
+      - name: Record public image settings and digest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os,json,re,hashlib
+          t=Path(os.environ['RUNNER_TEMP']);out=t/'reference6s-image-evidence';cfg=json.loads((t/'reference6s-image-config-private.json').read_text());ctx=json.loads((t/'reference6s-image-context/CONTEXT_RECEIPT.json').read_text())
+          digest=json.loads((out/'REGISTRY_DIGESTS.json').read_text());assert len(digest)==1 and re.fullmatch(r'ghcr.io/dimon3898-sys/world-simulation-shorts-engine@sha256:[0-9a-f]{64}',digest[0])
+          assert cfg.get('User','') in ['', '0', 'root', '0:0'] and cfg['Entrypoint']==ctx['entrypoint']
+          value={'status':'PASS_BUILT_VERIFIED_PUBLISHED','imageTag':(t/'reference6s-image-tag').read_text().strip(),'imageByDigest':digest[0],'digest':digest[0].split('@')[1],'buildCommit':os.environ['GITHUB_SHA'],'runId':os.environ['GITHUB_RUN_ID'],'parentImage':ctx['parentImage'],'startupManifestSHA256':ctx['startupManifestSHA256'],'runtimeManifestSHA256':ctx['runtimeManifestSHA256'],'compilerInputSHA256':ctx['compilerInputSHA256'],'bootstrapUser':cfg.get('User',''),'verifiedReadOnlySourceProbeUID':1000,'workerUID':1000,'entrypoint':cfg['Entrypoint'],'exposedPorts':cfg.get('ExposedPorts',{}),'GPUExecutions':0,'studioRenders':0,'existingImageOverwritten':False,'deploymentReady':False}
+          (out/'IMAGE_BUILD.json').write_text(json.dumps(value,indent=2)+'\n')
+          PY
+      - name: Preserve build outcome without changing any other branch
+        if: always()
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os,json,shutil
+          t=Path(os.environ['RUNNER_TEMP']);out=Path('world-simulation-shorts-engine/production/reference-6s-20261112/image-a1');out.mkdir(exist_ok=False)
+          src=t/'reference6s-image-evidence'
+          if src.exists():
+              for f in src.iterdir():
+                  if f.is_file():shutil.copy2(f,out/f.name)
+          (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'sourceCommit':os.environ['GITHUB_SHA'],'imagePass':(out/'IMAGE_BUILD.json').exists(),'GPUExecutions':0})+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reference6s-image-${{ github.run_id }}
+          path: world-simulation-shorts-engine/production/reference-6s-20261112/image-a1/
+          retention-days: 90
+      - name: Commit image evidence using a fresh branch lease
+        if: always()
+        run: |
+          set -euo pipefail
+          BRANCH=fix/reference-6s-formal-admission-20261113
+          test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
+          git config user.name 'WORLD ENGINE image evidence'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse world-simulation-shorts-engine/production/reference-6s-20261112/image-a1
+          git commit -m 'Preserve registered reference immutable image evidence'
+          git push origin "HEAD:refs/heads/${BRANCH}"
