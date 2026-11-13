@@ -13,8 +13,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '6c51c7f165ca016650f191b4c04346514bee7761' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_JAPAN6S_V2_CPU_A1'
+      github.event.before == '211d92c4f980b89314c8e59500be40b3da948159' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_JAPAN6S_V2_CPU_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -66,8 +66,8 @@ jobs:
           import os,json,shutil,hashlib,gzip
           from pathlib import Path
           base=Path('world-simulation-shorts-engine/production/japan-6s-v2-20261113')
-          out=base/'cpu-a1';out.mkdir(exist_ok=False)
-          src=Path('/workspace/japan6s-v2-cpu-a1')
+          out=base/'cpu-a2';out.mkdir(exist_ok=False)
+          src=Path('/workspace/japan6s-v2-cpu-a2')
           for f in src.glob('*'):
               if f.is_file() and (f.suffix in ['.png','.mp4'] or f.name in ['CAPTURE_RECEIPT.json','TASK_FAILURE.json','HTTP_ASSET_BINDINGS.json','REQUEST.json','NEW_INPUT_RESULT.json','FRAME_SUMMARY.json']):shutil.copy2(f,out/f.name)
           for f in Path(os.environ['RUNNER_TEMP'],'japan-v2-logs').glob('*.log'):shutil.copy2(f,out/f.name)

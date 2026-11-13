@@ -6,24 +6,25 @@ import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {analyzePresentationPrompt} from '../../recovery/universal-presentation-v2/presentation_prompt.mjs';
 import {validateRuntimeRequest,capturePresentation} from '../../recovery/universal-presentation-v2/capture_presentation.mjs';
-const p=path.dirname(fileURLToPath(import.meta.url)),out='/workspace/japan6s-v2-cpu-a1';
+const p=path.dirname(fileURLToPath(import.meta.url)),out='/workspace/japan6s-v2-cpu-a2',attempt=path.join(p,'attempt-a2');
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const write=(dir,name,value)=>fs.writeFile(path.join(dir,name),JSON.stringify(value,null,2)+'\n',{flag:'wx'});
 const raw=await fs.readFile(path.join(p,'JAPAN_V2_SCENE_INPUT.json')),input=JSON.parse(raw);
 const cp=JSON.parse(await fs.readFile(path.join(p,'CHECKPOINT.json')));
 let stage='V2_FORMAL_COMPILE',runtimeSHA=null;
 try {
+ await fs.mkdir(attempt,{recursive:false});
  const result=await analyzePresentationPrompt(input);
- await write(p,'COMPILE_RESULT.json',result);
+ await write(attempt,'COMPILE_RESULT.json',result);
  assert.equal(result.status,'PASS',JSON.stringify(result.issues));
  const request={schema:'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2',totalFrames:result.totalFrames,sourceInputSHA256:result.inputSHA256,
   segments:result.renderRequests.map(({sceneId,startFrame,endFrame,scene,region,presentation})=>({sceneId,startFrame,endFrame,scene,region,presentation})),
   transitions:result.transitionPlan,inputTrace:{inputFile:'JAPAN_V2_SCENE_INPUT.json',fileSHA256:hash(raw),compilerInputSHA256:result.inputSHA256,compilerVersion:result.compilerVersion}};
  stage='V2_RUNTIME_REQUEST_VALIDATION';validateRuntimeRequest(request);assert.equal(request.totalFrames,180);
- await write(p,'RUNTIME_REQUEST.json',request);
- await write(p,'COMPILED_SCENES.json',request.segments.map(s=>({sceneId:s.sceneId,scene:s.scene})));
- const packageFile=path.join(p,'RUNTIME_REQUEST.json');runtimeSHA=hash(await fs.readFile(packageFile));
- await write(p,'INPUT_ADMISSION.json',{status:'V2_FORMAL_COMPILE_AND_RUNTIME_SCHEMA_PASS',inputSHA256:hash(raw),runtimeSHA256:runtimeSHA,compilerInputSHA256:result.inputSHA256,frames:180,oldPassReruns:0,productCodeChanges:0,GPUExecutions:0,sourcePreparation:'Next: performed once by official capturePresentation before any draw'});
+ await write(attempt,'RUNTIME_REQUEST.json',request);
+ await write(attempt,'COMPILED_SCENES.json',request.segments.map(s=>({sceneId:s.sceneId,scene:s.scene})));
+ const packageFile=path.join(attempt,'RUNTIME_REQUEST.json');runtimeSHA=hash(await fs.readFile(packageFile));
+ await write(attempt,'INPUT_ADMISSION.json',{status:'V2_FORMAL_COMPILE_AND_RUNTIME_SCHEMA_PASS',inputSHA256:hash(raw),runtimeSHA256:runtimeSHA,compilerInputSHA256:result.inputSHA256,frames:180,oldPassReruns:0,productCodeChanges:0,GPUExecutions:0,sourcePreparation:'Next: performed once by official capturePresentation before any draw'});
  cp.status='V2_COMPILE_PASS_PENDING_CPU';cp.firstIncomplete='V2_OFFICIAL_SOURCE_PREPARATION_AND_CAPTURE';
  await fs.writeFile(path.join(p,'CHECKPOINT.json'),JSON.stringify(cp,null,2)+'\n');
  stage='V2_OFFICIAL_SOURCE_PREPARATION_AND_CAPTURE';
