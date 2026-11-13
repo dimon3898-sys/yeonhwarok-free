@@ -3,9 +3,9 @@
   "task": "64306.mp4 4-9s motion + 1s hold",
   "branch": "fix/reference-6s-formal-admission-20261113",
   "baseHead": "667f453d80fcc2540f50a49af333fba90e292f77",
-  "status": "PASS_CPU_QUALITY_V2_IMAGE_PENDING",
-  "firstIncomplete": "NEW_IMMUTABLE_QUALITY_V2_IMAGE_BUILD",
-  "inputCandidateSha256": "b54522ab3616a3cab9737749f38b13918676b5ed9ea94abae0b3b094441ce72e",
+  "status": "READY_FOR_USER_GPU_QUALITY_RETRY",
+  "firstIncomplete": "USER_GPU_QUALITY_RENDER_AND_REVIEW_NO_RETRY_AUTHORIZED",
+  "inputCandidateSha256": "c1fb0b8dba90a15b7b90ead6c57ba4ec56ca749a20dccaf2057a15be9be4531f",
   "format": {
     "width": 1080,
     "height": 1920,
@@ -42,34 +42,39 @@
   "classification": [
     {
       "step": "Recover original candidate + V9-V11",
-      "class": "\uae30\uc874 PASS \uc7ac\uc0ac\uc6a9"
+      "class": "기존 PASS 재사용"
     },
     {
       "step": "Formal compile of recovered new6s candidate",
-      "class": "\uc2e0\uaddc \uc791\uc5c5"
+      "class": "신규 작업"
     },
     {
       "step": "CPU7PNG/180continuity",
-      "class": "\uc2e0\uaddc \uc791\uc5c5",
+      "class": "신규 작업",
       "state": "PASS_7_PNG_AND_180_CONTINUITY"
     },
     {
       "step": "Image build",
-      "class": "\uc2e0\uaddc \uc791\uc5c5",
+      "class": "신규 작업",
       "state": "PASS_NEW_IMMUTABLE_IMAGE"
     },
     {
       "step": "gCube config",
-      "class": "\uc2e0\uaddc \uc791\uc5c5",
+      "class": "신규 작업",
       "state": "PASS_SAVED_WITHOUT_DEPLOYMENT"
     },
     {
       "step": "Common recurrence gate + actual immutable image + saved stopped workload readback",
-      "class": "\uc2e0\uaddc / \uae30\uc874 PASS \uc7ac\uc0ac\uc6a9",
+      "class": "신규 / 기존 PASS 재사용",
       "state": "PASS_NO_GPU_EXECUTION"
     },
     {
       "step": "Boundary drawing and camera timing quality delta + sealed image + stopped gCube settings",
+      "class": "NEW_CHANGE_SCOPE_ONLY / EXISTING_PASS_REUSED",
+      "state": "READY_FOR_USER_GPU_QUALITY_RETRY"
+    },
+    {
+      "step": "Second GPU quality revision: complete boundary trace target coverage and smooth camera acceleration; actual CPU preview, sealed immutable image, stopped gCube readback",
       "class": "NEW_CHANGE_SCOPE_ONLY / EXISTING_PASS_REUSED",
       "state": "READY_FOR_USER_GPU_QUALITY_RETRY"
     }
@@ -92,9 +97,9 @@
       "sha256": "d88c180c6b11ee87ac033c9e0667c6461fe8eb57da8bfd8fb4f40596b3f3e0eb"
     }
   ],
-  "activeInput": "quality-v1/REFERENCE_6S_QUALITY_INPUT.json",
+  "activeInput": "quality-v2/REFERENCE_6S_QUALITY_INPUT.json",
   "inputCorrectionState": "ALPHA_0_6_AND_FRAME149_179_HOLD_ALREADY_PRESENT_SKIP_FIX_SCRIPT",
-  "nextAction": "Build sealed15-file delta on prior immutable cf52 image; actual common gate and quality source closure before publication; only then save stopped gCube settings.",
+  "nextAction": "User only: start gCube5373 with saved quality-v2 image, upload NEW quality-v2/REFERENCE_6S_QUALITY_INPUT.json, render once, download MP4 and stop deployment. No GPU retry is authorized to Work. Final NVIDIA visual quality remains unverified.",
   "lastError": null,
   "formalCompile": {
     "status": "PASS",
@@ -131,16 +136,16 @@
   },
   "imageBuild": {
     "status": "PASS",
-    "evidence": "quality-v1/image-a1/RELEASE_APPROVAL.json",
-    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-boundary-camera-044bde9e8bc3-43368976255",
-    "digest": "sha256:cf52ba25cb46b16b6bee0ba3149d1e8048a3d6a5abf05f1cfda932f7094665a8",
-    "buildCommit": "044bde9e8bc342b09d91ea71d62325f9f6f28226",
-    "runId": "43368976255",
-    "newRuntimeFiles": 12,
+    "evidence": "quality-v2/image-a1/RELEASE_APPROVAL.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-v2-2c26a3bfa6e3-43376804907",
+    "digest": "sha256:ed2ff287e7617b201876059210603e4f507632ca7143ae1768414364faf848ce",
+    "buildCommit": "2c26a3bfa6e3d5669c5e251dd78677a4c697c2ff",
+    "runId": "43376804907",
+    "newRuntimeFiles": 15,
     "newImageOnlyCommonGate": "PASS",
     "GPUExecutions": 0
   },
-  "deploymentReady": false,
+  "deploymentReady": true,
   "sourcePinVerification": {
     "status": "PASS",
     "scope": "Changed NVIDIA variants and mandatory atomic 3-variant source check only; no GPU, no image build",
@@ -153,7 +158,7 @@
     "admission": "FULL_CAMERA_SOURCE_ADMISSION.json",
     "oldApproximateFitPreservedInGit": true
   },
-  "lastRemoteSavedBeforeThisUnit": "571d836a1c91d4face9a9f062b3b60e74aafc3fe",
+  "lastRemoteSavedBeforeThisUnit": "a77a6b1ca7e06e2cb4f6b3b4f286da3ff72b5a8a",
   "registeredCompile": {
     "status": "PASS",
     "compilerInputSHA256": "4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45",
@@ -178,11 +183,14 @@
   },
   "gcubePredeployment": {
     "status": "PASS_SAVED_AND_REOPENED_STOPPED",
-    "config": "GCUBE_PREDEPLOY_CONFIG.json",
-    "evidence": "quality-v1/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
+    "config": "quality-v2/GCUBE_PREDEPLOY_CONFIG.json",
+    "evidence": "quality-v2/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
     "deployStarts": 0,
     "studioRenders": 0,
-    "additionalGPUExecutions": 0
+    "additionalGPUExecutions": 0,
+    "screenshot": "quality-v2/gcube-readback/GCUBE_STOPPED.jpg",
+    "deploymentGateEvidence": "quality-v2/gcube-readback/DEPLOYMENT_GATE.json",
+    "observedStatus": "Stopped"
   },
   "unverifiedAfterUserDeployment": [
     "Actual NVIDIA quality of this new boundary/camera revision",
@@ -289,7 +297,9 @@
     "evidence": "quality-v1/GPU_SUCCESS_RECEIPT.json",
     "originalMP4Preserved": true,
     "visualQuality": "TWO_USER_REPORTED_GAPS",
-    "newQualityRevisionGPUVerified": false
+    "newQualityRevisionGPUVerified": false,
+    "secondVideoEvidence": "quality-v2/GPU_SECOND_MOTION.json",
+    "secondVideoSHA256": "e1af0080e7f3dcc772584db1337c31ab18ab70990211ec6e888d2838799832a3"
   },
   "qualityDelta": {
     "status": "READY_FOR_USER_GPU_QUALITY_RETRY",
@@ -345,15 +355,39 @@
   "qualityV2": {
     "scope": "quality-v2/CHANGE_SCOPE.json",
     "candidate": "quality-v2/REFERENCE_6S_QUALITY_INPUT.json",
-    "status": "PASS_CHANGED_SCOPE_CPU",
+    "status": "READY_FOR_USER_GPU_QUALITY_RETRY",
     "oldPassReruns": 0,
     "GPUExecutions": 0,
     "sourceBinding": "quality-v2/CAMERA_SOURCE_BINDING.json",
-    "additionalChangedScope": "Only new interpolated-track semantic transport comparison mirrored in CPU/NVIDIA; image source pins must be resealed after CPU PASS.",
+    "additionalChangedScope": "Derived camera source receipt and semantic pose transport repaired only for new interpolation mode; CPU and NVIDIA routes mirrored and actual-image seals PASS.",
     "cpuEvidence": "quality-v2/CPU_VISUAL_REVIEW.json",
     "CPUPreview": "quality-v2/cpu-a4/VIDEO.mp4",
     "sourceCommit": "c064b22023d6f5648f788cf96c615a3d93b5b486",
     "actualGPURenderQuality": "NOT_RUN",
-    "finalCPUPixelsUnchanged": true
+    "finalCPUPixelsUnchanged": true,
+    "implementationCommit": "e59f6d89ea74d13ef58f75c00520d7c67cabf896",
+    "imageBuildCommit": "2c26a3bfa6e3d5669c5e251dd78677a4c697c2ff",
+    "imageEvidenceCommit": "a77a6b1ca7e06e2cb4f6b3b4f286da3ff72b5a8a",
+    "imageBindings": "quality-v2/image-a1/QUALITY_IMAGE_BINDINGS.json",
+    "imageReleaseApproval": "quality-v2/image-a1/RELEASE_APPROVAL.json",
+    "savedStoppedGcubeReadback": "quality-v2/gcube-readback/GCUBE_SETTINGS_RECEIPT.json",
+    "newFocusedChecks": 10,
+    "actualCPUFrames": 180,
+    "boundaryTargets": 135,
+    "boundaryPaths": 568,
+    "boundaryCompleteAtFrame": 54,
+    "observedCPUZoomJerkRMSReductionPercent": 50.7864202307633,
+    "holdRawFrames149Through179Identical": true
+  },
+  "previousQualityV1ImageBuild": {
+    "status": "PASS",
+    "evidence": "quality-v1/image-a1/RELEASE_APPROVAL.json",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:quality-boundary-camera-044bde9e8bc3-43368976255",
+    "digest": "sha256:cf52ba25cb46b16b6bee0ba3149d1e8048a3d6a5abf05f1cfda932f7094665a8",
+    "buildCommit": "044bde9e8bc342b09d91ea71d62325f9f6f28226",
+    "runId": "43368976255",
+    "newRuntimeFiles": 12,
+    "newImageOnlyCommonGate": "PASS",
+    "GPUExecutions": 0
   }
 }
