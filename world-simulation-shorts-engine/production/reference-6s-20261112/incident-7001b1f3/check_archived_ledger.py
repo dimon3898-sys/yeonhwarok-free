@@ -23,7 +23,9 @@ def main(archive, result):
     source = found[0]
     raw = source.read_bytes()
     assert sha(raw) == LEDGER_SHA, 'ARCHIVED_LEDGER_CHANGED'
-    receipt = json.loads((source.parent / 'CAPTURE_RECEIPT.json').read_bytes())
+    # The original artifact puts the ledger under workspace/ and its receipt
+    # under repository evidence. Reuse the already committed exact receipt.
+    receipt = json.loads((HERE.parent / 'cpu-continuity-a1/CAPTURE_RECEIPT.json').read_bytes())
     assert receipt['frameEvidence'] == {'file': source.name, 'sha256': LEDGER_SHA}
     assert receipt['sourceInputSHA256'] == '4525c72c09c2563dd71153a4fdae5f22d400035a875df771eec98d4d79d9be45'
     assert receipt['totalFrames'] == receipt['renderedFrames'] == 180

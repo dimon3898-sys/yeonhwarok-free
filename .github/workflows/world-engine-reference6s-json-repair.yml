@@ -15,8 +15,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '676c559942043b63b0d9120c4e06c940cb7d4130' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE6S_JSON_REPAIR_A1'
+      github.event.before == '72c9b28fa94f4a1c6231fc4ba76b35c311002bae' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_REFERENCE6S_JSON_REPAIR_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
@@ -28,6 +28,7 @@ jobs:
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /world-simulation-shorts-engine/production/reference-6s-20261112/incident-7001b1f3/
+            /world-simulation-shorts-engine/production/reference-6s-20261112/cpu-continuity-a1/CAPTURE_RECEIPT.json
             /world-simulation-shorts-engine/production/capture-json-size-fix-v13/evidence/CPU_RESULT.json
             /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py
             /world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/RUNTIME_SOURCE_MANIFEST.json
@@ -101,7 +102,7 @@ jobs:
           python - <<'PY'
           import json,os,shutil
           from pathlib import Path
-          t=Path(os.environ['RUNNER_TEMP']);out=Path(os.environ['INCIDENT'])/'execution-a1';out.mkdir(exist_ok=False)
+          t=Path(os.environ['RUNNER_TEMP']);out=Path(os.environ['INCIDENT'])/'execution-a2';out.mkdir(exist_ok=False)
           src=t/'repair-evidence'
           if src.exists():
               for p in src.iterdir():
@@ -112,7 +113,7 @@ jobs:
         if: always()
         with:
           name: reference6s-json-repair-${{ github.run_id }}
-          path: ${{ env.INCIDENT }}/execution-a1/
+          path: ${{ env.INCIDENT }}/execution-a2/
           retention-days: 90
       - name: Commit evidence with a fresh branch lease
         if: always()
@@ -122,6 +123,6 @@ jobs:
           test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
           git config user.name 'WORLD ENGINE incident evidence'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add --sparse "${INCIDENT}/execution-a1"
+          git add --sparse "${INCIDENT}/execution-a2"
           git commit -m 'Preserve post-capture admission and immutable image evidence'
           git push origin "HEAD:refs/heads/${BRANCH}"
