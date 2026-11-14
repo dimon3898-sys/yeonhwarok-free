@@ -50,27 +50,11 @@ export async function compileAuthoredHistory(input){
  const t=input.timing,n=600;
  check(Object.values(t).every(Number.isSafeInteger)&&t.territoryStartFrame>=2&&t.finalHoldFrames>=30&&t.territoryEndFrame>t.territoryStartFrame&&t.territoryEndFrame<=n-t.finalHoldFrames,'TIMING_RANGE');
  check(exact(input.presentation,['camera','mapStyle','territoryColors','labels']),'PRESENTATION_FIELDS');
- const source=await reviewedSource(input.source),s=copy(source.segment),scene=s.scene,p=s.presentation;
- // Freeze the already-qualified geographic source, rather than carrying AUTO
- // into an execution request. This changes display source selection only.
- check(typeof source.segment.regionEvidence?.sourceId==='string','PINNED_MAP_SOURCE_REQUIRED');
- s.region.sourceId=source.segment.regionEvidence.sourceId;
- const effect=p.territoryChanges.items[0];check(t.territoryEndFrame-t.territoryStartFrame===effect.continuous.frames.length,'REUSED_GEOMETRY_TIME_BINDING');
- s.startFrame=0;s.endFrame=n;
- scene.timing={...scene.timing,total_frames:n,duration_seconds:20,initial_reveal_frames:t.territoryStartFrame,state_transition_frames:n-t.finalHoldFrames-t.territoryStartFrame,action_frames:n-t.finalHoldFrames,final_hold_frames:t.finalHoldFrames};
- scene.time_steps[0].transition_frames=t.territoryStartFrame;scene.time_steps[1].start_frame=t.territoryStartFrame;scene.time_steps[1].transition_frames=scene.timing.state_transition_frames;
- scene.beats=[['EVENT_ACTION',0,t.territoryStartFrame],['STATE_CHANGE',t.territoryStartFrame,n-t.finalHoldFrames],['HOLD',n-t.finalHoldFrames,n]].map(([type,a,b],i)=>({id:'BEAT_'+String(i+1).padStart(2,'0'),type,start_frame:a,end_frame:b,duration_frames:b-a,geometry_refs:copy(scene.camera_intent.target_geometry_refs),...(type==='HOLD'?{camera_intent:'LOCK'}:{})}));
- Object.assign(p,copy(input.presentation));effect.startFrame=t.territoryStartFrame;effect.endFrame=t.territoryEndFrame;
- p.territoryChanges.config.visualProfile='FRONTIER_LIGHT_V1';
- check(p.camera.mode==='GEOGRAPHIC_TRACK'&&p.mapStyle.nativeBoundaries===false,'GEOGRAPHIC_HISTORY_PRESENTATION_REQUIRED');
- validateScenePlan(scene);const presentation=validatePresentation(p,{scene,region:s.region});
- // The compiled packet carries only consumed fields, no stale automatic audit.
- const segment={sceneId:s.sceneId,startFrame:0,endFrame:n,scene,region:s.region,presentation,
-  inputTrace:[{origin:'EXPLICIT_AUTHORED_HISTORY_DISPLAY_V1',source:copy(input.source),sourceEvidence:source.sourceEvidence,sourceDatesChanged:false,sourceGeometryChanged:false,interpolationRegenerated:false,authoredInputSHA256:hash(input)}]};
- compileExistingEnginePlan(scene);
+ const source=await reviewedSource(input.source);
+ const segment=compileReviewedHistoryDisplay(source,{timing:t,presentation:input.presentation,totalFrames:n,inputTrace:[{origin:'EXPLICIT_AUTHORED_HISTORY_DISPLAY_V1',source:copy(input.source),sourceEvidence:source.sourceEvidence,sourceDatesChanged:false,sourceGeometryChanged:false,interpolationRegenerated:false,authoredInputSHA256:hash(input)}]});
  const admission={schema:HISTORY_ADMISSION_SCHEMA,status:'PASS',simulationType:'HISTORICAL',scope:HISTORY_RUNTIME_PROFILE,source:copy(input.source),sourceEvidence:source.sourceEvidence,authoredInputSHA256:hash(input),runtimeSegmentSHA256:hash(segment),paidExecutionAllowed:false};
  return{schema:'WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2',compilerVersion:'AUTHORED_HISTORY_V1',status:'PASS',issues:[],clarifications:[],simulationType:'HISTORICAL',historicalRenderAllowed:true,paidExecutionAllowed:false,
-  inputSHA256:hash(input),totalFrames:600,durationSeconds:20,renderRequests:[segment],renderableSceneIds:[s.sceneId],blockedSceneIds:[],transitionPlan:[],sceneResults:[{sceneId:s.sceneId,status:'PASS',issues:[]}],historicalAdmission:admission,inputTrace:copy(segment.inputTrace)};
+  inputSHA256:hash(input),totalFrames:600,durationSeconds:20,renderRequests:[segment],renderableSceneIds:[segment.sceneId],blockedSceneIds:[],transitionPlan:[],sceneResults:[{sceneId:segment.sceneId,status:'PASS',issues:[]}],historicalAdmission:admission,inputTrace:copy(segment.inputTrace)};
 }
 export async function verifyAuthoredHistoryRuntime(runtime){
  check(runtime?.totalFrames===600&&runtime.durationSeconds===20&&runtime.profile===HISTORY_RUNTIME_PROFILE&&runtime.simulationType==='HISTORICAL','RUNTIME_PROFILE');
@@ -84,4 +68,26 @@ export async function verifyAuthoredHistoryRuntime(runtime){
  const compiled=await compileAuthoredHistory(input);
  check(runtime.sourceInputSHA256===compiled.inputSHA256&&canonicalJSON(compiled.historicalAdmission)===canonicalJSON(a)&&canonicalJSON(compiled.renderRequests[0])===canonicalJSON(s),'RUNTIME_SOURCE_OR_DISPLAY_CHANGED');
  return{status:'PASS',profile:HISTORY_RUNTIME_PROFILE,sourceEvidence:a.sourceEvidence};
+}
+
+/** Existing display compiler, independent of topic and external data location. */
+export function compileReviewedHistoryDisplay(source,{timing:t,presentation:display,totalFrames:n,inputTrace=[]}){
+ const s=copy(source.segment),scene=s.scene,p=s.presentation;
+ // Freeze the already-qualified geographic source, rather than carrying AUTO
+ // into an execution request. This changes display source selection only.
+ check(typeof source.segment.regionEvidence?.sourceId==='string','PINNED_MAP_SOURCE_REQUIRED');
+ s.region.sourceId=source.segment.regionEvidence.sourceId;
+ const effect=p.territoryChanges.items[0];check(t.territoryEndFrame-t.territoryStartFrame===effect.continuous.frames.length,'REUSED_GEOMETRY_TIME_BINDING');
+ s.startFrame=0;s.endFrame=n;
+ scene.timing={...scene.timing,total_frames:n,duration_seconds:n/30,initial_reveal_frames:t.territoryStartFrame,state_transition_frames:n-t.finalHoldFrames-t.territoryStartFrame,action_frames:n-t.finalHoldFrames,final_hold_frames:t.finalHoldFrames};
+ scene.time_steps[0].transition_frames=t.territoryStartFrame;scene.time_steps[1].start_frame=t.territoryStartFrame;scene.time_steps[1].transition_frames=scene.timing.state_transition_frames;
+ scene.beats=[['EVENT_ACTION',0,t.territoryStartFrame],['STATE_CHANGE',t.territoryStartFrame,n-t.finalHoldFrames],['HOLD',n-t.finalHoldFrames,n]].map(([type,a,b],i)=>({id:'BEAT_'+String(i+1).padStart(2,'0'),type,start_frame:a,end_frame:b,duration_frames:b-a,geometry_refs:copy(scene.camera_intent.target_geometry_refs),...(type==='HOLD'?{camera_intent:'LOCK'}:{})}));
+ Object.assign(p,copy(display));effect.startFrame=t.territoryStartFrame;effect.endFrame=t.territoryEndFrame;
+ p.territoryChanges.config.visualProfile='FRONTIER_LIGHT_V1';
+ check(p.camera.mode==='GEOGRAPHIC_TRACK'&&p.mapStyle.nativeBoundaries===false,'GEOGRAPHIC_HISTORY_PRESENTATION_REQUIRED');
+ validateScenePlan(scene);const presentation=validatePresentation(p,{scene,region:s.region});
+ // The compiled packet carries only consumed fields, no stale automatic audit.
+ const segment={sceneId:s.sceneId,startFrame:0,endFrame:n,scene,region:s.region,presentation,
+  inputTrace:copy(inputTrace)};
+ compileExistingEnginePlan(scene);return segment;
 }

@@ -84,6 +84,17 @@ def compile_prompt(prompt, evidence_registry, *, allow_ten_second_sample=False):
 
 
 def compile_authored_history(prompt):
+    if prompt.get('schema') == 'WORLD_ENGINE_AUTHORED_HISTORY_INPUT_V2':
+        value = node_json("import{readFileSync}from'node:fs';"
+            "const p=JSON.parse(readFileSync(0,'utf8'));"
+            "const{compileHistoryInputV2}=await import(p.module);"
+            "process.stdout.write(JSON.stringify(await compileHistoryInputV2(p.input)));",
+            {'module': (HERE / 'history_input_v2.mjs').as_uri(), 'input': prompt}, timeout=150)
+        if (value.get('schema') != 'WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2'
+                or value.get('compilerVersion') != 'AUTHORED_HISTORY_V2'
+                or value.get('historicalAdmission', {}).get('status') != 'PASS'):
+            raise StudioError('UP2_HISTORY_V2_ADMISSION_REQUIRED')
+        return value
     value = node_json("import{readFileSync}from'node:fs';"
         "const p=JSON.parse(readFileSync(0,'utf8'));"
         "const{compileAuthoredHistory}=await import(p.module);"
@@ -147,6 +158,12 @@ def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False, allo
                 and analyzed.get('historicalAdmission', {}).get('status') == 'PASS'
                 and analyzed.get('simulationType') == 'HISTORICAL' and analyzed.get('totalFrames') == 600):
             maximum = 600
+        if (allow_authored_history is True and analyzed.get('compilerVersion') == 'AUTHORED_HISTORY_V2'
+                and analyzed.get('historicalAdmission', {}).get('scope') == 'HISTORICAL_AUTHORED_WINDOW_V2'
+                and analyzed.get('historicalAdmission', {}).get('status') == 'PASS'
+                and analyzed.get('simulationType') == 'HISTORICAL'
+                and analyzed.get('totalFrames') in {180, 300, 600}):
+            maximum = 600
         if not rows or not 2 <= end <= maximum:
             raise StudioError('UP2_BOUNDED_TIMELINE_REQUIRED')
         transitions = deepcopy(analyzed.get('transitionPlan', []))
@@ -166,7 +183,7 @@ def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False, allo
 
 
 def runtime_segment(row):
-    fields = ['sceneId', 'startFrame', 'endFrame', 'scene', 'region', 'presentation', 'inputTrace', 'sourceFrameRange']
+    fields = ['sceneId', 'startFrame', 'endFrame', 'scene', 'region', 'presentation', 'inputTrace', 'sourceFrameRange', 'timelineWindow']
     return {key: deepcopy(row[key]) for key in fields if key in row}
 
 
@@ -203,7 +220,7 @@ class StudioController(manager.StudioController):
                     self._verify_material_files(cached.get('materialFiles'))
                     self._verify_qualification(cached['admission'], request['totalFrames'])
                     prepared = cached.get('prepared')
-                    if request.get('profile') == 'HISTORICAL_CONTINUOUS_600F_V1' and cached.get('cacheFormat') == 'HISTORY_PREPARED_WIRE_ONLY_V1':
+                    if request.get('profile') in {'HISTORICAL_CONTINUOUS_600F_V1', 'HISTORICAL_AUTHORED_WINDOW_V2'} and cached.get('cacheFormat') == 'HISTORY_PREPARED_WIRE_ONLY_V1':
                         try:
                             prepared = json.loads(cached['preparedWireJSON'])
                         except (KeyError, ValueError, TypeError):
@@ -229,7 +246,7 @@ class StudioController(manager.StudioController):
                 material_files = self._verify_material_files(prepared.get('sourceBindings'))
                 verify_prepared_sources(prepared, admission)
                 prepared_wire = json.dumps(prepared, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
-                history_cache = request.get('profile') == 'HISTORICAL_CONTINUOUS_600F_V1'
+                history_cache = request.get('profile') in {'HISTORICAL_CONTINUOUS_600F_V1', 'HISTORICAL_AUTHORED_WINDOW_V2'}
                 # The new history record stores one exact wire copy, not two
                 # geometry-heavy copies. The generic 32MiB cache limit is intact.
                 sources.write_json(identity + '.json', {'requestSHA256': sha(canonical(request)),
@@ -279,7 +296,7 @@ class StudioController(manager.StudioController):
             raise StudioError('UP2_EXPLICIT_PRESENTATION_INPUT_REQUIRED', status=400)
         extended = getattr(self, 'allow_ten_second_sample', False)
         authored_history = (getattr(self, 'allow_authored_history', False)
-                            and value['prompt'].get('schema') == 'WORLD_ENGINE_AUTHORED_HISTORY_INPUT_V1')
+                            and value['prompt'].get('schema') in {'WORLD_ENGINE_AUTHORED_HISTORY_INPUT_V1', 'WORLD_ENGINE_AUTHORED_HISTORY_INPUT_V2'})
         if authored_history:
             if value['sceneId'] != TIMELINE_ID:
                 raise StudioError('UP2_HISTORY_COMPLETE_TIMELINE_REQUIRED')
@@ -293,11 +310,18 @@ class StudioController(manager.StudioController):
                 fields=[{'issues': analyzed.get('issues', [])}])
         rows, total, cuts = (selected_segments(analyzed, value['sceneId'], allow_ten_second_sample=True, allow_authored_history=authored_history)
                             if extended else selected_segments(analyzed, value['sceneId']))
+        history_window = authored_history and analyzed.get('compilerVersion') == 'AUTHORED_HISTORY_V2'
         for row in rows:
             scene = row.get('scene', {})
+            window = row.get('timelineWindow', {})
+            scene_frames_match = (scene.get('timing', {}).get('total_frames') == row['endFrame'] - row['startFrame'])
+            if history_window:
+                scene_frames_match = (type(window.get('startFrame')) is int and type(window.get('endFrame')) is int
+                    and 0 <= window['startFrame'] < window['endFrame'] <= scene.get('timing', {}).get('total_frames', 0)
+                    and window['endFrame'] - window['startFrame'] == row['endFrame'] - row['startFrame'])
             if (scene.get('metadata', {}).get('schema') != 'PLANNER_SCENE_JSON_V1'
                     or scene.get('metadata', {}).get('output') != {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False}
-                    or scene.get('timing', {}).get('total_frames') != row['endFrame'] - row['startFrame']):
+                    or not scene_frames_match):
                 raise StudioError('UP2_CANONICAL_SCENE_AND_FRAME_BINDING_REQUIRED')
         runtime = {'schema': 'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2', 'segments': [runtime_segment(row) for row in rows],
             'totalFrames': total, 'transitions': cuts, 'sourceInputSHA256': analyzed.get('inputSHA256'),
@@ -305,7 +329,7 @@ class StudioController(manager.StudioController):
         if extended and total == 300:
             runtime['durationSeconds'] = 10
         if authored_history:
-            runtime.update(durationSeconds=20, simulationType='HISTORICAL', profile='HISTORICAL_CONTINUOUS_600F_V1',
+            runtime.update(durationSeconds=analyzed['durationSeconds'], simulationType='HISTORICAL', profile=analyzed['historicalAdmission']['scope'],
                            historicalAdmission=deepcopy(analyzed['historicalAdmission']))
         # Strings preserve the actual Planner member ordering across sorted
         # private JSON persistence. Semantic and wire hashes are independent.
@@ -338,7 +362,7 @@ class StudioController(manager.StudioController):
         if extended and total == 300:
             result['sourcePipeline']['durationSeconds'] = 10
         if authored_history:
-            result['sourcePipeline'].update(durationSeconds=20, historicalAdmission=deepcopy(analyzed['historicalAdmission']))
+            result['sourcePipeline'].update(durationSeconds=analyzed['durationSeconds'], historicalAdmission=deepcopy(analyzed['historicalAdmission']))
         return result
 
     def _preflight_record(self, root, record):
