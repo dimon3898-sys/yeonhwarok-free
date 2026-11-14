@@ -1,6 +1,6 @@
 {
   "schema": "WORLD_ENGINE_DEPLOY_PREFLIGHT_V2",
-  "status": "COMMON_IMAGE_VALIDATED_GPU_ENVIRONMENT_BLOCKED",
+  "status": "DEPLOYMENT_SETTINGS_SAVED_GPU_RUNTIME_BLOCKED",
   "readyForUserGPUStart": false,
   "sourceGitHubHEAD": "f32d54dc01507036fd66c4b06813611e48a6214b",
   "evidenceGitHubCommit": "ca80a2cb2afa8dd79ba2ca215dce326493c70cc1",
@@ -24,7 +24,9 @@
       "window": {
         "startFrame": 0,
         "endFrame": 180
-      }
+      },
+      "providerPath": "/WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_01.json",
+      "containerStagingPath": "/world-storage/mongol-three-6s-20261114/MONGOL_6S_PART_01.json"
     },
     {
       "path": "world-simulation-shorts-engine/production/mongol-three-6s-20261114/MONGOL_6S_PART_02.json",
@@ -32,7 +34,9 @@
       "window": {
         "startFrame": 180,
         "endFrame": 360
-      }
+      },
+      "providerPath": "/WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_02.json",
+      "containerStagingPath": "/world-storage/mongol-three-6s-20261114/MONGOL_6S_PART_02.json"
     },
     {
       "path": "world-simulation-shorts-engine/production/mongol-three-6s-20261114/MONGOL_6S_PART_03.json",
@@ -40,7 +44,9 @@
       "window": {
         "startFrame": 360,
         "endFrame": 540
-      }
+      },
+      "providerPath": "/WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_03.json",
+      "containerStagingPath": "/world-storage/mongol-three-6s-20261114/MONGOL_6S_PART_03.json"
     }
   ],
   "externalHistoryDataSHA256": "8e42f3ec56bf2c8bbf321d47aa1fc23102b78bf971f2b49dea089876b8e664c0",
@@ -54,7 +60,7 @@
   "worker": "PASS_ACTUAL_IMAGE_BYTE_PRESERVATION",
   "receipt": "PASS_CHANGED_SCOPE_IN_MEMORY_CONTRACT_ONLY_NO_RENDER_RECEIPT",
   "gCube": {
-    "source": "Signed-in gCube workload UI read-only",
+    "source": "Signed-in gCube saved settings and reopened readback",
     "date": "2026-11-14",
     "workload": 5373,
     "state": "종료",
@@ -66,20 +72,31 @@
     "diskGB": 937,
     "sharedMemory": "3GB",
     "storage": "dropbox (/world-storage)",
-    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:history20-6970708eb71a-43551475182",
+    "imageTag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:universal-input-v2-f32d54dc0150-43567343017",
     "actualPodImageDigest": "NOT_AVAILABLE_STOPPED",
     "lastDeployDisplayed": "2026-11-14 13:34:54",
     "lastStopEventDisplayed": "2026-11-14 13:40:35",
-    "settingsChanged": false,
+    "settingsChanged": true,
     "gpuStarts": 0,
-    "stoppedStateReconfirmedAtUTC": "2026-11-14T07:09:09.365718+00:00",
+    "stoppedStateReconfirmedAtUTC": "2026-11-14T07:28:38.011Z",
     "currentDriver": "NOT_VISIBLE_STOPPED",
     "terminalAvailable": false,
     "latestEventPod": "dep5373-76bc6dcb67-hpz2l",
-    "latestEventNode": "wnb247afd4"
+    "latestEventNode": "wnb247afd4",
+    "configuredExpectedDigest": "sha256:8afa856b2c87378354aae42755b3329eceed7c1db27a27491d367b76c15dc10d",
+    "settingsReadbackExact": true,
+    "port": 8080,
+    "command": "",
+    "externalStorageProviderPath": "/WORLD_ENGINE"
   },
-  "deploymentSettingsApplied": false,
-  "currentGPUCostEstimate": "UNCONFIRMED_NOT_AUTHORIZED",
+  "deploymentSettingsApplied": true,
+  "currentGPUCostEstimate": {
+    "minHourlyKRW": 910,
+    "maxHourlyKRW": 1300,
+    "VATIncluded": false,
+    "source": "Retained GPU selector in gCube edit UI",
+    "approved": false
+  },
   "maxTime": "NOT_AUTHORIZED",
   "maxCost": "NOT_AUTHORIZED",
   "retryCount": 0,
@@ -94,5 +111,9 @@
   "actualGPU": "PENDING_GPU",
   "MP4": "NOT_GENERATED",
   "visualQuality": "NOT_CLAIMED",
-  "resumeEvidence": "world-simulation-shorts-engine/production/reference-reconstruction-20s-20261114/gpu-failure-recovery/resume-evidence-20261114/RESUMED_EVIDENCE.json"
+  "resumeEvidence": "world-simulation-shorts-engine/production/reference-reconstruction-20s-20261114/gpu-failure-recovery/resume-evidence-20261114/RESUMED_EVIDENCE.json",
+  "deploymentSettingsEvidence": "GCUBE_DEPLOYMENT_SETTINGS_APPLIED.json",
+  "inputPlacementEvidence": "DEPLOYMENT_DATA_TRANSFER.json",
+  "imageBuildsThisSettingsTask": 0,
+  "readyForGPURender": false
 }

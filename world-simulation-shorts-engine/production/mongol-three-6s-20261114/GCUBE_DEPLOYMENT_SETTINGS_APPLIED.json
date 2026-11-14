@@ -1,0 +1,123 @@
+{
+  "schema": "WORLD_ENGINE_GCUBE_SETTINGS_APPLIED_V1",
+  "status": "APPLIED_SAVED_REOPENED",
+  "overallStatus": "DEPLOYMENT_SETTINGS_SAVED_GPU_RUNTIME_BLOCKED",
+  "baselineGitHubHEAD": "9d5ab5c50cc42ac28fcf7542500b3e66889c5bf5",
+  "observedAtUTC": "2026-11-14T07:28:38.011Z",
+  "workload": 5373,
+  "source": "Signed-in gCube edit UI, save-only 수정 action, settings reopened and exact values compared",
+  "workloadURL": "https://gcube.ai/demand/ns74a360e2/workload/5373",
+  "image": {
+    "tag": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine:universal-input-v2-f32d54dc0150-43567343017",
+    "expectedDigest": "sha256:8afa856b2c87378354aae42755b3329eceed7c1db27a27491d367b76c15dc10d",
+    "referenceForm": "TAG_WITH_TWO_DIGEST_ENV_BINDINGS",
+    "digestEvidence": "../../recovery/universal-input-contract-v2/image-a1/RELEASE_APPROVAL.json",
+    "actualPodImageDigest": "NOT_CHECKED_STOPPED"
+  },
+  "savedSettingsMatchExpected": true,
+  "environmentCount": 17,
+  "unchangedExistingEnvironmentCount": 13,
+  "secretValuesUnchanged": true,
+  "gpu": {
+    "tier": "Tier2",
+    "model": "RTX5090",
+    "count": 1,
+    "vramGB": 32,
+    "cpuCores": 12,
+    "ramGB": 63,
+    "diskGB": 937,
+    "replicas": 1,
+    "sharedMemoryGB": 3,
+    "istioProxy": true,
+    "l7ConsistentHash": false,
+    "minimumCUDA": null
+  },
+  "storage": {
+    "provider": "Dropbox",
+    "alias": "world-engine-test",
+    "providerPath": "/WORLD_ENGINE",
+    "containerMount": "/world-storage",
+    "PV": "Bound",
+    "PVC": "Bound"
+  },
+  "dataTransferEvidence": "DEPLOYMENT_DATA_TRANSFER.json",
+  "inputFiles": [
+    {
+      "content_hash": "b9e359ae8fdb8c56ac80e6350ad1f6d77f4b2ff82981ef000892da1edb3189b4",
+      "id": "id:C4090FVAeZAAAAAAAAAEAg",
+      "name": "MONGOL_6S_PART_01.json",
+      "path": "ns:1536899938//WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_01.json",
+      "path_display": "/WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_01.json",
+      "size": 120787,
+      "sourcePath": "world-simulation-shorts-engine/production/mongol-three-6s-20261114/MONGOL_6S_PART_01.json",
+      "sha256": "2ed4221c36531ea66b88d1cd144be320e0f3cf13be98b3bf8a71b23170fa5c87",
+      "containerPath": "/world-storage/mongol-three-6s-20261114/MONGOL_6S_PART_01.json",
+      "transferIdentity": "MATCH_SIZE_AND_DROPBOX_CONTENT_HASH"
+    },
+    {
+      "content_hash": "a71f1f5e9a586790ca5e6810f5ea23cdffe0a0b51e7af315b27fa3e386a17379",
+      "id": "id:C4090FVAeZAAAAAAAAAEAw",
+      "name": "MONGOL_6S_PART_02.json",
+      "path": "ns:1536899938//WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_02.json",
+      "path_display": "/WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_02.json",
+      "size": 120789,
+      "sourcePath": "world-simulation-shorts-engine/production/mongol-three-6s-20261114/MONGOL_6S_PART_02.json",
+      "sha256": "169b5cf2d75ae8b7ae3ec939e54ba3714b4ea175f3b8835d1ac947f7e4ade245",
+      "containerPath": "/world-storage/mongol-three-6s-20261114/MONGOL_6S_PART_02.json",
+      "transferIdentity": "MATCH_SIZE_AND_DROPBOX_CONTENT_HASH"
+    },
+    {
+      "content_hash": "4f1c73d027df8216406b195a2d5f1cb9d15b998a092711aa5902711e7351dc77",
+      "id": "id:C4090FVAeZAAAAAAAAAEBA",
+      "name": "MONGOL_6S_PART_03.json",
+      "path": "ns:1536899938//WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_03.json",
+      "path_display": "/WORLD_ENGINE/mongol-three-6s-20261114/MONGOL_6S_PART_03.json",
+      "size": 120789,
+      "sourcePath": "world-simulation-shorts-engine/production/mongol-three-6s-20261114/MONGOL_6S_PART_03.json",
+      "sha256": "36fd63004eb501f7b5d6048a67b4d6ca1f343b4d25598560ebf9748917a194b7",
+      "containerPath": "/world-storage/mongol-three-6s-20261114/MONGOL_6S_PART_03.json",
+      "transferIdentity": "MATCH_SIZE_AND_DROPBOX_CONTENT_HASH"
+    }
+  ],
+  "stateAfterSave": "종료",
+  "lastDeployDisplayed": "2026-11-14 13:34:54",
+  "lastStopEventDisplayed": "2026-11-14 13:40:35",
+  "noNewChargeObservation": {
+    "sameWorkloadDetailCostDisplayUnchanged": true,
+    "balanceDisplayUnchanged": true,
+    "billingBackendAudit": false,
+    "interpretation": "No new GPU resource was started; displayed costs did not increase. No independent billing audit claim."
+  },
+  "saveReadbackChecks": {
+    "imageTag": true,
+    "twoDigestEnvironmentValues": true,
+    "dataRootAndCatalogHash": true,
+    "portAndCommand": true,
+    "existingEnvironmentAndSecrets": true,
+    "resourceAndVolume": true,
+    "stoppedAfterSave": true
+  },
+  "thisTask": {
+    "GPUStarts": 0,
+    "StudioRenders": 0,
+    "imageBuilds": 0,
+    "engineCodeChanges": 0,
+    "oldPassReruns": 0,
+    "inputsRegenerated": 0
+  },
+  "notExecuted": [
+    "image pull",
+    "actual Pod imageID",
+    "mount POSIX ownership/modes",
+    "WebGL2/EGL",
+    "GPU render"
+  ],
+  "READY_FOR_GPU_RENDER": false,
+  "GPU_RENDER_PASS": false,
+  "remainingBlockers": [
+    "CURRENT_NODE_WEBGL_EGL_FAILURE_UNRESOLVED",
+    "EXTERNAL_DATA_VOLUME_POSIX_PERMISSIONS_AND_ACTUAL_MOUNT_NOT_CHECKED",
+    "ACTUAL_POD_IMAGE_DIGEST_NOT_CHECKED_STOPPED"
+  ],
+  "nextAction": "Separate bounded authorization is required for an initialization-first six-second GPU trial. Do not start or retry automatically; do not render if initialization fails."
+}
