@@ -1,0 +1,147 @@
+{
+  "schema": "WORLD_ENGINE_INCIDENT_RECURRENCE_COMPARISON_V1",
+  "classification": "ROOT_CAUSE_UNCONFIRMED",
+  "confirmedSymptom": "RECURRENT_WEBGL2_CONTEXT_INITIALIZATION_FAILURE",
+  "notEstablished": [
+    "RECURRENCE_CONFIRMED",
+    "NEW_DEFECT_CONFIRMED",
+    "RELATED_BUT_DISTINCT"
+  ],
+  "jobId": "studio-aa674e471413a268fb2f8da56e66535c",
+  "analysisSourceCommit": "a99012cd8f17ca68ad995b34fca75d7a90a3c24a",
+  "current": {
+    "node": "wnb247afd4",
+    "pod": "dep5373-76bc6dcb67-kw8p4",
+    "observedAtKST": "2026-11-14T12:54:41.860+09:00",
+    "domainCode": "UP2_WEBGL2_REQUIRED",
+    "lastSuccessfulOperation": "RUNTIME_IMPORT",
+    "failedOperation": "WEBGL_CONTEXT",
+    "frames": 0,
+    "nativeErrors": {
+      "codes": [
+        "EGL_NOT_INITIALIZED"
+      ],
+      "rawNativeMessagesAvailable": false,
+      "numericVulkanErrorAvailable": false,
+      "missingExtensionNamesAvailable": false
+    }
+  },
+  "priorProviderRepair": {
+    "node": "wnc6bc6433",
+    "providerStatement": "EGL vendor configuration was missing and was added; provider considered it likely cause. Vulkan config was stated normal.",
+    "replyProvenance": "USER_SUPPLIED_PROVIDER_REPLY_NOT_INDEPENDENT_MAILBOX_VERIFICATION",
+    "reply": {
+      "path": "world-simulation-shorts-engine/recovery/webgl-init-diagnostic-v1/support/gcube-5373-20261102/PROVIDER_REPLY_USER_SUPPLIED.txt",
+      "sha256": "d6fc103078557ddff41bc4ccd895cdb1ae8e6a05e9cd81f3dbb36a188e3e64bf"
+    },
+    "postRepair": {
+      "path": "world-simulation-shorts-engine/recovery/webgl-init-diagnostic-v1/executions/20261102-eglfix-a1/EXECUTION_RESULT.json",
+      "sha256": "a75f312ea62bcd6af1c18ac5f2a46c2baf729dbf957bf73d0d083120b965e187"
+    },
+    "postRepairResult": "WEBGL2_CONTEXT_PASS_RENDER_NOT_RUN",
+    "sourceChangesAndBuildsForProviderRepair": 0,
+    "currentNodeIsDifferent": true,
+    "currentNodeEGLConfiguration": "NOT_OBSERVED"
+  },
+  "successfulCaptureCounterexample": {
+    "source": {
+      "path": "world-simulation-shorts-engine/production/capture-json-size-fix-v13/evidence/CAPTURE_DIAGNOSTIC.json",
+      "sha256": "dee0b847c4e28b4d5863873e52c49c1b90c7f40a6454d39f9f726d6cbc2b0276"
+    },
+    "jobId": "studio-06ff7116b2bb6c464a64c1a576f3faf0",
+    "renderedFrames": 300,
+    "nativeProofCompleted": true,
+    "captureExitCode": 0,
+    "scope": "300 native frames captured; not evidence of entire MP4/receipt success",
+    "sameDriverVersion": true,
+    "driverVersion": "580.126.09",
+    "sameSafeActualArgs": true,
+    "sameRecordedGraphicsEnvironment": true,
+    "sameGPUAllocationUUIDHash": false,
+    "limits": "Safe fields are not complete argv, full environment, descriptor inventory or library selection."
+  },
+  "sourceComparisons": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs",
+      "scope": "launch constants and buildVulkanLaunchOptions",
+      "comparisonCommit": "f276f19fc3c61c77e17e3683a8b8302523a379dc",
+      "bytesEqual": true,
+      "oldScopedSHA256": "71370346b36e2f971f32b58b6c3313f8d76ce1169963a54e9de83366b770dbf7",
+      "currentScopedSHA256": "71370346b36e2f971f32b58b6c3313f8d76ce1169963a54e9de83366b770dbf7"
+    },
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+      "scope": "_runtime_environment",
+      "comparisonCommit": "f276f19fc3c61c77e17e3683a8b8302523a379dc",
+      "bytesEqual": true,
+      "oldScopedSHA256": "81e9a8ae521cfd961d0255d1d457f41f9dfc89b8eb456d897ccd26afc1efb6f2",
+      "currentScopedSHA256": "81e9a8ae521cfd961d0255d1d457f41f9dfc89b8eb456d897ccd26afc1efb6f2"
+    }
+  ],
+  "oldFixesInPublishedImage": {
+    "source": {
+      "path": "world-simulation-shorts-engine/production/reference-reconstruction-20s-20261114/image-a3/RELEASE_APPROVAL.json",
+      "sha256": "b49ae4d30a5b20830244df9cff72fc3451fbbb931b0a65fd15c89653ef47f594"
+    },
+    "scope": "REUSED_EXISTING_IMAGE_ARTIFACT_NOT_REPEATED_TEST_AND_NOT_FAILED_POD_ATTESTATION",
+    "imageDigest": "sha256:f44f5c9a6d948fb7a08476465566d7363fc4c1008526a4ab67681537bd700795",
+    "workerSHA256": "da0995b3e2b772bf970a171644ed39421c7f101c25d3301e7ca803a92d1f9b83",
+    "sourceManifestSHA256": "0908dd2844f3aa6b076b8e8043d62d191661c299402df9fe6f5a61450365d572",
+    "startupManifestSHA256": "a1929a653e1ca4e9c5a5cb68163018d959b25ff030a87d5b1b470dc89828ecb0",
+    "nativeRouteBinding": "PASS",
+    "workerPublicationFix": "PASS",
+    "parentChildStartupPins": "PASS",
+    "sourceClosure": "PASS",
+    "cases": [
+      "generic_32MiB_limit_preserved",
+      "imported_reader_over_32MiB",
+      "wrong_SHA_rejected",
+      "unsafe_mode_rejected",
+      "hardlink_rejected"
+    ]
+  },
+  "oldFailureRelations": [
+    {
+      "failure": "UP2_COMPLETE_TIMELINE_DATA_REQUIRED",
+      "stage": "INPUT_ADMISSION",
+      "relation": "Not observed. Current capture reached runtime import and WebGL context."
+    },
+    {
+      "failure": "JSON_SIZE_INVALID",
+      "stage": "POST_CAPTURE_ARTIFACT_READ",
+      "relation": "Different stage; prior 300 native frames completed. Bounded large-reader fix present in reused image evidence."
+    },
+    {
+      "failure": "COLD_START_MANIFEST_CONTRACT_INVALID",
+      "stage": "CONTAINER_STARTUP",
+      "relation": "Different stage; current browser launched. Startup pins passed in published image evidence."
+    },
+    {
+      "failure": "worker publication race",
+      "stage": "WORKER_LAUNCH_STATE",
+      "relation": "Prior fix covered by published-image admission. Current exact-job capture child ran and exported evidence."
+    },
+    {
+      "failure": "missing runtime/generated module or source mismatch",
+      "stage": "MODULE_OR_SOURCE_ADMISSION",
+      "relation": "No such error in this job; RUNTIME_IMPORT completed. Reuse original image closure evidence."
+    },
+    {
+      "failure": "EGL_NOT_INITIALIZED / UP2_WEBGL2_REQUIRED",
+      "stage": "NATIVE_GRAPHICS_CONTEXT",
+      "relation": "Matching symptom family; current-node cause unconfirmed."
+    }
+  ],
+  "additionalCodeLead": {
+    "files": [
+      "world-simulation-shorts-engine/deployment/gcube/graphics_runtime.py",
+      "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py"
+    ],
+    "finding": "Legacy start prepares graphics descriptors in its own environment. Studio capture allowlist includes VK_ICD_FILENAMES but excludes __EGL_VENDOR_LIBRARY_FILENAMES and VK_DRIVER_FILES. That allowlist is unchanged since the earlier provider-repaired context success.",
+    "incidentCausation": "UNCONFIRMED; current original selectors, descriptor files and resolved libraries were not archived. No conditional workaround was added."
+  },
+  "gpuStarts": 0,
+  "renderExecutions": 0,
+  "oldPassReruns": 0,
+  "productionCodeChanges": 0
+}
