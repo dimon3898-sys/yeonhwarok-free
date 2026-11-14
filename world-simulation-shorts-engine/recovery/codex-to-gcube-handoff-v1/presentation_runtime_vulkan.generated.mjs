@@ -1,3 +1,7 @@
+import {loadPhysicalContext} from '../universal-presentation-v2/physical_context_v1.mjs';
+import {applyContinuousTerritory,continuousTerritoryAt} from '../universal-presentation-v2/continuous_territory_runtime.mjs';
+import {territoryEffectsAt} from '../universal-presentation-v2/territory_effects_v2.mjs';
+import {composePresentationFlowControls,highlightRingAt} from '../universal-presentation-v2/presentation_flow.mjs';
 /** Explicit moving-projection composition; unchanged engines own every pixel. */
 import {compileGeographicCamera,geographicCameraFrame,GEOGRAPHIC_CAMERA_VERSION,geographicTrackTransportDelta} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
 import * as THREE from '/three.js';
@@ -28,7 +32,7 @@ const flatPoints=g=>g.type==='Polygon'?g.coordinates.flat():g.type==='MultiPolyg
 export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,diagnostics=null}={}){
  const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'PRESENTATION_RUNTIME'}):task();
  validateScenePlan(scene);
- assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&scene.timing.total_frames<=240,'UP2_FREE_FRAME_SCOPE');
+ assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&(scene.timing.total_frames<=240||scene.timing.total_frames<=600&&['HISTORICAL_STATES_V2','HISTORICAL_STATES_V3','HISTORICAL_CONTINUOUS_V1'].includes(presentationPlan.presentation?.territoryChanges?.profile)),'UP2_FREE_FRAME_SCOPE');
  assert(canvas?.width===1080&&canvas?.height===1920,'UP2_CANONICAL_CANVAS_REQUIRED');
  assert(['NE1_SOURCE_NATIVE_COVERAGE','GLOBAL_RGB_SOURCE_NATIVE_COVERAGE','GEOGRAPHIC_TERRAIN_PYRAMID_V1'].includes(sourceStyle?.styleId),'UP2_ACTUAL_NATIVE_SOURCE_REQUIRED');
  assert(sourceStyle.terrainAsset.sha256===nativePlan.assets.terrain.sha256&&terrainTreatment===sourceStyle.terrainTreatment,'UP2_SOURCE_BINDING_REQUIRED');
@@ -39,6 +43,9 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
  const{backend}=await observe('RENDERER_IDENTIFICATION',()=>assertNvidiaVulkanContext(gl));
  const renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:false});renderer.setPixelRatio(1);renderer.setSize(1080,1920,false);renderer.autoClear=false;
  renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
+ const physicalContext=await loadPhysicalContext(p,scene.timing.total_frames);
+ const labelSpec=physicalContext?{enabled:true,items:[...(p.labels?.items??[]),...physicalContext.labels]}:p.labels;
+ const labelScene=physicalContext?{...scene,locations:[...scene.locations,...physicalContext.locations]}:scene;
  let labelPass=null;
  let factory,graphics,last,lastBasePixels,disposed=false,nativeStabilityProof=null;const passes=[];
  try{
@@ -47,9 +54,9 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   // title slot in the new close view; visible presentation labels keep their checks.
   const layoutPlan=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?{...visualPlan,scale:{...visualPlan.scale,
    information:{...visualPlan.scale.information,title:false}}}:nativePlan;
-  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment,boundaryTrace:p.mapStyle?.boundaryTrace,...(geographic?{projectionMode:GEOGRAPHIC_CAMERA_VERSION,terrainSources:sourceStyle.terrainLevels}:{})}));
+  factory=await observe('MAP_TEXTURE_PREPARATION',()=>createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment,boundaryTrace:p.mapStyle?.boundaryTrace,sourceReliefDetail:p.mapStyle?.sourceReliefDetail==='SOURCE_RELIEF_V1',...(geographic?{projectionMode:GEOGRAPHIC_CAMERA_VERSION,terrainSources:sourceStyle.terrainLevels}:{})}));
   graphics=await observe('GRAPHICS_PREPARATION',()=>createMovingGraphicPass({renderer,factory,width:1080,height:1920}));
-  if(p.labels?.enabled===true&&p.labels.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
+  if(labelSpec?.enabled===true&&labelSpec.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
   // Derived plans are created in their consuming JS realm. The frozen owner's
   // canonical check is retained; JSON is the transport for authored inputs,
   // not a promise that Node/Chromium Math.log coefficients are bit-identical.
@@ -82,8 +89,9 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   function areaPass(stateId,accent=false){const key=(stateId??'__DEFAULT__')+(accent?'_ACCENT':'');if(!colorPasses.has(key)){
    const style=copy(defaultAreaStyle),color=p.territoryColors?.[stateId];if(color)style.AREA.fillColor=copy(color);
    if(p.mapStyle?.preset==='REFERENCE_FOCUS_V2'){
-    // Native country border owns the outline; existing source line owns the coast accent.
-    style.AREA.coreColor[3]=0;style.AREA.glowGain=0;
+    // Where native borders are enabled they own the outline. Territory-only
+    // historical maps hide modern borders and retain the existing Area contour.
+    if(p.mapStyle.nativeBoundaries!==false){style.AREA.coreColor[3]=0;style.AREA.glowGain=0;}
     style.FRONT={...style.FRONT,coreColor:accent?[.08,.95,1,1]:[1,.87,.1,.2],
      width:accent?7:2,glowColor:[.05,.8,1,1],glowRadius:accent?9:1,glowGain:accent ? .28 : 0};
    }
@@ -92,13 +100,22 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
   const bindings=engines.plans.map(binding=>{
    if(binding.engine==='EXISTING_AREA_V3')return binding;
    assert(binding.engine==='EXISTING_FLOW_V2','UP2_ENGINE_UNSUPPORTED');
-   const style=selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style});passes.push(pass);
+   const style=binding.presentationFlow?.style??selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style,trail:binding.presentationFlow?.trail,previewStyle:binding.presentationFlow?.previewStyle});passes.push(pass);
    return{...binding,pass,style,analysisPrimitive:compileFlowRoute(binding.plan.intent,{project:analysisProject})};
   });
+  let contextPass=null;
+  if(physicalContext){const style=copy(defaultAreaStyle);style.FRONT={...style.FRONT,width:1.5,coreColor:[.48,.84,.85,.7],glowRadius:0,glowGain:0};contextPass=createAreaOverlayPass({canvas,style});passes.push(contextPass);}
+  const deltaPasses=new Map();
+  function deltaPass(kind){if(!deltaPasses.has(kind)){const style=copy(defaultAreaStyle);style.AREA={...style.AREA,fillColor:kind==='added'?[1,.85,.25,.24]:[.9,.4,.18,.16],coreColor:kind==='added'?[1,.94,.5,.95]:[1,.5,.25,.65],glowColor:[1,.8,.22,1],glowGain:.18,glowRadius:2.4,width:3.2};if(kind==='moving_boundary'){style.AREA={...style.AREA,fillColor:[1,.92,.38,.8],coreColor:[1,.92,.38,0],glowGain:0,glowRadius:0,width:0};}if(p.territoryChanges?.config?.visualProfile==='FRONTIER_LIGHT_V1'){
+   if(kind==='moving_boundary')style.AREA={...style.AREA,fillColor:[.65,.98,1,.24],coreColor:[.88,1,1,.98],width:1.4,glowColor:[.10,.85,1,1],glowRadius:5,glowGain:.25};
+   if(kind==='visible_added')style.AREA={...style.AREA,fillColor:[.10,.78,.95,.32],coreColor:[0,0,0,0],width:0,glowRadius:0,glowGain:0};
+   if(kind==='visible_removed')style.AREA={...style.AREA,fillColor:[1,.35,.15,.25],coreColor:[0,0,0,0],width:0,glowRadius:0,glowGain:0};
+  }const pass=createAreaOverlayPass({canvas,style});passes.push(pass);deltaPasses.set(kind,pass);}return deltaPasses.get(kind);}
+  const ringBindings=p.highlights.filter(h=>h.ring).map(h=>{const pass=createFlowGraphicPass({canvas,style:{width:2,glowRadius:1,glowGain:0,coreColor:h.ring.color,glowColor:h.ring.color},pulseStyle:{width:h.ring.widthPx??1.6,glowRadius:h.ring.glowRadiusPx??0,glowGain:h.ring.glowGain??0}});passes.push(pass);return{highlight:h,pass};});
   const project=point=>factory.screen(point);let source=sourceStyle.terrainAsset;
   function markersAt(frame){
    const rows=(scene.markers??[]).map(item=>({id:item.id,anchor:copy(item.anchor),kind:'MARKER',scale:1,source:'SUPPLIED_SCENE_MARKER'}));
-   for(const h of p.highlights)if(frame>=h.startFrame&&frame<h.endFrame){const location=scene.locations.find(l=>l.id===h.locationId),progress=(frame-h.startFrame)/(h.endFrame-h.startFrame-1);
+   for(const h of p.highlights)if(!h.ring&&frame>=h.startFrame&&frame<h.endFrame){const location=scene.locations.find(l=>l.id===h.locationId),progress=(frame-h.startFrame)/(h.endFrame-h.startFrame-1);
     rows.push({id:h.id,anchor:copy(location.anchor),kind:'MARKER',scale:1+.4*Math.sin(Math.PI*progress),source:'SUPPLIED_LOCATION_EVENT_NATIVE_MARKER_PULSE',locationId:h.locationId,progress,...(presentationReplacesHighlightMarker(p,h,frame)?{qualityPinCandidate:true}:{})});}
    for(const row of rows){row.position=project(row.anchor);row.size=nativeMarker.box[2]*row.scale;const r=row.size/2+2;row.box=[row.position[0]-r,row.position[1]-r,row.position[0]+r,row.position[1]+r];
     assert(finiteBox(row.box)&&inside(row.box.slice(0,2),safe)&&inside(row.box.slice(2),safe),'UP2_SUPPLIED_MARKER_FULL_ROI_OUTSIDE_SAFE');}
@@ -120,47 +137,54 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    const layoutAudit=hiddenNative?{validation:{valid:null},scope:'NATIVE_GRAPHICS_NOT_DRAWN'}:auditRuntimeLayout({plan:layoutPlan,screen:project});
    if(!hiddenNative)assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(displayFrame),preparedLabel=null;
-   if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
-   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:geographic?{...visualPlan,secondary:scene.camera_intent.native_context.country_ids.filter(id=>id!==visualPlan.primary)}:visualPlan,project,frame:displayFrame});
+   if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:labelSpec,scene:labelScene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
+   const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:geographic&&scene.camera_intent.native_context?{...visualPlan,secondary:scene.camera_intent.native_context.country_ids.filter(id=>id!==visualPlan.primary)}:visualPlan,project,frame:displayFrame});
+   const contextDraw=contextPass?.draw({controls:{contextLines:physicalContext.lines},project,safeArea:[0,0,1080,1920],protectedGraphics:(preparedLabel?.drawn??[]).map(x=>({box:x.box})),primaryMaterialColor:nativePlan.theme.primary});
    const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=displayFrame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
-     const controls=evaluateAreaFrame(binding.plan,binding.plan.startFrame+localFrame,{project}),groups=[...new Set(controls.areas.map(a=>a.state_id??binding.colorId??'__DEFAULT__'))];if(!groups.length)groups.push('__DEFAULT__');
+     const controls=applyContinuousTerritory(evaluateAreaFrame(binding.plan,binding.plan.startFrame+localFrame,{project}),p.territoryChanges,displayFrame),groups=[...new Set(controls.areas.map(a=>a.state_id??binding.colorId??'__DEFAULT__'))];if(!groups.length)groups.push('__DEFAULT__');
      const areaViewport=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?[0,0,1080,1920]:safe;
-     for(const area of controls.areas)if(area.alpha>0)presentationAreaViewport({geometry:area.geometry,project,safeArea:safe,presentation:p});
+     const offscreen=new Set();
+     for(const area of controls.areas)if(area.alpha>0){try{presentationAreaViewport({geometry:area.geometry,project,safeArea:safe,presentation:p});}catch(error){if(p.territoryChanges&&error.message==='UP2_AREA_SOURCE_OUTSIDE_VIEWPORT')offscreen.add(area.id);else throw error;}}
      const accentRange=p.mapStyle?.lineAccentFrames,accent=!!accentRange&&displayFrame>=accentRange[0]&&displayFrame<accentRange[1];
      const draws=groups.map((id,index)=>{const subset={...controls,areas:controls.areas.filter(a=>(a.state_id??binding.colorId??'__DEFAULT__')===id),fronts:index===0&&!accent?controls.fronts:[],impacts:index===0?controls.impacts:[],propagations:index===0?controls.propagations:[]};
-      return{stateId:id,color:p.territoryColors?.[id]??defaultAreaStyle.AREA.fillColor,draw:areaPass(id,accent).draw({controls:subset,project,safeArea:areaViewport,protectedGraphics:markerRows,primaryMaterialColor:nativePlan.theme.primary,boundarySegments})};});
+      return{stateId:id,color:p.territoryColors?.[id]??defaultAreaStyle.AREA.fillColor,draw:areaPass(id,accent).draw({controls:subset,project,safeArea:areaViewport,protectedGraphics:controls.continuousEvidence?[...markerRows,...(preparedLabel?.drawn??[]).map(x=>({box:x.box}))].filter(x=>x.box):markerRows,primaryMaterialColor:nativePlan.theme.primary,boundarySegments})};});
      // Intentional source-line emphasis is drawn over the existing country edge.
      // The area fill still keeps the native boundary mask; only this separate
      // line-only draw omits it, preserving exact line coordinates and label boxes.
      const lineAccent=accent?areaPass('__LINE_ACCENT__',true).draw({controls:{...controls,areas:[],impacts:[],propagations:[]},
       project,safeArea:areaViewport,protectedGraphics:markerRows,primaryMaterialColor:visualPlan.theme.primary,boundarySegments:[]}):null;
-     for(const item of controls.areas)if(item.alpha>0&&item.coverage>0)assert(draws.some(d=>d.draw.areas.some(a=>a.id===item.id&&a.drawn)),'UP2_AREA_NOT_DRAWN');
-     features.push({id:binding.id,engine:binding.engine,state:controls.state,stateId:controls.stateId,lineAccent,activeFeatures:controls.activeFeatures,presentationOperationBinding:copy(binding.presentationOperationBinding??null),sourceAreas:controls.areas.map(a=>({id:a.id,stateId:a.state_id,geometry:copy(a.geometry),coverage:a.coverage,alpha:a.alpha})),sourceFronts:controls.fronts.map(f=>({id:f.id,geometry:copy(f.geometry),alpha:f.alpha,revealFraction:f.revealFraction})),draws});
+     for(const item of controls.areas)if(item.alpha>0&&item.coverage>0&&!offscreen.has(item.id))assert(draws.some(d=>d.draw.areas.some(a=>a.id===item.id&&a.drawn)),'UP2_AREA_NOT_DRAWN');
+     features.push({id:binding.id,engine:binding.engine,state:controls.state,stateId:controls.stateId,lineAccent,activeFeatures:controls.activeFeatures,presentationOperationBinding:copy(binding.presentationOperationBinding??null),continuousEvidence:controls.continuousEvidence??null,sourceAreas:controls.areas.map(a=>({id:a.id,stateId:a.state_id,geometry:copy(a.geometry),coverage:a.coverage,alpha:a.alpha})),sourceFronts:controls.fronts.map(f=>({id:f.id,geometry:copy(f.geometry),alpha:f.alpha,revealFraction:f.revealFraction})),draws});
     }else{
-     const model=evaluateFlowFrame(binding.plan,binding.plan.startFrame+localFrame,{primitive:binding.analysisPrimitive,eventContext:{cameraState:presentationPlan.analysisCamera,project:analysisProject,safeArea:safe,scalePlan:nativePlan,heightSource:null,protectedBoxes:[]}}),primitive=compileFlowRoute(binding.plan.intent,{project}),controls=reprojectFlowPresentation({modelControls:model,primitive,flowIntent:binding.plan.intent});
+     const model=evaluateFlowFrame(binding.plan,binding.plan.startFrame+localFrame,{primitive:binding.analysisPrimitive,eventContext:{cameraState:presentationPlan.analysisCamera,project:analysisProject,safeArea:safe,scalePlan:nativePlan,heightSource:null,protectedBoxes:[]}}),primitive=compileFlowRoute(binding.plan.intent,{project}),controls=composePresentationFlowControls(reprojectFlowPresentation({modelControls:model,primitive,flowIntent:binding.plan.intent}),primitive,binding.presentationFlow);
      const admission=assertMovingProjectionAdmission({primitive,controls,camera,modelCamera:presentationPlan.analysisCamera,safeArea:safe,sourceBounds:source.bounds,project,sourceGeometry:binding.plan.intent.route_geometry,currentBounds:bounds,protectedGraphics:markerRows,flowIntent:binding.plan.intent});
      const draw=binding.pass.draw({primitive,controls,safeArea:safe,protectedGraphics:markerRows,flowIntent:binding.plan.intent});
      assert(!controls.objectVisible||draw.object?.drawn===true,'UP2_FLOW_OBJECT_NOT_DRAWN');assert(controls.routeFraction===0||draw.route?.drawn===true,'UP2_FLOW_ROUTE_NOT_DRAWN');
      features.push({id:binding.id,engine:binding.engine,state:controls.state,routeFraction:controls.routeFraction,objectFraction:controls.objectFraction,objectPosition:copy(controls.objectPosition),heading:controls.heading,departurePulse:controls.departurePulse,arrivalPulse:controls.arrivalPulse,routeReveal:controls.routeReveal,geometry:copy(binding.plan.intent.route_geometry),projectedRoute:copy(primitive.screenCoordinates),admission,modelEventReadinessScope:controls.eventControls.readinessScope,draw});
     }
    }
+   const territoryDifferenceDraws=territoryEffectsAt(p.territoryChanges,displayFrame).map(e=>({id:e.id,kind:e.kind,alpha:e.alpha,stateId:e.stateId,geometry:copy(e.geometry),priority:e.priority??null,source:'DERIVED_SOURCE_STATE_DIFFERENCE_NOT_EVENT',draw:deltaPass(e.kind).draw({controls:{areas:[e],fronts:[],propagations:[],impacts:[]},project,safeArea:[0,0,1080,1920],protectedGraphics:[...markerRows,...(preparedLabel?.drawn??[]).map(x=>({box:x.box}))].filter(x=>x.box),primaryMaterialColor:nativePlan.theme.primary,boundarySegments})}));
+   if(territoryDifferenceDraws.length)features.push({id:'TERRITORY_DIFFERENCES_V2',engine:'EXISTING_AREA_V3_DIFFERENCE_OVERLAY',draws:territoryDifferenceDraws});
+   const locationRings=[];for(const {highlight,pass} of ringBindings){const location=scene.locations.find(l=>l.id===highlight.locationId),pulse=highlightRingAt(highlight,displayFrame,project(location.anchor));if(pulse)locationRings.push({id:highlight.id,locationId:highlight.locationId,draw:pass.drawPulse({pulse,safeArea:safe,protectedGraphics:markerRows})});}
    const featurePixels=factory.readPixels();let featureChangedPixels=0;for(let i=0;i<featurePixels.length;i+=4)if(featurePixels[i]!==basePixels[i]||featurePixels[i+1]!==basePixels[i+1]||featurePixels[i+2]!==basePixels[i+2]||featurePixels[i+3]!==basePixels[i+3])featureChangedPixels++;
    // RGBA8 rounds contributions below half a channel step to zero.
    // The draw/geometry guards still apply; do not require a changed byte before visibility.
    if(features.some(f=>f.engine==='EXISTING_FLOW_V2'&&f.routeFraction>0)||features.some(f=>f.engine==='EXISTING_AREA_V3'&&f.sourceAreas.some(a=>a.alpha>0.5/255&&a.coverage>0)))assert(featureChangedPixels>0,'UP2_ACTUAL_FEATURE_PIXELS_MISSING');
    renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
-   const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
+   const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:labelSpec,scene:labelScene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
    gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');
    last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
     camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},
     fixedModelCamera:{sourceFrame:presentationPlan.analysisSourceFrame,state:presentationPlan.analysisCamera,scope:'UNCHANGED_FLOW_TIMING_ONLY_NEVER_CURRENT_MOVING_CAMERA'},
     layout:{valid:layoutAudit.validation.valid,nativeAuditScope:layoutAudit.scope??'CURRENT_NATIVE_LAYOUT',visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
-    material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
+    material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,sourceReliefDetail:p.mapStyle?.sourceReliefDetail??null,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
     featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
+   if(physicalContext)last.physicalContext={source:physicalContext.source,sourceSHA256:physicalContext.sourceSHA256,derivedSHA256:physicalContext.derivedSHA256,precision:physicalContext.precision,selectedLabels:physicalContext.labels.map(x=>x.id),draw:contextDraw,historicalCitiesAdded:0,modernBordersAdded:0};
    if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,boundaryTrace:copy(factory.evidence.boundaryTrace??null),geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false,areaViewportPolicy:p.mapStyle.preset==='REFERENCE_FOCUS_V2'?'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY':'WHOLE_SOURCE_SAFE',effectiveTheme:copy(visualPlan.theme)};
+   if(ringBindings.length)last.locationRings=locationRings;
    if(labelDraw){last.layout.visiblePresentationLabels=labelDraw.visibleCount>0;last.presentationLabels=copy(labelDraw);}
    return last;
   }

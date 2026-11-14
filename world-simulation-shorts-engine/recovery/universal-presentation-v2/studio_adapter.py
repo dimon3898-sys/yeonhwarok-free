@@ -83,6 +83,19 @@ def compile_prompt(prompt, evidence_registry, *, allow_ten_second_sample=False):
     return value
 
 
+def compile_authored_history(prompt):
+    value = node_json("import{readFileSync}from'node:fs';"
+        "const p=JSON.parse(readFileSync(0,'utf8'));"
+        "const{compileAuthoredHistory}=await import(p.module);"
+        "process.stdout.write(JSON.stringify(await compileAuthoredHistory(p.input)));",
+        {'module': (HERE / 'history_authored_v1.mjs').as_uri(), 'input': prompt}, timeout=150)
+    if (value.get('schema') != 'WORLD_ENGINE_PRESENTATION_PIPELINE_RESULT_V2'
+            or value.get('compilerVersion') != 'AUTHORED_HISTORY_V1'
+            or value.get('historicalAdmission', {}).get('status') != 'PASS'):
+        raise StudioError('UP2_HISTORY_ADMISSION_REQUIRED')
+    return value
+
+
 def prepare_runtime(request, cache_root):
     return node_json("import{readFileSync}from'node:fs';"
         "const p=JSON.parse(readFileSync(0,'utf8'));"
@@ -116,7 +129,7 @@ def verify_prepared_sources(prepared, admission=None, prepared_wire=None):
     return result
 
 
-def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False):
+def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False, allow_authored_history=False):
     requests = analyzed.get('renderRequests', [])
     if scene_id == TIMELINE_ID:
         if analyzed.get('status') != 'PASS' or analyzed.get('blockedSceneIds'):
@@ -129,6 +142,11 @@ def selected_segments(analyzed, scene_id, *, allow_ten_second_sample=False):
                 raise StudioError('UP2_CONTIGUOUS_TIMELINE_REQUIRED')
             end = row['endFrame']
         maximum = 300 if allow_ten_second_sample is True and analyzed.get('totalFrames') == 300 else 240
+        if (allow_authored_history is True and analyzed.get('compilerVersion') == 'AUTHORED_HISTORY_V1'
+                and analyzed.get('historicalAdmission', {}).get('scope') == 'HISTORICAL_CONTINUOUS_600F_V1'
+                and analyzed.get('historicalAdmission', {}).get('status') == 'PASS'
+                and analyzed.get('simulationType') == 'HISTORICAL' and analyzed.get('totalFrames') == 600):
+            maximum = 600
         if not rows or not 2 <= end <= maximum:
             raise StudioError('UP2_BOUNDED_TIMELINE_REQUIRED')
         transitions = deepcopy(analyzed.get('transitionPlan', []))
@@ -154,7 +172,7 @@ def runtime_segment(row):
 
 class StudioController(manager.StudioController):
     def __init__(self, *, control_root, export_root, evidence_registry=None, expected_registry_sha256=None,
-                 allow_free_data_review=False, allow_ten_second_sample=False, **kwargs):
+                 allow_free_data_review=False, allow_ten_second_sample=False, allow_authored_history=False, **kwargs):
         root, exports = Path(control_root), Path(export_root)
         if (not root.is_absolute() or root.is_relative_to(REPO) or root.is_symlink()
                 or root.resolve().is_relative_to(exports.resolve()) or exports.resolve().is_relative_to(root.resolve())):
@@ -163,6 +181,7 @@ class StudioController(manager.StudioController):
         self.registry_pin = expected_registry_sha256
         self.allow_free_data_review = allow_free_data_review is True
         self.allow_ten_second_sample = allow_ten_second_sample is True
+        self.allow_authored_history = allow_authored_history is True
         super().__init__(control_root=root, export_root=exports, source_root=HERE,
             expected_index_sha256=sha(canonical({'schema': PROFILE, 'registryPin': self.registry_pin})),
             image_digest=legacy.BASELINE_IMAGE_PROVENANCE, allow_software_source_review=True)
@@ -249,13 +268,20 @@ class StudioController(manager.StudioController):
                 or not isinstance(value.get('sceneId'), str)):
             raise StudioError('UP2_EXPLICIT_PRESENTATION_INPUT_REQUIRED', status=400)
         extended = getattr(self, 'allow_ten_second_sample', False)
-        analyzed = (compile_prompt(value['prompt'], self._registry(), allow_ten_second_sample=True)
-                    if extended else compile_prompt(value['prompt'], self._registry()))
+        authored_history = (getattr(self, 'allow_authored_history', False)
+                            and value['prompt'].get('schema') == 'WORLD_ENGINE_AUTHORED_HISTORY_INPUT_V1')
+        if authored_history:
+            if value['sceneId'] != TIMELINE_ID:
+                raise StudioError('UP2_HISTORY_COMPLETE_TIMELINE_REQUIRED')
+            analyzed = compile_authored_history(value['prompt'])
+        else:
+            analyzed = (compile_prompt(value['prompt'], self._registry(), allow_ten_second_sample=True)
+                        if extended else compile_prompt(value['prompt'], self._registry()))
         simulation = analyzed.get('simulationType')
         if simulation not in {'GENERAL', 'FICTIONAL', 'HISTORICAL'}:
             raise StudioError('UP2_SIMULATION_TYPE_REQUIRED', status=422,
                 fields=[{'issues': analyzed.get('issues', [])}])
-        rows, total, cuts = (selected_segments(analyzed, value['sceneId'], allow_ten_second_sample=True)
+        rows, total, cuts = (selected_segments(analyzed, value['sceneId'], allow_ten_second_sample=True, allow_authored_history=authored_history)
                             if extended else selected_segments(analyzed, value['sceneId']))
         for row in rows:
             scene = row.get('scene', {})
@@ -268,22 +294,26 @@ class StudioController(manager.StudioController):
             'inputTrace': deepcopy(analyzed.get('inputTrace', []))}
         if extended and total == 300:
             runtime['durationSeconds'] = 10
+        if authored_history:
+            runtime.update(durationSeconds=20, simulationType='HISTORICAL', profile='HISTORICAL_CONTINUOUS_600F_V1',
+                           historicalAdmission=deepcopy(analyzed['historicalAdmission']))
         # Strings preserve the actual Planner member ordering across sorted
         # private JSON persistence. Semantic and wire hashes are independent.
         wire = json.dumps(runtime, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
         wire_sha, semantic_sha = sha(wire.encode()), sha(canonical(runtime))
         bindings = source_bindings()
         historical = simulation == 'HISTORICAL'
-        admission = {'status': 'BLOCKED', 'reason': 'UP2_HISTORICAL_G3_REMAINS_BLOCKED'} if historical else self._admit_sources(runtime, bindings)
+        history_blocked = historical and not authored_history
+        admission = {'status': 'BLOCKED', 'reason': 'UP2_HISTORICAL_G3_REMAINS_BLOCKED'} if history_blocked else self._admit_sources(runtime, bindings)
         request_sha = sha(canonical(value))
         identity = {'requestSHA256': request_sha, 'runtimeSemanticSHA256': semantic_sha,
             'runtimeWireSHA256': wire_sha, 'sourceAdmission': admission, 'sourceBindings': bindings,
             'sourceRegistrySHA256': self.registry_pin}
         result = {'schema': SCHEMA, 'title': str(value['prompt'].get('prompt', 'Presentation review'))[:180],
             'profile': PROFILE, 'videoPlan': runtime, 'sfx': {'enabled': False},
-            'sourcePipeline': {'ready': not historical and admission['status'] == 'PASS',
+            'sourcePipeline': {'ready': not history_blocked and admission['status'] == 'PASS',
                 'mode': 'FREE_PRESENTATION_REVIEW', 'scope': PROFILE, 'simulationType': simulation,
-                'blockers': ['UP2_HISTORICAL_G3_REMAINS_BLOCKED'] if historical else [],
+                'blockers': ['UP2_HISTORICAL_G3_REMAINS_BLOCKED'] if history_blocked else [],
                 'totalFrames': total, 'fps': 30, 'startFrame': 0, 'segmentCount': len(rows),
                 'requestSHA256': request_sha, 'originalRequest': deepcopy(value),
                 'runtimePayload': runtime, 'runtimeRequestWireJSON': wire,
@@ -297,6 +327,8 @@ class StudioController(manager.StudioController):
                 'actualRuntime': 'SOURCE_CHECKOUT_NOT_OCI_IMAGE'}}
         if extended and total == 300:
             result['sourcePipeline']['durationSeconds'] = 10
+        if authored_history:
+            result['sourcePipeline'].update(durationSeconds=20, historicalAdmission=deepcopy(analyzed['historicalAdmission']))
         return result
 
     def _preflight_record(self, root, record):

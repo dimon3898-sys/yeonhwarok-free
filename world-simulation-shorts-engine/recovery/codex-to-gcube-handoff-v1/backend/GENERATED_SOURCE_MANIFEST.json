@@ -1,77 +1,42 @@
 {
-  "activeCaptureCheckpoint": {
-    "actualGPUValidation": "NOT_RUN",
-    "purpose": "Bounded operation recording and active safe mirror",
-    "sourceBaseCommit": "b52e9367d89e41e0e6a48bb69bda16885d03d302"
-  },
-  "actualGPUValidation": "NOT_TESTED",
-  "coreRendererChanged": true,
-  "defaultSoftwareFilesChanged": true,
-  "frame1IncidentFix": {
-    "actualGPUValidation": "NOT_RUN",
-    "cpuValidation": "PENDING",
-    "sourceParent": "f2b58a1d97408678797dc62d05fe797112fba04d"
-  },
-  "geographicConnection": {
-    "actualGPUValidation": "NOT_RUN",
-    "cpuVisualValidation": "NOT_RUN",
-    "oldDiagnosticsPreserved": true,
-    "sourceBaseCommit": "c75478463085aea8c2689044636fce4ac9f4975e"
-  },
-  "optionalBoundaryTraceQuality": {
-    "CPUVisualValidation": "PASS_CHANGED_SCOPE",
-    "actualGPUValidation": "NOT_RUN",
-    "runtimeChanges": "Quality-v2: matching optional derived-camera semantic transport check; mandatory1e-9 geographic drift gate and all NVIDIA diagnostics preserved"
-  },
-  "optionalReferenceLabelQuality": {
-    "actualGPUValidation": "NOT_RUN",
-    "optInOnly": true,
-    "sourceBaseCommit": "f276f19fc3c61c77e17e3683a8b8302523a379dc"
-  },
-  "optionalVisibleLabelExtension": {
-    "actualGPUValidation": "NOT_RUN",
-    "baselineCommit": "f80a6e585c5f8d25db2b66c9f0c0a9c45709b784",
-    "defaultNoLabelBehaviorPreserved": true,
-    "sourceOriginalRuntimeExtended": true
-  },
-  "paidGPUExecuted": false,
-  "profile": "GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1",
-  "referenceSampleV2": {
-    "GPUValidation": "NOT_RUN",
-    "optInPreset": "REFERENCE_FOCUS_V2",
-    "sourceBaseCommit": "e12c5e8bfc1de3e6c1484e77554b9d6ee5bee1a6"
-  },
-  "registeredGeographicCamera": {
-    "CPUVisualValidation": "PENDING",
-    "actualGPUValidation": "NOT_RUN",
-    "privateWorkspaceAndDiagnosticsPreserved": true,
-    "sourceBaseCommit": "0f6a73b"
-  },
   "schema": "WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1",
+  "profile": "GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1",
+  "supportedProfiles": [
+    "GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1",
+    "GCUBE_NVIDIA_CONTINUOUS_HISTORY_20S_V1"
+  ],
+  "derivationVersion": "CURRENT_CPU_PLUS_PINNED_GPU_PATCH_V1",
   "variants": [
     {
-      "diff": "../capture-stall-review-v1/evidence/capture-retention.patch",
-      "oldFileModified": true,
       "original": "world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs",
-      "originalSHA256": "6cdce0dff2c30f605e5a637021cf9ea5f7a2a44816edd895477e7fbf8c145d61",
+      "originalSHA256": "37f4e032a959aab0ae0091332588397246dd6589c954f39002e0d1c05c933139",
       "variant": "capture_vulkan.generated.mjs",
-      "variantSHA256": "a2c83ca1e360316069bd02ad814a9bbbead17bc9929edeb8ebbf4a8abc07bea9"
+      "variantSHA256": "aa43e19a15e418b59e197e5e373964fdf43a49d22c1c0a8585c4b1f8f651b44e",
+      "diff": "backend/capture_vulkan.generated.mjs.current.patch",
+      "diffSHA256": "6f265dd6226010f721c07c72e5c3876de70fcaf4522ae767bcc16855be2b2fbd",
+      "oldFileModified": false
     },
     {
-      "diff": "../capture-stall-review-v1/evidence/presentation-frame1.patch",
-      "oldFileModified": true,
       "original": "world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs",
-      "originalSHA256": "be4e8cf058e6db51ec3be1b5e3b0193109ae61397b90a403e30d36867937e510",
+      "originalSHA256": "678d0443c4ba80f4a43c1933d5e95b16d2c3aa133d5ee5b2454e0f983fc71ad7",
       "variant": "presentation_runtime_vulkan.generated.mjs",
-      "variantSHA256": "0ad978b73a53a19d3906e9122df911fda79fa8f01f8d286d43d06082d29d2a66"
+      "variantSHA256": "6596073cf03e803e70fbb6f066020352e9f08f0365e300a1df3e107314222330",
+      "diff": "backend/presentation_runtime_vulkan.generated.mjs.current.patch",
+      "diffSHA256": "92497d5cd7bcf7e35b7a35118fde3fe7a9ab7e6136de2284b3f8ea8687b9ba5b",
+      "oldFileModified": false
     },
     {
-      "diff": "backend/region_source_vulkan.generated.mjs.patch",
-      "oldFileModified": false,
       "original": "world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs",
-      "originalSHA256": "a6a2c8e651eede505f4106dc6dc11c870319788d7efd1e165665e348906e3fc3",
+      "originalSHA256": "6ec337fffeae09d04623cecc80d42756b1d702a55992a15b64a28788968643e3",
       "variant": "region_source_vulkan.generated.mjs",
-      "variantSHA256": "2c8487d3bce8c8996f6c1a4baf8a1ef13e7c538291d9ab4b683cd0f111ea4d60"
+      "variantSHA256": "3f7f2badae60b1cf2473746288cdad3e559aa66d076672c5056a35f4ace0c812",
+      "diff": "backend/region_source_vulkan.generated.mjs.current.patch",
+      "diffSHA256": "64aa5f923b8c4b2bd638bac5306419e85a8535bb58bee8e11d85ba7e0f19fd3e",
+      "oldFileModified": false
     }
-  ]
+  ],
+  "defaultSoftwareFilesChanged": false,
+  "coreRendererChanged": false,
+  "actualGPUValidation": "PENDING_GPU",
+  "paidGPUExecuted": false
 }

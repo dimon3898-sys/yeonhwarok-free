@@ -9,7 +9,7 @@ import json
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from common import PLAN, PROFILE, REQUEST, RECOVERY, canonical, duration_contract, load, mvp, sha, verify_manifest
+from common import PLAN, PROFILE, HISTORY_PROFILE, REQUEST, RECOVERY, canonical, duration_contract, load, mvp, sha, verify_manifest
 
 # Closed source-literal vocabulary from presentation_prompt.mjs, prompt_pipeline.mjs,
 # and presentation_plan.mjs at af934796. Unknown values never become log text.
@@ -227,9 +227,9 @@ class NvidiaPresentationController(base.StudioController):
         if self._source_normalizer is None:
             module = load('_handoff_preserved_cpu_source_normalizer',
                           RECOVERY / 'universal-presentation-v2/studio_adapter.py')
-            def node_profile_json(script, payload, *, timeout=90):
+            def node_profile_json(script, payload, *, timeout=90, maximum_input_bytes=8 * 1024**2):
                 raw = module.canonical(payload)
-                if len(raw) > 8 * 1024**2:
+                if maximum_input_bytes not in {8 * 1024**2, 24 * 1024**2} or len(raw) > maximum_input_bytes:
                     raise module.StudioError('UP2_INPUT_SIZE_LIMIT', status=400)
                 try:
                     completed = subprocess.run(['node', '--input-type=module', '-e', script], input=raw,
@@ -288,7 +288,9 @@ class NvidiaPresentationController(base.StudioController):
                     {'module': (HERE.parent / 'backend/capture_nvidia.mjs').as_uri(),
                      'preparedWireJSON': wire,
                      'input': {'privateWorkspaceRoot': str(self.control_root),
-                        'publicExportRoot': str(self.export_root)}}, timeout=150)
+                        'publicExportRoot': str(self.export_root)}}, timeout=150,
+                    maximum_input_bytes=24 * 1024**2 if prepared.get('profile') == 'HISTORICAL_CONTINUOUS_600F_V1'
+                    and prepared.get('totalFrames') == 600 else 8 * 1024**2)
                 if result.get('status') != 'PASS':
                     raise module.StudioError('UP2_STORED_SOURCE_QUALIFICATION_INVALID',
                                              fields=[{'code': result.get('code')}])
@@ -297,23 +299,28 @@ class NvidiaPresentationController(base.StudioController):
             self._source_normalizer = module.StudioController(
                 control_root=self.control_root / 'handoff-source-normalization',
                 export_root=self.export_root, allow_free_data_review=True,
-                allow_ten_second_sample=True)
+                allow_ten_second_sample=True, allow_authored_history=True)
         module = sys.modules['_handoff_preserved_cpu_source_normalizer']
         cpu = _normal_with_up2_diagnostic(self._source_normalizer._normal,
             {**deepcopy(value), 'schema': module.REQUEST_SCHEMA})
         pipeline = cpu['sourcePipeline']
-        if (pipeline.get('simulationType') not in {'GENERAL', 'FICTIONAL'}
-                or pipeline.get('totalFrames') not in {180, 300} or pipeline.get('fps') != 30
+        historical = (pipeline.get('simulationType') == 'HISTORICAL' and pipeline.get('totalFrames') == 600
+                      and pipeline.get('durationSeconds') == 20
+                      and pipeline.get('historicalAdmission', {}).get('status') == 'PASS'
+                      and pipeline.get('historicalAdmission', {}).get('scope') == 'HISTORICAL_CONTINUOUS_600F_V1')
+        if ((not historical and (pipeline.get('simulationType') not in {'GENERAL', 'FICTIONAL'}
+                or pipeline.get('totalFrames') not in {180, 300})) or pipeline.get('fps') != 30
                 or (pipeline.get('totalFrames') == 300 and pipeline.get('durationSeconds') != 10)
                 or pipeline.get('ready') is not True
                 or pipeline.get('sourceAdmission', {}).get('status') != 'PASS'):
             invalid('HANDOFF_QUALIFIED_NONHISTORICAL_180_FRAMES_REQUIRED')
         frames = pipeline['totalFrames']
+        profile = HISTORY_PROFILE if historical else PROFILE
         plan = {'schema': PLAN, 'totalFrames': frames, 'durationSeconds': frames // 30, 'fps': 30,
             'resolution': {'width': 1080, 'height': 1920}, 'aspectRatio': '9:16',
             'audioSettings': {'enabled': False, 'mode': 'SILENT'},
             'simulationType': pipeline['simulationType'],
-            'renderProfile': {'profileId': PROFILE, 'backend': 'vulkan',
+            'renderProfile': {'profileId': profile, 'backend': 'vulkan',
                 'imageDigest': self.image_digest, 'sourceClosureSHA256': self.source_sha},
             'runtime': deepcopy(pipeline['runtimePayload']),
             'runtimeWireJSON': pipeline['runtimeRequestWireJSON'],
@@ -322,19 +329,21 @@ class NvidiaPresentationController(base.StudioController):
             'sourceBindings': deepcopy(pipeline['sourceBindings']),
             'sourceQualification': deepcopy(pipeline['sourceAdmission']['sourceQualification']),
             'originalInputSHA256': pipeline['compilerInputSHA256']}
+        if historical:
+            plan['historicalAdmission'] = deepcopy(pipeline['historicalAdmission'])
         duration_contract(plan)
         return {'schema': 'WORLD_ENGINE_NVIDIA_STUDIO_SUBMISSION_V1',
-                'title': cpu['title'], 'profile': PROFILE, 'videoPlan': plan,
+                'title': cpu['title'], 'profile': profile, 'videoPlan': plan,
                 'sfx': {'enabled': False}, 'sourceTrace': {'cpuSourceQualificationReused': True,
                     'freeProfileStartCalled': False, 'sourceInputSHA256': pipeline['compilerInputSHA256']}}
 
     def _preflight_record(self, root, record):
         result = super()._preflight_record(root, record)
         timing = duration_contract(record['submission']['videoPlan'])
-        if timing['durationSeconds'] == 10:
+        if timing['durationSeconds'] in {10, 20}:
             # The preserved coordinator deliberately drops backend timing facts.
             # Surface only this new sample's validated duration for owner consent.
-            result.update(durationSeconds=10, totalFrames=300)
+            result.update(durationSeconds=timing['durationSeconds'], totalFrames=timing['totalFrames'])
         return result
 
     def resume(self, *args, **kwargs):

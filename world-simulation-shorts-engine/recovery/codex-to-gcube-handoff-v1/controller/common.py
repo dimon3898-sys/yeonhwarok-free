@@ -13,6 +13,7 @@ HERE = Path(__file__).resolve().parent
 RECOVERY = HERE.parents[1]
 REPO = HERE.parents[3]
 PROFILE = 'GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1'
+HISTORY_PROFILE = 'GCUBE_NVIDIA_CONTINUOUS_HISTORY_20S_V1'
 REQUEST = 'WORLD_ENGINE_NVIDIA_PRESENTATION_REQUEST_V1'
 PLAN = 'WORLD_ENGINE_NVIDIA_PRESENTATION_PLAN_V1'
 SHA = re.compile(r'[0-9a-f]{64}\Z')
@@ -107,14 +108,26 @@ def verify_manifest(file, expected, *, repo=REPO, require_external=False):
             'externalParentContractVerified': require_external}
 
 
+def profile_for(plan):
+    return HISTORY_PROFILE if isinstance(plan, dict) and plan.get('durationSeconds') == 20 else PROFILE
+
+
 def duration_contract(plan):
-    """Read only the two validated Studio sample durations; never infer 10s."""
+    """Keep legacy defaults; the new 600 contract requires explicit history."""
     if (not isinstance(plan, dict) or type(plan.get('durationSeconds')) is not int
-            or plan['durationSeconds'] not in {6, 10}
+            or plan['durationSeconds'] not in {6, 10, 20}
             or type(plan.get('totalFrames')) is not int
             or plan['totalFrames'] != plan['durationSeconds'] * 30
             or type(plan.get('fps')) is not int or plan['fps'] != 30):
         raise RuntimeError('HANDOFF_EXACT_NONHISTORICAL_SIX_SECOND_PLAN_REQUIRED')
+    if plan['durationSeconds'] == 20:
+        admission = plan.get('historicalAdmission', {})
+        if (plan.get('simulationType') != 'HISTORICAL'
+                or plan.get('renderProfile', {}).get('profileId') != HISTORY_PROFILE
+                or admission.get('schema') != 'WORLD_ENGINE_AUTHORED_HISTORY_ADMISSION_V1'
+                or admission.get('status') != 'PASS' or admission.get('scope') != 'HISTORICAL_CONTINUOUS_600F_V1'
+                or admission.get('simulationType') != 'HISTORICAL' or admission.get('paidExecutionAllowed') is not False):
+            raise RuntimeError('HANDOFF_REVIEWED_CONTINUOUS_HISTORY_REQUIRED')
     return {'durationSeconds': plan['durationSeconds'], 'totalFrames': plan['totalFrames'], 'fps': 30}
 
 
@@ -125,10 +138,11 @@ def validate_plan(plan, *, image_digest, source_sha):
             or plan.get('resolution') != {'width': 1080, 'height': 1920}
             or plan.get('aspectRatio') != '9:16'
             or plan.get('audioSettings') != {'enabled': False, 'mode': 'SILENT'}
-            or plan.get('simulationType') not in {'GENERAL', 'FICTIONAL'}):
+            or (plan.get('simulationType') != 'HISTORICAL' if timing['durationSeconds'] == 20
+                else plan.get('simulationType') not in {'GENERAL', 'FICTIONAL'})):
         raise RuntimeError('HANDOFF_EXACT_NONHISTORICAL_SIX_SECOND_PLAN_REQUIRED')
     profile = plan.get('renderProfile', {})
-    if (profile != {'profileId': PROFILE, 'backend': 'vulkan', 'imageDigest': image_digest,
+    if (profile != {'profileId': profile_for(plan), 'backend': 'vulkan', 'imageDigest': image_digest,
                     'sourceClosureSHA256': source_sha}
             or not DIGEST.fullmatch(str(image_digest)) or not SHA.fullmatch(str(source_sha))):
         raise RuntimeError('HANDOFF_PLAN_EXECUTION_BINDING_CHANGED')
@@ -136,10 +150,17 @@ def validate_plan(plan, *, image_digest, source_sha):
     if (not isinstance(wire, str) or len(wire.encode()) > 8 * 1024 ** 2
             or sha(wire.encode()) != plan.get('runtimeWireSHA256')
             or not isinstance(runtime, dict) or json.loads(wire) != runtime or runtime.get('totalFrames') != frames
-            or (timing['durationSeconds'] == 10 and runtime.get('durationSeconds') != 10)
+            or (timing['durationSeconds'] in {10, 20} and runtime.get('durationSeconds') != timing['durationSeconds'])
             or ('durationSeconds' in runtime and runtime['durationSeconds'] != timing['durationSeconds'])
             or not SHA.fullmatch(str(plan.get('sourceQualificationSHA256')))):
         raise RuntimeError('HANDOFF_RUNTIME_WIRE_BINDING_CHANGED')
+    if timing['durationSeconds'] == 20:
+        if (runtime.get('profile') != 'HISTORICAL_CONTINUOUS_600F_V1'
+                or runtime.get('simulationType') != 'HISTORICAL'
+                or runtime.get('historicalAdmission') != plan['historicalAdmission']
+                or len(runtime.get('segments', [])) != 1
+                or runtime['segments'][0].get('presentation', {}).get('territoryChanges', {}).get('profile') != 'HISTORICAL_CONTINUOUS_V1'):
+            raise RuntimeError('HANDOFF_HISTORY_ADMISSION_BINDING_CHANGED')
     cursor = 0
     for segment in runtime.get('segments', []):
         scene = segment.get('scene', {})

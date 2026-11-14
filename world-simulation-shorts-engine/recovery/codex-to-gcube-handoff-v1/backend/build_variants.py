@@ -174,10 +174,91 @@ def main():
     if not manifest.exists():manifest.write_bytes(data)
     print(json.dumps(receipt))
 
-if __name__=='__main__':
-    if sys.argv[1:]==['--verify-existing']:
-        print(json.dumps(verify_existing(),sort_keys=True))
-    elif sys.argv[1:]:
-        raise RuntimeError('GCUBE_VARIANT_ARGUMENT_UNSUPPORTED')
+def apply_current_patch(source, patch):
+    """Apply exact pinned unified hunks; fail on every source/context drift."""
+    import re
+    lines = source.splitlines(True)
+    output, cursor = [], 0
+    diff = patch.splitlines(True)
+    index = 0
+    while index < len(diff):
+        if diff[index].startswith(("--- ", "+++ ")):
+            index += 1
+            continue
+        match = re.fullmatch(r"@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@.*\n", diff[index])
+        if not match:
+            raise RuntimeError("GCUBE_DERIVATION_HUNK_REQUIRED")
+        start = int(match[1]) - 1
+        old_count = int(match[2] or 1)
+        new_count = int(match[4] or 1)
+        if start < cursor:
+            raise RuntimeError("GCUBE_DERIVATION_OVERLAP")
+        output.extend(lines[cursor:start])
+        cursor, old_seen, new_seen = start, 0, 0
+        index += 1
+        while index < len(diff) and not diff[index].startswith("@@ "):
+            item = diff[index]
+            if item[0] not in " +-":
+                raise RuntimeError("GCUBE_DERIVATION_LINE_REQUIRED")
+            if item[0] in " -":
+                if cursor >= len(lines) or lines[cursor] != item[1:]:
+                    raise RuntimeError("GCUBE_DERIVATION_SOURCE_CONTEXT_CHANGED")
+                cursor += 1
+                old_seen += 1
+            if item[0] in " +":
+                output.append(item[1:])
+                new_seen += 1
+            index += 1
+        if (old_seen, new_seen) != (old_count, new_count):
+            raise RuntimeError("GCUBE_DERIVATION_HUNK_COUNT")
+    output.extend(lines[cursor:])
+    return "".join(output)
+
+
+def current_derivation(*, write=False):
+    repo = HERE.parents[2]
+    spec = json.loads((HERE / "backend/CURRENT_GPU_DERIVATION.json").read_text())
+    if spec.get("schema") != "WORLD_ENGINE_CURRENT_GPU_DERIVATION_V1":
+        raise RuntimeError("GCUBE_CURRENT_DERIVATION_SPEC_REQUIRED")
+    rows = spec["variants"]
+    expected = {"capture_vulkan.generated.mjs", "presentation_runtime_vulkan.generated.mjs", "region_source_vulkan.generated.mjs"}
+    if len(rows) != 3 or {row["variant"] for row in rows} != expected:
+        raise RuntimeError("GCUBE_CURRENT_VARIANT_SET")
+    candidates = []
+    for row in rows:
+        source, patch, target = repo / row["original"], HERE / row["diff"], HERE / row["variant"]
+        if source.parent != UP2 or patch.parent != HERE / "backend" or target.parent != HERE:
+            raise RuntimeError("GCUBE_CURRENT_DERIVATION_PATH")
+        for file, pin in [(source, row["originalSHA256"]), (patch, row["diffSHA256"])]:
+            if file.is_symlink() or not file.is_file() or hashlib.sha256(file.read_bytes()).hexdigest() != pin:
+                raise RuntimeError("GCUBE_CURRENT_DERIVATION_PIN_CHANGED:" + file.name)
+        candidate = apply_current_patch(source.read_text(), patch.read_text()).encode()
+        if hashlib.sha256(candidate).hexdigest() != row["variantSHA256"]:
+            raise RuntimeError("GCUBE_CURRENT_DERIVATION_OUTPUT_CHANGED")
+        if not write and (target.is_symlink() or target.read_bytes() != candidate):
+            raise RuntimeError("GCUBE_CURRENT_GENERATED_SOURCE_CHANGED")
+        candidates.append((target, candidate))
+    manifest = {"schema": "WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1",
+        "profile": "GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1", "supportedProfiles": spec["supportedProfiles"],
+        "derivationVersion": spec["derivationVersion"], "variants": rows,
+        "defaultSoftwareFilesChanged": False, "coreRendererChanged": False,
+        "actualGPUValidation": "PENDING_GPU", "paidGPUExecuted": False}
+    raw = (json.dumps(manifest, indent=2) + "\n").encode()
+    destination = HERE / "backend/GENERATED_SOURCE_MANIFEST.json"
+    if write:
+        for target, candidate in candidates:
+            target.write_bytes(candidate)
+        destination.write_bytes(raw)
+    elif destination.read_bytes() != raw:
+        raise RuntimeError("GCUBE_CURRENT_MANIFEST_CHANGED")
+    return {"status": "PASS", "scope": "CURRENT_SOURCE_PATCH_DERIVATION_ONLY",
+        "variants": len(rows), "filesWritten": 4 if write else 0, "gpuExecuted": False}
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] == ["--regenerate-current"]:
+        print(json.dumps(current_derivation(write=True), sort_keys=True))
+    elif sys.argv[1:] == ["--verify-existing"]:
+        print(json.dumps(current_derivation(), sort_keys=True))
     else:
-        main()
+        raise RuntimeError("GCUBE_VARIANT_EXPLICIT_CURRENT_MODE_REQUIRED")

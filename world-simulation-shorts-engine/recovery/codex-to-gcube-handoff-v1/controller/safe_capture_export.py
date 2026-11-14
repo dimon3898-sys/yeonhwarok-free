@@ -44,15 +44,16 @@ FAILURE_KINDS = frozenset({"DOMAIN_ERROR", "UNCLASSIFIED_EXCEPTION", "MODULE_IMP
 EXCEPTIONS = frozenset({"Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "TimeoutError", "DOMException", "UNKNOWN"})
 
 def frame_limit(value):
-    # Diagnostic bounds never authorize a capture. Only the explicit supported
-    # 10s/300 pair extends the default six-second diagnostic range.
-    return 300 if (isinstance(value, dict) and type(value.get("durationSeconds")) is int
-        and value["durationSeconds"] == 10 and type(value.get("totalFrames")) is int
-        and value["totalFrames"] == 300) else 180
+    # Diagnostic bounds never authorize capture; only exact supported pairs.
+    if (isinstance(value, dict) and type(value.get("durationSeconds")) is int
+            and type(value.get("totalFrames")) is int
+            and (value["durationSeconds"], value["totalFrames"]) in ((10, 300), (20, 600))):
+        return value["totalFrames"]
+    return 180
 
 
 def safe_failure(value, *, total_frames=180):
-    if (type(total_frames) is not int or total_frames not in (180, 300)
+    if (type(total_frames) is not int or total_frames not in (180, 300, 600)
             or not isinstance(value, dict) or value.get("operationId") not in OPERATIONS
             or value.get("sourceId") not in SOURCES):
         return None
@@ -91,8 +92,8 @@ def safe_operations(value):
         "sequence": sequence if type(sequence) is int and 0 <= sequence <= 1000000 else None,
         "evidenceStatus": value.get("evidenceStatus") if value.get("evidenceStatus") in {"LOCAL_ATOMIC_CHECKPOINT", "LOCAL_WRITE_FAILED", "NOT_WRITTEN"} else "UNKNOWN",
         "storageError": value.get("storageError") if value.get("storageError") in {"DIAGNOSTIC_STORAGE_PERMISSION", "DIAGNOSTIC_STORAGE_NO_SPACE", "DIAGNOSTIC_STORAGE_TOO_LARGE", "DIAGNOSTIC_STORAGE_IO"} else None}
-    if total_frames == 300:
-        result.update(durationSeconds=10, totalFrames=300)
+    if total_frames in (300, 600):
+        result.update(durationSeconds=total_frames // 30, totalFrames=total_frames)
     return result
 
 

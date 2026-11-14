@@ -15,7 +15,7 @@ from contextlib import contextmanager
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from common import PROFILE, RECOVERY, canonical, duration_contract, load, sha
+from common import PROFILE, RECOVERY, canonical, duration_contract, profile_for, load, sha
 from nvidia_backend import NvidiaPresentationBackend, approval_limit, cache, lease_helper, _runtime_environment
 from lease_supervisor import original_lease_descriptor, parent_identity
 
@@ -85,7 +85,7 @@ def _read_frame_evidence(directory, reference, total_frames):
     evidence, ownership, no-follow, immutable-read and JSON checks here.
     """
     frozen = cache()
-    if (total_frames not in {180, 300} or type(total_frames) is not int
+    if (total_frames not in {180, 300, 600} or type(total_frames) is not int
             or not isinstance(reference, dict) or reference.get('file') != 'FRAME_EVIDENCE.json'
             or not re.fullmatch(r'[a-f0-9]{64}', str(reference.get('sha256')))):
         raise RuntimeError('HANDOFF_FRAME_EVIDENCE_REFERENCE_INVALID')
@@ -114,7 +114,7 @@ def _read_frame_evidence(directory, reference, total_frames):
 def _validate_capture(output, plan):
     timing = duration_contract(plan)
     total_frames, duration = timing['totalFrames'], timing['durationSeconds']
-    label = 'SIX' if duration == 6 else 'TEN'
+    label = {6: 'SIX', 10: 'TEN', 20: 'TWENTY'}[duration]
     video = output / 'VIDEO.mp4'
     with cache().PrivateTree(output) as directory:
         receipt = directory.json('CAPTURE_RECEIPT.json')
@@ -125,12 +125,14 @@ def _validate_capture(output, plan):
             or receipt.get('sourceQualificationSHA256') != plan['sourceQualificationSHA256']
             or receipt.get('softwareOnly') is not False or receipt.get('nvidiaVerified') is not True
             or receipt.get('renderedFrames') != total_frames or receipt.get('totalFrames') != total_frames
-            or duration == 10 and (type(receipt.get('durationSeconds')) is not int
-                or receipt.get('durationSeconds') != 10
+            or duration in {10, 20} and (type(receipt.get('durationSeconds')) is not int
+                or receipt.get('durationSeconds') != duration
                 or any(type(receipt.get(key)) is not int for key in ('renderedFrames', 'totalFrames')))
             or receipt.get('visualQualityApproved') is not False
             or receipt.get('video', {}).get('sha256') != sha(video.read_bytes())):
         raise RuntimeError('HANDOFF_NVIDIA_CAPTURE_RECEIPT_INVALID')
+    if duration == 20 and receipt.get('historicalAdmission') != plan.get('historicalAdmission'):
+        raise RuntimeError('HANDOFF_HISTORY_RECEIPT_BINDING_CHANGED')
     proofs = receipt.get('nativeStability', [])
     if [row.get('segmentIndex') for row in proofs] != list(range(len(plan['runtime']['segments']))):
         raise RuntimeError('HANDOFF_NATIVE_STABILITY_SEGMENTS_REQUIRED')
@@ -163,8 +165,8 @@ def _validate_capture(output, plan):
         raise RuntimeError('HANDOFF_VIDEO_FULL_DECODE_FAILED')
     rows = frames.get('frames', [])
     if (len(rows) != total_frames or [row.get('frame') for row in rows] != list(range(total_frames))
-            or duration == 10 and (type(frames.get('durationSeconds')) is not int
-                or frames.get('durationSeconds') != 10 or type(frames.get('totalFrames')) is not int
+            or duration in {10, 20} and (type(frames.get('durationSeconds')) is not int
+                or frames.get('durationSeconds') != duration or type(frames.get('totalFrames')) is not int
                 or frames.get('totalFrames') != total_frames
                 or any(type(row.get('frame')) is not int for row in rows))
             or any(row.get('diagnostic', {}).get('glError') != 0 for row in rows)):
@@ -205,7 +207,7 @@ def _run(args):
         plan, approval, state = directory.json('PLAN.json'), directory.json('APPROVAL.json'), directory.json('state.json')
     image = plan['renderProfile']['imageDigest']
     backend = NvidiaPresentationBackend(args.manifest_file, args.manifest_sha256, image)
-    backend._verify(plan, PROFILE)
+    backend._verify(plan, profile_for(plan))
     timing = duration_contract(plan)
     if sha(canonical(plan)) != args.plan_sha256:
         raise RuntimeError('HANDOFF_PRIVATE_PLAN_CHANGED')

@@ -20,7 +20,7 @@ import json
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from common import PROFILE, RECOVERY, REPO, canonical, duration_contract, load, mvp, sha, validate_plan, verify_manifest
+from common import PROFILE, RECOVERY, REPO, canonical, duration_contract, profile_for, load, mvp, sha, validate_plan, verify_manifest
 
 base = mvp()
 JOB = re.compile(r'studio-[0-9a-f]{32}\Z')
@@ -131,7 +131,7 @@ class NvidiaPresentationBackend:
         self.source_sha, self.image_digest = expected_manifest_sha256, image_digest
 
     def _verify(self, plan, profile):
-        if profile != PROFILE:
+        if profile != profile_for(plan):
             raise RuntimeError('HANDOFF_UNSUPPORTED_GPU_PROFILE')
         verify_manifest(self.manifest_file, self.source_sha, require_external=True)
         validate_plan(plan, image_digest=self.image_digest, source_sha=self.source_sha)
@@ -155,11 +155,12 @@ class NvidiaPresentationBackend:
                 if not re.fullmatch(r'[A-Z][A-Z0-9_]{1,95}', code):
                     code = 'HANDOFF_PREFLIGHT_OPERATION_FAILED'
                 checks.append({'name': name, 'status': 'BLOCKED', 'code': code})
-        check('NVIDIA_TEN_SECOND_SOURCE_AND_MODE' if isinstance(plan, dict) and plan.get('durationSeconds') == 10
+        check('NVIDIA_CONTINUOUS_HISTORY_SOURCE_AND_MODE' if isinstance(plan, dict) and plan.get('durationSeconds') == 20
+              else 'NVIDIA_TEN_SECOND_SOURCE_AND_MODE' if isinstance(plan, dict) and plan.get('durationSeconds') == 10
               else 'NVIDIA_SIX_SECOND_SOURCE_AND_MODE', lambda: self._verify(plan, profile))
         if checks[-1]['status'] != 'PASS':
             return {'checks': checks, 'renderAllowed': False, 'gpuRenderingVerified': False,
-                    'scope': PROFILE, 'hardwareCaptureNotYetPerformed': True}
+                    'scope': profile, 'hardwareCaptureNotYetPerformed': True}
         def private():
             with cache().PrivateTree(Path(control_root)):
                 pass
@@ -206,9 +207,9 @@ class NvidiaPresentationBackend:
         timing = duration_contract(plan)
         result = {'checks': checks, 'renderAllowed': all(row['status'] == 'PASS' for row in checks),
                 'gpuRenderingVerified': False, 'frames': timing['totalFrames'], 'scenes': len(plan.get('runtime', {}).get('segments', [])),
-                'scope': PROFILE, 'hardwareCaptureNotYetPerformed': True}
-        if timing['durationSeconds'] == 10:
-            result['durationSeconds'] = 10
+                'scope': profile, 'hardwareCaptureNotYetPerformed': True}
+        if timing['durationSeconds'] in {10, 20}:
+            result['durationSeconds'] = timing['durationSeconds']
         return result
 
     def start_studio_job(self, plan, profile, approval_path, audio_spec, request_id, *, control_root, export_root):
@@ -235,8 +236,8 @@ class NvidiaPresentationBackend:
                         'totalScenes': len(plan['runtime']['segments']), 'completedScenes': 0,
                         'processedFrames': 0, 'totalFrames': timing['totalFrames'], 'requiresGpu': True,
                         'gpuRenderingVerified': False, 'createdAt': _now()}
-                    if timing['durationSeconds'] == 10:
-                        state['durationSeconds'] = 10
+                    if timing['durationSeconds'] in {10, 20}:
+                        state['durationSeconds'] = timing['durationSeconds']
                     bounded = approval_limit(approval, plan, self.image_digest)
                     state['executionDeadline'] = (datetime.now(timezone.utc) +
                         timedelta(seconds=bounded['maxWallSeconds'])).isoformat()

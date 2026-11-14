@@ -1,0 +1,76 @@
+--- region_source.mjs
++++ region_source_vulkan.generated.mjs
+@@ -1,18 +1,19 @@
+ /** Data-driven region/source admission. No renderer, shader, invented elevation or country exception. */
+-import{loadGeographicTerrain,prepareGeographicTerrain,verifyGeographicTerrain}from'./geographic_terrain_source.mjs';
++import{loadGeographicTerrain,prepareGeographicTerrain,verifyGeographicTerrain}from'../universal-presentation-v2/geographic_terrain_source.mjs';
+ import {readFile,mkdir,lstat,realpath,writeFile} from 'node:fs/promises';
+ import path from 'node:path';
+ import {fileURLToPath} from 'node:url';
+ import {createHash} from 'node:crypto';
+ import {execFile} from 'node:child_process';
+ import {promisify} from 'node:util';
++import {assertPrivateWorkspace,assertQualifiedPrivatePath,ensureQualifiedPrivateDirectory} from './backend/private_workspace.mjs';
+ import {fitGeographicExtent,compileScalePlan} from '../../web/map_infographic_v1/scale_contract.mjs';
+ import {compileMinimumContextPlan,evaluateMinimumContextCameraFrame} from '../../web/map_infographic_v1/camera_director_v5.mjs';
+ 
+ export const REGION_SOURCE_VERSION='WORLD_ENGINE_REGION_SOURCE_V2';
+ export const HERE=path.dirname(fileURLToPath(import.meta.url));
+ export const REPO=path.resolve(HERE,'../../..');
+-const CATALOG=path.join(HERE,'REGION_SOURCE_CATALOG.json'),run=promisify(execFile),clone=structuredClone;
++const CATALOG=path.join(HERE,'../universal-presentation-v2/REGION_SOURCE_CATALOG.json'),run=promisify(execFile),clone=structuredClone;
+ const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+ const plain=v=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&[Object.prototype,null].includes(Object.getPrototypeOf(v));
+ const within=(p,r)=>p===r||p.startsWith(r+path.sep);
+@@ -201,16 +202,10 @@
+  return{schema:'WORLD_ENGINE_REGION_PLAN_V2',region:qualified.region,nativePlan:compiledNative,regionEvidence:qualified.regionEvidence,regionGateSHA256:qualified.regionGateSHA256,cameraProfile:clone(seed.cameraPlan.profile),baseCameraPlan,cameraPlan:baseCameraPlan,sourceCatalogSHA256:qualified.regionEvidence.catalogSHA256};
+ }
+ 
+-async function safeCacheRoot(value){
+- check(typeof value==='string'&&path.isAbsolute(value)&&within(value,'/workspace')&&!within(value,REPO),'REGION_PRIVATE_CACHE_ROOT_REQUIRED');
+- const resolved=path.resolve(value);
+- for(let p=path.dirname(resolved);p!==path.dirname(p);p=path.dirname(p)){const stat=await lstat(p);check(stat.isDirectory()&&!stat.isSymbolicLink()&&!(stat.mode&0o022),'REGION_PRIVATE_CACHE_ANCESTOR_UNSAFE');}
+- try{await mkdir(resolved,{mode:0o700});}catch(error){if(error.code!=='EEXIST')throw error;}
+- const stat=await lstat(resolved);check(stat.isDirectory()&&!stat.isSymbolicLink()&&stat.uid===process.getuid()&&!(stat.mode&0o077),'REGION_PRIVATE_CACHE_PERMISSIONS');return resolved;
+-}
++async function safeCacheRoot(value,options){return ensureQualifiedPrivateDirectory(value,options);}
+ 
+ /** One chosen, actual source covers the whole camera envelope; no per-frame style mixture. */
+-export async function prepareRegionTerrain({regionPlan,presentationPlan,bounds,outputRoot}={}){
++export async function prepareRegionTerrain({regionPlan,presentationPlan,bounds,outputRoot,privateWorkspaceRoot,publicExportRoot}={}){
+  check(regionPlan?.schema==='WORLD_ENGINE_REGION_PLAN_V2','REGION_RESOLVED_PLAN_REQUIRED');
+  const valid=validateRegionRequest({center:[(bounds?.[0]+bounds?.[2])/2,(bounds?.[1]+bounds?.[3])/2],bbox:bounds});check(valid.status==='PASS',valid.issues?.[0]?.code??'REGION_CAMERA_BOUNDS_INVALID');
+  const {data:catalog,sha256:catalogSHA256}=await loadRegionSourceCatalog();check(catalogSHA256===regionPlan.sourceCatalogSHA256,'REGION_SOURCE_CATALOG_CHANGED');
+@@ -218,9 +213,10 @@
+  // A panned movie may never visit one edge of that framing, so camera-only
+  // crops cannot satisfy the existing native scale/source admission contract.
+  const explicitSource=catalog.sources.find(s=>s.id===regionPlan.region.sourceId);
++ if(explicitSource?.pyramid)await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
+  if(explicitSource?.pyramid)return prepareGeographicTerrain({source:explicitSource,regionPlan,presentationPlan,catalogSHA256,catalogPath:CATALOG,safeFile,canonicalJSON,compileScalePlan});
+  const sourceRequiredBounds=unionBounds(bounds,regionPlan.nativePlan.framing.bounds);
+- const {source,window}=await chooseSource(catalog,regionPlan.region,sourceRequiredBounds),cache=await safeCacheRoot(outputRoot);
++ const {source,window}=await chooseSource(catalog,regionPlan.region,sourceRequiredBounds),cache=await safeCacheRoot(outputRoot,{privateWorkspaceRoot,publicExportRoot});
+  const identity={schema:'WORLD_ENGINE_NATIVE_SOURCE_WINDOW_V2',catalogSHA256,requestRegionGateSHA256:regionPlan.regionGateSHA256,sourceSHA256:source.sha256,cameraEnvelope:clone(bounds),initializationAndAnalysisBounds:clone(regionPlan.nativePlan.framing.bounds),sourceRequiredBounds:clone(sourceRequiredBounds),pixelBox:window.pixelBox,dimensions:window.dimensions,bounds:window.bounds,method:'EXACT_SOURCE_PIXEL_WINDOW_NO_RESAMPLE_NO_RECOLOR'},key=hash(canonicalJSON(identity)),directory=path.join(cache,'region-'+key),png=path.join(directory,'terrain.png'),record=path.join(directory,'CACHE.json');
+  let created=false;
+  try{await mkdir(directory,{mode:0o700});created=true;}catch(error){if(error.code!=='EEXIST')throw error;}
+@@ -246,9 +242,10 @@
+ }
+ 
+ /** Recheck untrusted/stored receipts against actual server files; this never authorizes a GPU. */
+-export async function verifyRegionQualification({prepared,qualification}={}){
++export async function verifyRegionQualification({prepared,qualification,privateWorkspaceRoot,publicExportRoot}={}){
+  try{
+   if(!prepared){check(qualification?.status==='PASS'&&qualification.regionEvidence?.phase!=='FULL_CAMERA_ENVELOPE','REGION_REQUEST_RECEIPT_REQUIRED');const locations=(qualification.regionEvidence.locationCountryChecks??[]).map(row=>({id:row.locationId,country_id:row.countryId,anchor:row.geographic}));const region=clone(qualification.region);if(qualification.regionEvidence.preservedLegacyFraming){delete region.center;delete region.bbox;}const actual=await qualifyRegion({region,facts:{locations}});check(actual.status==='PASS'&&actual.regionGateSHA256===qualification.regionGateSHA256,'REGION_REQUEST_RECEIPT_STALE_OR_INVALID');return{status:'PASS',phase:'REQUEST_COVERAGE_ONLY',regionGateSHA256:actual.regionGateSHA256,trajectoryCoverageRequiredBeforeStart:true};}
++  await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
+   const e=prepared.regionEvidence;
+   if(e?.phase==='FULL_CAMERA_PYRAMID'){const {data:catalog,sha256:catalogSHA256}=await loadRegionSourceCatalog();check(catalogSHA256===prepared.sourceCatalogSHA256,'REGION_SOURCE_CATALOG_CHANGED');const seed=await loadSeed(catalog,prepared.region.sourceId);check(canonicalJSON(seed.nativePlan.geometries)===canonicalJSON(prepared.nativePlan.geometries),'REGION_NATIVE_GEOMETRY_BINDING_MISMATCH');const source=catalog.sources.find(s=>s.id===prepared.region.sourceId);check(source?.pyramid,'GEOGRAPHIC_SOURCE_CATALOG_BINDING');return await verifyGeographicTerrain({prepared,source,safeFile,canonicalJSON,compileScalePlan,catalogSHA256,catalogPath:CATALOG});}
+   check(e?.phase==='FULL_CAMERA_ENVELOPE'&&e.trajectoryCoverageRequiredBeforeStart===false,'REGION_FULL_CAMERA_RECEIPT_REQUIRED');check(prepared.fullCoverageSHA256===hash(canonicalJSON(e)),'REGION_FULL_CAMERA_RECEIPT_SHA_MISMATCH');
+@@ -259,7 +256,7 @@
+   const requiredBounds=unionBounds(e.cameraEnvelope,e.initializationAndAnalysisBounds);check(canonicalJSON(requiredBounds)===canonicalJSON(e.sourceRequiredBounds),'REGION_REQUIRED_COVERAGE_RECEIPT_MISMATCH');
+   const selected=await chooseSource(catalog,prepared.region,requiredBounds);check(selected.source.id===e.sourceId&&selected.source.sha256===e.sourceSHA256,'REGION_SOURCE_RECEIPT_MISMATCH');
+   const identity={schema:'WORLD_ENGINE_NATIVE_SOURCE_WINDOW_V2',catalogSHA256,requestRegionGateSHA256:prepared.regionGateSHA256,sourceSHA256:selected.source.sha256,cameraEnvelope:clone(e.cameraEnvelope),initializationAndAnalysisBounds:clone(e.initializationAndAnalysisBounds),sourceRequiredBounds:clone(requiredBounds),pixelBox:selected.window.pixelBox,dimensions:selected.window.dimensions,bounds:selected.window.bounds,method:'EXACT_SOURCE_PIXEL_WINDOW_NO_RESAMPLE_NO_RECOLOR'},key=hash(canonicalJSON(identity));check(key===e.cacheKey,'REGION_CACHE_KEY_MISMATCH');
+-  const png=path.resolve(prepared.terrainPath),record=path.resolve(prepared.cacheRecordPath),dir=path.dirname(png);check(within(png,'/workspace')&&!within(png,REPO)&&path.basename(dir)==='region-'+key&&path.basename(png)==='terrain.png'&&record===path.join(dir,'CACHE.json'),'REGION_CACHE_RECEIPT_PATH_INVALID');
++  const png=path.resolve(prepared.terrainPath),record=path.resolve(prepared.cacheRecordPath),dir=path.dirname(png);await assertQualifiedPrivatePath(dir,{privateWorkspaceRoot,publicExportRoot});check(within(png,privateWorkspaceRoot)&&png!==privateWorkspaceRoot&&!within(png,REPO)&&path.basename(dir)==='region-'+key&&path.basename(png)==='terrain.png'&&record===path.join(dir,'CACHE.json'),'REGION_CACHE_RECEIPT_PATH_INVALID');
+   for(const file of [dir,png,record]){const stat=await lstat(file);check(!stat.isSymbolicLink()&&stat.uid===process.getuid()&&!(stat.mode&0o077),'REGION_CACHE_FILE_UNSAFE');check((await realpath(file))===file,'REGION_CACHE_FILE_PATH_UNSAFE');}
+   const saved=JSON.parse(await readFile(record,'utf8')),bytes=await readFile(png);check(canonicalJSON(saved.identity)===canonicalJSON(identity)&&hash(bytes)===saved.sha256&&saved.sha256===e.cropSHA256&&bytes.length===saved.bytes,'REGION_CACHE_CORRUPTION_REFUSED');
+   const a=prepared.sourceStyle?.terrainAsset;check(a?.sha256===saved.sha256&&a.file===png&&a.path===png&&canonicalJSON(a.bounds)===canonicalJSON(selected.window.bounds)&&canonicalJSON(a.dimensions)===canonicalJSON(selected.window.dimensions)&&canonicalJSON(a.pixelSpacing)===canonicalJSON(selected.source.pixelSpacing)&&a.classification===selected.source.classification&&canonicalJSON(prepared.nativePlan?.assets?.terrain)===canonicalJSON(a),'REGION_TERRAIN_BINDING_MISMATCH');

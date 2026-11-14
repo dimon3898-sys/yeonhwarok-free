@@ -5,8 +5,9 @@
 import {readFile,lstat} from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
-import {selectBackend,validateExecutionPermit,sha} from './profile_contract.mjs';
+import {selectBackend,validateExecutionPermit,sha,runtimeDurationContract,canonicalJSON} from './profile_contract.mjs';
 import {assertPrivateWorkspace} from './private_workspace.mjs';
+import {verifyAuthoredHistoryRuntime} from '../../universal-presentation-v2/history_authored_v1.mjs';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url)),ROOT=path.dirname(HERE);
 const check=(value,code)=>{if(!value)throw Error(code);};
@@ -29,9 +30,9 @@ export async function privateDocument(file,{maximum=24*1024**2}={}){
 export function validateVariantManifest(metadata){
  check(metadata.schema==='WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1'&&metadata.variants.length===3,'HANDOFF_VARIANT_MANIFEST_REQUIRED');
  const expectedVariants=new Map([
-  ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'6cdce0dff2c30f605e5a637021cf9ea5f7a2a44816edd895477e7fbf8c145d61'}],
-  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'be4e8cf058e6db51ec3be1b5e3b0193109ae61397b90a403e30d36867937e510'}],
-  ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'a6a2c8e651eede505f4106dc6dc11c870319788d7efd1e165665e348906e3fc3'}],
+  ['capture_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/capture_presentation.mjs',sha256:'37f4e032a959aab0ae0091332588397246dd6589c954f39002e0d1c05c933139'}],
+  ['presentation_runtime_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs',sha256:'678d0443c4ba80f4a43c1933d5e95b16d2c3aa133d5ee5b2454e0f983fc71ad7'}],
+  ['region_source_vulkan.generated.mjs',{original:'world-simulation-shorts-engine/recovery/universal-presentation-v2/region_source.mjs',sha256:'6ec337fffeae09d04623cecc80d42756b1d702a55992a15b64a28788968643e3'}],
  ]),seen=new Set();
  for(const row of metadata.variants){
   check(typeof row.original==='string'&&row.original.startsWith('world-simulation-shorts-engine/recovery/universal-presentation-v2/')&&!row.original.split('/').includes('..')&&expectedVariants.has(row.variant),'HANDOFF_VARIANT_PATH_INVALID');
@@ -69,7 +70,8 @@ export function classifyCaptureFailure(error){
 }
 
 export async function prepareNvidiaRuntimeRequest({request,cacheRoot,privateWorkspaceRoot,publicExportRoot}={}){
- check([6,10].includes(request?.durationSeconds===undefined?6:request.durationSeconds)&&request?.totalFrames===(request?.durationSeconds===undefined?6:request.durationSeconds)*30,'GCUBE_EXACT_180_FRAMES_REQUIRED');
+ runtimeDurationContract(request);
+ if(request.durationSeconds===20)await verifyAuthoredHistoryRuntime(request);
  await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
  await verifyGeneratedSources();
  const {prepareRuntimeRequest}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
@@ -96,10 +98,11 @@ export async function captureNvidiaPresentation({packageFile,outputRoot,expected
  check([packageFile,authorizationFile,planFile,outputRoot].every(file=>typeof file==='string'&&file.startsWith(privateWorkspaceRoot+path.sep)),'HANDOFF_EXECUTION_FILES_PRIVATE_ROOT_REQUIRED');
  // Source variants are checked before importing their executable Node code.
  const variants=await verifyGeneratedSources();
+ if(runtime.value.durationSeconds===20)await verifyAuthoredHistoryRuntime(runtime.value);
  const {captureVulkanDerived}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
  const receipt=await captureVulkanDerived({packageFile,outputRoot,expectedSHA256,expectedSourceQualificationSHA256,depsRoot,rootTestOnly,executionDeadline:permit.deadlineUnixMilliseconds,privateWorkspaceRoot,publicExportRoot});
- const totalFrames=plan.value.totalFrames,tenSecond=plan.value.durationSeconds===10;
- check(receipt.schema===(tenSecond?'WORLD_ENGINE_NVIDIA_TEN_SECOND_CAPTURE_V1':'WORLD_ENGINE_NVIDIA_SIX_SECOND_CAPTURE_V1')&&(!tenSecond||receipt.durationSeconds===10)&&receipt.status==='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'&&receipt.softwareOnly===false&&receipt.nvidiaVerified===true&&receipt.totalFrames===totalFrames&&receipt.renderedFrames===totalFrames&&receipt.video?.frames===totalFrames&&receipt.video?.fullDecode==='PASS','HANDOFF_HARDWARE_CAPTURE_RECEIPT_REQUIRED');
+ const totalFrames=plan.value.totalFrames,duration=plan.value.durationSeconds??6,label={6:'SIX',10:'TEN',20:'TWENTY'}[duration];
+ check(receipt.schema===`WORLD_ENGINE_NVIDIA_${label}_SECOND_CAPTURE_V1`&&(duration===6||receipt.durationSeconds===duration)&&(duration!==20||canonicalJSON(receipt.historicalAdmission)===canonicalJSON(plan.value.historicalAdmission))&&receipt.status==='TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED'&&receipt.softwareOnly===false&&receipt.nvidiaVerified===true&&receipt.totalFrames===totalFrames&&receipt.renderedFrames===totalFrames&&receipt.video?.frames===totalFrames&&receipt.video?.fullDecode==='PASS','HANDOFF_HARDWARE_CAPTURE_RECEIPT_REQUIRED');
  await verifyGeneratedSources();
  return{...receipt,executionPermit:{...permit,authorizationSHA256:expectedAuthorizationSHA256},sourceVariants:variants,rootTestOnly,productionEligible:!rootTestOnly,providerBillingStopControlled:false,visualQualityApproved:false};
 }

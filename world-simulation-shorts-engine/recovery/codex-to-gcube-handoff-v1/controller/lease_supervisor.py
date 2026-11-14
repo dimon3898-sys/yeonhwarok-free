@@ -248,7 +248,7 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
     A failed cleanup remains unresolved. The original descriptor is kept open
     until owned descendants have been checked, including after parent death.
     """
-    if type(total_frames) is not int or total_frames not in (180, 300):
+    if type(total_frames) is not int or total_frames not in (180, 300, 600):
         raise RuntimeError('HANDOFF_CAPTURE_FRAME_CONTRACT_REQUIRED')
     validate_lease_descriptor(lease_fd, lease_path)
     if (parent['pid'] != os.getppid() or parent_identity(parent['pid']) != parent
@@ -302,7 +302,7 @@ def supervise_owned_capture(command, *, lease_fd, lease_path, parent, seconds,
                 continue
             if (type(row.get('renderedFrames')) is not int or row['renderedFrames'] != count + 1
                     or row.get('totalFrames') != total_frames or row.get('frame') != count
-                    or total_frames == 300 and (type(row.get('totalFrames')) is not int or type(row.get('frame')) is not int)
+                    or total_frames in (300, 600) and (type(row.get('totalFrames')) is not int or type(row.get('frame')) is not int)
                     or count >= total_frames):
                 raise RuntimeError('HANDOFF_ACTUAL_FRAME_PROGRESS_INVALID')
             count += 1
@@ -419,7 +419,8 @@ def run(args):
         plan, approval, state = private.json('PLAN.json'), private.json('APPROVAL.json'), private.json('state.json')
     image = plan['renderProfile']['imageDigest']
     backend = NvidiaPresentationBackend(args.manifest_file, args.manifest_sha256, image)
-    backend._verify(plan, 'GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1')
+    from common import profile_for
+    backend._verify(plan, profile_for(plan))
     timing = duration_contract(plan)
     if sha(canonical(plan)) != args.plan_sha256:
         raise RuntimeError('HANDOFF_PRIVATE_PLAN_CHANGED')

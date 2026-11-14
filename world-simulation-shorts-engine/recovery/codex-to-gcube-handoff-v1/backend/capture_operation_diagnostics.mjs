@@ -31,7 +31,7 @@ export const PUBLIC_CODES=Object.freeze([
  'UP2_FRAME_RANGE','UP2_FREE_FRAME_SCOPE','UP2_MARKER_RESERVATION_CAPACITY','UP2_ORIGINAL_MARKER_DESIGN_REQUIRED',
  'UP2_SOURCE_BINDING_REQUIRED','UP2_SOURCE_MUTATION','UP2_SUPPLIED_MARKER_FULL_ROI_OUTSIDE_SAFE']);
 function timingScope({durationSeconds=6,totalFrames=180}={}){
- if(![6,10].includes(durationSeconds)||totalFrames!==durationSeconds*30)throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+ if(![6,10,20].includes(durationSeconds)||totalFrames!==durationSeconds*30)throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
  return{durationSeconds,totalFrames};
 }
 const frame=(n,totalFrames=180)=>Number.isSafeInteger(n)&&n>=0&&n<totalFrames?n:null;
@@ -72,7 +72,7 @@ export async function atomicPrivateJSON(file,value,{maximum=16384}={}){
 }
 export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA256=null,durationSeconds=6,totalFrames=180,write=atomicPrivateJSON}={}){
  const timing=timingScope({durationSeconds,totalFrames});
- const state={schema:SCHEMA,...(durationSeconds===10?timing:{}),runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
+ const state={schema:SCHEMA,...([10,20].includes(durationSeconds)?timing:{}),runId:/^studio-[a-f0-9]{32}$/.test(runId??'')?runId:null,
   imageDigest:/^sha256:[a-f0-9]{64}$/.test(imageDigest??'')?imageDigest:null,
   sceneSHA256:/^[a-f0-9]{64}$/.test(sceneSHA256??'')?sceneSHA256:null,
   operationId:null,operationPhase:null,lastCompletedOperation:null,frameIndex:null,firstFailure:null,cleanupFailure:null,
@@ -105,8 +105,8 @@ export function createRecorder({outputRoot,runId=null,imageDigest=null,sceneSHA2
 // Self-contained function serialized by Playwright; no Node closures cross realms.
 export function initializeBrowserDiagnostics(config){
  const{codes,operations,sources,exceptions}=config;let firstFailure=null,cleanupFailure=null,active='INPUT_CANVAS',source='CAPTURE_ADAPTER',frameIndex=null;
- const totalFrames=config.durationSeconds===10&&config.totalFrames===300?300:180;
- if((config.durationSeconds!==undefined||config.totalFrames!==undefined)&&!((config.durationSeconds===6&&config.totalFrames===180)||(config.durationSeconds===10&&config.totalFrames===300)))throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
+ const totalFrames=config.durationSeconds===20&&config.totalFrames===600?600:config.durationSeconds===10&&config.totalFrames===300?300:180;
+ if((config.durationSeconds!==undefined||config.totalFrames!==undefined)&&!((config.durationSeconds===6&&config.totalFrames===180)||(config.durationSeconds===10&&config.totalFrames===300)||(config.durationSeconds===20&&config.totalFrames===600)))throw Error('CAPTURE_DIAGNOSTIC_SCHEMA_INVALID');
  function classify(error){const known=codes.includes(error?.message),code=known?error.message:'UNCLASSIFIED_EXCEPTION';
   return{operationId:active,sourceId:source,line:null,column:null,frameIndex,errorCode:code,recognized:known,
    exceptionType:exceptions.includes(error?.name)?error.name:'UNKNOWN',failureKind:code==='CAPTURE_ASSET_HTTP_FAILED'?'ASSET_HTTP_FAILURE':
@@ -130,7 +130,7 @@ export function initializeBrowserDiagnostics(config){
 export async function attachPageDiagnostics(page,recorder){
  await page.exposeFunction('__weCaptureCheckpoint',raw=>recorder.event(raw));
  const state=recorder.snapshot();
- await page.evaluate(initializeBrowserDiagnostics,{schema:SCHEMA,codes:PUBLIC_CODES,operations:OPERATIONS,sources:SOURCES,exceptions:EXCEPTIONS,...(state.durationSeconds===10?timingScope(state):{})});
+ await page.evaluate(initializeBrowserDiagnostics,{schema:SCHEMA,codes:PUBLIC_CODES,operations:OPERATIONS,sources:SOURCES,exceptions:EXCEPTIONS,...([10,20].includes(state.durationSeconds)?timingScope(state):{})});
 }
 export async function evaluateDiagnosed(page,callback,arg,{recorder,timeoutMs}={}){
  let crashed=false,timer;const onCrash=()=>{crashed=true;};page.on('crash',onCrash);
