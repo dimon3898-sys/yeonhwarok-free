@@ -1,0 +1,11 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import{createHash}from'node:crypto';
+import{compileFrontierCamera}from '../../recovery/universal-presentation-v2/territory_camera_v1.mjs';
+import{geographicCameraFrame,selectGeographicTerrain}from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
+const base=new URL('../',import.meta.url).pathname,s=JSON.parse(fs.readFileSync(base+'continuous-territory-20261114/RUNTIME_REQUEST.json')).segments[0],p=s.presentation;
+const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex'),before=hash(p.territoryChanges),a=s.automaticDirection;
+const directed=compileFrontierCamera({scene:s.scene,territoryChanges:p.territoryChanges,timingAudit:a.timing,sourceLevels:s.regionEvidence.sourceLevels,closestBounds:s.regionEvidence.fittedBounds,initialPose:p.camera.frames[0],resultPoses:a.timing.choreography.map(c=>p.camera.frames[c.cameraEnd]),changeMetrics:a.changes});
+assert.equal(hash(p.territoryChanges),before);
+const metrics=camera=>{const anchors=[[92,50],[108,42],[118,54]],views=camera.frames.map(geographicCameraFrame),steps=views.slice(1).map((v,i)=>Math.max(...anchors.map(p=>{const a=v.project(p),b=views[i].project(p);return Math.hypot(a[0]-b[0],a[1]-b[1]);})));return{maxAnchorStepPx:Math.max(...steps),maxStepFrame:steps.indexOf(Math.max(...steps))+1,frames23to32Steps:steps.slice(22,32),first:camera.frames[0],last:camera.frames.at(-1),zoomRatio:camera.frames.at(-1).scale/camera.frames[0].scale};};
+const m=metrics(directed.camera);assert.ok(m.maxAnchorStepPx<10);assert.ok(m.zoomRatio>1.2);assert.ok(Math.max(...m.frames23to32Steps)<3);
+const report={status:'PASS_CHANGED_CAMERA_MATH_ONLY',oldPassReruns:0,geometryUnchanged:true,continuousGeometrySHA256:before,frames:180,old:metrics(p.camera),new:m,audit:directed.audit,sources:directed.camera.frames.map(p=>selectGeographicTerrain(s.regionEvidence.sourceLevels,p,{maximumTextureSize:8192})).reduce((a,b)=>{a.maxDensity=Math.max(a.maxDensity,...b.density);a.minGutter=Math.min(a.minGutter,b.gutter);return a;},{maxDensity:0,minGutter:1e30}),visualStatus:'REQUIRED'};
+fs.writeFileSync(base+'integrated-visual-20261114/CAMERA_PREFLIGHT.json',JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

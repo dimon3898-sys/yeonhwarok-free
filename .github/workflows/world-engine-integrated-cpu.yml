@@ -9,16 +9,16 @@ concurrency:
   group: world-engine-integrated-cpu
   cancel-in-progress: false
 jobs:
-  changed-territory:
+  changed-camera:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '5a38a8b709ec102861b8405d4de5ada43dceff92' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_INTEGRATED_TERRITORY_A1'
+      github.event.before == 'fa841e2e868e1da129e08bb63e44fd70b258945e' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_INTEGRATED_CAMERA_A1'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
-      STAGE: territory
+      STAGE: camera
       ATTEMPT: a1
     steps:
       - uses: actions/checkout@v4

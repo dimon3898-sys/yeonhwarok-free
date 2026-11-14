@@ -38,3 +38,6 @@ V1/V2/V3, 원본 3커밋/43파일 보존, 연속 도형/합성 14종, 56–85의
 ## 실행 경로
 
 기존 `capture_presentation.mjs` → `presentation_runtime.mjs` → native renderer / Area V3 / geographic camera. 새 생성기 없음. 무료 CPU GitHub Actions 사용; GPU/gCube/Studio 금지. 단계별 원격 저장 후 다음 단계. 기술 PASS와 최종 시각 품질/사용자 승인은 분리한다.
+
+## Stage 3 exact change scope
+The old camera audit remains valid for the old video. Only the newly derived camera path is evaluated: 180 source/viewport math samples, frames 0, 23–32, 53, 79, 105, 131, 179 in the unchanged formal CPU renderer. Existing geometry/topology tests are SKIP. The prior frame-27 jump is not a reason to rerun old tests; it motivates a separate globally qualified path. Same event and 48-frame hold timing. Source detail gates stay unchanged.
