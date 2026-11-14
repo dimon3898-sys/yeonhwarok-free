@@ -1,29 +1,19 @@
-# gCube #5373 — 차단된 배포 준비 기록
+# gCube #5373 — stopped configuration preparation
 
-상태: **BLOCKED_NOT_APPLIED**. 새 설정 저장, 이미지 변경, 배포 시작, Studio 렌더링 모두 0회다. 최신 사용자 진술은 중지 상태다. 이번 작업에서는 gCube UI 상태를 새로 관측하지 않았으며, 이를 새 readback PASS로 표현하지 않는다.
+Status: BLOCKED until a common V2 image passes actual-image admission and the existing GPU environment failure is resolved. Do not deploy, start Studio rendering or retry automatically.
 
-## 과거 실제 성공 기준
+Observed 2026-11-14: 종료 (Stopped), Tier2 RTX5090 ×1 /32GB, CPU12 Core, RAM63GB, disk937GB, shared memory3GB, existing dropbox volume /world-storage. Preserve these settings. This differs from historical RTX4080 SUPER success; its driver580.159.03 must not be assumed on the stopped5090 node. The UI does not expose a current Pod digest or driver.
 
-- 이미지: `ghcr.io/dimon3898-sys/world-simulation-shorts-engine:g2-diagnostics-v1-27f9fa5c133a-40767632198`
-- Digest: `sha256:9378a86d81341172b48910606d44ca389afd28f5e96b615ceec6fa84321b62da`
-- GPU: RTX 4080 SUPER ×1, NVIDIA 580.159.03.
-- CPU/RAM/스토리지 용량 및 현재 가능한 GPU 노드: 이 성공 기록에서 정확한 값 미확인. 임의 값으로 채우지 않는다.
-- 과거 Studio 접근 주소: `https://ae20158c.service.gcube.ai:24999/`. 현재 접근 가능성은 검증하지 않았다.
-- Chromium 선택 인수·sandbox·환경 관측값: `SIX_SECOND_GPU_SUCCESS_BASELINE.md` 참고. 기록되지 않은 EGL 환경을 임의 구성하지 않는다.
-- 정식 입력 전달: Studio의 기존 structured input → Controller 검증 → Worker. 몽골 HISTORICAL 180은 이 단계에서 거부되므로 업로드 파일은 아직 없다.
-- 출력: 각 formal job의 private `capture/VIDEO.mp4`, export `public/WORLD_ENGINE_STUDIO_VIDEO.mp4`. 세 job의 실제 독립 output ID 및 충돌 검사는 입력 생성 후에만 확정할 수 있다.
+The stopped workload still references history20-6970708eb71a-43551475182. No configuration change has been made. The old g2 success image and its digest are preserved in SIX_SECOND_GPU_SUCCESS_BASELINE.md; it does not admit the new historical input.
 
-## 별도 후속 설정 증거 — 위 성공 환경과 혼합 금지
+New common image tag/digest: PENDING_BUILD_AND_REMOTE_DIGEST. After release admission, both WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST and WORLD_ENGINE_DEPLOYMENT_IMAGE_DIGEST must equal its verified digest. Preserve GPU_BACKEND=vulkan, existing sandbox, startup and secret values. Never store owner codes or tokens in this report.
 
-`release-guard/recovery-20261113/gcube-readback/GCUBE_SETTINGS_RECEIPT.json`은 required-fixes `8f7a…e329` 이미지가 중지 상태로 저장·재열기 된 기록이다. RTX 5090 ×1, 12vCPU, RAM 63GB, shm 3GB, 내부 포트 8080, `/world-storage`가 기록돼 있다. 이는 G2 RTX4080 성공 당시 사양이 아니다.
+External-data configuration:
+- WORLD_ENGINE_DATA_ROOT=/world-storage/world-engine-data/v1
+- WORLD_ENGINE_DATA_CATALOG_SHA256=06cdf5e6509b3775c40afe307e95d77524da3fbb61b095987c9488c6e5d59822
+- Files: catalog.json and 8e42f3ec56bf2c8bbf321d47aa1fc23102b78bf971f2b49dea089876b8e664c0.json from data/.
+- Root, all ancestors and files: regular/non-symlink, owned by root or UID1000, no group/world write. UID1000 must read files and traverse directories. These stopped-node permissions remain unverified. Do not bypass the check.
 
-당시 정책은 1,300원/시간, 상한 2,000원, 최대 1,800초, 자동 재시도 0회였다. 현재 요금/3편 소요시간의 검증값이나 신규 실행 승인이 아니므로 이번 비용 견적에 전용하지 않는다. 현재 예상 비용은 확인 불가다.
+Submit MONGOL_6S_PART_01.json, 02, 03 through the existing authenticated Studio input only after release/runtime gates and separately authorized GPU scope. Output uses existing unique private job directories and exported WORLD_ENGINE_STUDIO_VIDEO.mp4; download each under distinct part names. Different input hashes and job IDs prevent private output collisions; do not overwrite downloaded files.
 
-## 다음 실행 게이트
-
-1. 변경 없는 성공 이미지와 HISTORICAL 입력 간 호환성 차단 해결.
-2. 정식 계약이 있는 세 JSON과 분할 상태 연속성 무료 검사 완료.
-3. 그 결과에 맞는 이미지·manifest·digest 및 중지 상태 설정 readback 확보.
-4. 그 뒤 사용자 별도 유료 GPU 시작 승인. 현재는 승인 요청 단계가 아니다.
-
-향후 승인된 실제 실행에서는 각 편을 순서대로 실행·검증·다운로드하고 gCube 배포를 중지한다. 실패 시 자동 재시도 없이 배포 중지와 기존 로그 보존이 우선이다. 이번 문서는 실행 가능한 최종 설정이나 READY 선언이 아니다.
+Execution order after separate approval: bounded GPU initialization check → part1 → part2 → part3 → download/check180frames each → stop workload → verify 종료. Do not proceed from failed initialization to full rendering, and do not auto-retry. Current GPU cost/time cap is NOT_AUTHORIZED; previous RTX4080 approvals do not transfer. Obtain current rate and present an explicit maximum before asking for GPU approval.

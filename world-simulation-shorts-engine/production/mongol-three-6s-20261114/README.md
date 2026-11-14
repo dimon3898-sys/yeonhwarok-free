@@ -1,7 +1,7 @@
-# Mongol three 6-second clips — evidence checkpoint
+# Mongol three six-second inputs
 
-Status: BLOCKED_SUCCESS_IMAGE_HISTORY_INCOMPATIBLE.
+The common V2 source contract and three inputs have passed changed-scope free checks. Source windows are [0,180), [180,360), [360,540); original600 design remains unchanged. Download the three MONGOL_6S_PART_0*.json files together with the approved external data package if preparing deployment.
 
-Prior real 6-second NVIDIA GPU success is preserved. The four inspected pinned image source versions reject the newly requested HISTORICAL 180-frame contract. No production input JSON, renderer change, image build, gCube start, or GPU render was performed.
+These inputs require WORLD_ENGINE_AUTHORED_HISTORY_INPUT_V2. Do not upload them to an older success/history20 image: those images lack this contract. Actual-image validation and node GPU readiness are separate gates; inspect CHECKPOINT.json. No GPU render is authorized or claimed.
 
-The evidence reports and CHECKPOINT.json in this directory record the exact image lineage, new compatibility rejection, source frame boundaries, preserved original 600-frame design, and proposed minimum scope decision. Frames 540–599 are authorized for exclusion only in the requested new deliverables; the original design remains unchanged.
+Previous success/image-block evidence is preserved in baseline-66e94bb/ and original git history. Current common-engine evidence is in ../../recovery/universal-input-contract-v2/.
