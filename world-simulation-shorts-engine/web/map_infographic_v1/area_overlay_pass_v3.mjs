@@ -248,8 +248,16 @@ export function createAreaOverlayPass({canvas,width=1080,height=1920,style=null}
    const impacts=(controls.impacts??[]).map(item=>drawArea(item,styles.IMPACT,project,reservations,safeArea));
    if(impactExclusionGeometries.length){boundaryMask(boundaries);gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER,null);gl.drawBuffers([gl.BACK]);gpuState(true);}
    const fronts=(controls.fronts??[]).map(item=>drawLine(item,styles.FRONT,project,reservations,safeArea));
+   const contextLines=(controls.contextLines??[]).map(item=>{
+    if(item.semantics!=='APPROXIMATE_PHYSICAL_DIVIDE_NOT_POLITICAL_BORDER'||!unit(item.alpha)||item.geometry?.type!=='MultiLineString')throw Error('AREA_CONTEXT_SOURCE_REQUIRED');
+    const paths=item.geometry.coordinates.map(r=>r.map(project));
+    if(!paths.flat().every(finitePoint))throw Error('AREA_CONTEXT_POINT_REQUIRED');
+    const dashed=[];
+    for(const path of paths){let travelled=0;for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i],len=Math.hypot(b[0]-a[0],b[1]-a[1]);if(!len)continue;let t=0;while(t<len){const phase=travelled%18,step=Math.min(len-t,phase<10?10-phase:18-phase);if(step<1e-8){travelled+=1e-6;t+=1e-6;continue;}if(phase<10)dashed.push([[a[0]+(b[0]-a[0])*t/len,a[1]+(b[1]-a[1])*t/len],[a[0]+(b[0]-a[0])*(t+step)/len,a[1]+(b[1]-a[1])*(t+step)/len]]);t+=step;travelled+=step;}}}
+    const contours=contour(dashed,styles.FRONT,item.alpha,{origin:[0,0],radius:0,limited:false},reservations,safeArea);return{id:item.id,drawn:contours.length>0,contours,semantics:item.semantics};
+   });
    const items=[...areas,...propagations,...impacts,...fronts];
-   result={version:AREA_OVERLAY_PASS_V3_VERSION,areas,propagations,impacts,fronts,rois:items.filter(item=>item.drawn&&item.roi).map(item=>clone(item.roi)),
+   result={version:AREA_OVERLAY_PASS_V3_VERSION,areas,propagations,impacts,fronts,contextLines,rois:items.filter(item=>item.drawn&&item.roi).map(item=>clone(item.roi)),
     style:clone(styles),safeArea:clone(safeArea),protectedReservations:clone(reservations),boundaryMaskSegments:boundaries.length,
     nativeBoundaryGlowPreserved:true,nativeStateRestored:true,sourceGeometryMutation:false,propagationExclusionPolygonCount:propagationExclusionGeometries.length,
     reservedOverlap:items.filter(item=>item.drawn&&item.roi).flatMap(item=>reservations.filter(reservation=>intersect(item.roi,reservation.box)).map(reservation=>({id:item.id,kind:reservation.kind,box:clone(reservation.box),rasterMasked:true})))};

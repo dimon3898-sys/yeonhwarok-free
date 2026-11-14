@@ -1,0 +1,110 @@
+name: WORLD ENGINE integrated visuals free CPU
+on:
+  push:
+    branches: [fix/reference-6s-formal-admission-20261113]
+    paths: ['.github/workflows/world-engine-integrated-cpu.yml']
+permissions:
+  contents: write
+concurrency:
+  group: world-engine-integrated-cpu
+  cancel-in-progress: false
+jobs:
+  changed-map:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == 'feb6ebf7f1b7b10491147bd45d40d1758b8d445a' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_INTEGRATED_MAP_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      STAGE: map
+      ATTEMPT: a1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /world-simulation-shorts-engine/web/
+            /world-simulation-shorts-engine/recovery/universal-presentation-v2/
+            /world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/
+            /world-simulation-shorts-engine/recovery/reference-director-v1/director_events.mjs
+            /world-simulation-shorts-engine/recovery/g2-final-recovery-v1/layout_extension.mjs
+            /world-simulation-shorts-engine/recovery/g2-final-recovery-v1/fixtures/GENERIC_REGION_INPUTS.zip
+            /world-simulation-shorts-engine/production/continuous-territory-20261114/RUNTIME_REQUEST.json
+            /world-simulation-shorts-engine/production/integrated-visual-20261114/
+            /world-simulation-shorts-engine/production/reference-6s-20261112/sources/
+            /cinematic-world-map/assets/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned free CPU dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          python -m pip install --disable-pip-version-check --only-binary=:all: Pillow==13.0.0
+          npm install --prefix "${RUNNER_TEMP}/integrated-deps" --ignore-scripts --no-audit --no-fund playwright@1.62.1
+          "${RUNNER_TEMP}/integrated-deps/node_modules/.bin/playwright" install --with-deps chromium
+          CHROMIUM_PATH=$(node -e "process.stdout.write(require('${RUNNER_TEMP}/integrated-deps/node_modules/playwright').chromium.executablePath())")
+          sudo ln -sfn "${CHROMIUM_PATH}" /usr/bin/chromium
+          sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" /workspace
+      - name: Capture changed scope only
+        env:
+          WORLD_ENGINE_NODE_DEPS: ${{ runner.temp }}/integrated-deps
+          NVIDIA_VISIBLE_DEVICES: void
+        run: |
+          set -o pipefail
+          mkdir -p "${RUNNER_TEMP}/integrated-logs"
+          node world-simulation-shorts-engine/production/integrated-visual-20261114/run_cpu.mjs "${STAGE}" "${ATTEMPT}" > >(tee "${RUNNER_TEMP}/integrated-logs/stdout.log") 2> >(tee "${RUNNER_TEMP}/integrated-logs/stderr.log" >&2)
+      - name: Preserve output and exact checkpoint
+        if: always()
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          python - <<'PY'
+          import os,json,shutil,hashlib,gzip
+          from pathlib import Path
+          base=Path('world-simulation-shorts-engine/production/integrated-visual-20261114')
+          name=os.environ['STAGE']+'-'+os.environ['ATTEMPT']
+          out=base/name;out.mkdir(exist_ok=False)
+          src=Path('/workspace/integrated-'+name)
+          for f in src.glob('*'):
+              if not f.is_file(): continue
+              if f.name in ['FRAME_EVIDENCE.json','RUNTIME.json','REQUEST.json']:
+                  (out/(f.name+'.gz')).write_bytes(gzip.compress(f.read_bytes(),compresslevel=6,mtime=0))
+              elif f.suffix in ['.png','.mp4','.json']: shutil.copy2(f,out/f.name)
+          for f in Path(os.environ['RUNNER_TEMP'],'integrated-logs').glob('*.log'):shutil.copy2(f,out/f.name)
+          (out/'RUN.json').write_text(json.dumps({'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'stage':os.environ['STAGE'],'gpuStarts':0,'oldPassReruns':0},indent=2)+'\n')
+          manifest='\n'.join(hashlib.sha256(f.read_bytes()).hexdigest()+'  '+f.name for f in sorted(out.iterdir()) if f.is_file())+'\n'
+          (out/'SHA256SUMS').write_text(manifest)
+          receipt=json.loads((out/'CAPTURE_RECEIPT.json').read_text()) if (out/'CAPTURE_RECEIPT.json').exists() else {}
+          success=receipt.get('status') in ['ACTUAL_DRAW_PROBE_PASS_NOT_STUDIO_VIDEO','TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED']
+          cp=json.loads((base/'CHECKPOINT.json').read_text());cp['status']='CHANGED_SCOPE_CAPTURED_REVIEW_REQUIRED' if success else 'BLOCKED'
+          cp['firstIncomplete']=os.environ['STAGE'].upper()+'_VISUAL_REVIEW' if success else os.environ['STAGE'].upper()+'_CAPTURE_FAILURE'
+          cp['stages'][os.environ['STAGE']]='CAPTURED_REVIEW_REQUIRED' if success else 'BLOCKED';cp['lastRun']={'sourceCommit':os.environ['SOURCE_SHA'],'runId':os.environ['RUN_ID'],'folder':name,'captureStatus':receipt.get('status','NO_RECEIPT')}
+          (base/'CHECKPOINT.json').write_text(json.dumps(cp,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integrated-${{ github.run_id }}
+          path: world-simulation-shorts-engine/production/integrated-visual-20261114/
+          retention-days: 90
+      - name: Save evidence on authorized branch
+        if: always()
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          BRANCH=fix/reference-6s-formal-admission-20261113
+          REMOTE_SHA=$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)
+          test "${REMOTE_SHA}" = "${SOURCE_SHA}"
+          git config user.name 'WORLD ENGINE CPU evidence'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse world-simulation-shorts-engine/production/integrated-visual-20261114
+          git commit -m "Preserve integrated ${STAGE} changed-scope evidence [skip ci]"
+          git push origin "HEAD:refs/heads/${BRANCH}"

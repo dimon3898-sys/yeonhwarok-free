@@ -31,12 +31,14 @@ export function validatePresentation(input,{scene,region}={}){
  ok(scene?.timing?.fps===30&&Number.isSafeInteger(scene.timing.total_frames),'PRESENTATION_SCENE_TIMING_REQUIRED');
  const n=scene.timing.total_frames,result=copy(input);
  if(input.mapStyle!==undefined){
-  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames','nativeBoundaries','boundaryTrace'],'PRESENTATION_MAP_STYLE');
+  keys(input.mapStyle,['preset','revealFrames','countryFill','lineAccentFrames','nativeBoundaries','boundaryTrace','sourceReliefDetail','physicalContext'],'PRESENTATION_MAP_STYLE');
   ok(['COUNTRY_FOCUS_V1','REFERENCE_FOCUS_V2'].includes(input.mapStyle.preset),'PRESENTATION_MAP_STYLE_PRESET_UNSUPPORTED');
   const revealFrames=input.mapStyle.revealFrames??18,countryFill=input.mapStyle.countryFill??false;
   ok(Number.isSafeInteger(revealFrames)&&revealFrames>=1&&revealFrames<=n,'PRESENTATION_MAP_REVEAL_RANGE_INVALID');
   ok(typeof countryFill==='boolean','PRESENTATION_MAP_FILL_BOOLEAN_REQUIRED');
   result.mapStyle={preset:input.mapStyle.preset,revealFrames,countryFill};
+  if(input.mapStyle.sourceReliefDetail!==undefined){ok(input.mapStyle.sourceReliefDetail==='SOURCE_RELIEF_V1','PRESENTATION_SOURCE_RELIEF_PROFILE');result.mapStyle.sourceReliefDetail=input.mapStyle.sourceReliefDetail;}
+  if(input.mapStyle.physicalContext!==undefined){ok(input.mapStyle.physicalContext==='NATURAL_EARTH_V1','PRESENTATION_PHYSICAL_CONTEXT_PROFILE');result.mapStyle.physicalContext=input.mapStyle.physicalContext;}
   if(input.mapStyle.boundaryTrace!==undefined)result.mapStyle.boundaryTrace=validateBoundaryTrace(input.mapStyle.boundaryTrace,{totalFrames:n,holdFrames:scene.timing.final_hold_frames});
   if(input.mapStyle.nativeBoundaries!==undefined){
    ok(input.mapStyle.preset==='REFERENCE_FOCUS_V2'&&typeof input.mapStyle.nativeBoundaries==='boolean','PRESENTATION_NATIVE_BOUNDARIES_BOOLEAN_REQUIRED');

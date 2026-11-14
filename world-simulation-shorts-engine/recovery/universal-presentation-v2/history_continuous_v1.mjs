@@ -74,7 +74,8 @@ export function deriveContinuousHistory({scene,admission,timingAudit}){
   keys.push({frame:c.endFrame-1,role:'RESULT',pose:copy(frames[c.endFrame-1])});current=copy(target);
  }
  p.camera={mode:'GEOGRAPHIC_TRACK',projection:'GEOGRAPHIC_MERCATOR_V1',frames};
- p.territoryColors=Object.fromEntries(scene.time_steps.map(s=>[s.id,[1,.78,.08,.48]]));
+ p.mapStyle={...p.mapStyle,sourceReliefDetail:'SOURCE_RELIEF_V1',physicalContext:'NATURAL_EARTH_V1'};
+ p.territoryColors=Object.fromEntries(scene.time_steps.map(s=>[s.id,[1,.75,.12,.28]]));
  const starts=scene.time_steps.map((s,i)=>i?items[i-1].startFrame+Math.ceil((items[i-1].endFrame-items[i-1].startFrame-1)/2):0);
  p.labels.items=p.labels.items.filter(x=>!['TIMELINE','DISCLOSURE'].includes(x.role));
  p.labels.items.push(...scene.time_steps.map((s,i)=>({id:'HISTORY_YEAR_'+i,role:'TIMELINE',stateId:s.id,text:historicalTimeLabel(s.date),startFrame:starts[i],endFrame:starts[i+1]??frames.length,revealFrames:1,exitFrames:1,priority:100})),

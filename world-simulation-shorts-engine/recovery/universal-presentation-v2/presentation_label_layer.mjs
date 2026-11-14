@@ -5,7 +5,7 @@ import {validateLabelText,REFERENCE_LABEL_STYLE} from './presentation_labels.mjs
 import {authoredPinSvg,popScale,graphemes} from '../reference-director-v1/director_events.mjs';
 export const LABEL_LAYER_SCHEMA='WORLD_ENGINE_PRESENTATION_LABEL_LAYER_V1';
 export const LABEL_FONT_FAMILY='Gate1Bold';
-const roles=Object.freeze({TITLE:6,TIMELINE:5,DISCLOSURE:4,EVENT:3,NUMERIC:2,COUNTRY:1});
+const roles=Object.freeze({TITLE:6,TIMELINE:5,DISCLOSURE:4,EVENT:3,NUMERIC:2,COUNTRY:1,PHYSICAL:0});
 const check=(value,code)=>{if(!value)throw Error(code);};
 const copy=value=>structuredClone(value);
 const point=value=>Array.isArray(value)&&value.length===2&&value.every(Number.isFinite);
@@ -36,7 +36,7 @@ function validateItem(item){
 }
 function measuredSize(item,width,height,measure){
  const scale=Math.min(width/1080,height/1920),reference=item.style===REFERENCE_LABEL_STYLE,
-  preferred=(reference?{COUNTRY:48,EVENT:56,NUMERIC:52}:{COUNTRY:36,EVENT:44,NUMERIC:52,TITLE:68,TIMELINE:86,DISCLOSURE:30})[item.role]*scale;
+  preferred=(reference?{COUNTRY:48,EVENT:56,NUMERIC:52}:{COUNTRY:36,PHYSICAL:30,EVENT:44,NUMERIC:52,TITLE:68,TIMELINE:86,DISCLOSURE:30})[item.role]*scale;
  const min=Math.max(10,18*scale),paddingX=(reference?24:16)*scale,paddingY=(reference?24:10)*scale,maxWidth=Math.min(width*(item.screenPlacement?.length? .86:.48),width-64*scale);
  let size=Math.max(min,preferred),advance;
  for(let i=0;i<4;i++){
@@ -50,6 +50,7 @@ function measuredSize(item,width,height,measure){
 }
 function candidateOffsets(role,w,h,s,referencePinHeight=null){
  if(referencePinHeight!==null)return[[-w/2,-h-referencePinHeight-12*s],[70*s,-h-40*s],[-w-70*s,-h-40*s],[-w/2,44*s],[70*s,44*s],[-w-70*s,44*s]];
+ if(role==='PHYSICAL')return[[-w/2,-h/2],[-w/2,-h-8*s]];
  const gap=44*s;
  if(role==='COUNTRY')return[[-w/2,-h-100*s],[gap,-h-100*s],[-w-gap,-h-100*s],[-w/2,100*s],[gap,100*s],[-w-gap,100*s]];
  if(role==='NUMERIC')return[[gap,44*s],[-w-gap,44*s],[gap,-h-gap],[-w-gap,-h-gap],[-w/2,100*s]];
@@ -109,7 +110,7 @@ export function layoutLabels({items,frame,project,width=1080,height=1920,safeAre
   let projected;try{projected=project(item.anchor);}catch{throw Error('UP2_LABEL_PROJECTION_UNSUPPORTED');}
   check(point(projected),'UP2_LABEL_PROJECTION_UNSUPPORTED');
   if(!within(projected,safe)){suppressed.push({id:item.id,reason:'ANCHOR_OUTSIDE_SAFE_VIEWPORT'});continue;}
-  const reference=item.style===REFERENCE_LABEL_STYLE,pinStyle=reference?(item.pin??'CONTEXT'):null,
+  const reference=item.style===REFERENCE_LABEL_STYLE,pinStyle=reference?(item.pin??'CONTEXT'):item.role==='PHYSICAL'?'NONE':null,
    pinWidth=(pinStyle==='HERO'?116:49)*scale,pinHeight=(pinStyle==='HERO'?151:64)*scale;
   const size=measuredSize(item,width,height,measureText),offsets=candidateOffsets(item.role,size.width,size.height,scale,reference?(pinStyle==='NONE'?0:pinHeight):null);
   if(size.width>safe[2]-safe[0]||size.height>safe[3]-safe[1]){suppressed.push({id:item.id,reason:'LABEL_DOES_NOT_FIT_SAFE_VIEWPORT'});continue;}
@@ -121,8 +122,8 @@ export function layoutLabels({items,frame,project,width=1080,height=1920,safeAre
   for(const slot of indices){
    const offset=offsets[slot],x=clamp(projected[0]+offset[0],safe[0],safe[2]-size.width),y=clamp(projected[1]+offset[1],safe[1],safe[3]-size.height);
    const rect=[x,y,x+size.width,y+size.height],gap=10*scale;
-   if(within(projected,rect)||(pinStyle!=='NONE'&&overlap(rect,pinBox,4*scale))||protectedAndPins.some(other=>overlap(rect,other,gap))||drawn.some(other=>overlap(rect,other.box,gap)))continue;
-   let connector=connectorFor(rect,projected,protectedAndPins,drawn,2+2*scale);if(!connector)continue;
+   if((item.role!=='PHYSICAL'&&within(projected,rect))||(pinStyle!=='NONE'&&overlap(rect,pinBox,4*scale))||protectedAndPins.some(other=>overlap(rect,other,gap))||drawn.some(other=>overlap(rect,other.box,gap)))continue;
+   let connector=item.role==='PHYSICAL'?[]:connectorFor(rect,projected,protectedAndPins,drawn,2+2*scale);if(!connector)continue;
    const pinDrawn=pinStyle!=='NONE'&&!pins.has(item.locationId)&&within(pinBox.slice(0,2),safe)&&within(pinBox.slice(2),safe)
     &&!protectedAndPins.some(other=>overlap(pinBox,other))&&!drawn.some(other=>overlap(pinBox,other.box));
    if(reference&&pinDrawn){connector=connectorFor(rect,projected,[...protectedAndPins,pinBox],drawn,2+2*scale);if(!connector)continue;}
@@ -182,7 +183,7 @@ export function paintLabels(context,layout){
  const[x0,y0,x1,y1]=layout.safeArea;context.beginPath();context.rect(x0,y0,x1-x0,y1-y0);context.clip();
  context.lineCap='round';context.lineJoin='round';
  for(const row of layout.drawn){
-  if(!row.connector)continue;
+  if(!row.connector?.length)continue;
   context.globalAlpha=row.alpha;context.strokeStyle='#22252b';context.lineWidth=Math.max(1,2*s);
   context.beginPath();context.moveTo(...row.connector[0]);context.lineTo(...row.connector[1]);context.stroke();
  }
@@ -200,7 +201,7 @@ export function paintLabels(context,layout){
    else{context.fillStyle='#191c22';context.fillText(row.text,cx,cy);}
   }else{
    if(row.style===REFERENCE_LABEL_STYLE){context.save();paintReferenceText(context,row,layout,cx,cy,s);context.restore();}
-   else{context.lineWidth=Math.max(2,6*s);context.strokeStyle='#171a20';context.strokeText(row.text,cx,cy);context.fillStyle='#fff';context.fillText(row.text,cx,cy);}
+   else{context.lineWidth=Math.max(2,(row.role==='PHYSICAL'?4:6)*s);context.strokeStyle='#171a20';context.strokeText(row.text,cx,cy);context.fillStyle=row.role==='PHYSICAL'?'#e6e5d4':'#fff';context.fillText(row.text,cx,cy);}
   }
  }
  context.restore();return{paintedLabels:layout.drawn.length,paintedPins:layout.drawn.filter(row=>row.pinDrawn).length};

@@ -43,7 +43,7 @@ uniform vec4 globeDisc;
 uniform vec3 globeEast,globeNorth,globeCenter;
 uniform vec3 primaryHue, secondaryHue;
 uniform float primaryStrength, secondaryStrength, primaryLuminance, secondaryLuminance, detailContrast, reliefStrength, exposure;
-uniform int mode, terrainTreatment;
+uniform int mode, terrainTreatment, sourceReliefDetail;
 // Height is a MATERIAL input, not an RGB overlay. IDs/coverage stay unchanged.
 uniform sampler2D demHeight;
 uniform vec2 demFirstSample, demSpacing, demDimensions, canonicalPixelDegrees;
@@ -190,7 +190,12 @@ void main(){
  if(terrainTreatment==1&&inside>.5){
   float y=max(lum(source),.002);
   // Shadow-side only: never lift NE1's already bright desert/highlights.
-  surface*=pow(min(y/.80,1.),.50);
+  surface*=pow(min(y/.80,1.),sourceReliefDetail==1?.12:.50);
+  if(sourceReliefDetail==1){
+   // Tone existing NASA/NE luminance only: no inferred normals or added detail.
+   float sy=max(lum(surface),.002);
+   surface=mix(vec3(sy),surface,.70)*(.22*pow(sy/.22,.88)/sy);
+  }
   // Limit the Gate1A amplification of baked shadows. This does NOT claim to
   // reconstruct true albedo or remove NE1's original embedded hillshade.
   if(demAmount>0.&&demBakedSuppression>0.)surface/=pow(min(y/.80,1.),.50*demBakedSuppression*demAmount);
@@ -233,6 +238,14 @@ void main(){
  // Sea retains actual raster surface variation; receives NO country chroma.
  vec3 sea=linearize(vec3(.012,.10,.19))*(.65+2.*pow(max(lum(source),.001),.4));
  vec3 color=mix(sea,land,cov.r);
+ if(sourceReliefDetail==1){
+  // Screen-space derivatives of the existing land coverage isolate coastlines;
+  // adjoining country polygons remain the same land value and add no borders.
+  vec2 px=1./vec2(textureSize(coverage,0));
+  float nearLand=max(max(texture(coverage,gisUv+vec2(px.x,0.)).r,texture(coverage,gisUv-vec2(px.x,0.)).r),max(texture(coverage,gisUv+vec2(0.,px.y)).r,texture(coverage,gisUv-vec2(0.,px.y)).r));
+  float coast=clamp(nearLand-cov.r,0.,1.);
+  color=mix(color,linearize(vec3(.46,.66,.67)),coast*.45);
+ }
  if(mode==2){frag=vec4(color,1.);return;}
  vec3 originalColor=color/(1.+color*.70);
  if(stage>=3){
@@ -393,7 +406,7 @@ function ribbon(rings){
  g.setAttribute('tangent',new THREE.Float32BufferAttribute(tan,2));g.setAttribute('side',new THREE.Float32BufferAttribute(side,1));
  g.setIndex(idx);return g;
 }
-export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null,outputRenderer=null,outputTarget=null,layoutPlan=null,contextTerrain=null,contextGeometries=[],projectionMode=null,terrainSources=null,boundaryTrace=null}){
+export async function createMapInfographicRenderer({canvas,plan,width=1080,height=1920,terrainTreatment='BAKED_RELIEF_V1',heightSource=null,outputRenderer=null,outputTarget=null,layoutPlan=null,contextTerrain=null,contextGeometries=[],projectionMode=null,terrainSources=null,boundaryTrace=null,sourceReliefDetail=false}){
  const geographicOptIn=projectionMode===GEOGRAPHIC_CAMERA_VERSION;
  const similarityOptIn=projectionMode===REFERENCE_SIMILARITY_SCHEMA;
  if(projectionMode!==null&&!similarityOptIn&&!geographicOptIn)throw Error('SIMILARITY_PROJECTION_MODE_UNSUPPORTED');
@@ -509,7 +522,7 @@ export async function createMapInfographicRenderer({canvas,plan,width=1080,heigh
   shadingStage:{value:0},
   bounds:{value:new THREE.Vector4(...b)},tileBounds:{value:new THREE.Vector4(...plan.assets.terrain.bounds)},
   primaryHue:{value:new THREE.Vector3(...theme.primary)},secondaryHue:{value:new THREE.Vector3(...theme.secondary)},
-  primaryStrength:{value:theme.primaryStrength},secondaryStrength:{value:theme.secondaryStrength},primaryLuminance:{value:theme.primaryLuminance??1},secondaryLuminance:{value:theme.secondaryLuminance??1},detailContrast:{value:theme.detailContrast??1},reliefStrength:{value:theme.relief},exposure:{value:theme.exposure},mode:{value:0},terrainTreatment:{value:terrainTreatment==='CURRENT'?0:1}};
+  primaryStrength:{value:theme.primaryStrength},secondaryStrength:{value:theme.secondaryStrength},primaryLuminance:{value:theme.primaryLuminance??1},secondaryLuminance:{value:theme.secondaryLuminance??1},detailContrast:{value:theme.detailContrast??1},reliefStrength:{value:theme.relief},exposure:{value:theme.exposure},mode:{value:0},sourceReliefDetail:{value:sourceReliefDetail?1:0},terrainTreatment:{value:terrainTreatment==='CURRENT'?0:1}};
  const terrainMaterial=mat(fullscreenVertex,geographicOptIn?geographicTerrainFragment:similarityOptIn?referenceSimilarityTerrainFragment():terrainFragment,uniforms),terrainScene=fullScene(terrainMaterial);
  const primaryGeometry=ribbon(primaryRings),secondaryGeometry=ribbon(secondaryRings),boundaryScene=new THREE.Scene(),glowScene=new THREE.Scene();
  function line(scene,g,pixels,color){const material=mat(ribbonVertex,rgbaFragment,{resolution:{value:new THREE.Vector2(width,height)},width:{value:pixels*scale},color:{value:new THREE.Vector4(...color)}},true);const mesh=new THREE.Mesh(g,material);scene.add(mesh);return mesh;}

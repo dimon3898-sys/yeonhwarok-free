@@ -1,3 +1,4 @@
+import {loadPhysicalContext} from './physical_context_v1.mjs';
 import {applyContinuousTerritory,continuousTerritoryAt} from './continuous_territory_runtime.mjs';
 import {territoryEffectsAt} from './territory_effects_v2.mjs';
 import {composePresentationFlowControls,highlightRingAt} from './presentation_flow.mjs';
@@ -41,6 +42,9 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
  assert(backend.includes('SwiftShader'),'UP2_FREE_SOFTWARE_BACKEND_REQUIRED');
  const renderer=new THREE.WebGLRenderer({canvas,context:gl,antialias:false});renderer.setPixelRatio(1);renderer.setSize(1080,1920,false);renderer.autoClear=false;
  renderer.outputColorSpace=THREE.LinearSRGBColorSpace;renderer.toneMapping=THREE.NoToneMapping;
+ const physicalContext=await loadPhysicalContext(p,scene.timing.total_frames);
+ const labelSpec=physicalContext?{enabled:true,items:[...(p.labels?.items??[]),...physicalContext.labels]}:p.labels;
+ const labelScene=physicalContext?{...scene,locations:[...scene.locations,...physicalContext.locations]}:scene;
  let labelPass=null;
  let factory,graphics,last,lastBasePixels,disposed=false;const passes=[];
  try{
@@ -49,9 +53,9 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
   // title slot in the new close view; visible presentation labels keep their checks.
   const layoutPlan=p.mapStyle?.preset==='REFERENCE_FOCUS_V2'?{...visualPlan,scale:{...visualPlan.scale,
    information:{...visualPlan.scale.information,title:false}}}:nativePlan;
-  factory=await createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment,boundaryTrace:p.mapStyle?.boundaryTrace,...(geographic?{projectionMode:GEOGRAPHIC_CAMERA_VERSION,terrainSources:sourceStyle.terrainLevels}:{})});
+  factory=await createMapInfographicRenderer({canvas,plan:visualPlan,layoutPlan,outputRenderer:renderer,terrainTreatment,boundaryTrace:p.mapStyle?.boundaryTrace,sourceReliefDetail:p.mapStyle?.sourceReliefDetail==='SOURCE_RELIEF_V1',...(geographic?{projectionMode:GEOGRAPHIC_CAMERA_VERSION,terrainSources:sourceStyle.terrainLevels}:{})});
   graphics=await createMovingGraphicPass({renderer,factory,width:1080,height:1920});
-  if(p.labels?.enabled===true&&p.labels.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
+  if(labelSpec?.enabled===true&&labelSpec.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
   // Derived plans are created in their consuming JS realm. The frozen owner's
   // canonical check is retained; JSON is the transport for authored inputs,
   // not a promise that Node/Chromium Math.log coefficients are bit-identical.
@@ -98,6 +102,8 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    const style=binding.presentationFlow?.style??selectEventLineStyle({role:'PRIMARY',theme:nativePlan.theme,primaryMaterialColor:nativePlan.theme.primary}),pass=createFlowGraphicPass({canvas,style,trail:binding.presentationFlow?.trail,previewStyle:binding.presentationFlow?.previewStyle});passes.push(pass);
    return{...binding,pass,style,analysisPrimitive:compileFlowRoute(binding.plan.intent,{project:analysisProject})};
   });
+  let contextPass=null;
+  if(physicalContext){const style=copy(defaultAreaStyle);style.FRONT={...style.FRONT,width:1.5,coreColor:[.48,.84,.85,.7],glowRadius:0,glowGain:0};contextPass=createAreaOverlayPass({canvas,style});passes.push(contextPass);}
   const deltaPasses=new Map();
   function deltaPass(kind){if(!deltaPasses.has(kind)){const style=copy(defaultAreaStyle);style.AREA={...style.AREA,fillColor:kind==='added'?[1,.85,.25,.24]:[.9,.4,.18,.16],coreColor:kind==='added'?[1,.94,.5,.95]:[1,.5,.25,.65],glowColor:[1,.8,.22,1],glowGain:.18,glowRadius:2.4,width:3.2};if(kind==='moving_boundary'){style.AREA={...style.AREA,fillColor:[1,.92,.38,.8],coreColor:[1,.92,.38,0],glowGain:0,glowRadius:0,width:0};}const pass=createAreaOverlayPass({canvas,style});passes.push(pass);deltaPasses.set(kind,pass);}return deltaPasses.get(kind);}
   const ringBindings=p.highlights.filter(h=>h.ring).map(h=>{const pass=createFlowGraphicPass({canvas,style:{width:2,glowRadius:1,glowGain:0,coreColor:h.ring.color,glowColor:h.ring.color},pulseStyle:{width:h.ring.widthPx??1.6,glowRadius:h.ring.glowRadiusPx??0,glowGain:h.ring.glowGain??0}});passes.push(pass);return{highlight:h,pass};});
@@ -126,8 +132,9 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    const layoutAudit=hiddenNative?{validation:{valid:null},scope:'NATIVE_GRAPHICS_NOT_DRAWN'}:auditRuntimeLayout({plan:layoutPlan,screen:project});
    if(!hiddenNative)assert(layoutAudit.validation.valid,'UP2_CURRENT_LAYOUT_FAILED');
    let markerRows=markersAt(displayFrame),preparedLabel=null;
-   if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
+   if(labelPass)({markerRows,layout:preparedLabel}=resolvePresentationMarkerLayout(markerRows,rows=>labelPass.prepare({labels:labelSpec,scene:labelScene,frame:displayFrame,project,safeArea:safe,protectedBoxes:rows})));
    const native=factory.renderFrame(mapOptions),boundarySegments=presentationBoundarySegments({presentation:p,nativePlan:geographic&&scene.camera_intent.native_context?{...visualPlan,secondary:scene.camera_intent.native_context.country_ids.filter(id=>id!==visualPlan.primary)}:visualPlan,project,frame:displayFrame});
+   const contextDraw=contextPass?.draw({controls:{contextLines:physicalContext.lines},project,safeArea:[0,0,1080,1920],protectedGraphics:(preparedLabel?.drawn??[]).map(x=>({box:x.box})),primaryMaterialColor:nativePlan.theme.primary});
    const basePixels=factory.readPixels();lastBasePixels=basePixels;const features=[],localFrame=displayFrame-engines.globalEventStartFrame;
    if(localFrame>=0)for(const binding of bindings){assert(localFrame<binding.plan.totalFrames,'UP2_ENGINE_FRAME_BINDING_REQUIRED');
     if(binding.engine==='EXISTING_AREA_V3'){
@@ -161,15 +168,16 @@ export async function createPresentationRuntime({canvas,scene,nativePlan,baseCam
    // The draw/geometry guards still apply; do not require a changed byte before visibility.
    if(features.some(f=>f.engine==='EXISTING_FLOW_V2'&&f.routeFraction>0)||features.some(f=>f.engine==='EXISTING_AREA_V3'&&f.sourceAreas.some(a=>a.alpha>0.5/255&&a.coverage>0)))assert(featureChangedPixels>0,'UP2_ACTUAL_FEATURE_PIXELS_MISSING');
    renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
-   const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:p.labels,scene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
+   const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:labelSpec,scene:labelScene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
    gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');
    last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,nvidiaVerified:false,qualityApproved:false,
     camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},
     fixedModelCamera:{sourceFrame:presentationPlan.analysisSourceFrame,state:presentationPlan.analysisCamera,scope:'UNCHANGED_FLOW_TIMING_ONLY_NEVER_CURRENT_MOVING_CAMERA'},
     layout:{valid:layoutAudit.validation.valid,nativeAuditScope:layoutAudit.scope??'CURRENT_NATIVE_LAYOUT',visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
-    material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
+    material:{styleId:sourceStyle.styleId,terrainTreatment,terrainSHA256:source.sha256,sourceOriginalSHA256:source.sourceOriginalSHA256,bounds:copy(source.bounds),cameraBounds:copy(bounds),minimumSourceGutterPixels:gutter,fullViewportCovered:true,demEnabled:false,sourceReliefDetail:p.mapStyle?.sourceReliefDetail??null,defaultCountryTintEnabled:mapOptions.mode===0,classification:source.classification},
     suppliedLocations:scene.locations.map(l=>({id:l.id,anchor:copy(l.anchor),projected:project(l.anchor),inSafe:inside(project(l.anchor),safe)})),markers:copy(markerRows),features,featureChangedPixels,
     featurePixelComparison:'ACTUAL_NATIVE_MAP_READPIXELS_BEFORE_AND_AFTER_FEATURE_PASSES_BEFORE_MARKERS',inputTrace:copy(inputTrace),sourceGeometryBinding:engines.sourceGeometryBinding,nativeDraw:frame+1,glError:native.glError};
+   if(physicalContext)last.physicalContext={source:physicalContext.source,sourceSHA256:physicalContext.sourceSHA256,derivedSHA256:physicalContext.derivedSHA256,precision:physicalContext.precision,selectedLabels:physicalContext.labels.map(x=>x.id),draw:contextDraw,historicalCitiesAdded:0,modernBordersAdded:0};
    if(p.mapStyle)last.presentationMap={preset:p.mapStyle.preset,countryId:nativePlan.primary,countryFillEnabled:p.mapStyle.countryFill,boundariesEnabled:mapOptions.boundaries,glowEnabled:mapOptions.glow,reveal:mapOptions.reveal.primary,protectedBoundarySegments:boundarySegments.length,boundaryTrace:copy(factory.evidence.boundaryTrace??null),geometryOwner:'UNCHANGED_NATIVE_COUNTRY_GIS',projectionOwner:'CURRENT_FACTORY_SCREEN',nativeTextEnabled:false,areaViewportPolicy:p.mapStyle.preset==='REFERENCE_FOCUS_V2'?'NATIVE_VIEWPORT_CLIP_UNCHANGED_GEOMETRY':'WHOLE_SOURCE_SAFE',effectiveTheme:copy(visualPlan.theme)};
    if(ringBindings.length)last.locationRings=locationRings;
    if(labelDraw){last.layout.visiblePresentationLabels=labelDraw.visibleCount>0;last.presentationLabels=copy(labelDraw);}
