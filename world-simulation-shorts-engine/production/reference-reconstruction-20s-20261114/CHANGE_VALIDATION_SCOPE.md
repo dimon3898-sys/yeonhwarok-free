@@ -17,3 +17,6 @@
 7. 600프레임 prepared object와 동일 wire를 중복 저장하면 기존 캐시 32MiB 한도를 넘는다. 새 history 캐시에만 검증된 wire 한 부를 저장하고 재사용 때 동일 object로 복원·검증한다. 일반 캐시 한도·권한·해시·잠금은 수정하지 않는다.
 
 8. 모바일 Studio가 내부적으로 6/10초만 인식해 새 20초 preflight 표시를 거부한다. 명시적 HISTORICAL 20초/600 입력과 완전한 request wrapper를 수용하고 600프레임 표시를 추가한다. 기존 동의·정책·시작 버튼의 조건은 유지한다.
+
+9. 최종 closure pin은 모바일 변경 후 갱신됐다. 이전 Controller 계약·캐시 PASS는 보존하고, 새 이미지 내부 473파일·외부 의존 및 Controller→Worker의 정확한 wire 전달만 실제 이미지에서 검사한다. 기존 이미지와 bytes가 달라 common publication gate의 새 이미지 admission이 필요하다.
+10. 공통 게시 정책의 Worker/backend 전체 해시는 신규 600프레임 selector 변경으로 무효화됐다. 기존 정책·launch/publication AST 보존 증거를 기준으로 policy v2에 새 정확 해시와 600 계약을 추가한다. 승인·비용·권한·잠금·게시 검사 자체는 유지한다.

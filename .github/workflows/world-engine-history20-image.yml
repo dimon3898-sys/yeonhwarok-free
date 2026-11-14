@@ -1,0 +1,132 @@
+name: WORLD ENGINE history 20s formal image
+on:
+  push:
+    branches: [fix/reference-6s-formal-admission-20261113]
+    paths: ['.github/workflows/world-engine-history20-image.yml']
+permissions:
+  contents: write
+  packages: write
+concurrency:
+  group: world-engine-history20-image
+  cancel-in-progress: false
+jobs:
+  history-image:
+    if: >-
+      github.run_attempt == 1 && github.event.repository.private == false &&
+      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
+      github.event.before == '412b753556926675111da32b4da634933171bf48' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY20_IMAGE_A1'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NVIDIA_VISIBLE_DEVICES: void
+      GUARD: world-simulation-shorts-engine/release-guard
+      TARGET: world-simulation-shorts-engine/production/reference-reconstruction-20s-20261114
+    steps:
+      - name: Fetch common release policy from this exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: .world-engine-guard-control
+          persist-credentials: false
+          sparse-checkout: |
+            .github/actions/world-engine-release-guard
+            world-simulation-shorts-engine/release-guard
+      - name: Install mandatory common image publication gate
+        uses: ./.world-engine-guard-control/.github/actions/world-engine-release-guard
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /.github/workflows/
+            /world-simulation-shorts-engine/release-guard/
+            /world-simulation-shorts-engine/production/reference-reconstruction-20s-20261114/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact sealed delta and preserve prior validation
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,subprocess
+          from pathlib import Path
+          p=Path(os.environ['TARGET']);v=json.loads((p/'GPU_CONNECTION_VALIDATION.json').read_bytes())
+          assert v['status']=='PASS_FREE_SOURCE_CONTRACT_SCOPE' and v['gpuStarts']==0
+          for row in v['evidence']:
+              assert hashlib.sha256((p/row['file']).read_bytes()).hexdigest()==row['sha256']
+          package=json.loads((p/'PACKAGE.json').read_bytes())
+          paths=['/.github/workflows/','/world-simulation-shorts-engine/release-guard/','/'+str(p)+'/']
+          paths += ['/'+row['path'] for row in package['files']]
+          subprocess.run(['git','sparse-checkout','set','--no-cone','--stdin'],input='\n'.join(paths)+'\n',text=True,check=True)
+          policy=json.loads(Path(os.environ['GUARD']+'/REQUIRED_FIXES.json').read_bytes())['reviewed600Extension']
+          for prefix in ['validation','workerEvidence','backendEvidence']:
+              assert hashlib.sha256(Path(policy[prefix]).read_bytes()).hexdigest()==policy[prefix+'SHA256']
+          print('Remote evidence hashes reused; no previous suite or video rerun')
+          PY
+          python -m pip install --disable-pip-version-check PyYAML==6.0.3
+          python -B "${GUARD}/audit_workflows.py" --repo . --output "${WORLD_ENGINE_GUARD_EVIDENCE}/WORKFLOW_COVERAGE.json"
+      - name: Enable existing disposable builder compatibility
+        run: |
+          sudo python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/etc/docker/daemon.json');d=json.loads(p.read_text()) if p.exists() else {}
+          d.setdefault('features',{})['containerd-snapshotter']=True;d['max-download-attempts']=1
+          p.write_text(json.dumps(d)+'\n')
+          PY
+          sudo systemctl restart docker
+      - name: Build exact delta using existing formal Dockerfile generator
+        run: |
+          set -euo pipefail
+          python -B "${GUARD}/package_delta.py" "${TARGET}/PACKAGE.json" "${RUNNER_TEMP}/history-image-context"
+          IMAGE="ghcr.io/dimon3898-sys/world-simulation-shorts-engine:history20-${GITHUB_SHA:0:12}-${GITHUB_RUN_ID}"
+          if docker manifest inspect "${IMAGE}" >/dev/null 2>&1; then echo IMMUTABLE_TAG_EXISTS; exit 1; fi
+          docker build --platform linux/amd64 --label "org.opencontainers.image.revision=${GITHUB_SHA}" --label 'org.opencontainers.image.source=https://github.com/dimon3898-sys/yeonhwarok-free' -t "${IMAGE}" "${RUNNER_TEMP}/history-image-context"
+          printf '%s\n' "${IMAGE}" > "${RUNNER_TEMP}/history-image-tag"
+      - name: Actual-image source and Controller Worker transport without GPU
+        timeout-minutes: 8
+        run: |
+          set -euo pipefail
+          IMAGE="$(cat "${RUNNER_TEMP}/history-image-tag")"
+          docker run --rm -i --network none --read-only --user 1000:1000 --cap-drop ALL --security-opt no-new-privileges --tmpfs /history-gate:rw,nosuid,nodev,size=1g,mode=700,uid=1000,gid=1000 --tmpfs /tmp:rw,nosuid,nodev,size=128m,mode=1777 -e NVIDIA_VISIBLE_DEVICES=void -e PYTHONDONTWRITEBYTECODE=1 --mount "type=bind,src=${GITHUB_WORKSPACE}/${TARGET}/probe_history_image.py,dst=/history-probe.py,readonly" --entrypoint /usr/bin/python3 "${IMAGE}" -I -B /history-probe.py > "${WORLD_ENGINE_GUARD_EVIDENCE}/HISTORY_IMAGE_TRANSPORT.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          x=json.loads((Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE'])/'HISTORY_IMAGE_TRANSPORT.json').read_bytes())
+          assert x['status']=='PASS_ACTUAL_IMAGE_CONTROLLER_WORKER_TRANSPORT' and x['GPUExecutions']==0 and x['totalFrames']==600 and x['workerInputBytesUnchanged']
+          PY
+      - name: Verify actual image with unchanged mandatory protection gates
+        run: |
+          python -B "${GUARD}/control.py" verify --image "$(cat "${RUNNER_TEMP}/history-image-tag")" --evidence "${WORLD_ENGINE_GUARD_EVIDENCE}"
+      - name: Publish through common image interlock and confirm remote digest
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          docker push "$(cat "${RUNNER_TEMP}/history-image-tag")"
+          docker logout ghcr.io
+      - name: Preserve exact image evidence on task branch
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os,shutil
+          from pathlib import Path
+          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['TARGET'])/'image-a1';out.mkdir(exist_ok=False)
+          if src.exists():shutil.copytree(src,out,dirs_exist_ok=True)
+          (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'buildCommit':os.environ['GITHUB_SHA'],'releaseApproved':(out/'RELEASE_APPROVAL.json').exists(),'GPUExecutions':0})+'\n')
+          PY
+          BRANCH=fix/reference-6s-formal-admission-20261113
+          test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
+          git config user.name 'WORLD ENGINE history image evidence'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --sparse "${TARGET}/image-a1"
+          git commit -m 'Preserve formal history20 actual-image evidence [skip ci]'
+          git push origin "HEAD:refs/heads/${BRANCH}"
+      - name: Upload immutable evidence for interruption recovery
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: history20-image-${{ github.run_id }}
+          path: ${{ runner.temp }}/world-engine-release-evidence/
+          if-no-files-found: warn
+          retention-days: 90
