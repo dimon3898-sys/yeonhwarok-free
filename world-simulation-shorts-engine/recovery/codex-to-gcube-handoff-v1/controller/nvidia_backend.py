@@ -69,7 +69,8 @@ def _runtime_environment(environ=None):
         '__GLX_VENDOR_LIBRARY_NAME', 'LIBGL_DRIVERS_PATH', 'CHROME_PATH',
         'PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH', 'WORLD_ENGINE_RENDER_MODE',
         'WORLD_ENGINE_STARTUP_MODE', 'WORLD_ENGINE_GPU_PROFILE', 'WORLD_ENGINE_NODE_DEPS',
-        'WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST', 'GPU_BACKEND'}
+        'WORLD_ENGINE_UNIVERSAL_IMAGE_DIGEST', 'GPU_BACKEND',
+        'WORLD_ENGINE_DATA_ROOT', 'WORLD_ENGINE_DATA_CATALOG_SHA256'}
     return {key: value for key, value in (os.environ if environ is None else environ).items() if key in names}
 
 

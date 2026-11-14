@@ -131,7 +131,7 @@ def _validate_capture(output, plan):
             or receipt.get('visualQualityApproved') is not False
             or receipt.get('video', {}).get('sha256') != sha(video.read_bytes())):
         raise RuntimeError('HANDOFF_NVIDIA_CAPTURE_RECEIPT_INVALID')
-    if duration == 20 and receipt.get('historicalAdmission') != plan.get('historicalAdmission'):
+    if plan.get('simulationType') == 'HISTORICAL' and receipt.get('historicalAdmission') != plan.get('historicalAdmission'):
         raise RuntimeError('HANDOFF_HISTORY_RECEIPT_BINDING_CHANGED')
     proofs = receipt.get('nativeStability', [])
     if [row.get('segmentIndex') for row in proofs] != list(range(len(plan['runtime']['segments']))):
@@ -171,6 +171,13 @@ def _validate_capture(output, plan):
                 or any(type(row.get('frame')) is not int for row in rows))
             or any(row.get('diagnostic', {}).get('glError') != 0 for row in rows)):
         raise RuntimeError('HANDOFF_ACTUAL_FRAME_EVIDENCE_INVALID')
+    if plan.get('historicalAdmission', {}).get('scope') == 'HISTORICAL_AUTHORED_WINDOW_V2':
+        window = plan['historicalAdmission']['timeline']['window']
+        if any(type(row.get('diagnostic', {}).get('sourceFrame')) is not int
+               or type(row.get('diagnostic', {}).get('outputFrame')) is not int
+               or row['diagnostic']['sourceFrame'] != window['startFrame'] + index
+               or row['diagnostic']['outputFrame'] != index for index, row in enumerate(rows)):
+            raise RuntimeError('HANDOFF_HISTORY_WINDOW_FRAME_EVIDENCE_INVALID')
     return {'schema': f'WORLD_ENGINE_NVIDIA_{label}_SECOND_MEDIA_VERIFY_V1',
             'videoSHA256': sha(video.read_bytes()), 'frames': total_frames, 'width': 1080,
             'height': 1920, 'fps': 30, 'durationSeconds': duration, 'fullDecode': 'PASS',

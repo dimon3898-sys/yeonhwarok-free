@@ -14,6 +14,8 @@ RECOVERY = HERE.parents[1]
 REPO = HERE.parents[3]
 PROFILE = 'GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1'
 HISTORY_PROFILE = 'GCUBE_NVIDIA_CONTINUOUS_HISTORY_20S_V1'
+WINDOW_PROFILE = 'GCUBE_NVIDIA_HISTORICAL_V2'
+WINDOW_RUNTIME_PROFILE = 'HISTORICAL_AUTHORED_WINDOW_V2'
 REQUEST = 'WORLD_ENGINE_NVIDIA_PRESENTATION_REQUEST_V1'
 PLAN = 'WORLD_ENGINE_NVIDIA_PRESENTATION_PLAN_V1'
 SHA = re.compile(r'[0-9a-f]{64}\Z')
@@ -108,7 +110,14 @@ def verify_manifest(file, expected, *, repo=REPO, require_external=False):
             'externalParentContractVerified': require_external}
 
 
+def window_history(plan):
+    return (isinstance(plan, dict) and isinstance(plan.get('historicalAdmission'), dict)
+            and plan['historicalAdmission'].get('scope') == WINDOW_RUNTIME_PROFILE)
+
+
 def profile_for(plan):
+    if window_history(plan):
+        return WINDOW_PROFILE
     return HISTORY_PROFILE if isinstance(plan, dict) and plan.get('durationSeconds') == 20 else PROFILE
 
 
@@ -120,7 +129,17 @@ def duration_contract(plan):
             or plan['totalFrames'] != plan['durationSeconds'] * 30
             or type(plan.get('fps')) is not int or plan['fps'] != 30):
         raise RuntimeError('HANDOFF_EXACT_NONHISTORICAL_SIX_SECOND_PLAN_REQUIRED')
-    if plan['durationSeconds'] == 20:
+    if window_history(plan):
+        admission = plan['historicalAdmission']
+        if (plan.get('simulationType') != 'HISTORICAL'
+                or plan.get('renderProfile', {}).get('profileId') != WINDOW_PROFILE
+                or admission.get('schema') != 'WORLD_ENGINE_AUTHORED_HISTORY_ADMISSION_V2'
+                or admission.get('status') != 'PASS' or admission.get('simulationType') != 'HISTORICAL'
+                or admission.get('paidExecutionAllowed') is not False
+                or not SHA.fullmatch(str(admission.get('runtimeSegmentSHA256')))
+                or not SHA.fullmatch(str(admission.get('authoredInputSHA256')))):
+            raise RuntimeError('HANDOFF_REVIEWED_HISTORY_WINDOW_REQUIRED')
+    elif plan['durationSeconds'] == 20:
         admission = plan.get('historicalAdmission', {})
         if (plan.get('simulationType') != 'HISTORICAL'
                 or plan.get('renderProfile', {}).get('profileId') != HISTORY_PROFILE
@@ -138,7 +157,7 @@ def validate_plan(plan, *, image_digest, source_sha):
             or plan.get('resolution') != {'width': 1080, 'height': 1920}
             or plan.get('aspectRatio') != '9:16'
             or plan.get('audioSettings') != {'enabled': False, 'mode': 'SILENT'}
-            or (plan.get('simulationType') != 'HISTORICAL' if timing['durationSeconds'] == 20
+            or (plan.get('simulationType') != 'HISTORICAL' if timing['durationSeconds'] == 20 or window_history(plan)
                 else plan.get('simulationType') not in {'GENERAL', 'FICTIONAL'})):
         raise RuntimeError('HANDOFF_EXACT_NONHISTORICAL_SIX_SECOND_PLAN_REQUIRED')
     profile = plan.get('renderProfile', {})
@@ -154,8 +173,9 @@ def validate_plan(plan, *, image_digest, source_sha):
             or ('durationSeconds' in runtime and runtime['durationSeconds'] != timing['durationSeconds'])
             or not SHA.fullmatch(str(plan.get('sourceQualificationSHA256')))):
         raise RuntimeError('HANDOFF_RUNTIME_WIRE_BINDING_CHANGED')
-    if timing['durationSeconds'] == 20:
-        if (runtime.get('profile') != 'HISTORICAL_CONTINUOUS_600F_V1'
+    if timing['durationSeconds'] == 20 or window_history(plan):
+        expected_profile = WINDOW_RUNTIME_PROFILE if window_history(plan) else 'HISTORICAL_CONTINUOUS_600F_V1'
+        if (runtime.get('profile') != expected_profile
                 or runtime.get('simulationType') != 'HISTORICAL'
                 or runtime.get('historicalAdmission') != plan['historicalAdmission']
                 or len(runtime.get('segments', [])) != 1
@@ -164,9 +184,20 @@ def validate_plan(plan, *, image_digest, source_sha):
     cursor = 0
     for segment in runtime.get('segments', []):
         scene = segment.get('scene', {})
+        scene_frames_match = scene.get('timing', {}).get('total_frames') == segment.get('endFrame', -1) - cursor
+        if window_history(plan):
+            window = segment.get('timelineWindow', {})
+            scene_frames_match = (set(window) == {'startFrame', 'endFrame'}
+                and type(window.get('startFrame')) is int and type(window.get('endFrame')) is int
+                and 0 <= window['startFrame'] < window['endFrame'] <= scene.get('timing', {}).get('total_frames', 0)
+                and window['endFrame'] - window['startFrame'] == segment.get('endFrame', -1) - cursor
+                and window == plan['historicalAdmission'].get('timeline', {}).get('window')
+                and scene.get('timing', {}).get('total_frames') == plan['historicalAdmission'].get('timeline', {}).get('totalFrames'))
+        elif 'timelineWindow' in segment:
+            raise RuntimeError('HANDOFF_LEGACY_WINDOW_FORBIDDEN')
         if (segment.get('startFrame') != cursor or type(segment.get('endFrame')) is not int
                 or segment['endFrame'] <= cursor or scene.get('timing', {}).get('fps') != 30
-                or scene.get('timing', {}).get('total_frames') != segment['endFrame'] - cursor
+                or not scene_frames_match
                 or scene.get('metadata', {}).get('output') != {'width': 1080, 'height': 1920, 'fps': 30, 'audio': False}):
             raise RuntimeError('HANDOFF_SCENE_FRAME_BINDING_CHANGED')
         cursor = segment['endFrame']

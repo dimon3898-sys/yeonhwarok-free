@@ -9,7 +9,7 @@ import json
 HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
-from common import PLAN, PROFILE, HISTORY_PROFILE, REQUEST, RECOVERY, canonical, duration_contract, load, mvp, sha, verify_manifest
+from common import PLAN, PROFILE, HISTORY_PROFILE, WINDOW_PROFILE, REQUEST, RECOVERY, canonical, duration_contract, load, mvp, sha, verify_manifest
 
 # Closed source-literal vocabulary from presentation_prompt.mjs, prompt_pipeline.mjs,
 # and presentation_plan.mjs at af934796. Unknown values never become log text.
@@ -289,8 +289,7 @@ class NvidiaPresentationController(base.StudioController):
                      'preparedWireJSON': wire,
                      'input': {'privateWorkspaceRoot': str(self.control_root),
                         'publicExportRoot': str(self.export_root)}}, timeout=150,
-                    maximum_input_bytes=24 * 1024**2 if prepared.get('profile') == 'HISTORICAL_CONTINUOUS_600F_V1'
-                    and prepared.get('totalFrames') == 600 else 8 * 1024**2)
+                    maximum_input_bytes=24 * 1024**2 if prepared.get('profile') in {'HISTORICAL_CONTINUOUS_600F_V1', 'HISTORICAL_AUTHORED_WINDOW_V2'} else 8 * 1024**2)
                 if result.get('status') != 'PASS':
                     raise module.StudioError('UP2_STORED_SOURCE_QUALIFICATION_INVALID',
                                              fields=[{'code': result.get('code')}])
@@ -308,6 +307,13 @@ class NvidiaPresentationController(base.StudioController):
                       and pipeline.get('durationSeconds') == 20
                       and pipeline.get('historicalAdmission', {}).get('status') == 'PASS'
                       and pipeline.get('historicalAdmission', {}).get('scope') == 'HISTORICAL_CONTINUOUS_600F_V1')
+        history_window = (pipeline.get('simulationType') == 'HISTORICAL'
+                          and pipeline.get('historicalAdmission', {}).get('scope') == 'HISTORICAL_AUTHORED_WINDOW_V2'
+                          and pipeline.get('historicalAdmission', {}).get('schema') == 'WORLD_ENGINE_AUTHORED_HISTORY_ADMISSION_V2'
+                          and pipeline.get('historicalAdmission', {}).get('status') == 'PASS'
+                          and pipeline.get('totalFrames') in {180, 300, 600}
+                          and pipeline.get('durationSeconds') == pipeline['totalFrames'] // 30)
+        historical = historical or history_window
         if ((not historical and (pipeline.get('simulationType') not in {'GENERAL', 'FICTIONAL'}
                 or pipeline.get('totalFrames') not in {180, 300})) or pipeline.get('fps') != 30
                 or (pipeline.get('totalFrames') == 300 and pipeline.get('durationSeconds') != 10)
@@ -315,7 +321,7 @@ class NvidiaPresentationController(base.StudioController):
                 or pipeline.get('sourceAdmission', {}).get('status') != 'PASS'):
             invalid('HANDOFF_QUALIFIED_NONHISTORICAL_180_FRAMES_REQUIRED')
         frames = pipeline['totalFrames']
-        profile = HISTORY_PROFILE if historical else PROFILE
+        profile = WINDOW_PROFILE if history_window else HISTORY_PROFILE if historical else PROFILE
         plan = {'schema': PLAN, 'totalFrames': frames, 'durationSeconds': frames // 30, 'fps': 30,
             'resolution': {'width': 1080, 'height': 1920}, 'aspectRatio': '9:16',
             'audioSettings': {'enabled': False, 'mode': 'SILENT'},
