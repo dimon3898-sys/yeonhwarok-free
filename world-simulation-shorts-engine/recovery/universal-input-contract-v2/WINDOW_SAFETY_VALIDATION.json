@@ -1,0 +1,39 @@
+{
+  "status": "PASS_CHANGED_GUARDS_ONLY",
+  "reason": "Code review discovered label layout hysteresis. Unsupported offset label state is rejected before source preparation; current screen labels are stateless.",
+  "checks": [
+    {
+      "name": "PART_1_NEW_FAIL_CLOSED_GUARDS_KEEP_COMPILED_RUNTIME_IDENTICAL",
+      "status": "PASS"
+    },
+    {
+      "name": "PART_2_NEW_FAIL_CLOSED_GUARDS_KEEP_COMPILED_RUNTIME_IDENTICAL",
+      "status": "PASS"
+    },
+    {
+      "name": "PART_3_NEW_FAIL_CLOSED_GUARDS_KEEP_COMPILED_RUNTIME_IDENTICAL",
+      "status": "PASS"
+    },
+    {
+      "name": "NULL_WINDOW",
+      "status": "PASS_REJECTED",
+      "code": "WINDOW_REQUIRED"
+    },
+    {
+      "name": "STATEFUL_GEOGRAPHIC_LABEL_OFFSET",
+      "status": "PASS_REJECTED",
+      "code": "STATEFUL_LABEL_WINDOW_NOT_ADMITTED"
+    },
+    {
+      "name": "STATEFUL_PHYSICAL_CONTEXT_OFFSET",
+      "status": "PASS_REJECTED",
+      "code": "STATEFUL_LABEL_WINDOW_NOT_ADMITTED"
+    }
+  ],
+  "limitations": [
+    "Geographic/physical labels at a nonzero window need a separately validated carry-state contract. No silent reset is permitted."
+  ],
+  "controllerNormalizationReruns": 0,
+  "rendererExecutions": 0,
+  "GPUExecutions": 0
+}
