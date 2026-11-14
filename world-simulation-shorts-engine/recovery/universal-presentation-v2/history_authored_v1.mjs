@@ -51,6 +51,10 @@ export async function compileAuthoredHistory(input){
  check(Object.values(t).every(Number.isSafeInteger)&&t.territoryStartFrame>=2&&t.finalHoldFrames>=30&&t.territoryEndFrame>t.territoryStartFrame&&t.territoryEndFrame<=n-t.finalHoldFrames,'TIMING_RANGE');
  check(exact(input.presentation,['camera','mapStyle','territoryColors','labels']),'PRESENTATION_FIELDS');
  const source=await reviewedSource(input.source),s=copy(source.segment),scene=s.scene,p=s.presentation;
+ // Freeze the already-qualified geographic source, rather than carrying AUTO
+ // into an execution request. This changes display source selection only.
+ check(typeof source.segment.regionEvidence?.sourceId==='string','PINNED_MAP_SOURCE_REQUIRED');
+ s.region.sourceId=source.segment.regionEvidence.sourceId;
  const effect=p.territoryChanges.items[0];check(t.territoryEndFrame-t.territoryStartFrame===effect.continuous.frames.length,'REUSED_GEOMETRY_TIME_BINDING');
  s.startFrame=0;s.endFrame=n;
  scene.timing={...scene.timing,total_frames:n,duration_seconds:20,initial_reveal_frames:t.territoryStartFrame,state_transition_frames:n-t.finalHoldFrames-t.territoryStartFrame,action_frames:n-t.finalHoldFrames,final_hold_frames:t.finalHoldFrames};

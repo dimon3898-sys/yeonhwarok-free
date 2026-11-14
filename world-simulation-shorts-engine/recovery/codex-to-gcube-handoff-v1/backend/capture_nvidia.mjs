@@ -80,6 +80,10 @@ export async function prepareNvidiaRuntimeRequest({request,cacheRoot,privateWork
 
 export async function verifyNvidiaPreparedRuntimeRequest({prepared,privateWorkspaceRoot,publicExportRoot}={}){
  await assertPrivateWorkspace({privateWorkspaceRoot,publicExportRoot});
+ if(prepared?.durationSeconds===20){
+  const request={...prepared,schema:'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2',segments:prepared.segments.map(s=>Object.fromEntries(['sceneId','startFrame','endFrame','scene','region','presentation','inputTrace'].map(k=>[k,s[k]])))};
+  await verifyAuthoredHistoryRuntime(request);
+ }
  await verifyGeneratedSources();
  const {verifyPreparedRuntimeRequest}=await import(pathToFileURL(path.join(ROOT,'capture_vulkan.generated.mjs')).href);
  return verifyPreparedRuntimeRequest(prepared,{privateWorkspaceRoot,publicExportRoot});

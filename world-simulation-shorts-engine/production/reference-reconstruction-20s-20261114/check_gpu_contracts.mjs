@@ -1,0 +1,38 @@
+/** New profile boundary tests only. No browser, render, worker start or GPU. */
+import fs from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import {compileAuthoredHistory,verifyAuthoredHistoryRuntime} from '../../recovery/universal-presentation-v2/history_authored_v1.mjs';
+import {runtimeDurationContract,PROFILE,HISTORY_PROFILE,canonicalJSON,validateExecutionPermit} from '../../recovery/codex-to-gcube-handoff-v1/backend/profile_contract.mjs';
+import {validateRuntimeRequest} from '../../recovery/codex-to-gcube-handoff-v1/capture_vulkan.generated.mjs';
+import {verifyGeneratedSources} from '../../recovery/codex-to-gcube-handoff-v1/backend/capture_nvidia.mjs';
+import {createRecorder} from '../../recovery/codex-to-gcube-handoff-v1/backend/capture_operation_diagnostics.mjs';
+const base=new URL('./',import.meta.url),input=JSON.parse(await fs.readFile(new URL('FINAL_20S_INPUT.json',base))),checks=[];
+const pass=(name,evidence={})=>checks.push({name,status:'PASS',evidence}),hash=v=>createHash('sha256').update(typeof v==='string'||Buffer.isBuffer(v)?v:canonicalJSON(v)).digest('hex');
+const c=await compileAuthoredHistory(input.prompt),r={schema:'WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2',totalFrames:600,durationSeconds:20,profile:'HISTORICAL_CONTINUOUS_600F_V1',simulationType:'HISTORICAL',historicalAdmission:c.historicalAdmission,sourceInputSHA256:c.inputSHA256,segments:c.renderRequests,transitions:[],inputTrace:c.inputTrace};
+assert.equal(runtimeDurationContract(r).profile,HISTORY_PROFILE);validateRuntimeRequest(r);await verifyAuthoredHistoryRuntime(r);
+pass('EXPLICIT_HISTORY_600_RUNTIME_ADMISSION',{runtimeSHA256:hash(r),continuousSHA256:c.historicalAdmission.source.continuousSHA256,sourceEvidence:c.historicalAdmission.sourceEvidence});
+assert.deepEqual(r.segments[0].presentation.camera,input.prompt.presentation.camera);assert.deepEqual(r.segments[0].presentation.labels,input.prompt.presentation.labels);assert.equal(r.segments[0].presentation.mapStyle.physicalContext,undefined);assert.equal(r.segments[0].region.sourceId,'NASA_BMNG_EURASIA_PYRAMID_V1');
+pass('AUTHORED_CAMERA_LABEL_AND_EXPLICIT_MAP_REACH_RENDER_SEGMENT');
+async function reject(name,edit,pattern){const x=structuredClone(input.prompt);edit(x);await assert.rejects(()=>compileAuthoredHistory(x),pattern);pass(name);}
+await reject('UNKNOWN_INPUT_REJECTED',x=>x.hiddenCamera='ignored',/INPUT_FIELDS/);
+await reject('GENERAL_DISGUISE_REJECTED',x=>x.simulationType='GENERAL',/EXPLICIT_PROFILE/);
+await reject('SOURCE_HASH_TAMPER_REJECTED',x=>x.source.runtimeSHA256='0'.repeat(64),/SOURCE_REFERENCE/);
+await reject('UNSOURCED_PERIOD_REJECTED',x=>x.source.periods[1].end='1216',/SOURCE_REFERENCE/);
+await reject('599_FRAME_OUTPUT_REJECTED',x=>x.output.totalFrames=599,/EXACT_600/);
+await reject('INTERPOLATION_FRAME_COUNT_CHANGE_REJECTED',x=>x.timing.territoryEndFrame--,/REUSED_GEOMETRY/);
+await reject('CAMERA_GAP_REJECTED',x=>x.presentation.camera.frames.pop(),/GEOGRAPHIC|PRESENTATION/);
+const bad=structuredClone(r);bad.segments[0].scene.geometries[0].geometry.coordinates[0][0][0][0]+=.001;
+await assert.rejects(()=>verifyAuthoredHistoryRuntime(bad),/RUNTIME_SOURCE_OR_DISPLAY_CHANGED/);pass('RUNTIME_GEOMETRY_TAMPER_REJECTED');
+const noAdmission={...r};delete noAdmission.historicalAdmission;assert.throws(()=>runtimeDurationContract(noAdmission),/REVIEWED_CONTINUOUS/);pass('600_WITHOUT_HISTORY_ADMISSION_REJECTED');
+for(const d of [6,10])assert.deepEqual(runtimeDurationContract({totalFrames:d*30,...(d===10?{durationSeconds:d}:{})}),{durationSeconds:d,totalFrames:d*30,profile:PROFILE});pass('CHANGED_BOUNDARY_PRESERVES_LEGACY_6_10_DEFAULTS');
+const variants=await verifyGeneratedSources();pass('CURRENT_SOURCE_VARIANT_HASHES',variants);
+const writes=[],rec=createRecorder({outputRoot:'/not-used',durationSeconds:20,totalFrames:600,write:async(file,value)=>writes.push(value)});await rec.completeFrame(600);assert.equal(rec.state?.totalFrames??writes.at(-1)?.totalFrames,600);pass('600_DIAGNOSTIC_SCOPE');
+const wire=JSON.stringify(r),plan={schema:'WORLD_ENGINE_NVIDIA_PRESENTATION_PLAN_V1',durationSeconds:20,totalFrames:600,fps:30,aspectRatio:'9:16',resolution:{width:1080,height:1920},audioSettings:{enabled:false,mode:'SILENT'},simulationType:'HISTORICAL',renderProfile:{profileId:HISTORY_PROFILE,backend:'vulkan',imageDigest:'sha256:'+'a'.repeat(64),sourceClosureSHA256:'b'.repeat(64)},historicalAdmission:c.historicalAdmission,runtime:r,runtimeWireJSON:wire,runtimeWireSHA256:hash(wire),sourceQualificationSHA256:'c'.repeat(64)};
+const pw=JSON.stringify(plan),approval={schema:'WORLD_ENGINE_UNIVERSAL_GPU_AUTHORIZATION_V1',approved:false,planSHA256:hash(pw),imageDigest:plan.renderProfile.imageDigest,validUntil:'2030-01-01T00:10:00Z',maxWallSeconds:600,maxRetries:0,maxCostAmount:100,currency:'KRW',gpuHourlyRate:600};
+const args={plan,planWire:pw,packageWire:wire,expectedPlanSHA256:hash(pw),expectedPackageSHA256:hash(wire),approval,now:Date.parse('2030-01-01T00:00:00Z')};
+assert.throws(()=>validateExecutionPermit(args),/GPU_APPROVAL_REQUIRED/);pass('UNAPPROVED_600_EXECUTION_REJECTED');
+const permitted=validateExecutionPermit({...args,approval:{...approval,approved:true}});assert.equal(permitted.maxRetries,0);assert.equal(permitted.maxWallSeconds,600);assert.equal(permitted.profile,HISTORY_PROFILE);pass('SYNTHETIC_POLICY_CONTRACT_ONLY',{notExecutionAuthorization:true,filesWritten:false});
+assert.throws(()=>validateExecutionPermit({...args,approval:{...approval,approved:true,maxCostAmount:1}}),/COST_LIMIT/);pass('600_COST_LIMIT_PRESERVED');
+const report={schema:'WORLD_ENGINE_600_GPU_CONTRACT_TESTS_V1',status:'PASS_CHANGED_CONTRACT_ONLY',checks,executedRenderers:0,gpuStarts:0,oldPassReruns:0,actualGPU:'PENDING_GPU'};
+await fs.writeFile(new URL('GPU_CONTRACT_TESTS.json',base),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({status:report.status,checks:checks.length}));

@@ -13,3 +13,7 @@
 실제 NVIDIA 렌더링·최종 화질·영상 인코딩 실행 결과는 PENDING_GPU다. 무료 검증 통과는 GPU 실행 승인이나 화질 PASS가 아니다.
 
 6. 새 600프레임의 source preparation은 성공했으나 prepared result의 내부 검증 전달에서 UP2_INPUT_SIZE_LIMIT이 발생했다. 서버가 생성한 HISTORICAL_CONTINUOUS_600F_V1/600 prepared payload의 검증 호출만 24MiB로 제한 확장한다. 사용자 입력·기존 6/10·일반 JSON 저장의 기존 한도는 유지한다.
+
+7. 600프레임 prepared object와 동일 wire를 중복 저장하면 기존 캐시 32MiB 한도를 넘는다. 새 history 캐시에만 검증된 wire 한 부를 저장하고 재사용 때 동일 object로 복원·검증한다. 일반 캐시 한도·권한·해시·잠금은 수정하지 않는다.
+
+8. 모바일 Studio가 내부적으로 6/10초만 인식해 새 20초 preflight 표시를 거부한다. 명시적 HISTORICAL 20초/600 입력과 완전한 request wrapper를 수용하고 600프레임 표시를 추가한다. 기존 동의·정책·시작 버튼의 조건은 유지한다.

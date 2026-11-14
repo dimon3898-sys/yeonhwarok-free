@@ -202,7 +202,13 @@ class StudioController(manager.StudioController):
                         raise StudioError('UP2_SOURCE_ADMISSION_CACHE_INVALID')
                     self._verify_material_files(cached.get('materialFiles'))
                     self._verify_qualification(cached['admission'], request['totalFrames'])
-                    verify_prepared_sources(cached.get('prepared'), cached['admission'], cached.get('preparedWireJSON'))
+                    prepared = cached.get('prepared')
+                    if request.get('profile') == 'HISTORICAL_CONTINUOUS_600F_V1' and cached.get('cacheFormat') == 'HISTORY_PREPARED_WIRE_ONLY_V1':
+                        try:
+                            prepared = json.loads(cached['preparedWireJSON'])
+                        except (KeyError, ValueError, TypeError):
+                            raise StudioError('UP2_STORED_SOURCE_WIRE_CHANGED') from None
+                    verify_prepared_sources(prepared, cached['admission'], cached.get('preparedWireJSON'))
                     return cached['admission']
                 prepared = prepare_runtime(request, self.control_root / 'presentation-sources' / (identity + '-crop'))
                 qualification = prepared.get('sourceQualification')
@@ -222,10 +228,14 @@ class StudioController(manager.StudioController):
                 self._verify_qualification(admission, request['totalFrames'])
                 material_files = self._verify_material_files(prepared.get('sourceBindings'))
                 verify_prepared_sources(prepared, admission)
+                prepared_wire = json.dumps(prepared, ensure_ascii=False, separators=(',', ':'), allow_nan=False)
+                history_cache = request.get('profile') == 'HISTORICAL_CONTINUOUS_600F_V1'
+                # The new history record stores one exact wire copy, not two
+                # geometry-heavy copies. The generic 32MiB cache limit is intact.
                 sources.write_json(identity + '.json', {'requestSHA256': sha(canonical(request)),
                     'sourceBindings': bindings, 'materialFiles': material_files, 'admission': admission,
-                    'prepared': prepared, 'preparedWireJSON': json.dumps(prepared,
-                        ensure_ascii=False, separators=(',', ':'), allow_nan=False)})
+                    **({'cacheFormat': 'HISTORY_PREPARED_WIRE_ONLY_V1'} if history_cache else {'prepared': prepared}),
+                    'preparedWireJSON': prepared_wire})
                 return admission
 
     def _verify_qualification(self, admission, total_frames):
