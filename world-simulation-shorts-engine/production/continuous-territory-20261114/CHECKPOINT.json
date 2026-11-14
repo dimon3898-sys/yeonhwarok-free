@@ -1,10 +1,10 @@
 {
-  "status": "NEW_FULL_CPU_CAPTURE_COMPLETE_AWAITING_FULL_REVIEW",
+  "status": "NEW_FULL_CPU_MP4_TECHNICAL_PASS_VISUAL_ISSUES_REMAIN",
   "baseHEAD": "4f1ccf960bd3ca102f7de543c229299744673839",
-  "firstIncomplete": "FULL_180_FRAME_AND_REFERENCE_REVIEW",
+  "firstIncomplete": "VISUAL_ISSUES_REVIEW_AND_USER_FINAL_APPROVAL",
   "oldPassReruns": 0,
   "gpuStarts": 0,
-  "technicalPass": false,
+  "technicalPass": true,
   "visualQualityPass": false,
   "userVisualApproval": "PENDING",
   "sourceVideoSHA256": "6ba4d0fcea079b2baa65a531deb8ec590099e72a6182b4d777378cb37f3b4b9f",
@@ -19,7 +19,10 @@
     "new module syntax",
     "original local commit SHAs and all 43 changed file blobs preserved and verified on GitHub",
     "first actual 30 consecutive CPU frames plus four context frames captured and saved",
-    "saved PNG hashes and camera-compensated boundary pixels verified; sample visual gate passed"
+    "saved PNG hashes and camera-compensated boundary pixels verified; sample visual gate passed",
+    "new continuous-territory 1080x1920 30fps 6s MP4 generated once on CPU and saved remotely",
+    "all 180 MP4 frames and saved per-frame ledger reviewed without renderer reruns",
+    "direct comparison with hashed reference64306 and existingV370391; visual gaps explicitly recorded"
   ],
   "probeAllowed": false,
   "fullMP4Allowed": false,
@@ -51,8 +54,8 @@
     "consecutiveFrames": 30,
     "review": "PROBE_VISUAL_REVIEW.json"
   },
-  "nextAction": "Use this valid probe gate for a new full CPU capture and full-duration rhythm review; no existing probe/model/video PASS rerun.",
-  "scopeCompleted": "Original history preservation and 30-frame probe; new full capture is now authorized",
+  "nextAction": "Present the saved new 6-second MP4 for user visual review. Before any later quality revision, address frame-27 camera continuity and moving-boundary glow; do not repeat valid PASS or rerender this input.",
+  "scopeCompleted": "New full CPU capture, all 180 decoded-frame review, reference/V3 comparison and staged remote evidence preservation",
   "newMP4Created": true,
   "fullCapturePreflight": "evidence/FULL_CAPTURE_PREFLIGHT_A1.json",
   "fullCapture": {
@@ -74,6 +77,27 @@
       "audio": false,
       "sourceCreditsEmbedded": true
     },
-    "status": "TECHNICAL_PASS_QUALITY_REVIEW_REQUIRED"
+    "status": "TECHNICAL_PASS_VISUAL_ISSUES_REMAIN",
+    "evidenceCommit": "0123dfdcce4bae8a5530dd24257229caa302adb6"
+  },
+  "technicalPassScope": "VIDEO_FORMAT_DECODE_PTS_LEDGER_AND_SAFE_LABELS",
+  "fullReview": {
+    "complete": true,
+    "decodedFrames": 180,
+    "visuallyReviewedFrames": 180,
+    "contactSheets": 12,
+    "technicalEvidence": "final-a1-review/FULL_FRAME_TECHNICAL_REVIEW.json",
+    "report": "FULL_VIDEO_REVIEW.md",
+    "referenceComparison": "REFERENCE_COMPARISON_REPORT.md",
+    "visualIssues": [
+      "FRAME_27_CAMERA_STEP_OUTLIER",
+      "MOVING_BOUNDARY_BAND_GLOW_GAIN_ZERO",
+      "REFERENCE_CLOSE_MAP_DETAIL_AND_COMPOSITION_GAP"
+    ],
+    "oldPassInvalidated": [],
+    "oldPassReruns": 0,
+    "rendererRerunsByReview": 0,
+    "engineCodeModified": false,
+    "runtimeInputModified": false
   }
 }
