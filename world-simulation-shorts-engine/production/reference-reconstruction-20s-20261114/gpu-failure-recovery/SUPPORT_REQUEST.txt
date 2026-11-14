@@ -1,0 +1,25 @@
+제목: [워크로드 #5373] 다른 노드에서 EGL/WebGL2 초기화 실패 — 종료 상태 기존 기록 확인 요청
+
+안녕하세요. 워크로드 world-engine-test #5373은 현재 종료 상태입니다.
+GPU 재기동·유료 재현·배포 시작 없이, 기존 노드 설정과 보존된 기록만 확인해 주세요.
+
+실패 작업: studio-aa674e471413a268fb2f8da56e66535c
+실행 노드: wnb247afd4
+Pod: dep5373-76bc6dcb67-kw8p4
+시간(KST): 2026-11-14 12:53:24 배포, 12:54:41.860 실패 관측, 12:55:56 종료
+상태: 0/600프레임, Node capture exit code 1
+원본 안전 진단 메시지: page.evaluate: Error: UP2_WEBGL2_REQUIRED
+실패 단계: WEBGL_CONTEXT (RUNTIME_IMPORT는 완료)
+브라우저 안전 기록: EGL_NOT_INITIALIZED / eglInitialize, ANGLE·Vulkan 초기화 실패
+NVIDIA 조회: 드라이버 580.126.09, 메모리 32607MiB
+이미지: ghcr.io/dimon3898-sys/world-simulation-shorts-engine:history20-6970708eb71a-43551475182
+설정된 digest: sha256:f44f5c9a6d948fb7a08476465566d7363fc4c1008526a4ab67681537bd700795
+(실패 Pod의 실제 imageID는 아직 확보하지 못했습니다.)
+
+11월 2일 문의에서 gCube는 다른 노드 wnc6bc6433의 EGL vendor 설정 누락을 확인하고 보완했다고 답변했습니다. 그 조치 후 동일 이미지로 WebGL2 컨텍스트 생성이 성공한 기록이 있습니다. 이번 노드는 다르므로 동일 원인이라고 단정하지 않고 확인을 요청합니다.
+
+1. 이번 노드 wnb247afd4에도 NVIDIA EGL vendor 설정 누락이 있었는지 확인해 주세요. /etc/glvnd/egl_vendor.d 및 /usr/share/glvnd/egl_vendor.d의 NVIDIA descriptor, 연결된 libEGL_nvidia.so.0, Vulkan ICD 설정과 라이브러리 마운트/접근 권한을 기존 설정·기록으로 확인 부탁드립니다.
+2. 해당 시간의 보존된 컨테이너 stderr/stdout, Chromium GPU 프로세스 EGL/Vulkan 오류, CRI-O/kubelet 기록 및 실제 imageID가 있으면 제공해 주세요. 현재 설정만 확인 가능하면 사고 당시 기록과 구분해 주세요.
+3. 과거 EGL 조치가 이번 노드에도 적용됐는지, 누락이 확인되면 정확히 어떤 설정이 빠졌는지 알려주세요. 현재 저장된 로그가 없다면 없다는 사실을 명시해 주세요.
+
+워크로드는 계속 종료 상태로 유지해 주세요. 재시작 또는 유료 재현이 필요한 작업은 수행하지 말아 주세요. 인증정보·토큰·개인 파일 내용은 필요하지 않습니다.
