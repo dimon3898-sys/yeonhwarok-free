@@ -1,12 +1,12 @@
 {
   "schema": "WORLD_ENGINE_REQUIRED_FIXES_V1",
-  "version": 2,
+  "version": 3,
   "scope": "ALL_FORMAL_WORLD_ENGINE_IMAGES_ANY_SCENE",
   "imageRepository": "ghcr.io/dimon3898-sys/world-simulation-shorts-engine",
   "installedRepoRoot": "/opt/world-engine-handoffs/studio-capture-diagnostics-g2-v1/repo",
-  "requiredWorkerSHA256": "da0995b3e2b772bf970a171644ed39421c7f101c25d3301e7ca803a92d1f9b83",
+  "requiredWorkerSHA256": "f1c63aca9361ba21eebc44f9794aefa458c28a0f6c147c196f282db8064058fc",
   "preservedCodePins": {
-    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py": "60b0527b883d4e0eae7fcc7bb7c9d76519b6f90a7c74c6acee8bd23b34d15035",
+    "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py": "d747081de741fcca1e92f8423e4bab1f27e9c11592679081275369d01e146306",
     "world-simulation-shorts-engine/recovery/universal-auto-video-v2/cache.py": "4ad9dc03c11ccb39df027cb39dc31715525f2eb7be6da76bedbccfaefd5984fd",
     "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/storage.py": "4c858e7afe5e912bce63bf03f08c6c98d9430cc91134262710db5bdbd6ca4491"
   },
@@ -82,6 +82,30 @@
       "private ownership",
       "generic32MiB"
     ],
+    "actualGPU": "PENDING_GPU"
+  },
+  "reviewedExternalHistoryV2": {
+    "scope": "COMMON_EXTERNAL_REVIEWED_DATA_AND_TIMELINE_WINDOWS",
+    "evidence": [
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-input-contract-v2/CONTRACT_VALIDATION.json",
+        "sha256": "6fd4ae22804651c443532446c72f5b2234cb1e9c76b584dcd142330d6af3065c"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-input-contract-v2/TRANSPORT_VALIDATION.json",
+        "sha256": "910ea1fc351d2299675972be1a7cf334f40bfb9a35954bdc678f9cfd3dc3c5bf"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-input-contract-v2/WINDOW_SAFETY_VALIDATION.json",
+        "sha256": "3113447bd491e42e9a84aff3354ccf87f77ab95a03493dd58d1f5a69f572c8c9"
+      },
+      {
+        "path": "world-simulation-shorts-engine/recovery/universal-input-contract-v2/RECEIPT_TYPE_VALIDATION.json",
+        "sha256": "b9bf02d731ba87dc4886708234524c5e8cd3a9b67ec9064527e671174d4ccb90"
+      }
+    ],
+    "unchangedSafetyFunctions": "TRANSPORT_VALIDATION.json AST-identical approval/start/lease/frame-reader/runtime-write functions",
+    "actualImageGate": "probe_image.py must pass all three external inputs as UID1000 before publication",
     "actualGPU": "PENDING_GPU"
   }
 }
