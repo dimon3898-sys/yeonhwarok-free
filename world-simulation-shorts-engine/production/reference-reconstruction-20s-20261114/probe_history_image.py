@@ -10,6 +10,8 @@ sha=lambda b:hashlib.sha256(b).hexdigest()
 assert os.getuid()==1000 and os.environ['NVIDIA_VISIBLE_DEVICES']=='void'
 manifest=H/'RUNTIME_SOURCE_MANIFEST.json';pin=sha(manifest.read_bytes());verify_manifest(manifest,pin,require_external=True)
 request=json.loads((P/'FINAL_20S_INPUT.json').read_bytes());work=Path('/history-gate');work.mkdir(exist_ok=True)
+(work/'exports').mkdir(mode=0o700)
+# Match the real bootstrap precondition: public export root already exists.
 # Format-valid fixture digest is never authorization or publication approval.
 digest='sha256:'+'a'*64
 c=NvidiaPresentationController(control_root=work/'private',export_root=work/'exports',image_digest=digest,source_manifest=manifest,expected_manifest_sha256=pin)

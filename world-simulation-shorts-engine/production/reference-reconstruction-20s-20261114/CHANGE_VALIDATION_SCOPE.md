@@ -22,3 +22,6 @@
 10. 공통 게시 정책의 Worker/backend 전체 해시는 신규 600프레임 selector 변경으로 무효화됐다. 기존 정책·launch/publication AST 보존 증거를 기준으로 policy v2에 새 정확 해시와 600 계약을 추가한다. 승인·비용·권한·잠금·게시 검사 자체는 유지한다.
 
 11. A1 실제 이미지에서 역사 registry JSON 누락으로 Controller import가 실패했다. 봉인된 473파일만 복사한 별도 closure에서도 ENOENT를 재현했다. 기존 REVIEWED_HISTORICAL.json을 byte 동일 추가하고 manifest/startup pin만 갱신한다. 설계·Controller·Worker·renderer 소스는 변경하지 않는다. A2는 실패한 실제 이미지 전달과 필수 게시 게이트만 검사한다.
+
+## Actual-image A2 setup correction
+A2 source closure succeeded, then realpath rejected the missing isolated export directory. This is the probe setup, not a production code defect: bootstrap.py prepare_private requires exports.is_dir(). Create only that fixture directory; retain all ownership/path checks. Correct the evidence save folder. Runtime/package/design bytes unchanged. A2 image was unpublished and not retained on the disposable runner, requiring reconstruction for the failed actual-image gate. No valid source PASS is rerun.

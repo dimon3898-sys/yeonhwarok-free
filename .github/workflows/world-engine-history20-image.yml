@@ -14,8 +14,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == 'cbb7ecfbc635812a9adf9d98658743decc02c7c2' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY20_IMAGE_A2'
+      github.event.before == '147988e11548c7968911720a5e02057677634de7' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY20_IMAGE_A3'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -111,7 +111,7 @@ jobs:
           python - <<'PY'
           import json,os,shutil
           from pathlib import Path
-          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['TARGET'])/'image-a2';out.mkdir(exist_ok=False)
+          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['TARGET'])/'image-a3';out.mkdir(exist_ok=False)
           if src.exists():shutil.copytree(src,out,dirs_exist_ok=True)
           (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'buildCommit':os.environ['GITHUB_SHA'],'releaseApproved':(out/'RELEASE_APPROVAL.json').exists(),'GPUExecutions':0})+'\n')
           PY
@@ -119,7 +119,7 @@ jobs:
           test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
           git config user.name 'WORLD ENGINE history image evidence'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add --sparse "${TARGET}/image-a1"
+          git add --sparse "${TARGET}/image-a3"
           git commit -m 'Preserve formal history20 actual-image evidence [skip ci]'
           git push origin "HEAD:refs/heads/${BRANCH}"
       - name: Upload immutable evidence for interruption recovery

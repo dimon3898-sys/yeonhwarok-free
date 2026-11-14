@@ -1,0 +1,15 @@
+{
+  "status": "BLOCKED_TEST_HARNESS",
+  "runId": 43550995655,
+  "jobId": 132313158800,
+  "buildSucceeded": true,
+  "published": false,
+  "controllerError": "UP2_DATA_PROCESSOR_FAILED",
+  "underlyingError": "ENOENT realpath /history-gate/exports",
+  "rootCause": "Isolated image probe omitted the public export directory required before Controller normalization; production bootstrap already checks this directory exists.",
+  "minimumFix": "Create isolated fixture export directory with mode 0700; preserve production workspace checks unchanged. Correct evidence commit folder image-a2 versus stale image-a1.",
+  "invalidated": "Only isolated image-test setup and A2 report-save path; 474-file closure byte check completed before failure.",
+  "imageReuse": "A2 image was not published or retained in artifacts; disposable runner ended. Recreate exact unchanged PACKAGE bytes to finish previously failed gate.",
+  "GPUExecutions": 0,
+  "oldPassReruns": 0
+}
