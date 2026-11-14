@@ -78,37 +78,3 @@
 ## 14. 현재 몽골 작업
 
 기존 600프레임과 106개 도형은 보존한다. 사용자 승인대로 [0,180), [180,360), [360,540)만 출력하고 [540,600)은 제외한다. 재분배/가속/새 장면 금지. 이전 성공 이미지의 HISTORICAL 미지원은 확인된 사실이다. 최신 공통 코드를 기준으로 외부 역사·영토 데이터와 글로벌 구간을 정식 지원하도록 최소 확장하는 것은 이번 MASTER에서 승인됐다. 몽골 전용 생성기/이미지는 만들지 않는다. 범용 이미지 빌드는 실제 필요성과 무료 검증이 충족된 경우에만 진행한다. 현재 유료 GPU 승인 없음.
-'''
-cat > world-simulation-shorts-engine/recovery/universal-input-contract-v2/PRE_IMPLEMENTATION_REVIEW.md <<'EOF'
-# 공통 입력 확장 — 구현 전 위험 및 변경 범위
-
-기준 HEAD: 66e94bb19fbb8bdd32f42b5f051f4e190bae74d5. 사용자 MASTER 2026-11-14로 이전 scope-decision 차단은 해소됐다. 기존 GPU 성공/실패 증거와 기존 600 설계는 보존한다.
-
-| 사전 질문 | 실제 근거와 판단 |
-|---|---|
-| 기존 엔진 처리 가능? | 지도/카메라/106개 continuous/effect 평가 기능은 이미 있다. 새 renderer가 필요하지 않다. |
-| 기존 기능 존재? | history_authored_v1.mjs, presentation_runtime.mjs, HISTORY_SOURCE_CATALOG.json에 기존 연결이 있다. |
-| 운영 이미지 포함? | 이전 성공 이미지에는 새 history 모듈이 없고, history20 이미지는 V1/600 경로만 포함한다. 현재 전체 범용 PRODUCTION_READY 이미지는 입증되지 않았다. |
-| GPU 성공 경로 호환? | NVIDIA launch/lease/native guard/FFmpeg는 보존한다. 현재 노드 WebGL 장애는 독립 BLOCKED다. |
-| JSON만으로 가능? | 불가. V1 compiler, Controller/Worker, backend 계약이 600/HISTORICAL 또는 6·10/nonhistorical로 고정돼 있다. |
-| 공통 수정? | 버전 있는 외부 검토 자료 loader, 글로벌 frame window, 명시적 historical profile 전달이 필요하다. |
-| 빌드 필요? | 위 공통 계약이 기존 이미지에 없어 향후 하나의 공통 버전 갱신은 필요하다. 검증 전 빌드하지 않는다. 신규 주제 자료는 이후 빌드 없이 교체한다. |
-| 기존 기능 영향? | 새 명시적 V2 분기만 추가하고 기존 V1/6·10 경로를 보존한다. shared request validation/adapter derivation 변경은 해당 연결만 검사한다. |
-| 재사용? | 국가명/연도/도형 개수를 코드에 넣지 않는다. server-approved 외부 catalog와 내용 해시로 dataset을 선택한다. |
-| 무료 확인? | dataset hash/path/권한/심사 경계, 스키마/거부 조건, 글로벌 frame 및 상태 전달, Controller/Worker/capture 계약, generated/manifest, 실제 이미지 CPU 검사. |
-
-## 보안·재현성 결정
-
-- 데이터 파일은 코드와 분리하고 외부 immutable content-addressed package로 제공한다. 입력에는 dataset ID/version/hash만 둔다.
-- 사실 검토는 기존 evidence owner를 유지한다. 별도 operator-configured catalog hash로 승인된 외부 자료만 로드한다. 사용자 JSON의 VERIFIED 주장, 임의 path/URL/module은 승인 권한이 없다.
-- 새 V2의 출력 window는 기존 전체 source scene/presentation을 보존하고 capture가 해당 글로벌 frame을 평가한다. 라벨 종료/효과 진행 상태를 각 6초 경계로 재작성하지 않는다.
-- 현재 지원 규격 1080×1920·30fps 및 실행 길이 6/10/20초를 명시한다. 검증되지 않은 규격/길이를 무제한 지원한다고 선언하지 않는다.
-- 기존 V1 schema와 image/published evidence는 유지한다. 새 V2가 기존 이미지에서 작동한다고 표시하지 않는다.
-
-## 재검증 범위 사전 기록
-
-기존 reference/design/history/106 geometry/실제 GPU/MP4 PASS는 무효화되지 않았으며 재실행하지 않는다. 새 공통 분기로 변경될 adapter, request/profile validation, capture frame mapping, receipt 및 generated manifest의 이전 hash 기반 연결 증거는 **새 코드에 그대로 적용할 수 없다**. 따라서 신규 V2 요청과 변조 거부, 기존 분기 상수/선택 기본값 보존, source 대비 window 평가만 검사한다. 기존 전체 6초·10초·600프레임 suite/MP4 재생성은 금지한다. 변경된 일반 함수가 기존 의미를 바꾸는 결함이 발견되면 별도 최소 영향 기록 후 그 부분만 확인한다.
-
-## 명시적 미해결 항목
-
-현재 gCube 노드의 EGL/WebGL2 원인은 미확정이며 이번 입력 계약 개발과 독립이다. 무료 계약 PASS나 새 이미지 게시로 GPU_RENDER_PASS/PRODUCTION_READY를 선언하지 않는다. 실제 Pod image digest/환경 readback도 별도 게이트다.
