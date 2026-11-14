@@ -4,7 +4,7 @@ on:
     branches: [fix/reference-6s-formal-admission-20261113]
     paths: ['.github/workflows/world-engine-universal-input-v2-image.yml']
 permissions:
-  contents: write
+  contents: read
   packages: write
 concurrency:
   group: world-engine-universal-input-v2-image
@@ -110,23 +110,15 @@ jobs:
           printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
           docker push "$(cat "${RUNNER_TEMP}/common-image-tag")"
           docker logout ghcr.io
-      - name: Preserve exact image evidence on task branch
+      - name: Preserve exact image evidence as immutable artifact
         if: always()
         run: |
           python - <<'PY'
-          import json,os,shutil
+          import json,os
           from pathlib import Path
-          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['TARGET'])/'image-a1';out.mkdir(exist_ok=False)
-          if src.exists():shutil.copytree(src,out,dirs_exist_ok=True)
-          (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'buildCommit':os.environ['GITHUB_SHA'],'releaseApproved':(out/'RELEASE_APPROVAL.json').exists(),'GPUExecutions':0})+'\n')
+          out=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out.mkdir(exist_ok=True)
+          (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'buildCommit':os.environ['GITHUB_SHA'],'releaseApproved':(out/'RELEASE_APPROVAL.json').exists(),'GPUExecutions':0,'branchMutation':False})+'\n')
           PY
-          BRANCH=fix/reference-6s-formal-admission-20261113
-          test "$(git ls-remote origin "refs/heads/${BRANCH}" | cut -f1)" = "${GITHUB_SHA}"
-          git config user.name 'WORLD ENGINE common image evidence'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add --sparse "${TARGET}/image-a1"
-          git commit -m 'Preserve common V2 actual-image evidence [skip ci]'
-          git push origin "HEAD:refs/heads/${BRANCH}"
       - name: Upload immutable evidence for interruption recovery
         if: always()
         uses: actions/upload-artifact@v4

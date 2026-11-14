@@ -1,64 +1,11 @@
-name: WORLD ENGINE exact common source save
+name: WORLD ENGINE source save archived
 on:
-  push:
-    branches: [fix/reference-6s-formal-admission-20261113]
-    paths: ['.github/workflows/world-engine-universal-input-v2-save.yml']
+  workflow_dispatch:
 permissions:
-  contents: write
-concurrency:
-  group: world-engine-common-source-save
-  cancel-in-progress: false
+  contents: read
 jobs:
-  save-exact-files:
-    if: >-
-      github.run_attempt == 1 && github.event.repository.private == false &&
-      github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_COMMON_SOURCE_SAVE_V2_A1'
+  archived:
+    if: false
     runs-on: ubuntu-24.04
-    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /world-engine-universal-input-v2-source.json.gz
-            /world-engine-universal-input-v2-source-manifest.json
-            /.github/workflows/world-engine-universal-input-v2-save.yml
-      - name: Apply only the exact reviewed files and unchanged predecessors
-        run: |
-          python - <<'PY'
-          import gzip,hashlib,json,os,subprocess
-          from pathlib import Path,PurePosixPath
-          p=Path('world-engine-universal-input-v2-source.json.gz');raw=p.read_bytes()
-          assert hashlib.sha256(raw).hexdigest()=='ebc8bee983e4717193beae9f947dff0c18e560694205fc7389807635f96868c8'
-          manifest=json.loads(Path('world-engine-universal-input-v2-source-manifest.json').read_bytes())
-          assert manifest['payloadSHA256']==hashlib.sha256(raw).hexdigest()
-          value=json.loads(gzip.decompress(raw));rows=value['files']
-          assert value['schema']=='WORLD_ENGINE_EXACT_BRANCH_SAVE_V1' and len(rows)==61 and value['gpuExecutions']==0
-          branch='fix/reference-6s-formal-admission-20261113'
-          assert value['branch']==branch and value['baseCommit']=='66e94bb19fbb8bdd32f42b5f051f4e190bae74d5'
-          assert subprocess.check_output(['git','ls-remote','origin','refs/heads/'+branch],text=True).split()[0]==os.environ['GITHUB_SHA']
-          paths=[]
-          for row in rows:
-              path=PurePosixPath(row['path'])
-              assert not path.is_absolute() and '..' not in path.parts and row['path'].startswith('world-simulation-shorts-engine/')
-              assert path.suffix in {'.json','.md','.mjs','.py','.patch'}
-              old=subprocess.run(['git','show','HEAD:'+row['path']],capture_output=True)
-              assert (hashlib.sha256(old.stdout).hexdigest() if old.returncode==0 else None)==row['oldSHA256'], row['path']
-              data=row['content'].encode();assert len(data)==row['bytes'] and hashlib.sha256(data).hexdigest()==row['sha256']
-              paths.append(row['path'])
-          assert len(set(paths))==len(paths)
-          subprocess.run(['git','sparse-checkout','set','--no-cone','--stdin'],input='\n'.join('/'+p for p in paths)+'\n',text=True,check=True)
-          for row in rows:
-              path=Path(row['path']);path.parent.mkdir(parents=True,exist_ok=True);path.write_text(row['content']);path.chmod(0o644)
-          subprocess.run(['git','diff','--check'],check=True)
-          subprocess.run(['git','add','--sparse','--']+paths,check=True)
-          subprocess.run(['git','config','user.name','WORLD ENGINE exact source preservation'],check=True)
-          subprocess.run(['git','config','user.email','41898282+github-actions[bot]@users.noreply.github.com'],check=True)
-          subprocess.run(['git','commit','-m','Integrate reviewed common external data and timeline windows [skip ci]'],check=True)
-          subprocess.run(['git','push','origin','HEAD:refs/heads/'+branch],check=True)
-          local=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
-          remote=subprocess.check_output(['git','ls-remote','origin','refs/heads/'+branch],text=True).split()[0]
-          assert local==remote
-          print(json.dumps({'status':'REMOTE_EXACT_SOURCE_SAVED','commit':local,'files':len(paths),'GPUExecutions':0,'imageBuilds':0}))
-          PY
+      - run: echo 'Archived unused automatic apply. Source was committed directly through GitHub UI.'
