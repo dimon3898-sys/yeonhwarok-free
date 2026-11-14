@@ -1,3 +1,4 @@
+import {sourceFrameForWindow} from '../universal-presentation-v2/timeline_window.mjs';
 import {loadPhysicalContext} from '../universal-presentation-v2/physical_context_v1.mjs';
 import {applyContinuousTerritory,continuousTerritoryAt} from '../universal-presentation-v2/continuous_territory_runtime.mjs';
 import {territoryEffectsAt} from '../universal-presentation-v2/territory_effects_v2.mjs';
@@ -29,7 +30,7 @@ const flatPoints=g=>g.type==='Polygon'?g.coordinates.flat():g.type==='MultiPolyg
 
 /** Source data, camera track and regional coverage were qualified before claim.
  * Actual current-projection admission is nevertheless repeated at every draw. */
-export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,diagnostics=null}={}){
+export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,timelineWindow=null,diagnostics=null}={}){
  const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'PRESENTATION_RUNTIME'}):task();
  validateScenePlan(scene);
  assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&(scene.timing.total_frames<=240||scene.timing.total_frames<=600&&['HISTORICAL_STATES_V2','HISTORICAL_STATES_V3','HISTORICAL_CONTINUOUS_V1'].includes(presentationPlan.presentation?.territoryChanges?.profile)),'UP2_FREE_FRAME_SCOPE');
@@ -122,6 +123,8 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    assert(rows.length<=64,'UP2_MARKER_RESERVATION_CAPACITY');return rows;
   }
   function drawFrame(frame){
+   const outputFrame=frame;
+   frame=sourceFrameForWindow(frame,timelineWindow,scene.timing.total_frames);
    assert(!disposed&&Number.isSafeInteger(frame)&&frame>=0&&frame<scene.timing.total_frames,'UP2_FRAME_RANGE');
    const displayFrame=scene.event_type==='GEOGRAPHIC'?Math.min(frame,scene.timing.total_frames-scene.timing.final_hold_frames-1):frame;
    const camera=evaluatePresentationCameraFrame(activePresentationPlan,displayFrame),bounds=camera.flatBounds;
@@ -175,7 +178,7 @@ export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,b
    renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
    const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:labelSpec,scene:labelScene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
    gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');
-   last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
+   last={schema:PRESENTATION_RUNTIME_SCHEMA,...(timelineWindow===null?{}:{sourceFrame:frame,outputFrame}),frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
     camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},
     fixedModelCamera:{sourceFrame:presentationPlan.analysisSourceFrame,state:presentationPlan.analysisCamera,scope:'UNCHANGED_FLOW_TIMING_ONLY_NEVER_CURRENT_MOVING_CAMERA'},
     layout:{valid:layoutAudit.validation.valid,nativeAuditScope:layoutAudit.scope??'CURRENT_NATIVE_LAYOUT',visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
