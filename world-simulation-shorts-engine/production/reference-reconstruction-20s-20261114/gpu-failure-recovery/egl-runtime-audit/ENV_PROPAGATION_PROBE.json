@@ -1,0 +1,108 @@
+{
+  "schema": "WORLD_ENGINE_EGL_ENV_INVESTIGATION_PROBE_V1",
+  "status": "AUDIT_COMPLETE_PROPAGATION_GAPS_FOUND_ROOT_CAUSE_BLOCKED",
+  "sourceFiles": [
+    {
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+      "sha256": "60b0527b883d4e0eae7fcc7bb7c9d76519b6f90a7c74c6acee8bd23b34d15035"
+    },
+    {
+      "path": "world-simulation-shorts-engine/deployment/gcube/graphics_runtime.py",
+      "sha256": "d9181df105db02246cac28c4c46cbc86877bef8197f117b9702bcab60adb9127"
+    }
+  ],
+  "executionScope": "New narrow CPU investigation; exact source functions, fake driver, temporary files. Not a production Worker or GPU result.",
+  "observations": [
+    {
+      "name": "helper_generation_in_fixture_only",
+      "observationVerified": true,
+      "evidenceClass": "CPU_FAKE_DRIVER_NOT_REAL_GPU_RECORD",
+      "generatedKinds": [
+        "egl",
+        "vulkan"
+      ]
+    },
+    {
+      "name": "fixture_descriptors_readable_as_current_uid1000",
+      "observationVerified": true,
+      "uid": 1000,
+      "parentMode": "0700",
+      "directoryMode": "0755",
+      "fileMode": "0644",
+      "realContainerFilePermissions": "NOT_OBSERVED"
+    },
+    {
+      "name": "helper_accepts_its_valid_descriptor_paths",
+      "observationVerified": true
+    },
+    {
+      "name": "helper_rejects_outside_descriptor_before_loading",
+      "observationVerified": true,
+      "scope": "Existing helper root-containment gate with private fixture root"
+    },
+    {
+      "name": "valid_generated_EGL_and_VK_DRIVER_selectors_dropped",
+      "observationVerified": true,
+      "stages": [
+        {
+          "boundary": "Controller_to_Worker",
+          "selectorsPresent": [
+            "VK_ICD_FILENAMES"
+          ]
+        },
+        {
+          "boundary": "Worker_to_supervisor",
+          "selectorsPresent": [
+            "VK_ICD_FILENAMES"
+          ]
+        },
+        {
+          "boundary": "supervisor_runtime_environment",
+          "selectorsPresent": [
+            "VK_ICD_FILENAMES"
+          ]
+        },
+        {
+          "boundary": "supervisor_to_capture",
+          "selectorsPresent": [
+            "VK_ICD_FILENAMES"
+          ]
+        }
+      ],
+      "result": "PROPAGATION_CONTRACT_GAP_CONFIRMED_IN_CPU_FIXTURE",
+      "wholeWorkerExecution": false
+    },
+    {
+      "name": "existing_VK_ICD_value_survives",
+      "observationVerified": true
+    },
+    {
+      "name": "secrets_and_caller_debug_remain_filtered",
+      "observationVerified": true
+    },
+    {
+      "name": "source_environment_not_mutated",
+      "observationVerified": true
+    },
+    {
+      "name": "existing_VK_ICD_allowlist_is_not_path_validation",
+      "observationVerified": true,
+      "result": "OUTSIDE_PATH_RETAINED_BY_EXISTING_FILTER",
+      "pathSafetyGate": "NOT_PRESENT_IN_RUNTIME_ENVIRONMENT",
+      "implication": "Do not extend selector allowlist without retaining helper containment/content checks"
+    },
+    {
+      "name": "separate_legacy_environment_updates_do_not_reach_studio_parent",
+      "observationVerified": true,
+      "evidenceClass": "PYTHON_ENVIRONMENT_MODEL_WITH_SOURCE_VERIFIED_PROCESS_BOUNDARIES",
+      "realLegacyPreparationDuringFailedRun": "UNCONFIRMED"
+    }
+  ],
+  "actualGPUGenerationProved": false,
+  "oldPassSuitesRun": 0,
+  "productionCodeChanges": 0,
+  "GPUStarts": 0,
+  "browserLaunches": 0,
+  "rendererExecutions": 0,
+  "GPU_RENDER_PASS": false
+}

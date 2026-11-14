@@ -1,0 +1,155 @@
+{
+  "schema": "WORLD_ENGINE_EGL_ENV_PROPAGATION_AUDIT_V1",
+  "status": "BLOCKED_ACTUAL_INCIDENT_GENERATION_NOT_PROVEN",
+  "sourceHEAD": "4a92593fc374402bca104fbfeba6608f01654352",
+  "checkedAtUTC": "2026-11-14T04:48:18.070418+00:00",
+  "rootCauseClassification": "ROOT_CAUSE_UNCONFIRMED",
+  "confirmedCodeFindings": [
+    "prepare_graphics_runtime is called in separate legacy GPU admission child, not formal Studio Controller/Worker/capture ancestry",
+    "Legacy admission copies its environment and applies updates locally; no return of selectors to parent or Studio",
+    "Studio process is spawned before legacy admission child; no loader-preparation completion barrier between siblings",
+    "If supplied, _runtime_environment drops __EGL_VENDOR_LIBRARY_FILENAMES and VK_DRIVER_FILES at Controller-to-Worker boundary",
+    "Existing VK_ICD_FILENAMES is retained without descriptor path/content validation in _runtime_environment"
+  ],
+  "sevenQuestions": {
+    "calledInFormalStudioRenderProcess": "NO_DIRECT_OR_TRANSITIVE_CALL_IDENTIFIED; helper is in sibling legacy admission path",
+    "calledBeforeChromium": "YES_IN_LEGACY_ADMISSION_LOCAL_PATH; no ordering/visibility guarantee for separate Studio capture",
+    "generatedPaths": [
+      "/run/world-engine/nvidia-graphics-<random>/10_nvidia.json",
+      "/run/world-engine/nvidia-graphics-<random>/nvidia_icd.json"
+    ],
+    "uid1000Readability": {
+      "code": "legacy bootstrap makes runtime parent UID1000/GID1000 mode0700, drops privileges; generated subdirectory0755 files0644",
+      "fixture": "Read as actual local UID1000 succeeded in new bounded propagation probe",
+      "failedContainer": "NOT_OBSERVED"
+    },
+    "returnedEnvironmentReachesController": "NO_SIBLING_TO_PARENT_STUDIO_TRANSFER_IMPLEMENTED",
+    "throughWorkerToCapture": {
+      "__EGL_VENDOR_LIBRARY_FILENAMES": "DROPPED_BY_FIRST_RUNTIME_ENVIRONMENT_FILTER",
+      "VK_DRIVER_FILES": "DROPPED_BY_FIRST_RUNTIME_ENVIRONMENT_FILTER",
+      "VK_ICD_FILENAMES": "RETAINED_IF_ALREADY_SUPPLIED_TO_CONTROLLER; legacy-local updates are not supplied"
+    },
+    "includedInPublishedImage": {
+      "result": "YES_REUSED_EXISTING_ACTUAL_IMAGE_SOURCE_CLOSURE_EVIDENCE",
+      "imageDigest": "sha256:f44f5c9a6d948fb7a08476465566d7363fc4c1008526a4ab67681537bd700795",
+      "releaseEvidence": "world-simulation-shorts-engine/production/reference-reconstruction-20s-20261114/image-a3/RELEASE_APPROVAL.json",
+      "externalManifestRows": [
+        {
+          "bytes": 9471,
+          "path": "/opt/rtx-package/repo/world-simulation-shorts-engine/deployment/gcube/graphics_runtime.py",
+          "sha256": "d9181df105db02246cac28c4c46cbc86877bef8197f117b9702bcab60adb9127"
+        },
+        {
+          "bytes": 23235,
+          "path": "/opt/rtx-package/repo/world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+          "sha256": "ca6e076b6e1aff6806f61b73e493159b4c705769877775b6afa42b2a80d8553a"
+        }
+      ],
+      "livePodImageAttestation": "NOT_RECOVERED"
+    }
+  },
+  "causation": {
+    "actualRecoveryFilesCreatedDuringFailedJob": false,
+    "actualRecoveryFilesCreatedDuringFailedJobMeaning": "NOT_PROVEN; not a claim generation did not occur",
+    "actualControllerOriginalSelectors": "NOT_RECORDED",
+    "newUserDiagnosticPod": "dep5373-76bc6dcb67-hpz21",
+    "originalJobPod": "dep5373-76bc6dcb67-kw8p4",
+    "manualWebGL2Result": false,
+    "manualRunEqualsFormalWorker": false,
+    "legacyHelperLibraryRequirements": "Files must dlopen fixed SONAME and expose __egl_Main / vk_icdGetInstanceProcAddr; ldconfig entries alone insufficient"
+  },
+  "minimumEditGate": {
+    "required": "Evidence actual automatic recovery settings were generated during formal execution and lost before Worker",
+    "satisfied": false,
+    "reason": "Code-level loss and split-process reachability are established; original runtime generation/selection receipt is absent. Manual /tmp export is not helper output and WebGL still failed.",
+    "productionCodeChanged": false,
+    "noAllowlistOnlyPatch": true
+  },
+  "security": {
+    "helperRootContainment": "Fixed EGL/Vulkan descriptor directories, /usr/local/nvidia and /run/world-engine; _contained_file resolves containment; _descriptor_valid restricts JSON size/version/NVIDIA SONAME/allowed library directories/fixed driver entrypoint",
+    "existingCaptureFilter": "Name allowlist only, not descriptor validation",
+    "outsideVKICDPathProbe": "RETAINED_EXISTING_BEHAVIOR_NO_NEW_PERMISSION_ADDED",
+    "secrets": "Sentinel owner/token and caller DEBUG filtered in new probe",
+    "manifestAndStartupRules": "UNCHANGED_NO_GENERATED_FILES_EDITED"
+  },
+  "sourceReferences": [
+    {
+      "role": "coldStart",
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/bootstrap.py",
+      "sha256": "2f22f111767f817ceaafd8e5962e58a6b6dea1544b4fc74cd6d03c761dd53fa4"
+    },
+    {
+      "role": "coldStartWorker",
+      "path": "world-simulation-shorts-engine/recovery/studio-cold-start-v2/worker.py",
+      "sha256": "75edd4919e545b06f0bab139a3ad106f11a26f072896a8cf4f1983165b0157b0"
+    },
+    {
+      "role": "supervisor",
+      "path": "world-simulation-shorts-engine/recovery/studio-https-bootstrap-v1/https_bootstrap.py",
+      "sha256": "58dd9a8da56c86ca7203960cdee03c4d30ff8e5db553ea19956af208486188a6"
+    },
+    {
+      "role": "baseBootstrap",
+      "path": "world-simulation-shorts-engine/recovery/production-studio-mvp-v1/bootstrap.py",
+      "sha256": "9791501263fe146de64510a8747619bb0003ea53f296ec12a7b3335a9bba203a"
+    },
+    {
+      "role": "legacyStorage",
+      "path": "world-simulation-shorts-engine/recovery/gcube-storage-fix-v1/launch.py",
+      "sha256": "1605cdf34090daf9323309dca9490c38942c57ce25b0462112aae0bba5b8dc5c"
+    },
+    {
+      "role": "legacyStartup",
+      "path": "world-simulation-shorts-engine/recovery/gcube-diagnostic-image-v1/startup.py",
+      "sha256": "41475b58eb39c6ca106455be655f842a9498dd69eb713df4cc9c2517ee73abc7"
+    },
+    {
+      "role": "legacyLauncher",
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/gpu_launcher.py",
+      "sha256": "ca6e076b6e1aff6806f61b73e493159b4c705769877775b6afa42b2a80d8553a"
+    },
+    {
+      "role": "legacyUIDBootstrap",
+      "path": "world-simulation-shorts-engine/recovery/rtx-gpu-package-v1/bootstrap.py",
+      "sha256": "01dbd40b366e22685742d4eda1fd25c6d13d975a25ea565ab090cd3e7dbc11bb"
+    },
+    {
+      "role": "graphicsHelper",
+      "path": "world-simulation-shorts-engine/deployment/gcube/graphics_runtime.py",
+      "sha256": "d9181df105db02246cac28c4c46cbc86877bef8197f117b9702bcab60adb9127"
+    },
+    {
+      "role": "nvidiaBackend",
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_backend.py",
+      "sha256": "60b0527b883d4e0eae7fcc7bb7c9d76519b6f90a7c74c6acee8bd23b34d15035"
+    },
+    {
+      "role": "nvidiaWorker",
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/nvidia_worker.py",
+      "sha256": "da0995b3e2b772bf970a171644ed39421c7f101c25d3301e7ca803a92d1f9b83"
+    },
+    {
+      "role": "leaseSupervisor",
+      "path": "world-simulation-shorts-engine/recovery/codex-to-gcube-handoff-v1/controller/lease_supervisor.py",
+      "sha256": "5a4c99087b30960462e27aa47f9d581517256bcbc21708e6d5489dac29913991"
+    },
+    {
+      "role": "imageGenerator",
+      "path": "world-simulation-shorts-engine/release-guard/package_delta.py",
+      "sha256": "f74ba871758eb38670f6534685cf73eeefa010b4409c35a13d01988db6175deb"
+    }
+  ],
+  "probe": {
+    "path": "egl-runtime-audit/ENV_PROPAGATION_PROBE.json",
+    "observations": 10,
+    "scope": "New narrow CPU investigation; exact source functions, fake driver, temporary files. Not a production Worker or GPU result.",
+    "productionWorkerExecuted": false,
+    "GPUStarts": 0
+  },
+  "oldPassReruns": 0,
+  "productionCodeChanges": 0,
+  "imageBuilds": 0,
+  "gCubeActions": 0,
+  "GPUStarts": 0,
+  "nextEvidence": "Existing admission_private.json graphicsPreparation plus descriptor path metadata and Controller/Worker selector keys from the same pod; do not start a GPU to obtain it under this authorization."
+}
