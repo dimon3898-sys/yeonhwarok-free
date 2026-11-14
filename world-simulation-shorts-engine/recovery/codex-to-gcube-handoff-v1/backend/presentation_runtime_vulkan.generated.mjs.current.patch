@@ -1,10 +1,12 @@
---- presentation_runtime.mjs
+--- world-simulation-shorts-engine/recovery/universal-presentation-v2/presentation_runtime.mjs
 +++ presentation_runtime_vulkan.generated.mjs
-@@ -1,7 +1,7 @@
+@@ -1,8 +1,8 @@
+-import {sourceFrameForWindow} from './timeline_window.mjs';
 -import {loadPhysicalContext} from './physical_context_v1.mjs';
 -import {applyContinuousTerritory,continuousTerritoryAt} from './continuous_territory_runtime.mjs';
 -import {territoryEffectsAt} from './territory_effects_v2.mjs';
 -import {composePresentationFlowControls,highlightRingAt} from './presentation_flow.mjs';
++import {sourceFrameForWindow} from '../universal-presentation-v2/timeline_window.mjs';
 +import {loadPhysicalContext} from '../universal-presentation-v2/physical_context_v1.mjs';
 +import {applyContinuousTerritory,continuousTerritoryAt} from '../universal-presentation-v2/continuous_territory_runtime.mjs';
 +import {territoryEffectsAt} from '../universal-presentation-v2/territory_effects_v2.mjs';
@@ -12,7 +14,7 @@
  /** Explicit moving-projection composition; unchanged engines own every pixel. */
  import {compileGeographicCamera,geographicCameraFrame,GEOGRAPHIC_CAMERA_VERSION,geographicTrackTransportDelta} from '../../web/map_infographic_v1/geographic_camera_v1.mjs';
  import * as THREE from '/three.js';
-@@ -17,10 +17,11 @@
+@@ -18,10 +18,11 @@
  import {createMovingGraphicPass} from '../../web/map_infographic_v1/graphic_motion_pass_v4.mjs';
  import {auditRuntimeLayout} from '../../web/map_infographic_v1/graphic_layout.mjs';
  import {compileReferenceCameraTrack,evaluateReferenceCameraTrackFrame} from '../../web/map_infographic_v1/reference_camera_adapter_v1.mjs';
@@ -27,17 +29,17 @@
  const copy=x=>structuredClone(x),assert=(v,c)=>{if(!v)throw Error(c);};
  const inside=(p,b)=>p[0]>=b[0]&&p[0]<=b[2]&&p[1]>=b[1]&&p[1]<=b[3];
  const finiteBox=b=>Array.isArray(b)&&b.length===4&&b.every(Number.isFinite)&&b[0]<b[2]&&b[1]<b[3];
-@@ -28,7 +29,8 @@
+@@ -29,7 +30,8 @@
  
  /** Source data, camera track and regional coverage were qualified before claim.
   * Actual current-projection admission is nevertheless repeated at every draw. */
--export async function createPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null}={}){
-+export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,diagnostics=null}={}){
+-export async function createPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,timelineWindow=null}={}){
++export async function createNvidiaPresentationRuntime({canvas,scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle,terrainTreatment,inputTrace=null,timelineWindow=null,diagnostics=null}={}){
 + const observe=(operation,task)=>diagnostics?diagnostics.run(operation,task,{sourceId:'PRESENTATION_RUNTIME'}):task();
   validateScenePlan(scene);
   assert(scene.timing.fps===30&&scene.timing.total_frames>=2&&(scene.timing.total_frames<=240||scene.timing.total_frames<=600&&['HISTORICAL_STATES_V2','HISTORICAL_STATES_V3','HISTORICAL_CONTINUOUS_V1'].includes(presentationPlan.presentation?.territoryChanges?.profile)),'UP2_FREE_FRAME_SCOPE');
   assert(canvas?.width===1080&&canvas?.height===1920,'UP2_CANONICAL_CANVAS_REQUIRED');
-@@ -37,24 +39,23 @@
+@@ -38,24 +40,23 @@
   assert(baseCameraPlan?.directorVersion==='CAMERA_DIRECTOR_V5'&&presentationPlan?.actualMovingCameraLockForged===false,'UP2_CAMERA_OWNER_REQUIRED');
   const geographic=presentationPlan.mode==='GEOGRAPHIC_TRACK';
   const original=JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle}),p=presentationPlan.presentation,engines=compilePresentationEnginePlan({scene,presentation:p}),safe=copy(nativePlan.layout.safe);
@@ -67,16 +69,16 @@
    if(labelSpec?.enabled===true&&labelSpec.items.length){labelPass=createPresentationLabelPass({renderer,THREE,width:1080,height:1920});passes.push(labelPass);}
    // Derived plans are created in their consuming JS realm. The frozen owner's
    // canonical check is retained; JSON is the transport for authored inputs,
-@@ -174,7 +175,7 @@
+@@ -177,7 +178,7 @@
     renderer.resetState();for(const marker of markerRows){const items=copy(baseline),item=items.find(i=>i.kind==='MARKER');item.box=[marker.position[0]-marker.size/2,marker.position[1]-marker.size/2,marker.size,marker.size];graphics.draw({items,reveal:{marker:1,location:0,country:0,title:0,disclosure:0}});}
     const labelDraw=labelPass?(preparedLabel?labelPass.drawPrepared(preparedLabel):labelPass.draw({labels:labelSpec,scene:labelScene,frame:displayFrame,project,safeArea:safe,protectedBoxes:markerRows})):null;
     gl.finish();assert(gl.getError()===gl.NO_ERROR,'UP2_ACTUAL_DRAW_GL_ERROR');assert(JSON.stringify({scene,nativePlan,baseCameraPlan,presentationPlan,sourceStyle})===original,'UP2_SOURCE_MUTATION');
--   last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,nvidiaVerified:false,qualityApproved:false,
-+   last={schema:PRESENTATION_RUNTIME_SCHEMA,frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
+-   last={schema:PRESENTATION_RUNTIME_SCHEMA,...(timelineWindow===null?{}:{sourceFrame:frame,outputFrame}),frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,nvidiaVerified:false,qualityApproved:false,
++   last={schema:PRESENTATION_RUNTIME_SCHEMA,...(timelineWindow===null?{}:{sourceFrame:frame,outputFrame}),frame,timeSeconds:frame/30,localEventFrame:localFrame,backend,get nvidiaVerified(){return nativeStabilityProof!==null;},qualityApproved:false,
      camera:{owner:presentationPlan.movingCameraOwner,profile:presentationPlan.mode,state:camera,actualFactory:copy(factory.evidence.cameraFrame),center:camera.camera.center??[(bounds[0]+bounds[2])/2,(bounds[1]+bounds[3])/2],bounds:copy(bounds),motionClaimed:true,actualCameraLocked:false,actualSettleLocked:false,trackHydration},
      fixedModelCamera:{sourceFrame:presentationPlan.analysisSourceFrame,state:presentationPlan.analysisCamera,scope:'UNCHANGED_FLOW_TIMING_ONLY_NEVER_CURRENT_MOVING_CAMERA'},
      layout:{valid:layoutAudit.validation.valid,nativeAuditScope:layoutAudit.scope??'CURRENT_NATIVE_LAYOUT',visibleNativeLabels:false,locationRecovery:layoutAudit.validation.locationRecovery},
-@@ -189,7 +190,8 @@
+@@ -192,7 +193,8 @@
    }
    const truthfulFactoryEvidence=copy(factory.evidence);if(geographic){truthfulFactoryEvidence.projection=GEOGRAPHIC_CAMERA_VERSION;truthfulFactoryEvidence.sourceRelief='NASA BMNG source baked topography; no invented elevation; qualified native density pyramid';}if(sourceStyle.styleId==='GLOBAL_RGB_SOURCE_NATIVE_COVERAGE')truthfulFactoryEvidence.sourceRelief='ACTUAL_GLOBAL_RGB_AND_EXISTING_NATIVE_RELIEF_PROXY_NO_DEM_OR_BAKED_HILLSHADE_CLAIM';
    return{drawFrame,readPixels:factory.readPixels,readBasePixels:()=>{assert(lastBasePixels,'UP2_FRAME_NOT_DRAWN');return lastBasePixels;},png:()=>canvas.toDataURL('image/png'),project,

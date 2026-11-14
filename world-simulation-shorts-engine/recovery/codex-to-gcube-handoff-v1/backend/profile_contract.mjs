@@ -5,6 +5,9 @@ import {createHash} from 'node:crypto';
 export const PROFILE = 'GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1';
 export const HISTORY_PROFILE = 'GCUBE_NVIDIA_CONTINUOUS_HISTORY_20S_V1';
 export const HISTORY_RUNTIME_PROFILE = 'HISTORICAL_CONTINUOUS_600F_V1';
+export const WINDOW_PROFILE = 'GCUBE_NVIDIA_HISTORICAL_V2';
+export const WINDOW_RUNTIME_PROFILE = 'HISTORICAL_AUTHORED_WINDOW_V2';
+import {validateTimelineWindow} from '../../universal-presentation-v2/timeline_window.mjs';
 export const PLAN_SCHEMA = 'WORLD_ENGINE_NVIDIA_PRESENTATION_PLAN_V1';
 export const APPROVAL_SCHEMA = 'WORLD_ENGINE_UNIVERSAL_GPU_AUTHORIZATION_V1';
 const check=(value,code)=>{if(!value)throw Error(code);};
@@ -28,12 +31,19 @@ export function canonicalJSON(value){
 export function runtimeDurationContract(request){
  const duration=request?.durationSeconds===undefined?6:request.durationSeconds;
  check(Number.isSafeInteger(duration)&&[6,10,20].includes(duration)&&request?.totalFrames===duration*30,'HANDOFF_RUNTIME_DURATION_REQUIRED');
- if(duration===20){
+ if(request.profile===WINDOW_RUNTIME_PROFILE){
+  const a=request.historicalAdmission,s=request.segments?.[0];
+  check(request.simulationType==='HISTORICAL'&&a?.schema==='WORLD_ENGINE_AUTHORED_HISTORY_ADMISSION_V2'&&a.status==='PASS'&&a.scope===WINDOW_RUNTIME_PROFILE&&a.simulationType==='HISTORICAL'&&a.paidExecutionAllowed===false&&hex(a.runtimeSegmentSHA256)&&hex(a.authoredInputSHA256),'HANDOFF_REVIEWED_HISTORY_WINDOW_REQUIRED');
+  check(request.segments?.length===1&&s.scene?.event_type==='WAR'&&s.presentation?.territoryChanges?.profile==='HISTORICAL_CONTINUOUS_V1'&&s.startFrame===0&&s.endFrame===request.totalFrames,'HANDOFF_HISTORY_WINDOW_SEGMENT_REQUIRED');
+  validateTimelineWindow(s.timelineWindow,s.scene.timing.total_frames,request.totalFrames);
+  check(s.timelineWindow!==undefined&&s.scene.timing.total_frames===a.timeline?.totalFrames&&canonicalJSON(s.timelineWindow)===canonicalJSON(a.timeline.window),'HANDOFF_HISTORY_WINDOW_BINDING_CHANGED');
+ }else if(duration===20){
   const a=request.historicalAdmission;
   check(request.profile===HISTORY_RUNTIME_PROFILE&&request.simulationType==='HISTORICAL'&&a?.schema==='WORLD_ENGINE_AUTHORED_HISTORY_ADMISSION_V1'&&a.status==='PASS'&&a.scope===HISTORY_RUNTIME_PROFILE&&a.simulationType==='HISTORICAL'&&a.paidExecutionAllowed===false&&hex(a.runtimeSegmentSHA256)&&hex(a.authoredInputSHA256),'HANDOFF_REVIEWED_CONTINUOUS_HISTORY_REQUIRED');
   check(request.segments?.length===1&&request.segments[0].scene?.event_type==='WAR'&&request.segments[0].presentation?.territoryChanges?.profile==='HISTORICAL_CONTINUOUS_V1','HANDOFF_CONTINUOUS_HISTORY_SEGMENT_REQUIRED');
  }else check(request.profile===undefined&&request.historicalAdmission===undefined&&request.simulationType===undefined,'HANDOFF_LEGACY_PROFILE_FIELDS_CHANGED');
- return{durationSeconds:duration,totalFrames:duration*30,profile:duration===20?HISTORY_PROFILE:PROFILE};
+ if(request.profile!==WINDOW_RUNTIME_PROFILE)check(!request.segments?.some(s=>s.timelineWindow!==undefined),'HANDOFF_UNDECLARED_TIMELINE_WINDOW');
+ return{durationSeconds:duration,totalFrames:duration*30,profile:request.profile===WINDOW_RUNTIME_PROFILE?WINDOW_PROFILE:duration===20?HISTORY_PROFILE:PROFILE};
 }
 
 export function selectBackend(environ={}){
@@ -117,11 +127,12 @@ export function validateExecutionPermit({plan,planWire,approval,packageWire,expe
  let parsedPlan,parsedRuntime;try{parsedPlan=JSON.parse(planText);parsedRuntime=JSON.parse(packageText);}catch{throw Error('HANDOFF_EXECUTION_JSON_INVALID');}
  check(canonicalJSON(parsedPlan)===canonicalJSON(plan),'HANDOFF_PLAN_WIRE_CHANGED');
  check(hex(expectedPlanSHA256)&&sha(planWire)===expectedPlanSHA256&&approval.planSHA256===expectedPlanSHA256,'HANDOFF_APPROVED_PLAN_SHA_MISMATCH');
- const historical=plan.durationSeconds===20;
+ const windowHistory=plan.historicalAdmission?.scope===WINDOW_RUNTIME_PROFILE;
+ const historical=plan.durationSeconds===20||windowHistory;
  check(plan.schema===PLAN_SCHEMA&&[6,10,20].includes(plan.durationSeconds)&&plan.totalFrames===plan.durationSeconds*30&&plan.fps===30&&plan.aspectRatio==='9:16'&&canonicalJSON(plan.resolution)==='{"height":1920,"width":1080}','HANDOFF_SIX_SECOND_PLAN_REQUIRED');
  check(canonicalJSON(plan.audioSettings)==='{"enabled":false,"mode":"SILENT"}'&&(historical?plan.simulationType==='HISTORICAL':['GENERAL','FICTIONAL'].includes(plan.simulationType)),'HANDOFF_NONHISTORICAL_SILENT_SCOPE_REQUIRED');
  const render=plan.renderProfile;
- check(plain(render)&&render.profileId===(historical?HISTORY_PROFILE:PROFILE)&&render.backend==='vulkan'&&hex(render.sourceClosureSHA256)&&digest(render.imageDigest),'HANDOFF_NVIDIA_RENDER_PROFILE_REQUIRED');
+ check(plain(render)&&render.profileId===(windowHistory?WINDOW_PROFILE:historical?HISTORY_PROFILE:PROFILE)&&render.backend==='vulkan'&&hex(render.sourceClosureSHA256)&&digest(render.imageDigest),'HANDOFF_NVIDIA_RENDER_PROFILE_REQUIRED');
  check(approval.schema===APPROVAL_SCHEMA&&approval.approved===true&&approval.imageDigest===render.imageDigest,'HANDOFF_GPU_APPROVAL_REQUIRED');
  const policyKeys=['schema','approved','planSHA256','imageDigest','validUntil','maxWallSeconds','maxRetries','maxCostAmount','currency','gpuHourlyRate'];
  check(Object.keys(approval).length===policyKeys.length&&Object.keys(approval).every(k=>policyKeys.includes(k)),'HANDOFF_OPERATOR_POLICY_FIELDS_INVALID');
@@ -134,6 +145,7 @@ export function validateExecutionPermit({plan,planWire,approval,packageWire,expe
  check(typeof plan.runtimeWireJSON==='string'&&plan.runtimeWireJSON===packageText&&hex(expectedPackageSHA256)&&sha(packageWire)===expectedPackageSHA256&&plan.runtimeWireSHA256===expectedPackageSHA256,'HANDOFF_RUNTIME_WIRE_SHA_MISMATCH');
  check(plain(plan.runtime)&&canonicalJSON(parsedRuntime)===canonicalJSON(plan.runtime)&&parsedRuntime.schema==='WORLD_ENGINE_PRESENTATION_RUNTIME_REQUEST_V2'&&parsedRuntime.totalFrames===plan.totalFrames&&(parsedRuntime.durationSeconds===undefined?6:parsedRuntime.durationSeconds)===plan.durationSeconds,'HANDOFF_RUNTIME_PLAN_MISMATCH');
  const contract=runtimeDurationContract(parsedRuntime);
+ check(render.profileId===contract.profile,'HANDOFF_RUNTIME_EXECUTION_PROFILE_CHANGED');
  if(historical)check(canonicalJSON(plan.historicalAdmission)===canonicalJSON(parsedRuntime.historicalAdmission),'HANDOFF_HISTORY_ADMISSION_BINDING_CHANGED');
  check(Array.isArray(parsedRuntime.segments)&&parsedRuntime.segments.length>=1&&parsedRuntime.segments.length<=16,'HANDOFF_RUNTIME_SEGMENTS_REQUIRED');
  let cursor=0;for(const segment of parsedRuntime.segments){check(plain(segment)&&segment.startFrame===cursor&&Number.isSafeInteger(segment.endFrame)&&segment.endFrame>cursor&&segment.endFrame<=plan.totalFrames,'HANDOFF_RUNTIME_FRAME_RANGE_INVALID');cursor=segment.endFrame;}

@@ -241,7 +241,7 @@ def current_derivation(*, write=False):
     manifest = {"schema": "WORLD_ENGINE_PINNED_GPU_ADAPTER_VARIANTS_V1",
         "profile": "GCUBE_NVIDIA_SIX_SECOND_REVIEW_V1", "supportedProfiles": spec["supportedProfiles"],
         "derivationVersion": spec["derivationVersion"], "variants": rows,
-        "defaultSoftwareFilesChanged": False, "coreRendererChanged": False,
+        "defaultSoftwareFilesChanged": spec.get("defaultSoftwareFilesChanged", False), "coreRendererChanged": False,
         "actualGPUValidation": "PENDING_GPU", "paidGPUExecuted": False}
     raw = (json.dumps(manifest, indent=2) + "\n").encode()
     destination = HERE / "backend/GENERATED_SOURCE_MANIFEST.json"
