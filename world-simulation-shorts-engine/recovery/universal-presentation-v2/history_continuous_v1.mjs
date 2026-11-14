@@ -45,7 +45,7 @@ export function deriveContinuousHistory({scene,admission,timingAudit}){
  const a=analyzeTerritoryChanges(scene),reused=deriveHistoryPresentationV2({scene,admission,analysis:a,timingAudit}),p=copy(reused.presentation),levels=admission.regionEvidence.sourceLevels;
  const shapes=compileContinuousTerritory(a.changes.map((d,i)=>({previous:a.states[i],following:a.states[i+1],frames:timingAudit.choreography[i].endFrame-timingAudit.choreography[i].startFrame,bandWidth:.045})));
  const items=a.changes.map((d,i)=>{const c=timingAudit.choreography[i];return{fromStateId:d.fromStateId,toStateId:d.toStateId,startFrame:c.startFrame,endFrame:c.endFrame,strength:.65,added:d.added,removed:d.removed,continuous:shapes[i]};});
- p.territoryChanges={profile:CONTINUOUS_PROFILE,config:{semanticMode:'GEOMETRIC_VISUAL_INTERPOLATION_NOT_HISTORICAL_ROUTE'},items};
+ p.territoryChanges={profile:CONTINUOUS_PROFILE,config:{semanticMode:'GEOMETRIC_VISUAL_INTERPOLATION_NOT_HISTORICAL_ROUTE',visualProfile:'FRONTIER_LIGHT_V1'},items};
  const frames=Array(scene.timing.total_frames),keys=[];let current=copy(reused.audit.cameraKeys[0].pose);
  for(const [i,c] of timingAudit.choreography.entries()){
   const target=copy(reused.audit.cameraKeys[i+2].pose),context=copy(current);

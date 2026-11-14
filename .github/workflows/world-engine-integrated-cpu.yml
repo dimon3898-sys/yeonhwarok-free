@@ -9,16 +9,16 @@ concurrency:
   group: world-engine-integrated-cpu
   cancel-in-progress: false
 jobs:
-  changed-map:
+  changed-territory:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == 'feb6ebf7f1b7b10491147bd45d40d1758b8d445a' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_INTEGRATED_MAP_A1'
+      github.event.before == '5a38a8b709ec102861b8405d4de5ada43dceff92' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_INTEGRATED_TERRITORY_A1'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     env:
-      STAGE: map
+      STAGE: territory
       ATTEMPT: a1
     steps:
       - uses: actions/checkout@v4

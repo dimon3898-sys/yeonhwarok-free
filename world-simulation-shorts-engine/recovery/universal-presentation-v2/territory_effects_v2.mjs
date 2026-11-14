@@ -1,3 +1,4 @@
+import {frontierPresentationAt,FRONTIER_VISUAL_PROFILE} from './frontier_presentation_v1.mjs';
 import {CONTINUOUS_PROFILE,continuousTerritoryAt,validateDerivedGeometry} from './continuous_territory_runtime.mjs';
 /** Reuses the Area V3 drawing pass for geometric differences only. */
 import {analyzeTerritoryChanges,multi} from './territory_delta_v2.mjs';
@@ -18,7 +19,7 @@ export function validateTerritoryEffects(spec,scene){
  }return structuredClone(spec);
 }
 export function territoryEffectsAt(spec,frame){
- if(!spec)return[];if(spec.profile===CONTINUOUS_PROFILE){const c=continuousTerritoryAt(spec,frame);return c.active&&c.boundaryAlpha>0&&multi(c.boundaryBand).length?[{id:'MOVING_BOUNDARY',kind:'moving_boundary',stateId:c.stateId,geometry:c.boundaryBand,alpha:c.boundaryAlpha,coverage:1}]:[];}const rows=[];
+ if(!spec)return[];if(spec.profile===CONTINUOUS_PROFILE&&spec.config?.visualProfile===FRONTIER_VISUAL_PROFILE)return frontierPresentationAt(spec,frame);if(spec.profile===CONTINUOUS_PROFILE){const c=continuousTerritoryAt(spec,frame);return c.active&&c.boundaryAlpha>0&&multi(c.boundaryBand).length?[{id:'MOVING_BOUNDARY',kind:'moving_boundary',stateId:c.stateId,geometry:c.boundaryBand,alpha:c.boundaryAlpha,coverage:1}]:[];}const rows=[];
  for(const [index,e]of spec.items.entries()){
   if(!e.strength||frame<e.startFrame||frame>=e.endFrame)continue;
   const u=(frame-e.startFrame)/(e.endFrame-e.startFrame-1),smooth=u*u*u*(10+u*(-15+6*u));
