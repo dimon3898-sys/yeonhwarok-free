@@ -1,7 +1,7 @@
 {
-  "latestRemoteHEAD": "350972e2a4852c27c1bf47ca367ef88625713241",
+  "latestRemoteHEAD": "43899ed9d492d931fed5a1fad8fd4ce70e67ddbc",
   "currentBranch": "fix/reference-6s-formal-admission-20261113",
-  "status": "READY_FOR_USER_GPU_START",
+  "status": "GPU_FAILED_EXACT_JOB_EVIDENCE_RECOVERED",
   "referenceAnalysis": "COMPLETE_REUSED_635_ROWS_WITH_MISSING_ANNOTATIONS_SUPPLEMENTED",
   "featureMapping": "COMPLETE_SOURCE_AUDIT",
   "topicSelection": "COMPLETE_MONGOL_1206_1209_TO_1210_1215",
@@ -14,13 +14,15 @@
   "inputValidation": "PASS_DESIGN_NEW_CONTRACT_AND_ACTUAL_IMAGE_TRANSPORT",
   "imageStatus": "PASS_PUBLISHED_AND_REMOTE_DIGEST_CONFIRMED",
   "deploymentPreflight": "PASS_FREE_GATES_GCUBE_SAVED_STOPPED",
-  "firstIncomplete": "USER_GPU_START_SEPARATE_APPROVAL_REQUIRED",
+  "firstIncomplete": "GPU_FAILURE_ROOT_CAUSE_ANALYSIS",
   "existingPassPreserved": true,
   "oldPassReruns": 0,
   "gpuStarts": 0,
   "gpuCost": 0,
-  "blockers": [],
-  "nextAction": "Separate explicit user GPU authorization, then user starts #5373; upload FINAL_20S_INPUT.json, confirm20s/600f, approve1 render, download MP4 and diagnostics, manually stop workload. No automatic retries.",
+  "blockers": [
+    "UNDERLYING_NATIVE_GRAPHICS_FAILURE_NOT_YET_CONFIRMED"
+  ],
+  "nextAction": "Compare exact-job WebGL context failure with prior evidence and preserved runtime source before changing code.",
   "technicalPassScope": "Existing technical evidence retained only; no visual quality approval",
   "visualQualityPass": false,
   "userVisualApproval": "PENDING",
@@ -56,7 +58,9 @@
   "buildCommit": "6970708eb71a073b6793b8a77a577d3b6d4bfee0",
   "deployPreflight": "DEPLOY_PREFLIGHT.json",
   "GPUStartAuthorized": false,
-  "actualRender": "PENDING_GPU",
+  "actualRender": "FAILED_0_OF_600_WEBGL_CONTEXT",
   "actualVideoQuality": "PENDING_GPU_USER_REVIEW",
-  "remoteStateNote": "Remote-saved settings/evidence anchor at preflight; this report and CHECKPOINT are saved in the following commit. Resolve branch HEAD for latest handoff."
+  "remoteStateNote": "Remote-saved settings/evidence anchor at preflight; this report and CHECKPOINT are saved in the following commit. Resolve branch HEAD for latest handoff.",
+  "failureRecovery": "gpu-failure-recovery/GPU_FAILURE_EVIDENCE.json",
+  "gpuStartsThisRecovery": 0
 }
