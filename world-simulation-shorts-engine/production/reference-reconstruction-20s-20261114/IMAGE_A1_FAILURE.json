@@ -1,0 +1,14 @@
+{
+  "status": "BLOCKED",
+  "buildSucceeded": true,
+  "published": false,
+  "runId": 43550667871,
+  "jobId": 132312130015,
+  "controllerError": "UP2_DATA_PROCESSOR_FAILED",
+  "sealedImportExit": 1,
+  "sealedImportError": "node:fs:621\n  return binding.open(\n                 ^\n\nError: ENOENT: no such file or directory, open '/workspace/scratch/fa5a5027cb12/sealed-runtime-a1/world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/evidence/REVIEWED_HISTORICAL.json'\n    at Object.openSync (node:fs:621:18)\n    at Object.readFileSync (node:fs:487:35)\n    at file:///workspace/scratch/fa5a5027cb12/sealed-runtime-a1/world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/reviewed_historical_registry.mjs:4:14\n    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)\n    at async node:internal/modules/esm/loader:647:26\n    at async file:///workspace/scratch/c445e91c4b92/world-engine/[eval1]:1:1 {\n  errno: -2,\n  code: 'ENOENT',\n  syscall: 'open',\n  path: '/workspace/scratch/fa5a5027cb12/sealed-runtime-a1/world-simulation-shorts-engine/recovery/universal-data-pipeline-v1/evidence/REVIEWED_HISTORICAL.json'\n}\n\nNode.js v24.22.1\n",
+  "rootCause": "Historical registry JSON was absent from RUNTIME_SOURCE_MANIFEST and image delta",
+  "invalidated": "Completeness of image source closure; existing source-contract checks and design remain valid",
+  "minimumFix": "Seal existing REVIEWED_HISTORICAL.json; refresh runtime/bootstrap manifests and package; retest only failed image transport + required actual-image publication gates",
+  "GPUExecutions": 0
+}

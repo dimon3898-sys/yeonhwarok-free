@@ -13,7 +13,12 @@ request=json.loads((P/'FINAL_20S_INPUT.json').read_bytes());work=Path('/history-
 # Format-valid fixture digest is never authorization or publication approval.
 digest='sha256:'+'a'*64
 c=NvidiaPresentationController(control_root=work/'private',export_root=work/'exports',image_digest=digest,source_manifest=manifest,expected_manifest_sha256=pin)
-submission=c._normal(request);plan=submission['videoPlan'];validate_plan(plan,image_digest=digest,source_sha=pin)
+try:
+ submission=c._normal(request)
+except Exception as error:
+ print(json.dumps({'status':'FAIL','code':getattr(error,'code',str(error)),'privateFixtureDiagnostic':getattr(error,'_private_profile_stderr',b'').decode(errors='replace')[:4000],'GPUExecutions':0}),file=sys.stderr)
+ raise
+plan=submission['videoPlan'];validate_plan(plan,image_digest=digest,source_sha=pin)
 assert plan['simulationType']=='HISTORICAL' and plan['durationSeconds']==20 and plan['totalFrames']==600 and plan['fps']==30
 assert plan['resolution']=={'width':1080,'height':1920} and plan['renderProfile']['profileId']=='GCUBE_NVIDIA_CONTINUOUS_HISTORY_20S_V1'
 segment=plan['runtime']['segments'][0]; authored=request['prompt']

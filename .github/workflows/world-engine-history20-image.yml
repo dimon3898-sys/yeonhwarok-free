@@ -14,8 +14,8 @@ jobs:
     if: >-
       github.run_attempt == 1 && github.event.repository.private == false &&
       github.repository == 'dimon3898-sys/yeonhwarok-free' &&
-      github.event.before == '412b753556926675111da32b4da634933171bf48' &&
-      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY20_IMAGE_A1'
+      github.event.before == 'cbb7ecfbc635812a9adf9d98658743decc02c7c2' &&
+      github.event.head_commit.message == 'WORLD_ENGINE_HISTORY20_IMAGE_A2'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -111,7 +111,7 @@ jobs:
           python - <<'PY'
           import json,os,shutil
           from pathlib import Path
-          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['TARGET'])/'image-a1';out.mkdir(exist_ok=False)
+          src=Path(os.environ['WORLD_ENGINE_GUARD_EVIDENCE']);out=Path(os.environ['TARGET'])/'image-a2';out.mkdir(exist_ok=False)
           if src.exists():shutil.copytree(src,out,dirs_exist_ok=True)
           (out/'RUN.json').write_text(json.dumps({'runId':os.environ['GITHUB_RUN_ID'],'buildCommit':os.environ['GITHUB_SHA'],'releaseApproved':(out/'RELEASE_APPROVAL.json').exists(),'GPUExecutions':0})+'\n')
           PY
